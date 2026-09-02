@@ -1,0 +1,609 @@
+可以，而且我觉得**“数据流视角”非常适合你现在这个东西**，甚至比“模块堆叠视角”更自然。
+
+因为你真正关心的本来就不是“有几个 Agent / 几个 LLM”，而是：
+
+> **一条客观事件，经过哪些信息变换，最后为什么导致某个行为；这个行为又如何形成下一条客观事件。**
+
+这本质就是数据流。
+
+你原来已经有一个雏形：
+
+$$
+W_t \rightarrow C_t \rightarrow S_t \rightarrow A_t \rightarrow W_{t+1}
+$$
+
+以及“客观世界 → 角色遮罩 → 主观状态 → 行为”的隔离。
+
+但如果按数据流重新想，我会把它改得更漂亮一点。
+
+## 1. 不把 History 当一坨文本，而当 Event Stream
+
+现在很多 LLM 角色系统实际上是：
+
+```text
+Persona
++
+一大坨历史文本
++
+当前场景
+→ LLM
+→ 下一行为
+```
+
+你可以换成：
+
+```text
+Objective Event Stream
+        │
+        ▼
+    perception
+        │
+        ▼
+Subjective Event Stream
+        │
+        ▼
+    appraisal
+        │
+        ▼
+Psychological State Delta
+        │
+        ▼
+ Current Subject State
+        │
+        ▼
+ Decision Context
+        │
+        ▼
+ Action Distribution
+        │
+        ▼
+      Action
+        │
+        ▼
+   Consequence
+        │
+        └────→ new Objective Event
+```
+
+这一下就非常清楚。
+
+比如：
+
+```text
+[Objective Event]
+exam_result(A, 58)
+```
+
+不是直接：
+
+```text
+→ A 很绝望
+```
+
+而是先流过去。
+
+### 第一步：Perception
+
+```text
+A 看到了自己的成绩
+```
+
+形成：
+
+```json
+{
+  "event": "exam_result",
+  "score": 58,
+  "known_by": "A"
+}
+```
+
+### 第二步：Appraisal
+
+结合人物当前目标和信念：
+
+```json
+{
+  "goal_obstruction": 0.7,
+  "unexpectedness": 0.4,
+  "controllability": 0.6,
+  "self_relevance": 0.9
+}
+```
+
+### 第三步：State transition
+
+才变成：
+
+```text
+stress          +0.12
+self_efficacy   -0.05
+mood            -0.08
+goal_commitment +0.01
+```
+
+注意这里已经不是：
+
+> “LLM 决定 A 现在很抑郁。”
+
+而是：
+
+> **event 数据经过一系列约束变换，形成 state delta。**
+
+这跟你刚才担心的 LLM“顺坡滑”正好对上。
+
+---
+
+# 2. `State` 和 `Delta` 最好分开
+
+这个我觉得特别重要。
+
+不要让模块每次输出完整的新人物：
+
+```json
+{
+  "personality": ...,
+  "mood": ...,
+  "relationship": ...,
+  "belief": ...
+}
+```
+
+而是输入：
+
+$$
+S_t
+$$
+
+输出：
+
+$$
+\Delta S_t
+$$
+
+再由程序：
+
+$$
+S_{t+1}=Apply(S_t,\Delta S_t)
+$$
+
+例如：
+
+```json
+{
+  "stress": +0.12,
+  "self_efficacy": -0.05,
+  "trust.B": 0,
+  "mood": -0.08
+}
+```
+
+这样你可以非常容易加：
+
+```text
+rate limit
+decay
+inertia
+bounds
+homeostasis
+trait modulation
+```
+
+甚至检查：
+
+```text
+为什么这一步 stress +0.7？
+```
+
+这对科研尤其好。
+
+因为数据流中间的每一步都有**可观测中间变量**。
+
+---
+
+# 3. 其实“心理学约束”就变成数据流上的 transformation
+
+例如：
+
+```text
+Event
+↓
+Appraisal
+↓
+Psychological Transition
+↓
+State Delta
+```
+
+不同心理模型就是不同 transform。
+
+比如你以后可以有：
+
+```text
+F_llm
+```
+
+LLM 自由更新状态。
+
+对比：
+
+```text
+F_rule
+```
+
+规则更新。
+
+再对比：
+
+```text
+F_hybrid
+```
+
+LLM appraisal + 心理学约束 transition。
+
+于是你的科研实验都特别自然：
+
+```text
+同样的输入事件流
+        │
+   ┌────┼─────┐
+   ↓    ↓     ↓
+ LLM  Rules  Hybrid
+   ↓    ↓     ↓
+State trajectories
+   ↓    ↓     ↓
+Behavior prediction
+```
+
+这就不是三个系统了。
+
+而是**同一条数据流里替换一个算子**。
+
+这个思路特别适合 ablation。
+
+---
+
+# 4. “主观—客观隔离”也会变成一种信息流权限
+
+这个甚至比“World / Character 两个数据库”更优雅。
+
+假设：
+
+```text
+Event E:
+B tells C "I hate A."
+```
+
+客观事件总线上有：
+
+```json
+{
+  "speaker": "B",
+  "listener": "C",
+  "content": "B dislikes A"
+}
+```
+
+然后经过：
+
+```text
+PerceptionFilter_A(E)
+PerceptionFilter_B(E)
+PerceptionFilter_C(E)
+```
+
+结果：
+
+```text
+A → null
+B → event
+C → event
+```
+
+所以不是：
+
+> A 的 prompt 里“不小心不要写那句话”。
+
+而是**那份数据根本没有流到 A 的 subjective pipeline 里。**
+
+这比 prompt 约束强很多。
+
+你 md 里原来那个“角色遮罩”其实就是这个思想：客观世界知道 B 对 C 说了什么，但不在场的 A 不能获得这条事实。
+
+数据流视角会让这个设计非常干净：
+
+$$
+Event
+\xrightarrow{PerceptionMask_i}
+Observation_i
+$$
+
+---
+
+# 5. Belief 也可以不等于 World Fact
+
+这时候甚至可以出现：
+
+```text
+ObjectiveEvent
+↓
+Observation
+↓
+Interpretation
+↓
+BeliefUpdate
+```
+
+例如：
+
+客观：
+
+```text
+B 没回消息
+```
+
+A 收到：
+
+```text
+message_not_replied(duration=5h)
+```
+
+A 的 appraisal / interpretation：
+
+```text
+“B 可能在躲我”
+```
+
+于是：
+
+```text
+belief(B_avoiding_me) += 0.2
+```
+
+但世界里完全没有：
+
+```text
+B is avoiding A = true
+```
+
+这正是你之前觉得很有意思的地方：**同一个客观世界里，每个人可以形成不同的主观世界。** 
+
+从数据流看：
+
+```text
+World fact
+≠
+Observation
+≠
+Interpretation
+≠
+Belief
+```
+
+这四个最好根本不是一个数据类型。
+
+这个设计我非常喜欢。
+
+---
+
+# 6. 对科研最大的价值：Provenance
+
+也就是：
+
+> **这个状态为什么变成这样？**
+
+假设最后：
+
+```text
+trust_B = 0.31
+```
+
+如果是一坨 LLM memory，你很难知道为什么。
+
+数据流可以留下：
+
+```text
+trust_B = 0.31
+
+provenance:
+  E12: B helped A       +0.08
+  E19: B lied to A      -0.25
+  E27: B apologized     +0.06
+  decay                 +0.02
+```
+
+这不一定最后真要做得这么精细，但思想非常重要：
+
+$$
+State_t
+$$
+
+不只是一个结果。
+
+还有：
+
+$$
+State_t = f(E_1,E_2,\dots,E_t)
+$$
+
+而且这个计算路径可以追踪。
+
+这对你要研究**动态一致性**特别合适。
+
+因为你可以问：
+
+> 角色今天突然不信任 B，是哪个历史事件造成的？
+
+甚至进一步做 counterfactual：
+
+```text
+删掉 E19
+```
+
+重新跑数据流。
+
+看：
+
+$$
+\Delta State
+$$
+
+和：
+
+$$
+\Delta P(Action)
+$$
+
+这几乎天然就是反事实实验。
+
+---
+
+# 7. 时间流逝也只是另一种数据源
+
+这还能把你上一轮说的“物品随时间自然更新”保留下来，但不需要造 Minecraft。
+
+可以有：
+
+```text
+External Events
+Character Actions
+Time Events
+Random Events
+```
+
+全部进入：
+
+```text
+Objective Event Bus
+```
+
+例如：
+
+```text
+TIME_ELAPSED(8h)
+```
+
+进入心理状态系统：
+
+```text
+stress decay
+mood recovery
+fatigue change
+memory salience decay
+```
+
+进入客观世界：
+
+```text
+phone battery ↓
+shop closed
+weather changed
+```
+
+所以：
+
+> **时间不是一个特殊 hardcode，而是一种事件源。**
+
+这很数据流。
+
+---
+
+# 8. 游戏以后也能吃同一套东西
+
+科研版可能只是：
+
+```text
+JSON events
+→ Python pipeline
+→ action probabilities
+```
+
+游戏版：
+
+```text
+Godot events
+→ same conceptual pipeline
+→ NPC action
+→ Godot world
+```
+
+也就是说你不是为了科研造游戏。
+
+而是：
+
+```text
+            Character Dynamics Core
+                      │
+            ┌─────────┴─────────┐
+            ↓                   ↓
+     Research Replay        Game Runtime
+     小说事件流              游戏事件流
+            │                   │
+            └─────────┬─────────┘
+                      ↓
+                Character Model
+```
+
+这个结合方式我觉得比“科研系统直接就是游戏系统”健康得多。
+
+---
+
+## 但这里也有一个必须提醒你的边界
+
+**“使用数据流架构”本身大概率不是科研创新。**
+
+它首先是一个很好的**建模/工程范式**。
+
+除非你最后证明：
+
+> 显式因果信息流、状态增量更新、provenance 等机制显著提高了某些能力。
+
+否则论文里它只是：
+
+> implementation / framework design。
+
+真正科研的问题仍然应该是类似：
+
+$$
+\text{不同 state-update mechanism}
+\rightarrow
+\text{behavioral prediction / coherence}
+$$
+
+而数据流架构的价值是：
+
+> **让你能非常干净地替换模块、控制变量、回放历史、做反事实和定位错误。**
+
+换句话说：
+
+**数据流不是你要证明的理论；它可能是非常适合承载你理论的实验骨架。**
+
+我现在甚至会把你的第一版系统骨架定成这条：
+
+```text
+ObjectiveEvent
+      ↓
+PerceptionFilter
+      ↓
+Observation
+      ↓
+LLM Appraisal
+      ↓
+Psychological Transition
+      ↓
+StateDelta
+      ↓
+SubjectState
+      ↓
+Decision
+      ↓
+ActionDistribution
+      ↓
+Action
+```
+
+每一个箭头都可以记录输入输出。
+
+这样你以后想研究哪一段，就替换哪一段。
+
+**这可能比现在继续讨论“整个系统到底该多大”更重要——先把它变成一条可拆、可测、可替换的数据流。**

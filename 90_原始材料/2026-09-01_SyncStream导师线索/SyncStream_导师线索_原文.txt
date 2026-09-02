@@ -1,0 +1,798 @@
+syncstreams是啥，这是我成长导师junming Shao14年发的
+
+你导师 2014 年那篇的 SyncStream，不是“同步数据流框架”，而是一种处理概念漂移（concept drift）的在线数据流分类算法：
+
+Junming Shao, Zahra Ahmadi, Stefan Kramer. Prototype-based Learning on Concept-drifting Data Streams. KDD 2014, pp. 412–421. DOI: 10.1145/2623330.2623609。
+
+而且这篇跟你现在想“历史 → 动态人物状态 → 未来行为”其实有一个挺有意思的交点。
+
+它要解决什么？
+
+传统监督学习默认：
+
+$$ P_t(X,Y)\approx P_{t+1}(X,Y) $$
+
+也就是昨天的数据规律和今天差不多。
+
+但真实数据流可能一直变化，比如垃圾邮件：
+
+2012:
+"Free money!!!"
+→ spam
+
+后来大家不用这种写法了
+
+2014:
+新的 spam 模式出现
+
+也就是：
+
+$$ P_t(Y\mid X) $$
+
+会随时间变。
+
+这就叫 concept drift。
+
+SyncStream 研究的就是：
+
+数据一个个不断进来，而且规律会变，模型怎样既记住仍然有用的过去，又快速适应新的规律？
+
+这句话你是不是已经觉得有点眼熟了。
+
+SyncStream 最核心的思想：不保存所有历史，而保存“有代表性的过去”
+
+它不是：
+
+所有历史样本
+↓
+不断重新训练整个模型
+
+也不是简单：
+
+只保留最近 1000 条
+
+而是维护一小批：
+
+prototypes（原型样本）
+
+大概可以理解成：
+
+过去来了 100000 条数据
+             ↓
+     哪些仍然代表当前规律？
+             ↓
+       少量 prototypes
+             ↓
+       用它们预测新数据
+
+论文明确强调，他们认为“最新的数据一定比旧数据重要”并不总成立。有些比较老的数据仍然可能非常适合解释当前样本，所以 SyncStream 动态选择 short-term / long-term representative examples。
+
+这点其实挺漂亮。
+
+它怎么知道一个 prototype 还有没有用？
+
+用了一个很直觉的东西：
+
+error-driven representativeness learning
+
+假设当前保留：
+
+prototype P1
+prototype P2
+prototype P3
+
+来了一个新样本 \(x_t\)。
+
+SyncStream 找附近的 prototype 来分类：
+
+P2 → 预测 x_t 是 A
+
+真实标签揭晓：
+
+如果预测对
+
+说明：
+
+P2 仍然很好地代表现在的数据规律。
+
+于是：
+
+representativeness(P2) ↑
+如果预测错
+
+说明：
+
+P2 可能正在过时，或者新规律出现了。
+
+于是：
+
+representativeness(P2) ↓
+
+长期没代表性的 prototype 可以被扔掉。
+
+所以系统不是机械地：
+
+“数据老了就忘。”
+
+而是：
+
+“过去的信息如果仍然能预测现在，就继续保留。”
+
+这个思想跟你刚才谈的 Predictive State 简直有一个非常明显的哲学呼应：
+
+历史是否值得保留，不应该只取决于它有多近，而应该取决于它对未来还有没有预测力。
+
+注意，我说的是启发上的联系，不是说 SyncStream 可以直接拿来当人物模型。
+
+那 Sync 是什么意思？
+
+这个名字不是因为“同步多个数据流”。
+
+它的重要技术之一叫：
+
+synchronization-inspired constrained clustering
+
+邵老师在这之前就做过 synchronization-inspired clustering，例如 2013 TKDE 的 Synchronization-inspired partitioning and hierarchical clustering；导师主页也列了这篇工作。
+
+大意是受同步动力系统启发：
+
+相似数据点彼此作用
+↓
+逐渐同步/靠拢
+↓
+形成簇
+
+SyncStream 把这种 synchronization-inspired clustering 用来把大量代表样本进一步压缩成少数 prototypes，并施加类别约束，让一个 prototype 对应特定 class。
+
+所以：
+
+SyncStream ≈ Synchronization + Stream
+
+而不是“同步流处理”。
+
+P-Tree 又是什么？
+
+他们又设计了一种 P-Tree 来动态维护 prototypes。
+
+你可以先非常粗略地想成：
+
+                 P-Tree
+                   │
+          ┌────────┴────────┐
+          ↓                 ↓
+      一类 prototypes    另一类 prototypes
+          │
+       局部结构
+
+它不是用来保存全部历史，而是高效组织那一小批代表当前/历史 concept 的 prototype。
+
+新数据不断进来：
+
+new example
+    ↓
+在 P-Tree 找邻近 prototype
+    ↓
+预测
+    ↓
+看预测对不对
+    ↓
+更新 representativeness
+    ↓
+必要时增加/删除/聚合 prototype
+
+于是 P-Tree 本身也一直变。论文把它作为支持在线 prototype 更新、时变 concept 建模和快速预测的数据结构。
+
+Concept drift 还有两种
+
+这个对你现在也蛮有启发。
+
+Gradual drift
+
+比如：
+
+t0: AAAAAAAAAA
+t1: AAAAAAAABB
+t2: AAAAABBBBB
+t3: BBBBBBBBBB
+
+规律慢慢变。
+
+SyncStream 通过 prototype representativeness 的持续变化，可以隐式适应这种 drift。
+
+Abrupt drift
+AAAAAAAAAA
+AAAAAAAAAA
+────────── 突变
+BBBBBBBBBB
+BBBBBBBBBB
+
+这时候慢慢降权就太慢了。
+
+所以论文还用了 PCA / statistics-based heuristic 来显式检测突然 drift，然后快速更新模型。
+
+也就是同时处理：
+
+$$ \text{slow adaptation} + \text{sudden change detection} $$
+为什么这篇和你现在的东西意外地有点搭？
+
+不是因为你要直接用 SyncStream。
+
+而是你现在的人物问题也在面对一个非常类似的抽象：
+
+人物历史不断到来
+↓
+人物行为规律可能改变
+↓
+但不能每次事件以后人格全部重写
+↓
+过去有些东西失效
+过去有些东西长期保留
+↓
+还要预测下一行为
+
+你现在在想：
+
+$$ H_{1:t}\rightarrow S_t\rightarrow P(A_{t+1}) $$
+
+而 SyncStream 在想：
+
+$$ X_{1:t},Y_{1:t} \rightarrow \text{small evolving prototype set} \rightarrow P(Y_{t+1}\mid X_{t+1}) $$
+
+两者当然不是同一个任务，但有一个共同母题：
+
+面对不断到来的历史，怎样维护一个足够小、会动态演化、又仍保留预测能力的状态表示？
+
+这可比“数据流架构”这个词和你科研的联系深得多。
+
+甚至你现在有一个值得跟导师聊的问题
+
+你之前一直在想：
+
+人物 state 应该怎么更新？哪些历史应该留？哪些应该衰减？
+
+SyncStream 给了一个完全不同于“心理学规则”的视角：
+
+是否可以根据一个历史成分对未来行为预测的贡献，动态决定它在人物状态中的 representativeness？
+
+例如人物曾经发生：
+
+E1 被同学嘲笑
+E2 考试失败
+E3 被 B 帮助
+E4 和 B 吵架
+E5 普通吃饭
+...
+
+不是统一：
+
+越老权重越低
+
+而可能是：
+
+E1 发生很久了，但持续影响行为 → 保留
+E5 很近，但几乎不影响未来行为 → 淡化
+
+这就与 SyncStream：
+
+old prototype 仍然可能比 recent example 更 relevant
+
+有明显的概念呼应。论文自己就专门强调了这个问题。
+
+当然，要把这个做成人物模型，还差非常远；但这是一个值得问导师的连接点，而不是硬蹭。
+
+另外这不是邵老师只做了一篇就结束的东西。2017 年他后来又做了 Robust Prototype-Based Learning on Data Streams，继续扩展 SyncStream，包括对分布式数据流之间关系的建模等，后来发表在 IEEE TKDE。
+
+所以从他的公开研究方向看，这确实属于他长期的数据流分类 / concept drift 研究线；他的主页也把 Data Stream Clustering and Classification 列为研究兴趣。
+
+你现在跟他聊 character dynamics，反而可以把问题说成他熟悉的语言：evolving latent state / concept drift / predictive representation / online adaptation。 不需要一上来跟他讲“我要造一个心理学 NPC”。这个桥其实挺巧的。
+
+再去dmuestc找找有无相关工作！
+
+有，而且我挖到一篇比 SyncStream 更贴你现在想法的。dmuestc 这边其实能连出一条挺完整的线：
+
+concept-drifting stream → evolving representation → evolving user behavior → dynamic personalization
+
+尤其是 2020 那篇 Learning evolving user's behaviors on location-based social networks，你真应该读。
+
+工作	它在做什么	和你的联系	我建议
+Prototype-based Learning on Concept-drifting Data Streams, KDD 2014	SyncStream：不断到来的数据中维护仍有预测力的 prototype，应对 concept drift	“过去什么该保留、什么该忘掉”	★★★★
+Robust Prototype-Based Learning on Data Streams, TKDE 2017	延续 prototype + evolving stream，增强对动态流的鲁棒适应	动态状态压缩/历史选择	★★★★
+Learning Individual Moving Preference and Social Interaction for Location Prediction, IEEE Access 2018	个人内部偏好 + 外部社会互动 → 下一位置预测，并考虑时间上过时的模式	已经出现你非常熟悉的“内部状态 + 外部环境 → 下一行为”	★★★★★
+Learning evolving user's behaviors on location-based social networks, GeoInformatica 2020	个人 preference + social interaction excitation + temporal dynamics → evolving behavior prediction	目前最贴你的！	★★★★★
+Preference Modeling by Exploiting Latent Components of Ratings, KAIS 2018/19	从用户评分这种外显反馈里反推 latent preference components	对应你之前“观察行为/反馈反推人物状态”	★★★★
+Learning evolving prototypes..., Information Sciences 2024	用 evolving micro-cluster/prototype 动态表示当前 concept	history → compact evolving representation	★★★★
+Bridging the Gap Between Ratings and True User Opinions with Dynamic Review Alignment for Personalized Recommendation, Neural Networks 2025	动态对齐评分与真实用户意见做个性化推荐	用户显式反馈 ≠ 真实内在偏好，这个命题很有意思	★★★★
+Community-Level Personalized Recommendation by Exploiting Evolving User-Item Micro-clusters, ICDE 2026	直接把 evolving user-item micro-clusters 用于个性化推荐	很可能是导师组最新的“动态用户偏好”延续线	★★★★★
+
+这些工作的时间线和作者信息在实验室 publication 页面能直接对应起来。
+
+其中 2020 那篇真的很值得你注意
+
+题目就是：
+
+Learning evolving user's behaviors on location-based social networks
+
+他们明确说现有方法没有很好地 model evolving user behaviors，于是提出 DGPS，把三个东西连起来：
+
+历史 check-in 序列
+       ↓
+geo-aware personal preference
+       +
+social interaction excitation
+       +
+temporal point process
+       ↓
+用户动态行为机制
+       ↓
+下一次行为/位置
+
+论文里甚至直接说，是联合建模 personal preferences、social interaction excitations 和 dynamic mobility mechanism；位置特征也是按时间顺序提取的。
+
+Learning evolving user's behaviors on location-based social networks PDF
+
+你看这和你的：
+
+$$ History \rightarrow SubjectiveState_t $$
+
+然后：
+
+$$ (SubjectiveState_t,\ ObjectiveContext_t) \rightarrow P(Action_{t+1}) $$
+
+已经不是“哲学上有点像”了，研究结构真有亲缘关系。
+
+更早的 2018 PSI 也很贴。
+
+Learning Individual Moving Preference and Social Interaction for Location Prediction 做的是：
+
+$$ IndividualPreference + SocialInteraction \rightarrow NextLocation $$
+
+他们的问题恰好也是：
+
+单靠个人过去轨迹，行为有很大随机性，怎么提高下一行为预测？
+
+于是把个人内部 moving preferences和外部 social interactions一起建模，而且用时间相关策略过滤过时的 pattern。
+
+这跟你前面想到：
+
+人物行为随机程度本来就与内部状态和外部条件共同有关
+
+非常接近。
+
+然后我发现一个特别巧的事情
+
+你现在想的东西，可能真的可以用你导师组已经非常熟悉的三种语言来讲。
+
+他们过去十几年一直在研究：
+
+Data stream
+↓
+concept changes over time
+↓
+retain useful history
+forget obsolete history
+↓
+compact evolving representation
+↓
+predict new samples
+
+SyncStream 开始的 prototype-based line 一直延续到 2023、2024、2025、2026；2024 的 LEPID 仍然明确在研究如何动态维护表示当前 concept 的重要 prototype，并且“保留部分过去有价值的信息、适应新的 drift”。
+
+而你现在在想：
+
+Human history
+↓
+psychological / subjective state changes
+↓
+retain behaviorally relevant history
+forget / decay irrelevant history
+↓
+compact evolving person state
+↓
+predict next behavior
+
+两边抽象一下真的都是：
+
+$$ \boxed{ Streaming\ History \rightarrow Evolving\ Predictive\ Representation \rightarrow Future\ Prediction } $$
+
+这不是说拿 SyncStream 改改就能做人。
+
+而是说你完全可以从导师最熟悉的 evolving representation / concept drift / online prediction 往人物动态建模搭桥。
+
+而 2026 最新那篇更有意思
+
+实验室今年 ICDE 接收了：
+
+Community-Level Personalized Recommendation by Exploiting Evolving User-Item Micro-clusters
+
+作者里有 Xinyu Liu、Jinxia Guo、Qirui Hao、Qinli Yang、Junming Shao 等，ICDE 官方 accepted papers 也能确认。
+
+dmuestc 2026 论文记录
+
+我目前没拿到可靠的全文摘要，所以不想根据标题瞎讲内部机制。但光题目已经说明：
+
+“evolving” 已经从纯分类数据流延伸到了 personalized recommendation / user-item relation。
+
+这个对你特别值得问导师：
+
+您组里从 concept-drifting streams 到 evolving user-item recommendation 这一条，是不是本质上都在研究“随时间演化的预测表示”？如果把对象换成长期人物/用户行为，已有的方法论哪些还能成立？
+
+这个问题就很正常，完全不是“老师我有个改变世界的心理学 NPC”。
+
+还有个有趣的旁支：Preference Modeling by Exploiting Latent Components of Ratings。
+
+它不是直接存一个：
+
+user.preference = xxx
+
+而是从外显的 rating feedback 中分解 latent components，而且模型预测误差会参与这个分解过程。
+
+这个和你之前自己想到的：
+
+$$ State \rightarrow Prediction \rightarrow ObservedBehavior \rightarrow PredictionError \rightarrow StateUpdate $$
+
+也有明显呼应。
+
+所以你之前那个“根据用户真实行为/评分反向修正人物画像”的想法，在导师已有的 preference modeling 经验里也有语言可以接。
+
+最后最关键的判断
+
+我在 dmuestc 暂时没有找到他们已经做过：
+
+显式心理状态 + 部分可观测客观环境 + 历史状态演化 + 人物下一行为预测 + 动态一致性评价
+
+这样完整的一套。
+
+他们更像是分别覆盖了你的几个“前置领域”：
+
+Shao 这边强的是：
+
+concept drift
+evolving representation
+prototype/micro-cluster
+online adaptation
+
+他们过去的 user behavior 工作又覆盖：
+
+personal preference
+social interaction
+temporal dynamics
+next behavior prediction
+
+2026 最新又到了：
+
+evolving user-item state
+personalized recommendation
+
+而你现在想往前接的是：
+
+evolving latent person state
++
+partial observation of environment
++
+history-dependent psychological dynamics
++
+behavior distribution
++
+controlled consistency evaluation
+
+所以我现在反而觉得：这个方向拿去和邵老师聊非常合适。
+
+不是因为他以前就在做 character AI，而是因为你这个问题里最困难的那部分——
+
+“一个对象不断变化，我怎样从流式历史中维护一个紧凑、适应变化、仍然能预测未来的表示？”
+
+恰好就是他组里非常熟悉的问题范式。
+
+而 2020 那篇 Learning evolving user's behaviors...，我建议你直接让 Codex 下载进你现在 character-dynamics/01_文献 里。这篇应该排到 PSR 后面甚至和 PSR 同一优先级。
+
+这么多都和我贴近吗？你别乱来。还有我确实是关注这世界、人物几个状态如何合理的更新，这样才能用来判断角色已有行为的一致性和预测未来或者驱动NPC。
+
+对，你这次把目标重新说清以后，我得把刚才那堆“都很贴”砍掉一大半。
+
+你关注的不是一般意义上的“随时间变化的数据”，而是更具体的：
+
+$$ \boxed{ \text{世界状态 }W_t + \text{人物主观状态 }S_t } $$
+
+怎样随着事件和行为合理地联合更新：
+
+$$ W_{t+1}=G(W_t,A_t,E_t) $$ $$ O_t=M_i(W_t) $$ $$ S_{t+1}=F(S_t,O_t,A_t,\text{Outcome}_t) $$
+
+再由：
+
+$$ P(A_{t+1}\mid S_{t+1},O_{t+1}) $$
+
+去做三件事：
+
+回看已有剧情：这个真实行为在当时是否合理；
+隐藏下一步：预测人物接下来可能做什么；
+没有既定剧情时：从行为分布采样，驱动 NPC。
+
+这才是你的中心。你之前说的“一个客观世界、多个隔离的主观世界”，以及客观只能通过可感知信息影响主观、主观只能通过行为影响客观，正是这套结构。
+
+按这个标准重新审 dmuestc，我现在只会留下 3 篇作为不同程度的相关工作。
+
+1. SyncStream / Concept-drifting Data Streams：方法启发相关，不是任务相关
+
+2014 KDD 的 SyncStream 确实是邵老师的数据流代表工作之一，实验室主页也列为 selected publication；他的研究兴趣里明确有 Data Stream Mining。
+
+它研究的是：
+
+$$ \text{stream history} \rightarrow \text{evolving prototypes} \rightarrow \text{future classification} $$
+
+随着 concept drift，动态维护能代表当前概念的 prototype。
+
+后续 2020 的 Selective Prototype-based Learning 也很清楚地说，关键是动态维护重要实例来捕获 time-changing concept，预测错误又反过来影响实例的 representativeness。
+
+这与你真正的关系只有：
+
+一个持续变化的系统，怎样从历史中维护一个不断演化且仍具有预测力的表示？
+
+它没有：
+
+人物心理状态；
+世界状态；
+perception；
+action；
+双状态耦合；
+行为一致性。
+
+所以：
+
+相关度：★★★☆☆，属于方法论启发。
+
+不是“邵老师以前已经做人类动态状态了”。
+
+2. 2018 PSI：结构上有一小块真的接近
+
+Learning Individual Moving Preference and Social Interaction for Location Prediction
+
+这篇真正值得注意的地方，是它明确把人的移动行为拆成两部分：
+
+individual's internal preferences + exterior social influences
+
+然后共同预测 next location，并且有 time-aware strategy 去过滤 outdated patterns。
+
+所以它有一个结构：
+
+$$ \text{internal preference} + \text{external influence} \rightarrow \text{next behavior} $$
+
+这个确实和你：
+
+$$ S_t + O_t \rightarrow P(A_t) $$
+
+有亲缘性。
+
+但是必须强调区别：
+
+它没有显式研究
+
+$$ S_t\rightarrow S_{t+1} $$
+
+更没有：
+
+$$ A_t\rightarrow W_{t+1}\rightarrow O_{t+1}\rightarrow S_{t+1} $$
+
+它的目标还是位置预测，所谓 internal preference 也是从轨迹模式里学到的移动偏好，不是一个随事件持续更新的通用人物主观状态。
+
+所以：
+
+相关度：★★★☆☆～★★★★☆，主要相关于“内在因素 + 外部情境 → 行为预测”。
+
+3. 2020 DGPS：目前 dmuestc 里我认为离你最近，但仍只有半边
+
+Learning evolving user's behaviors on location-based social networks
+
+这个比我刚才说得应该谨慎一点。
+
+它确实明确研究 evolving user behaviors，方法把：
+
+geo-aware personal preference；
+social interaction excitation；
+temporal point process；
+
+结合起来，建立用户 check-in 行为的 dynamic mobility mechanism。论文原文就是这么描述的。
+
+所以它已经有：
+
+$$ \text{history} + \text{personal preference} + \text{external social influence} + \text{temporal dynamics} \rightarrow \text{future behavior} $$
+
+这和你确实有明显交集。
+
+但仍然没有你的关键东西：
+
+Objective World State W
+        ↓
+Perception
+        ↓
+Subjective State S
+        ↓
+Action
+        ↓
+World State W'
+        ↓
+...
+
+DGPS 主要是对 check-in event intensity 建模。
+
+它不会显式问：
+
+“用户目前相信什么？”
+
+“世界真实状态和人物认知是否不同？”
+
+“这个事件怎样改变人物内部状态？”
+
+“人物行为之后怎样反过来改变客观环境？”
+
+所以：
+
+相关度：★★★★☆，但只是与你的“动态行为预测”这一侧最接近。
+
+并不是你的整个问题已经有人做过。
+
+其他那些我现在会直接降级
+
+Synchronization-based Clustering on Evolving Data Stream：
+
+主要是 evolving stream clustering。
+
+与你的人物问题弱相关。
+
+2026 Evolving User-Item Micro-clusters：
+
+目前我只能确认标题、作者、ICDE 接收和实验室称其为“基于数据流演化的推荐算法”；公开页面没有足够方法细节让我负责任地说它和你的状态更新结构多接近。
+
+所以我刚才直接说“比 SyncStream 更贴你的动态用户状态”确实说过头了。
+
+目前应该标：
+
+待读全文，不判断。
+
+其他 federated evolving stream、label-limited stream、micro-cluster：
+
+基本都是 concept drift / online learning 方法线。
+
+与你顶多共享：
+
+$$ \text{evolving data} $$
+
+这个词。
+
+不应该硬说贴近。
+
+这样看，反而更有意思
+
+邵老师组里真正与你能搭桥的部分其实很明确：
+
+他们熟悉
+$$ \text{history stream} \rightarrow \text{evolving representation} \rightarrow \text{prediction} $$
+
+以及：
+
+$$ \text{internal preference} + \text{external influence} \rightarrow \text{behavior prediction} $$
+
+而你想再多走一步
+$$ \boxed{ \begin{aligned} W_t &\rightarrow O_t^i\\ (S_t^i,O_t^i)&\rightarrow S_{t+1}^i\\ (S_{t+1}^i,O_t^i)&\rightarrow P(A_t^i)\\ (W_t,A_t^i)&\rightarrow W_{t+1} \end{aligned}} $$
+
+这里真正新增的问题不是：
+
+“数据会不会 evolve？”
+
+而是：
+
+世界和人物是两个不同性质的状态系统，它们如何通过受限的信息/行为接口共同演化？
+
+然后最关键的是：
+
+这个隐含人物状态的更新是否正确？
+
+怎么判断？
+
+不是去问 LLM：
+
+“这个 stress=0.63 合不合理？”
+
+而是看它有没有 predictive validity：
+
+$$ S_t \rightarrow P(A_t) $$
+
+能不能长期把人物真实行为放在合理概率区域。
+
+也可以通过干预：
+
+$$ \Delta W \rightarrow \Delta O \rightarrow \Delta S \rightarrow \Delta P(A) $$
+
+检查状态变化是否有合理方向。
+
+这已经和纯 concept drift 不一样了。
+
+而且你这里其实有两个不同的 state transition 问题
+
+我觉得这一点我们之前还没有足够认真地区分。
+
+客观状态更新
+$$ W_{t+1}=G(W_t,A_t,E_t,\Delta t) $$
+
+这里要求的是：
+
+causal validity / executable consistency
+
+例如：
+
+门：open → closed
+杯子：full → empty
+人物：room_A → corridor
+B：没有回复 A
+
+它应该尽量不解释心理。
+
+主观状态更新
+$$ S_{t+1}^i = F(S_t^i,M_i(W_t),A_t^i,Outcome_t^i) $$
+
+这里要求的是：
+
+psychological / behavioral validity
+
+比如：
+
+belief
+goal
+emotion
+relationship
+expectation
+habit
+...
+
+到底怎样因历史而变化。
+
+然后这两个系统不是互相复制：
+
+World: B没有回消息
+≠
+Subject: B讨厌我
+
+而是通过：
+
+World
+↓
+Observation
+↓
+Interpretation / state update
+
+产生差异。
+
+我觉得这才是你现在最有意思的地方。
+
+所以现在如果你问我：
+
+“邵老师以前的东西跟我到底关系有多大？”
+
+我的答案会变成：
+
+他以前的工作并没有直接做你的问题。
+
+但是他很熟悉你这个问题背后的一个重要数学/数据挖掘母题：
+
+面对持续到来的历史，如何维护会变化的表示，并用未来观测检验它是否仍有效。
+
+而你把这个母题推到了一个复杂得多的对象：
+
+人物的不可观测主观状态 + 一个独立演化的客观世界 + 两者有限交互产生的行为。
+
+所以真正值得你读的 dmuestc 工作，我现在只推荐先看：
+
+SyncStream 2014 → PSI 2018 → DGPS 2020。
+
+三篇分别看三个问题：
+
+SyncStream： “状态/表示怎么跟着流变化？”
+
+PSI： “内在因素和外部环境怎么共同决定行为？”
+
+DGPS： “怎么显式处理行为随时间演化并预测未来？”
+
+然后你的 PSR、state-space、computational psychology 那几篇负责补他们没有覆盖的：
+
+latent state 到底应该是什么、怎样更新、怎样从 observable behavior 验证。
+
+这样拼起来才是真的和你当前问题对得上，不需要把整个 dmuestc publication list 都硬往人物 AI 上套。
