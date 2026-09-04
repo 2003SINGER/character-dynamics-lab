@@ -87,11 +87,17 @@ std::string state_summary(const CharacterState& state) {
     append_value(output, "anxiety", state.anxiety); output << ", ";
     append_value(output, "screen_strain", state.screen_strain); output << ", ";
     append_value(output, "purchase_urge", state.purchase_urge);
-    output << ", intention=";
-    if (state.intention.active) {
-        output << to_string(state.intention.action) << "(" << state.intention.remaining_decision_points << ")";
-    } else {
+    output << ", commitment=";
+    switch (state.commitment.status) {
+    case CommitmentStatus::None:
         output << "none";
+        break;
+    case CommitmentStatus::Active:
+        output << state.commitment.task_id << "(active)";
+        break;
+    case CommitmentStatus::Suspended:
+        output << state.commitment.task_id << "(suspended:" << state.commitment.suspended_decision_points << ')';
+        break;
     }
     output << '}';
     return output.str();

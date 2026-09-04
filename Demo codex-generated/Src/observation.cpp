@@ -119,7 +119,19 @@ Observation refresh_observation(Observation observation,
         [](const WorldEvent& event) { return event.id == "alarm-rings"; });
     write_fact(observation, "room.alarm", room.alarm_ringing ? "ringing" : "silent",
                alarm_rang ? "direct_room_auditory" : "direct_room_visual", now);
-    write_fact(observation, "task.progress", std::to_string(world.task_progress), "direct_room_visual", now);
+    for (const WorldTask& task : world.tasks) {
+        std::ostringstream effort;
+        effort << std::fixed << std::setprecision(3) << task.effort_done;
+        write_fact(observation, "task." + task.id + ".effort", effort.str(), "direct_room_visual", now);
+        switch (task.status) {
+        case TaskStatus::Active: write_fact(observation, "task." + task.id + ".status", "active", "direct_room_visual", now); break;
+        case TaskStatus::Completed: write_fact(observation, "task." + task.id + ".status", "completed", "direct_room_visual", now); break;
+        }
+        const bool deadline_passed = task.due_at_total_minutes >= 0
+            && total_minutes(world.time) >= task.due_at_total_minutes;
+        write_fact(observation, "task." + task.id + ".deadline", deadline_passed ? "passed" : "upcoming",
+                   "internal_calendar", now);
+    }
     write_fact(observation, "message.unread_count", std::to_string(world.unread_messages), "phone_notification_state", now);
     write_fact(observation, "clock.time", now, "internal_clock", now);
     write_fact(observation, "room.temperature", format_temperature(room.temperature_celsius), "direct_room_thermal", now);
@@ -204,7 +216,8 @@ std::string observation_summary(const Observation& observation) {
            << ", temperature=" << fact_value(observation, "room.temperature")
            << ", time=" << fact_value(observation, "clock.time")
            << ", light=" << fact_value(observation, "room.light")
-           << ", task_progress=" << fact_value(observation, "task.progress")
+           << ", coursework_effort=" << fact_value(observation, "task.coursework.effort")
+           << ", coursework_status=" << fact_value(observation, "task.coursework.status")
            << ", unread_messages=" << fact_value(observation, "message.unread_count")
            << ", self_action=";
     if (observation.last_self_action.has_action) {

@@ -17,6 +17,20 @@ CandidateAction candidate(ActionType action, double activation, double threshold
     result.reason = std::move(reason);
     return result;
 }
+
+bool commitment_can_bias_study(const Observation& observation, const CharacterState& state) {
+    if (state.commitment.status == CommitmentStatus::None) return false;
+    if (!has_known_fact(observation, "task." + state.commitment.task_id + ".status", "active")) return false;
+    const bool study_is_known = observation_knows_action(observation, ActionType::StudyAtDesk)
+        || observation_knows_action(observation, ActionType::StudyAtComputer);
+    if (!study_is_known) return false;
+    if (state.commitment.status == CommitmentStatus::Active) return true;
+
+    // A suspended commitment may shape a return to work only after immediate
+    // bodily/recovery demands have eased. This is a v0 reconsideration gate,
+    // not a planner or an automatic multi-step script.
+    return state.fatigue < 0.65 && state.hunger < 0.60 && state.bathroom_urge < 0.60;
+}
 } // namespace
 
 DecisionContext decide(const Observation& observation,
@@ -24,12 +38,19 @@ DecisionContext decide(const Observation& observation,
                        const Personality& personality) {
     DecisionContext decision;
     decision.known_actions = observation.known_actions;
-    if (state.intention.active && state.intention.remaining_decision_points > 0) {
-        decision.intention_status = "active: " + to_string(state.intention.action)
-                                  + " for " + std::to_string(state.intention.remaining_decision_points)
-                                  + " more decision point(s)";
-    } else {
+    switch (state.commitment.status) {
+    case CommitmentStatus::None:
         decision.intention_status = "none";
+        break;
+    case CommitmentStatus::Active:
+        decision.intention_status = "active task: " + state.commitment.task_id;
+        break;
+    case CommitmentStatus::Suspended:
+        decision.intention_status = "suspended task: " + state.commitment.task_id
+                                  + " for " + std::to_string(state.commitment.suspended_decision_points)
+                                  + " decision point(s); reconsideration "
+                                  + (commitment_can_bias_study(observation, state) ? "permits return" : "defers return");
+        break;
     }
     const double distraction = state.boredom * 0.65 + personality.procrastination * 0.25
                              + personality.stimulation_seeking * 0.20;
@@ -61,9 +82,10 @@ DecisionContext decide(const Observation& observation,
     // A^W -> A^O -> pi(A): W declares what is legal; persistent O exposes
     // only the actions afforded by things the character currently knows.
     for (ActionType action : observation.known_actions) {
-        const double commitment_bonus = state.intention.active
-                                     && state.intention.remaining_decision_points > 0
-                                     && state.intention.action == action ? 0.16 : 0.0;
+        const bool advances_committed_task = (action == ActionType::StudyAtDesk
+            || action == ActionType::StudyAtComputer)
+            && commitment_can_bias_study(observation, state);
+        const double commitment_bonus = advances_committed_task ? 0.16 : 0.0;
         switch (action) {
         case ActionType::UsePhone:
             decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * 0.30 - state.fatigue * 0.12 + commitment_bonus, 0.12, "phone offers immediate stimulation but raises strain"));
@@ -157,22 +179,33 @@ ActionType sample_action(const DecisionContext& decision, std::mt19937& rng) {
     return actions[distribution(rng)];
 }
 
-void update_intention(CharacterState& state,
-                      ActionType chosen_action) {
-    const bool study_choice = chosen_action == ActionType::StudyAtDesk
-                           || chosen_action == ActionType::StudyAtComputer;
-    if (study_choice) {
-        state.intention = {true, chosen_action, "continue reducing task pressure", 2};
+void update_commitment(CharacterState& state,
+                       const WorldOutcome& outcome,
+                       int settled_at_total_minutes) {
+    if (!outcome.accepted) return;
+
+    if (outcome.task_completed) {
+        state.commitment = {};
         return;
     }
-    if (!state.intention.active) {
+    if (!outcome.task_id.empty()) {
+        state.commitment = {CommitmentStatus::Active, outcome.task_id,
+                            "continue advancing unfinished task", settled_at_total_minutes, 0};
         return;
     }
-    --state.intention.remaining_decision_points;
-    if (state.intention.remaining_decision_points <= 0 || chosen_action == ActionType::RestAtBed
-        || chosen_action == ActionType::SleepAtBed
-        || chosen_action == ActionType::GetMeal || chosen_action == ActionType::GoToBathroom) {
-        state.intention = {};
+
+    const bool bodily_or_recovery_action = outcome.action == ActionType::RestAtBed
+        || outcome.action == ActionType::SleepAtBed
+        || outcome.action == ActionType::GetMeal
+        || outcome.action == ActionType::GoToBathroom;
+    if (state.commitment.status == CommitmentStatus::Active && bodily_or_recovery_action) {
+        state.commitment.status = CommitmentStatus::Suspended;
+        state.commitment.reason = "temporarily yield to bodily or recovery need";
+        state.commitment.suspended_decision_points = 0;
+        return;
+    }
+    if (state.commitment.status == CommitmentStatus::Suspended) {
+        ++state.commitment.suspended_decision_points;
     }
 }
 

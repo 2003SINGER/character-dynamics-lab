@@ -1,11 +1,31 @@
 #include "world.h"
 
 #include <algorithm>
+#include <random>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
+#include <vector>
 
 namespace {
+constexpr int kMinutesPerDay = 24 * 60;
+
+enum class ScheduledEventKind {
+    Alarm,
+    StudyMessage,
+    Weather,
+    Temperature,
+    TaskReminder,
+    Evening
+};
+
+struct ScheduledEvent {
+    int minute_of_day = 0;
+    ScheduledEventKind kind = ScheduledEventKind::Alarm;
+    bool rainy = false;
+    double temperature_celsius = 23.0;
+};
+
 Room& require_room(Scene& scene, const std::string& room_id) {
     if (Room* room = scene.room_by_id(room_id)) {
         return *room;
@@ -19,7 +39,200 @@ const Room& require_room(const Scene& scene, const std::string& room_id) {
     }
     throw std::logic_error("World location does not resolve to a Room in its Scene");
 }
+
+std::vector<ScheduledEvent> schedule_for_day(unsigned int scenario_seed, int day_index) {
+    if (scenario_seed == 0U) {
+        std::vector<ScheduledEvent> legacy = {
+            {9 * 60, ScheduledEventKind::Alarm},
+            {9 * 60 + 30, ScheduledEventKind::StudyMessage},
+            {11 * 60, ScheduledEventKind::Weather, true},
+            {12 * 60, ScheduledEventKind::TaskReminder},
+            {16 * 60, ScheduledEventKind::Temperature, false, 17.0},
+            {18 * 60, ScheduledEventKind::Evening},
+        };
+        if (day_index > 0) {
+            legacy.erase(std::remove_if(legacy.begin(), legacy.end(), [](const ScheduledEvent& event) {
+                return event.kind == ScheduledEventKind::Weather || event.kind == ScheduledEventKind::Temperature;
+            }), legacy.end());
+        }
+        return legacy;
+    }
+
+    std::seed_seq sequence{
+        scenario_seed,
+        static_cast<unsigned int>(day_index),
+        0x43445257U,
+        0x20260904U,
+    };
+    std::mt19937 generator(sequence);
+    const auto minute_between = [&generator](int first, int last) {
+        return std::uniform_int_distribution<int>(first, last)(generator);
+    };
+    const bool rain = std::bernoulli_distribution(0.55)(generator);
+    const bool cold = std::bernoulli_distribution(0.45)(generator);
+
+    std::vector<ScheduledEvent> events = {
+        {minute_between(7 * 60, 9 * 60 + 30), ScheduledEventKind::Alarm},
+        {minute_between(9 * 60, 18 * 60), ScheduledEventKind::StudyMessage},
+        {minute_between(10 * 60, 17 * 60), ScheduledEventKind::Weather, rain},
+        {minute_between(12 * 60, 20 * 60), ScheduledEventKind::Temperature, false, cold ? 17.0 : 24.0},
+        {minute_between(11 * 60, 19 * 60), ScheduledEventKind::TaskReminder},
+        {minute_between(17 * 60 + 30, 20 * 60 + 30), ScheduledEventKind::Evening},
+    };
+    std::sort(events.begin(), events.end(), [](const ScheduledEvent& left, const ScheduledEvent& right) {
+        if (left.minute_of_day != right.minute_of_day) return left.minute_of_day < right.minute_of_day;
+        return static_cast<int>(left.kind) < static_cast<int>(right.kind);
+    });
+    return events;
+}
+
+int first_cold_event_between(unsigned int scenario_seed, int before, int after) {
+    const int first_day = before / kMinutesPerDay;
+    const int last_day = after / kMinutesPerDay;
+    for (int day_index = first_day; day_index <= last_day; ++day_index) {
+        for (const ScheduledEvent& event : schedule_for_day(scenario_seed, day_index)) {
+            const int absolute_minute = day_index * kMinutesPerDay + event.minute_of_day;
+            if (event.kind == ScheduledEventKind::Temperature && event.temperature_celsius <= 18.0
+                && before < absolute_minute && absolute_minute <= after) {
+                return absolute_minute;
+            }
+        }
+    }
+    return -1;
+}
+
+void append_event(WorldOutcome& outcome, WorldEvent event) {
+    outcome.effects.push_back("external event: " + event.description);
+    outcome.events.push_back(std::move(event));
+}
+
+std::string task_status_name(TaskStatus status) {
+    switch (status) {
+    case TaskStatus::Active: return "active";
+    case TaskStatus::Completed: return "completed";
+    }
+    return "unknown";
+}
+
+double settlement_variation(unsigned int scenario_seed, const WorldTask& task) {
+    std::seed_seq sequence{
+        scenario_seed,
+        static_cast<unsigned int>(task.execution_count),
+        0x5441534BU,
+        0x20260905U,
+    };
+    std::mt19937 generator(sequence);
+    return std::uniform_real_distribution<double>(0.90, 1.10)(generator);
+}
+
+void apply_scheduled_events(World& world, int before, int after, bool was_sleeping, WorldOutcome& outcome) {
+    const int first_day = before / kMinutesPerDay;
+    const int last_day = after / kMinutesPerDay;
+    Room& room = world.current_room();
+    for (int day_index = first_day; day_index <= last_day; ++day_index) {
+        for (const ScheduledEvent& scheduled : schedule_for_day(world.scenario_seed, day_index)) {
+            const int absolute_minute = day_index * kMinutesPerDay + scheduled.minute_of_day;
+            if (before >= absolute_minute || after < absolute_minute) continue;
+
+            switch (scheduled.kind) {
+            case ScheduledEventKind::Alarm:
+                if (!room.alarm_ringing) {
+                    room.alarm_ringing = true;
+                    append_event(outcome, {"alarm-rings", "the alarm clock rings in the room", "room/alarm-clock", absolute_minute});
+                }
+                break;
+            case ScheduledEventKind::StudyMessage:
+                ++world.unread_messages;
+                append_event(outcome, {"message-study-group", "a study-group message arrives", "phone notification", absolute_minute});
+                break;
+            case ScheduledEventKind::Weather:
+                world.weather = scheduled.rainy ? "rain" : "clear";
+                append_event(outcome, {scheduled.rainy ? "weather-rain" : "weather-clear",
+                    scheduled.rainy ? "rain begins outside" : "clouds clear outside",
+                    "world/weather", absolute_minute});
+                break;
+            case ScheduledEventKind::Temperature: {
+                room.temperature_celsius = scheduled.temperature_celsius;
+                std::ostringstream description;
+                description << "room temperature changes to " << static_cast<int>(scheduled.temperature_celsius) << "C";
+                WorldEvent event{"room-temperature-shift", description.str(), "room/temperature", absolute_minute};
+                append_event(outcome, event);
+                if (was_sleeping && scheduled.temperature_celsius <= 18.0) {
+                    outcome.sleeping_sensory_events.push_back(event);
+                    outcome.effects.push_back("sleeping sensory update: cold is felt despite other O fields being frozen");
+                }
+                break;
+            }
+            case ScheduledEventKind::TaskReminder:
+                if (world.has_pending_task()) {
+                    append_event(outcome, {"task-reminder", "calendar reminder: a task remains due today", "calendar", absolute_minute});
+                }
+                break;
+            case ScheduledEventKind::Evening:
+                append_event(outcome, {"evening", "evening begins; the room becomes quieter", "world clock", absolute_minute});
+                break;
+            }
+        }
+    }
+    for (const WorldTask& task : world.tasks) {
+        if (task.status == TaskStatus::Active && task.due_at_total_minutes >= 0
+            && before < task.due_at_total_minutes && after >= task.due_at_total_minutes) {
+            append_event(outcome, {"task-deadline", "deadline passes for task: " + task.id,
+                "world/task-calendar", task.due_at_total_minutes});
+        }
+    }
+}
 } // namespace
+
+World::World(unsigned int seed) : scenario_seed(seed) {
+    std::seed_seq sequence{seed, 0x5441534BU, 0x20260905U};
+    std::mt19937 generator(sequence);
+    const double target = seed == 0U ? 8.0 : std::uniform_real_distribution<double>(7.2, 9.2)(generator);
+    const double desk_effort = seed == 0U ? 0.45 : std::uniform_real_distribution<double>(0.38, 0.56)(generator);
+    const double computer_effort = seed == 0U ? 0.85 : std::uniform_real_distribution<double>(0.68, 1.02)(generator);
+    const int due_offset = seed == 0U ? 12 * 60 : std::uniform_int_distribution<int>(10 * 60, 30 * 60)(generator);
+    tasks.push_back({"coursework", "coursework", 0.0, target, TaskStatus::Active,
+                     {ActionType::StudyAtDesk, ActionType::StudyAtComputer}, due_offset,
+                     desk_effort, computer_effort});
+}
+
+const WorldTask* World::task_by_id(const std::string& task_id) const {
+    const auto found = std::find_if(tasks.begin(), tasks.end(), [&task_id](const WorldTask& task) {
+        return task.id == task_id;
+    });
+    return found == tasks.end() ? nullptr : &*found;
+}
+
+WorldTask* World::task_by_id(const std::string& task_id) {
+    const auto found = std::find_if(tasks.begin(), tasks.end(), [&task_id](const WorldTask& task) {
+        return task.id == task_id;
+    });
+    return found == tasks.end() ? nullptr : &*found;
+}
+
+const WorldTask* World::active_task_for(ActionType action) const {
+    const auto found = std::find_if(tasks.begin(), tasks.end(), [action](const WorldTask& task) {
+        return task.status == TaskStatus::Active
+            && std::find(task.supporting_actions.begin(), task.supporting_actions.end(), action)
+                != task.supporting_actions.end();
+    });
+    return found == tasks.end() ? nullptr : &*found;
+}
+
+WorldTask* World::active_task_for(ActionType action) {
+    const auto found = std::find_if(tasks.begin(), tasks.end(), [action](const WorldTask& task) {
+        return task.status == TaskStatus::Active
+            && std::find(task.supporting_actions.begin(), task.supporting_actions.end(), action)
+                != task.supporting_actions.end();
+    });
+    return found == tasks.end() ? nullptr : &*found;
+}
+
+bool World::has_pending_task() const {
+    return std::any_of(tasks.begin(), tasks.end(), [](const WorldTask& task) {
+        return task.status == TaskStatus::Active;
+    });
+}
 
 Room& World::current_room() {
     return require_room(scene, location);
@@ -42,7 +255,7 @@ bool World::can_execute(ActionType action) const {
         return wallet >= 30;
     case ActionType::StudyAtDesk:
     case ActionType::StudyAtComputer:
-        return room.light_on && task_progress < task_target;
+        return room.light_on && active_task_for(action) != nullptr;
     case ActionType::TurnLightOn:
         return !room.light_on;
     case ActionType::TurnLightOff:
@@ -90,7 +303,6 @@ CharacterActionPlan World::expand_action(ActionType action) const {
     case ActionType::StudyAtComputer:
     case ActionType::StudyAtDesk:
         add("count-study-session", "study session completed", IncrementWorldCounter{WorldCounter::StudySessions});
-        add("advance-task", "task progress increased by 1", AdjustWorldValue{WorldValue::TaskProgress, 1});
         break;
     case ActionType::RestAtBed:
         add("count-rest-session", "rest session completed in bed", IncrementWorldCounter{WorldCounter::RestSessions});
@@ -149,7 +361,7 @@ std::vector<ActionType> World::available_actions() const {
 }
 
 WorldOutcome World::settle(ActionType action) {
-    // Re-expand inside W immediately before settlement.  This deliberately
+    // Re-expand inside W immediately before settlement. This deliberately
     // makes CharacterActionPlan a trace/provenance object rather than a
     // capability that another module can forge to mutate W.
     CharacterActionPlan plan = expand_action(action);
@@ -180,11 +392,13 @@ WorldOutcome World::settle(ActionType action) {
     }
     auto& advance = std::get<AdvanceSimulationTime>(time_primitive->payload);
     int after = before + advance.minutes;
-    constexpr int kColdWakeMinute = 16 * 60;
-    if (plan.action == ActionType::SleepAtBed && before < kColdWakeMinute && after >= kColdWakeMinute) {
-        after = kColdWakeMinute;
-        advance.minutes = after - before;
-        outcome.woke_early = true;
+    if (plan.action == ActionType::SleepAtBed) {
+        const int cold_wake_minute = first_cold_event_between(scenario_seed, before, after);
+        if (cold_wake_minute >= 0) {
+            after = cold_wake_minute;
+            advance.minutes = after - before;
+            outcome.woke_early = true;
+        }
     }
 
     Room& room = current_room();
@@ -208,7 +422,8 @@ WorldOutcome World::settle(ActionType action) {
             } else if constexpr (std::is_same_v<Payload, AdjustWorldValue>) {
                 switch (payload.value) {
                 case WorldValue::Wallet: wallet += payload.amount; break;
-                case WorldValue::TaskProgress: task_progress += payload.amount; break;
+                case WorldValue::TaskProgress:
+                    throw std::logic_error("Task effort must be settled through WorldTask, not an integer primitive");
                 }
             } else if constexpr (std::is_same_v<Payload, SetRoomFlag>) {
                 switch (payload.flag) {
@@ -227,53 +442,42 @@ WorldOutcome World::settle(ActionType action) {
     if (plan.action == ActionType::SleepAtBed) {
         outcome.observation_frozen_during_action = true;
         outcome.effects.push_back(outcome.woke_early
-            ? "character wakes early because cold is sensed; the next decision point can refresh O from the room"
+            ? "character wakes early because a cold scenario event is sensed; the next decision point can refresh O from the room"
             : "character wakes; the next decision point can refresh O from the room");
     }
 
-    const auto emit_daily_if_crossed = [&](int minute_of_day, const char* id, const char* description, const char* source) {
-        constexpr int kMinutesPerDay = 24 * 60;
-        const int first_day_index = before / kMinutesPerDay;
-        const int last_day_index = after / kMinutesPerDay;
-        for (int day_index = first_day_index; day_index <= last_day_index; ++day_index) {
-            const int event_minute = day_index * kMinutesPerDay + minute_of_day;
-            if (before < event_minute && after >= event_minute) {
-                WorldEvent event{id, description, source};
-                outcome.events.push_back(event);
-                outcome.effects.push_back("external event: " + event.description);
-            }
+    apply_scheduled_events(*this, before, after, plan.action == ActionType::SleepAtBed, outcome);
+
+    if (plan.action == ActionType::StudyAtDesk || plan.action == ActionType::StudyAtComputer) {
+        WorldTask* task = active_task_for(plan.action);
+        if (task == nullptr) {
+            throw std::logic_error("Accepted study action has no active supporting task");
         }
-    };
-    if (before < alarm_minute_of_day && after >= alarm_minute_of_day && !room.alarm_ringing) {
-        room.alarm_ringing = true;
-        WorldEvent event{"alarm-rings", "the alarm clock rings in the room", "room/alarm-clock"};
-        outcome.events.push_back(event);
-        outcome.effects.push_back("scene event: " + event.description);
-    }
-    emit_daily_if_crossed(9 * 60 + 30, "message-study-group", "a study-group message arrives", "phone notification");
-    if (before < 11 * 60 && after >= 11 * 60 && weather == "clear") {
-        weather = "rain";
-        WorldEvent event{"weather-rain", "rain begins outside", "world/weather"};
-        outcome.events.push_back(event);
-        outcome.effects.push_back("world event: " + event.description);
-    }
-    if (before < kColdWakeMinute && after >= kColdWakeMinute && room.temperature_celsius > 17.0) {
-        room.temperature_celsius = 17.0;
-        WorldEvent event{"room-cold", "room temperature falls to 17C", "room/temperature"};
-        outcome.events.push_back(event);
-        outcome.effects.push_back("world event: " + event.description);
-        if (plan.action == ActionType::SleepAtBed) {
-            outcome.sleeping_sensory_events.push_back(event);
-            outcome.effects.push_back("sleeping sensory update: cold is felt despite other O fields being frozen");
-        }
-    }
-    if (task_progress < task_target) {
-        emit_daily_if_crossed(12 * 60, "task-reminder", "calendar reminder: task remains due today", "calendar");
-    }
-    emit_daily_if_crossed(18 * 60, "evening", "evening begins; the room becomes quieter", "world clock");
-    for (const WorldEvent& event : outcome.events) {
-        if (event.id == "message-study-group") {
-            ++unread_messages;
+        outcome.task_id = task->id;
+        outcome.task_effort_before = task->effort_done;
+        outcome.task_settlement_variation = settlement_variation(scenario_seed, *task);
+        const double base_effort = plan.action == ActionType::StudyAtDesk
+            ? task->desk_base_effort : task->computer_base_effort;
+        const double duration_factor = static_cast<double>(outcome.elapsed_minutes)
+            / static_cast<double>(action_definition(plan.action).default_duration_minutes);
+        outcome.task_session_interrupted = outcome.elapsed_minutes
+            < action_definition(plan.action).default_duration_minutes;
+        const double interruption_factor = outcome.task_session_interrupted ? 0.55 : 1.0;
+        outcome.task_effort_gained = base_effort * duration_factor
+            * interruption_factor * outcome.task_settlement_variation;
+        task->effort_done = std::min(task->effort_target, task->effort_done + outcome.task_effort_gained);
+        ++task->execution_count;
+        outcome.task_effort_after = task->effort_done;
+        std::ostringstream effect;
+        effect << "task effort settled: " << task->id << ' ' << outcome.task_effort_before
+               << " + " << outcome.task_effort_gained << " -> " << outcome.task_effort_after
+               << '/' << task->effort_target << " (variation=" << outcome.task_settlement_variation << ')';
+        outcome.effects.push_back(effect.str());
+        if (task->effort_done >= task->effort_target) {
+            task->status = TaskStatus::Completed;
+            task->completed_at_total_minutes = total_minutes(time);
+            outcome.task_completed = true;
+            append_event(outcome, {"task-completed", "coursework has been completed", "world/task", total_minutes(time)});
         }
     }
     return outcome;
@@ -291,6 +495,7 @@ std::string World::summary() const {
     const Room& room = current_room();
     std::ostringstream output;
     output << "W{time=" << time_summary()
+           << ", scenario_seed=" << scenario_seed
            << ", scene=" << scene.id
            << ", location=" << location
            << ", light=" << (room.light_on ? "on" : "off")
@@ -298,7 +503,14 @@ std::string World::summary() const {
            << ", curtain=" << (room.curtain_open ? "open" : "closed")
            << ", weather=" << weather
            << ", temperature=" << room.temperature_celsius << "C"
-           << ", task=" << task_progress << '/' << task_target
+           << ", tasks=[";
+    for (std::size_t index = 0; index < tasks.size(); ++index) {
+        const WorldTask& task = tasks[index];
+        output << task.id << ':' << task.effort_done << '/' << task.effort_target
+               << '{' << task_status_name(task.status) << '}';
+        if (index + 1 < tasks.size()) output << ", ";
+    }
+    output << ']'
            << ", wallet=" << wallet
            << ", unread_messages=" << unread_messages
            << ", objects=[";

@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.20)
 
 project(CharacterDynamicsReference LANGUAGES CXX)
 
+find_package(Git QUIET)
+if(GIT_FOUND)
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" -C "${CMAKE_CURRENT_SOURCE_DIR}" rev-parse --short HEAD
+        OUTPUT_VARIABLE CHARACTER_DYNAMICS_GIT_REVISION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET)
+endif()
+if(NOT CHARACTER_DYNAMICS_GIT_REVISION)
+    set(CHARACTER_DYNAMICS_GIT_REVISION "unknown")
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -23,6 +35,8 @@ add_executable(character_dynamics_reference
 )
 
 target_include_directories(character_dynamics_reference PRIVATE Inc)
+target_compile_definitions(character_dynamics_reference PRIVATE
+    CHARACTER_DYNAMICS_GIT_REVISION="${CHARACTER_DYNAMICS_GIT_REVISION}")
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(character_dynamics_reference PRIVATE -Wall -Wextra -Wpedantic)

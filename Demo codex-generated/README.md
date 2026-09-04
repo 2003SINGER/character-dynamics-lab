@@ -11,14 +11,15 @@ W → O → X → S → D → π(A^char) → CharacterActionPlan[a^world...] →
 ## 它会做什么
 
 - 同一初始房间世界运行两次：拖延/低自控、较高自控/任务导向；
-- 每次运行固定随机种子，连续 12 个离散决策点；每个动作直接结算并推进 1–60 分钟的模拟时间；
-- W 维护时间、Scene、角色所在 Room、天气、任务进度、钱包、未读消息和确定性世界事件；Room 自己维护灯光、闹钟、窗帘、温度和室内对象；
+- 默认展示每次使用固定随机种子、连续 12 个离散决策点；每个动作直接结算并推进 1–480 分钟的模拟时间；
+- `--batch` 会生成 32 个固定可复现、每个字段均位于 `[0,1)` 的合成人格，针对 8 个世界情景种子各运行 256 步，共保存 65,536 个决策点；每次运行在所给根目录下创建唯一 `run_<timestamp>_<suffix>/`，不会覆盖旧结果；人格参数、世界事件时间、天气、温度和任务 effort 配置均可由输出文件审计；
+- W 维护时间、Scene、角色所在 Room、天气、通用 `WorldTask`、钱包、未读消息和确定性世界事件；Room 自己维护灯光、闹钟、窗帘、温度和室内对象；
 - `Scene(home) → Room(student room) → Object` 是当前世界层级。手机、电脑、书桌、床、门、灯、闹钟、窗户都是 Room 的 Object；Object 提供 affordance，再自然给出浏览、网购、学习、休息/睡觉、上厕所、买饭、开/关灯、关闭闹钟、开/关窗帘等候选；
 - 角色并不按脚本轮流执行动作：每步由当前 `S + P` 算动作 activation；低于 threshold 的动作被抑制，其余动作按概率采样。床和门只让行动成为可能，不决定角色必定去睡或出门；
 - `O` 是跨决策点保持的字段记录；每项有 `known/stale/unknown`、来源和观察时刻。当前房间对象通常来自 `direct_room_visual`，闹钟来自同场景的 `direct_room_auditory`；
 - `A^W → A^O → π(A)` 已显式输出：W 给出合法动作，O 只暴露角色已知物品对应的动作。这个房间通常两者相同，但层没有被省掉；
 - 每次选择的 `A^char` 由 W 自行展开为 typed `CharacterActionPlan`，其中含 `set activity / increment counter / adjust value / set room flag / advance time` 等 `a^world`；调用方不能提交 primitive 让 W 执行。日志会并列打印 W 生成的计划 primitive 与实际结算 primitive，例如睡眠被冷醒后时间 primitive 会缩短；
-- `X` 是 `(ΔO, O, old S, P) → Appraisal` 的可替换小函数；它不直接读取原始 `WorldOutcome`。S 包含无聊、疲劳、任务压力、满意度、饥饿、如厕需求、焦虑、屏幕疲劳和购买欲，并有一个轻量的 persistent intention 占位；
+- `X` 是 `(ΔO, O, old S, P) → Appraisal` 的可替换小函数；它不直接读取原始 `WorldOutcome`。S 包含无聊、疲劳、任务压力、满意度、饥饿、如厕需求、焦虑、屏幕疲劳、购买欲与任务绑定的 `TaskCommitment`；学习 action 仅代表一次 session，W 以连续 effort、时长与可复现的小幅种子扰动结算任务推进。截止时间先由 W 产生事件、再经 O 的任务字段进入 X；
 - 打印动作前后 W、O、X 输入、X、requested/applied StateDelta 与 S、D 的 activation/threshold/概率、世界结算、外部事件与来源；
 - 不实现 LLM、UI、异步、玩家可见延迟、多角色、P 学习、真正的 O 信息差或回放评测。
 
@@ -39,7 +40,7 @@ W → O → X → S → D → π(A^char) → CharacterActionPlan[a^world...] →
 - `CharacterActionPlan` / `WorldPrimitive` 是人物动作与 W 写入之间的 typed 边界。policy 只选择 `A^char`，不能直接改 W，也不能提交伪造 primitive；W 结算后才确认 actual primitive。新的场景效果应新增明确 primitive 类型及其 W executor，而不是把字段名塞进字符串；
 - `ObservationFact` 是 O 中 room light、温度、时间、任务等信息的唯一存储，避免“同一事实既在 facts 又在几个 bool/int 字段”逐渐不同步；
 - `X` 只读取 O/ΔO、旧 S 和 P；`D` 只读取 O、S、P 和已经由上游形成的 A^O。W 只在上游给出 A^W、在下游校验/结算；这样 policy 不会绕过 O 偷看 W；
-- `intention` 只在 W 接受所选动作后写回 S；被拒绝或未来因异步失效的计划不应被错误记成角色已承诺的行为。睡眠提前醒来是当前明确的已结算中断语义，其实际时间 primitive 会被记录；
+- `TaskCommitment` 只在 W 接受所选动作后写回 S；学习 session 建立或恢复对未完成 task 的承诺，吃饭、如厕和恢复动作使其暂停，task 完成时关闭。暂停中的承诺只有在任务状态和学习 affordance 仍被 O 已知、且疲劳/饥饿/如厕需求低于 v0 门槛时，才会重新提高学习动作 activation；这不是规划器。被拒绝或未来因异步失效的计划不应被错误记成角色已承诺的行为。睡眠提前醒来是当前明确的已结算中断语义，其实际时间 primitive 会被记录；
 - `Simulation` 仍故意保留为可读的编排层。不要把 W 结算、X 解释、S 更新和 D 选择硬塞进一个万能规则表：它们正是后续替换机制时需要各自独立的边界。
 
 ## 构建与运行（本机 MinGW）
@@ -51,8 +52,11 @@ Set-Location D:\Tools\cpp-src\character-dynamics-reference
 cmake --preset mingw-debug
 cmake --build --preset build
 D:\Tools\cpp-build\character-dynamics-reference\character_dynamics_reference.exe
+D:\Tools\cpp-build\character-dynamics-reference\character_dynamics_reference.exe --batch D:\Tools\character-dynamics-batch
 ctest --preset test
 ```
+
+批量目录包含 `metadata.txt`（配置版本与构建时 Git revision）、`personalities.csv`、`trajectories.csv` 和 `runs.csv`。`trajectories.csv` 明确区分 `pre_*` 决策时状态、`outcome_*` 结算事实与 `post_*` 结算后世界/承诺，避免把同一行误当作同一时刻的快照。
 
 VS Code 已提供 `CMake Tools` + `clangd` 本机配置。打开本目录后选择 preset `mingw-debug`，再运行 Configure / Build 即可。
 
