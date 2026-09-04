@@ -3,6 +3,7 @@
 #include "action.h"
 #include "scene.h"
 #include "simulation_time.h"
+#include "world_primitive.h"
 
 #include <string>
 #include <vector>
@@ -21,6 +22,7 @@ struct WorldOutcome {
     int elapsed_minutes = 0;
     bool observation_frozen_during_action = false;
     bool woke_early = false;
+    std::vector<WorldPrimitive> settled_primitives;
     std::vector<WorldEvent> events;
     std::vector<WorldEvent> sleeping_sensory_events;
     std::vector<std::string> effects;
@@ -52,6 +54,8 @@ struct World {
     Room& current_room();
     const Room& current_room() const;
     const Object* object_for(ActionType action) const;
+    CharacterActionPlan expand_action(ActionType action) const;
+    WorldOutcome settle(const CharacterActionPlan& plan);
     WorldOutcome execute(ActionType action);
     std::string time_summary() const;
     std::string summary() const;

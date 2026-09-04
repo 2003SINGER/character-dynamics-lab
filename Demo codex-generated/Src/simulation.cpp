@@ -6,6 +6,7 @@
 #include "state.h"
 #include "world.h"
 
+#include <algorithm>
 #include <iomanip>
 #include <ostream>
 #include <random>
@@ -70,16 +71,37 @@ bool Simulation::verify(std::ostream& output) const {
     }
     const WorldOutcome rejected = unavailable_computer.execute(ActionType::UseComputer);
 
+    World primitive_world;
+    const CharacterActionPlan study_plan = primitive_world.expand_action(ActionType::StudyAtDesk);
+    const WorldOutcome settled_study = primitive_world.settle(study_plan);
+
+    World sleeping_world;
+    sleeping_world.time.minute_of_day = 10 * 60 + 46;
+    const WorldOutcome interrupted_sleep = sleeping_world.settle(
+        sleeping_world.expand_action(ActionType::SleepAtBed));
+    const bool sleep_primitive_shortened = std::any_of(interrupted_sleep.settled_primitives.begin(),
+        interrupted_sleep.settled_primitives.end(), [](const WorldPrimitive& primitive) {
+            const auto* advance = std::get_if<AdvanceSimulationTime>(&primitive.payload);
+            return advance != nullptr && advance->minutes == 314;
+        });
+
     const bool reproducible = first_run == repeated_first_run;
     const bool profile_sensitive = first_run != second_run;
     const bool validates_world = !rejected.accepted && !rejected.provenance.empty();
-    const bool has_provenance = first_run.find("World::execute(") != std::string::npos;
+    const bool has_primitives = first_run.find("a^world") != std::string::npos;
+    const bool primitives_settle = settled_study.accepted && primitive_world.task_progress == 1
+                                && settled_study.settled_primitives.size() == study_plan.world_primitives.size();
+    const bool handles_interruption = interrupted_sleep.accepted && interrupted_sleep.woke_early
+                                   && sleep_primitive_shortened;
 
     output << "verify: reproducible=" << reproducible
            << ", profile_sensitive=" << profile_sensitive
            << ", rejects_illegal_action=" << validates_world
-           << ", trace_has_provenance=" << has_provenance << '\n';
-    return reproducible && profile_sensitive && validates_world && has_provenance;
+           << ", trace_has_primitives=" << has_primitives
+           << ", primitives_settle=" << primitives_settle
+           << ", interruption_rewrites_plan=" << handles_interruption << '\n';
+    return reproducible && profile_sensitive && validates_world && has_primitives
+        && primitives_settle && handles_interruption;
 }
 
 std::string Simulation::run_profile(const Personality& personality,
@@ -110,10 +132,13 @@ std::string Simulation::run_profile(const Personality& personality,
         const DecisionContext decision = decide(observation, state, personality);
         const ActionType chosen_action = sample_action(decision, rng);
         const std::string state_at_decision = state_summary(state);
-        update_intention(state, chosen_action);
         const std::string world_before = world.summary();
         const std::string decision_time = world.time_summary();
-        const WorldOutcome outcome = world.execute(chosen_action);
+        const CharacterActionPlan action_plan = world.expand_action(chosen_action);
+        const WorldOutcome outcome = world.settle(action_plan);
+        if (outcome.accepted) {
+            update_intention(state, chosen_action);
+        }
 
         output << "\n[Decision point " << step << " | " << decision_time << "]\n"
                << "  W before action: " << world_before << '\n'
@@ -129,13 +154,15 @@ std::string Simulation::run_profile(const Personality& personality,
                << "  " << state_at_decision << '\n'
                << "  " << decision_summary(decision)
                << "  chosen A^char: " << to_string(chosen_action) << '\n'
+               << "  planned a^world: " << world_primitives_summary(action_plan.world_primitives) << '\n'
                << "  W settlement: " << (outcome.accepted ? "accepted" : "rejected")
                << " | provenance=" << outcome.provenance;
         if (!outcome.object_id.empty()) {
             output << " | object=" << outcome.object_id;
         }
         output << '\n';
-        output << "  persistent intention after choice: " << state_summary(state) << '\n';
+        output << "  settled a^world: " << world_primitives_summary(outcome.settled_primitives) << '\n';
+        output << "  persistent intention after settlement: " << state_summary(state) << '\n';
         for (const std::string& effect : outcome.effects) {
             output << "    effect: " << effect << '\n';
         }

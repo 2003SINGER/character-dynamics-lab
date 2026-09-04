@@ -13,6 +13,7 @@ add_executable(character_dynamics_reference
     Src/simulation_time.cpp
     Src/object.cpp
     Src/scene.cpp
+    Src/world_primitive.cpp
     Src/world.cpp
     Src/observation.cpp
     Src/appraisal.cpp

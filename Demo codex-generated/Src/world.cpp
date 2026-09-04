@@ -1,7 +1,9 @@
 #include "world.h"
 
+#include <algorithm>
 #include <sstream>
 #include <stdexcept>
+#include <type_traits>
 
 namespace {
 Room& require_room(Scene& scene, const std::string& room_id) {
@@ -60,6 +62,74 @@ const Object* World::object_for(ActionType action) const {
     return current_room().object_for(action);
 }
 
+CharacterActionPlan World::expand_action(ActionType action) const {
+    CharacterActionPlan plan;
+    plan.action = action;
+    const auto add = [&plan](std::string id, std::string description, WorldPrimitivePayload payload) {
+        plan.world_primitives.push_back({std::move(id), std::move(description), std::move(payload)});
+    };
+
+    add("record-action", action == ActionType::Idle
+            ? "character remains in the room without a focused activity"
+            : "character begins " + to_string(action),
+        SetCurrentActivity{action});
+    switch (action) {
+    case ActionType::UsePhone:
+        add("count-phone-use", "phone browsing completed", IncrementWorldCounter{WorldCounter::PhoneUses});
+        break;
+    case ActionType::ShopOnPhone:
+        add("spend-wallet", "online order placed; wallet decreased by 30", AdjustWorldValue{WorldValue::Wallet, -30});
+        add("count-order", "online order recorded", IncrementWorldCounter{WorldCounter::OnlineOrders});
+        break;
+    case ActionType::UseComputer:
+        add("count-computer-use", "computer browsing completed", IncrementWorldCounter{WorldCounter::ComputerUses});
+        break;
+    case ActionType::StudyAtComputer:
+    case ActionType::StudyAtDesk:
+        add("count-study-session", "study session completed", IncrementWorldCounter{WorldCounter::StudySessions});
+        add("advance-task", "task progress increased by 1", AdjustWorldValue{WorldValue::TaskProgress, 1});
+        break;
+    case ActionType::RestAtBed:
+        add("count-rest-session", "rest session completed in bed", IncrementWorldCounter{WorldCounter::RestSessions});
+        break;
+    case ActionType::SleepAtBed:
+        add("count-sleep-session", "sleep session begins; ordinary O refresh is frozen during the interval",
+            IncrementWorldCounter{WorldCounter::RestSessions});
+        break;
+    case ActionType::GoToBathroom:
+        add("count-bathroom-visit", "brief excursion through door: bathroom visit completed",
+            IncrementWorldCounter{WorldCounter::BathroomVisits});
+        break;
+    case ActionType::GetMeal:
+        add("count-meal", "brief excursion through door: meal collected and eaten",
+            IncrementWorldCounter{WorldCounter::MealsCollected});
+        break;
+    case ActionType::TurnLightOn:
+        add("light-on", "room light turned on", SetRoomFlag{RoomFlag::LightOn, true});
+        break;
+    case ActionType::TurnLightOff:
+        add("light-off", "room light turned off", SetRoomFlag{RoomFlag::LightOn, false});
+        break;
+    case ActionType::TurnOffAlarm:
+        add("alarm-off", "alarm clock silenced", SetRoomFlag{RoomFlag::AlarmRinging, false});
+        break;
+    case ActionType::OpenCurtain:
+        add("curtain-open", "curtains opened; outside weather becomes visible from the room",
+            SetRoomFlag{RoomFlag::CurtainOpen, true});
+        break;
+    case ActionType::CloseCurtain:
+        add("curtain-close", "curtains closed; outside weather is no longer directly visible",
+            SetRoomFlag{RoomFlag::CurtainOpen, false});
+        break;
+    case ActionType::Idle:
+        break;
+    case ActionType::Count:
+        throw std::logic_error("ActionType::Count cannot be expanded");
+    }
+    add("advance-time", "advance simulated time", AdvanceSimulationTime{action_definition(action).default_duration_minutes});
+    return plan;
+}
+
 std::vector<ActionType> World::available_actions() const {
     std::vector<ActionType> actions = {ActionType::Idle};
     const Room& room = current_room();
@@ -73,100 +143,79 @@ std::vector<ActionType> World::available_actions() const {
     return actions;
 }
 
-WorldOutcome World::execute(ActionType action) {
+WorldOutcome World::settle(const CharacterActionPlan& plan) {
     WorldOutcome outcome;
-    outcome.action = action;
-    outcome.provenance = "World::execute(" + to_string(action) + ")";
+    outcome.action = plan.action;
+    outcome.provenance = "World::settle(" + to_string(plan.action) + ")";
 
-    if (!can_execute(action)) {
+    if (!can_execute(plan.action)) {
         outcome.effects.push_back("rejected: object unavailable or action precondition failed");
         return outcome;
     }
 
     outcome.accepted = true;
-    last_action = action;
-    current_activity = to_string(action);
-    outcome.activity = current_activity;
-    if (const Object* object = object_for(action)) {
+    if (const Object* object = object_for(plan.action)) {
         outcome.object_id = object->id;
         outcome.provenance += " via object:" + object->id;
     }
 
-    Room& room = current_room();
-    switch (action) {
-    case ActionType::UsePhone:
-        ++phone_uses;
-        outcome.effects.push_back("phone browsing completed");
-        break;
-    case ActionType::ShopOnPhone:
-        wallet -= 30;
-        ++online_orders;
-        outcome.effects.push_back("online order placed; wallet decreased by 30");
-        break;
-    case ActionType::UseComputer:
-        ++computer_uses;
-        outcome.effects.push_back("computer browsing completed");
-        break;
-    case ActionType::StudyAtComputer:
-    case ActionType::StudyAtDesk:
-        ++study_sessions;
-        ++task_progress;
-        outcome.effects.push_back("study session completed; task progress increased by 1");
-        break;
-    case ActionType::RestAtBed:
-        ++rest_sessions;
-        outcome.effects.push_back("rest session completed in bed");
-        break;
-    case ActionType::SleepAtBed:
-        ++rest_sessions;
-        outcome.observation_frozen_during_action = true;
-        outcome.effects.push_back("character falls asleep; O is not refreshed during the sleep interval");
-        break;
-    case ActionType::GoToBathroom:
-        ++bathroom_visits;
-        outcome.effects.push_back("brief excursion through door: bathroom visit completed");
-        break;
-    case ActionType::GetMeal:
-        ++meals_collected;
-        outcome.effects.push_back("brief excursion through door: meal collected and eaten");
-        break;
-    case ActionType::TurnLightOn:
-        room.light_on = true;
-        outcome.effects.push_back("room light turned on");
-        break;
-    case ActionType::TurnLightOff:
-        room.light_on = false;
-        outcome.effects.push_back("room light turned off");
-        break;
-    case ActionType::TurnOffAlarm:
-        room.alarm_ringing = false;
-        outcome.effects.push_back("alarm clock silenced");
-        break;
-    case ActionType::OpenCurtain:
-        room.curtain_open = true;
-        outcome.effects.push_back("curtains opened; outside weather becomes visible from the room");
-        break;
-    case ActionType::CloseCurtain:
-        room.curtain_open = false;
-        outcome.effects.push_back("curtains closed; outside weather is no longer directly visible");
-        break;
-    case ActionType::Idle:
-        outcome.effects.push_back("character remains in the room without a focused activity");
-        break;
-    }
-
-    outcome.elapsed_minutes = action_definition(action).default_duration_minutes;
+    outcome.settled_primitives = plan.world_primitives;
     const int before = total_minutes(time);
-    int after = before + outcome.elapsed_minutes;
+    auto time_primitive = std::find_if(outcome.settled_primitives.begin(), outcome.settled_primitives.end(),
+        [](const WorldPrimitive& primitive) {
+            return std::holds_alternative<AdvanceSimulationTime>(primitive.payload);
+        });
+    if (time_primitive == outcome.settled_primitives.end()) {
+        throw std::logic_error("CharacterActionPlan has no AdvanceSimulationTime primitive");
+    }
+    auto& advance = std::get<AdvanceSimulationTime>(time_primitive->payload);
+    int after = before + advance.minutes;
     constexpr int kColdWakeMinute = 16 * 60;
-    if (action == ActionType::SleepAtBed && before < kColdWakeMinute && after >= kColdWakeMinute) {
+    if (plan.action == ActionType::SleepAtBed && before < kColdWakeMinute && after >= kColdWakeMinute) {
         after = kColdWakeMinute;
-        outcome.elapsed_minutes = after - before;
+        advance.minutes = after - before;
         outcome.woke_early = true;
     }
-    advance_minutes(time, outcome.elapsed_minutes);
 
-    if (action == ActionType::SleepAtBed) {
+    Room& room = current_room();
+    for (const WorldPrimitive& primitive : outcome.settled_primitives) {
+        std::visit([&](const auto& payload) {
+            using Payload = std::decay_t<decltype(payload)>;
+            if constexpr (std::is_same_v<Payload, SetCurrentActivity>) {
+                last_action = payload.action;
+                current_activity = to_string(payload.action);
+                outcome.activity = current_activity;
+            } else if constexpr (std::is_same_v<Payload, IncrementWorldCounter>) {
+                switch (payload.counter) {
+                case WorldCounter::PhoneUses: phone_uses += payload.amount; break;
+                case WorldCounter::ComputerUses: computer_uses += payload.amount; break;
+                case WorldCounter::StudySessions: study_sessions += payload.amount; break;
+                case WorldCounter::RestSessions: rest_sessions += payload.amount; break;
+                case WorldCounter::BathroomVisits: bathroom_visits += payload.amount; break;
+                case WorldCounter::MealsCollected: meals_collected += payload.amount; break;
+                case WorldCounter::OnlineOrders: online_orders += payload.amount; break;
+                }
+            } else if constexpr (std::is_same_v<Payload, AdjustWorldValue>) {
+                switch (payload.value) {
+                case WorldValue::Wallet: wallet += payload.amount; break;
+                case WorldValue::TaskProgress: task_progress += payload.amount; break;
+                }
+            } else if constexpr (std::is_same_v<Payload, SetRoomFlag>) {
+                switch (payload.flag) {
+                case RoomFlag::LightOn: room.light_on = payload.value; break;
+                case RoomFlag::AlarmRinging: room.alarm_ringing = payload.value; break;
+                case RoomFlag::CurtainOpen: room.curtain_open = payload.value; break;
+                }
+            } else if constexpr (std::is_same_v<Payload, AdvanceSimulationTime>) {
+                outcome.elapsed_minutes = payload.minutes;
+                advance_minutes(time, payload.minutes);
+            }
+        }, primitive.payload);
+        outcome.effects.push_back(primitive.description);
+    }
+
+    if (plan.action == ActionType::SleepAtBed) {
+        outcome.observation_frozen_during_action = true;
         outcome.effects.push_back(outcome.woke_early
             ? "character wakes early because cold is sensed; the next decision point can refresh O from the room"
             : "character wakes; the next decision point can refresh O from the room");
@@ -197,7 +246,7 @@ WorldOutcome World::execute(ActionType action) {
         WorldEvent event{"room-cold", "room temperature falls to 17C", "room/temperature"};
         outcome.events.push_back(event);
         outcome.effects.push_back("world event: " + event.description);
-        if (action == ActionType::SleepAtBed) {
+        if (plan.action == ActionType::SleepAtBed) {
             outcome.sleeping_sensory_events.push_back(event);
             outcome.effects.push_back("sleeping sensory update: cold is felt despite other O fields being frozen");
         }
@@ -210,6 +259,10 @@ WorldOutcome World::execute(ActionType action) {
         }
     }
     return outcome;
+}
+
+WorldOutcome World::execute(ActionType action) {
+    return settle(expand_action(action));
 }
 
 std::string World::time_summary() const {
