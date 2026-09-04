@@ -49,6 +49,7 @@ O + S + P ──本轮 D──> π(A^char) ──原子结算──> W'
 | [00_研究设计](00_研究设计/) | 当前判断、机制骨架、实验边界、原型接口 | [前台问题与候选创新](00_研究设计/前台问题与候选创新.md) |
 | [01_文献](01_文献/) | 本地 PDF、来源与职责级阅读路线 | [文献库 README](01_文献/README.md) |
 | `E:\Character Dynamics Demo` | 用户自行实现的未来 C++ demo 根目录；研究文档不在此处维护 | 尚未纳入当前研究仓库 |
+| [Demo codex-generated](Demo%20codex-generated/) | 独立、可运行、只供阅读的 Codex C++17 参考实现；不替代用户的 E: demo | [参考实现 README](Demo%20codex-generated/README.md) |
 | [90_原始材料](90_原始材料/) | 原始对话、哈希和阅读边界；不可改写 | [原始材料索引](90_原始材料/README.md) |
 | `tmp/` | 本地 PDF 文本/页面缓存，可再生成，不进 Git | — |
 

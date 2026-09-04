@@ -1,0 +1,30 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "mingw-debug",
+      "displayName": "MinGW Debug (local reference)",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "D:/Tools/cpp-build/character-dynamics-reference",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "D:/Tools/winlibs/mingw64/bin/g++.exe",
+        "CMAKE_MAKE_PROGRAM": "D:/Tools/winlibs/mingw64/bin/mingw32-make.exe",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "build",
+      "configurePreset": "mingw-debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test",
+      "configurePreset": "mingw-debug",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}
