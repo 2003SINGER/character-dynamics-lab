@@ -15,11 +15,11 @@ namespace {
 constexpr int kStepsPerRun = 12;
 
 Personality procrastinating_profile() {
-    return {"procrastinating / low self-control", 0.85, 0.20, 0.55};
+    return {"procrastinating / low self-control", 0.85, 0.20, 0.55, 0.75, 0.70, 0.45, 0.55, 0.70};
 }
 
 Personality self_controlled_profile() {
-    return {"self-controlled / task-oriented", 0.20, 0.85, 0.45};
+    return {"self-controlled / task-oriented", 0.20, 0.85, 0.45, 0.35, 0.45, 0.60, 0.65, 0.35};
 }
 
 std::string personality_summary(const Personality& personality) {
@@ -27,7 +27,21 @@ std::string personality_summary(const Personality& personality) {
     output << "P{name=" << personality.name
            << ", procrastination=" << std::fixed << std::setprecision(2) << personality.procrastination
            << ", self_control=" << personality.self_control
-           << ", rest_preference=" << personality.rest_preference << '}';
+           << ", rest_preference=" << personality.rest_preference
+           << ", stimulation_seeking=" << personality.stimulation_seeking
+           << ", task_anxiety_sensitivity=" << personality.task_anxiety_sensitivity
+           << ", screen_strain_sensitivity=" << personality.screen_strain_sensitivity
+           << ", need_response=" << personality.need_response
+           << ", action_noise=" << personality.action_noise << '}';
+    return output.str();
+}
+
+std::string outcome_summary(const WorldOutcome& outcome) {
+    std::ostringstream output;
+    output << "last_outcome{action=" << to_string(outcome.action)
+           << ", accepted=" << outcome.accepted
+           << ", elapsed_minutes=" << outcome.elapsed_minutes
+           << ", provenance=" << outcome.provenance << '}';
     return output.str();
 }
 } // namespace
@@ -74,6 +88,10 @@ std::string Simulation::run_profile(const Personality& personality,
     CharacterState state;
     std::mt19937 rng(seed);
     std::ostringstream output;
+    WorldOutcome previous_outcome;
+    previous_outcome.action = ActionType::Idle;
+    previous_outcome.accepted = true;
+    previous_outcome.provenance = "initial_world";
 
     if (include_header) {
         output << "============================================================\n"
@@ -83,15 +101,17 @@ std::string Simulation::run_profile(const Personality& personality,
 
     for (int step = 1; step <= kStepsPerRun; ++step) {
         const Observation observation = refresh_observation(world, "SceneFilter(room) -> direct observation refresh");
-        const Appraisal appraisal = appraise(observation);
-        const StateDelta state_delta = update_state(state, appraisal, personality);
-        const DecisionContext decision = decide(observation, state, personality);
+        const Appraisal appraisal = appraise(observation, previous_outcome);
+        const StateDelta state_delta = update_state(state, appraisal, personality, previous_outcome.elapsed_minutes);
+        const DecisionContext decision = decide(world, state, personality);
         const ActionType chosen_action = sample_action(decision, rng);
         const std::string world_before = world.summary();
+        const std::string decision_time = world.time_summary();
         const WorldOutcome outcome = world.execute(chosen_action);
 
-        output << "\n[Step " << step << "]\n"
-               << "  W before decision: " << world_before << '\n'
+        output << "\n[Decision point " << step << " | " << decision_time << "]\n"
+               << "  W before action: " << world_before << '\n'
+               << "  X input: " << outcome_summary(previous_outcome) << '\n'
                << "  " << observation_summary(observation) << '\n'
                << "  " << appraisal_summary(appraisal) << '\n'
                << "  " << state_delta_summary(state_delta) << '\n'
@@ -107,6 +127,12 @@ std::string Simulation::run_profile(const Personality& personality,
         for (const std::string& effect : outcome.effects) {
             output << "    effect: " << effect << '\n';
         }
+        for (const WorldEvent& event : outcome.events) {
+            output << "    event: id=" << event.id << " | source=" << event.source
+                   << " | " << event.description << '\n';
+        }
+        output << "  W after action: " << world.summary() << '\n';
+        previous_outcome = outcome;
     }
     return output.str();
 }

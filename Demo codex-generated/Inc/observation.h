@@ -10,6 +10,10 @@
 struct Observation {
     std::vector<std::string> visible_object_labels;
     std::vector<ActionType> available_actions;
+    bool light_known_on = true;
+    int known_task_progress = 0;
+    int known_unread_messages = 0;
+    std::string observed_time;
     ActionType observed_last_action = ActionType::Idle;
     std::string source;
 };

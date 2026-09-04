@@ -10,6 +10,10 @@ Observation refresh_observation(const World& world, const std::string& source) {
         }
     }
     observation.available_actions = world.available_actions();
+    observation.light_known_on = world.light_on;
+    observation.known_task_progress = world.task_progress;
+    observation.known_unread_messages = world.unread_messages;
+    observation.observed_time = world.time_summary();
     observation.observed_last_action = world.last_action;
     observation.source = source;
     return observation;
@@ -31,7 +35,11 @@ std::string observation_summary(const Observation& observation) {
             output << ", ";
         }
     }
-    output << "], observed_last_action=" << to_string(observation.observed_last_action)
+    output << "], time=" << observation.observed_time
+           << ", light=" << (observation.light_known_on ? "known-on" : "known-off")
+           << ", task_progress=" << observation.known_task_progress
+           << ", unread_messages=" << observation.known_unread_messages
+           << ", observed_last_action=" << to_string(observation.observed_last_action)
            << ", source=" << observation.source << "}";
     return output.str();
 }

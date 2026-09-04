@@ -14,30 +14,52 @@ struct RoomObject {
     std::vector<ActionType> affordances;
 };
 
+struct SimTime {
+    int day = 1;
+    int minute_of_day = 8 * 60;
+};
+
+struct WorldEvent {
+    std::string id;
+    std::string description;
+    std::string source;
+};
+
 struct WorldOutcome {
     bool accepted = false;
     ActionType action = ActionType::Idle;
     std::string activity;
     std::string object_id;
+    int elapsed_minutes = 0;
+    std::vector<WorldEvent> events;
     std::vector<std::string> effects;
     std::string provenance;
 };
 
 struct World {
     std::vector<RoomObject> room_objects = {
-        {"phone", "phone", true, {ActionType::UsePhone}},
-        {"computer", "computer", true, {ActionType::UseComputer}},
+        {"phone", "phone", true, {ActionType::UsePhone, ActionType::ShopOnPhone}},
+        {"computer", "computer", true, {ActionType::UseComputer, ActionType::StudyAtComputer}},
         {"desk", "desk with study materials", true, {ActionType::StudyAtDesk}},
         {"bed", "bed", true, {ActionType::RestAtBed}},
-        {"door", "room door", true, {ActionType::GoToBathroom, ActionType::GetMeal}}
+        {"door", "room door", true, {ActionType::GoToBathroom, ActionType::GetMeal}},
+        {"light", "room light", true, {ActionType::TurnLightOn, ActionType::TurnLightOff}}
     };
 
+    SimTime time;
+    bool light_on = true;
+    int task_progress = 0;
+    int task_target = 5;
+    int wallet = 120;
+    int unread_messages = 0;
+    std::string location = "room";
     int phone_uses = 0;
     int computer_uses = 0;
     int study_sessions = 0;
     int rest_sessions = 0;
     int bathroom_visits = 0;
     int meals_collected = 0;
+    int online_orders = 0;
     std::string current_activity = "idle";
     ActionType last_action = ActionType::Idle;
 
@@ -45,5 +67,6 @@ struct World {
     std::vector<ActionType> available_actions() const;
     const RoomObject* object_for(ActionType action) const;
     WorldOutcome execute(ActionType action);
+    std::string time_summary() const;
     std::string summary() const;
 };
