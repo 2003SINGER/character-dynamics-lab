@@ -89,6 +89,10 @@ Appraisal appraise(const Observation& observation, const WorldOutcome& previous_
             appraisal.boredom_delta += 0.03;
             appraisal.anxiety_delta += 0.04;
             appraisal.tags.push_back("alarm_interrupts_room");
+        } else if (event.id == "room-cold") {
+            appraisal.fatigue_delta += 0.04;
+            appraisal.satisfaction_delta -= 0.06;
+            appraisal.tags.push_back("cold_interrupts_sleep");
         } else if (event.id == "message-study-group") {
             appraisal.task_pressure_delta += 0.08;
             appraisal.anxiety_delta += 0.05;

@@ -43,6 +43,7 @@ std::string outcome_summary(const WorldOutcome& outcome) {
            << ", accepted=" << outcome.accepted
            << ", elapsed_minutes=" << outcome.elapsed_minutes
            << ", O_frozen=" << outcome.observation_frozen_during_action
+           << ", woke_early=" << outcome.woke_early
            << ", provenance=" << outcome.provenance << '}';
     return output.str();
 }
@@ -139,6 +140,10 @@ std::string Simulation::run_profile(const Personality& personality,
         for (const WorldEvent& event : outcome.events) {
             output << "    event: id=" << event.id << " | source=" << event.source
                    << " | " << event.description << '\n';
+        }
+        if (!outcome.sleeping_sensory_events.empty()) {
+            observation = apply_sleep_sensory_update(std::move(observation), outcome, world);
+            output << "  O partial update while asleep: " << observation_updates_summary(observation) << '\n';
         }
         output << "  W after action: " << world.summary() << '\n';
         previous_outcome = outcome;

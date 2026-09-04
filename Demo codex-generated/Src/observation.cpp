@@ -1,6 +1,7 @@
 #include "observation.h"
 
 #include <algorithm>
+#include <iomanip>
 #include <sstream>
 
 namespace {
@@ -47,6 +48,12 @@ void mark_stale(Observation& observation, const std::string& key) {
 bool contains_id(const std::vector<std::string>& ids, const std::string& id) {
     return std::find(ids.begin(), ids.end(), id) != ids.end();
 }
+
+std::string format_temperature(double temperature) {
+    std::ostringstream output;
+    output << std::fixed << std::setprecision(1) << temperature << "C";
+    return output.str();
+}
 } // namespace
 
 Observation refresh_observation(Observation observation,
@@ -71,12 +78,14 @@ Observation refresh_observation(Observation observation,
     observation.light_known_on = world.light_on;
     observation.known_task_progress = world.task_progress;
     observation.known_unread_messages = world.unread_messages;
+    observation.known_temperature_celsius = world.room_temperature_celsius;
     observation.observed_time = now;
     observation.observed_last_action = world.last_action;
     write_fact(observation, "room.light", world.light_on ? "on" : "off", "direct_room_visual", now);
     write_fact(observation, "room.alarm", world.alarm_ringing ? "ringing" : "silent", "direct_room_visual", now);
     write_fact(observation, "task.progress", std::to_string(world.task_progress), "direct_room_visual", now);
     write_fact(observation, "clock.time", now, "internal_clock", now);
+    write_fact(observation, "room.temperature", format_temperature(world.room_temperature_celsius), "direct_room_thermal", now);
     if (world.curtain_open) {
         write_fact(observation, "outside.weather", world.weather, "direct_window_visual", now);
     } else {
@@ -110,6 +119,33 @@ bool observation_knows_action(const Observation& observation, ActionType action)
         != observation.known_actions.end();
 }
 
+Observation apply_sleep_sensory_update(Observation observation,
+                                       const WorldOutcome& outcome,
+                                       const World& world) {
+    observation.updates_this_refresh.clear();
+    for (const WorldEvent& event : outcome.sleeping_sensory_events) {
+        if (event.id == "room-cold") {
+            observation.known_temperature_celsius = world.room_temperature_celsius;
+            write_fact(observation, "room.temperature", format_temperature(world.room_temperature_celsius),
+                       "direct_room_thermal_while_asleep", world.time_summary());
+        }
+    }
+    return observation;
+}
+
+std::string observation_updates_summary(const Observation& observation) {
+    std::ostringstream output;
+    output << "updates=[";
+    for (std::size_t index = 0; index < observation.updates_this_refresh.size(); ++index) {
+        const ObservationFact& fact = observation.updates_this_refresh[index];
+        output << fact.key << '=' << fact.value << "{" << to_string(fact.status)
+               << ", " << fact.source << '}';
+        if (index + 1 < observation.updates_this_refresh.size()) output << ", ";
+    }
+    output << ']';
+    return output.str();
+}
+
 std::string observation_summary(const Observation& observation) {
     std::ostringstream output;
     output << "O{visible_objects=[";
@@ -122,14 +158,9 @@ std::string observation_summary(const Observation& observation) {
         output << to_string(observation.known_actions[index]);
         if (index + 1 < observation.known_actions.size()) output << ", ";
     }
-    output << "], updates=[";
-    for (std::size_t index = 0; index < observation.updates_this_refresh.size(); ++index) {
-        const ObservationFact& fact = observation.updates_this_refresh[index];
-        output << fact.key << '=' << fact.value << "{" << to_string(fact.status)
-               << ", " << fact.source << '}';
-        if (index + 1 < observation.updates_this_refresh.size()) output << ", ";
-    }
-    output << "], time=" << observation.observed_time
+    output << "], " << observation_updates_summary(observation)
+           << ", temperature=" << format_temperature(observation.known_temperature_celsius)
+           << ", time=" << observation.observed_time
            << ", light=" << (observation.light_known_on ? "known-on" : "known-off")
            << ", task_progress=" << observation.known_task_progress
            << ", unread_messages=" << observation.known_unread_messages

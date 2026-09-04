@@ -33,6 +33,7 @@ struct Observation {
     bool light_known_on = true;
     int known_task_progress = 0;
     int known_unread_messages = 0;
+    double known_temperature_celsius = 0.0;
     std::string observed_time;
     ActionType observed_last_action = ActionType::Idle;
 };
@@ -41,4 +42,8 @@ Observation refresh_observation(Observation previous,
                                 const World& world,
                                 const WorldOutcome& previous_outcome);
 bool observation_knows_action(const Observation& observation, ActionType action);
+Observation apply_sleep_sensory_update(Observation previous,
+                                       const WorldOutcome& outcome,
+                                       const World& world);
+std::string observation_updates_summary(const Observation& observation);
 std::string observation_summary(const Observation& observation);

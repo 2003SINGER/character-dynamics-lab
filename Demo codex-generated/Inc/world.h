@@ -32,7 +32,9 @@ struct WorldOutcome {
     std::string object_id;
     int elapsed_minutes = 0;
     bool observation_frozen_during_action = false;
+    bool woke_early = false;
     std::vector<WorldEvent> events;
+    std::vector<WorldEvent> sleeping_sensory_events;
     std::vector<std::string> effects;
     std::string provenance;
 };
@@ -55,6 +57,7 @@ struct World {
     int alarm_minute_of_day = 9 * 60;
     bool curtain_open = true;
     std::string weather = "clear";
+    double room_temperature_celsius = 23.0;
     int task_progress = 0;
     int task_target = 5;
     int wallet = 120;

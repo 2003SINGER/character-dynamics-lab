@@ -167,13 +167,21 @@ WorldOutcome World::execute(ActionType action) {
 
     outcome.elapsed_minutes = action_duration(action);
     const int before = total_minutes(time);
-    const int after = before + outcome.elapsed_minutes;
+    int after = before + outcome.elapsed_minutes;
+    constexpr int kColdWakeMinute = 16 * 60;
+    if (action == ActionType::SleepAtBed && before < kColdWakeMinute && after >= kColdWakeMinute) {
+        after = kColdWakeMinute;
+        outcome.elapsed_minutes = after - before;
+        outcome.woke_early = true;
+    }
     time.day = after / (24 * 60) + 1;
     time.minute_of_day = after % (24 * 60);
 
     if (action == ActionType::SleepAtBed) {
         character_asleep = false;
-        outcome.effects.push_back("character wakes; the next decision point can refresh O from the room");
+        outcome.effects.push_back(outcome.woke_early
+            ? "character wakes early because cold is sensed; the next decision point can refresh O from the room"
+            : "character wakes; the next decision point can refresh O from the room");
     }
 
     const auto emit_if_crossed = [&](int at, const char* id, const char* description, const char* source) {
@@ -195,6 +203,16 @@ WorldOutcome World::execute(ActionType action) {
         WorldEvent event{"weather-rain", "rain begins outside", "world/weather"};
         outcome.events.push_back(event);
         outcome.effects.push_back("world event: " + event.description);
+    }
+    if (before < kColdWakeMinute && after >= kColdWakeMinute && room_temperature_celsius > 17.0) {
+        room_temperature_celsius = 17.0;
+        WorldEvent event{"room-cold", "room temperature falls to 17C", "room/temperature"};
+        outcome.events.push_back(event);
+        outcome.effects.push_back("world event: " + event.description);
+        if (action == ActionType::SleepAtBed) {
+            outcome.sleeping_sensory_events.push_back(event);
+            outcome.effects.push_back("sleeping sensory update: cold is felt despite other O fields being frozen");
+        }
     }
     emit_if_crossed(12 * 60, "task-reminder", "calendar reminder: task remains due today", "calendar");
     emit_if_crossed(18 * 60, "evening", "evening begins; the room becomes quieter", "world clock");
@@ -221,6 +239,7 @@ std::string World::summary() const {
            << ", alarm=" << (alarm_ringing ? "ringing" : "silent")
            << ", curtain=" << (curtain_open ? "open" : "closed")
            << ", weather=" << weather
+           << ", temperature=" << room_temperature_celsius << "C"
            << ", task=" << task_progress << '/' << task_target
            << ", wallet=" << wallet
            << ", unread_messages=" << unread_messages
