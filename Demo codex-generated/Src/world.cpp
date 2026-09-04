@@ -65,6 +65,9 @@ const Object* World::object_for(ActionType action) const {
 CharacterActionPlan World::expand_action(ActionType action) const {
     CharacterActionPlan plan;
     plan.action = action;
+    if (const Object* object = object_for(action)) {
+        plan.object_id = object->id;
+    }
     const auto add = [&plan](std::string id, std::string description, WorldPrimitivePayload payload) {
         plan.world_primitives.push_back({std::move(id), std::move(description), std::move(payload)});
     };
@@ -136,14 +139,20 @@ std::vector<ActionType> World::available_actions() const {
     for (const Object& object : room.objects) {
         for (ActionType action : object.affordances) {
             if (object.usable && can_execute(action)) {
-                actions.push_back(action);
+                if (std::find(actions.begin(), actions.end(), action) == actions.end()) {
+                    actions.push_back(action);
+                }
             }
         }
     }
     return actions;
 }
 
-WorldOutcome World::settle(const CharacterActionPlan& plan) {
+WorldOutcome World::settle(ActionType action) {
+    // Re-expand inside W immediately before settlement.  This deliberately
+    // makes CharacterActionPlan a trace/provenance object rather than a
+    // capability that another module can forge to mutate W.
+    CharacterActionPlan plan = expand_action(action);
     WorldOutcome outcome;
     outcome.action = plan.action;
     outcome.provenance = "World::settle(" + to_string(plan.action) + ")";
@@ -154,12 +163,13 @@ WorldOutcome World::settle(const CharacterActionPlan& plan) {
     }
 
     outcome.accepted = true;
-    if (const Object* object = object_for(plan.action)) {
-        outcome.object_id = object->id;
-        outcome.provenance += " via object:" + object->id;
+    if (!plan.object_id.empty()) {
+        outcome.object_id = plan.object_id;
+        outcome.provenance += " via object:" + plan.object_id;
     }
 
-    outcome.settled_primitives = plan.world_primitives;
+    outcome.planned_primitives = plan.world_primitives;
+    outcome.settled_primitives = outcome.planned_primitives;
     const int before = total_minutes(time);
     auto time_primitive = std::find_if(outcome.settled_primitives.begin(), outcome.settled_primitives.end(),
         [](const WorldPrimitive& primitive) {
@@ -221,11 +231,17 @@ WorldOutcome World::settle(const CharacterActionPlan& plan) {
             : "character wakes; the next decision point can refresh O from the room");
     }
 
-    const auto emit_if_crossed = [&](int at, const char* id, const char* description, const char* source) {
-        if (before < at && after >= at) {
-            WorldEvent event{id, description, source};
-            outcome.events.push_back(event);
-            outcome.effects.push_back("external event: " + event.description);
+    const auto emit_daily_if_crossed = [&](int minute_of_day, const char* id, const char* description, const char* source) {
+        constexpr int kMinutesPerDay = 24 * 60;
+        const int first_day_index = before / kMinutesPerDay;
+        const int last_day_index = after / kMinutesPerDay;
+        for (int day_index = first_day_index; day_index <= last_day_index; ++day_index) {
+            const int event_minute = day_index * kMinutesPerDay + minute_of_day;
+            if (before < event_minute && after >= event_minute) {
+                WorldEvent event{id, description, source};
+                outcome.events.push_back(event);
+                outcome.effects.push_back("external event: " + event.description);
+            }
         }
     };
     if (before < alarm_minute_of_day && after >= alarm_minute_of_day && !room.alarm_ringing) {
@@ -234,7 +250,7 @@ WorldOutcome World::settle(const CharacterActionPlan& plan) {
         outcome.events.push_back(event);
         outcome.effects.push_back("scene event: " + event.description);
     }
-    emit_if_crossed(9 * 60 + 30, "message-study-group", "a study-group message arrives", "phone notification");
+    emit_daily_if_crossed(9 * 60 + 30, "message-study-group", "a study-group message arrives", "phone notification");
     if (before < 11 * 60 && after >= 11 * 60 && weather == "clear") {
         weather = "rain";
         WorldEvent event{"weather-rain", "rain begins outside", "world/weather"};
@@ -251,8 +267,10 @@ WorldOutcome World::settle(const CharacterActionPlan& plan) {
             outcome.effects.push_back("sleeping sensory update: cold is felt despite other O fields being frozen");
         }
     }
-    emit_if_crossed(12 * 60, "task-reminder", "calendar reminder: task remains due today", "calendar");
-    emit_if_crossed(18 * 60, "evening", "evening begins; the room becomes quieter", "world clock");
+    if (task_progress < task_target) {
+        emit_daily_if_crossed(12 * 60, "task-reminder", "calendar reminder: task remains due today", "calendar");
+    }
+    emit_daily_if_crossed(18 * 60, "evening", "evening begins; the room becomes quieter", "world clock");
     for (const WorldEvent& event : outcome.events) {
         if (event.id == "message-study-group") {
             ++unread_messages;
@@ -262,7 +280,7 @@ WorldOutcome World::settle(const CharacterActionPlan& plan) {
 }
 
 WorldOutcome World::execute(ActionType action) {
-    return settle(expand_action(action));
+    return settle(action);
 }
 
 std::string World::time_summary() const {

@@ -17,9 +17,9 @@ W → O → X → S → D → π(A^char) → CharacterActionPlan[a^world...] →
 - 角色并不按脚本轮流执行动作：每步由当前 `S + P` 算动作 activation；低于 threshold 的动作被抑制，其余动作按概率采样。床和门只让行动成为可能，不决定角色必定去睡或出门；
 - `O` 是跨决策点保持的字段记录；每项有 `known/stale/unknown`、来源和观察时刻。当前房间对象通常来自 `direct_room_visual`，闹钟来自同场景的 `direct_room_auditory`；
 - `A^W → A^O → π(A)` 已显式输出：W 给出合法动作，O 只暴露角色已知物品对应的动作。这个房间通常两者相同，但层没有被省掉；
-- 每次选择的 `A^char` 先展开为 typed `CharacterActionPlan`，其中含 `set activity / increment counter / adjust value / set room flag / advance time` 等 `a^world`；W 再次验证并结算。日志会并列打印计划 primitive 与实际结算 primitive，例如睡眠被冷醒后时间 primitive 会缩短；
+- 每次选择的 `A^char` 由 W 自行展开为 typed `CharacterActionPlan`，其中含 `set activity / increment counter / adjust value / set room flag / advance time` 等 `a^world`；调用方不能提交 primitive 让 W 执行。日志会并列打印 W 生成的计划 primitive 与实际结算 primitive，例如睡眠被冷醒后时间 primitive 会缩短；
 - `X` 是 `(ΔO, O, old S, P) → Appraisal` 的可替换小函数；它不直接读取原始 `WorldOutcome`。S 包含无聊、疲劳、任务压力、满意度、饥饿、如厕需求、焦虑、屏幕疲劳和购买欲，并有一个轻量的 persistent intention 占位；
-- 打印动作前后 W、O、X 输入、X、StateDelta/S、D 的 activation/threshold/概率、世界结算、外部事件与来源；
+- 打印动作前后 W、O、X 输入、X、requested/applied StateDelta 与 S、D 的 activation/threshold/概率、世界结算、外部事件与来源；
 - 不实现 LLM、UI、异步、玩家可见延迟、多角色、P 学习、真正的 O 信息差或回放评测。
 
 ## 阅读顺序
@@ -35,8 +35,8 @@ W → O → X → S → D → π(A^char) → CharacterActionPlan[a^world...] →
 
 - `simulation_time` 只负责离散时间运算；它刻意不叫 `time.h`，避免遮蔽 C++ 标准库依赖的 C 头文件；
 - `Scene` 是局部 W 边界，持有一个或多个 `Room`；`Room` 是 Scene 内的场所对象，持有室内 `Object` 容器与局部物理状态；`Object` 才是手机、床、门等具体可交互物。`World` 持有 Scene、角色位置、跨场景时间/天气/任务/钱包，以及动作的最终结算；
-- `ActionDefinition` 是唯一的动作显示名/默认时长目录。`World::expand_action` 生成 plan，`World::settle` 复核当前 W 并结算其后果；`World::execute` 仅保留为“展开后立即结算”的便捷包装；
-- `CharacterActionPlan` / `WorldPrimitive` 是人物动作与 W 写入之间的 typed 边界。policy 只选择 `A^char`，不能直接改 W；W 结算后才确认 actual primitive。新的场景效果应新增明确 primitive 类型及其 W executor，而不是把字段名塞进字符串；
+- `ActionDefinition` 是唯一的动作显示名/默认时长目录。`World::expand_action` 只供解释/trace；`World::settle(A^char)` 在 W 内部重新生成 primitive、复核当前 W 并结算其后果；`World::execute` 是同一条受限路径的便捷包装；
+- `CharacterActionPlan` / `WorldPrimitive` 是人物动作与 W 写入之间的 typed 边界。policy 只选择 `A^char`，不能直接改 W，也不能提交伪造 primitive；W 结算后才确认 actual primitive。新的场景效果应新增明确 primitive 类型及其 W executor，而不是把字段名塞进字符串；
 - `ObservationFact` 是 O 中 room light、温度、时间、任务等信息的唯一存储，避免“同一事实既在 facts 又在几个 bool/int 字段”逐渐不同步；
 - `X` 只读取 O/ΔO、旧 S 和 P；`D` 只读取 O、S、P 和已经由上游形成的 A^O。W 只在上游给出 A^W、在下游校验/结算；这样 policy 不会绕过 O 偷看 W；
 - `intention` 只在 W 接受所选动作后写回 S；被拒绝或未来因异步失效的计划不应被错误记成角色已承诺的行为。睡眠提前醒来是当前明确的已结算中断语义，其实际时间 primitive 会被记录；

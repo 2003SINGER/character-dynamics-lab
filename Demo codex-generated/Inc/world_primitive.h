@@ -69,6 +69,10 @@ struct WorldPrimitive {
 // proposal; World::settle revalidates it against the current W.
 struct CharacterActionPlan {
     ActionType action = ActionType::Idle;
+    // The object selected by W while expanding this action.  The current
+    // policy chooses action types only; later policies can choose a concrete
+    // opportunity without changing the settlement boundary.
+    std::string object_id;
     std::vector<WorldPrimitive> world_primitives;
 };
 

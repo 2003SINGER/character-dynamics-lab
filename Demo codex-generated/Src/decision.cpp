@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <limits>
 #include <sstream>
+#include <stdexcept>
 
 namespace {
 CandidateAction candidate(ActionType action, double activation, double threshold, std::string reason) {
@@ -108,16 +110,30 @@ DecisionContext decide(const Observation& observation,
         case ActionType::Idle:
             decision.candidates.push_back(candidate(action, 0.05 + state.boredom * 0.10 - state.task_pressure * 0.06 + commitment_bonus, 0.0, "no focused action wins decisively"));
             break;
+        case ActionType::Count:
+            break;
         }
     }
 
-    const double temperature = 0.45 + personality.action_noise;
+    const double temperature = std::max(0.05, 0.45 + personality.action_noise);
+    double max_logit = -std::numeric_limits<double>::infinity();
+    for (const CandidateAction& item : decision.candidates) {
+        if (item.eligible && std::isfinite(item.activation)) {
+            max_logit = std::max(max_logit, item.activation / temperature);
+        }
+    }
     double normalizer = 0.0;
     for (CandidateAction& item : decision.candidates) {
-        if (item.eligible) {
-            item.probability = std::exp(item.activation / temperature);
+        if (item.eligible && std::isfinite(item.activation)) {
+            item.probability = std::exp(item.activation / temperature - max_logit);
             normalizer += item.probability;
+        } else {
+            item.eligible = false;
+            item.probability = 0.0;
         }
+    }
+    if (!std::isfinite(normalizer) || normalizer <= 0.0) {
+        throw std::logic_error("Decision has no finite eligible action probability");
     }
     for (CandidateAction& item : decision.candidates) {
         item.probability = item.eligible ? item.probability / normalizer : 0.0;
@@ -133,6 +149,9 @@ ActionType sample_action(const DecisionContext& decision, std::mt19937& rng) {
             weights.push_back(item.probability);
             actions.push_back(item.action);
         }
+    }
+    if (actions.empty()) {
+        throw std::logic_error("Cannot sample an empty action distribution");
     }
     std::discrete_distribution<std::size_t> distribution(weights.begin(), weights.end());
     return actions[distribution(rng)];

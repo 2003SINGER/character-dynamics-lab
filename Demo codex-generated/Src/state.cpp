@@ -14,11 +14,13 @@ void append_value(std::ostringstream& output, const char* label, double value) {
 }
 } // namespace
 
-StateDelta update_state(CharacterState& state,
+StateUpdate update_state(CharacterState& state,
                         const Appraisal& appraisal,
                         const Personality& personality,
                         int elapsed_minutes) {
-    StateDelta delta;
+    const CharacterState before = state;
+    StateUpdate update;
+    StateDelta& delta = update.requested;
     delta.elapsed_minutes = elapsed_minutes;
     const double time_scale = static_cast<double>(elapsed_minutes) / 30.0;
 
@@ -60,7 +62,17 @@ StateDelta update_state(CharacterState& state,
     state.anxiety = clamp_unit(state.anxiety + delta.anxiety);
     state.screen_strain = clamp_unit(state.screen_strain + delta.screen_strain);
     state.purchase_urge = clamp_unit(state.purchase_urge + delta.purchase_urge);
-    return delta;
+    update.applied.elapsed_minutes = elapsed_minutes;
+    update.applied.boredom = state.boredom - before.boredom;
+    update.applied.fatigue = state.fatigue - before.fatigue;
+    update.applied.task_pressure = state.task_pressure - before.task_pressure;
+    update.applied.satisfaction = state.satisfaction - before.satisfaction;
+    update.applied.hunger = state.hunger - before.hunger;
+    update.applied.bathroom_urge = state.bathroom_urge - before.bathroom_urge;
+    update.applied.anxiety = state.anxiety - before.anxiety;
+    update.applied.screen_strain = state.screen_strain - before.screen_strain;
+    update.applied.purchase_urge = state.purchase_urge - before.purchase_urge;
+    return update;
 }
 
 std::string state_summary(const CharacterState& state) {
@@ -99,4 +111,9 @@ std::string state_delta_summary(const StateDelta& delta) {
     append_value(output, "purchase_urge", delta.purchase_urge);
     output << '}';
     return output.str();
+}
+
+std::string state_update_summary(const StateUpdate& update) {
+    return "StateUpdate{requested=" + state_delta_summary(update.requested)
+         + ", applied=" + state_delta_summary(update.applied) + '}';
 }

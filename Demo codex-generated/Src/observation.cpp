@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
+#include <string_view>
 
 namespace {
 const char* to_string(KnowledgeStatus status) {
@@ -95,7 +96,24 @@ Observation refresh_observation(Observation observation,
             write_fact(observation, "object." + object.id, "present", "direct_room_visual", now);
         }
     }
-    observation.last_self_action = {world.last_action, "self_action_feedback", now};
+    // Objects absent from this refresh remain remembered, but no longer count
+    // as current visual knowledge. This is the minimal stale/unknown hook for
+    // later movement, occlusion, and dynamically removed objects.
+    for (const ObservationFact& fact : observation.facts) {
+        constexpr std::string_view kObjectPrefix = "object.";
+        if (fact.key.rfind(kObjectPrefix, 0) == 0) {
+            const std::string object_id = fact.key.substr(kObjectPrefix.size());
+            if (!contains_id(observation.known_object_ids, object_id)) {
+                mark_stale(observation, fact.key);
+            }
+        }
+    }
+    if (!previous_outcome.provenance.empty()) {
+        observation.last_self_action = {true, previous_outcome.action, previous_outcome.accepted,
+            previous_outcome.accepted ? "accepted by W" : "rejected by W", "self_action_feedback", now};
+    } else {
+        observation.last_self_action = {};
+    }
     write_fact(observation, "room.light", room.light_on ? "on" : "off", "direct_room_visual", now);
     const bool alarm_rang = std::any_of(previous_outcome.events.begin(), previous_outcome.events.end(),
         [](const WorldEvent& event) { return event.id == "alarm-rings"; });
@@ -188,7 +206,14 @@ std::string observation_summary(const Observation& observation) {
            << ", light=" << fact_value(observation, "room.light")
            << ", task_progress=" << fact_value(observation, "task.progress")
            << ", unread_messages=" << fact_value(observation, "message.unread_count")
-           << ", self_action=" << to_string(observation.last_self_action.action)
-           << "{" << observation.last_self_action.source << "}}";
+           << ", self_action=";
+    if (observation.last_self_action.has_action) {
+        output << to_string(observation.last_self_action.action)
+               << "{" << (observation.last_self_action.accepted ? "accepted" : "rejected")
+               << ", " << observation.last_self_action.source << "}";
+    } else {
+        output << "none";
+    }
+    output << '}';
     return output.str();
 }

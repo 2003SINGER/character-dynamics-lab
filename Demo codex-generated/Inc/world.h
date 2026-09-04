@@ -23,6 +23,7 @@ struct WorldOutcome {
     bool observation_frozen_during_action = false;
     bool woke_early = false;
     std::vector<WorldPrimitive> settled_primitives;
+    std::vector<WorldPrimitive> planned_primitives;
     std::vector<WorldEvent> events;
     std::vector<WorldEvent> sleeping_sensory_events;
     std::vector<std::string> effects;
@@ -55,7 +56,9 @@ struct World {
     const Room& current_room() const;
     const Object* object_for(ActionType action) const;
     CharacterActionPlan expand_action(ActionType action) const;
-    WorldOutcome settle(const CharacterActionPlan& plan);
+    // W owns primitive generation.  A plan is useful for trace/provenance,
+    // but callers cannot submit arbitrary primitives for execution.
+    WorldOutcome settle(ActionType action);
     WorldOutcome execute(ActionType action);
     std::string time_summary() const;
     std::string summary() const;

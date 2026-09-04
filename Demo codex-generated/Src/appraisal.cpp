@@ -12,6 +12,13 @@ Appraisal appraise(const Observation& observation,
 
     // This is intentionally a small replaceable X function. It reads only O,
     // Delta-O, old S, and P: raw WorldOutcome must first pass through O.
+    if (observation.last_self_action.has_action && !observation.last_self_action.accepted) {
+        // A rejected A^char is still a character-side observation, but it
+        // must not be mistaken for a successful W transition.
+        appraisal.satisfaction_delta = -0.03;
+        appraisal.anxiety_delta = 0.03;
+        appraisal.tags = {"action_rejected", "goal_obstructed"};
+    } else if (observation.last_self_action.has_action) {
     switch (observation.last_self_action.action) {
     case ActionType::UsePhone:
         appraisal.boredom_delta = -0.22;
@@ -81,12 +88,28 @@ Appraisal appraise(const Observation& observation,
         appraisal.satisfaction_delta = 0.02;
         appraisal.tags = {"room_prepared_for_rest"};
         break;
+    case ActionType::TurnOffAlarm:
+        appraisal.satisfaction_delta = 0.03;
+        appraisal.anxiety_delta = -0.02;
+        appraisal.tags = {"alarm_silenced", "interruption_resolved"};
+        break;
+    case ActionType::OpenCurtain:
+        appraisal.satisfaction_delta = 0.01;
+        appraisal.tags = {"outside_visibility_restored"};
+        break;
+    case ActionType::CloseCurtain:
+        appraisal.satisfaction_delta = 0.01;
+        appraisal.tags = {"room_stimulation_reduced"};
+        break;
     case ActionType::Idle:
         appraisal.boredom_delta = 0.12;
         appraisal.task_pressure_delta = 0.08;
         appraisal.satisfaction_delta = -0.05;
         appraisal.tags = {"under_stimulation", "task_unattended"};
         break;
+    case ActionType::Count:
+        break;
+    }
     }
 
     const auto apply_observation_update = [&](const ObservationFact& update) {

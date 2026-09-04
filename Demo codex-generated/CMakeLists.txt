@@ -24,6 +24,12 @@ add_executable(character_dynamics_reference
 
 target_include_directories(character_dynamics_reference PRIVATE Inc)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(character_dynamics_reference PRIVATE -Wall -Wextra -Wpedantic)
+elseif(MSVC)
+    target_compile_options(character_dynamics_reference PRIVATE /W4)
+endif()
+
 # Keep the reference executable runnable from CTest or Explorer without
 # requiring every parent process to inherit MinGW's DLL directory.
 if(MINGW)

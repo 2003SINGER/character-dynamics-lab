@@ -73,12 +73,11 @@ bool Simulation::verify(std::ostream& output) const {
 
     World primitive_world;
     const CharacterActionPlan study_plan = primitive_world.expand_action(ActionType::StudyAtDesk);
-    const WorldOutcome settled_study = primitive_world.settle(study_plan);
+    const WorldOutcome settled_study = primitive_world.settle(ActionType::StudyAtDesk);
 
     World sleeping_world;
     sleeping_world.time.minute_of_day = 10 * 60 + 46;
-    const WorldOutcome interrupted_sleep = sleeping_world.settle(
-        sleeping_world.expand_action(ActionType::SleepAtBed));
+    const WorldOutcome interrupted_sleep = sleeping_world.settle(ActionType::SleepAtBed);
     const bool sleep_primitive_shortened = std::any_of(interrupted_sleep.settled_primitives.begin(),
         interrupted_sleep.settled_primitives.end(), [](const WorldPrimitive& primitive) {
             const auto* advance = std::get_if<AdvanceSimulationTime>(&primitive.payload);
@@ -91,6 +90,40 @@ bool Simulation::verify(std::ostream& output) const {
     const bool has_primitives = first_run.find("a^world") != std::string::npos;
     const bool primitives_settle = settled_study.accepted && primitive_world.task_progress == 1
                                 && settled_study.settled_primitives.size() == study_plan.world_primitives.size();
+    World completed_task_world;
+    completed_task_world.task_progress = completed_task_world.task_target;
+    completed_task_world.time.minute_of_day = 11 * 60 + 50;
+    const WorldOutcome no_completed_task_reminder = completed_task_world.execute(ActionType::Idle);
+    const bool completed_task_stays_quiet = std::none_of(no_completed_task_reminder.events.begin(),
+        no_completed_task_reminder.events.end(), [](const WorldEvent& event) { return event.id == "task-reminder"; });
+    World duplicate_affordance_world;
+    duplicate_affordance_world.current_room().objects.push_back(
+        {"backup-phone", "backup phone", true, {ActionType::UsePhone}});
+    const auto duplicate_actions = duplicate_affordance_world.available_actions();
+    const bool deduplicates_actions = std::count(duplicate_actions.begin(), duplicate_actions.end(), ActionType::UsePhone) == 1;
+    Observation visible_observation = refresh_observation({}, unavailable_computer, {});
+    const WorldOutcome rejected_attempt = unavailable_computer.execute(ActionType::UseComputer);
+    const Observation rejected_observation = refresh_observation(visible_observation, unavailable_computer, rejected_attempt);
+    const Appraisal rejected_appraisal = appraise(rejected_observation, CharacterState{}, first);
+    const bool preserves_rejected_feedback = rejected_observation.last_self_action.has_action
+        && !rejected_observation.last_self_action.accepted
+        && std::find(rejected_appraisal.tags.begin(), rejected_appraisal.tags.end(), "action_rejected")
+            != rejected_appraisal.tags.end();
+    World stale_object_world;
+    Observation object_observation = refresh_observation({}, stale_object_world, {});
+    for (Object& object : stale_object_world.current_room().objects) {
+        if (object.id == "phone") object.usable = false;
+    }
+    object_observation = refresh_observation(std::move(object_observation), stale_object_world, {});
+    const ObservationFact* stale_phone = find_fact(object_observation, "object.phone");
+    const bool marks_absent_object_stale = stale_phone != nullptr && stale_phone->status == KnowledgeStatus::Stale;
+    CharacterState capped_state;
+    capped_state.hunger = 0.10;
+    Appraisal large_reduction;
+    large_reduction.hunger_delta = -1.0;
+    const StateUpdate capped_update = update_state(capped_state, large_reduction, first, 0);
+    const bool reports_applied_delta = capped_update.requested.hunger < capped_update.applied.hunger
+        && capped_update.applied.hunger == -0.10;
     const bool handles_interruption = interrupted_sleep.accepted && interrupted_sleep.woke_early
                                    && sleep_primitive_shortened;
 
@@ -99,9 +132,15 @@ bool Simulation::verify(std::ostream& output) const {
            << ", rejects_illegal_action=" << validates_world
            << ", trace_has_primitives=" << has_primitives
            << ", primitives_settle=" << primitives_settle
-           << ", interruption_rewrites_plan=" << handles_interruption << '\n';
+           << ", interruption_rewrites_plan=" << handles_interruption
+           << ", completed_task_stays_quiet=" << completed_task_stays_quiet
+           << ", deduplicates_actions=" << deduplicates_actions
+           << ", preserves_rejected_feedback=" << preserves_rejected_feedback
+           << ", marks_absent_object_stale=" << marks_absent_object_stale
+           << ", reports_applied_delta=" << reports_applied_delta << '\n';
     return reproducible && profile_sensitive && validates_world && has_primitives
-        && primitives_settle && handles_interruption;
+        && primitives_settle && handles_interruption && completed_task_stays_quiet && deduplicates_actions
+        && preserves_rejected_feedback && marks_absent_object_stale && reports_applied_delta;
 }
 
 std::string Simulation::run_profile(const Personality& personality,
@@ -112,10 +151,7 @@ std::string Simulation::run_profile(const Personality& personality,
     std::mt19937 rng(seed);
     std::ostringstream output;
     Observation observation;
-    WorldOutcome previous_outcome;
-    previous_outcome.action = ActionType::Idle;
-    previous_outcome.accepted = true;
-    previous_outcome.provenance = "initial_world";
+    WorldOutcome previous_outcome; // No prior action at the initial decision point.
 
     if (include_header) {
         output << "============================================================\n"
@@ -128,14 +164,14 @@ std::string Simulation::run_profile(const Personality& personality,
         const std::vector<ActionType> world_actions = world.available_actions();
         const Appraisal appraisal = appraise(observation, state, personality);
         clear_pending_appraisal_updates(observation);
-        const StateDelta state_delta = update_state(state, appraisal, personality, previous_outcome.elapsed_minutes);
+        const StateUpdate state_update = update_state(state, appraisal, personality, previous_outcome.elapsed_minutes);
         const DecisionContext decision = decide(observation, state, personality);
         const ActionType chosen_action = sample_action(decision, rng);
         const std::string state_at_decision = state_summary(state);
         const std::string world_before = world.summary();
         const std::string decision_time = world.time_summary();
         const CharacterActionPlan action_plan = world.expand_action(chosen_action);
-        const WorldOutcome outcome = world.settle(action_plan);
+        const WorldOutcome outcome = world.settle(chosen_action);
         if (outcome.accepted) {
             update_intention(state, chosen_action);
         }
@@ -143,14 +179,15 @@ std::string Simulation::run_profile(const Personality& personality,
         output << "\n[Decision point " << step << " | " << decision_time << "]\n"
                << "  W before action: " << world_before << '\n'
                << "  X input: Delta-O / O + old S + P"
-               << " | self_action=" << to_string(observation.last_self_action.action) << '\n'
+               << " | self_action=" << (observation.last_self_action.has_action
+                   ? to_string(observation.last_self_action.action) : "none") << '\n'
                << (previous_outcome.observation_frozen_during_action
                        ? "  O refresh boundary: W advanced during sleep while O was frozen; current room perception now reconciles O.\n"
                        : "")
                << "  " << observation_summary(observation) << '\n'
                << "  " << action_space_summary(world_actions) << '\n'
                << "  " << appraisal_summary(appraisal) << '\n'
-               << "  " << state_delta_summary(state_delta) << '\n'
+               << "  " << state_update_summary(state_update) << '\n'
                << "  " << state_at_decision << '\n'
                << "  " << decision_summary(decision)
                << "  chosen A^char: " << to_string(chosen_action) << '\n'

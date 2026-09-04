@@ -25,7 +25,10 @@ struct ObservationFact {
 // Self-action feedback is part of O too. It stays typed rather than being
 // encoded as a string fact, but carries the same provenance boundary.
 struct ObservedAction {
+    bool has_action = false;
     ActionType action = ActionType::Idle;
+    bool accepted = false;
+    std::string outcome_reason;
     std::string source = "self_action_feedback";
     std::string observed_at;
 };
