@@ -7,6 +7,8 @@ enum class ActionType {
     UseComputer,
     StudyAtDesk,
     RestAtBed,
+    GoToBathroom,
+    GetMeal,
     Idle
 };
 

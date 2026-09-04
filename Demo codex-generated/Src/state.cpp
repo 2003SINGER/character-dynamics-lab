@@ -22,6 +22,8 @@ StateDelta update_state(CharacterState& state,
     delta.fatigue = appraisal.fatigue_delta;
     delta.task_pressure = appraisal.task_pressure_delta;
     delta.satisfaction = appraisal.satisfaction_delta;
+    delta.hunger = appraisal.hunger_delta + 0.04;
+    delta.bathroom_urge = appraisal.bathroom_urge_delta + 0.03;
 
     // P changes the response curve, not the identity of the action itself.
     if (appraisal.task_pressure_delta > 0.0) {
@@ -38,6 +40,8 @@ StateDelta update_state(CharacterState& state,
     state.fatigue = clamp_unit(state.fatigue + delta.fatigue);
     state.task_pressure = clamp_unit(state.task_pressure + delta.task_pressure);
     state.satisfaction = clamp_unit(state.satisfaction + delta.satisfaction);
+    state.hunger = clamp_unit(state.hunger + delta.hunger);
+    state.bathroom_urge = clamp_unit(state.bathroom_urge + delta.bathroom_urge);
     return delta;
 }
 
@@ -51,6 +55,10 @@ std::string state_summary(const CharacterState& state) {
     append_value(output, "task_pressure", state.task_pressure);
     output << ", ";
     append_value(output, "satisfaction", state.satisfaction);
+    output << ", ";
+    append_value(output, "hunger", state.hunger);
+    output << ", ";
+    append_value(output, "bathroom_urge", state.bathroom_urge);
     output << '}';
     return output.str();
 }
@@ -65,6 +73,10 @@ std::string state_delta_summary(const StateDelta& delta) {
     append_value(output, "task_pressure", delta.task_pressure);
     output << ", ";
     append_value(output, "satisfaction", delta.satisfaction);
+    output << ", ";
+    append_value(output, "hunger", delta.hunger);
+    output << ", ";
+    append_value(output, "bathroom_urge", delta.bathroom_urge);
     output << '}';
     return output.str();
 }

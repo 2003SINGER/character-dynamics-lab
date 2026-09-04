@@ -34,6 +34,18 @@ Appraisal appraise(const Observation& observation) {
         appraisal.satisfaction_delta = 0.05;
         appraisal.tags = {"recovery", "task_still_pending"};
         break;
+    case ActionType::GoToBathroom:
+        appraisal.boredom_delta = 0.01;
+        appraisal.satisfaction_delta = 0.07;
+        appraisal.bathroom_urge_delta = -0.55;
+        appraisal.tags = {"bodily_need_resolved", "brief_room_exit"};
+        break;
+    case ActionType::GetMeal:
+        appraisal.boredom_delta = -0.04;
+        appraisal.satisfaction_delta = 0.10;
+        appraisal.hunger_delta = -0.48;
+        appraisal.tags = {"hunger_resolved", "brief_room_exit"};
+        break;
     case ActionType::Idle:
         appraisal.boredom_delta = 0.12;
         appraisal.fatigue_delta = -0.01;

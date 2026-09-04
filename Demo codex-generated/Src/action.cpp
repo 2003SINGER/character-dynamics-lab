@@ -10,6 +10,10 @@ std::string to_string(ActionType action) {
         return "study_at_desk";
     case ActionType::RestAtBed:
         return "rest_at_bed";
+    case ActionType::GoToBathroom:
+        return "go_to_bathroom";
+    case ActionType::GetMeal:
+        return "get_meal";
     case ActionType::Idle:
         return "idle";
     }

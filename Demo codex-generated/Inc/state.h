@@ -10,6 +10,8 @@ struct CharacterState {
     double fatigue = 0.15;
     double task_pressure = 0.55;
     double satisfaction = 0.45;
+    double hunger = 0.25;
+    double bathroom_urge = 0.15;
 };
 
 struct StateDelta {
@@ -17,6 +19,8 @@ struct StateDelta {
     double fatigue = 0.0;
     double task_pressure = 0.0;
     double satisfaction = 0.0;
+    double hunger = 0.0;
+    double bathroom_urge = 0.0;
 };
 
 StateDelta update_state(CharacterState& state,

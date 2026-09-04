@@ -48,7 +48,11 @@ bool Simulation::verify(std::ostream& output) const {
     const std::string second_run = run_profile(second, 20260904U, false);
 
     World unavailable_computer;
-    unavailable_computer.computer_available = false;
+    for (RoomObject& object : unavailable_computer.room_objects) {
+        if (object.id == "computer") {
+            object.usable = false;
+        }
+    }
     const WorldOutcome rejected = unavailable_computer.execute(ActionType::UseComputer);
 
     const bool reproducible = first_run == repeated_first_run;
@@ -95,7 +99,11 @@ std::string Simulation::run_profile(const Personality& personality,
                << "  " << decision_summary(decision)
                << "  chosen A^char: " << to_string(chosen_action) << '\n'
                << "  W settlement: " << (outcome.accepted ? "accepted" : "rejected")
-               << " | provenance=" << outcome.provenance << '\n';
+               << " | provenance=" << outcome.provenance;
+        if (!outcome.object_id.empty()) {
+            output << " | object=" << outcome.object_id;
+        }
+        output << '\n';
         for (const std::string& effect : outcome.effects) {
             output << "    effect: " << effect << '\n';
         }

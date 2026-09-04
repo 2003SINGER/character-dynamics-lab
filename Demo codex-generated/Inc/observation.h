@@ -8,10 +8,8 @@
 // O: a separately stored character-side view, even though this one-room
 // reference refreshes all visible fields deterministically.
 struct Observation {
-    bool phone_known_available = false;
-    bool computer_known_available = false;
-    bool desk_known_available = false;
-    bool bed_known_available = false;
+    std::vector<std::string> visible_object_labels;
+    std::vector<ActionType> available_actions;
     ActionType observed_last_action = ActionType::Idle;
     std::string source;
 };
