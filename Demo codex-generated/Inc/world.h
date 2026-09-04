@@ -1,23 +1,11 @@
 #pragma once
 
 #include "action.h"
+#include "scene.h"
+#include "simulation_time.h"
 
 #include <string>
 #include <vector>
-
-// Objects own affordances. Adding an object to the room is therefore the
-// single place where a new action can become possible in this small demo.
-struct RoomObject {
-    std::string id;
-    std::string label;
-    bool usable = true;
-    std::vector<ActionType> affordances;
-};
-
-struct SimTime {
-    int day = 1;
-    int minute_of_day = 8 * 60;
-};
 
 struct WorldEvent {
     std::string id;
@@ -40,24 +28,10 @@ struct WorldOutcome {
 };
 
 struct World {
-    std::vector<RoomObject> room_objects = {
-        {"phone", "phone", true, {ActionType::UsePhone, ActionType::ShopOnPhone}},
-        {"computer", "computer", true, {ActionType::UseComputer, ActionType::StudyAtComputer}},
-        {"desk", "desk with study materials", true, {ActionType::StudyAtDesk}},
-        {"bed", "bed", true, {ActionType::RestAtBed, ActionType::SleepAtBed}},
-        {"door", "room door", true, {ActionType::GoToBathroom, ActionType::GetMeal}},
-        {"light", "room light", true, {ActionType::TurnLightOn, ActionType::TurnLightOff}},
-        {"alarm", "alarm clock", true, {ActionType::TurnOffAlarm}},
-        {"window", "window with curtains", true, {ActionType::OpenCurtain, ActionType::CloseCurtain}}
-    };
-
     SimTime time;
-    bool light_on = true;
-    bool alarm_ringing = false;
+    RoomScene room = make_default_room();
     int alarm_minute_of_day = 9 * 60;
-    bool curtain_open = true;
     std::string weather = "clear";
-    double room_temperature_celsius = 23.0;
     int task_progress = 0;
     int task_target = 5;
     int wallet = 120;
@@ -70,8 +44,6 @@ struct World {
     int bathroom_visits = 0;
     int meals_collected = 0;
     int online_orders = 0;
-    bool character_asleep = false;
-    std::string current_activity = "idle";
     ActionType last_action = ActionType::Idle;
 
     bool can_execute(ActionType action) const;

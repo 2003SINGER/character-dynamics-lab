@@ -65,7 +65,7 @@ bool Simulation::verify(std::ostream& output) const {
     const std::string second_run = run_profile(second, 20260904U, false);
 
     World unavailable_computer;
-    for (RoomObject& object : unavailable_computer.room_objects) {
+    for (RoomObject& object : unavailable_computer.room.objects) {
         if (object.id == "computer") {
             object.usable = false;
         }
@@ -110,7 +110,7 @@ std::string Simulation::run_profile(const Personality& personality,
         const DecisionContext decision = decide(observation, world, state, personality);
         const ActionType chosen_action = sample_action(decision, rng);
         const std::string state_at_decision = state_summary(state);
-        update_intention(state, decision, chosen_action);
+        update_intention(state, chosen_action);
         const std::string world_before = world.summary();
         const std::string decision_time = world.time_summary();
         const WorldOutcome outcome = world.execute(chosen_action);

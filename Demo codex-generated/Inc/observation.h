@@ -30,14 +30,11 @@ struct Observation {
     std::vector<ActionType> known_actions; // A^O, not W's full action set.
     std::vector<ObservationFact> facts;
     std::vector<ObservationFact> updates_this_refresh;
-    bool light_known_on = true;
-    int known_task_progress = 0;
-    int known_unread_messages = 0;
-    double known_temperature_celsius = 0.0;
-    std::string observed_time;
     ActionType observed_last_action = ActionType::Idle;
 };
 
+const ObservationFact* find_fact(const Observation& observation, const std::string& key);
+bool has_known_fact(const Observation& observation, const std::string& key, const std::string& value);
 Observation refresh_observation(Observation previous,
                                 const World& world,
                                 const WorldOutcome& previous_outcome);

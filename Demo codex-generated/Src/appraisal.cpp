@@ -106,7 +106,7 @@ Appraisal appraise(const Observation& observation, const WorldOutcome& previous_
             appraisal.tags.push_back("evening_fatigue_cue");
         }
     }
-    if (!observation.light_known_on) {
+    if (has_known_fact(observation, "room.light", "off")) {
         appraisal.tags.push_back("room_is_dark");
     }
     for (const ObservationFact& update : observation.updates_this_refresh) {

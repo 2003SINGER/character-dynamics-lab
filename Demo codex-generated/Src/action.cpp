@@ -1,37 +1,32 @@
 #include "action.h"
 
+#include <array>
+
+namespace {
+constexpr std::array<ActionDefinition, static_cast<std::size_t>(ActionType::Count)> kDefinitions = {{
+    {"use_phone", 25},
+    {"shop_on_phone", 20},
+    {"use_computer", 30},
+    {"study_at_computer", 35},
+    {"study_at_desk", 35},
+    {"rest_at_bed", 60},
+    {"sleep_at_bed", 8 * 60},
+    {"go_to_bathroom", 15},
+    {"get_meal", 35},
+    {"turn_light_on", 1},
+    {"turn_light_off", 1},
+    {"turn_off_alarm", 1},
+    {"open_curtain", 1},
+    {"close_curtain", 1},
+    {"idle", 10},
+}};
+} // namespace
+
+const ActionDefinition& action_definition(ActionType action) {
+    // ActionType::Count is a sentinel, never a runtime action.
+    return kDefinitions.at(static_cast<std::size_t>(action));
+}
+
 std::string to_string(ActionType action) {
-    switch (action) {
-    case ActionType::UsePhone:
-        return "use_phone";
-    case ActionType::ShopOnPhone:
-        return "shop_on_phone";
-    case ActionType::UseComputer:
-        return "use_computer";
-    case ActionType::StudyAtComputer:
-        return "study_at_computer";
-    case ActionType::StudyAtDesk:
-        return "study_at_desk";
-    case ActionType::RestAtBed:
-        return "rest_at_bed";
-    case ActionType::SleepAtBed:
-        return "sleep_at_bed";
-    case ActionType::GoToBathroom:
-        return "go_to_bathroom";
-    case ActionType::GetMeal:
-        return "get_meal";
-    case ActionType::TurnLightOn:
-        return "turn_light_on";
-    case ActionType::TurnLightOff:
-        return "turn_light_off";
-    case ActionType::TurnOffAlarm:
-        return "turn_off_alarm";
-    case ActionType::OpenCurtain:
-        return "open_curtain";
-    case ActionType::CloseCurtain:
-        return "close_curtain";
-    case ActionType::Idle:
-        return "idle";
-    }
-    return "unknown_action";
+    return std::string(action_definition(action).name);
 }

@@ -22,3 +22,8 @@
 ## Sync
 
 - Sync LifeOS only when the project lifecycle, commitment, priority, deadline or waiting state changes.
+
+## Version Control
+
+- After verified project edits, create a local Git commit when appropriate.
+- Do **not** push commits to any remote unless the user explicitly asks to push in the current request.

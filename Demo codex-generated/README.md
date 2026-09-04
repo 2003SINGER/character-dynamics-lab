@@ -25,9 +25,18 @@ W → O → X → S → D → π(A) → A → W'
 
 1. `Src/main.cpp`：程序入口；
 2. `Src/simulation.cpp`：整条 W→O→X→S→D→A→W 链如何编排；
-3. `Inc/*.h`：每个量的接口和所有权；
-4. `Src/world.cpp`、`Src/decision.cpp`：世界结算与动作分布；
-5. `Src/appraisal.cpp`、`Src/state.cpp`：语义解释与状态动力学怎样分开。
+3. `Inc/simulation_time.h`、`Inc/object.h`、`Inc/scene.h`：时间、物品 affordance 与房间局部状态；
+4. `Inc/*.h`：其余每个量的接口和所有权；
+5. `Src/world.cpp`、`Src/decision.cpp`：世界结算与动作分布；
+6. `Src/appraisal.cpp`、`Src/state.cpp`：语义解释与状态动力学怎样分开。
+
+## 当前代码的边界
+
+- `simulation_time` 只负责离散时间运算；它刻意不叫 `time.h`，避免遮蔽 C++ 标准库依赖的 C 头文件；
+- `RoomObject` 只描述一个场景实例可提供什么动作、现在是否可用；`RoomScene` 承担房间内灯光、温度、窗帘、闹钟和物品集合；`World` 承担跨场景的时间、天气、任务、钱包和动作结算；
+- `ActionDefinition` 是唯一的动作显示名/默认时长目录。动作是否可用仍由 `World::can_execute` 判断，动作对 W 的后果仍由 `World::execute` 判断；
+- `ObservationFact` 是 O 中 room light、温度、时间、任务等信息的唯一存储，避免“同一事实既在 facts 又在几个 bool/int 字段”逐渐不同步；
+- `Simulation` 仍故意保留为可读的编排层。不要把 W 结算、X 解释、S 更新和 D 选择硬塞进一个万能规则表：它们正是后续替换机制时需要各自独立的边界。
 
 ## 构建与运行（本机 MinGW）
 

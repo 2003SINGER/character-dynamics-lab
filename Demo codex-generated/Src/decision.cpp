@@ -12,7 +12,6 @@ CandidateAction candidate(ActionType action, double activation, double threshold
     result.activation = activation;
     result.threshold = threshold;
     result.eligible = activation >= threshold || action == ActionType::Idle;
-    result.score = activation;
     result.reason = std::move(reason);
     return result;
 }
@@ -121,7 +120,7 @@ DecisionContext decide(const Observation& observation,
     double normalizer = 0.0;
     for (CandidateAction& item : decision.candidates) {
         if (item.eligible) {
-            item.probability = std::exp(item.score / temperature);
+            item.probability = std::exp(item.activation / temperature);
             normalizer += item.probability;
         }
     }
@@ -145,7 +144,6 @@ ActionType sample_action(const DecisionContext& decision, std::mt19937& rng) {
 }
 
 void update_intention(CharacterState& state,
-                      const DecisionContext& decision,
                       ActionType chosen_action) {
     const bool study_choice = chosen_action == ActionType::StudyAtDesk
                            || chosen_action == ActionType::StudyAtComputer;

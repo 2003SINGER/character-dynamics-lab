@@ -12,7 +12,6 @@
 
 struct CandidateAction {
     ActionType action = ActionType::Idle;
-    double score = 0.0;
     double activation = 0.0;
     double threshold = 0.0;
     double probability = 0.0;
@@ -37,6 +36,5 @@ DecisionContext decide(const Observation& observation,
                        const Personality& personality);
 ActionType sample_action(const DecisionContext& decision, std::mt19937& rng);
 void update_intention(CharacterState& state,
-                      const DecisionContext& decision,
                       ActionType chosen_action);
 std::string decision_summary(const DecisionContext& decision);

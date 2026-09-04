@@ -10,6 +10,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(character_dynamics_reference
     Src/main.cpp
     Src/action.cpp
+    Src/simulation_time.cpp
+    Src/object.cpp
+    Src/scene.cpp
     Src/world.cpp
     Src/observation.cpp
     Src/appraisal.cpp
