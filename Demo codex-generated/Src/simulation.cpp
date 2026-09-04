@@ -37,14 +37,12 @@ std::string personality_summary(const Personality& personality) {
     return output.str();
 }
 
-std::string outcome_summary(const WorldOutcome& outcome) {
+std::string action_space_summary(const std::vector<ActionType>& world_actions) {
     std::ostringstream output;
-    output << "last_outcome{action=" << to_string(outcome.action)
-           << ", accepted=" << outcome.accepted
-           << ", elapsed_minutes=" << outcome.elapsed_minutes
-           << ", O_frozen=" << outcome.observation_frozen_during_action
-           << ", woke_early=" << outcome.woke_early
-           << ", provenance=" << outcome.provenance << '}';
+    output << "A^W=";
+    for (ActionType action : world_actions) {
+        output << to_string(action) << ' ';
+    }
     return output.str();
 }
 } // namespace
@@ -65,7 +63,7 @@ bool Simulation::verify(std::ostream& output) const {
     const std::string second_run = run_profile(second, 20260904U, false);
 
     World unavailable_computer;
-    for (RoomObject& object : unavailable_computer.room.objects) {
+    for (Object& object : unavailable_computer.current_room().objects) {
         if (object.id == "computer") {
             object.usable = false;
         }
@@ -105,9 +103,11 @@ std::string Simulation::run_profile(const Personality& personality,
 
     for (int step = 1; step <= kStepsPerRun; ++step) {
         observation = refresh_observation(std::move(observation), world, previous_outcome);
-        const Appraisal appraisal = appraise(observation, previous_outcome);
+        const std::vector<ActionType> world_actions = world.available_actions();
+        const Appraisal appraisal = appraise(observation, state, personality);
+        clear_pending_appraisal_updates(observation);
         const StateDelta state_delta = update_state(state, appraisal, personality, previous_outcome.elapsed_minutes);
-        const DecisionContext decision = decide(observation, world, state, personality);
+        const DecisionContext decision = decide(observation, state, personality);
         const ActionType chosen_action = sample_action(decision, rng);
         const std::string state_at_decision = state_summary(state);
         update_intention(state, chosen_action);
@@ -117,11 +117,13 @@ std::string Simulation::run_profile(const Personality& personality,
 
         output << "\n[Decision point " << step << " | " << decision_time << "]\n"
                << "  W before action: " << world_before << '\n'
-               << "  X input: " << outcome_summary(previous_outcome) << '\n'
+               << "  X input: Delta-O / O + old S + P"
+               << " | self_action=" << to_string(observation.last_self_action.action) << '\n'
                << (previous_outcome.observation_frozen_during_action
                        ? "  O refresh boundary: W advanced during sleep while O was frozen; current room perception now reconciles O.\n"
                        : "")
                << "  " << observation_summary(observation) << '\n'
+               << "  " << action_space_summary(world_actions) << '\n'
                << "  " << appraisal_summary(appraisal) << '\n'
                << "  " << state_delta_summary(state_delta) << '\n'
                << "  " << state_at_decision << '\n'

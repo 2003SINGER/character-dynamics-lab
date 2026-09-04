@@ -27,8 +27,9 @@ void write_fact(Observation& observation,
         observation.facts.push_back(next);
         observation.updates_this_refresh.push_back(next);
     } else {
-        const bool changed = existing->value != next.value || existing->status != next.status
-                          || existing->source != next.source;
+        // A different observation channel can refresh provenance without
+        // creating a new semantic Delta-O for X to interpret again.
+        const bool changed = existing->value != next.value || existing->status != next.status;
         *existing = next;
         if (changed) {
             observation.updates_this_refresh.push_back(next);
@@ -86,24 +87,25 @@ Observation refresh_observation(Observation observation,
     // Current room rule: every usable room object is directly observable.
     // Other scenes can later omit objects here while still retaining facts from
     // message, memory, sound, or stale prior observation.
-    for (const RoomObject& object : world.room.objects) {
+    const Room& room = world.current_room();
+    for (const Object& object : room.objects) {
         if (object.usable) {
             observation.known_object_ids.push_back(object.id);
             observation.visible_object_labels.push_back(object.label);
             write_fact(observation, "object." + object.id, "present", "direct_room_visual", now);
         }
     }
-    observation.observed_last_action = world.last_action;
-    write_fact(observation, "room.light", world.room.light_on ? "on" : "off", "direct_room_visual", now);
+    observation.last_self_action = {world.last_action, "self_action_feedback", now};
+    write_fact(observation, "room.light", room.light_on ? "on" : "off", "direct_room_visual", now);
     const bool alarm_rang = std::any_of(previous_outcome.events.begin(), previous_outcome.events.end(),
         [](const WorldEvent& event) { return event.id == "alarm-rings"; });
-    write_fact(observation, "room.alarm", world.room.alarm_ringing ? "ringing" : "silent",
+    write_fact(observation, "room.alarm", room.alarm_ringing ? "ringing" : "silent",
                alarm_rang ? "direct_room_auditory" : "direct_room_visual", now);
     write_fact(observation, "task.progress", std::to_string(world.task_progress), "direct_room_visual", now);
     write_fact(observation, "message.unread_count", std::to_string(world.unread_messages), "phone_notification_state", now);
     write_fact(observation, "clock.time", now, "internal_clock", now);
-    write_fact(observation, "room.temperature", format_temperature(world.room.temperature_celsius), "direct_room_thermal", now);
-    if (world.room.curtain_open) {
+    write_fact(observation, "room.temperature", format_temperature(room.temperature_celsius), "direct_room_thermal", now);
+    if (room.curtain_open) {
         write_fact(observation, "outside.weather", world.weather, "direct_window_visual", now);
     } else {
         mark_stale(observation, "outside.weather");
@@ -111,6 +113,11 @@ Observation refresh_observation(Observation observation,
 
     // The alarm is a room-local event. Its auditory source wins over the
     // ordinary visual refresh when it rang during the preceding action.
+    for (const WorldEvent& event : previous_outcome.events) {
+        if (event.id == "task-reminder") {
+            write_fact(observation, "calendar.task_due", "today", "calendar_notification", now);
+        }
+    }
 
     // Explicit A^W -> A^O: an action is known only when W says it is currently
     // legal and O contains the object that affords it. In this room all objects
@@ -118,7 +125,7 @@ Observation refresh_observation(Observation observation,
     for (ActionType action : world.available_actions()) {
         if (action == ActionType::Idle) {
             observation.known_actions.push_back(action);
-        } else if (const RoomObject* object = world.object_for(action);
+        } else if (const Object* object = world.object_for(action);
                    object != nullptr && contains_id(observation.known_object_ids, object->id)) {
             observation.known_actions.push_back(action);
         }
@@ -137,11 +144,17 @@ Observation apply_sleep_sensory_update(Observation observation,
     observation.updates_this_refresh.clear();
     for (const WorldEvent& event : outcome.sleeping_sensory_events) {
         if (event.id == "room-cold") {
-            write_fact(observation, "room.temperature", format_temperature(world.room.temperature_celsius),
+            write_fact(observation, "room.temperature", format_temperature(world.current_room().temperature_celsius),
                        "direct_room_thermal_while_asleep", world.time_summary());
         }
     }
+    observation.pending_appraisal_updates.insert(observation.pending_appraisal_updates.end(),
+        observation.updates_this_refresh.begin(), observation.updates_this_refresh.end());
     return observation;
+}
+
+void clear_pending_appraisal_updates(Observation& observation) {
+    observation.pending_appraisal_updates.clear();
 }
 
 std::string observation_updates_summary(const Observation& observation) {
@@ -175,6 +188,7 @@ std::string observation_summary(const Observation& observation) {
            << ", light=" << fact_value(observation, "room.light")
            << ", task_progress=" << fact_value(observation, "task.progress")
            << ", unread_messages=" << fact_value(observation, "message.unread_count")
-           << ", observed_last_action=" << to_string(observation.observed_last_action) << '}';
+           << ", self_action=" << to_string(observation.last_self_action.action)
+           << "{" << observation.last_self_action.source << "}}";
     return output.str();
 }

@@ -29,7 +29,7 @@ struct WorldOutcome {
 
 struct World {
     SimTime time;
-    RoomScene room = make_default_room();
+    Scene scene = make_default_scene();
     int alarm_minute_of_day = 9 * 60;
     std::string weather = "clear";
     int task_progress = 0;
@@ -37,6 +37,7 @@ struct World {
     int wallet = 120;
     int unread_messages = 0;
     std::string location = "room";
+    std::string current_activity = "idle";
     int phone_uses = 0;
     int computer_uses = 0;
     int study_sessions = 0;
@@ -48,7 +49,9 @@ struct World {
 
     bool can_execute(ActionType action) const;
     std::vector<ActionType> available_actions() const;
-    const RoomObject* object_for(ActionType action) const;
+    Room& current_room();
+    const Room& current_room() const;
+    const Object* object_for(ActionType action) const;
     WorldOutcome execute(ActionType action);
     std::string time_summary() const;
     std::string summary() const;

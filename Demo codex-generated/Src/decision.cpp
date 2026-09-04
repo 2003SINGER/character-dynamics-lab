@@ -18,11 +18,9 @@ CandidateAction candidate(ActionType action, double activation, double threshold
 } // namespace
 
 DecisionContext decide(const Observation& observation,
-                       const World& world,
                        const CharacterState& state,
                        const Personality& personality) {
     DecisionContext decision;
-    decision.world_actions = world.available_actions();
     decision.known_actions = observation.known_actions;
     if (state.intention.active && state.intention.remaining_decision_points > 0) {
         decision.intention_status = "active: " + to_string(state.intention.action)
@@ -61,9 +59,6 @@ DecisionContext decide(const Observation& observation,
     // A^W -> A^O -> pi(A): W declares what is legal; persistent O exposes
     // only the actions afforded by things the character currently knows.
     for (ActionType action : observation.known_actions) {
-        if (!world.can_execute(action)) {
-            continue;
-        }
         const double commitment_bonus = state.intention.active
                                      && state.intention.remaining_decision_points > 0
                                      && state.intention.action == action ? 0.16 : 0.0;
@@ -167,9 +162,7 @@ std::string decision_summary(const DecisionContext& decision) {
     output << "D{dominant_need=" << decision.dominant_need
            << ", intention_hint=" << decision.intention_hint
            << ", persistent_intention=" << decision.intention_status << "}\n"
-           << "    A^W=";
-    for (ActionType action : decision.world_actions) output << to_string(action) << ' ';
-    output << "\n    A^O=";
+           << "    A^O=";
     for (ActionType action : decision.known_actions) output << to_string(action) << ' ';
     output << '\n';
     for (const CandidateAction& item : decision.candidates) {

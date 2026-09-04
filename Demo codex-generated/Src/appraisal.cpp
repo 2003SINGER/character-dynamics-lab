@@ -1,13 +1,18 @@
 #include "appraisal.h"
 
+#include "personality.h"
+#include "state.h"
+
 #include <sstream>
 
-Appraisal appraise(const Observation& observation, const WorldOutcome& previous_outcome) {
+Appraisal appraise(const Observation& observation,
+                   const CharacterState& old_state,
+                   const Personality& personality) {
     Appraisal appraisal;
 
-    // This is intentionally a small replaceable X function. Its input is an
-    // observation plus the last settled world outcome, not direct writes to S.
-    switch (previous_outcome.action) {
+    // This is intentionally a small replaceable X function. It reads only O,
+    // Delta-O, old S, and P: raw WorldOutcome must first pass through O.
+    switch (observation.last_self_action.action) {
     case ActionType::UsePhone:
         appraisal.boredom_delta = -0.22;
         appraisal.fatigue_delta = 0.08;
@@ -38,7 +43,7 @@ Appraisal appraise(const Observation& observation, const WorldOutcome& previous_
         appraisal.task_pressure_delta = -0.25;
         appraisal.satisfaction_delta = 0.13;
         appraisal.anxiety_delta = -0.08;
-        appraisal.screen_strain_delta = previous_outcome.action == ActionType::StudyAtComputer ? 0.08 : 0.0;
+        appraisal.screen_strain_delta = observation.last_self_action.action == ActionType::StudyAtComputer ? 0.08 : 0.0;
         appraisal.tags = {"task_progress", "mental_effort"};
         break;
     case ActionType::RestAtBed:
@@ -84,37 +89,41 @@ Appraisal appraise(const Observation& observation, const WorldOutcome& previous_
         break;
     }
 
-    for (const WorldEvent& event : previous_outcome.events) {
-        if (event.id == "alarm-rings") {
+    const auto apply_observation_update = [&](const ObservationFact& update) {
+        if (update.key == "room.alarm" && update.value == "ringing"
+            && update.status == KnowledgeStatus::Known) {
             appraisal.boredom_delta += 0.03;
-            appraisal.anxiety_delta += 0.04;
+            appraisal.anxiety_delta += 0.02 + 0.04 * personality.task_anxiety_sensitivity;
             appraisal.tags.push_back("alarm_interrupts_room");
-        } else if (event.id == "room-cold") {
+        } else if (update.key == "room.temperature" && update.value == "17.0C"
+                   && update.status == KnowledgeStatus::Known) {
             appraisal.fatigue_delta += 0.04;
             appraisal.satisfaction_delta -= 0.06;
             appraisal.tags.push_back("cold_interrupts_sleep");
-        } else if (event.id == "message-study-group") {
+        } else if (update.key == "message.unread_count" && update.value != "0"
+                   && update.status == KnowledgeStatus::Known) {
             appraisal.task_pressure_delta += 0.08;
             appraisal.anxiety_delta += 0.05;
             appraisal.tags.push_back("social_task_reminder");
-        } else if (event.id == "task-reminder") {
+        } else if (update.key == "calendar.task_due" && update.value == "today"
+                   && update.status == KnowledgeStatus::Known) {
             appraisal.task_pressure_delta += 0.14;
-            appraisal.anxiety_delta += 0.12;
+            appraisal.anxiety_delta += 0.06 + 0.08 * personality.task_anxiety_sensitivity;
             appraisal.tags.push_back("deadline_salience");
-        } else if (event.id == "evening") {
-            appraisal.fatigue_delta += 0.04;
-            appraisal.tags.push_back("evening_fatigue_cue");
-        }
-    }
-    if (has_known_fact(observation, "room.light", "off")) {
-        appraisal.tags.push_back("room_is_dark");
-    }
-    for (const ObservationFact& update : observation.updates_this_refresh) {
-        if (update.key == "outside.weather" && update.value == "rain"
-            && update.status == KnowledgeStatus::Known) {
+        } else if (update.key == "outside.weather" && update.value == "rain"
+                   && update.status == KnowledgeStatus::Known && old_state.boredom > 0.40) {
             appraisal.boredom_delta += 0.03;
             appraisal.tags.push_back("rain_observed_through_window");
         }
+    };
+    for (const ObservationFact& update : observation.updates_this_refresh) {
+        apply_observation_update(update);
+    }
+    for (const ObservationFact& update : observation.pending_appraisal_updates) {
+        apply_observation_update(update);
+    }
+    if (has_known_fact(observation, "room.light", "off")) {
+        appraisal.tags.push_back("room_is_dark");
     }
     return appraisal;
 }

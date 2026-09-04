@@ -1,7 +1,6 @@
 #pragma once
 
 #include "observation.h"
-#include "world.h"
 
 #include <string>
 #include <vector>
@@ -21,5 +20,10 @@ struct Appraisal {
     std::vector<std::string> tags;
 };
 
-Appraisal appraise(const Observation& observation, const WorldOutcome& previous_outcome);
+struct CharacterState;
+struct Personality;
+
+Appraisal appraise(const Observation& observation,
+                   const CharacterState& old_state,
+                   const Personality& personality);
 std::string appraisal_summary(const Appraisal& appraisal);

@@ -1,11 +1,37 @@
 #include "world.h"
 
 #include <sstream>
+#include <stdexcept>
+
+namespace {
+Room& require_room(Scene& scene, const std::string& room_id) {
+    if (Room* room = scene.room_by_id(room_id)) {
+        return *room;
+    }
+    throw std::logic_error("World location does not resolve to a Room in its Scene");
+}
+
+const Room& require_room(const Scene& scene, const std::string& room_id) {
+    if (const Room* room = scene.room_by_id(room_id)) {
+        return *room;
+    }
+    throw std::logic_error("World location does not resolve to a Room in its Scene");
+}
+} // namespace
+
+Room& World::current_room() {
+    return require_room(scene, location);
+}
+
+const Room& World::current_room() const {
+    return require_room(scene, location);
+}
 
 bool World::can_execute(ActionType action) const {
     if (action == ActionType::Idle) {
         return true;
     }
+    const Room& room = current_room();
     if (object_for(action) == nullptr) {
         return false;
     }
@@ -30,13 +56,14 @@ bool World::can_execute(ActionType action) const {
     }
 }
 
-const RoomObject* World::object_for(ActionType action) const {
-    return room.object_for(action);
+const Object* World::object_for(ActionType action) const {
+    return current_room().object_for(action);
 }
 
 std::vector<ActionType> World::available_actions() const {
     std::vector<ActionType> actions = {ActionType::Idle};
-    for (const RoomObject& object : room.objects) {
+    const Room& room = current_room();
+    for (const Object& object : room.objects) {
         for (ActionType action : object.affordances) {
             if (object.usable && can_execute(action)) {
                 actions.push_back(action);
@@ -58,13 +85,14 @@ WorldOutcome World::execute(ActionType action) {
 
     outcome.accepted = true;
     last_action = action;
-    room.current_activity = to_string(action);
-    outcome.activity = room.current_activity;
-    if (const RoomObject* object = object_for(action)) {
+    current_activity = to_string(action);
+    outcome.activity = current_activity;
+    if (const Object* object = object_for(action)) {
         outcome.object_id = object->id;
         outcome.provenance += " via object:" + object->id;
     }
 
+    Room& room = current_room();
     switch (action) {
     case ActionType::UsePhone:
         ++phone_uses;
@@ -189,8 +217,10 @@ std::string World::time_summary() const {
 }
 
 std::string World::summary() const {
+    const Room& room = current_room();
     std::ostringstream output;
     output << "W{time=" << time_summary()
+           << ", scene=" << scene.id
            << ", location=" << location
            << ", light=" << (room.light_on ? "on" : "off")
            << ", alarm=" << (room.alarm_ringing ? "ringing" : "silent")
@@ -202,13 +232,13 @@ std::string World::summary() const {
            << ", unread_messages=" << unread_messages
            << ", objects=[";
     for (std::size_t index = 0; index < room.objects.size(); ++index) {
-        const RoomObject& object = room.objects[index];
+        const Object& object = room.objects[index];
         output << object.id << ':' << (object.usable ? "ready" : "unavailable");
         if (index + 1 < room.objects.size()) {
             output << ", ";
         }
     }
-    output << "], activity=" << room.current_activity
+    output << "], activity=" << current_activity
            << ", counts=[phone:" << phone_uses
            << ", computer:" << computer_uses
            << ", study:" << study_sessions
