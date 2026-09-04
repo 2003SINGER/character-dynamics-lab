@@ -1,9 +1,19 @@
 #pragma once
 
+#include "action.h"
 #include "appraisal.h"
 #include "personality.h"
 
 #include <string>
+
+// Placeholder for a future goal/intention module. It is deliberately small:
+// it can bias repeated study choices, but does not claim to model planning.
+struct PersistentIntention {
+    bool active = false;
+    ActionType action = ActionType::Idle;
+    std::string reason;
+    int remaining_decision_points = 0;
+};
 
 struct CharacterState {
     double boredom = 0.55;
@@ -15,6 +25,7 @@ struct CharacterState {
     double anxiety = 0.20;
     double screen_strain = 0.05;
     double purchase_urge = 0.10;
+    PersistentIntention intention;
 };
 
 struct StateDelta {

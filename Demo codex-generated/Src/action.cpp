@@ -14,6 +14,8 @@ std::string to_string(ActionType action) {
         return "study_at_desk";
     case ActionType::RestAtBed:
         return "rest_at_bed";
+    case ActionType::SleepAtBed:
+        return "sleep_at_bed";
     case ActionType::GoToBathroom:
         return "go_to_bathroom";
     case ActionType::GetMeal:
@@ -22,6 +24,12 @@ std::string to_string(ActionType action) {
         return "turn_light_on";
     case ActionType::TurnLightOff:
         return "turn_light_off";
+    case ActionType::TurnOffAlarm:
+        return "turn_off_alarm";
+    case ActionType::OpenCurtain:
+        return "open_curtain";
+    case ActionType::CloseCurtain:
+        return "close_curtain";
     case ActionType::Idle:
         return "idle";
     }

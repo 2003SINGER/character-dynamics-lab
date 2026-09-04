@@ -31,6 +31,7 @@ struct WorldOutcome {
     std::string activity;
     std::string object_id;
     int elapsed_minutes = 0;
+    bool observation_frozen_during_action = false;
     std::vector<WorldEvent> events;
     std::vector<std::string> effects;
     std::string provenance;
@@ -41,13 +42,19 @@ struct World {
         {"phone", "phone", true, {ActionType::UsePhone, ActionType::ShopOnPhone}},
         {"computer", "computer", true, {ActionType::UseComputer, ActionType::StudyAtComputer}},
         {"desk", "desk with study materials", true, {ActionType::StudyAtDesk}},
-        {"bed", "bed", true, {ActionType::RestAtBed}},
+        {"bed", "bed", true, {ActionType::RestAtBed, ActionType::SleepAtBed}},
         {"door", "room door", true, {ActionType::GoToBathroom, ActionType::GetMeal}},
-        {"light", "room light", true, {ActionType::TurnLightOn, ActionType::TurnLightOff}}
+        {"light", "room light", true, {ActionType::TurnLightOn, ActionType::TurnLightOff}},
+        {"alarm", "alarm clock", true, {ActionType::TurnOffAlarm}},
+        {"window", "window with curtains", true, {ActionType::OpenCurtain, ActionType::CloseCurtain}}
     };
 
     SimTime time;
     bool light_on = true;
+    bool alarm_ringing = false;
+    int alarm_minute_of_day = 9 * 60;
+    bool curtain_open = true;
+    std::string weather = "clear";
     int task_progress = 0;
     int task_target = 5;
     int wallet = 120;
@@ -60,6 +67,7 @@ struct World {
     int bathroom_visits = 0;
     int meals_collected = 0;
     int online_orders = 0;
+    bool character_asleep = false;
     std::string current_activity = "idle";
     ActionType last_action = ActionType::Idle;
 

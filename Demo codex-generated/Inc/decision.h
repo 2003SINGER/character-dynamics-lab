@@ -1,6 +1,7 @@
 #pragma once
 
 #include "action.h"
+#include "observation.h"
 #include "personality.h"
 #include "state.h"
 #include "world.h"
@@ -24,11 +25,18 @@ struct CandidateAction {
 struct DecisionContext {
     std::string dominant_need;
     std::string intention_hint;
+    std::string intention_status;
+    std::vector<ActionType> world_actions; // A^W
+    std::vector<ActionType> known_actions; // A^O
     std::vector<CandidateAction> candidates;
 };
 
-DecisionContext decide(const World& world,
+DecisionContext decide(const Observation& observation,
+                       const World& world,
                        const CharacterState& state,
                        const Personality& personality);
 ActionType sample_action(const DecisionContext& decision, std::mt19937& rng);
+void update_intention(CharacterState& state,
+                      const DecisionContext& decision,
+                      ActionType chosen_action);
 std::string decision_summary(const DecisionContext& decision);

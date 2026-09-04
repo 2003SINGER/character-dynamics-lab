@@ -9,10 +9,14 @@ enum class ActionType {
     StudyAtComputer,
     StudyAtDesk,
     RestAtBed,
+    SleepAtBed,
     GoToBathroom,
     GetMeal,
     TurnLightOn,
     TurnLightOff,
+    TurnOffAlarm,
+    OpenCurtain,
+    CloseCurtain,
     Idle
 };
 

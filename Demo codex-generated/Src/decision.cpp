@@ -18,10 +18,20 @@ CandidateAction candidate(ActionType action, double activation, double threshold
 }
 } // namespace
 
-DecisionContext decide(const World& world,
+DecisionContext decide(const Observation& observation,
+                       const World& world,
                        const CharacterState& state,
                        const Personality& personality) {
     DecisionContext decision;
+    decision.world_actions = world.available_actions();
+    decision.known_actions = observation.known_actions;
+    if (state.intention.active && state.intention.remaining_decision_points > 0) {
+        decision.intention_status = "active: " + to_string(state.intention.action)
+                                  + " for " + std::to_string(state.intention.remaining_decision_points)
+                                  + " more decision point(s)";
+    } else {
+        decision.intention_status = "none";
+    }
     const double distraction = state.boredom * 0.65 + personality.procrastination * 0.25
                              + personality.stimulation_seeking * 0.20;
     const double task_drive = state.task_pressure * (0.70 + personality.self_control * 0.80)
@@ -49,42 +59,60 @@ DecisionContext decide(const World& world,
         decision.intention_hint = "use an available device";
     }
 
-    // Room-demo shortcut: derive A directly from W's valid object affordances.
-    // Full research v0 later changes this to the character-known action set A^O.
-    for (ActionType action : world.available_actions()) {
+    // A^W -> A^O -> pi(A): W declares what is legal; persistent O exposes
+    // only the actions afforded by things the character currently knows.
+    for (ActionType action : observation.known_actions) {
+        if (!world.can_execute(action)) {
+            continue;
+        }
+        const double commitment_bonus = state.intention.active
+                                     && state.intention.remaining_decision_points > 0
+                                     && state.intention.action == action ? 0.16 : 0.0;
         switch (action) {
         case ActionType::UsePhone:
-            decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * 0.30 - state.fatigue * 0.12, 0.12, "phone offers immediate stimulation but raises strain"));
+            decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * 0.30 - state.fatigue * 0.12 + commitment_bonus, 0.12, "phone offers immediate stimulation but raises strain"));
             break;
         case ActionType::ShopOnPhone:
-            decision.candidates.push_back(candidate(action, 0.03 + state.purchase_urge * 0.95 + distraction * 0.10, 0.18, "phone supports online shopping when purchase urge activates"));
+            decision.candidates.push_back(candidate(action, 0.03 + state.purchase_urge * 0.95 + distraction * 0.10 + commitment_bonus, 0.18, "phone supports online shopping when purchase urge activates"));
             break;
         case ActionType::UseComputer:
-            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * 0.28, 0.13, "computer offers longer-form stimulation"));
+            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * 0.28 + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
             break;
         case ActionType::StudyAtComputer:
-            decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 - personality.procrastination * 0.16, 0.18, "computer can be used for task progress"));
+            decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 - personality.procrastination * 0.16 + commitment_bonus, 0.18, "computer can be used for task progress"));
             break;
         case ActionType::StudyAtDesk:
-            decision.candidates.push_back(candidate(action, 0.07 + task_drive - state.fatigue * 0.22 - personality.procrastination * 0.14, 0.18, "lit desk and materials support studying"));
+            decision.candidates.push_back(candidate(action, 0.07 + task_drive - state.fatigue * 0.22 - personality.procrastination * 0.14 + commitment_bonus, 0.18, "lit desk and materials support studying"));
             break;
         case ActionType::RestAtBed:
-            decision.candidates.push_back(candidate(action, 0.05 + recovery_drive - state.anxiety * 0.10, 0.16, "bed supports recovery from fatigue and screen strain"));
+            decision.candidates.push_back(candidate(action, 0.05 + recovery_drive - state.anxiety * 0.10 + commitment_bonus, 0.16, "bed supports recovery from fatigue and screen strain"));
+            break;
+        case ActionType::SleepAtBed:
+            decision.candidates.push_back(candidate(action, -0.10 + recovery_drive * 1.15 + state.fatigue * 0.25 + commitment_bonus, 0.58, "bed supports a long sleep interval when fatigue becomes high"));
             break;
         case ActionType::GoToBathroom:
-            decision.candidates.push_back(candidate(action, 0.03 + bathroom_drive, 0.16, "door supports resolving a bodily need"));
+            decision.candidates.push_back(candidate(action, 0.03 + bathroom_drive + commitment_bonus, 0.16, "door supports resolving a bodily need"));
             break;
         case ActionType::GetMeal:
-            decision.candidates.push_back(candidate(action, 0.03 + hunger_drive, 0.16, "door supports getting a meal"));
+            decision.candidates.push_back(candidate(action, 0.03 + hunger_drive + commitment_bonus, 0.16, "door supports getting a meal"));
             break;
         case ActionType::TurnLightOn:
-            decision.candidates.push_back(candidate(action, 0.02 + task_drive * 0.55, 0.20, "light enables currently blocked study actions"));
+            decision.candidates.push_back(candidate(action, 0.02 + task_drive * 0.55 + commitment_bonus, 0.20, "light enables currently blocked study actions"));
             break;
         case ActionType::TurnLightOff:
-            decision.candidates.push_back(candidate(action, 0.02 + recovery_drive * 0.45, 0.20, "darkening the room prepares a rest-oriented context"));
+            decision.candidates.push_back(candidate(action, 0.02 + recovery_drive * 0.45 + commitment_bonus, 0.20, "darkening the room prepares a rest-oriented context"));
+            break;
+        case ActionType::TurnOffAlarm:
+            decision.candidates.push_back(candidate(action, 0.45 + state.anxiety * 0.25 + commitment_bonus, 0.12, "ringing alarm is immediately available to silence"));
+            break;
+        case ActionType::OpenCurtain:
+            decision.candidates.push_back(candidate(action, 0.04 + state.boredom * 0.22 + commitment_bonus, 0.18, "opening curtains restores direct access to outside conditions"));
+            break;
+        case ActionType::CloseCurtain:
+            decision.candidates.push_back(candidate(action, 0.03 + recovery_drive * 0.22 + commitment_bonus, 0.19, "closing curtains can reduce environmental stimulation before rest"));
             break;
         case ActionType::Idle:
-            decision.candidates.push_back(candidate(action, 0.05 + state.boredom * 0.10 - state.task_pressure * 0.06, 0.0, "no focused action wins decisively"));
+            decision.candidates.push_back(candidate(action, 0.05 + state.boredom * 0.10 - state.task_pressure * 0.06 + commitment_bonus, 0.0, "no focused action wins decisively"));
             break;
         }
     }
@@ -116,10 +144,36 @@ ActionType sample_action(const DecisionContext& decision, std::mt19937& rng) {
     return actions[distribution(rng)];
 }
 
+void update_intention(CharacterState& state,
+                      const DecisionContext& decision,
+                      ActionType chosen_action) {
+    const bool study_choice = chosen_action == ActionType::StudyAtDesk
+                           || chosen_action == ActionType::StudyAtComputer;
+    if (study_choice) {
+        state.intention = {true, chosen_action, "continue reducing task pressure", 2};
+        return;
+    }
+    if (!state.intention.active) {
+        return;
+    }
+    --state.intention.remaining_decision_points;
+    if (state.intention.remaining_decision_points <= 0 || chosen_action == ActionType::RestAtBed
+        || chosen_action == ActionType::SleepAtBed
+        || chosen_action == ActionType::GetMeal || chosen_action == ActionType::GoToBathroom) {
+        state.intention = {};
+    }
+}
+
 std::string decision_summary(const DecisionContext& decision) {
     std::ostringstream output;
     output << "D{dominant_need=" << decision.dominant_need
-           << ", intention_hint=" << decision.intention_hint << "}\n";
+           << ", intention_hint=" << decision.intention_hint
+           << ", persistent_intention=" << decision.intention_status << "}\n"
+           << "    A^W=";
+    for (ActionType action : decision.world_actions) output << to_string(action) << ' ';
+    output << "\n    A^O=";
+    for (ActionType action : decision.known_actions) output << to_string(action) << ' ';
+    output << '\n';
     for (const CandidateAction& item : decision.candidates) {
         output << "    " << (item.eligible ? "eligible " : "suppressed")
                << " | pi(" << to_string(item.action) << ")="

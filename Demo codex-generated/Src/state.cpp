@@ -75,6 +75,12 @@ std::string state_summary(const CharacterState& state) {
     append_value(output, "anxiety", state.anxiety); output << ", ";
     append_value(output, "screen_strain", state.screen_strain); output << ", ";
     append_value(output, "purchase_urge", state.purchase_urge);
+    output << ", intention=";
+    if (state.intention.active) {
+        output << to_string(state.intention.action) << "(" << state.intention.remaining_decision_points << ")";
+    } else {
+        output << "none";
+    }
     output << '}';
     return output.str();
 }

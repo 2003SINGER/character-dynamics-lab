@@ -10,6 +10,7 @@
 #include <ostream>
 #include <random>
 #include <sstream>
+#include <utility>
 
 namespace {
 constexpr int kStepsPerRun = 12;
@@ -41,6 +42,7 @@ std::string outcome_summary(const WorldOutcome& outcome) {
     output << "last_outcome{action=" << to_string(outcome.action)
            << ", accepted=" << outcome.accepted
            << ", elapsed_minutes=" << outcome.elapsed_minutes
+           << ", O_frozen=" << outcome.observation_frozen_during_action
            << ", provenance=" << outcome.provenance << '}';
     return output.str();
 }
@@ -88,6 +90,7 @@ std::string Simulation::run_profile(const Personality& personality,
     CharacterState state;
     std::mt19937 rng(seed);
     std::ostringstream output;
+    Observation observation;
     WorldOutcome previous_outcome;
     previous_outcome.action = ActionType::Idle;
     previous_outcome.accepted = true;
@@ -100,11 +103,13 @@ std::string Simulation::run_profile(const Personality& personality,
     }
 
     for (int step = 1; step <= kStepsPerRun; ++step) {
-        const Observation observation = refresh_observation(world, "SceneFilter(room) -> direct observation refresh");
+        observation = refresh_observation(std::move(observation), world, previous_outcome);
         const Appraisal appraisal = appraise(observation, previous_outcome);
         const StateDelta state_delta = update_state(state, appraisal, personality, previous_outcome.elapsed_minutes);
-        const DecisionContext decision = decide(world, state, personality);
+        const DecisionContext decision = decide(observation, world, state, personality);
         const ActionType chosen_action = sample_action(decision, rng);
+        const std::string state_at_decision = state_summary(state);
+        update_intention(state, decision, chosen_action);
         const std::string world_before = world.summary();
         const std::string decision_time = world.time_summary();
         const WorldOutcome outcome = world.execute(chosen_action);
@@ -112,10 +117,13 @@ std::string Simulation::run_profile(const Personality& personality,
         output << "\n[Decision point " << step << " | " << decision_time << "]\n"
                << "  W before action: " << world_before << '\n'
                << "  X input: " << outcome_summary(previous_outcome) << '\n'
+               << (previous_outcome.observation_frozen_during_action
+                       ? "  O refresh boundary: W advanced during sleep while O was frozen; current room perception now reconciles O.\n"
+                       : "")
                << "  " << observation_summary(observation) << '\n'
                << "  " << appraisal_summary(appraisal) << '\n'
                << "  " << state_delta_summary(state_delta) << '\n'
-               << "  " << state_summary(state) << '\n'
+               << "  " << state_at_decision << '\n'
                << "  " << decision_summary(decision)
                << "  chosen A^char: " << to_string(chosen_action) << '\n'
                << "  W settlement: " << (outcome.accepted ? "accepted" : "rejected")
@@ -124,6 +132,7 @@ std::string Simulation::run_profile(const Personality& personality,
             output << " | object=" << outcome.object_id;
         }
         output << '\n';
+        output << "  persistent intention after choice: " << state_summary(state) << '\n';
         for (const std::string& effect : outcome.effects) {
             output << "    effect: " << effect << '\n';
         }

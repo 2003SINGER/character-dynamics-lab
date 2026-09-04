@@ -49,6 +49,14 @@ Appraisal appraise(const Observation& observation, const WorldOutcome& previous_
         appraisal.satisfaction_delta = 0.05;
         appraisal.tags = {"recovery", "task_still_pending"};
         break;
+    case ActionType::SleepAtBed:
+        appraisal.boredom_delta = -0.08;
+        appraisal.fatigue_delta = -0.58;
+        appraisal.screen_strain_delta = -0.30;
+        appraisal.task_pressure_delta = 0.06;
+        appraisal.satisfaction_delta = 0.08;
+        appraisal.tags = {"sleep_recovery", "long_unobserved_interval", "task_still_pending"};
+        break;
     case ActionType::GoToBathroom:
         appraisal.satisfaction_delta = 0.07;
         appraisal.bathroom_urge_delta = -0.62;
@@ -77,7 +85,11 @@ Appraisal appraise(const Observation& observation, const WorldOutcome& previous_
     }
 
     for (const WorldEvent& event : previous_outcome.events) {
-        if (event.id == "message-study-group") {
+        if (event.id == "alarm-rings") {
+            appraisal.boredom_delta += 0.03;
+            appraisal.anxiety_delta += 0.04;
+            appraisal.tags.push_back("alarm_interrupts_room");
+        } else if (event.id == "message-study-group") {
             appraisal.task_pressure_delta += 0.08;
             appraisal.anxiety_delta += 0.05;
             appraisal.tags.push_back("social_task_reminder");
@@ -92,6 +104,13 @@ Appraisal appraise(const Observation& observation, const WorldOutcome& previous_
     }
     if (!observation.light_known_on) {
         appraisal.tags.push_back("room_is_dark");
+    }
+    for (const ObservationFact& update : observation.updates_this_refresh) {
+        if (update.key == "outside.weather" && update.value == "rain"
+            && update.status == KnowledgeStatus::Known) {
+            appraisal.boredom_delta += 0.03;
+            appraisal.tags.push_back("rain_observed_through_window");
+        }
     }
     return appraisal;
 }
