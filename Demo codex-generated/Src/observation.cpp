@@ -78,7 +78,8 @@ bool has_known_fact(const Observation& observation, const std::string& key, cons
 
 Observation refresh_observation(Observation observation,
                                 const World& world,
-                                const WorldOutcome& previous_outcome) {
+                                const WorldOutcome& previous_outcome,
+                                const InformationAccess& access) {
     observation.updates_this_refresh.clear();
     observation.visible_object_labels.clear();
     observation.known_object_ids.clear();
@@ -95,6 +96,10 @@ Observation refresh_observation(Observation observation,
         observation.known_object_ids.push_back(object.id);
         observation.visible_object_labels.push_back(object.label);
         write_fact(observation, "object." + object.id, "present", "direct_room_visual", now);
+        if (access.object_usability_observable) {
+            write_fact(observation, "object." + object.id + ".usable",
+                       object.usable ? "true" : "false", "direct_object_inspection", now);
+        }
     }
     // Objects absent from this refresh remain remembered, but no longer count
     // as current visual knowledge. This is the minimal stale/unknown hook for
@@ -108,8 +113,14 @@ Observation refresh_observation(Observation observation,
             }
         }
     }
-    apply_self_action_feedback(observation, previous_outcome, now);
+    apply_self_action_feedback(observation, previous_outcome, now,
+                               access.self_task_completion_observable);
     write_fact(observation, "room.light", room.light_on ? "on" : "off", "direct_room_visual", now);
+    write_fact(observation, "room.curtain", room.curtain_open ? "open" : "closed", "direct_room_visual", now);
+    if (access.wallet_balance_observable) {
+        write_fact(observation, "wallet.balance", std::to_string(world.wallet),
+                   "direct_wallet_observation", now);
+    }
     const bool alarm_rang = std::any_of(previous_outcome.events.begin(), previous_outcome.events.end(),
         [](const WorldEvent& event) { return event.id == "alarm-rings"; });
     write_fact(observation, "room.alarm", room.alarm_ringing ? "ringing" : "silent",
@@ -151,7 +162,12 @@ Observation refresh_observation(Observation observation,
     for (const Object& object : room.objects) {
         if (!contains_id(observation.known_object_ids, object.id)) continue;
         for (ActionType action : object.affordances) {
-            if (!observation_knows_action(observation, action)) {
+            const bool known_precondition_allows =
+                (action != ActionType::TurnLightOn || has_known_fact(observation, "room.light", "off"))
+                && (action != ActionType::TurnLightOff || has_known_fact(observation, "room.light", "on"))
+                && (action != ActionType::OpenCurtain || has_known_fact(observation, "room.curtain", "closed"))
+                && (action != ActionType::CloseCurtain || has_known_fact(observation, "room.curtain", "open"));
+            if (known_precondition_allows && !observation_knows_action(observation, action)) {
                 observation.known_actions.push_back(action);
             }
         }

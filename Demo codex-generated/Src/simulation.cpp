@@ -180,9 +180,10 @@ StepTrace advance_one_decision(World& world,
                                Observation& observation,
                                WorldOutcome& previous_outcome,
                                std::mt19937& action_rng,
-                               const Personality& personality) {
+                               const Personality& personality,
+                               const InformationAccess& information_access = {}) {
     StepTrace trace;
-    observation = refresh_observation(std::move(observation), world, previous_outcome);
+    observation = refresh_observation(std::move(observation), world, previous_outcome, information_access);
     trace.observation_at_decision = observation;
     trace.decision_time = world.time_summary();
     trace.world_before = world.summary();
@@ -195,7 +196,8 @@ StepTrace advance_one_decision(World& world,
     trace.chosen_action = sample_action(trace.decision, action_rng);
     trace.action_plan = world.expand_action(trace.chosen_action);
     trace.outcome = world.settle(trace.chosen_action);
-    apply_self_action_feedback(observation, trace.outcome, world.time_summary());
+    apply_self_action_feedback(observation, trace.outcome, world.time_summary(),
+                               information_access.self_task_completion_observable);
     update_commitment(state, observation, total_minutes(world.time));
     trace.state_after_settlement = state;
     trace.task_after = coursework_snapshot(world);
@@ -534,6 +536,68 @@ bool Simulation::verify(std::ostream& output) const {
     const bool gates_suspended_return = deferred_return.intention_status.find("defers return") != std::string::npos
         && permitted_return.intention_status.find("permits return") != std::string::npos;
 
+    const auto same_policy = [](const DecisionContext& left, const DecisionContext& right) {
+        if (left.candidates.size() != right.candidates.size()) return false;
+        for (std::size_t index = 0; index < left.candidates.size(); ++index) {
+            if (left.candidates[index].action != right.candidates[index].action
+                || left.candidates[index].probability != right.candidates[index].probability) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    // Research invariants: hidden W changes cannot affect policy before O
+    // changes; observed O changes may affect the candidate support; S must be
+    // consumed by policy; completion relief requires observable feedback.
+    World hidden_wallet_a;
+    World hidden_wallet_b;
+    hidden_wallet_a.wallet = 20;
+    hidden_wallet_b.wallet = 120;
+    const Observation hidden_wallet_o_a = refresh_observation({}, hidden_wallet_a, {});
+    const Observation hidden_wallet_o_b = refresh_observation({}, hidden_wallet_b, {});
+    const DecisionContext hidden_wallet_pi_a = decide(hidden_wallet_o_a, CharacterState{}, first);
+    const DecisionContext hidden_wallet_pi_b = decide(hidden_wallet_o_b, CharacterState{}, first);
+    const bool hidden_w_same_pi = same_policy(hidden_wallet_pi_a, hidden_wallet_pi_b)
+        && hidden_wallet_o_a.known_actions == hidden_wallet_o_b.known_actions;
+
+    World visible_light_off;
+    World visible_light_on;
+    visible_light_off.current_room().light_on = false;
+    visible_light_on.current_room().light_on = true;
+    const Observation visible_o_off = refresh_observation({}, visible_light_off, {});
+    const Observation visible_o_on = refresh_observation({}, visible_light_on, {});
+    const DecisionContext visible_pi_off = decide(visible_o_off, CharacterState{}, first);
+    const DecisionContext visible_pi_on = decide(visible_o_on, CharacterState{}, first);
+    const bool visible_o_can_change_pi = visible_o_off.known_actions != visible_o_on.known_actions
+        && !same_policy(visible_pi_off, visible_pi_on);
+
+    CharacterState state_low_signal;
+    CharacterState state_high_signal;
+    state_low_signal.boredom = 0.0;
+    state_high_signal.boredom = 1.0;
+    const DecisionContext shuffled_s_low = decide(visible_o_off, state_low_signal, first);
+    const DecisionContext shuffled_s_high = decide(visible_o_off, state_high_signal, first);
+    const bool shuffled_s_is_consumed = !same_policy(shuffled_s_low, shuffled_s_high);
+
+    World information_access_world;
+    information_access_world.wallet = 20;
+    const InformationAccess visible_wallet_access{true, true, false};
+    const Observation visible_wallet_observation = refresh_observation(
+        {}, information_access_world, {}, visible_wallet_access);
+    const bool scenario_information_access_is_configurable =
+        has_known_fact(visible_wallet_observation, "wallet.balance", "20");
+
+    const bool light_precondition_filters_known_state =
+        std::find(visible_o_on.known_actions.begin(), visible_o_on.known_actions.end(), ActionType::TurnLightOn)
+            == visible_o_on.known_actions.end();
+    World open_curtain_world;
+    open_curtain_world.current_room().curtain_open = true;
+    const Observation open_curtain_observation = refresh_observation({}, open_curtain_world, {});
+    const bool curtain_precondition_filters_known_state =
+        std::find(open_curtain_observation.known_actions.begin(), open_curtain_observation.known_actions.end(), ActionType::OpenCurtain)
+            == open_curtain_observation.known_actions.end();
+
     output << "verify: reproducible=" << reproducible
            << ", profile_sensitive=" << profile_sensitive
            << ", rejects_illegal_action=" << validates_world
@@ -553,14 +617,23 @@ bool Simulation::verify(std::ostream& output) const {
            << ", completes_task_with_variable_effort=" << completes_task_with_variable_effort
            << ", completion_requires_observable_feedback=" << completion_requires_observable_feedback
            << ", deadline_is_observable=" << deadline_is_observable
-           << ", gates_suspended_return=" << gates_suspended_return << '\n';
+           << ", gates_suspended_return=" << gates_suspended_return
+           << ", hidden_w_same_pi=" << hidden_w_same_pi
+           << ", visible_o_can_change_pi=" << visible_o_can_change_pi
+           << ", shuffled_s_is_consumed=" << shuffled_s_is_consumed
+           << ", scenario_information_access_is_configurable=" << scenario_information_access_is_configurable
+           << ", light_precondition_filters_known_state=" << light_precondition_filters_known_state
+           << ", curtain_precondition_filters_known_state=" << curtain_precondition_filters_known_state << '\n';
     return reproducible && profile_sensitive && validates_world && has_primitives
         && primitives_settle && handles_interruption && completed_task_stays_quiet && deduplicates_actions
         && preserves_rejected_feedback && keeps_broken_object_visible && does_not_leak_hidden_wallet
         && marks_absent_object_stale && reports_applied_delta
         && starts_task_commitment && suspends_for_bodily_need && resumes_task_commitment
         && completes_task_with_variable_effort && completion_requires_observable_feedback
-        && deadline_is_observable && gates_suspended_return;
+        && deadline_is_observable && gates_suspended_return
+        && hidden_w_same_pi && visible_o_can_change_pi && shuffled_s_is_consumed
+        && scenario_information_access_is_configurable
+        && light_precondition_filters_known_state && curtain_precondition_filters_known_state;
 }
 
 std::string Simulation::run_profile(const Personality& personality,

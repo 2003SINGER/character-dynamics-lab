@@ -35,6 +35,14 @@ struct ObservedAction {
     std::string observed_at;
 };
 
+// Scenario-level information policy. False means the fact remains a hidden W
+// condition and can only be learned through an observed feedback path.
+struct InformationAccess {
+    bool self_task_completion_observable = true;
+    bool wallet_balance_observable = false;
+    bool object_usability_observable = false;
+};
+
 // O: a separately stored character-side view, even though this one-room
 // reference refreshes all visible fields deterministically.
 struct Observation {
@@ -53,7 +61,8 @@ const ObservationFact* find_fact(const Observation& observation, const std::stri
 bool has_known_fact(const Observation& observation, const std::string& key, const std::string& value);
 Observation refresh_observation(Observation previous,
                                 const World& world,
-                                const WorldOutcome& previous_outcome);
+                                const WorldOutcome& previous_outcome,
+                                const InformationAccess& access = {});
 // This is the only W-outcome -> O bridge for a character's own completed
 // action. Callers may deliberately withhold completion confirmation to model
 // a task whose actual settlement is not yet observable to the character.

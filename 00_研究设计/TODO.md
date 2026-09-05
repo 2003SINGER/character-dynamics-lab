@@ -96,7 +96,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ~~**T33b**~~ | ✅ **已实现并复核于 `807359b`**：`decision.cpp:86–90` 已将 `StudyFocused`、`StudyHalfhearted`、`StudyAtComputer` 全部计为 `advances_committed_task` | commitment bonus 不会因动作拆分而静默失效；本次复核同时更正此前过期的待办状态 | 已办 |
 | **T34** | 抓下剩余 8 个 demo 包存档 | companion 站点在腐烂，C09（Utility Theory 导论）链接**已实测 404** | 低（有时效） |
 
-| **T42** | **下一代码切片（不启动 E0）**：实现最小 `InformationAccess/PerceptionPolicy`，并补齐 T03 的 O-known/W-authoritative 前置条件分层 | 复核原文指出当前 helper bool 只适合 fixture；需保证只切换信息权限、其余机制与 seed 不变 | 最高 |
+| ~~**T42**~~ | ✅ **已实现于本提交**：最小 `InformationAccess` 已贯穿 observation/simulation；`A^O` 按 O-known 灯/窗帘前置条件筛选，未知钱包/故障仍留给 W 结算；verify 增加四个研究不变量及前置条件反例 | C++ 仍是最小配置结构，不引入 DSL；CTest/`--verify` 全通过。**这只表示 E0 仪器基本可用，不表示 E0 或研究假设已验证** | 已办 |
 
 状态同步约束：凡 TODO 宣称“已实现”或“待修复”的代码项，必须同列提交号、代码位置和可复核验收；实现改动与该行状态变更须在同一提交中完成。若是事后审计发现偏差，明确记录为“复核更正”，不把旧状态继续当作事实。
 
