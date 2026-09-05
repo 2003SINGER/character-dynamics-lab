@@ -16,7 +16,7 @@
 |---|---|---|---|
 | T01 | 待决策 | 明确暂停承诺恢复是软偏好还是硬守卫；明确 started_at 与可知反馈语义；**补上 canceling conditions**（Côté 2013 §11.4.3 明列的 starting/canceling/completing 三类条件之一，当前缺） | 写下接受/拒绝、暂停/恢复、不可见完成的预期；并评估把承诺实现从 weight 调制改为 **rank 调制**是否更贴合语义，见 Q07 |
 | T02 | 待设计 | 选一个 X 意义维度与一个 U_k，分开解释和实际 delta | 同一 action 两个情境有独立 X→S 记录；保留旧映射对照，见 Q02/Q03 |
-| T03 | 部分完成 | v0 已固定 A^O 为角色相信可尝试的候选：由 O 中可见对象及其稳定 affordance 生成；W 只在结算时接受/拒绝，结果经 typed self-feedback 写回 O | 内建 verify 已覆盖“余额不足时 ShopOnPhone 不得从 A^O 消失”和“故障电脑仍可见、尝试后被 W 拒绝”。遮挡、错误 belief、对象实例绑定和一般化反馈策略仍见 Q04/Q05 |
+| T03 | 部分完成 | 保留“稳定 affordance + O 已知前置条件”两层：角色已知的灯/窗帘状态可筛 `A^O`，未知余额、故障和远端服务条件只能由 W 结算；先做最小 predicate 表，不引入 DSL | 当前实现只有可见对象+稳定 affordance，尚未消费 O-known precondition；已有 verify 只覆盖隐藏钱包/故障对象不提前删候选。完成后需加灯/窗帘反例与 hidden-W 不变性测试 |
 | T04 | 待设计 | 给一个自然场景组合写最小 recipe 和对象实例绑定 | Object 基础能力→Scene 组合→W 结算；两同类物品可区别。**affordance 关系**建议按 `(effect, (entity, behavior))` 三元形式化，三分量以角色感知为准、关系存放于角色侧的 `O`，同时兼作规划算子；它不是多角色人际关系，见 Q05。选择条件与保持条件分开声明且放同一处 |
 
 T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插件架构。涉及接口变动时先保留已知基线，再做最小代码切片。[问题详情](未决问题与机制候选.md)是各 Q 编号的唯一说明。
@@ -32,7 +32,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ID | 状态 | 下一动作 | 判定条件 |
 |---|---|---|---|
 | T08 | 待继续 | 围绕 X/U/P/承诺缺口精读，不再泛列相似 Agent | 每篇给输入、状态、更新、P、动作、验证及可迁移边界；接文献库，不另抄全文 |
-| T09 | 待实验设计（E0） | 成对历史：固定 W/O，分别做观察 mask、同 O 下隐藏 W 改变、`S` 置换；另做完成反馈可见/抑制 | 记录 ΔO/X/S/commitment/π；验证未知 W 不进 policy、隐藏完成不直接解除压力。**仅作受控机制验收，不作为行为预测证据**；依赖 Q04/Q07 |
+| T09 | 待实验设计（fixture-ready，非 E0-ready） | 先引入最小 `InformationAccess/PerceptionPolicy` 场景配置，再做成对历史：观察 mask、同 O 下隐藏 W 改变、完成反馈 visible/hidden、`S` 置换 | 配置只改变信息权限，其余机制与 seed 相同；验证 hidden W 不改变观测前 `π`、observable O 可改变 `π`、hidden completion 不解除 commitment、shuffled S 被 policy 消费。**仅作受控机制验收，不作为行为预测证据**；依赖 Q04/Q07 |
 | T10 | 待决策 | 判断单 session 质量是否为首个实验所需 | 如需才设计显式 ActionQuality；不能让 W 暗读 S，见 Q06 |
 | T11 | 待实验设计 | 检验 task_pressure 与残留紧张是否需要拆开 | 完成后是否有数据要求不同恢复；不要仅因可拆就加字段 |
 | T12 | 待实验设计 | 单因素改变 deadline、疲劳、中断或一个 P 维度 | 相同其余条件/seed，保留负结果；不以更多随机人格替代控制 |
@@ -82,9 +82,9 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 
 | ID | 下一动作 | 依据 | 优先级 |
 |---|---|---|---|
-| ~~**T25**~~ | ✅ **已实现于 `807359b`**：轨迹 CSV 落盘每个实际 `ActionType` 的 `p_<action>`，共 16 列 | 65,536 行 smoke 已验证每行概率和为 1、chosen action 概率大于 0；这是记录仪，不是 Replay 或模型比较 | 已办 |
-| ~~**T25b**~~ | ✅ **已实现于 `807359b`**：同时落盘 `known_action_count = |A^O|`，并规定将来**同时报告**按 `|A^O|` 分层的原始 NLL 和 `NLL / ln|A^O|` | `ln|A^O|` 是均匀随机 NLL 基线，不是数学上限；总体平均只能描述数据，不可单独支撑主张。若 `|A^O|=1`，归一化无定义，单列确定性步 | 已办 |
-| ~~**T25c**~~ | ✅ **已实现并验证于 `6be808a`**：每步为 16 个动作落 `known_<action>` support mask | `p_action=0` 可区分 `not_known` 与 `known_but_suppressed`；65,536 行验收中 mask 和均等于 `known_action_count`，chosen action 的 mask 均为 1 | 已办 |
+| ~~**T25**~~ | ✅ **已实现于 `807359b`，历史口径**：轨迹 CSV 落盘每个实际 `ActionType` 的 `p_<action>` | 65,536 行 smoke 仍是记录仪，但其 `A^O` 来自旧的 `W.available_actions()` 语义；当前分支已改为 visible-object affordance，**旧统计对当前模型候选集无效**，不得当作当前分布或实验结果 | 已办（需重标） |
+| ~~**T25b**~~ | ✅ **已实现于 `807359b`，历史口径**：落盘 `known_action_count = |A^O|` 及 NLL 报告规则 | `ln|A^O|` 规则仍保留；旧 9/10/11/13/14 分布只属于历史候选定义。E0 前重跑几十/几百步 smoke 后再记录当前分布 | 已办（需重标） |
+| ~~**T25c**~~ | ✅ **已实现并验证于 `6be808a`，历史口径**：每步落 `known_<action>` support mask | mask 机制可复用，但旧 65,536 行验收不能证明当前 `A^O`；待 T03 的 O-known predicate 落地后重新验收 | 已办（需重标） |
 | **T26** | 接 `ngram_lib`（V1 C48，1762 行 header-only）跑 N=1..5 留一 NLL 作**基线地板** | 其 `Probability_Next_Is(event)` 正好给出完整下一跳分布 | 高 |
 | **T27** | **ΔNLL 阈值必须与候选集规模挂钩**，在真实比较前预先写定，用 Δbits + N-gram 对照（非随机对照） | `ln|A^O|` 是随机基线；不能把它误当 NLL 上限，也不能用大词表直觉设未标定阈值 | 高 |
 | **T28** | 增设**置换 S 对照**：保持 X 与 π 不变，随机置换 S（或换成他人 S），看 NLL 是否显著变差 | 整合后 LLM 先验会从 X 一路传导到 π 并被包装成"角色决策"。此对照**成本极低、杀伤力最大** | 高 |
@@ -95,6 +95,8 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ~~**T33**~~ | ✅ **已实现于 `807359b`**：`StudyAtDesk` 拆为 `StudyFocused` / `StudyHalfhearted`，实际动作数 **15→16** | 后者消费 boredom 与 suspended 决策点，前者消费 satisfaction；π(A) 形式与 softmax 未改。系数只是规则占位，拆分不自动证明 Q01，见 [Q01 拍板块](未决问题与机制候选.md#q01-分段逆映射与量变质变) | 已办 |
 | ~~**T33b**~~ | ✅ **已实现并复核于 `807359b`**：`decision.cpp:86–90` 已将 `StudyFocused`、`StudyHalfhearted`、`StudyAtComputer` 全部计为 `advances_committed_task` | commitment bonus 不会因动作拆分而静默失效；本次复核同时更正此前过期的待办状态 | 已办 |
 | **T34** | 抓下剩余 8 个 demo 包存档 | companion 站点在腐烂，C09（Utility Theory 导论）链接**已实测 404** | 低（有时效） |
+
+| **T42** | **下一代码切片（不启动 E0）**：实现最小 `InformationAccess/PerceptionPolicy`，并补齐 T03 的 O-known/W-authoritative 前置条件分层 | 复核原文指出当前 helper bool 只适合 fixture；需保证只切换信息权限、其余机制与 seed 不变 | 最高 |
 
 状态同步约束：凡 TODO 宣称“已实现”或“待修复”的代码项，必须同列提交号、代码位置和可复核验收；实现改动与该行状态变更须在同一提交中完成。若是事后审计发现偏差，明确记录为“复核更正”，不把旧状态继续当作事实。
 
