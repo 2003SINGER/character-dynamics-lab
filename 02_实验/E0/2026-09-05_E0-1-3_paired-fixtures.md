@@ -10,9 +10,9 @@
 
 | fixture | 干预 | support low / high | max_abs_delta_p | commitment low / high | 判定 |
 |---|---|---|---:|---|---|
-| E0-1 hidden wallet | wallet 20 vs 120，wallet hidden | 相同（13）/相同（13） | 0.000000 | none / none | PASS：hidden-W non-interference |
+| E0-1 hidden wallet | wallet 20 vs 120，wallet hidden | O/X/S/support 全部相同 | 0.000000 | none / none | PASS：hidden-W non-interference（完整链路硬断言） |
 | E0-2 visible wallet | wallet 20 vs 120，wallet visible | 12 / 13（`ShopOnPhone` 仅 high） | 0.085815 | none / none | PASS：visible-O channel connected |
-| E0-3 completion visibility | 同一完成结算，completion visible vs hidden | 10 / 13（学习动作仅 hidden） | 0.131328 | none / active | PASS：feedback visibility channel connected；`O→X→S` 已在此 fixture 中输出 |
+| E0-3 completion visibility | 同一完成结算，completion visible vs hidden | 10 / 13（学习动作仅 hidden） | 0.131328 | none / active | PASS：`task_completed` X 标签、ΔS 方向与 policy 分叉均有硬断言 |
 
 ## E0-1 hidden wallet 逐动作概率
 
@@ -37,6 +37,6 @@
 
 ## 原始 stdout
 
-完整原文见 [2026-09-05_E0-1-3_stdout.txt](2026-09-05_E0-1-3_stdout.txt)。本页只保留结果索引，不把摘要冒充原始输出。
+完整原文见 [2026-09-05_E0-1-3_stdout.txt](2026-09-05_E0-1-3_stdout.txt)。本轮 stdout 新增 `hidden_wallet_same_X/S/support`、`completion_X_assertion` 与 `completion_state_assertion`。
 
 这些是当前确定性规则 fixture 的控制链结果，不证明 `S` 的现实预测价值，也不构成 held-out 行为实验。

@@ -17,6 +17,7 @@
 #include <random>
 #include <sstream>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 namespace {
@@ -697,14 +698,27 @@ bool Simulation::run_e0(std::ostream& output) const {
             || left.known_object_ids != right.known_object_ids
             || left.known_actions != right.known_actions
             || left.facts.size() != right.facts.size()
-            || left.last_self_action.has_action != right.last_self_action.has_action
-            || left.last_self_action.action != right.last_self_action.action) return false;
-        for (std::size_t index = 0; index < left.facts.size(); ++index) {
-            const ObservationFact& a = left.facts[index];
-            const ObservationFact& b = right.facts[index];
-            if (a.key != b.key || a.value != b.value || a.status != b.status
-                || a.source != b.source || a.observed_at != b.observed_at) return false;
-        }
+            || left.updates_this_refresh.size() != right.updates_this_refresh.size()
+            || left.pending_appraisal_updates.size() != right.pending_appraisal_updates.size()) return false;
+        const auto same_fact = [](const ObservationFact& a, const ObservationFact& b) {
+            return a.key == b.key && a.value == b.value && a.status == b.status
+                && a.source == b.source && a.observed_at == b.observed_at;
+        };
+        const auto same_facts = [&same_fact](const auto& a, const auto& b) {
+            for (std::size_t index = 0; index < a.size(); ++index) {
+                if (!same_fact(a[index], b[index])) return false;
+            }
+            return true;
+        };
+        if (!same_facts(left.facts, right.facts)
+            || !same_facts(left.updates_this_refresh, right.updates_this_refresh)
+            || !same_facts(left.pending_appraisal_updates, right.pending_appraisal_updates)) return false;
+        const ObservedAction& a = left.last_self_action;
+        const ObservedAction& b = right.last_self_action;
+        if (a.has_action != b.has_action || a.action != b.action || a.accepted != b.accepted
+            || a.task_id != b.task_id || a.task_completed != b.task_completed
+            || a.outcome_reason != b.outcome_reason || a.source != b.source
+            || a.observed_at != b.observed_at) return false;
         return true;
     };
     const auto emit_pair = [&](const char* fixture,
@@ -745,10 +759,22 @@ bool Simulation::run_e0(std::ostream& output) const {
     const Observation hidden_low_o = refresh_observation({}, hidden_low, {}, hidden_scenario.information_access);
     const Observation hidden_high_o = refresh_observation({}, hidden_high, {}, hidden_scenario.information_access);
     const CharacterState empty_state;
-    const DecisionContext hidden_low_pi = decide(hidden_low_o, empty_state, personality);
-    const DecisionContext hidden_high_pi = decide(hidden_high_o, empty_state, personality);
-    const double hidden_delta = emit_pair("E0-1_hidden_wallet", hidden_low_o, hidden_low_pi, empty_state,
-                                          hidden_high_o, hidden_high_pi, empty_state);
+    const auto evaluate_hidden_wallet = [&personality](Observation observation) {
+        CharacterState state;
+        const Appraisal x = appraise(observation, state, personality);
+        clear_pending_appraisal_updates(observation);
+        const StateUpdate update = update_state(state, x, personality, 0);
+        const DecisionContext policy = decide(observation, state, personality);
+        return std::tuple<Observation, Appraisal, StateUpdate, CharacterState, DecisionContext>{
+            std::move(observation), x, update, state, policy};
+    };
+    auto hidden_low_eval = evaluate_hidden_wallet(hidden_low_o);
+    auto hidden_high_eval = evaluate_hidden_wallet(hidden_high_o);
+    const DecisionContext& hidden_low_pi = std::get<4>(hidden_low_eval);
+    const DecisionContext& hidden_high_pi = std::get<4>(hidden_high_eval);
+    const double hidden_delta = emit_pair("E0-1_hidden_wallet", std::get<0>(hidden_low_eval), hidden_low_pi,
+                                          std::get<3>(hidden_low_eval), std::get<0>(hidden_high_eval), hidden_high_pi,
+                                          std::get<3>(hidden_high_eval));
 
     const ScenarioConfig visible_scenario{{true, true, false}};
     const Observation visible_low_o = refresh_observation({}, hidden_low, {}, visible_scenario.information_access);
@@ -797,6 +823,11 @@ bool Simulation::run_e0(std::ostream& output) const {
            << "completion_hidden_S=" << state_summary(completion_hidden_state) << '\n';
 
     const bool hidden_observation_equal = same_observation(hidden_low_o, hidden_high_o);
+    const bool hidden_appraisal_equal = appraisal_summary(std::get<1>(hidden_low_eval))
+        == appraisal_summary(std::get<1>(hidden_high_eval));
+    const bool hidden_state_equal = state_summary(std::get<3>(hidden_low_eval))
+        == state_summary(std::get<3>(hidden_high_eval));
+    const bool hidden_support_equal = support_summary(hidden_low_o) == support_summary(hidden_high_o);
     const bool visible_wallet_facts_correct = has_known_fact(visible_low_o, "wallet.balance", "20")
         && has_known_fact(visible_high_o, "wallet.balance", "120");
     const bool visible_wallet_support_correct =
@@ -807,15 +838,33 @@ bool Simulation::run_e0(std::ostream& output) const {
     output << "metadata=git_revision=" << CHARACTER_DYNAMICS_GIT_REVISION
            << ",world_seed=42,personality=procrastinating,action_sampling=none"
            << ",hidden_wallet_same_O=" << hidden_observation_equal
+           << ",hidden_wallet_same_X=" << hidden_appraisal_equal
+           << ",hidden_wallet_same_S=" << hidden_state_equal
+           << ",hidden_wallet_same_support=" << hidden_support_equal
            << ",hidden_wallet_same_pi=" << (hidden_delta == 0.0)
            << ",visible_wallet_facts_correct=" << visible_wallet_facts_correct
            << ",visible_wallet_support_correct=" << visible_wallet_support_correct
            << ",visible_wallet_pi_changed=" << (visible_delta > 0.0)
            << ",completion_visibility_changes_state_or_pi=" << (completion_delta > 0.0
                || completion_visible_state.commitment.status != completion_hidden_state.commitment.status) << '\n';
+    const auto has_tag = [](const Appraisal& appraisal, const std::string& tag) {
+        return std::find(appraisal.tags.begin(), appraisal.tags.end(), tag) != appraisal.tags.end();
+    };
+    const bool completion_x_assertion = has_tag(completion_visible_x, "task_completed")
+        && !has_tag(completion_hidden_x, "task_completed");
+    const bool completion_state_assertion = completion_visible_update.applied.task_pressure
+        != completion_hidden_update.applied.task_pressure
+        && completion_visible_update.applied.satisfaction
+            > completion_hidden_update.applied.satisfaction
+        && completion_visible_state.task_pressure < completion_hidden_state.task_pressure
+        && completion_visible_state.satisfaction > completion_hidden_state.satisfaction;
+    output << "completion_X_assertion=" << completion_x_assertion
+           << ",completion_state_assertion=" << completion_state_assertion << '\n';
     return hidden_observation_equal && hidden_delta == 0.0
+        && hidden_appraisal_equal && hidden_state_equal && hidden_support_equal
         && visible_wallet_facts_correct && visible_wallet_support_correct && visible_delta > 0.0
-        && completion_visible_state.commitment.status != completion_hidden_state.commitment.status;
+        && completion_visible_state.commitment.status != completion_hidden_state.commitment.status
+        && completion_x_assertion && completion_state_assertion;
 }
 
 std::string Simulation::run_profile(const Personality& personality,
