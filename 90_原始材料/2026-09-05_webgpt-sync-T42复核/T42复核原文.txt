@@ -1,0 +1,633 @@
+再看完了。这次结论比上一轮复杂一点：
+
+**Luna 确实实现了 T42 的主体，但它现在把 T42 勾成“✅ 已完成”还是早了。准确状态应该是：`部分完成，已有骨架和核心不变量，但 information boundary 还没有闭环。`**
+
+最新 HEAD 是：
+
+```text
+b8581fb feat: implement T42 information boundaries
+```
+
+这次是真改代码了。
+
+### 你刚才问的三项，现在应该这样改表
+
+| 项目                                 | 我现在的判定                         |
+| ---------------------------------- | ------------------------------ |
+| `O-known precondition` 参与 `A^O`    | **部分实现**                       |
+| scenario-level `InformationAccess` | **骨架实现，但还不是真正 scenario-level** |
+| 4 个 research invariant tests       | **基本实现**                       |
+
+---
+
+## 1. `O-known precondition → A^O`：只实现了两类，不是整体完成
+
+现在确实加了：
+
+```cpp
+TurnLightOn  only if O knows light=off
+TurnLightOff only if O knows light=on
+
+OpenCurtain  only if O knows curtain=closed
+CloseCurtain only if O knows curtain=open
+```
+
+这部分是对的。
+
+所以：
+
+```text
+O: light = on
+→ TurnLightOn 不再出现
+```
+
+和：
+
+```text
+O: curtain = open
+→ OpenCurtain 不再出现
+```
+
+已经修了。
+
+但看看 W 真正的 precondition：
+
+```text
+ShopOnPhone:
+    wallet >= 30
+
+StudyFocused/Halfhearted/AtComputer:
+    light_on
+    active_task exists
+
+TurnLightOn/Off:
+    light state
+
+TurnOffAlarm:
+    alarm ringing
+
+Open/CloseCurtain:
+    curtain state
+
+所有 object action:
+    object usable
+```
+
+目前 `A^O` 只消费了：
+
+```text
+light toggle
+curtain toggle
+```
+
+却还没消费：
+
+```text
+Study* ← O-known light
+Study* ← O-known task status
+
+TurnOffAlarm ← O-known alarm
+
+ShopOnPhone ← O-known wallet
+
+Object actions ← O-known usability
+```
+
+举几个现在仍然存在的问题。
+
+### 学习动作
+
+如果：
+
+```text
+O: room.light = off
+```
+
+角色明明知道灯关着。
+
+但当前：
+
+```text
+StudyFocused
+StudyHalfhearted
+StudyAtComputer
+```
+
+依然可以留在 `A^O`。
+
+最后 W 才拒绝。
+
+这就不对，因为这不是 hidden W，是**角色自己已经知道的条件**。
+
+---
+
+### 闹钟
+
+如果：
+
+```text
+O: room.alarm = silent
+```
+
+`TurnOffAlarm` 仍然可能留在 `A^O`。
+
+同样属于已知前置条件没消费。
+
+---
+
+### 钱包
+
+这次 Luna 新增了：
+
+```cpp
+InformationAccess.wallet_balance_observable
+```
+
+开启后会得到：
+
+```text
+O:
+wallet.balance = 20
+```
+
+很好。
+
+但即使角色已经明确知道：
+
+```text
+wallet.balance = 20
+```
+
+`ShopOnPhone` **仍然不会因此从 `A^O` 移除**。
+
+所以现在出现了一个很明显的断层：
+
+```text
+InformationAccess
+→ 钱包进入 O
+
+但是
+
+O wallet
+×
+A^O
+```
+
+没有接上。
+
+这正是我说的：
+
+> **“可观察”实现了，但“已知事实成为 believed precondition”没实现完整。**
+
+---
+
+## 2. `object_usability_observable` 还有一个真 bug
+
+这个比上面更具体。
+
+现在会写：
+
+```text
+object.computer.usable = false
+```
+
+但是下面 stale 逻辑是：
+
+```cpp
+if (fact.key starts_with "object.") {
+    object_id = remainder
+}
+```
+
+于是：
+
+```text
+object.computer
+```
+
+会被解释成：
+
+```text
+computer
+```
+
+正常。
+
+但：
+
+```text
+object.computer.usable
+```
+
+会被解释成：
+
+```text
+computer.usable
+```
+
+然后代码去查：
+
+```text
+known_object_ids contains "computer.usable"?
+```
+
+当然没有。
+
+于是它可能**刚刚被 direct_object_inspection 写成 Known，同一次 refresh 立刻又被 mark stale。**
+
+所以这个一定要修。
+
+不能用：
+
+```text
+所有 object.* 都表示 object existence
+```
+
+这种 prefix 判断。
+
+至少要区分：
+
+```text
+object.<id>
+```
+
+和：
+
+```text
+object.<id>.usable
+```
+
+或者更干净一点，不要靠字符串解析判断 object existence。
+
+---
+
+## 3. `InformationAccess`：结构有了，但我还不接受“scenario-level 已完成”
+
+现在有：
+
+```cpp
+struct InformationAccess {
+    bool self_task_completion_observable = true;
+    bool wallet_balance_observable = false;
+    bool object_usability_observable = false;
+};
+```
+
+而且已经贯穿：
+
+```text
+refresh_observation(...)
+advance_one_decision(...)
+```
+
+这很好。
+
+但正式：
+
+```cpp
+Simulation::run_profile(...)
+Simulation::run_batch(...)
+```
+
+调用 `advance_one_decision()` 时都没有传一个 scenario-owned `InformationAccess`。
+
+它们还是：
+
+```cpp
+advance_one_decision(... personality);
+```
+
+然后吃默认：
+
+```cpp
+InformationAccess{}
+```
+
+所以现在实际上是：
+
+```text
+内部 helper 支持 InformationAccess
+```
+
+还不是：
+
+```text
+Scenario config
+  owns InformationAccess
+       ↓
+whole trajectory
+```
+
+这两者还是有差别。
+
+真正 scenario-level 应该类似：
+
+```cpp
+struct ScenarioConfig {
+    ...
+    InformationAccess information_access;
+};
+```
+
+然后：
+
+```text
+run_profile(config)
+run_batch(config)
+```
+
+整条 trajectory 固定使用这一套。
+
+这样以后 E0 才能真正生成：
+
+```text
+Scenario A:
+seed = 42
+W = same
+P = same
+events = same
+completion observable = true
+
+Scenario B:
+seed = 42
+W = same
+P = same
+events = same
+completion observable = false
+```
+
+而不是 verify 里面手写一次：
+
+```cpp
+InformationAccess visible_wallet_access{...};
+```
+
+所以这里我仍然叫：
+
+**config plumbing implemented，scenario ownership 未完成。**
+
+---
+
+# 4. 四个 research invariant：这次基本算实现了
+
+这个我给 Luna credit。
+
+### ① hidden W → same π
+
+现在有：
+
+```text
+wallet=20
+wallet=120
+```
+
+钱包默认隐藏。
+
+分别构造 O，然后：
+
+```cpp
+same_policy(...)
+```
+
+要求概率分布完全一样。
+
+**对。**
+
+而且这已经直接对应：
+
+$$
+W_a\neq W_b,\quad O_a=O_b,\quad S_a=S_b,\quad P_a=P_b
+\Rightarrow
+\pi_a=\pi_b
+$$
+
+这就是我们要的信息边界 invariant。
+
+---
+
+### ② visible O change → π may change
+
+现在用：
+
+```text
+light off
+vs
+light on
+```
+
+O 不同，`A^O` 不同，π 不同。
+
+**对。**
+
+但名字 `visible_o_can_change_pi` 很好，注意它不是：
+
+> visible O 必须总导致 π 改变。
+
+只是构造一个敏感 fixture 验证通道接通。
+
+---
+
+### ③ hidden completion → no commitment relief
+
+这个之前已有，现在仍然保留：
+
+```text
+W completed
+completion feedback suppressed
+→ O does not know completed
+→ commitment stays Active
+```
+
+**通过。**
+
+---
+
+### ④ shuffled S → π changes
+
+现在其实不是真正的 shuffle：
+
+```cpp
+state_low_signal.boredom = 0
+state_high_signal.boredom = 1
+```
+
+然后检查 π 不同。
+
+所以准确名字应该叫：
+
+```text
+state_input_is_consumed
+```
+
+而不是：
+
+```text
+shuffled_s_is_consumed
+```
+
+但作为**工程 wiring invariant**，它已经完成了我的要求：
+
+> 构造一个 policy 明确敏感的 S fixture，确认 S 不是日志里有、policy 实际没吃。
+
+真正的：
+
+```text
+permuted S across trajectories
+```
+
+留到正式 baseline / E1。
+
+所以这里不必扩大实现。
+
+---
+
+# 5. W 的坏电脑结算我也核了：这一点没有 bug
+
+我刚才特意继续追了。
+
+`World::can_execute()` 看起来没有直接：
+
+```cpp
+object.usable
+```
+
+但：
+
+```cpp
+object_for(action)
+```
+
+最终调用：
+
+```cpp
+Room::object_for()
+```
+
+而它有：
+
+```cpp
+if (object.usable && provides_action(...))
+```
+
+所以 broken computer：
+
+```text
+object.usable=false
+→ object_for=nullptr
+→ can_execute=false
+→ W rejects
+```
+
+这条结算边界是好的。
+
+---
+
+# 6. 所以现在 T42 应该怎么改状态？
+
+我建议 Luna **撤掉现在的“✅ 已实现”**，暂时改成：
+
+```text
+T42 — 部分完成
+
+已完成：
+- InformationAccess 最小结构
+- completion/wallet/usability observation channels
+- light/curtain O-known preconditions
+- hidden-W / visible-O / hidden-completion / S-consumption invariants
+
+未完成：
+- 完整 O-known precondition resolver
+- observed wallet → ShopOnPhone support
+- observed usability → object action support
+- task/light → Study support
+- alarm → TurnOffAlarm support
+- object.* stale parsing bug
+- InformationAccess 进入正式 ScenarioConfig / trajectory
+```
+
+然后**下一提交只补这些，不扩大架构。**
+
+---
+
+# 7. 我建议 Luna 下一刀怎么写
+
+不要搞 DSL。
+
+就写一个很小的：
+
+```cpp
+bool subjective_preconditions_allow(
+    ActionType action,
+    const Observation& observation,
+    const Object& object);
+```
+
+里面逐项：
+
+```text
+TurnLightOn
+→ known light off
+
+TurnLightOff
+→ known light on
+
+OpenCurtain
+→ known curtain closed
+
+CloseCurtain
+→ known curtain open
+
+TurnOffAlarm
+→ known alarm ringing
+
+Study*
+→ if light is Known, require on
+→ if task status is Known, require active
+→ unknown does not reject
+
+ShopOnPhone
+→ if wallet Known, require >=30
+→ unknown does not reject
+
+any object action
+→ if object.usable Known, require true
+→ unknown does not reject
+```
+
+最重要的规则是统一成一句：
+
+> **Known false → remove；Known true → allow；Unknown/Stale → do not smuggle W truth, retain the candidate unless some other known condition forbids it.**
+
+这个语义非常漂亮，也非常适合你们之后写 Methods。
+
+然后把：
+
+```text
+InformationAccess
+```
+
+挂进一个最小：
+
+```cpp
+ScenarioConfig
+```
+
+不要再改大结构。
+
+---
+
+所以这轮最终审核：
+
+**`b8581fb` 不是失败；相反，它已经把 T42 做到了大概 70–80%。四个核心 wiring invariant 基本到位。**
+
+但我**不同意当前 TODO 的“✅ T42 已完成 / E0 仪器基本可用”这么快下结论**。
+
+先补掉：
+
+1. 完整 `O-known precondition`；
+2. `object.*.usable` stale bug；
+3. `InformationAccess` 真正进入 scenario trajectory；
+
+然后我再看一次。
+
+**做完这三项，我大概率就会批准：“T42 complete，E0 instrument ready，可以开始设计/跑 E0。”**

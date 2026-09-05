@@ -299,6 +299,7 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
         const Personality& personality = personalities[personality_index];
         for (unsigned int scenario_seed = 1; scenario_seed <= kBatchScenarioSeedCount; ++scenario_seed) {
             const unsigned int action_seed = action_seed_for(personality_index, scenario_seed);
+            const ScenarioConfig scenario{};
             World world(scenario_seed);
             CharacterState state;
             Observation observation;
@@ -306,7 +307,8 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
             std::mt19937 action_rng(action_seed);
 
             for (int step = 1; step <= kBatchStepsPerRun; ++step) {
-                const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome, action_rng, personality);
+                const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome,
+                                                             action_rng, personality, scenario.information_access);
                 std::ostringstream event_ids;
                 for (std::size_t event_index = 0; event_index < trace.outcome.events.size(); ++event_index) {
                     if (event_index != 0) event_ids << '|';
@@ -597,6 +599,35 @@ bool Simulation::verify(std::ostream& output) const {
     const bool curtain_precondition_filters_known_state =
         std::find(open_curtain_observation.known_actions.begin(), open_curtain_observation.known_actions.end(), ActionType::OpenCurtain)
             == open_curtain_observation.known_actions.end();
+    World dark_room_world;
+    dark_room_world.current_room().light_on = false;
+    const Observation dark_room_observation = refresh_observation({}, dark_room_world, {});
+    const bool study_requires_known_light =
+        std::find(dark_room_observation.known_actions.begin(), dark_room_observation.known_actions.end(), ActionType::StudyFocused)
+            == dark_room_observation.known_actions.end();
+    const bool silent_alarm_filters_action =
+        std::find(visible_o_off.known_actions.begin(), visible_o_off.known_actions.end(), ActionType::TurnOffAlarm)
+            == visible_o_off.known_actions.end();
+    const bool visible_wallet_filters_purchase =
+        std::find(visible_wallet_observation.known_actions.begin(), visible_wallet_observation.known_actions.end(), ActionType::ShopOnPhone)
+            == visible_wallet_observation.known_actions.end();
+    World visibly_broken_world;
+    for (Object& object : visibly_broken_world.current_room().objects) {
+        if (object.id == "computer") object.usable = false;
+    }
+    const InformationAccess visible_object_access{true, false, true};
+    const Observation visibly_broken_observation = refresh_observation({}, visibly_broken_world, {}, visible_object_access);
+    const ObservationFact* visible_usability = find_fact(visibly_broken_observation, "object.computer.usable");
+    const bool visible_usability_filters_action =
+        visible_usability != nullptr && visible_usability->status == KnowledgeStatus::Known
+        && visible_usability->value == "false"
+        && std::find(visibly_broken_observation.known_actions.begin(), visibly_broken_observation.known_actions.end(), ActionType::UseComputer)
+            == visibly_broken_observation.known_actions.end();
+    ScenarioConfig configured_scenario;
+    configured_scenario.information_access.wallet_balance_observable = true;
+    const std::string default_scenario_run = run_profile(first, 20260904U, 0U, false, 2, true);
+    const std::string configured_scenario_run = run_profile(first, 20260904U, 0U, false, 2, true, configured_scenario);
+    const bool scenario_config_reaches_trajectory = default_scenario_run != configured_scenario_run;
 
     output << "verify: reproducible=" << reproducible
            << ", profile_sensitive=" << profile_sensitive
@@ -622,8 +653,13 @@ bool Simulation::verify(std::ostream& output) const {
            << ", visible_o_can_change_pi=" << visible_o_can_change_pi
            << ", shuffled_s_is_consumed=" << shuffled_s_is_consumed
            << ", scenario_information_access_is_configurable=" << scenario_information_access_is_configurable
+           << ", scenario_config_reaches_trajectory=" << scenario_config_reaches_trajectory
            << ", light_precondition_filters_known_state=" << light_precondition_filters_known_state
-           << ", curtain_precondition_filters_known_state=" << curtain_precondition_filters_known_state << '\n';
+           << ", curtain_precondition_filters_known_state=" << curtain_precondition_filters_known_state
+           << ", study_requires_known_light=" << study_requires_known_light
+           << ", silent_alarm_filters_action=" << silent_alarm_filters_action
+           << ", visible_wallet_filters_purchase=" << visible_wallet_filters_purchase
+           << ", visible_usability_filters_action=" << visible_usability_filters_action << '\n';
     return reproducible && profile_sensitive && validates_world && has_primitives
         && primitives_settle && handles_interruption && completed_task_stays_quiet && deduplicates_actions
         && preserves_rejected_feedback && keeps_broken_object_visible && does_not_leak_hidden_wallet
@@ -633,7 +669,10 @@ bool Simulation::verify(std::ostream& output) const {
         && deadline_is_observable && gates_suspended_return
         && hidden_w_same_pi && visible_o_can_change_pi && shuffled_s_is_consumed
         && scenario_information_access_is_configurable
-        && light_precondition_filters_known_state && curtain_precondition_filters_known_state;
+        && scenario_config_reaches_trajectory
+        && light_precondition_filters_known_state && curtain_precondition_filters_known_state
+        && study_requires_known_light && silent_alarm_filters_action
+        && visible_wallet_filters_purchase && visible_usability_filters_action;
 }
 
 std::string Simulation::run_profile(const Personality& personality,
@@ -641,7 +680,8 @@ std::string Simulation::run_profile(const Personality& personality,
                                     unsigned int world_seed,
                                     bool include_header,
                                     int steps_per_run,
-                                    bool verbose_trace) const {
+                                    bool verbose_trace,
+                                    const ScenarioConfig& scenario) const {
     World world(world_seed);
     CharacterState state;
     std::mt19937 rng(action_seed);
@@ -658,7 +698,8 @@ std::string Simulation::run_profile(const Personality& personality,
     for (int step = 1; step <= steps_per_run; ++step) {
         const std::vector<ActionType> world_actions = world.available_actions();
         const bool was_observation_frozen = previous_outcome.observation_frozen_during_action;
-        const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome, rng, personality);
+        const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome,
+                                                     rng, personality, scenario.information_access);
 
         if (verbose_trace) {
             output << "\n[Decision point " << step << " | " << trace.decision_time << "]\n"

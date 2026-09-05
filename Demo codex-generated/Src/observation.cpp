@@ -63,6 +63,63 @@ std::string fact_value(const Observation& observation, const std::string& key) {
     }
     return "unknown";
 }
+
+std::string object_id_from_fact_key(const std::string& key) {
+    constexpr std::string_view prefix = "object.";
+    if (key.rfind(prefix, 0) != 0) return {};
+    const std::string remainder = key.substr(prefix.size());
+    constexpr std::string_view usability_suffix = ".usable";
+    if (remainder.size() > usability_suffix.size()
+        && remainder.compare(remainder.size() - usability_suffix.size(), usability_suffix.size(), usability_suffix) == 0) {
+        return remainder.substr(0, remainder.size() - usability_suffix.size());
+    }
+    return remainder.find('.') == std::string::npos ? remainder : std::string{};
+}
+
+bool known_fact_allows(const Observation& observation,
+                       const std::string& key,
+                       const std::string& allowed_value,
+                       const std::string& forbidden_value = {}) {
+    const ObservationFact* fact = find_fact(observation, key);
+    if (fact == nullptr || fact->status != KnowledgeStatus::Known) return true;
+    if (!forbidden_value.empty() && fact->value == forbidden_value) return false;
+    return fact->value == allowed_value;
+}
+
+bool subjective_preconditions_allow(ActionType action,
+                                    const Observation& observation,
+                                    const Object& object) {
+    const std::string object_usable_key = "object." + object.id + ".usable";
+    if (!known_fact_allows(observation, object_usable_key, "true", "false")) return false;
+    switch (action) {
+    case ActionType::TurnLightOn:
+        return known_fact_allows(observation, "room.light", "off", "on");
+    case ActionType::TurnLightOff:
+        return known_fact_allows(observation, "room.light", "on", "off");
+    case ActionType::OpenCurtain:
+        return known_fact_allows(observation, "room.curtain", "closed", "open");
+    case ActionType::CloseCurtain:
+        return known_fact_allows(observation, "room.curtain", "open", "closed");
+    case ActionType::TurnOffAlarm:
+        return known_fact_allows(observation, "room.alarm", "ringing", "silent");
+    case ActionType::StudyAtComputer:
+    case ActionType::StudyFocused:
+    case ActionType::StudyHalfhearted:
+        return known_fact_allows(observation, "room.light", "on", "off")
+            && known_fact_allows(observation, "task.coursework.status", "active", "completed");
+    case ActionType::ShopOnPhone: {
+        const ObservationFact* wallet = find_fact(observation, "wallet.balance");
+        if (wallet == nullptr || wallet->status != KnowledgeStatus::Known) return true;
+        try {
+            return std::stoi(wallet->value) >= 30;
+        } catch (...) {
+            return true;
+        }
+    }
+    default:
+        return true;
+    }
+}
 } // namespace
 
 const ObservationFact* find_fact(const Observation& observation, const std::string& key) {
@@ -105,9 +162,8 @@ Observation refresh_observation(Observation observation,
     // as current visual knowledge. This is the minimal stale/unknown hook for
     // later movement, occlusion, and dynamically removed objects.
     for (const ObservationFact& fact : observation.facts) {
-        constexpr std::string_view kObjectPrefix = "object.";
-        if (fact.key.rfind(kObjectPrefix, 0) == 0) {
-            const std::string object_id = fact.key.substr(kObjectPrefix.size());
+        const std::string object_id = object_id_from_fact_key(fact.key);
+        if (!object_id.empty()) {
             if (!contains_id(observation.known_object_ids, object_id)) {
                 mark_stale(observation, fact.key);
             }
@@ -162,12 +218,8 @@ Observation refresh_observation(Observation observation,
     for (const Object& object : room.objects) {
         if (!contains_id(observation.known_object_ids, object.id)) continue;
         for (ActionType action : object.affordances) {
-            const bool known_precondition_allows =
-                (action != ActionType::TurnLightOn || has_known_fact(observation, "room.light", "off"))
-                && (action != ActionType::TurnLightOff || has_known_fact(observation, "room.light", "on"))
-                && (action != ActionType::OpenCurtain || has_known_fact(observation, "room.curtain", "closed"))
-                && (action != ActionType::CloseCurtain || has_known_fact(observation, "room.curtain", "open"));
-            if (known_precondition_allows && !observation_knows_action(observation, action)) {
+            if (subjective_preconditions_allow(action, observation, object)
+                && !observation_knows_action(observation, action)) {
                 observation.known_actions.push_back(action);
             }
         }

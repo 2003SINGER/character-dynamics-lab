@@ -16,7 +16,7 @@
 |---|---|---|---|
 | T01 | 待决策 | 明确暂停承诺恢复是软偏好还是硬守卫；明确 started_at 与可知反馈语义；**补上 canceling conditions**（Côté 2013 §11.4.3 明列的 starting/canceling/completing 三类条件之一，当前缺） | 写下接受/拒绝、暂停/恢复、不可见完成的预期；并评估把承诺实现从 weight 调制改为 **rank 调制**是否更贴合语义，见 Q07 |
 | T02 | 待设计 | 选一个 X 意义维度与一个 U_k，分开解释和实际 delta | 同一 action 两个情境有独立 X→S 记录；保留旧映射对照，见 Q02/Q03 |
-| T03 | 部分完成 | 保留“稳定 affordance + O 已知前置条件”两层：角色已知的灯/窗帘状态可筛 `A^O`，未知余额、故障和远端服务条件只能由 W 结算；先做最小 predicate 表，不引入 DSL | 当前实现只有可见对象+稳定 affordance，尚未消费 O-known precondition；已有 verify 只覆盖隐藏钱包/故障对象不提前删候选。完成后需加灯/窗帘反例与 hidden-W 不变性测试 |
+| T03 | **部分完成** | 保留“稳定 affordance + O 已知前置条件”两层：角色已知的灯/窗帘/闹钟/任务/钱包/对象可用性可筛 `A^O`，未知条件只能由 W 结算；采用最小 predicate 表，不引入 DSL | T42 已接通这些已知条件与未知条件的区分；对象错误 belief、遮挡、实例绑定和一般化反馈策略仍见 Q04/Q05 |
 | T04 | 待设计 | 给一个自然场景组合写最小 recipe 和对象实例绑定 | Object 基础能力→Scene 组合→W 结算；两同类物品可区别。**affordance 关系**建议按 `(effect, (entity, behavior))` 三元形式化，三分量以角色感知为准、关系存放于角色侧的 `O`，同时兼作规划算子；它不是多角色人际关系，见 Q05。选择条件与保持条件分开声明且放同一处 |
 
 T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插件架构。涉及接口变动时先保留已知基线，再做最小代码切片。[问题详情](未决问题与机制候选.md)是各 Q 编号的唯一说明。
@@ -96,7 +96,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ~~**T33b**~~ | ✅ **已实现并复核于 `807359b`**：`decision.cpp:86–90` 已将 `StudyFocused`、`StudyHalfhearted`、`StudyAtComputer` 全部计为 `advances_committed_task` | commitment bonus 不会因动作拆分而静默失效；本次复核同时更正此前过期的待办状态 | 已办 |
 | **T34** | 抓下剩余 8 个 demo 包存档 | companion 站点在腐烂，C09（Utility Theory 导论）链接**已实测 404** | 低（有时效） |
 
-| ~~**T42**~~ | ✅ **已实现于本提交**：最小 `InformationAccess` 已贯穿 observation/simulation；`A^O` 按 O-known 灯/窗帘前置条件筛选，未知钱包/故障仍留给 W 结算；verify 增加四个研究不变量及前置条件反例 | C++ 仍是最小配置结构，不引入 DSL；CTest/`--verify` 全通过。**这只表示 E0 仪器基本可用，不表示 E0 或研究假设已验证** | 已办 |
+| **T42** | **部分完成**：本提交补齐主体但暂不宣称 complete | 已实现最小 `InformationAccess` trajectory 配置、O-known 灯/窗帘/闹钟/任务/钱包/对象可用性前置条件、`object.<id>.usable` stale 解析修复，以及四个研究不变量；CTest/`--verify` 全通过 | 尚缺正式成对 E0 scenario fixture、跨 trajectory 的固定 seed/配置导出与研究数据协议；**不表示 E0 或研究假设已验证** |
 
 状态同步约束：凡 TODO 宣称“已实现”或“待修复”的代码项，必须同列提交号、代码位置和可复核验收；实现改动与该行状态变更须在同一提交中完成。若是事后审计发现偏差，明确记录为“复核更正”，不把旧状态继续当作事实。
 
