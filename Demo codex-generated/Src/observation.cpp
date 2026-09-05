@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string_view>
+#include <cstdlib>
 
 namespace {
 const char* to_string(KnowledgeStatus status) {
@@ -108,13 +109,9 @@ bool subjective_preconditions_allow(ActionType action,
         return known_fact_allows(observation, "room.light", "on", "off")
             && known_fact_allows(observation, "task.coursework.status", "active", "completed");
     case ActionType::ShopOnPhone: {
-        const ObservationFact* wallet = find_fact(observation, "wallet.balance");
-        if (wallet == nullptr || wallet->status != KnowledgeStatus::Known) return true;
-        try {
-            return std::stoi(wallet->value) >= 30;
-        } catch (...) {
-            return true;
-        }
+        int wallet_balance = 0;
+        if (!known_int(observation, FactKey::WalletBalance, wallet_balance)) return true;
+        return wallet_balance >= 30;
     }
     default:
         return true;
@@ -131,6 +128,24 @@ const ObservationFact* find_fact(const Observation& observation, const std::stri
 bool has_known_fact(const Observation& observation, const std::string& key, const std::string& value) {
     const ObservationFact* fact = find_fact(observation, key);
     return fact != nullptr && fact->status == KnowledgeStatus::Known && fact->value == value;
+}
+
+bool known_bool(const Observation& observation, const std::string& key, bool& value) {
+    const ObservationFact* fact = find_fact(observation, key);
+    if (fact == nullptr || fact->status != KnowledgeStatus::Known) return false;
+    if (fact->value == "true") { value = true; return true; }
+    if (fact->value == "false") { value = false; return true; }
+    return false;
+}
+
+bool known_int(const Observation& observation, const std::string& key, int& value) {
+    const ObservationFact* fact = find_fact(observation, key);
+    if (fact == nullptr || fact->status != KnowledgeStatus::Known || fact->value.empty()) return false;
+    char* end = nullptr;
+    const long parsed = std::strtol(fact->value.c_str(), &end, 10);
+    if (end == fact->value.c_str() || *end != '\0') return false;
+    value = static_cast<int>(parsed);
+    return true;
 }
 
 Observation refresh_observation(Observation observation,
