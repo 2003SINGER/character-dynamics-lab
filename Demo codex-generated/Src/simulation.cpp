@@ -63,6 +63,18 @@ std::string action_space_summary(const std::vector<ActionType>& world_actions) {
 
 constexpr std::size_t kActionCount = static_cast<std::size_t>(ActionType::Count);
 using ActionProbabilityVector = std::array<double, kActionCount>;
+using ActionSupportVector = std::array<unsigned char, kActionCount>;
+
+ActionSupportVector support_by_action(const DecisionContext& decision) {
+    ActionSupportVector support{};
+    for (ActionType action : decision.known_actions) {
+        if (action == ActionType::Count) {
+            throw std::logic_error("A^O cannot contain ActionType::Count");
+        }
+        support.at(static_cast<std::size_t>(action)) = 1U;
+    }
+    return support;
+}
 
 ActionProbabilityVector probability_by_action(const DecisionContext& decision) {
     ActionProbabilityVector probabilities{};
@@ -76,6 +88,13 @@ void write_action_probability_columns(std::ostream& output, const DecisionContex
     const ActionProbabilityVector probabilities = probability_by_action(decision);
     for (double probability : probabilities) {
         output << ',' << probability;
+    }
+}
+
+void write_action_support_columns(std::ostream& output, const DecisionContext& decision) {
+    const ActionSupportVector support = support_by_action(decision);
+    for (unsigned char known : support) {
+        output << ',' << static_cast<int>(known);
     }
 }
 
@@ -263,6 +282,9 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
 
     trajectories_file << "personality_index,scenario_seed,action_seed,step,decision_time,pre_commitment_status,pre_commitment_task_id,pre_task_effort,pre_task_effort_target,pre_task_status,pre_boredom,pre_fatigue,pre_task_pressure,pre_satisfaction,pre_hunger,pre_bathroom_urge,pre_anxiety,pre_screen_strain,pre_purchase_urge,known_action_count";
     for (std::size_t index = 0; index < kActionCount; ++index) {
+        trajectories_file << ",known_" << to_string(static_cast<ActionType>(index));
+    }
+    for (std::size_t index = 0; index < kActionCount; ++index) {
         trajectories_file << ",p_" << to_string(static_cast<ActionType>(index));
     }
     trajectories_file << ",chosen_action,accepted,elapsed_minutes,event_ids,outcome_task_id,outcome_task_effort_gained,outcome_task_settlement_variation,outcome_task_session_interrupted,post_commitment_status,post_commitment_task_id,post_task_effort,post_task_effort_target,post_task_status,post_wallet,post_unread_messages,post_weather,post_temperature_celsius\n";
@@ -306,6 +328,7 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
                                   << ',' << trace.state_at_decision.screen_strain
                                   << ',' << trace.state_at_decision.purchase_urge
                                   << ',' << trace.decision.known_actions.size();
+                write_action_support_columns(trajectories_file, trace.decision);
                 write_action_probability_columns(trajectories_file, trace.decision);
                 trajectories_file << ',';
                 write_csv_field(trajectories_file, to_string(trace.chosen_action));
