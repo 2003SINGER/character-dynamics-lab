@@ -78,7 +78,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 |---|---|---|---|
 | ~~**T25**~~ | ✅ **已实现于 `807359b`**：轨迹 CSV 落盘每个实际 `ActionType` 的 `p_<action>`，共 16 列 | 65,536 行 smoke 已验证每行概率和为 1、chosen action 概率大于 0；这是记录仪，不是 Replay 或模型比较 | 已办 |
 | ~~**T25b**~~ | ✅ **已实现于 `807359b`**：同时落盘 `known_action_count = |A^O|`，并规定将来**同时报告**按 `|A^O|` 分层的原始 NLL 和 `NLL / ln|A^O|` | `ln|A^O|` 是均匀随机 NLL 基线，不是数学上限；总体平均只能描述数据，不可单独支撑主张。若 `|A^O|=1`，归一化无定义，单列确定性步 | 已办 |
-| ~~**T25c**~~ | ✅ **已验证、待本次提交**：每步为 16 个动作落 `known_<action>` support mask | `p_action=0` 可区分 `not_known` 与 `known_but_suppressed`；65,536 行验收中 mask 和均等于 `known_action_count`，chosen action 的 mask 均为 1 | 已办 |
+| ~~**T25c**~~ | ✅ **已实现并验证于 `6be808a`**：每步为 16 个动作落 `known_<action>` support mask | `p_action=0` 可区分 `not_known` 与 `known_but_suppressed`；65,536 行验收中 mask 和均等于 `known_action_count`，chosen action 的 mask 均为 1 | 已办 |
 | **T26** | 接 `ngram_lib`（V1 C48，1762 行 header-only）跑 N=1..5 留一 NLL 作**基线地板** | 其 `Probability_Next_Is(event)` 正好给出完整下一跳分布 | 高 |
 | **T27** | **ΔNLL 阈值必须与候选集规模挂钩**，在真实比较前预先写定，用 Δbits + N-gram 对照（非随机对照） | `ln|A^O|` 是随机基线；不能把它误当 NLL 上限，也不能用大词表直觉设未标定阈值 | 高 |
 | **T28** | 增设**置换 S 对照**：保持 X 与 π 不变，随机置换 S（或换成他人 S），看 NLL 是否显著变差 | 整合后 LLM 先验会从 X 一路传导到 π 并被包装成"角色决策"。此对照**成本极低、杀伤力最大** | 高 |
