@@ -241,11 +241,18 @@ void apply_self_action_feedback(Observation& observation,
     if (!outcome.accepted || outcome.task_id.empty()) return;
 
     const std::string status_key = "task." + outcome.task_id + ".status";
+    const std::size_t pending_start = observation.updates_this_refresh.size();
     if (outcome.task_completed && completion_is_observable) {
         write_fact(observation, status_key, "completed", "self_action_completion_feedback", observed_at);
     } else {
         write_fact(observation, status_key, "active", "self_action_progress_feedback", observed_at);
     }
+    // Preserve only semantic feedback created by this call for the next X
+    // evaluation. refresh_observation clears the per-refresh list, so without
+    // this handoff a completion delta can be lost before appraisal consumes it.
+    observation.pending_appraisal_updates.insert(observation.pending_appraisal_updates.end(),
+        observation.updates_this_refresh.begin() + static_cast<std::ptrdiff_t>(pending_start),
+        observation.updates_this_refresh.end());
 }
 
 bool observation_knows_action(const Observation& observation, ActionType action) {

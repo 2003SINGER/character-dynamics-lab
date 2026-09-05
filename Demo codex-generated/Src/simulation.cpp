@@ -692,6 +692,21 @@ bool Simulation::run_e0(std::ostream& output) const {
         }
         return result.str();
     };
+    const auto same_observation = [](const Observation& left, const Observation& right) {
+        if (left.visible_object_labels != right.visible_object_labels
+            || left.known_object_ids != right.known_object_ids
+            || left.known_actions != right.known_actions
+            || left.facts.size() != right.facts.size()
+            || left.last_self_action.has_action != right.last_self_action.has_action
+            || left.last_self_action.action != right.last_self_action.action) return false;
+        for (std::size_t index = 0; index < left.facts.size(); ++index) {
+            const ObservationFact& a = left.facts[index];
+            const ObservationFact& b = right.facts[index];
+            if (a.key != b.key || a.value != b.value || a.status != b.status
+                || a.source != b.source || a.observed_at != b.observed_at) return false;
+        }
+        return true;
+    };
     const auto emit_pair = [&](const char* fixture,
                                const Observation& low_observation,
                                const DecisionContext& low_policy,
@@ -763,19 +778,43 @@ bool Simulation::run_e0(std::ostream& output) const {
                                                hidden_scenario.information_access);
     completion_hidden_o = refresh_observation(std::move(completion_hidden_o), completion_hidden_world, {},
                                               hidden_scenario.information_access);
+    const Appraisal completion_visible_x = appraise(completion_visible_o, completion_visible_state, personality);
+    const Appraisal completion_hidden_x = appraise(completion_hidden_o, completion_hidden_state, personality);
+    const StateUpdate completion_visible_update = update_state(completion_visible_state, completion_visible_x, personality,
+                                                               visible_completion.elapsed_minutes);
+    const StateUpdate completion_hidden_update = update_state(completion_hidden_state, completion_hidden_x, personality,
+                                                              hidden_completion.elapsed_minutes);
     const DecisionContext completion_visible_pi = decide(completion_visible_o, completion_visible_state, personality);
     const DecisionContext completion_hidden_pi = decide(completion_hidden_o, completion_hidden_state, personality);
     const double completion_delta = emit_pair("E0-3_completion_visibility", completion_visible_o, completion_visible_pi,
                                               completion_visible_state, completion_hidden_o, completion_hidden_pi,
                                               completion_hidden_state);
+    output << "completion_visible_X=" << appraisal_summary(completion_visible_x)
+           << ",completion_hidden_X=" << appraisal_summary(completion_hidden_x) << '\n'
+           << "completion_visible_delta_S=" << state_delta_summary(completion_visible_update.applied)
+           << ",completion_hidden_delta_S=" << state_delta_summary(completion_hidden_update.applied) << '\n'
+           << "completion_visible_S=" << state_summary(completion_visible_state) << '\n'
+           << "completion_hidden_S=" << state_summary(completion_hidden_state) << '\n';
 
+    const bool hidden_observation_equal = same_observation(hidden_low_o, hidden_high_o);
+    const bool visible_wallet_facts_correct = has_known_fact(visible_low_o, "wallet.balance", "20")
+        && has_known_fact(visible_high_o, "wallet.balance", "120");
+    const bool visible_wallet_support_correct =
+        std::find(visible_low_o.known_actions.begin(), visible_low_o.known_actions.end(), ActionType::ShopOnPhone)
+            == visible_low_o.known_actions.end()
+        && std::find(visible_high_o.known_actions.begin(), visible_high_o.known_actions.end(), ActionType::ShopOnPhone)
+            != visible_high_o.known_actions.end();
     output << "metadata=git_revision=" << CHARACTER_DYNAMICS_GIT_REVISION
            << ",world_seed=42,personality=procrastinating,action_sampling=none"
+           << ",hidden_wallet_same_O=" << hidden_observation_equal
            << ",hidden_wallet_same_pi=" << (hidden_delta == 0.0)
+           << ",visible_wallet_facts_correct=" << visible_wallet_facts_correct
+           << ",visible_wallet_support_correct=" << visible_wallet_support_correct
            << ",visible_wallet_pi_changed=" << (visible_delta > 0.0)
            << ",completion_visibility_changes_state_or_pi=" << (completion_delta > 0.0
                || completion_visible_state.commitment.status != completion_hidden_state.commitment.status) << '\n';
-    return hidden_delta == 0.0 && visible_delta > 0.0
+    return hidden_observation_equal && hidden_delta == 0.0
+        && visible_wallet_facts_correct && visible_wallet_support_correct && visible_delta > 0.0
         && completion_visible_state.commitment.status != completion_hidden_state.commitment.status;
 }
 

@@ -1,0 +1,398 @@
+看完了。**这次确实有结果了，而且 E0-1/2/3 的数值方向都对。**但更重要的是：这次 E0 真把一个之前没发现的 **`O → X → S` 时序 bug** 暴露出来了，所以我现在不会让 Luna 继续往历史干预扩。
+
+当前 `webgpt-sync` HEAD：
+
+```text
+775a9ce  feat: archive E0 paired fixture results
+```
+
+前一提交：
+
+```text
+752fbcc  feat: add paired E0 intervention fixtures
+```
+
+## 先看实际结果
+
+归档在：
+
+```text
+02_实验/E0/2026-09-05_E0-1-3_paired-fixtures.md
+```
+
+| Fixture | 干预                          | support |     max |Δp| | commitment    | 判定        |
+| ------- | --------------------------- | ------: | -----------: | ------------- | --------- |
+| E0-1    | wallet 20 vs 120，隐藏         | 13 / 13 | **0.000000** | none / none   | ✅         |
+| E0-2    | wallet 20 vs 120，可见         | 12 / 13 | **0.085815** | none / none   | ✅         |
+| E0-3    | completion visible / hidden | 10 / 13 | **0.121125** | none / active | ✅，但只是部分链路 |
+
+E0-1 很漂亮：
+
+$$
+W_{20}\neq W_{120},\qquad
+\max_a|\pi_{20}(a)-\pi_{120}(a)|=0
+$$
+
+而且逐动作概率真的全部一致。例如：
+
+```text
+UsePhone        0.138442 / 0.138442
+ShopOnPhone     0.085815 / 0.085815
+StudyFocused    0.103952 / 0.103952
+Idle            0.076976 / 0.076976
+...
+```
+
+所以当前实现至少证明：
+
+> **隐藏 wallet 值没有泄漏进当前 policy。**
+
+E0-2 正好构成镜像：
+
+```text
+wallet hidden:
+20 vs 120
+→ support same
+→ π same
+
+wallet visible:
+20 vs 120
+→ ShopOnPhone 只在 120 一侧
+→ support 12 vs 13
+→ max |Δp| = 0.085815
+```
+
+这组 intervention 的结构是对的。
+
+E0-3 也出现了预期分叉：
+
+```text
+W:
+两边都是同一次 StudyFocused 后 coursework 真正完成
+
+visible:
+O knows completed
+→ commitment = none
+→ Study* 从 A^O 删除
+→ support = 10
+
+hidden:
+O still says active
+→ commitment = active
+→ Study* 仍可尝试
+→ support = 13
+```
+
+于是：
+
+$$
+\max |\Delta p|=0.121125
+$$
+
+从 **W → O/commitment → A^O → π** 这一部分来说，它是通过的。
+
+---
+
+# 但是：E0 真发现问题了
+
+这是这一轮最重要的东西。
+
+正常 `advance_one_decision()` 在行动结算后做：
+
+```cpp
+apply_self_action_feedback(observation, trace.outcome, ...);
+update_commitment(...);
+```
+
+假设任务完成，这时候 O 里产生：
+
+```text
+task.coursework.status:
+active → completed
+```
+
+也就是一个真正的：
+
+$$
+\Delta O
+$$
+
+而 `appraise()` 明明专门写了：
+
+```cpp
+if task.coursework.status == completed:
+    task_pressure_delta -= 0.85
+    anxiety_delta      -= 0.55
+    satisfaction_delta += 0.32
+```
+
+也就是说设计上应该：
+
+```text
+observed completion
+      ↓
+ΔO: active → completed
+      ↓
+X: task_completed
+      ↓
+S:
+task pressure ↓
+anxiety ↓
+satisfaction ↑
+```
+
+**但目前正常 trajectory 很可能吃不到这个 ΔO。**
+
+原因是：
+
+```text
+step t settlement
+↓
+apply_self_action_feedback()
+↓
+updates_this_refresh 里写入 completed
+↓
+返回
+```
+
+到了下一 decision point：
+
+```cpp
+refresh_observation(...)
+```
+
+一开头就是：
+
+```cpp
+observation.updates_this_refresh.clear();
+```
+
+然后又对同一个 `previous_outcome` 调：
+
+```cpp
+apply_self_action_feedback(...)
+```
+
+但此时：
+
+```text
+task.status 已经是 completed
+```
+
+所以 `write_fact()` 判断：
+
+```text
+没有 semantic change
+```
+
+不会重新加入：
+
+```text
+updates_this_refresh
+```
+
+结果就是：
+
+```text
+真正的 completion ΔO
+产生了
+↓
+还没进入 X
+↓
+下一轮 refresh 清掉了
+```
+
+而 `appraise()` 后面依赖的：
+
+```cpp
+updates_this_refresh
+pending_appraisal_updates
+```
+
+里面没有它。
+
+### 所以 completion 的特殊 X→S 反应可能根本没发生。
+
+这不是 E0 的失败。
+
+**这恰恰是 E0 应该找到的 wiring bug。**
+
+---
+
+# 为什么当前 E0-3 没发现它？
+
+因为 E0-3 没走完整正常链。
+
+它现在手动：
+
+```cpp
+apply_self_action_feedback(... true);
+apply_self_action_feedback(... false);
+
+update_commitment(...);
+
+refresh_observation(...);
+
+decide(...);
+```
+
+但是没有：
+
+```text
+appraise
+↓
+update_state
+↓
+decide
+```
+
+所以它目前验证的是：
+
+$$
+completion\ visibility
+\rightarrow
+O
+\rightarrow
+commitment/A^O
+\rightarrow
+\pi
+$$
+
+而没有验证：
+
+$$
+completion\ visibility
+\rightarrow
+\Delta O
+\rightarrow
+X
+\rightarrow
+S
+\rightarrow
+\pi
+$$
+
+偏偏这才是我们架构里非常重要的一段。
+
+因此文档里的：
+
+> `PASS：feedback visibility channel connected`
+
+可以保留。
+
+但不能升级成：
+
+> `O→X→S completion chain verified`
+
+目前没有。
+
+---
+
+# 还有两个较小但必须修的 E0 验收漏洞
+
+第一，E0-1 现在输出了 support，但 **PASS 条件没有检查 support 相同**。
+
+它最后主要检查：
+
+```cpp
+hidden_delta == 0.0
+```
+
+这是不够的。
+
+因为完全可能：
+
+```text
+hidden W 偷偷让某个 action 从 A^O 消失
+```
+
+但那个 action 本来：
+
+```text
+p = 0
+```
+
+那么：
+
+$$
+\max|\Delta p|=0
+$$
+
+仍然成立。
+
+测试就会假 PASS。
+
+所以 E0-1 必须同时断言：
+
+$$
+O_{\text{low}}=O_{\text{high}}
+$$
+
+$$
+A^O_{\text{low}}=A^O_{\text{high}}
+$$
+
+$$
+\pi_{\text{low}}=\pi_{\text{high}}
+$$
+
+而且现在还只比较 support，没有比较**完整 O**。TODO 自己写的也是：
+
+> 相同 O/action support/π
+
+那就真的测完整 O，不能只测 policy。
+
+第二，实际结果虽然归档了，但现在只有：
+
+```text
+paired-fixtures.md
+README.md
+```
+
+所谓“原始 stdout”其实只是：
+
+> **stdout 摘要**
+
+E0-2、E0-3 每个动作的完整概率虽然程序会打印，但没有原样保存。
+
+研究 provenance 最好再放一个：
+
+```text
+02_实验/E0/
+2026-09-05_E0-1-3_stdout.txt
+```
+
+原封不动保存命令输出。
+
+---
+
+# 所以我现在的 E0 判定
+
+不是：
+
+> “E0 三组全部完成，可以继续下一实验。”
+
+而是：
+
+| 层                                 | 状态                                   |
+| --------------------------------- | ------------------------------------ |
+| hidden W → O 边界                   | ⚠️ 数值结果正确，但需补完整 O/support assert     |
+| visible W→O → A^O                 | ✅ E0-2 已显示预期镜像                       |
+| completion visibility → O         | ✅                                    |
+| O → commitment                    | ✅                                    |
+| O → A^O                           | ✅                                    |
+| commitment/A^O → π                | ✅                                    |
+| **completion ΔO → X → numeric S** | **❌ 尚未真正验收，并发现正常 trajectory 可能丢 ΔO** |
+| raw result provenance             | ⚠️ 有 summary，无完整 stdout              |
+
+所以 Luna 下一轮**不要做 history intervention，更不要碰正式行为实验**。只收掉 E0 暴露的这个 bug：
+
+1. 让 post-settlement self-feedback 产生的 semantic `ΔO` **保留到下一次 appraisal**，最小做法可以把这部分新 updates 放进 `pending_appraisal_updates`，但不要把本轮旧 updates 一起重复塞进去。
+2. E0-3 改成真正走 `InformationAccess → refresh/feedback → appraisal → update_state → decide`，并输出 visible/hidden 的 `X tags`、`ΔS`、最终 S、commitment、support、π。
+3. E0-1 增加 **完整 O equality + support equality** 的硬断言，不能只看 `max_abs_delta_p=0`。
+4. E0-2 明确 assert `wallet=20/120` 已进入 O，以及 `ShopOnPhone` low absent / high present。
+5. 保存完整 raw stdout，而不是只有人工整理摘要。
+
+这轮反而让我对 E0 的用途更确定了：**第一批结果不是在“证明我们的模型”，而是在开始真正攻击自己的实现。现在已经攻击出了一个真实的 `ΔO → X` 时序漏洞。**
+
+**先修这个；暂时仍然不要 merge `main`。**
