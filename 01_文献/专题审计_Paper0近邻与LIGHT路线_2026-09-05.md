@@ -12,11 +12,19 @@
 
 这只说明它是**候选**，并不说明可直接形成 Paper-0 数据。T0c 只抽 30–50 条，逐条恢复 actor、turn、persona、当前世界、过往记录、真实动作与候选集；关键门槛是能否以角色为中心重建 `O`、不使用未来信息，并先检查物理 action 的实际长度。审计失败即停止，不训练、不为适配数据重写 ontology；通过后才讨论人工 replay。
 
+## OPeRA：优先于 LIGHT 的 T0d 准入审计
+
+[OPeRA ACL 2026 官方页面](https://aclanthology.org/2026.acl-long.2033/)报告其从人类 persona、history 与 observation 预测下一行动；页面摘要中的规模数字（51 users、692 sessions、28,904 observation–action pairs、604 rationales，以及过滤后的 527 sessions/5,856 pairs）在本项目中先作为**官方但待独立逐项复核**的线索。它是候选人类轨迹来源，但不能据此宣称持久 `S` 的充分性/必要性已被先例覆盖。
+
+T0d 只抽 30–50 个 session，逐项审计 session 长度、动作 ontology/click subtype、user grouping、observation 完整性、rationale 时间位置、split 与未来泄漏，并确认 finite candidate/ranking/NLL 可计算。动作不是独立样本，后续统计须按 session/user 聚类；未通过则保留负结果，不训练、不重写 ontology。
+
 ## 近邻的职责边界
 
 | 近邻 | 当前可确认的关系 | 对 Paper-0 的动作 |
 |---|---|---|
-| LIGHT | 世界/动作/下一步预测的外部数据候选 | 走 T0c 数据准入 |
+| OPeRA | 人类 persona/history/observation→next action 候选 | **先走 T0d 数据准入**；不等于验证 `S` |
+| LIGHT | 世界/动作/下一步预测的外部数据候选 | 走 T0c 数据准入，优先级低于 OPeRA |
+| [PersonaX](https://aclanthology.org/2025.findings-acl.300/) | 官方论文涉及动态 persona 与行为/对话一致性；需逐项核对其 state、更新源与评测是否等价 | 作为高风险近邻，后续按 13 维审计，不作裸判重 |
 | [PersonaForge](https://aclanthology.org/2026.findings-acl.386/) | 官方摘要称三层人格和双过程，用于长对话一致性；威胁“动态 state”泛化新颖性 | 后续逐项读实现，不能以概念名判重 |
 | [ThinkPersona](https://aclanthology.org/2026.acl-long.449/) | 官方摘要称 persona graph 与角色扮演任务 | 结构化 history 应成为强基线，不能只比弱摘要 |
 | [AdaMARP](https://aclanthology.org/2026.findings-acl.1563/) | 官方摘要涉及多主体管理、thought/action/environment/speech 交织 | 属未来多角色/Scene 分支，不挤进 Paper-0 |
