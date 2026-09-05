@@ -21,7 +21,7 @@ W → O → X → S → D → π(A^char) → CharacterActionPlan[a^world...] →
 - 每次选择的 `A^char` 由 W 自行展开为 typed `CharacterActionPlan`，其中含 `set activity / increment counter / adjust value / set room flag / advance time` 等 `a^world`；调用方不能提交 primitive 让 W 执行。日志会并列打印 W 生成的计划 primitive 与实际结算 primitive，例如睡眠被冷醒后时间 primitive 会缩短；
 - `X` 是 `(ΔO, O, old S, P) → Appraisal` 的可替换小函数；它不直接读取原始 `WorldOutcome`。S 包含无聊、疲劳、任务压力、满意度、饥饿、如厕需求、焦虑、屏幕疲劳、购买欲与任务绑定的 `TaskCommitment`；学习 action 仅代表一次 session，W 以连续 effort、时长与可复现的小幅种子扰动结算任务推进。截止时间先由 W 产生事件、再经 O 的任务字段进入 X；
 - 打印动作前后 W、O、X 输入、X、requested/applied StateDelta 与 S、D 的 activation/threshold/概率、世界结算、外部事件与来源；
-- 不实现 LLM、UI、异步、玩家可见延迟、多角色、P 学习、真正的 O 信息差或回放评测。
+- 不实现 LLM、UI、异步、玩家可见延迟、多角色、P 学习或研究用回放评测。已有睡眠/温感/窗帘的局部 O 信息差演示，但尚无正式信息干预实验。
 
 ## 阅读顺序
 
@@ -30,7 +30,9 @@ W → O → X → S → D → π(A^char) → CharacterActionPlan[a^world...] →
 3. `Inc/simulation_time.h`、`Inc/object.h`、`Inc/scene.h`：时间、物品 affordance 与房间局部状态；
 4. `Inc/*.h`：其余每个量的接口和所有权；
 5. `Src/world.cpp`、`Src/decision.cpp`：世界结算与动作分布；
-6. `Src/appraisal.cpp`、`Src/state.cpp`：语义解释与状态动力学怎样分开。
+6. `Src/appraisal.cpp`、`Src/state.cpp`：当前规则 Appraisal 与状态更新的调用边界；Appraisal 仍携带直接 delta，并非已实现完整语义 X。
+
+完整机制与本实现的差距统一见[当前实现进度](../00_研究设计/当前实现进度.md)和[未决问题](../00_研究设计/未决问题与机制候选.md)。本页维护构建、运行和源码导航，不另列研究 TODO。
 
 ## 当前代码的边界
 

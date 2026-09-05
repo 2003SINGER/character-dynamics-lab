@@ -8,13 +8,13 @@
 ## First Read
 
 - Read `README.md` first.
-- Then read `00_研究设计\前台问题与候选创新.md` for the current research frame and evidence boundaries.
+- Then read `00_研究设计\README.md` and follow its ownership routing: full mechanism, research questions, open questions, TODO, and implementation status each have one owner.
 - For related work, read `01_文献\README.md` before making novelty or gap claims.
 - For origin and evidence boundaries, read `90_原始材料\2026-09-01_动态人物世界模拟探索\阅读判断.md`.
 
 ## Boundaries
 
-- A world with objects, legal actions, state transitions and information masks is a candidate experimental boundary, not a completed engine.
+- The executable reference demo is an interface/stress-test artifact, not evidence that the full mechanism or a research hypothesis is validated. Check `00_研究设计\当前实现进度.md` for the code baseline and limitations.
 - Do not claim a psychological mechanism, literature gap, benchmark, novelty, training result or publication potential without fresh verification.
 - Keep research question, validation engineering and optional game implementation distinct.
 - Preserve raw dialogue and do not overwrite it; user messages are first-party direction, model responses are leads only.
