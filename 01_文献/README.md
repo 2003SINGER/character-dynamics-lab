@@ -7,6 +7,8 @@
 
 ## 检索原则
 
+针对值域逆映射/阶段响应、低耦合更新和 Object—Scene 动作所有权的当前定向核读见：[三项 TODO 与机制修改方案](专题核读_三项TODO与机制修改方案_2026-09-05.md)。它核对 FAtiMA-PSI、Two Sides of Appraisal、Temporal Causal Network 与 Hierarchical State Space 的相关方法及证据边界；不是全库重新精读。非线性与阈值已有直接先例，具体分区作为本项目可比较假设保留。
+
 本库围绕完整研究链而建，不把项目缩写为泛泛的 persona 或 role-playing：
 
 ```text
