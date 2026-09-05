@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.20)
 
 project(CharacterDynamicsReference LANGUAGES CXX)
 
+set(CHARACTER_DYNAMICS_GIT_REVISION "" CACHE STRING "Revision recorded in generated experiment provenance")
 find_package(Git QUIET)
-if(GIT_FOUND)
+if(NOT CHARACTER_DYNAMICS_GIT_REVISION AND GIT_FOUND)
     execute_process(
         COMMAND "${GIT_EXECUTABLE}" -C "${CMAKE_CURRENT_SOURCE_DIR}" rev-parse --short HEAD
         OUTPUT_VARIABLE CHARACTER_DYNAMICS_GIT_REVISION

@@ -1,0 +1,1071 @@
+我把最新 `webgpt-sync@b571e88` 的主要 C++ 又从代码结构角度审了一遍。先回答你最关心的两个问题：
+
+> **代码不是“AI 屎山”，但已经开始出现 AI 连续补丁式开发的典型技术债。**
+>
+> **而你现在确实在做科研工作，但准确说还处于“研究问题形成 + 测量仪器构建 + pilot”的阶段，还没有走到能靠结果证明研究命题的阶段。**
+
+这两个其实是同一个问题：你之前不敢碰实验，于是整个项目自然向“机制设计得越来越完整”倾斜。现在该做的不是推翻机制，而是**把代码从“机制 demo”整理成“实验仪器”，然后逼自己跨进独立证据阶段。**
+
+---
+
+# 一、代码到底有没有 AI 屎山？
+
+## 没有到“屎山”的程度
+
+目前最重要的结构其实是好的：
+
+```text
+World
+  ↓
+Observation
+  ↓
+Appraisal
+  ↓
+State
+  ↓
+Decision
+  ↓
+World settlement
+```
+
+而且不是只在文档里分层，代码也真的有：
+
+```text
+world.cpp
+observation.cpp
+appraisal.cpp
+state.cpp
+decision.cpp
+```
+
+尤其这几个边界我认为质量不错：
+
+* `W` 最终负责 legality / settlement；
+* `O` 有 `Known / Stale / Unknown`；
+* `ObservationFact` 有 `source / observed_at`；
+* hidden W 已经不能直接删 `A^O`；
+* `WorldOutcome → O → commitment`，而不是 W 直接写心理；
+* `StateDelta` 分 requested / applied；
+* `π(A)` 能完整记录，而不是只存 sampled action；
+* random seed、world seed、git revision 都开始显式记录。
+
+这些是**研究代码真正有用的工程特性**，不是花架子。
+
+---
+
+# 二、但已经有一个非常明显的“大胖文件”
+
+最明显的是：
+
+```text
+simulation.cpp
+≈ 54 KB
+```
+
+它现在同时负责：
+
+```text
+正常 runtime
+StepTrace
+advance_one_decision
+persona fixture
+batch generation
+CSV serialization
+run directory
+65k smoke
+所有 verify 测试
+E0 实验
+E0 比较函数
+experiment stdout
+run_profile
+```
+
+这就是当前最大的 AI 技术债。
+
+AI 很容易形成这种代码：
+
+> “发现一个问题 → 不敢碰已有结构 → 在已有大函数下面继续加一个 helper / bool / fixture。”
+
+一次两次没事。
+
+现在已经到了：
+
+```cpp
+bool Simulation::verify(...)
+```
+
+里面几十个：
+
+```cpp
+const bool xxx = ...
+```
+
+最后：
+
+```cpp
+return a && b && c && d && e && f ...
+```
+
+这部分我明确判：
+
+> **应该重构。**
+
+不是为了代码优雅。
+
+而是因为它已经开始影响**实验可信度**。
+
+刚才那个 `ΔO → X → S` bug 为什么这么晚才发现？
+
+就是因为：
+
+```text
+runtime
+测试
+fixture
+实验
+```
+
+没有使用完全相同的 pipeline。
+
+E0-3 手工拼了一套路径，所以第一次漏掉了正常 trajectory 的时序问题。
+
+这是研究代码里比“写得丑”严重得多的问题。
+
+---
+
+# 三、我认为实验前最值得做的重构只有 4 刀
+
+不是大重构。
+
+更不是：
+
+```text
+抽象基类
+factory
+plugin manager
+dependency injection framework
+动态加载
+visitor
+```
+
+这些现在全都不要。
+
+## 第一刀，也是最重要的一刀：拆“决策”和“执行”
+
+现在：
+
+```cpp
+advance_one_decision(...)
+```
+
+一次性干了：
+
+```text
+refresh O
+→ X
+→ update S
+→ decide π
+→ sample A
+→ W settle
+→ feedback
+→ commitment
+```
+
+自主 NPC 当然方便。
+
+但 Replay 实验不行。
+
+因为 Replay 要做的是：
+
+```text
+看到 t 时刻信息
+↓
+输出 π(A)
+↓
+保存预测
+↓
+这时候才揭晓真实 A*
+↓
+评分
+↓
+用真实后续推进
+```
+
+所以现在最值得做的代码重构是：
+
+```cpp
+DecisionSnapshot prepare_decision(...);
+SettlementResult settle_action(...);
+```
+
+大概：
+
+```text
+prepare_decision
+    O refresh
+    ↓
+    X
+    ↓
+    S update
+    ↓
+    D / π
+    ↓
+    RETURN
+```
+
+然后两条模式：
+
+```text
+Autonomous:
+snapshot
+→ sample_action(snapshot.pi)
+→ settle_action()
+```
+
+```text
+Replay:
+snapshot
+→ score(A*)
+→ teacher-force / ingest A*
+→ advance
+```
+
+### 这不是 clean-code 重构。
+
+这是：
+
+> **把研究协议直接编码进软件边界。**
+
+我认为这是现在整个代码库最值钱的一次重构。
+
+---
+
+# 四、第二刀：把测试从 `Simulation::verify()` 搬出去
+
+现在 `verify()` 已经变成：
+
+> 一间塞了所有电器的杂物房。
+
+应该至少分成：
+
+```text
+tests/
+    test_world.cpp
+    test_observation_boundary.cpp
+    test_pipeline.cpp
+    test_policy.cpp
+```
+
+而：
+
+```text
+experiments/
+    e0.cpp
+```
+
+必须和 test 分开。
+
+因为：
+
+### test 问的是
+
+```text
+隐藏钱包是否泄漏？
+completion ΔO 是否真的进 X？
+S 输入是不是被 policy 消费？
+```
+
+要求：
+
+```text
+PASS / FAIL
+```
+
+### experiment 问的是
+
+```text
+某种 intervention 产生多大 Δπ？
+S 和 history 哪个预测好？
+```
+
+输出：
+
+```text
+measurement + uncertainty + result
+```
+
+这两种东西概念上就不一样。
+
+现在 `--verify` 和 `--e0` 已经开始分了，是好事。
+
+下一步直接物理分文件。
+
+---
+
+# 五、第三刀：`ObservationFact` 现在太 stringly-typed
+
+这是第二个真正值得担心的代码问题。
+
+现在大量：
+
+```cpp
+"task.coursework.status"
+"wallet.balance"
+"room.light"
+"object.computer.usable"
+```
+
+value 也是：
+
+```cpp
+"active"
+"completed"
+"20"
+"true"
+```
+
+甚至有：
+
+```cpp
+std::stoi(wallet->value)
+```
+
+这种东西。
+
+我们之前已经因为：
+
+```text
+object.computer.usable
+```
+
+字符串解析出过一次 stale bug 了。
+
+以后实验更多以后会出现：
+
+```text
+task.coursework.status
+task.courseworks.status
+task.coursework.state
+```
+
+这种非常难查的错误。
+
+### 但我也不建议现在造一个庞大 variant ECS。
+
+最小改法就够：
+
+```cpp
+namespace FactKey {
+constexpr auto WalletBalance = "wallet.balance";
+constexpr auto RoomLight = "room.light";
+...
+}
+```
+
+加 typed accessor：
+
+```cpp
+known_int(...)
+known_bool(...)
+known_enum(...)
+```
+
+比如：
+
+```cpp
+auto wallet = known_int(o, FactKey::WalletBalance);
+```
+
+而不是：
+
+```cpp
+std::stoi(find_fact(...)->value)
+```
+
+这是**实验可靠性重构**，值得做。
+
+---
+
+# 六、第四刀：把 `StepTrace` 升成正式实验记录
+
+现在 `StepTrace` 藏在：
+
+```cpp
+simulation.cpp
+```
+
+匿名 namespace 里面。
+
+但它其实已经是这个项目未来最重要的数据结构之一：
+
+```text
+O
+X
+ΔS
+S
+D
+π
+A
+WorldOutcome
+```
+
+它应该成为正式：
+
+```cpp
+DecisionRecord
+```
+
+或者：
+
+```cpp
+StepRecord
+```
+
+然后：
+
+```text
+runtime
+E0
+batch
+Replay
+debug
+```
+
+全都消费同一个 record。
+
+这能解决一个巨大问题：
+
+> **以后实验不要自己重新拼一份“实验版 pipeline”。**
+
+所有模式都从同一个 StepRecord 取数据。
+
+---
+
+# 七、反过来，有几块我明确建议现在不要重构
+
+## `decision.cpp` 那个大 switch
+
+看起来很“手写”。
+
+但现在我反而建议留。
+
+因为：
+
+```cpp
+UsePhone → 具体 activation
+StudyFocused → 具体 activation
+...
+```
+
+在研究 prototype 阶段非常透明。
+
+现在把它改成：
+
+```text
+ActionScorerFactory
+IUtilityCurve
+PolicyStrategyRegistry
+```
+
+只会让你更难看清机制。
+
+---
+
+## `world.cpp` 也比较大
+
+大概 24 KB。
+
+但 W 本来就拥有：
+
+```text
+precondition
+primitive
+time
+task
+settlement
+events
+```
+
+目前还能接受。
+
+等出现：
+
+```text
+多个 Scene
+多个 Task
+多个 action recipe
+```
+
+再拆：
+
+```text
+World
+TaskSystem
+EventScheduler
+Settlement
+```
+
+现在别动。
+
+---
+
+## `State` 9 个字段也不要为了“低耦合”立刻插件化
+
+现在：
+
+```cpp
+update_state()
+```
+
+虽然是一个函数，
+
+但它非常容易看懂。
+
+等到**真的开始比较两个 updater**时，再抽：
+
+```cpp
+update_task_pressure()
+update_fatigue()
+```
+
+否则又回到了：
+
+> 做实验前先把实验框架造完美。
+
+这是你现在最该避免的模式。
+
+---
+
+# 八、所以我会给 Luna 一个非常有限的“实验前重构任务”
+
+不是重写。
+
+就这四个：
+
+```text
+R1. split prepare_decision / settle_action
+R2. verify tests → tests/；E0 → experiments/
+R3. centralize FactKey + typed readers
+R4. StepTrace → public StepRecord shared by runtime/replay/experiment
+```
+
+然后停。
+
+### 不许顺手：
+
+```text
+重构 World
+重构 Decision
+重构全部 S updater
+搞插件系统
+搞 Scene recipe
+搞 ToM
+搞 P drift
+```
+
+做完以后，**代码就已经足够干净地进入实验阶段了。**
+
+---
+
+# 九、然后说你真正问的那件事：我们现在到底算不算在做科研？
+
+我给你一个不绕的答案：
+
+## **算在做科研工作。**
+
+但：
+
+## **目前还没有做出一个成立的科研结果。**
+
+这是两个不同概念。
+
+你现在已经做了科研流程里的：
+
+```text
+问题形成
+↓
+近邻调查
+↓
+问题收缩
+↓
+定义可证伪假设
+↓
+定义变量和信息边界
+↓
+造测量仪器
+↓
+pilot / E0
+↓
+发现 instrumentation bug
+↓
+修实验仪器
+```
+
+这全都是研究工作。
+
+你缺的是后半段：
+
+```text
+冻结假设
+↓
+独立数据
+↓
+baseline
+↓
+实验
+↓
+统计
+↓
+负结果也接受
+↓
+解释
+↓
+复现
+```
+
+所以我不会说：
+
+> “我们已经完成一个科研项目了。”
+
+当然没有。
+
+但要说：
+
+> “这只是瞎折腾机制，不是科研。”
+
+也不对。
+
+---
+
+# 十、你之前那个“很烂的实验”其实留下了一个很明显的后遗症
+
+你现在的行为模式很明显：
+
+```text
+不知道实验怎么做
+↓
+害怕实验不成立
+↓
+于是继续把机制想得更完整
+↓
+继续查论文
+↓
+继续完善边界
+↓
+越完善越不敢真正测试
+```
+
+这个模式特别常见。
+
+因为：
+
+### 机制设计的反馈是舒服的
+
+每次都能：
+
+```text
+发现 bug
+→ 修掉
+→ 系统更漂亮
+```
+
+### 实验的反馈可能很残酷
+
+可能花几天以后得到：
+
+```text
+S ≈ summary
+```
+
+甚至：
+
+```text
+S < raw history
+```
+
+或者：
+
+```text
+OPeRA 根本不适合
+```
+
+于是你下意识更愿意待在机制区。
+
+但科研真正开始变难，恰恰是在：
+
+> **你允许现实数据否定自己设计出来的漂亮系统之后。**
+
+---
+
+# 十一、你说“AI 带着我走，我没能力判断这是不是科研道路”
+
+这个担心我认为**非常合理**。
+
+而且答案不是：
+
+> “放心吧你就是科研。”
+
+真正的问题是：
+
+## 谁拥有这个项目的“认识论决策权”？
+
+不是：
+
+> 谁写 C++。
+
+也不是：
+
+> 谁找到论文。
+
+更不是：
+
+> 谁写英文。
+
+而是这些问题谁能判断：
+
+```text
+什么证据能支持这个命题？
+什么证据不能？
+这个 baseline 公平吗？
+这个实验是不是自评分？
+这个变量有没有偷看答案？
+结果失败意味着什么？
+什么情况下应该放弃这个假设？
+```
+
+这才是科研能力。
+
+---
+
+# 十二、就目前这几天，我不会说你只是 AI 的传声筒
+
+原因不是安慰你。
+
+是因为你实际上已经几次做出了**反 AI 的研究判断**。
+
+例如你自己非常强烈地指出过：
+
+> 不能看到别的论文也有 `world/state/persona` 就说跟我们一样，要比较具体机制。
+
+这直接导致现在的 13 维机制审计。
+
+你也不断追问：
+
+> “这个所谓实验到底证明了什么？”
+
+于是我们最后把：
+
+```text
+65,536 synthetic rows
+```
+
+从“结果”降成了：
+
+```text
+self-generated smoke evidence
+```
+
+你也不接受：
+
+> “下一步预测”四个字相同就算研究相同。
+
+而是一直逼着分：
+
+```text
+输入是什么
+状态是什么
+怎么更新
+为什么影响行为
+真实 A* 从哪里来
+```
+
+这些都是**研究判断**，不是代码工作。
+
+所以现在说：
+
+> “这个项目完全是 AI 自己在科研，你只是复制粘贴。”
+
+和实际情况不符。
+
+---
+
+# 十三、但你现在确实有一个很真实的能力短板
+
+不是机制设计。
+
+不是想法。
+
+甚至暂时也不是代码。
+
+而是：
+
+# **实验方法。**
+
+你自己也已经意识到了。
+
+具体表现为你现在还不太自然地想到：
+
+```text
+independent variable
+dependent variable
+control
+unit of analysis
+split
+baseline
+confounder
+leakage
+pre-registration
+effect size
+uncertainty
+negative result
+```
+
+这些东西。
+
+这不是“你不适合科研”。
+
+只是：
+
+> **你目前研究训练最缺的一课就是 experimental thinking。**
+
+所以接下来继续让 AI 给你想更多机制，反而是在逃避真正该学的东西。
+
+---
+
+# 十四、我建议从现在开始改我们的 WebGPT → Luna 工作流
+
+现在是：
+
+```text
+我长评
+↓
+你复制
+↓
+Luna 做
+↓
+我审
+```
+
+这个开发方式很好。
+
+但研究判断上，我建议故意加入一个小障碍。
+
+以后每个真正实验开始之前，你先自己回答五句话：
+
+1. **我想知道什么？**
+2. **如果它是真的，我预计看到什么？**
+3. **跟什么 baseline 比？**
+4. **什么结果会让我承认这个想法没用？**
+5. **这个结果有没有可能只是另一个因素造成的？**
+
+不用数学。
+
+不用正式。
+
+甚至可以说得很土。
+
+例如 OPeRA 第一轮你完全可以自己写：
+
+> 我想知道 S 能不能代替历史预测下一步点击。
+> 如果能，S 的 NLL 应该接近 full history。
+> 我要跟 history、summary 和乱掉的 S 比。
+> 如果 S 比 summary 还差，而且加 history 后明显变好，那 S 没压住有用信息。
+> 还要防止模型只是记住用户/商品或者 session 前后泄漏。
+
+这已经是实验设计的骨架了。
+
+然后我再来批。
+
+---
+
+# 十五、我甚至建议你偶尔故意“禁 AI 20 分钟”
+
+不是因为 AI 不纯洁。
+
+而是为了测试一件东西：
+
+> **这个研究问题现在是不是已经进入你的脑子。**
+
+比如 T13 完成以后：
+
+关掉 ChatGPT / Codex。
+
+拿一张纸。
+
+自己画：
+
+```text
+H
+↓
+S
+↓
+A*
+```
+
+然后回答：
+
+```text
+为什么 synthetic action 不能当 A*？
+为什么 S 不可能信息上超过完整 H？
+S+H 是干嘛的？
+permuted-S 测什么？
+E0 为什么不算 Paper-0 证据？
+```
+
+如果这些你能自己解释，
+
+那这项研究就已经不是“AI 的东西”了。
+
+哪怕 90% C++ 都是 Luna 写的。
+
+---
+
+# 十六、科研从来不是“一个人闭门徒手造一切”
+
+导师会：
+
+```text
+给题
+否定方向
+建议文献
+修改实验
+改论文
+```
+
+同门会：
+
+```text
+帮看代码
+帮设计 baseline
+指出统计错误
+```
+
+过去还有：
+
+```text
+Google
+StackOverflow
+论文代码
+统计软件
+```
+
+现在多了 AI。
+
+AI 的能力强到可以同时扮演：
+
+```text
+程序员
+文献助理
+reviewer
+讨论伙伴
+```
+
+所以它确实会造成一个新问题：
+
+> **反馈速度太快，学生可能没来得及形成自己的判断。**
+
+这个风险是真的。
+
+但解决办法不是拒绝 AI。
+
+而是：
+
+> **把 AI 从“决策者”变成高强度 adversarial collaborator。**
+
+你现在让 WebGPT 和 Luna互相审，已经有这个雏形。
+
+下一步要补上的就是：
+
+> **你自己承担实验假设的最后签字权。**
+
+---
+
+# 十七、我现在会怎样定义你目前所在的位置
+
+如果一条科研道路是：
+
+```text
+0. 有个想法
+1. 能说清问题
+2. 知道别人做了什么
+3. 把问题变成可失败命题
+4. 造出不会作弊的仪器
+5. 找到独立数据
+6. 跑公平 baseline
+7. 得到结果
+8. 解释与复现
+9. 写论文
+```
+
+你现在大概是在：
+
+# **3 → 4 → 5 的交界处。**
+
+E0 是第 4 步。
+
+T0d OPeRA 是第 5 步。
+
+而你之前最容易做的事情，是不断从 4 回去：
+
+```text
+2 → 3 → 2 → 3
+```
+
+继续找机制、找论文。
+
+所以你现在的不安某种意义上是对的：
+
+> **我们必须开始往 5、6、7 走，否则再漂亮也会停留在 research design。**
+
+---
+
+# 十八、这反而让我更确定下一阶段该怎么走
+
+不是再设计一个更牛的 Character Dynamics。
+
+而是：
+
+```text
+实验前小重构
+       ↓
+T13 一页问题卡
+       ↓
+T0d OPeRA audit
+       ↓
+确定第一份独立 A*
+       ↓
+最小 X→S
+       ↓
+第一张 baseline 表
+```
+
+等第一张真正的：
+
+```text
+history
+summary
+S
+naive-S
+permuted-S
+S+history
+```
+
+结果出来，
+
+**哪怕 S 输得一塌糊涂，我都会认为这个项目比现在科研性更强。**
+
+因为到那一刻，你不是在描述一个系统。
+
+你是在问世界一个问题，然后允许世界回答：
+
+> **“你这个想法不对。”**
+
+那就是科研真正开始的地方。
+
+所以这一次我给你的判断不是“放心继续”。
+
+而是：
+
+> **方向现在已经足够合理，不需要再靠更多机制来获得安全感了。你真正缺的安全感，只能由第一次严肃实验训练补上。**
+
+而代码现在也刚好到了适合为这件事做一次**小而精准的实验化重构**的节点。

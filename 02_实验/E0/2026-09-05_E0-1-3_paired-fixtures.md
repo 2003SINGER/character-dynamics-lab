@@ -1,7 +1,7 @@
 # E0-1–E0-3 paired fixture 实际运行结果
 
 运行日期：2026-09-05  
-代码 revision：`0efce67`
+代码 revision：`576b28b`（本次 stdout 的实际 run commit）
 命令：`character_dynamics_reference.exe --e0`  
 构建：MinGW 16.1.0 / Debug / CMake（ASCII subst source path）  
 固定：world seed `42`、procrastinating personality、初始 `S` 相同；`action_sampling=none`
