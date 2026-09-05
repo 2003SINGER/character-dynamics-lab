@@ -195,7 +195,8 @@ StepTrace advance_one_decision(World& world,
     trace.chosen_action = sample_action(trace.decision, action_rng);
     trace.action_plan = world.expand_action(trace.chosen_action);
     trace.outcome = world.settle(trace.chosen_action);
-    update_commitment(state, trace.outcome, total_minutes(world.time));
+    apply_self_action_feedback(observation, trace.outcome, world.time_summary());
+    update_commitment(state, observation, total_minutes(world.time));
     trace.state_after_settlement = state;
     trace.task_after = coursework_snapshot(world);
     if (!trace.outcome.sleeping_sensory_events.empty()) {
@@ -450,11 +451,21 @@ bool Simulation::verify(std::ostream& output) const {
         && !rejected_observation.last_self_action.accepted
         && std::find(rejected_appraisal.tags.begin(), rejected_appraisal.tags.end(), "action_rejected")
             != rejected_appraisal.tags.end();
+    const bool keeps_broken_object_visible = observation_knows_action(visible_observation, ActionType::UseComputer)
+        && std::find(visible_observation.known_object_ids.begin(), visible_observation.known_object_ids.end(), "computer")
+            != visible_observation.known_object_ids.end();
+    World insufficient_wallet_world;
+    insufficient_wallet_world.wallet = 20;
+    const Observation insufficient_wallet_observation = refresh_observation({}, insufficient_wallet_world, {});
+    const WorldOutcome rejected_purchase = insufficient_wallet_world.execute(ActionType::ShopOnPhone);
+    const bool does_not_leak_hidden_wallet = observation_knows_action(insufficient_wallet_observation, ActionType::ShopOnPhone)
+        && !rejected_purchase.accepted;
     World stale_object_world;
     Observation object_observation = refresh_observation({}, stale_object_world, {});
-    for (Object& object : stale_object_world.current_room().objects) {
-        if (object.id == "phone") object.usable = false;
-    }
+    auto& stale_objects = stale_object_world.current_room().objects;
+    stale_objects.erase(std::remove_if(stale_objects.begin(), stale_objects.end(), [](const Object& object) {
+        return object.id == "phone";
+    }), stale_objects.end());
     object_observation = refresh_observation(std::move(object_observation), stale_object_world, {});
     const ObservationFact* stale_phone = find_fact(object_observation, "object.phone");
     const bool marks_absent_object_stale = stale_phone != nullptr && stale_phone->status == KnowledgeStatus::Stale;
@@ -469,23 +480,37 @@ bool Simulation::verify(std::ostream& output) const {
                                    && sleep_primitive_shortened;
     CharacterState commitment_state;
     World commitment_world;
+    Observation commitment_observation;
     const WorldOutcome first_study = commitment_world.settle(ActionType::StudyFocused);
-    update_commitment(commitment_state, first_study, total_minutes(commitment_world.time));
+    apply_self_action_feedback(commitment_observation, first_study, commitment_world.time_summary());
+    update_commitment(commitment_state, commitment_observation, total_minutes(commitment_world.time));
     const bool starts_task_commitment = commitment_state.commitment.status == CommitmentStatus::Active
                                      && commitment_state.commitment.task_id == "coursework";
     const WorldOutcome meal = commitment_world.settle(ActionType::GetMeal);
-    update_commitment(commitment_state, meal, total_minutes(commitment_world.time));
+    apply_self_action_feedback(commitment_observation, meal, commitment_world.time_summary());
+    update_commitment(commitment_state, commitment_observation, total_minutes(commitment_world.time));
     const bool suspends_for_bodily_need = commitment_state.commitment.status == CommitmentStatus::Suspended;
     const WorldOutcome resumed_study = commitment_world.settle(ActionType::StudyAtComputer);
-    update_commitment(commitment_state, resumed_study, total_minutes(commitment_world.time));
+    apply_self_action_feedback(commitment_observation, resumed_study, commitment_world.time_summary());
+    update_commitment(commitment_state, commitment_observation, total_minutes(commitment_world.time));
     const bool resumes_task_commitment = commitment_state.commitment.status == CommitmentStatus::Active;
     World completion_world;
     WorldTask* completion_task = completion_world.task_by_id("coursework");
     completion_task->effort_target = 0.10;
     const WorldOutcome completing_study = completion_world.settle(ActionType::StudyFocused);
-    update_commitment(commitment_state, completing_study, total_minutes(completion_world.time));
+    apply_self_action_feedback(commitment_observation, completing_study, completion_world.time_summary());
+    update_commitment(commitment_state, commitment_observation, total_minutes(completion_world.time));
     const bool completes_task_with_variable_effort = completing_study.task_completed
         && completing_study.task_effort_gained != 1.0 && commitment_state.commitment.status == CommitmentStatus::None;
+    CharacterState unconfirmed_completion_state;
+    Observation unconfirmed_completion_observation;
+    apply_self_action_feedback(unconfirmed_completion_observation, completing_study,
+                               completion_world.time_summary(), false);
+    update_commitment(unconfirmed_completion_state, unconfirmed_completion_observation,
+                      total_minutes(completion_world.time));
+    const bool completion_requires_observable_feedback = completing_study.task_completed
+        && !has_known_fact(unconfirmed_completion_observation, "task.coursework.status", "completed")
+        && unconfirmed_completion_state.commitment.status == CommitmentStatus::Active;
     World deadline_world;
     deadline_world.time.minute_of_day = 8 * 60;
     WorldTask* deadline_task = deadline_world.task_by_id("coursework");
@@ -518,19 +543,24 @@ bool Simulation::verify(std::ostream& output) const {
            << ", completed_task_stays_quiet=" << completed_task_stays_quiet
            << ", deduplicates_actions=" << deduplicates_actions
            << ", preserves_rejected_feedback=" << preserves_rejected_feedback
+           << ", keeps_broken_object_visible=" << keeps_broken_object_visible
+           << ", does_not_leak_hidden_wallet=" << does_not_leak_hidden_wallet
            << ", marks_absent_object_stale=" << marks_absent_object_stale
            << ", reports_applied_delta=" << reports_applied_delta
            << ", starts_task_commitment=" << starts_task_commitment
            << ", suspends_for_bodily_need=" << suspends_for_bodily_need
            << ", resumes_task_commitment=" << resumes_task_commitment
            << ", completes_task_with_variable_effort=" << completes_task_with_variable_effort
+           << ", completion_requires_observable_feedback=" << completion_requires_observable_feedback
            << ", deadline_is_observable=" << deadline_is_observable
            << ", gates_suspended_return=" << gates_suspended_return << '\n';
     return reproducible && profile_sensitive && validates_world && has_primitives
         && primitives_settle && handles_interruption && completed_task_stays_quiet && deduplicates_actions
-        && preserves_rejected_feedback && marks_absent_object_stale && reports_applied_delta
+        && preserves_rejected_feedback && keeps_broken_object_visible && does_not_leak_hidden_wallet
+        && marks_absent_object_stale && reports_applied_delta
         && starts_task_commitment && suspends_for_bodily_need && resumes_task_commitment
-        && completes_task_with_variable_effort && deadline_is_observable && gates_suspended_return;
+        && completes_task_with_variable_effort && completion_requires_observable_feedback
+        && deadline_is_observable && gates_suspended_return;
 }
 
 std::string Simulation::run_profile(const Personality& personality,

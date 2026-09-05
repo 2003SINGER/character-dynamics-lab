@@ -28,6 +28,8 @@ struct ObservedAction {
     bool has_action = false;
     ActionType action = ActionType::Idle;
     bool accepted = false;
+    std::string task_id;
+    bool task_completed = false;
     std::string outcome_reason;
     std::string source = "self_action_feedback";
     std::string observed_at;
@@ -52,6 +54,13 @@ bool has_known_fact(const Observation& observation, const std::string& key, cons
 Observation refresh_observation(Observation previous,
                                 const World& world,
                                 const WorldOutcome& previous_outcome);
+// This is the only W-outcome -> O bridge for a character's own completed
+// action. Callers may deliberately withhold completion confirmation to model
+// a task whose actual settlement is not yet observable to the character.
+void apply_self_action_feedback(Observation& observation,
+                                const WorldOutcome& outcome,
+                                const std::string& observed_at,
+                                bool completion_is_observable = true);
 bool observation_knows_action(const Observation& observation, ActionType action);
 Observation apply_sleep_sensory_update(Observation previous,
                                        const WorldOutcome& outcome,

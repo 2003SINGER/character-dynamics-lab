@@ -85,16 +85,16 @@ Observation refresh_observation(Observation observation,
     observation.known_actions.clear();
     const std::string now = world.time_summary();
 
-    // Current room rule: every usable room object is directly observable.
+    // Current room rule: every present room object is directly observable.
+    // Whether it is actually usable remains a W fact until an observation or
+    // rejected attempt supplies feedback; a broken object must not vanish.
     // Other scenes can later omit objects here while still retaining facts from
     // message, memory, sound, or stale prior observation.
     const Room& room = world.current_room();
     for (const Object& object : room.objects) {
-        if (object.usable) {
-            observation.known_object_ids.push_back(object.id);
-            observation.visible_object_labels.push_back(object.label);
-            write_fact(observation, "object." + object.id, "present", "direct_room_visual", now);
-        }
+        observation.known_object_ids.push_back(object.id);
+        observation.visible_object_labels.push_back(object.label);
+        write_fact(observation, "object." + object.id, "present", "direct_room_visual", now);
     }
     // Objects absent from this refresh remain remembered, but no longer count
     // as current visual knowledge. This is the minimal stale/unknown hook for
@@ -108,24 +108,18 @@ Observation refresh_observation(Observation observation,
             }
         }
     }
-    if (!previous_outcome.provenance.empty()) {
-        observation.last_self_action = {true, previous_outcome.action, previous_outcome.accepted,
-            previous_outcome.accepted ? "accepted by W" : "rejected by W", "self_action_feedback", now};
-    } else {
-        observation.last_self_action = {};
-    }
+    apply_self_action_feedback(observation, previous_outcome, now);
     write_fact(observation, "room.light", room.light_on ? "on" : "off", "direct_room_visual", now);
     const bool alarm_rang = std::any_of(previous_outcome.events.begin(), previous_outcome.events.end(),
         [](const WorldEvent& event) { return event.id == "alarm-rings"; });
     write_fact(observation, "room.alarm", room.alarm_ringing ? "ringing" : "silent",
                alarm_rang ? "direct_room_auditory" : "direct_room_visual", now);
     for (const WorldTask& task : world.tasks) {
-        std::ostringstream effort;
-        effort << std::fixed << std::setprecision(3) << task.effort_done;
-        write_fact(observation, "task." + task.id + ".effort", effort.str(), "direct_room_visual", now);
-        switch (task.status) {
-        case TaskStatus::Active: write_fact(observation, "task." + task.id + ".status", "active", "direct_room_visual", now); break;
-        case TaskStatus::Completed: write_fact(observation, "task." + task.id + ".status", "completed", "direct_room_visual", now); break;
+        // An initial task brief is scenario input. Later W state is not copied
+        // into O: progress and completion must arrive through typed feedback.
+        if (task.status == TaskStatus::Active
+            && find_fact(observation, "task." + task.id + ".status") == nullptr) {
+            write_fact(observation, "task." + task.id + ".status", "active", "initial_task_brief", now);
         }
         const bool deadline_passed = task.due_at_total_minutes >= 0
             && total_minutes(world.time) >= task.due_at_total_minutes;
@@ -149,18 +143,41 @@ Observation refresh_observation(Observation observation,
         }
     }
 
-    // Explicit A^W -> A^O: an action is known only when W says it is currently
-    // legal and O contains the object that affords it. In this room all objects
-    // are visible, so the sets will usually match; the layer is still separate.
-    for (ActionType action : world.available_actions()) {
-        if (action == ActionType::Idle) {
-            observation.known_actions.push_back(action);
-        } else if (const Object* object = world.object_for(action);
-                   object != nullptr && contains_id(observation.known_object_ids, object->id)) {
-            observation.known_actions.push_back(action);
+    // A^O is generated from known objects and their believed stable
+    // affordances. It must not call W::available_actions(): W-only guards
+    // (wallet, hidden task completion, object failure, room flags) are tested
+    // only at settlement and can then become O through feedback.
+    observation.known_actions.push_back(ActionType::Idle);
+    for (const Object& object : room.objects) {
+        if (!contains_id(observation.known_object_ids, object.id)) continue;
+        for (ActionType action : object.affordances) {
+            if (!observation_knows_action(observation, action)) {
+                observation.known_actions.push_back(action);
+            }
         }
     }
     return observation;
+}
+
+void apply_self_action_feedback(Observation& observation,
+                                const WorldOutcome& outcome,
+                                const std::string& observed_at,
+                                bool completion_is_observable) {
+    if (outcome.provenance.empty()) {
+        observation.last_self_action = {};
+        return;
+    }
+    observation.last_self_action = {true, outcome.action, outcome.accepted, outcome.task_id,
+        outcome.task_completed && completion_is_observable,
+        outcome.accepted ? "accepted by W" : "rejected by W", "self_action_feedback", observed_at};
+    if (!outcome.accepted || outcome.task_id.empty()) return;
+
+    const std::string status_key = "task." + outcome.task_id + ".status";
+    if (outcome.task_completed && completion_is_observable) {
+        write_fact(observation, status_key, "completed", "self_action_completion_feedback", observed_at);
+    } else {
+        write_fact(observation, status_key, "active", "self_action_progress_feedback", observed_at);
+    }
 }
 
 bool observation_knows_action(const Observation& observation, ActionType action) {

@@ -196,24 +196,25 @@ ActionType sample_action(const DecisionContext& decision, std::mt19937& rng) {
 }
 
 void update_commitment(CharacterState& state,
-                       const WorldOutcome& outcome,
+                       const Observation& observation,
                        int settled_at_total_minutes) {
-    if (!outcome.accepted) return;
+    const ObservedAction& action = observation.last_self_action;
+    if (!action.has_action || !action.accepted) return;
 
-    if (outcome.task_completed) {
+    if (action.task_completed) {
         state.commitment = {};
         return;
     }
-    if (!outcome.task_id.empty()) {
-        state.commitment = {CommitmentStatus::Active, outcome.task_id,
+    if (!action.task_id.empty()) {
+        state.commitment = {CommitmentStatus::Active, action.task_id,
                             "continue advancing unfinished task", settled_at_total_minutes, 0};
         return;
     }
 
-    const bool bodily_or_recovery_action = outcome.action == ActionType::RestAtBed
-        || outcome.action == ActionType::SleepAtBed
-        || outcome.action == ActionType::GetMeal
-        || outcome.action == ActionType::GoToBathroom;
+    const bool bodily_or_recovery_action = action.action == ActionType::RestAtBed
+        || action.action == ActionType::SleepAtBed
+        || action.action == ActionType::GetMeal
+        || action.action == ActionType::GoToBathroom;
     if (state.commitment.status == CommitmentStatus::Active && bodily_or_recovery_action) {
         state.commitment.status = CommitmentStatus::Suspended;
         state.commitment.reason = "temporarily yield to bodily or recovery need";
