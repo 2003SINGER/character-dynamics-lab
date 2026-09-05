@@ -651,7 +651,7 @@ bool Simulation::verify(std::ostream& output) const {
            << ", gates_suspended_return=" << gates_suspended_return
            << ", hidden_w_same_pi=" << hidden_w_same_pi
            << ", visible_o_can_change_pi=" << visible_o_can_change_pi
-           << ", shuffled_s_is_consumed=" << shuffled_s_is_consumed
+           << ", state_input_affects_policy=" << shuffled_s_is_consumed
            << ", scenario_information_access_is_configurable=" << scenario_information_access_is_configurable
            << ", scenario_config_reaches_trajectory=" << scenario_config_reaches_trajectory
            << ", light_precondition_filters_known_state=" << light_precondition_filters_known_state
@@ -673,6 +673,35 @@ bool Simulation::verify(std::ostream& output) const {
         && light_precondition_filters_known_state && curtain_precondition_filters_known_state
         && study_requires_known_light && silent_alarm_filters_action
         && visible_wallet_filters_purchase && visible_usability_filters_action;
+}
+
+bool Simulation::run_e0(std::ostream& output) const {
+    const Personality personality = procrastinating_profile();
+    const ScenarioConfig hidden_scenario{};
+    World low_wallet(42U);
+    World high_wallet(42U);
+    low_wallet.wallet = 20;
+    high_wallet.wallet = 120;
+    Observation low_observation = refresh_observation({}, low_wallet, {}, hidden_scenario.information_access);
+    Observation high_observation = refresh_observation({}, high_wallet, {}, hidden_scenario.information_access);
+    CharacterState low_state;
+    CharacterState high_state;
+    const DecisionContext low_policy = decide(low_observation, low_state, personality);
+    const DecisionContext high_policy = decide(high_observation, high_state, personality);
+    const bool same_support = low_observation.known_actions == high_observation.known_actions;
+    bool same_probabilities = low_policy.candidates.size() == high_policy.candidates.size();
+    if (same_probabilities) {
+        for (std::size_t index = 0; index < low_policy.candidates.size(); ++index) {
+            same_probabilities = low_policy.candidates[index].action == high_policy.candidates[index].action
+                && low_policy.candidates[index].probability == high_policy.candidates[index].probability;
+            if (!same_probabilities) break;
+        }
+    }
+    output << "fixture=E0_hidden_wallet_pair,world_seed=42,action_seed=20260904"
+           << ",wallet_low=20,wallet_high=120,wallet_observable=0"
+           << ",same_O_action_support=" << same_support
+           << ",same_pi=" << same_probabilities << '\n';
+    return same_support && same_probabilities;
 }
 
 std::string Simulation::run_profile(const Personality& personality,

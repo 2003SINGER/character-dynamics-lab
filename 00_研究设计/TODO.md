@@ -32,7 +32,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ID | 状态 | 下一动作 | 判定条件 |
 |---|---|---|---|
 | T08 | 待继续 | 围绕 X/U/P/承诺缺口精读，不再泛列相似 Agent | 每篇给输入、状态、更新、P、动作、验证及可迁移边界；接文献库，不另抄全文 |
-| T09 | 待实验设计（fixture-ready，非 E0-ready） | 先引入最小 `InformationAccess/PerceptionPolicy` 场景配置，再做成对历史：观察 mask、同 O 下隐藏 W 改变、完成反馈 visible/hidden、`S` 置换 | 配置只改变信息权限，其余机制与 seed 相同；验证 hidden W 不改变观测前 `π`、observable O 可改变 `π`、hidden completion 不解除 commitment、shuffled S 被 policy 消费。**仅作受控机制验收，不作为行为预测证据**；依赖 Q04/Q07 |
+| T09 | **进行中：E0 第一组 fixture** | 已有 `--e0` 可运行的 hidden-wallet paired fixture；下一步扩展 completion visible/hidden 与 observed-wallet paired 条件，固定 seed/P/S 并输出配置元数据 | 第一组须验证相同 O/action support/π；所有 E0 只作受控机制验收，不作为行为预测证据；依赖 Q04/Q07 |
 | T10 | 待决策 | 判断单 session 质量是否为首个实验所需 | 如需才设计显式 ActionQuality；不能让 W 暗读 S，见 Q06 |
 | T11 | 待实验设计 | 检验 task_pressure 与残留紧张是否需要拆开 | 完成后是否有数据要求不同恢复；不要仅因可拆就加字段 |
 | T12 | 待实验设计 | 单因素改变 deadline、疲劳、中断或一个 P 维度 | 相同其余条件/seed，保留负结果；不以更多随机人格替代控制 |
@@ -96,7 +96,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ~~**T33b**~~ | ✅ **已实现并复核于 `807359b`**：`decision.cpp:86–90` 已将 `StudyFocused`、`StudyHalfhearted`、`StudyAtComputer` 全部计为 `advances_committed_task` | commitment bonus 不会因动作拆分而静默失效；本次复核同时更正此前过期的待办状态 | 已办 |
 | **T34** | 抓下剩余 8 个 demo 包存档 | companion 站点在腐烂，C09（Utility Theory 导论）链接**已实测 404** | 低（有时效） |
 
-| **T42** | **部分完成**：本提交补齐主体但暂不宣称 complete | 已实现最小 `InformationAccess` trajectory 配置、O-known 灯/窗帘/闹钟/任务/钱包/对象可用性前置条件、`object.<id>.usable` stale 解析修复，以及四个研究不变量；CTest/`--verify` 全通过 | 尚缺正式成对 E0 scenario fixture、跨 trajectory 的固定 seed/配置导出与研究数据协议；**不表示 E0 或研究假设已验证** |
+| ~~**T42**~~ | ✅ **已完成于 `da70afa` 后续修订** | 已实现最小 `InformationAccess` trajectory 配置、完整 O-known/W-authoritative 前置条件、stale 解析修复与研究不变量；`--e0` 第一组 paired fixture 已可运行 | T42 只负责 information-boundary 仪器；E0 fixture、元数据与研究协议归 T09，不再倒灌；**不表示 E0 或研究假设已验证** |
 
 状态同步约束：凡 TODO 宣称“已实现”或“待修复”的代码项，必须同列提交号、代码位置和可复核验收；实现改动与该行状态变更须在同一提交中完成。若是事后审计发现偏差，明确记录为“复核更正”，不把旧状态继续当作事实。
 
