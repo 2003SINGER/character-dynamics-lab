@@ -42,7 +42,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ID | 状态 | 下一动作 | 完成判据/依赖 |
 |---|---|---|---|
 | **T0** | **已完成审计；路线 B 待 pilot** | 审计独立 `A*` 来源；不要用本项目规则采样的动作自评 | [审计记录](../01_文献/专题审计_行为真值A星可行性_2026-09-05.md)：BehaviorChain 完整数据因版权暂不可得；CharacterBox 不构成独立 `A*`；SOTOPIA 可进入 30 episode 外部合成轨迹 pilot。**未通过 pilot 前不得启动正式 baseline 比较。** |
-| **T0b** | 待执行 | 从 SOTOPIA 公开 dump 导出 30 个 episode 的开发切片，逐条核验 action、turn order、private/public information、provenance 与 episode-level split | 成功则冻结动作 ontology 和 information schema；失败则将小房间 fixture 明确仅作机制审计，并另行决定人类/授权语料采集，不为迎合数据篡改 `W/O`。 |
+| **T0b** | **已完成：结构通过，研究准入未过** | 从 SOTOPIA-π 公开 dump 导出 30 个 episode 的开发切片，核验 action、turn order、private/public information、provenance 与 episode-level split | 30/30 保留自身 goal 与对方 `Unknown`，但 provenance 在 dump 内未知，且动作表面高度坍缩为 `said/did nothing/left`，无法冻结不丢语义的有限动作 ontology。见 [T0b 结果](../01_文献/专题审计_行为真值A星可行性_2026-09-05.md#t0b-实测结果2026-09-05)。**不得据此启动 T14–T17。** |
 
 - [ ] T13：冻结一张问题卡：有限世界/行为集、可知信息、状态更新机制、一个干预对、主指标与失败条件。**2026-09-05 复核新增**：问题卡必须显式记录全局 `|A|`、每步 `|A^O|` 的定义和 NLL 报告口径。当前为 **16 项实际动作 + `Count` 哨兵**；`ln|A^O|` 是该步均匀随机猜测的 NLL 基线，**不是 NLL 上限**。换动作集或候选集定义即换实验；不同支撑集大小下的原始 NLL 不可直接混比，必须同时给分层原始 NLL 和按预注册分母归一化的 NLL。若未来出现 `|A^O|=1`，该步随机基线为 0、归一化无定义，需单列为确定性步而非除以 0。**NPC 数量建议先取少量（1–10），但这是成本建议不是机制约束**——2026-09-05 修正：此前基于 Zubek（V3 C34）「too many of them… for **the player** to care about them in detail」把它设为硬约束，属语境误用。该句主语是 the player，**人物一致性检测任务里没有 player**，见[研究问题页 §6.3.2.1](前台问题与候选创新.md)。深度建模的真实约束来自评价协议与计算成本，不来自"玩家是否在乎"。
 - [ ] T14：建立 persona only、raw history、强 summary、state 基线；相同信息权限和模型条件；区分开发/测试。
