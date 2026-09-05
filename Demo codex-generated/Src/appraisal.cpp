@@ -51,7 +51,7 @@ Appraisal appraise(const Observation& observation,
                                            : std::vector<std::string>{"screen_engagement"};
         break;
     case ActionType::StudyAtComputer:
-    case ActionType::StudyAtDesk:
+    case ActionType::StudyFocused:
         appraisal.boredom_delta = 0.02;
         appraisal.fatigue_delta = 0.11;
         appraisal.task_pressure_delta = -0.15;
@@ -59,6 +59,14 @@ Appraisal appraise(const Observation& observation,
         appraisal.anxiety_delta = -0.05;
         appraisal.screen_strain_delta = observation.last_self_action.action == ActionType::StudyAtComputer ? 0.08 : 0.0;
         appraisal.tags = {"task_effort_session", "mental_effort"};
+        break;
+    case ActionType::StudyHalfhearted:
+        appraisal.boredom_delta = 0.05;
+        appraisal.fatigue_delta = 0.08;
+        appraisal.task_pressure_delta = -0.08;
+        appraisal.satisfaction_delta = 0.02;
+        appraisal.anxiety_delta = -0.02;
+        appraisal.tags = {"task_effort_session", "distracted_effort"};
         break;
     case ActionType::RestAtBed:
         appraisal.boredom_delta = 0.04;

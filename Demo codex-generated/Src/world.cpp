@@ -192,7 +192,7 @@ World::World(unsigned int seed) : scenario_seed(seed) {
     const double computer_effort = seed == 0U ? 0.85 : std::uniform_real_distribution<double>(0.68, 1.02)(generator);
     const int due_offset = seed == 0U ? 12 * 60 : std::uniform_int_distribution<int>(10 * 60, 30 * 60)(generator);
     tasks.push_back({"coursework", "coursework", 0.0, target, TaskStatus::Active,
-                     {ActionType::StudyAtDesk, ActionType::StudyAtComputer}, due_offset,
+                     {ActionType::StudyFocused, ActionType::StudyHalfhearted, ActionType::StudyAtComputer}, due_offset,
                      desk_effort, computer_effort});
 }
 
@@ -253,7 +253,8 @@ bool World::can_execute(ActionType action) const {
     switch (action) {
     case ActionType::ShopOnPhone:
         return wallet >= 30;
-    case ActionType::StudyAtDesk:
+    case ActionType::StudyFocused:
+    case ActionType::StudyHalfhearted:
     case ActionType::StudyAtComputer:
         return room.light_on && active_task_for(action) != nullptr;
     case ActionType::TurnLightOn:
@@ -301,7 +302,8 @@ CharacterActionPlan World::expand_action(ActionType action) const {
         add("count-computer-use", "computer browsing completed", IncrementWorldCounter{WorldCounter::ComputerUses});
         break;
     case ActionType::StudyAtComputer:
-    case ActionType::StudyAtDesk:
+    case ActionType::StudyFocused:
+    case ActionType::StudyHalfhearted:
         add("count-study-session", "study session completed", IncrementWorldCounter{WorldCounter::StudySessions});
         break;
     case ActionType::RestAtBed:
@@ -448,7 +450,9 @@ WorldOutcome World::settle(ActionType action) {
 
     apply_scheduled_events(*this, before, after, plan.action == ActionType::SleepAtBed, outcome);
 
-    if (plan.action == ActionType::StudyAtDesk || plan.action == ActionType::StudyAtComputer) {
+    if (plan.action == ActionType::StudyFocused
+        || plan.action == ActionType::StudyHalfhearted
+        || plan.action == ActionType::StudyAtComputer) {
         WorldTask* task = active_task_for(plan.action);
         if (task == nullptr) {
             throw std::logic_error("Accepted study action has no active supporting task");
@@ -456,8 +460,11 @@ WorldOutcome World::settle(ActionType action) {
         outcome.task_id = task->id;
         outcome.task_effort_before = task->effort_done;
         outcome.task_settlement_variation = settlement_variation(scenario_seed, *task);
-        const double base_effort = plan.action == ActionType::StudyAtDesk
-            ? task->desk_base_effort : task->computer_base_effort;
+        const double base_effort = plan.action == ActionType::StudyAtComputer
+            ? task->computer_base_effort
+            : (plan.action == ActionType::StudyFocused
+                ? task->desk_base_effort
+                : task->desk_base_effort * 0.60);
         const double duration_factor = static_cast<double>(outcome.elapsed_minutes)
             / static_cast<double>(action_definition(plan.action).default_duration_minutes);
         outcome.task_session_interrupted = outcome.elapsed_minutes

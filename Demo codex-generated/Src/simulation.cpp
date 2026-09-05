@@ -7,6 +7,7 @@
 #include "world.h"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -58,6 +59,24 @@ std::string action_space_summary(const std::vector<ActionType>& world_actions) {
         output << to_string(action) << ' ';
     }
     return output.str();
+}
+
+constexpr std::size_t kActionCount = static_cast<std::size_t>(ActionType::Count);
+using ActionProbabilityVector = std::array<double, kActionCount>;
+
+ActionProbabilityVector probability_by_action(const DecisionContext& decision) {
+    ActionProbabilityVector probabilities{};
+    for (const CandidateAction& candidate : decision.candidates) {
+        probabilities.at(static_cast<std::size_t>(candidate.action)) = candidate.probability;
+    }
+    return probabilities;
+}
+
+void write_action_probability_columns(std::ostream& output, const DecisionContext& decision) {
+    const ActionProbabilityVector probabilities = probability_by_action(decision);
+    for (double probability : probabilities) {
+        output << ',' << probability;
+    }
 }
 
 void write_csv_field(std::ostream& output, const std::string& value) {
@@ -242,7 +261,11 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
                       << ',' << personality.action_noise << '\n';
     }
 
-    trajectories_file << "personality_index,scenario_seed,action_seed,step,decision_time,pre_commitment_status,pre_commitment_task_id,pre_task_effort,pre_task_effort_target,pre_task_status,pre_boredom,pre_fatigue,pre_task_pressure,pre_satisfaction,pre_hunger,pre_bathroom_urge,pre_anxiety,pre_screen_strain,pre_purchase_urge,chosen_action,accepted,elapsed_minutes,event_ids,outcome_task_id,outcome_task_effort_gained,outcome_task_settlement_variation,outcome_task_session_interrupted,post_commitment_status,post_commitment_task_id,post_task_effort,post_task_effort_target,post_task_status,post_wallet,post_unread_messages,post_weather,post_temperature_celsius\n";
+    trajectories_file << "personality_index,scenario_seed,action_seed,step,decision_time,pre_commitment_status,pre_commitment_task_id,pre_task_effort,pre_task_effort_target,pre_task_status,pre_boredom,pre_fatigue,pre_task_pressure,pre_satisfaction,pre_hunger,pre_bathroom_urge,pre_anxiety,pre_screen_strain,pre_purchase_urge,known_action_count";
+    for (std::size_t index = 0; index < kActionCount; ++index) {
+        trajectories_file << ",p_" << to_string(static_cast<ActionType>(index));
+    }
+    trajectories_file << ",chosen_action,accepted,elapsed_minutes,event_ids,outcome_task_id,outcome_task_effort_gained,outcome_task_settlement_variation,outcome_task_session_interrupted,post_commitment_status,post_commitment_task_id,post_task_effort,post_task_effort_target,post_task_status,post_wallet,post_unread_messages,post_weather,post_temperature_celsius\n";
     trajectories_file << std::fixed << std::setprecision(6);
     runs_file << "personality_index,scenario_seed,action_seed,steps,final_time,coursework_effort_done,coursework_effort_target,coursework_status,coursework_completed_at,coursework_execution_count,final_commitment_status,final_commitment_task_id,wallet,unread_messages,weather,temperature_celsius,phone_uses,computer_uses,study_sessions,rest_sessions,bathroom_visits,meals_collected,online_orders,final_boredom,final_fatigue,final_task_pressure,final_satisfaction,final_hunger,final_bathroom_urge,final_anxiety,final_screen_strain,final_purchase_urge\n";
     runs_file << std::fixed << std::setprecision(6);
@@ -281,7 +304,10 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
                                   << ',' << trace.state_at_decision.bathroom_urge
                                   << ',' << trace.state_at_decision.anxiety
                                   << ',' << trace.state_at_decision.screen_strain
-                                  << ',' << trace.state_at_decision.purchase_urge << ',';
+                                  << ',' << trace.state_at_decision.purchase_urge
+                                  << ',' << trace.decision.known_actions.size();
+                write_action_probability_columns(trajectories_file, trace.decision);
+                trajectories_file << ',';
                 write_csv_field(trajectories_file, to_string(trace.chosen_action));
                 trajectories_file << ',' << (trace.outcome.accepted ? 1 : 0)
                                   << ',' << trace.outcome.elapsed_minutes << ',';
@@ -360,8 +386,8 @@ bool Simulation::verify(std::ostream& output) const {
     const WorldOutcome rejected = unavailable_computer.execute(ActionType::UseComputer);
 
     World primitive_world;
-    const CharacterActionPlan study_plan = primitive_world.expand_action(ActionType::StudyAtDesk);
-    const WorldOutcome settled_study = primitive_world.settle(ActionType::StudyAtDesk);
+    const CharacterActionPlan study_plan = primitive_world.expand_action(ActionType::StudyFocused);
+    const WorldOutcome settled_study = primitive_world.settle(ActionType::StudyFocused);
 
     World sleeping_world;
     sleeping_world.time.minute_of_day = 10 * 60 + 46;
@@ -420,7 +446,7 @@ bool Simulation::verify(std::ostream& output) const {
                                    && sleep_primitive_shortened;
     CharacterState commitment_state;
     World commitment_world;
-    const WorldOutcome first_study = commitment_world.settle(ActionType::StudyAtDesk);
+    const WorldOutcome first_study = commitment_world.settle(ActionType::StudyFocused);
     update_commitment(commitment_state, first_study, total_minutes(commitment_world.time));
     const bool starts_task_commitment = commitment_state.commitment.status == CommitmentStatus::Active
                                      && commitment_state.commitment.task_id == "coursework";
@@ -433,7 +459,7 @@ bool Simulation::verify(std::ostream& output) const {
     World completion_world;
     WorldTask* completion_task = completion_world.task_by_id("coursework");
     completion_task->effort_target = 0.10;
-    const WorldOutcome completing_study = completion_world.settle(ActionType::StudyAtDesk);
+    const WorldOutcome completing_study = completion_world.settle(ActionType::StudyFocused);
     update_commitment(commitment_state, completing_study, total_minutes(completion_world.time));
     const bool completes_task_with_variable_effort = completing_study.task_completed
         && completing_study.task_effort_gained != 1.0 && commitment_state.commitment.status == CommitmentStatus::None;

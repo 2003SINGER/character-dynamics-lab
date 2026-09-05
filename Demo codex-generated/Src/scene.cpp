@@ -9,7 +9,7 @@ Scene make_default_scene() {
     scene.rooms.push_back({"room", "student room",
         {{"phone", "phone", true, {ActionType::UsePhone, ActionType::ShopOnPhone}},
          {"computer", "computer", true, {ActionType::UseComputer, ActionType::StudyAtComputer}},
-         {"desk", "desk with study materials", true, {ActionType::StudyAtDesk}},
+         {"desk", "desk with study materials", true, {ActionType::StudyFocused, ActionType::StudyHalfhearted}},
          {"bed", "bed", true, {ActionType::RestAtBed, ActionType::SleepAtBed}},
          {"door", "room door", true, {ActionType::GoToBathroom, ActionType::GetMeal}},
          {"light", "room light", true, {ActionType::TurnLightOn, ActionType::TurnLightOff}},

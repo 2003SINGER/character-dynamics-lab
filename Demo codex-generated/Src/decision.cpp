@@ -21,7 +21,8 @@ CandidateAction candidate(ActionType action, double activation, double threshold
 bool commitment_can_bias_study(const Observation& observation, const CharacterState& state) {
     if (state.commitment.status == CommitmentStatus::None) return false;
     if (!has_known_fact(observation, "task." + state.commitment.task_id + ".status", "active")) return false;
-    const bool study_is_known = observation_knows_action(observation, ActionType::StudyAtDesk)
+    const bool study_is_known = observation_knows_action(observation, ActionType::StudyFocused)
+        || observation_knows_action(observation, ActionType::StudyHalfhearted)
         || observation_knows_action(observation, ActionType::StudyAtComputer);
     if (!study_is_known) return false;
     if (state.commitment.status == CommitmentStatus::Active) return true;
@@ -82,7 +83,8 @@ DecisionContext decide(const Observation& observation,
     // A^W -> A^O -> pi(A): W declares what is legal; persistent O exposes
     // only the actions afforded by things the character currently knows.
     for (ActionType action : observation.known_actions) {
-        const bool advances_committed_task = (action == ActionType::StudyAtDesk
+        const bool advances_committed_task = (action == ActionType::StudyFocused
+            || action == ActionType::StudyHalfhearted
             || action == ActionType::StudyAtComputer)
             && commitment_can_bias_study(observation, state);
         const double commitment_bonus = advances_committed_task ? 0.16 : 0.0;
@@ -99,8 +101,22 @@ DecisionContext decide(const Observation& observation,
         case ActionType::StudyAtComputer:
             decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 - personality.procrastination * 0.16 + commitment_bonus, 0.18, "computer can be used for task progress"));
             break;
-        case ActionType::StudyAtDesk:
-            decision.candidates.push_back(candidate(action, 0.07 + task_drive - state.fatigue * 0.22 - personality.procrastination * 0.14 + commitment_bonus, 0.18, "lit desk and materials support studying"));
+        case ActionType::StudyFocused:
+            decision.candidates.push_back(candidate(action,
+                0.05 + task_drive + state.satisfaction * 0.10
+                - state.fatigue * 0.25 - personality.procrastination * 0.18
+                + commitment_bonus,
+                0.18,
+                "lit desk supports sustained focused study"));
+            break;
+        case ActionType::StudyHalfhearted:
+            decision.candidates.push_back(candidate(action,
+                0.06 + task_drive * 0.55 + state.boredom * 0.36
+                + 0.03 * static_cast<double>(state.commitment.suspended_decision_points)
+                - state.fatigue * 0.12 - personality.self_control * 0.18
+                + commitment_bonus,
+                0.16,
+                "lit desk permits partial study when task pressure coexists with distraction"));
             break;
         case ActionType::RestAtBed:
             decision.candidates.push_back(candidate(action, 0.05 + recovery_drive - state.anxiety * 0.10 + commitment_bonus, 0.16, "bed supports recovery from fatigue and screen strain"));
