@@ -32,7 +32,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ID | 状态 | 下一动作 | 判定条件 |
 |---|---|---|---|
 | T08 | 待继续 | 围绕 X/U/P/承诺缺口精读，不再泛列相似 Agent | 每篇给输入、状态、更新、P、动作、验证及可迁移边界；接文献库，不另抄全文 |
-| T09 | **进行中：E0 第一组 fixture** | 已有 `--e0` 可运行的 hidden-wallet paired fixture；下一步扩展 completion visible/hidden 与 observed-wallet paired 条件，固定 seed/P/S 并输出配置元数据 | 第一组须验证相同 O/action support/π；所有 E0 只作受控机制验收，不作为行为预测证据；依赖 Q04/Q07 |
+| T09 | **进行中：E0 paired fixtures** | E0-1 hidden-wallet、E0-2 visible-wallet、E0-3 completion visibility 已由 `--e0` 实际运行并归档；下一步核对 fixture 设计后再扩展历史干预 | 当前三组均固定 world seed/personality/state，未采样动作；结果只验证信息边界控制链，不作为行为预测证据；依赖 Q04/Q07 |
 | T10 | 待决策 | 判断单 session 质量是否为首个实验所需 | 如需才设计显式 ActionQuality；不能让 W 暗读 S，见 Q06 |
 | T11 | 待实验设计 | 检验 task_pressure 与残留紧张是否需要拆开 | 完成后是否有数据要求不同恢复；不要仅因可拆就加字段 |
 | T12 | 待实验设计 | 单因素改变 deadline、疲劳、中断或一个 P 维度 | 相同其余条件/seed，保留负结果；不以更多随机人格替代控制 |
