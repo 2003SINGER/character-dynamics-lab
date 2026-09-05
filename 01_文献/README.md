@@ -1,13 +1,22 @@
 # 本地文献库
 
-更新时间：2026-09-02  
-状态：**28 篇 PDF 已下载并以 `%PDF-` 文件头校验；2 篇已定位但待取得。** 下载只表示可离线阅读，不表示已精读、已认可其中论断，或已完成查新。
+更新时间：2026-09-05  
+状态：**82 篇 PDF 已下载并以 `%PDF-` 文件头校验；4 篇已定位但待取得。** 下载只表示可离线阅读，不表示已精读、已认可其中论断，或已完成查新。
+
+2026-09-05 四批新增共 54 篇，**全部尚未导入 Zotero，也未执行「检索 PDF 元数据」**：
+
+- 心理学/appraisal 4 篇（EMA 2009、Evaluating EMA 2005、Formal Models of Appraisal 2008、Fleeson 2001），核读见 [X 维度与状态动力学](专题核读_X维度与状态动力学_2026-09-05.md)。
+- 三方向近邻 6 篇（GOAP 2006、Utility Theory 2013、Behavior Trees 2022、SOTOPIA 2024、AgentVerse 2024、Social Simulacra 2022），核读见 [三方向近邻](专题核读_三方向近邻_2026-09-05.md)。其中 Behavior Trees 为 198 页**专著**（arXiv 1709.00084v6），非论文。
+- 工程三空白 10 篇（HTN Ch12、SHPE、Possibility Maps、Smart Zones、ETQ、Dual-Utility、Reactivity & Deliberation、Talk of the Town、CiF、Şahin 2007 affordance），核读见 [工程三空白](专题核读_工程三空白_2026-09-05.md)。**其中 8 篇是 Game AI Pro 系列图书章节，不是学术会议/期刊论文，无任何学术索引收录**，引用时须标明性质。
+- **Game AI Pro A 级 34 篇**（4 卷 146 章中按相关度筛出的 A 级 43 章，扣除本库已有的 9 章）。核读见 [Game AI Pro 全景与工程 Gap](专题核读_GameAIPro全景与工程Gap_2026-09-05.md)。**其中逐节核读仅 8 章，其余 35 章已下载并提取文本但未读**，未读状态由 TODO 的 T23b 跟踪。全部为行业书籍章节，无同行评审、无学术索引。
 
 已完成的项目审计入口：[全量近邻精读总表（2026-09-01）](全量近邻精读总表_2026-09-01.md)。它记录了每篇的覆盖范围、对本项目的边界、可借方法和必读顺序。
 
 ## 检索原则
 
 针对值域逆映射/阶段响应、低耦合更新和 Object—Scene 动作所有权的当前定向核读见：[三项 TODO 与机制修改方案](专题核读_三项TODO与机制修改方案_2026-09-05.md)。它核对 FAtiMA-PSI、Two Sides of Appraisal、Temporal Causal Network 与 Hierarchical State Space 的相关方法及证据边界；不是全库重新精读。非线性与阈值已有直接先例，具体分区作为本项目可比较假设保留。
+
+针对 X 维度选择、状态动力学 U_k 形式、P 的落位与 Q01 的定向核读见：[X 维度与状态动力学](专题核读_X维度与状态动力学_2026-09-05.md)。它按「输入 → 表示 → 更新 → P → 动作 → 验证」核对 12 篇（本地 8 + 新增 4），并给出最小 X 维度候选、可搬的 U_k 更新形式、re-appraisal 的实现路径，以及对 Q01 的否定性判定。**该页是本轮唯一的 X 维度文献依据入口，不在此处重复其内容。**
 
 本库围绕完整研究链而建，不把项目缩写为泛泛的 persona 或 role-playing：
 
@@ -49,6 +58,10 @@
 | 动力心理学 | [Hierarchical State Space Affective Dynamics](PDF/2010_Hierarchical_State_Space_Affective_Dynamics.pdf) | [作者公开 PDF](https://www.ppw.kuleuven.be/okp/_pdf/Lodewyckx2011AHSSA.pdf) | 个体差异下的情绪潜在状态与时间动力学 |
 | 动力心理学 | [Temporal Causal Network for Appraisal](PDF/2018_Temporal_Causal_Network_Appraisal_Process.pdf) | [SCITEPRESS](https://www.scitepress.org/PublishedPapers/2018/68674/pdf/index.html) | appraisal 过程的时间因果网络建模 |
 | 动力心理学 | [Modeling Cognitive-Affective Processes with Appraisal and RL](PDF/2023_Cognitive_Affective_Appraisal_and_RL.pdf) | [arXiv](https://arxiv.org/abs/2309.06367) | appraisal 与目标导向学习的计算结合 |
+| 动力心理学 | [EMA: A Process Model of Appraisal Dynamics](PDF/2009_EMA_Process_Model_of_Appraisal_Dynamics.pdf) | [作者公开 PDF](https://stacymarsella.org/publications/pdf/EMA_Dynamics.pdf) | 「appraisal 只读、由 coping 写状态」这一分层的直接依据；**假设过去/现在命题完全可观测，与 O 可陈旧冲突** |
+| 动力心理学 | [Evaluating a Computational Model of Emotion](PDF/2005_Evaluating_a_Computational_Model_of_Emotion.pdf) | [镜像 PDF](http://deadnet.se:8080/ict.usc.edu/pubs/Evaluating%20a%20computational%20model%20of%20emotion.pdf) | EMA 的人类数据评估；**10 条定性趋势对 8 条，无统计检验、未报告样本量** |
+| 动力心理学 | [Formal Models of Appraisal](PDF/2008_Formal_Models_of_Appraisal.pdf) | [作者公开 PDF](https://ii.tudelft.nl/~joostb/files/Broekens_DeGroot_Kosters_Formal%20Emotion%20Modeling%2012-Feb-2007_final.pdf) | appraisal 的形式化记号与阈值守卫；**无时间、无动作接口**，重评需 LTM 是其自述开放问题 |
+| 人格动力学 | [Traits as Density Distributions of States](PDF/2001_Traits_as_Density_Distributions_of_States.pdf) | [课程镜像 PDF](http://simine.com/407/readings/Fleeson_2001.pdf) | P = 状态分布参数 (μ, σ, skew, kurtosis) 的依据；**个体内跨时间分布，不是人群横截面** —— Q01 判定见核读页 |
 | 数据流/状态维护 | [SyncStream: Prototype-based Learning on Concept-drifting Data Streams](PDF/2014_SyncStream_Prototype_based_Learning_on_Concept_Drifting_Data_Streams.pdf) | [ACM DOI](https://doi.org/10.1145/2623330.2623609)；[KDD 2014 会议镜像](https://archive.gersteinlab.org/meetings/s/2014/08.28/kdd2014-i0kdd-meeting-materials/docs/p412.pdf) | 保留历史应按预测代表性而非仅按时近性；**不是**人物心理或角色模型 |
 | 动态行为预测 | [DGPS: Learning evolving user’s behaviors on location-based social networks](PDF/2020_DGPS_Learning_Evolving_User_Behaviors_on_Location_Based_Social_Networks.pdf) | [Springer DOI](https://doi.org/10.1007/s10707-020-00400-3)；[作者公开 PDF](https://people.cs.vt.edu/~clu/Publication/2020/Geoinformatica-Wu-2020.pdf) | 个人偏好、社会连接与时间过程共同预测 check-in；只覆盖本项目“动态行为预测”一侧，不含主客观分离或主观状态更新 |
 | 多主体心理模型 | [PsychSim](PDF/2005_PsychSim_Modeling_Theory_of_Mind_with_Decision_Theoretic_Agents.pdf) | [作者公开 PDF](https://people.ict.usc.edu/~pynadath/Papers/ijcai05.pdf) | factored ground-truth decision state、主体 belief、偏好决策与有限 mental-model revision 的直接先例；其 World 不应直接等同为对象化可执行世界层 |
@@ -56,6 +69,22 @@
 | 交互叙事 | [BDI Model for Narrative Generation](PDF/2013_BDI_Model_for_Narrative_Generation.pdf) | [AIIDE](https://ojs.aaai.org/index.php/AIIDE/article/view/12627) | 以 belief/desire/intention 建模角色动机与动作；belief 实现假定全知，不能替代局部可观测问题 |
 | 动态心智评测 | [DYNToM](PDF/2025_DYNToM_Dynamic_Theory_of_Mind_Benchmark.pdf) | [ACL](https://aclanthology.org/2025.acl-long.1171/) | 连续情境中的 belief–emotion–intention–action 轨迹与转移评测；是动态状态合理性问题的直接近邻 |
 | 角色模拟/评测 | [PersonaArena](PDF/2026_PersonaArena_Dynamic_Simulation_for_Evaluating_and_Enhancing.pdf) | [ACL](https://aclanthology.org/2026.findings-acl.471/) | 环境 agent 更新环境与角色状态，并评测行为连贯性；直接削弱“闭环模拟+一致性评测”作为创新 |
+| NPC 动机/规划 | [Three States and a Plan: The A.I. of F.E.A.R.](PDF/2006_GOAP_Three_States_and_a_Plan_FEAR.pdf) | [GDC 2006](https://www.gamedevs.org/uploads/three-states-plan-ai-of-fear.pdf) | GOAP 原始文献：Goal Set 与 Action Set 解耦、**SmartObject**、失败知识写入 working memory 后重规划；直接对应 Q04/Q05/Q07 |
+| NPC 决策/utility | [An Introduction to Utility Theory](PDF/2013_Utility_Theory_Introduction_GameAIPro.pdf) | [Game AI Pro](https://www.gameaipro.com/GameAIPro/GameAIPro_Chapter09_An_Introduction_to_Utility_Theory.pdf) | 响应曲线、**分段线性曲线**（Q01 的正确归属）、分桶/dual utility、**inertia**（承诺与迟滞的工程先例）；The Sims 系列实践 |
+| 反应式控制 | [Behavior Trees in Robotics and AI](PDF/2022_Behavior_Trees_in_Robotics_and_AI_Book.pdf) | [arXiv 1709.00084v6](https://arxiv.org/abs/1709.00084) | 198 页**专著**非论文；BT 如何泛化 FSM/HFSM/subsumption/teleo-reactive/决策树。**无跨轮状态，与本项目前向动力学不同层** |
+| Agent 社会/评测 | [SOTOPIA](PDF/2024_SOTOPIA_Interactive_Evaluation_Social_Intelligence.pdf) | [arXiv](https://arxiv.org/abs/2310.11667) | 90 社会场景、**私有目标导致信息不对称**、episode 末 7 维评分含 BELIEF/SECRET；**是行为真值 A\* 的候选语料来源**，但评测发生在事后而非揭晓前 |
+| Agent 社会/群体 | [AgentVerse](PDF/2024_AgentVerse_MultiAgent_Collaboration.pdf) | [arXiv](https://arxiv.org/abs/2308.10848) | 四阶段循环：专家招募→协同决策→动作执行→评估→新状态；**无个体内部状态**，评测群体配置 |
+| Agent 社会/原型 | [Social Simulacra](PDF/2022_Social_Simulacra_Populated_Prototypes.pdf) | [Stanford HCI](https://hci.stanford.edu/publications/2022/Park_SocialSimulacra_UIST22.pdf) | 由设计 brief 生成 agent population 供 red-team；N=16 设计者研究，**无下一行为预测评测** |
+| 规划/HTN | [Exploring HTN Planners through Example](PDF/2013_HTN_Exploring_HTN_Planners_through_Example.pdf) | [Game AI Pro Ch12](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf) | world state 是**角色所知的世界**而非世界本身；expected effects 只在规划期生效；**MTR** 编码计划优先级；前向分解支持部分计划（GOAP 后向搜索做不到）。与 GOAP 有同厂速度对比 |
+| 规划/HTN | [SHPE: HTN Planning for Video Games](PDF/2014_SHPE_HTN_Planning_for_Video_Games.pdf) | [Springer CCIS 504](https://link.springer.com/chapter/10.1007/978-3-319-14923-3_9) | 学术侧 HTN-for-games；SimpleFPS domain 毫秒级测量；引述 Killzone 3 / Transformers 3 实测规模（**计划长度 ≤4、NPC <12、约 1 计划/秒**） |
+| 未观测状态 | [Possibility Maps for Opportunistic AI](PDF/2015_Possibility_Maps_for_Opportunistic_AI.pdf) | [Game AI Pro 2 Ch7](http://www.gameaipro.com/GameAIPro2/GameAIPro2_Chapter07_Possibility_Maps_for_Opportunistic_AI_and_Believable_Worlds.pdf) | 对未观测状态维护 possibility/probability 分布、按传播规则演化、冲突于观测时实例化、支持 forking 推迟决策。**机制可借但方向相反**：目标是推迟提交真值（作者自述 technically cheating），不是真值/信念对照 |
+| Scene 组合 | [Smart Zones to Create the Ambience of Life](PDF/2015_Smart_Zones_to_Create_the_Ambience_of_Life.pdf) | [Game AI Pro 2 Ch11](http://www.gameaipro.com/GameAIPro2/GameAIPro2_Chapter11_Smart_Zones_to_Create_the_Ambience_of_Life.pdf) | role → behavior → timeline → 同步点 → 触发器的 Living Scene authoring；**主角色行为结束会取消所有非主角色行为**（组合动作取消语义，对应 Q08） |
+| **环境查询/主观视图** | [Asking the Environment Smart Questions (ETQ)](PDF/2013_Asking_the_Environment_Smart_Questions.pdf) | [Game AI Pro Ch33](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter33_Asking_the_Environment_Smart_Questions.pdf) | **对 Q04/Q05/Q07/Q08 最有用的一篇**：context object 定义 subjective world view；生成器按 "AI is aware of" 过滤；**同一 test 兼作 condition 与 weight**；validity test 在选择后持续校验（"oftentimes not the same thing"） |
+| 决策/分桶 | [Dual-Utility Reasoning](PDF/2015_Dual_Utility_Reasoning.pdf) | [Game AI Pro 2 Ch3](http://www.gameaipro.com/GameAIPro2/GameAIPro2_Chapter03_Dual-Utility_Reasoning.pdf) | rank（绝对，分类别）+ weight（相对，类内加权随机）四步算法；Zoo Tycoon 2 用 **rank 抬升**实现情境性承诺（树上 rank≈5、表演 98–102、死亡 1e6） |
+| 中断语义 | [Reactivity and Deliberation](PDF/2013_Reactivity_and_Deliberation_in_Decision_Making.pdf) | [Game AI Pro Ch11](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter11_Reactivity_and_Deliberation_in_Decision-Making_Systems.pdf) | "reactivity 关乎中断、deliberation 关乎维持，二者是 conceptual antipodes"；任务管理需 **starting / canceling / completing conditions** 三类；感知滞回用于**去抖**而非质变 |
+| 局部可观测 | [Talk of the Town: Character Knowledge Phenomena](PDF/2017_Simulating_Character_Knowledge_Phenomena_TalkOfTheTown.pdf) | [Game AI Pro 3 Ch37](http://www.gameaipro.com/GameAIPro3/GameAIPro3_Chapter37_Simulating_Character_Knowledge_Phenomena_in_Talk_of_the_Town.pdf) | **`W ≠ O` 的最强先例**：ground-truth value 与 belief facet 显式分离，facet 带 Predecessor/Parents/Evidence/Strength/**Accuracy**，11 类证据类型学，信念修正按证据强度比较。见[研究问题页 §6.1](../00_研究设计/前台问题与候选创新.md) |
+| 社会模拟/角色逻辑 | [An Architecture for Character-Rich Social Simulation (CiF)](PDF/2013_Architecture_for_Character_Rich_Social_Simulation.pdf) | [Game AI Pro Ch43](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter43_An_Architecture_for_Character-Rich_Social_Simulation.pdf) | **已补上原 Comme il Faut 缺口**（Mateas & McCoy 本人撰写的架构章）：Traits（永久）/Statuses（临时带 duration）；**私有 social network vs 公开 relationship，须经 exchange 才转化**；influence rules 谓词左部→权重右部；SFKB 保留完整历史（是强 raw-history 基线） |
+| affordance 正式化 | [To Afford or Not to Afford](PDF/2007_To_Afford_or_Not_to_Afford_Formalization.pdf) | [Adaptive Behavior 15(4):447–472](https://journals.sagepub.com/doi/abs/10.1177/1059712307084689) | affordance = `(effect, (entity, behavior))`，**三个分量均以 agent 感知为准、关系存放在 agent 侧**；以 effect 为索引可直接作规划算子；三个视角（agent/observer/environment）显式分离。**机器人论文，与心理/游戏 NPC 无关，只搬骨架** |
 
 > SyncStream 文件由 KDD 2014 会议镜像获取。该镜像 TLS 证书已过期，下载时仅为取得用户指定的公开论文而绕过证书校验；随后已校验 `%PDF-` 文件头、首页标题、页码（412 起）及 SHA-256：`9E8A74135B3CDDFC1E21868D8BC6ADF21D3B5D10790658DA3AED2A5B08A3C259`。其规范书目信息以 ACM DOI 为准。
 
@@ -69,6 +98,13 @@
 4. [BehaviorChain](PDF/2025_BehaviorChain.pdf)：核验 raw history/context 如何直接得到下一行为；它可提供预测任务，却不替代内部状态动力学。
 5. [FAtiMA](PDF/2012_FAtiMA_Creating_Adaptive_Affective_Autonomous_NPCs.pdf)（EMA 附件待取得）：核验事件怎样进入 belief/memory/appraisal/affect 并影响行为。
 
+另有两份**工程对照清单**，做 T18 查新或任何"机制新颖"表述前，先过一遍：
+
+- [三方向近邻核读 §2](专题核读_三方向近邻_2026-09-05.md)：项目当前的 π(A)、承诺惯性、目标优先级、对象动作、前置条件校验 与 2005–2013 年 utility-AI / GOAP 实践的逐条对应物。
+- [工程三空白核读 §5](专题核读_工程三空白_2026-09-05.md)：**`W ≠ O` 的先例清单**。Talk of the Town 已实现 ground-truth 与 belief facet 的显式分离、错误信念、证据来源追踪与 Accuracy 对照；HTN 的 world state 与 ETQ 的 context object 是另外两条佐证。**这一条比上一轮清单更硬，直接覆盖原本认为最站得住的那条差异。**
+- [Game AI Pro 全景与工程 Gap §1](专题核读_GameAIPro全景与工程Gap_2026-09-05.md)：**为什么有技术却没有游戏这么做**。六条 gap，逐条带原文引句。最硬的一条是 V3 C01 §1.3.6 正面否定"模拟内部状态"路线（"weird obsession… misguided"）；另一条是 V3 C34 记录的主动放弃——planner 性能超预期仍被弃用，理由是"wrong level of abstraction"和"too many of them… to care about them in detail"。**§2 给出"LLM 打破了哪几条、没打破哪几条"的对照表，直接决定项目定位。**
+- [工程可复用资产](专题核读_工程可复用资产_2026-09-05.md)（姊妹篇，讲**资产可用性**而非立场）：**代码 11 个包**（官网 `gameaipro.com/code/`，只对得上 V1 与 V3，V2/OE21 无），已下载 3 个存于 `代码/GameAIPro/`，**C09（Utility Theory 导论）链接已实测 404——站点正在腐烂**。`ngram_lib`（1762 行 header-only）的 `Probability_Next_Is(event)` 可直接作 R01 的**非理论基线地板**；`BackgroundAI`（10,758 行小镇模拟器）可作世界底座，或至少抄其 `ActionDefinition`/`ActionInstance` 切法与三类日程组合子（Sequential / WeightedRandom / Simple）。**实验方面最重要的发现是：全 146 章只有 1 个真人受试实验（V3 C04）**，其余命中 "evaluation" 的全是架构里的"评估树"或性能评测。**「83% of players were unable to recognize an AI that was literally nothing more than a random number generator」**——人类感知是低分辨率信道，是"用 held-out NLL 而非人类评分"迄今最强的支持证据。**二阶知识：全库零命中**（`theory of mind`/`second-order`/`nested belief` 检索 0 结果），但这是**有理由的放弃**而非无人区——学术界 ToM 有大量工作，见 TODO R2。
+
 每篇统一填写：`W 如何表示 / O 如何受限 / P 如何进入 / S 如何更新 / affordance 如何产生 / action 如何选 / 真实行为如何用于修正或评价`。不能因为论文含有 world、state、belief、action 任一名词就判定与本项目同构。
 
 ## 已定位、PDF 待取得
@@ -76,9 +112,15 @@
 | 文献 | 已确认信息 | 与项目的严格关系 | 当前阻碍 |
 |---|---|---|---|
 | PSI: *Learning Individual Moving Preference and Social Interaction for Location Prediction* (Wu, Luo, Yang, Shao; IEEE Access 2018; DOI 10.1109/ACCESS.2018.2805831) | 建模 individual moving preference 与 group-level exterior social interaction，并以 pair-wise ridge regression 预测下一地点。 | 仅可比较 `internal preference + external influence → next behavior` 的局部结构；没有可见信息遮罩、世界状态或主观状态转移。 | [学校公开 PDF](https://dm.uestc.edu.cn/wp-content/uploads/paper/Learning%20Individual%20Moving%20Preference%20and%20Social%20Interaction%20for%20Location%20Prediction.pdf) 当前连接超时；IEEE 自动下载端返回 418。 |
-| EMA: *A Domain-Independent Framework for Modeling Emotion* (Gratch & Marsella; Cognitive Systems Research 2004; DOI 10.1016/j.cogsys.2004.02.002) | appraisal/coping 将感知、规划、对话管理等连入虚拟人物情绪与行为生成。 | 是主观状态更新机制的基础近邻，不是当前 LLM 角色系统评测。 | 作者旧公开 PDF 链接现返回 404；已导入 Zotero 规范元数据和 DOI，待取得可验证附件。 |
+| EMA: *A Domain-Independent Framework for Modeling Emotion* (Gratch & Marsella; Cognitive Systems Research 2004; DOI 10.1016/j.cogsys.2004.02.002) | appraisal/coping 将感知、规划、对话管理等连入虚拟人物情绪与行为生成。 | 是主观状态更新机制的基础近邻，不是当前 LLM 角色系统评测。 | 作者旧公开 PDF 链接现返回 404；已导入 Zotero 规范元数据和 DOI，待取得可验证附件。**部分缓解**：2026-09-05 已取得同作者 2009 年 *EMA: A Process Model of Appraisal Dynamics*（自述为 EMA 的 updated description），其 appraisal 维度清单含 2004 版没有的 `expectedness`；2004 原篇仅用于核对版本差异。 |
+| ~~*Comme il Faut: A System for Authoring Playable Social Models* (McCoy, Treanor, Samuel, Wardrip-Fruin, Mateas; AIIDE 2011)~~ | **2026-09-05 已关闭**：取得 Mateas & McCoy 本人撰写的 CiF 架构章节（Game AI Pro 卷一 Ch43），覆盖架构全部要素。 | 同上，且已提取 trait/status、私有 network vs 公开 relationship、influence rules、SFKB 四条可用结论。 | ~~galley 链接全部 404~~ 不再需要。若日后要核对 AIIDE 2011 六页短文与图书章节的**版本差异**，再走 Semantic Scholar / OA.mg 全文入口。 |
+| *CreatureSmarts: The Art and Architecture of a Virtual Brain* (Burke, Isla, Downie, Ivanov, Blumberg; GDC 2001, pp.147–166) | MIT Media Lab Synthetic Characters 组的 C4 架构，GOAP 底层 agent 架构的直接来源。 | 虚拟角色认知架构的祖先；可用来判断项目架构在多大程度上重走了既有路径。 | 尚未检索公开全文；GDC 2001 论文集多数未公开线上。 |
+| *Social Activities: Implementing Wittgenstein* (Evans, Barnet; GDC 2002) | 把维特根斯坦语言游戏式的社会活动实现为游戏 AI 结构。 | Versu 一脉的早期工作；与 Comme il Faut 同为「社会规则可计算」的代表。 | 尚未检索；GDC 2002 论文集公开性未知。 |
 
 ## 尚待补齐/核验
 
+- **落地游戏工程三块空白已于 2026-09-05 补齐**（HTN、affordance 正式化、中断/部分失败语义），核读见 [工程三空白](专题核读_工程三空白_2026-09-05.md)。
+- **Game AI Pro 覆盖问题已解决**：全 4 卷 146 章（官网宣称 149，目录实列 146）已建完整分级清单，A 级 43 章全部下载到位。见 [Game AI Pro 全景与工程 Gap](专题核读_GameAIPro全景与工程Gap_2026-09-05.md) §5 附录。
+- **当前最大的未读量**：A 级 43 章中**逐节核读仅 8 章**，其余 35 章已下载并提取文本但未读。B 级 30 章未下载、未读。C 级 73 章（寻路/转向/人群/赛车/摄像机/动画/MCTS 等）判定为与机制链无对应，不读，但该排除须在 T18 查新报告中显式声明理由。跟踪见 TODO 的 T23b。
 - 原始对话中提到的心理学书章、用户建模、AI Town、PersonaForge GitHub 等，需要作为“实现或理论线索”另行登记；它们不能替代论文阅读。
 - 每篇论文需先完成：题目/版本/作者核对、任务与数据、状态定义、信息可见性、评测、可比与不可比边界；之后才可写入近邻地图或研究问题。
