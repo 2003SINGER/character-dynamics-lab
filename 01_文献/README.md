@@ -102,6 +102,8 @@
 
 另有两份**工程对照清单**，做 T18 查新或任何"机制新颖"表述前，先过一遍：
 
+- [Paper-0 近邻与 LIGHT 路线审计](专题审计_Paper0近邻与LIGHT路线_2026-09-05.md)：冻结首篇的三项可失败检验，并把 LIGHT 定为 **30–50 条准入审计候选**，不是已可用数据源；PersonaForge、ThinkPersona、AdaMARP 仅按职责登记为待复核近邻。
+
 - [三方向近邻核读 §2](专题核读_三方向近邻_2026-09-05.md)：项目当前的 π(A)、承诺惯性、目标优先级、对象动作、前置条件校验 与 2005–2013 年 utility-AI / GOAP 实践的逐条对应物。
 - [工程三空白核读 §5](专题核读_工程三空白_2026-09-05.md)：**`W ≠ O` 的先例清单**。Talk of the Town 已实现 ground-truth 与 belief facet 的显式分离、错误信念、证据来源追踪与 Accuracy 对照；HTN 的 world state 与 ETQ 的 context object 是另外两条佐证。**这一条比上一轮清单更硬，直接覆盖原本认为最站得住的那条差异。**
 - [Game AI Pro 全景与工程 Gap §1](专题核读_GameAIPro全景与工程Gap_2026-09-05.md)：**为什么有技术却没有游戏这么做**。六条 gap，逐条带原文引句。最硬的一条是 V3 C01 §1.3.6 正面否定"模拟内部状态"路线（"weird obsession… misguided"）；另一条是 V3 C34 记录的主动放弃——planner 性能超预期仍被弃用，理由是"wrong level of abstraction"和"too many of them… to care about them in detail"。**§2 给出"LLM 打破了哪几条、没打破哪几条"的对照表，直接决定项目定位。**
