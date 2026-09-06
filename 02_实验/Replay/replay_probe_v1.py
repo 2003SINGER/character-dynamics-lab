@@ -34,7 +34,7 @@ def fit_stateful(rows, l2, means=None, scales=None):
         loss = loss / len(sets) + 0.5*l2*np.dot(q,q); g = g/len(sets) + l2*q
         return loss, g
     result = minimize(lambda q: fg(q), np.zeros(2*d), jac=True, method="L-BFGS-B", options={"maxiter":1000,"gtol":1e-8})
-    return {"probe_version":PROBE_VERSION,"weights_theta":result.x[:d].tolist(),"weights_w":result.x[d:].tolist(),"lambda":l2,"means":means.tolist(),"scales":scales.tolist(),"optimizer":{"method":"L-BFGS-B","max_iter":1000,"gtol":1e-8,"success":bool(result.success),"iterations":int(result.nit)}}
+    return {"probe_version":PROBE_VERSION,"weights_theta":result.x[:d].tolist(),"weights_w":result.x[d:].tolist(),"lambda":l2,"means":means.tolist(),"scales":scales.tolist(),"optimizer":{"method":"L-BFGS-B","max_iter":1000,"gtol":1e-8,"initialization":"zeros","deterministic":True,"success":bool(result.success),"iterations":int(result.nit)}}
 
 def fit_no_state(rows, l2, means=None, scales=None):
     sets, ys, means, scales = _design(rows, means, scales); d=sets[0].shape[1]
@@ -45,7 +45,7 @@ def fit_no_state(rows, l2, means=None, scales=None):
             loss-=np.log(max(p[y],1e-300)); g+=(p-target)@x
         return loss/len(sets)+0.5*l2*np.dot(theta,theta), g/len(sets)+l2*theta
     result=minimize(lambda q: fg(q), np.zeros(d), jac=True, method="L-BFGS-B", options={"maxiter":1000,"gtol":1e-8})
-    return {"probe_version":PROBE_VERSION,"weights_theta":result.x.tolist(),"weights_w":[0.0]*d,"lambda":l2,"means":means.tolist(),"scales":scales.tolist(),"optimizer":{"method":"L-BFGS-B","max_iter":1000,"gtol":1e-8,"success":bool(result.success),"iterations":int(result.nit)}}
+    return {"probe_version":PROBE_VERSION,"weights_theta":result.x.tolist(),"weights_w":[0.0]*d,"lambda":l2,"means":means.tolist(),"scales":scales.tolist(),"optimizer":{"method":"L-BFGS-B","max_iter":1000,"gtol":1e-8,"initialization":"zeros","deterministic":True,"success":bool(result.success),"iterations":int(result.nit)}}
 
 def predict(model, features, state):
     x=(np.asarray(features,float)-np.asarray(model["means"]))/np.asarray(model["scales"]); q=np.asarray(model["weights_theta"])+float(state)*np.asarray(model["weights_w"]); z=x@q; z-=z.max(); p=np.exp(z); return (p/p.sum()).tolist()

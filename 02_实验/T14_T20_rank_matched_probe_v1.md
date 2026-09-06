@@ -19,7 +19,7 @@ z(t,a) = theta^T f(t,a) + S_t * w^T f(t,a)
 pi(a) = softmax(z(t,a))
 ```
 
-唯一 learnable parameters 是 `{theta,w}`。训练器位于 Python `Replay/replay_probe_v1.py`，使用 conditional multinomial NLL + 不惩罚 intercept 的 L2（本模型无 intercept）、L-BFGS、`max_iter=1000`、`gtol=1e-8`、seed `20260907`；lambda 网格 `{1e-4,1e-3,1e-2,1e-1,1}`，只由 train/validation 选择。train-only means/std（零方差 std=1）与 weights 一起写入 model/manifest。
+唯一 learnable parameters 是 `{theta,w}`。训练器位于 Python `Replay/replay_probe_v1.py`，使用 conditional multinomial NLL + 不惩罚 intercept 的 L2（本模型无 intercept）、L-BFGS、零向量初始化、`max_iter=1000`、`gtol=1e-8`；`seed=20260907` 只用于 split/permutation（优化器本身 deterministic）。lambda 网格 `{1e-4,1e-3,1e-2,1e-1,1}`，只由 train/validation 选择。train-only means/std（零方差 std=1）与 weights 一起写入 model/manifest。
 
 ## Fair comparison
 
