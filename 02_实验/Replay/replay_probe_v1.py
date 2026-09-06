@@ -35,7 +35,7 @@ def fit_stateful(rows, l2, means=None, scales=None):
         return loss, g
     history=[]
     def cb(q):
-        obj, grad=fg(q); history.append({"iteration":len(history)+1,"objective":float(obj),"gradient_norm":float(np.linalg.norm(grad))})
+        obj, grad=fg(q); reg=0.5*l2*np.dot(q,q); data=obj-reg; history.append({"iteration":len(history)+1,"objective":float(obj),"data_nll":float(data),"l2_penalty":float(reg),"gradient_norm":float(np.linalg.norm(grad)),"theta_norm":float(np.linalg.norm(q[:d])),"w_norm":float(np.linalg.norm(q[d:]))})
     result = minimize(lambda q: fg(q), np.zeros(2*d), jac=True, method="L-BFGS-B", callback=cb, options={"maxiter":1000,"gtol":1e-8})
     obj, grad=fg(result.x); data_nll=obj-0.5*l2*np.dot(result.x,result.x)
     return {"probe_version":PROBE_VERSION,"weights_theta":result.x[:d].tolist(),"weights_w":result.x[d:].tolist(),"lambda":l2,"means":means.tolist(),"scales":scales.tolist(),"optimization_history":history,"optimizer":{"method":"L-BFGS-B","max_iter":1000,"gtol":1e-8,"initialization":"zeros","deterministic":True,"success":bool(result.success),"status":int(result.status),"message":str(result.message),"iterations":int(result.nit),"function_evaluations":int(result.nfev),"gradient_evaluations":int(getattr(result,'njev',-1)),"final_objective":float(obj),"final_data_nll":float(data_nll),"final_l2_penalty":float(obj-data_nll),"final_gradient_norm":float(np.linalg.norm(grad))}}
@@ -50,7 +50,7 @@ def fit_no_state(rows, l2, means=None, scales=None):
         return loss/len(sets)+0.5*l2*np.dot(theta,theta), g/len(sets)+l2*theta
     history=[]
     def cb(q):
-        obj, grad=fg(q); history.append({"iteration":len(history)+1,"objective":float(obj),"gradient_norm":float(np.linalg.norm(grad))})
+        obj, grad=fg(q); reg=0.5*l2*np.dot(q,q); data=obj-reg; history.append({"iteration":len(history)+1,"objective":float(obj),"data_nll":float(data),"l2_penalty":float(reg),"gradient_norm":float(np.linalg.norm(grad)),"theta_norm":float(np.linalg.norm(q)),"w_norm":0.0})
     result=minimize(lambda q: fg(q), np.zeros(d), jac=True, method="L-BFGS-B", callback=cb, options={"maxiter":1000,"gtol":1e-8})
     obj, grad=fg(result.x); data_nll=obj-0.5*l2*np.dot(result.x,result.x)
     return {"probe_version":PROBE_VERSION,"weights_theta":result.x.tolist(),"weights_w":[0.0]*d,"lambda":l2,"means":means.tolist(),"scales":scales.tolist(),"optimization_history":history,"optimizer":{"method":"L-BFGS-B","max_iter":1000,"gtol":1e-8,"initialization":"zeros","deterministic":True,"success":bool(result.success),"status":int(result.status),"message":str(result.message),"iterations":int(result.nit),"function_evaluations":int(result.nfev),"gradient_evaluations":int(getattr(result,'njev',-1)),"final_objective":float(obj),"final_data_nll":float(data_nll),"final_l2_penalty":float(obj-data_nll),"final_gradient_norm":float(np.linalg.norm(grad))}}

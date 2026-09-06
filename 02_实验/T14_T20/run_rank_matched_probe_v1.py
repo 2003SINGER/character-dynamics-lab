@@ -5,7 +5,7 @@ This is an orchestration/dev-smoke tool, not a formal LIGHT evaluation.  All
 world/scene/transition/appraisal definitions remain frozen in Replay modules.
 """
 from __future__ import annotations
-import argparse, hashlib, json, random, sys, csv
+import argparse, hashlib, json, random, sys, csv, datetime, platform, subprocess, time
 from pathlib import Path
 import numpy as np
 
@@ -57,6 +57,11 @@ def split(records):
     n=len(ids); ntr=max(1,int(round(n*.70))); nv=max(1,int(round(n*.15))) if n>=3 else 0
     return {"train":ids[:ntr],"validation":ids[ntr:ntr+nv],"test":ids[ntr+nv:]}, ids
 
+def cyclic_donors(tids, seed=SEED):
+    """Deterministic no-self donor mapping; empty when a horizon is singleton."""
+    ids=list(tids); rng=random.Random(seed); rng.shuffle(ids)
+    return {} if len(ids)<2 else dict(zip(ids,ids[1:]+ids[:1]))
+
 def pick_lambda(train, valid, stateful, means, scales, condition):
     best=None; trials=[]
     for lam in probe.LAMBDA_GRID:
@@ -75,7 +80,13 @@ def metrics(model, rows, state_override=None):
         p=probe.predict(model,r["features"],r.get("state",0.) if state_override is None else state_override(r)); order=sorted(range(len(p)),key=lambda i:p[i],reverse=True); rank=order.index(int(r["gold_index"]))+1; nll-=np.log(max(p[int(r["gold_index"])],1e-300)); ranks.append(rank); top+=rank==1
     return {"nll":float(nll/len(rows)),"bits_per_action":float(nll/len(rows)/np.log(2)),"top1":top/len(rows),"mrr":float(np.mean([1/r for r in ranks])),"mean_rank":float(np.mean(ranks)),"rows":len(rows)}
 
+def stratified(model, rows, state_override=None):
+    groups={}
+    for r in rows: groups.setdefault(str(len(r["features"]) if len(r["features"])<5 else "5+"),[]).append(r)
+    return {k:metrics(model,v,state_override) for k,v in sorted(groups.items())}
+
 def main():
+    started=time.time(); started_utc=datetime.datetime.now(datetime.timezone.utc).isoformat()
     ap=argparse.ArgumentParser(); ap.add_argument("replay",type=Path); ap.add_argument("output",type=Path); ap.add_argument("--max-trajectories",type=int,default=50); ap.add_argument("--dev-smoke",action="store_true"); ap.add_argument("--overwrite-dev-run",action="store_true"); args=ap.parse_args()
     if args.output.exists() and any(args.output.iterdir()) and not args.overwrite_dev_run:
         raise RuntimeError(f"output directory is non-empty; choose a new path or pass --overwrite-dev-run: {args.output}")
@@ -89,6 +100,7 @@ def main():
     def rows_for(kind, part): return [r for r in all_rows[kind] if r["trajectory_id"] in split_map[part]]
     args.output.mkdir(parents=True,exist_ok=True)
     (args.output/"split.json").write_text(json.dumps({"seed":SEED,"trajectory_order":shuffled,"partitions":split_map,"dev_smoke":args.dev_smoke},indent=2)+"\n",encoding="utf8")
+    if not records: raise RuntimeError("records is empty")
     models={}; summary={}; all_trials=[]
     common_train=[r for r in all_rows["theory"] if r["trajectory_id"] in split_map["train"]]
     _, _, means, scales = probe._design(common_train)
@@ -97,25 +109,30 @@ def main():
     # Fit a common base feature normalization and lambda selection per condition.
     for kind in ("activity","support","theory"):
         tr,va,te=rows_for(kind,"train"),rows_for(kind,"validation"),rows_for(kind,"test")
+        if not tr: raise RuntimeError(f"{kind} train split has zero scored rows")
+        if not va: raise RuntimeError(f"{kind} validation split has zero scored rows")
+        if not te: raise RuntimeError(f"{kind} dev_holdout split has zero scored rows")
+        print(f"[{kind}] fitting lambda grid {list(probe.LAMBDA_GRID)}", flush=True)
         lam,model,val_nll,trials=pick_lambda(tr,va,True,means,scales,kind); all_trials.extend(trials)
-        models[f"{kind}_s"] = model; summary[f"{kind}-S"]={"train_rows":len(tr),"validation_rows":len(va),"dev_holdout_rows":len(te),"lambda":lam,"validation_nll":val_nll,"dev_holdout_nll":probe.evaluate(model,te)}
+        models[f"{kind}_s"] = model; summary[f"{kind}-S"]={"train_rows":len(tr),"validation_rows":len(va),"dev_holdout_rows":len(te),"lambda":lam,"validation_nll":val_nll,"dev_holdout_nll":probe.evaluate(model,te),"metrics":metrics(model,te),"candidate_count_stratified":stratified(model,te)}; print(f"[{kind}] selected lambda={lam} validation_nll={val_nll:.6f} iterations={model['optimizer']['iterations']} grad_norm={model['optimizer']['final_gradient_norm']:.3g}", flush=True)
     tr,va,te=rows_for("theory","train"),rows_for("theory","validation"),rows_for("theory","test")
-    lam,model,val_nll,trials=pick_lambda(tr,va,False,means,scales,"retrained-no-S"); all_trials.extend(trials); models["retrained_no_s"]=model; summary["retrained-no-S"]={"lambda":lam,"validation_nll":val_nll,"dev_holdout_nll":probe.evaluate(model,te)}
+    lam,model,val_nll,trials=pick_lambda(tr,va,False,means,scales,"retrained-no-S"); all_trials.extend(trials); models["retrained_no_s"]=model; summary["retrained-no-S"]={"lambda":lam,"validation_nll":val_nll,"dev_holdout_nll":probe.evaluate(model,te),"metrics":metrics(model,te),"candidate_count_stratified":stratified(model,te)}
     theory=models["theory_s"]
-    summary["Theory zeroed-S"]={"dev_holdout_nll":probe.evaluate(theory,te,lambda r:0.0)}
+    summary["Theory zeroed-S"]={"dev_holdout_nll":probe.evaluate(theory,te,lambda r:0.0),"metrics":metrics(theory,te,lambda r:0.0)}
     by_h={}
-    for r in te: by_h.setdefault(r["horizon_index"],{}).setdefault(r["trajectory_id"],r["state"])
+    for r in te: by_h.setdefault(r["horizon_index"],{}).setdefault(r["trajectory_id"],r)
     rng=random.Random(SEED); donor_map={}; perm_rows=[]
     for h, states in by_h.items():
-        tids=list(states); rng.shuffle(tids)
-        if len(tids)>1:
-            rotated=tids[1:]+tids[:1]
-            for recipient, donor in zip(tids,rotated):
-                donor_map[(recipient,h)]=states[donor]
-                perm_rows.append({"trajectory_id":recipient,"horizon_index":h,"donor_trajectory_id":donor,"donor_state":states[donor],"seed":SEED})
+        mapping=cyclic_donors(states,SEED)
+        if mapping:
+            for recipient, donor in mapping.items():
+                donor_map[(recipient,h)]=states[donor]["state"]
+                perm_rows.append({"trajectory_id":recipient,"t":states[recipient]["t"],"horizon_index":h,"original_state":states[recipient]["state"],"donor_trajectory_id":donor,"donor_state":states[donor]["state"],"seed":SEED})
     (args.output/"permutation_map.jsonl").write_text("".join(json.dumps(x)+"\n" for x in perm_rows),encoding="utf8")
     paired=[r for r in te if (r["trajectory_id"],r["horizon_index"]) in donor_map]
-    summary["Theory permuted-S"]={"dev_holdout_nll":probe.evaluate(theory,paired,lambda r:donor_map[(r["trajectory_id"],r["horizon_index"])]),"permutation_seed":SEED,"eligible_paired_rows":len(paired)}
+    summary["Theory permuted-S"]={"dev_holdout_nll":probe.evaluate(theory,paired,lambda r:donor_map[(r["trajectory_id"],r["horizon_index"])]),"permutation_seed":SEED,"eligible_paired_rows":len(paired),"metrics":metrics(theory,paired,lambda r:donor_map[(r["trajectory_id"],r["horizon_index"])] )}
+    correct_paired=probe.evaluate(theory,paired); zero_paired=probe.evaluate(theory,paired,lambda r:0.0); perm_paired=summary["Theory permuted-S"]["dev_holdout_nll"]
+    summary["paired_interventions"]={"eligible_rows":len(paired),"correct_nll":correct_paired,"zeroed_nll":zero_paired,"permuted_nll":perm_paired,"zeroed_minus_correct_nll":zero_paired-correct_paired,"permuted_minus_correct_nll":perm_paired-correct_paired,"zeroed_minus_correct_bits":(zero_paired-correct_paired)/np.log(2),"permuted_minus_correct_bits":(perm_paired-correct_paired)/np.log(2)}
     summary["uniform"]={"dev_holdout_nll":float(np.mean([np.log(len(r["features"])) for r in te]))}
     summary["diagnostics"]={"Activity-S":metrics(models["activity_s"],rows_for("activity","test")),"ActionSupport-S":metrics(models["support_s"],rows_for("support","test")),"Theory-S":metrics(theory,te),"Theory zeroed-S":metrics(theory,te,lambda r:0.0),"Theory permuted-S":metrics(theory,paired,lambda r:donor_map[(r["trajectory_id"],r["horizon_index"])]),"paired_intervention_rows":len(paired)}
     (args.output/"lambda_sweep.json").write_text(json.dumps(all_trials,indent=2)+"\n",encoding="utf8")
@@ -134,6 +151,6 @@ def main():
         md += [f"| {f} | {t:.8g} | {w:.8g} |" for f,t,w in zip(rf.FEATURE_NAMES,model["weights_theta"],model["weights_w"])] + [""]
     (args.output/"learned_weights.md").write_text("\n".join(md),encoding="utf8")
     manifest={"schema_version":"character_dynamics_rank_matched_probe_manifest_v1","probe_version":probe.PROBE_VERSION,"feature_version":rf.FEATURE_VERSION,"git_revision":__import__('subprocess').check_output(["git","rev-parse","HEAD"],text=True).strip(),"source_replay_sha256":hashlib.sha256(args.replay.read_bytes()).hexdigest(),"semantic_rules_sha256":hashlib.sha256((HERE.parent.parent/"T0c_LIGHT"/"compiled_semantics_v1.json").read_bytes()).hexdigest(),"eta":ETA,"seed":SEED,"dev_smoke":args.dev_smoke,"frozen_boundaries":["ReplayRecord","SceneSnapshot","transition compiler","expected-effect","appraisal X","candidate support","gold boundary"],"learnable_parameters":["theta","w"],"temperature":1.0}
-    manifest.update({"evaluation_status":"development_only","formal_test":False,"split_seed":SEED,"permutation_seed":SEED,"optimizer_seed":None,"optimizer_deterministic":True,"lambda_grid":list(probe.LAMBDA_GRID),"selection_rule":"minimum validation NLL; ties choose larger lambda","initialization":"zeros","trajectory_counts":{"total":len(records),"train":len(split_map["train"]),"validation":len(split_map["validation"]),"dev_holdout":len(split_map["test"])},"row_counts":{k:len(v) for k,v in all_rows.items()}})
+    manifest.update({"evaluation_status":"development_only","formal_test":False,"split_seed":SEED,"permutation_seed":SEED,"optimizer_seed":None,"optimizer_deterministic":True,"lambda_grid":list(probe.LAMBDA_GRID),"selection_rule":"minimum validation NLL; ties choose larger lambda","initialization":"zeros","started_at_utc":started_utc,"finished_at_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),"duration_seconds":time.time()-started,"python_version":platform.python_version(),"platform":platform.platform(),"numpy_version":np.__version__,"scipy_version":__import__('scipy').__version__,"runner_sha256":hashlib.sha256(HERE.read_bytes()).hexdigest(),"probe_module_sha256":hashlib.sha256((HERE.parent.parent/"Replay/replay_probe_v1.py").read_bytes()).hexdigest(),"feature_module_sha256":hashlib.sha256((HERE.parent.parent/"Replay/replay_features_v1.py").read_bytes()).hexdigest(),"scene_snapshot_module_sha256":hashlib.sha256((HERE.parent.parent/"Replay/scene_snapshot_v0.py").read_bytes()).hexdigest(),"transition_appraisal_module_sha256":hashlib.sha256((HERE.parent.parent/"Replay/transition_appraisal_v0.py").read_bytes()).hexdigest(),"trajectory_counts":{"total":len(records),"train":len(split_map["train"]),"validation":len(split_map["validation"]),"dev_holdout":len(split_map["test"])},"row_counts":{k:len(v) for k,v in all_rows.items()}})
     (args.output/"training_manifest.json").write_text(json.dumps(manifest,indent=2)+"\n",encoding="utf8"); (args.output/"dev_comparison.summary.json").write_text(json.dumps(summary,indent=2)+"\n",encoding="utf8"); print(json.dumps(summary,indent=2))
 if __name__=="__main__": main()

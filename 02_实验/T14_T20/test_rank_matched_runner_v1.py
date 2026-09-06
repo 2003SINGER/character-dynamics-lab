@@ -15,5 +15,10 @@ def test_current_state_uses_same_t_update_and_unscorable_step():
     rows=runner.state_rows(rec(),RULES); t2=[r for r in rows if r["horizon_index"]==2 and r["kind"]=="theory"][0]
     assert t2["state"] > 0.0
 
+def test_permutation_has_no_self_donor_and_is_seeded():
+    a=runner.cyclic_donors(["a","b","c"], 7); b=runner.cyclic_donors(["a","b","c"], 7)
+    assert a==b and all(k!=v for k,v in a.items())
+    assert runner.cyclic_donors(["only"], 7)=={}
+
 if __name__ == "__main__":
     test_current_state_uses_same_t_update_and_unscorable_step(); print("runner timing tests passed")
