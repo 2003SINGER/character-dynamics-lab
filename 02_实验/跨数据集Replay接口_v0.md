@@ -10,15 +10,18 @@ Episode:
   subject_id: required_or_unknown
   group_id: optional
   split_id: required
+  source_revision: optional_or_unknown
+  source_record_id: optional
   persona_P: optional
   source_dataset: required
   source_license: required_or_unknown
+  source_episode_context: optional
   steps:
     - t: required
       source_O: required_or_unknown
       source_event: optional
       source_action_A_star: required_or_unknown
-      source_context: optional
+      source_step_context: optional
       W: optional
       state_label: optional
       candidate_set_factual: optional
@@ -26,11 +29,15 @@ Episode:
       timestamp: optional
       provenance: observed | annotated | llm_inferred | synthetic_diagnostic | unknown
       provenance_detail: optional
+      field_provenance: optional per-field map with kind/source_ref/model/prompt_version/confidence
 ```
 
 ## 不可逾越的边界
 
 - `source_*` 永远保留；语义标准化另存，不覆盖原字段。
+- `source_episode_context` 与 `source_step_context` 分开命名；不得用一个含义模糊的 `source_context`。
+- `source_revision` 与 `source_record_id` 记录数据版本和原始行/轨迹标识；未知时显式写 `unknown`/`null`。
+- step 级 `provenance` 只是来源摘要；`field_provenance[field].kind` 才是字段级事实边界。
 - `W`、`O`、candidate set 缺失就留空或 `unknown`；LLM 生成的只能命名为 `inferred_W` / `llm_inferred`。
 - `candidate_set_factual` 只能来自数据或可复核环境；`candidate_set_expanded` 是诊断干预，不提供真人 ground truth。
 - factual replay 与 expanded diagnostic 分开报告，后者不能用于证明真人选择。

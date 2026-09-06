@@ -23,6 +23,18 @@ def validate(record: dict, source: str = "record") -> list[str]:
         p = step.get("provenance")
         if p not in PROVENANCE:
             errors.append(f"{source}: steps[{i}] invalid provenance {p!r}")
+        field_provenance = step.get("field_provenance", {})
+        if not isinstance(field_provenance, dict):
+            errors.append(f"{source}: steps[{i}] field_provenance must be an object")
+        else:
+            for field, detail in field_provenance.items():
+                if not isinstance(detail, dict) or detail.get("kind") not in PROVENANCE:
+                    errors.append(f"{source}: steps[{i}] invalid field provenance for {field!r}")
+            action_detail = field_provenance.get("source_action_A_star", {})
+            if isinstance(action_detail, dict) and action_detail.get("kind") == "llm_inferred" and any(
+                step.get(k) is True for k in ("action_is_ground_truth", "source_action_is_ground_truth", "human_ground_truth")
+            ):
+                errors.append(f"{source}: steps[{i}] LLM-inferred action cannot be human ground truth")
         if p == "llm_inferred" and any(step.get(k) is True for k in ("action_is_ground_truth", "source_action_is_ground_truth", "human_ground_truth")):
             errors.append(f"{source}: steps[{i}] LLM-inferred action cannot be human ground truth")
     return errors

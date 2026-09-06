@@ -9,9 +9,11 @@
     "group_id": {"type": ["string", "null"]},
     "split_id": {"type": "string"},
     "source_dataset": {"type": "string"},
+    "source_revision": {"type": ["string", "null"]},
+    "source_record_id": {"type": ["string", "null"]},
     "source_license": {"type": ["string", "null"]},
     "persona_P": {},
-    "source_context": {},
+    "source_episode_context": {},
     "steps": {
       "type": "array",
       "items": {
@@ -22,6 +24,7 @@
           "source_O": {},
           "source_event": {},
           "source_action_A_star": {},
+          "source_step_context": {},
           "W": {},
           "state_label": {},
           "candidate_set_factual": {},
@@ -31,7 +34,23 @@
             "type": "string",
             "enum": ["observed", "annotated", "llm_inferred", "synthetic_diagnostic", "unknown"]
           },
-          "provenance_detail": {}
+          "provenance_detail": {},
+          "field_provenance": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["kind"],
+              "properties": {
+                "kind": {"type": "string", "enum": ["observed", "annotated", "llm_inferred", "synthetic_diagnostic", "unknown"]},
+                "source_ref": {"type": ["string", "null"]},
+                "model": {"type": ["string", "null"]},
+                "prompt_version": {"type": ["string", "null"]},
+                "confidence": {},
+                "uncertainty": {}
+              },
+              "additionalProperties": true
+            }
+          }
         },
         "additionalProperties": true
       }
