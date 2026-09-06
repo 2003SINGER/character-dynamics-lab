@@ -22,7 +22,8 @@ def inspect(e: dict, index: int) -> dict:
         "setting_fields": sorted(e.get("setting", {}).keys()),
         "has_room_objects": bool(e.get("room_objects")),
         "has_room_agents": bool(e.get("room_agents")),
-        "has_future_outcome_field": False,
+        "future_leakage_static_check": "unresolved",
+        "semantic_audit_required": True,
         "notes": [
             "context is actor-specific text supplied by the processed LIGHT record",
             "setting/room graph is source environment and is not copied into W or O wholesale",

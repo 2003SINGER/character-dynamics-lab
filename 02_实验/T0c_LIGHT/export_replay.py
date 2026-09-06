@@ -51,13 +51,16 @@ def record(e: dict, idx: int, split_id: str) -> dict:
         "source_revision": "light-dialog-processed-small7.pkl",
         "source_record_id": f"episode:{idx}",
         "source_license": "LIGHT repository is MIT; processed data terms require separate review.",
-        "persona_P": agents,
+        "persona_P": None,
         "source_episode_context": {
+            "source_agents": agents,
+            "source_persona": agents,
             "setting": e.get("setting"),
             "all_descriptions": e.get("all_descriptions"),
             "character_sequence": list(e.get("character", ())),
             "source_environment_fields": ["setting", "room_objects", "room_agents", "all_descriptions"],
             "observation_boundary": "Only context is used as actor-available O; environment fields remain source context.",
+            "candidate_semantics": "Source-provided available-action list; relation to A^W/A^O unresolved.",
         },
         "steps": steps,
     }

@@ -6,6 +6,7 @@
 
 - 审计前 50 个 episode：41 个含至少一个非空 physical action，共 140 个 physical action turns；606 个 turn 提供 `available_actions`。
 - 导出 41 条 eligible trajectory / 140 steps，已通过 ReplayRecord v0 validator。
+- 全量无损抽取已完成：7,258 条 trajectory / 25,001 physical-action steps；统计见 [full extraction QA](full_extraction_report_v0.md)，全量 JSONL 仅保存在 ignored external-assets。
 - 每步只把 processed record 的 actor-specific `context` 作为 `source_O`；setting、room objects、room agents 保留在 episode/step source context，不把整个 world graph 复制进 `W` 或 `O`。
 - `action`、persona、候选列表和 turn actor 原样保留；dialogue-only turns 不冒充 `A*`。
 
@@ -19,4 +20,5 @@
 py -3 02_实验/T0c_LIGHT/audit_slice.py outputs/external_assets_2026-09-06/LIGHT/light_data.pkl outputs/external_assets_2026-09-06/LIGHT/light_audit_50.json --limit 50
 py -3 02_实验/T0c_LIGHT/export_replay.py outputs/external_assets_2026-09-06/LIGHT/light_data.pkl outputs/external_assets_2026-09-06/LIGHT/light_dev_50.replay.json --limit 50
 py -3 tools/validate_replay_record.py outputs/external_assets_2026-09-06/LIGHT/light_dev_50.replay.json
+py -3 02_实验/T0c_LIGHT/extract_full.py outputs/external_assets_2026-09-06/LIGHT/light_data.pkl outputs/external_assets_2026-09-06/LIGHT
 ```

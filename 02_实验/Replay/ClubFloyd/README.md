@@ -9,6 +9,7 @@
 - 开发切片：`outputs/external_assets_2026-09-06/ClubFloyd/clubfloyd_dev_30.replay.json`（本地忽略目录）
 - 生成器：`../clubfloyd_adapter.py`
 - 结果：30 条 trajectory、30,388 个 observed steps；已通过 ReplayRecord v0 validator。
+- 全量无损抽取：425 条 trajectory、438,188 steps；统计见 [full extraction QA](full_extraction_report_v0.md)，全量 JSONL 仅保存在 ignored external-assets。
 
 ## 映射边界
 
@@ -24,3 +25,9 @@ py -3 tools/validate_replay_record.py outputs/external_assets_2026-09-06/ClubFlo
 ```
 
 这只是结构切片，不是语义准入或机制实验。下一步是逐条审计 W/O/X/S 归属、动作语义损失和 future leakage；审核前不得扩大批量或进入 mechanism loop。
+
+全量抽取与分层 review slice：
+
+```powershell
+py -3 02_实验/Replay/ClubFloyd/extract_full.py outputs/external_assets_2026-09-06/ClubFloyd/raw/cleaned_corpora outputs/external_assets_2026-09-06/ClubFloyd
+```
