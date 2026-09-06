@@ -26,3 +26,7 @@ py -3 02_实验/T0c_LIGHT/extract_full.py outputs/external_assets_2026-09-06/LIG
 全量 QA 已标记两个 source alignment anomaly episode（486、778：actor 不在 source agents，且 A* 在 case-normalized 后不在 candidates）；这两个 episode quarantine，不进入 mechanism loop。候选统计同时报告 exact miss=3、casefold miss=2（24,999/25,001 casefold 命中）。
 
 机制开发视图必须用 `py -3 02_实验/Replay/build_mechanism_dev_view.py <full.replay.jsonl> <mechanism_dev.replay.jsonl>` 生成；脚本会硬排除 `source_episode_context.quarantine == true` 的 trajectory。
+
+## Batch 4–5 dev diagnostic (2026-09-06)
+
+已用 41 条非 quarantine trajectory / 140 steps 跑通 fixed compiled semantics → replay core → candidate scorer → held-out `A*` 链，并生成单事件 remove counterfactual（20 条 trajectory、52 对）。结果位于 `outputs/experiments/LIGHT_compiled_semantics_v0/`；该结果仍是 dev diagnostic，不构成 semantic admission 或 Paper-0 结论。
