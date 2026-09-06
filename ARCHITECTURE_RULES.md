@@ -60,13 +60,17 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 42. A warning is not evidence that a mechanism is wrong; it is a prompt for review.
 43. Every new adapter needs a small schema-validating dev slice before larger downloads or model comparisons.
 44. Preserve negative results, raw outputs, configuration, and errors.
+45. Adapter acceptance is two-stage: schema validation is necessary but not sufficient; a semantic audit must check W/O/X/S ownership, causal availability, action meaning, and provenance.
+46. First adapter slices (roughly 20–50 trajectories) receive near-complete semantic review before scaling. Later batches use stratified sampling plus mandatory review of anomalies, new ontology values, low-confidence/unknown-heavy records, and validator edge cases.
+47. The extraction script may be deterministic while semantic annotations are human/AI-assisted; after review, annotations are saved as versioned frozen data and runtime experiments do not call the reviewing model.
+48. Semantic QA must record what the source says, what the transformation adds or loses, which fields are inferred, and whether any future information was used.
 
 ## Documentation and review
 
-45. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
-46. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
-47. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
-48. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
+49. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
+50. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
+51. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
+52. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
 
 ## Current known baseline
 

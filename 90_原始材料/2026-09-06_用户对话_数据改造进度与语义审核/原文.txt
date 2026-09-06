@@ -1,0 +1,552 @@
+已调用工具
+已调用工具
+看了，这次我只按“数据集改造两条线”算进度，不把 Luna 正在改的 loop 文档算进去。
+两条线现在都还没有进入“批量改造数据 → 喂给 Character Dynamics”的阶段。
+更准确地说：
+```
+数据资产发现        ✅
+准入/字段审计       部分完成
+ReplayRecord统一接口 ✅ 基本好了
+真实dataset adapter  ❌ 还没正式开
+factual/expanded scene ❌ 还没开
+进入mechanism loop   ❌ 还没开
+```
+其中论文公开数据集线明显走得更远；玩家日志线目前主要还在资产登记和准入准备。
+这条目前最成熟。
+它不是只看过论文了，而是真的已经：
+-  固定数据 revision； 
+-  下载 filtered parquet； 
+-  校验 SHA； 
+-  做 30-session 实测； 
+-  做完 527-session 全量结构统计； 
+-  审过时间序、user split、动作类型、click subtype、rationale； 
+-  明确它有哪些字段能当 O、哪些可以当真人 A*； 
+-  明确 exact candidate set 缺失； 
+-  明确官方 split 有 user overlap； 
+-  明确它暂时不能直接当 Paper-0 主实验。 
+所以 OPeRA 当前状态是：
+```
+raw dataset
+    ↓
+字段结构理解          ✅
+准入审计              ✅
+实验边界              ✅
+ReplayRecord adapter   ❌
+scene reconstruction   ❌
+mechanism loop         ❌
+```
+也就是说，我们已经知道怎么吃它，但还没真正把它加工成统一食材。
+而且这没问题，因为 OPeRA 很可能最终只是一个辅助/跨域 dataset，不值得现在硬逼进主线。
+这个也已经实际取得官方 dump、跑过导出器。
+30 个 episode 的结果证明：
+```
+actor
+turn
+private/public information
+O boundary
+```
+这些结构是能恢复的。
+但最大问题是 action surface 大量坍缩成：
+```
+did nothing
+said
+left the conversation
+```
+而且轨迹生成 provenance 不知道究竟是 human / expert / self-play。
+所以它已经完成了：
+```
+小切片导出    ✅
+结构验证      ✅
+准入结论      ✅（结论是不适合）
+```
+它现在的价值主要变成：
+Replay/O-boundary 格式参考，而不是独立行为真值数据。
+这个其实是数据路线的一次成功负结果。
+仓库现在对 LIGHT 的状态仍然很明确：
+T0c：待做 30–50 条轻量准入审计。
+准备核：
+```
+actor
+turn
+persona
+world
+history
+A*
+candidate set
+O 是否能按角色恢复
+future leakage
+物理 action trajectory 长度
+```
+但目前没有 LIGHT adapter、没有切片结果，也没有 T0c 实测报告。
+所以：
+```
+LIGHT论文/工程理解       ✅
+作为数据候选定位          ✅
+实际数据审计              ❌
+ReplayRecord转换          ❌
+```
+我认为它依然是论文数据集线下一块最重要的角色域资产，但不一定要抢在 ClubFloyd 前面。
+这些目前仍然是：
+```
+baseline / representation / semantic asset
+```
+不是正在做的 trajectory adapter。
+也就是说暂时没有必要为了“进度”把它们一个个转换。
+我会画成：
+```
+               资产发现
+                   ✅
+                    │
+       ┌────────────┼────────────┐
+       ↓            ↓            ↓
+    SOTOPIA       OPeRA        LIGHT
+      ✅审计        ✅审计        ⏳待审计
+      ❌准入        ⚠️受限候选     未知
+       │            │             │
+       └────────────┴─────────────┘
+                    ↓
+             ReplayRecord v0
+                    ✅
+                    ↓
+          真正 dataset adapters
+                    ❌
+```
+所以这一条可以说：
+“数据可用性研究”已经做了一大截；“数据改造成我们统一输入”才刚准备开始。
+这一条比第一条晚一个阶段。
+现在仓库已经把资源找得不错了，但真正的数据改造基本还没开始。
+TODO 里 T0f 现在仍然明确标：
+待启动：玩家日志小切片审计。目标是先核 ClubFloyd、PowerWash、AGAIN、FarmQuest 的下载、许可、主体、时间、动作字段以及 factual scene 是否可恢复。
+当前做到了：
+-  找到数据出处； 
+-  核了论文统计： 
+  -  426 transcripts； 
+  -  约 590 games； 
+  -  223,527 context-action pairs； 
+- 判断它非常适合：
+  ```
+  text observation
+  → human A*
+  → next observation
+  ```
+-  定位为第一优先级玩家文本 adapter。 
+但仓库同时明确写着：
+原始 transcript 的长期保存与许可还待单独确认。
+所以现在：
+```
+论文确认           ✅
+规模确认           ✅
+适配价值判断       ✅
+raw transcript audit ❌
+small slice         ❌
+ReplayRecord export ❌
+```
+也就是说 ClubFloyd 连第一个 20–50 trajectory slice 都还没真正产出。
+现在主要是非常强的数据资产发现：
+```
+11,080 players
+222 days
+15.7m gameplay events
+21.2m status records
+726k survey responses
+```
+而且用途已经判断得很清楚：
+```
+长期 S
+session persistence
+progress/interruption
+wellbeing/focus/enjoyment/competence proxies
+```
+但是目前仓库只写：
+先做字段审计，不把它当 next-frame action benchmark。
+没有下载后的 schema audit、没有 CSV 字段映射、没有小切片。
+所以它还是：
+```
+asset discovery ✅
+field audit      ❌
+adapter          ❌
+```
+类似：
+已经知道它非常适合：
+```
+game telemetry
++
+continuous arousal annotation
+↓
+lag / decay / saturation
+```
+而且对我们调整短期 S dynamics 很有价值。
+但现在还停在：
+先做字段审计。
+没有实际 slice。
+也一样。
+已经知道：
+-  32 players × 2； 
+-  约 30 telemetry event types； 
+-  cozy game； 
+-  有 survey； 
+-  timestamp 有已知 bug。 
+这已经足够判断：
+很适合小型 adapter development，但不能拿 timestamp 做严肃动态推断。
+但还没真正转换。
+这个挺有意思。
+Luna 已经实际检查了 JerichoWorld 的公开包，它有：
+```
+state
+next_state
+action
+reward
+valid actions
+graph
+```
+所以对我们：
+```
+W/O-ish state
+candidate actions
+action
+next state
+```
+的接口设计非常有参考价值。
+但它不是 ClubFloyd 那种真人行为，而是 walkthrough/data-collection agent，因此仓库正确地把它降级成：
+工程结构参考，不作为 human A*.
+这算玩家日志线目前唯一真正“打开过数据结构”的资产，但它不是我们的目标真值。
+这个很关键。
+虽然 dataset adapter 还没开，但我们已经解决了最容易后面返工的东西：
+```
+ReplayRecord v0
+```
+现在已经支持：
+```
+source_dataset
+source_revision
+source_record_id
+
+source_episode_context
+
+step:
+  source_O
+  source_event
+  source_action_A*
+  source_step_context
+  W?
+  state_label?
+  candidate_set_factual?
+  candidate_set_expanded?
+
+  field_provenance
+```
+而且明确：
+```
+observed
+annotated
+llm_inferred
+synthetic_diagnostic
+unknown
+```
+分别是什么。
+这意味着接下来真正开 adapter 时，不需要每个 dataset 自己发明世界观。
+这是我看完仓库后最想强调的。
+目前 02_实验/ 真正的数据脚本还是：
+```
+T0b_sotopia/export_slice.py
+
+T0d_OPeRA/
+  audit_opera.py
+  audit_local_parquet.py
+  long_trajectory_stats.py
+```
+它们都是：
+dataset-specific audit scripts
+而不是：
+```
+raw ClubFloyd
+→ ReplayRecord
+
+raw LIGHT
+→ ReplayRecord
+
+raw PowerWash
+→ ReplayRecord
+```
+的正式 adapter。
+所以如果问：
+“两条数据改造路线实际推进到哪？”
+答案不是“已经在改造五个数据集”。
+而是：
+不是各做五个。
+先：
+```
+LIGHT 30–50 episode
+→ raw-field audit
+→ ReplayRecord
+```
+目的不是马上实验，而是测试：
+character/world/action 这种富结构数据是否能进入统一 schema。
+先：
+```
+ClubFloyd 20–50 trajectory
+→ ReplayRecord
+```
+目的测试：
+自然语言 observation + 真人动作能不能进入同一个接口。
+然后我们会第一次得到：
+```
+LIGHT ReplayRecord
+vs
+ClubFloyd ReplayRecord
+```
+两个完全不同来源却能被同一机制入口读取的数据。
+这时候 ReplayRecord v0 才算真正经过现实检验。
+因为它们不是传统 O→A* 数据。
+它们是：
+```
+event trajectory
++
+state proxy
+```
+会真正考验：
+ReplayRecord 当前是不是过度围绕 next-action 数据设计了。
+如果 PowerWash/AGAIN 也能自然进来，而不是硬塞，那这个接口才真的稳。
+所以现在三个方向的实际节奏可以画成：
+```
+论文数据线
+OPeRA/SOTOPIA 已审
+LIGHT 待 adapter
+          \
+           \
+            → ReplayRecord → factual/expanded scene
+           /
+玩家日志线
+ClubFloyd 待 adapter
+PowerWash/AGAIN 待字段审计
+                     ↓
+               mechanism loop
+```
+**数据线还没落后，反而刚好。**因为 Luna 现在正在把 loop 的实验纪律写清楚；等这个落地，第一个 ClubFloyd/LIGHT adapter 开始时，我们就不会一边转换数据一边临时发明“什么算 dev、什么能改机制、什么算语义映射”。这时候再开数据改造正合适。
+然后改造脚本不好的话直接你们亲自来处理也行啊你们最强的不是语义处理吗
+对，而且我现在反而觉得第一批数据就应该允许“我们亲自语义改造”，不要为了形式主义强迫所有东西都自动脚本化。
+脚本最擅长的是：
+```
+读文件
+切 trajectory
+按时间排序
+保留原字段
+hash / split
+导出 ReplayRecord
+```
+但像这些：
+```
+这句话到底算什么事件？
+角色此时知道了什么？
+这个动作属于哪类语义动作？
+某个 object 是否是合理候选？
+这次中断是主动放弃还是外部打断？
+```
+本来就是语义问题。硬写一个 parser，可能还不如我/Luna直接看。
+所以第一批 ClubFloyd / LIGHT 完全可以这样搞：
+```
+raw trajectory
+↓
+确定性脚本做“无脑部分”
+↓
+我 / Luna 逐条做 semantic transformation
+↓
+保存成结构化中间文件
+↓
+从此实验只读这个冻结文件
+```
+关键是：我们处理完以后，结果要变成死数据/死规则，而不是每次跑实验时重新让 AI 判断。
+比如我们人工处理 50 条：
+```
+source_event:
+  raw: "You finally finish the assignment."
+
+semantic_annotation:
+  event_type: task_completion
+  goal_relevance: high
+  interruption: false
+  perceived_progress: completed
+  confidence: high
+
+provenance:
+  kind: llm_inferred
+  model: GPT-5.6 Sol
+  annotation_version: semantic_v0
+```
+保存下来。
+下一轮实验：
+```
+不调用我
+不调用 Luna
+直接读 semantic_v0
+```
+然后如果实验暴露出：
+task_completion 这个语义划分太粗，
+我们再人工修：
+```
+semantic_v0
+→ semantic_v1
+```
+并记录哪些条目变了。
+这和我们前面说的机制 loop 完全一致。
+而且第一批我甚至不建议追求全自动化。
+20～50 条数据最重要的是搞懂：
+数据到底长什么样，我们究竟需要什么语义字段。
+如果一开始就先写：
+```
+ClubFloydSemanticParserV1
+```
+很可能我们连 ontology 都没搞明白，就已经把错误假设写进程序了。
+更好的顺序是：
+```
+第一批 20–50 条
+→ 我们亲自处理
+→ 看哪些判断反复出现
+→ 形成 semantic rule table
+→ 第二批再决定哪些值得自动化
+```
+也就是：
+先人工发现规则，再程序化规则。
+不是反过来。
+而且我们两个 AI 的优势确实就在这里。
+Luna适合：
+```
+批量读本地数据
+整理结构
+写转换结果
+维护版本
+```
+我更适合：
+```
+审语义边界
+看不同案例是不是被错误合并
+判断这个字段究竟属于 W/O/X/S 哪一层
+检查有没有 future leakage
+检查规则是不是偷偷根据 A* 定制
+```
+所以甚至可以做双层：
+```
+Luna 初标
+↓
+我抽查 / 争议样本复核
+↓
+冻结 semantic_v0
+```
+如果遇到真的模糊的样本，不需要假装确定：
+```
+uncertain
+unknown
+multiple plausible interpretations
+```
+都可以直接保留。
+这比一个自动脚本硬输出一个答案科研上更干净。
+后面规模起来以后再决定。
+比如我们人工标了 100 条，发现其中 80% 都是：
+```
+task start
+task completion
+interruption
+resource acquisition
+failure
+social message
+location change
+```
+这种稳定模式，
+那就把它们编译成固定规则。
+剩下 20% 复杂长尾继续：
+```
+人工/LLM semantic annotation
+```
+于是形成：
+```
+deterministic easy cases
++
+frozen AI-assisted hard cases
+```
+以后真正 live LLM 版本再单独做实验。
+所以数据改造路线我现在会改成：
+```
+raw dataset
+↓
+lossless extraction script
+↓
+semantic annotation
+  ├─ deterministic rule
+  ├─ 我/Luna人工处理
+  └─ unknown
+↓
+frozen ReplayRecord
+↓
+scene builder
+↓
+mechanism loop
+```
+不要求所有 semantic transformation 都由脚本完成。
+而且如果某个数据集特别乱，我甚至宁愿我们亲自处理 100 条高质量轨迹，也不愿写一个“自动转换 5000 条但语义全是假的”的 parser。
+首阶段我们追求的不是数据量。
+是：
+搞清楚什么信息值得进入机制，以及怎么进入。
+这正好就是我们最擅长帮你的部分。
+或者脚本处理完你们多审核审核
+对，这个我更赞成。脚本做第一遍，AI 做语义 QA，应该会比“全手工”或者“全自动”都稳。
+我建议以后固定成两级审核：
+- Level 1：脚本自动处理 
+  -  切 trajectory 
+  -  时间排序 
+  -  抽 action / observation 
+  -  candidate set 
+  -  原字段映射 
+  -  provenance 
+  -  生成 ReplayRecord 
+- Level 2：我/Luna 做 semantic audit 
+  -  随机抽样 + 高风险样本全审 
+  -  检查 W/O/X/S 归属 
+  -  检查 future leakage 
+  -  检查 action mapping 是否丢语义 
+  -  检查 factual / expanded 有没有混 
+  -  检查 LLM-inferred 是否被伪装成 observed 
+  -  检查同类事件有没有被映成不同语义 
+  -  检查“脚本虽然格式合法，但语义其实错了”的情况 
+而且不应该只随机抽 5 条看一眼。第一版 adapter 我建议审得比较重：
+前 20–50 条几乎逐条看。
+因为这个阶段我们是在验证 adapter 本身。等发现错误模式稳定以后，后续大批量再做：
+-  普通样本随机抽查； 
+-  异常样本必审； 
+-  新 ontology / 新 action type 必审； 
+-  低置信度必审； 
+-  schema validator 报边界情况必审。 
+这样能形成一种很好的循环：
+```
+脚本转换
+→ AI 审核
+→ 找系统性错误
+→ 改脚本/映射规则
+→ 重跑
+→ 再审核
+→ adapter v1 冻结
+```
+最重要的是：审核不能只是“看起来合理”。
+以后我会专门问这几个问题：
+原数据到底说了什么？
+ 转换后多出了什么？
+ 少掉了什么？
+ 哪些是推断？
+ 这个推断是否依赖未来？
+ 如果换一个角色/场景，这条规则还能成立吗？
+如果某批数据有 1000 条，我们也没必要全人工读完，但可以用“分层抽样”：
+```
+每种 action type
+每种 event type
+每种 provenance
+最长/最短 trajectory
+异常长度
+unknown 多的
+expanded candidate 多的
+LLM-inferred 多的
+```
+各抽一些。
+这样比单纯随机抽样靠谱很多。
+所以以后 dataset adapter 的验收我建议直接定成：
+“脚本通过 schema”不等于“adapter 通过”。
+还必须过一次 semantic audit。
+这个完全可以写进仓库规则里。

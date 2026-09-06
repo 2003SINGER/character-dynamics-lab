@@ -60,3 +60,10 @@ Episode:
 ## 当前不做
 
 不冻结 40 类继承体系，不启动大规模下载，不把 OPeRA action subtype 直接升级为 Paper-0 目标，不在当前阶段接入 runtime LLM。先以数据资产登记、小型 adapter 骨架和版本化 compiled semantic rules 验证字段可映射性。
+
+## Adapter 审核流程
+
+1. 确定性脚本只做切 trajectory、排序、抽取原字段、候选集和 hash/split，并导出带字段 provenance 的 ReplayRecord。
+2. 首个 20–50 trajectory dev slice 由人工/AI 逐条做 semantic audit；检查 W/O/X/S 归属、future leakage、动作语义损失、factual/expanded 混淆和 `llm_inferred` 冒充 observed。
+3. 审核结果写成版本化冻结中间文件；运行时只读取该文件，不重新调用审核模型。
+4. 扩大批量后按 action/event/provenance、长度、异常、unknown/低置信度和新 ontology 分层抽查；validator 通过不等于 adapter 通过。
