@@ -1,0 +1,423 @@
+diff --git a/Demo codex-generated/Inc/appraisal.h b/Demo codex-generated/Inc/appraisal.h
+--- a/Demo codex-generated/Inc/appraisal.h
++++ b/Demo codex-generated/Inc/appraisal.h
+@@
+ #include <string>
+ #include <vector>
+
++// X is the structured, character-side meaning of legally available O/Delta-O.
++// Numeric *_delta fields remain as legacy/demo placeholders while semantic
++// signals are migrated one slice at a time into explicit U updaters.
++enum class AppraisalSignalKind {
++    GoalCompletion
++};
++
++struct AppraisalSignal {
++    AppraisalSignalKind kind = AppraisalSignalKind::GoalCompletion;
++    double intensity = 0.0;
++    double goal_relevance = 0.0;
++    double goal_congruence = 0.0;
++    double controllability = 0.0; // may intentionally be a no-op in a scene
++    std::string source;
++};
++
+ // X: structured meaning of the observed world change. These values are
+ // illustrative rules, not claims about real psychology.
+ struct Appraisal {
++    // Legacy/demo numeric channels. New mechanism slices should prefer
++    // semantic_signals -> explicit U -> StateDelta rather than adding more
++    // direct deltas here.
+     double boredom_delta = 0.0;
+     double fatigue_delta = 0.0;
+     double task_pressure_delta = 0.0;
+@@
+     double anxiety_delta = 0.0;
+     double screen_strain_delta = 0.0;
+     double purchase_urge_delta = 0.0;
++    std::vector<AppraisalSignal> semantic_signals;
+     std::vector<std::string> tags;
+ };
+@@
+ Appraisal appraise(const Observation& observation,
+                    const CharacterState& old_state,
+                    const Personality& personality);
++const char* appraisal_signal_name(AppraisalSignalKind kind);
+ std::string appraisal_summary(const Appraisal& appraisal);
+
+diff --git a/Demo codex-generated/Inc/state.h b/Demo codex-generated/Inc/state.h
+--- a/Demo codex-generated/Inc/state.h
++++ b/Demo codex-generated/Inc/state.h
+@@
+ struct StateUpdate {
++    // Explicit U output caused by structured X signals. This is logged
++    // separately from legacy/demo direct deltas so experiments can inspect
++    // whether X actually changes S through U.
++    StateDelta semantic_contribution;
+     StateDelta requested;
+     StateDelta applied;
+ };
+
+diff --git a/Demo codex-generated/Src/appraisal.cpp b/Demo codex-generated/Src/appraisal.cpp
+--- a/Demo codex-generated/Src/appraisal.cpp
++++ b/Demo codex-generated/Src/appraisal.cpp
+@@
+         if (update.key == "task.coursework.status" && update.value == "completed"
+             && update.status == KnowledgeStatus::Known) {
+-            appraisal.task_pressure_delta -= 0.85;
+-            appraisal.anxiety_delta -= 0.55;
+-            appraisal.satisfaction_delta += 0.32;
++            // First real X -> U slice: X records goal completion as meaning;
++            // the state updater owns the numeric S response. Do not add the
++            // old direct deltas here as well, or the event would be counted
++            // twice.
++            appraisal.semantic_signals.push_back({
++                AppraisalSignalKind::GoalCompletion,
++                1.0,  // intensity
++                1.0,  // goal relevance
++                1.0,  // goal congruence
++                1.0,  // controllability is logged; v0 U need not consume it
++                "task.coursework.status=completed"
++            });
+             appraisal.tags.push_back("task_completed");
+@@
+     return appraisal;
+ }
+
++const char* appraisal_signal_name(AppraisalSignalKind kind) {
++    switch (kind) {
++    case AppraisalSignalKind::GoalCompletion:
++        return "goal_completion";
++    }
++    return "unknown";
++}
++
+ std::string appraisal_summary(const Appraisal& appraisal) {
+     std::ostringstream output;
+-    output << "X{tags=[";
++    output << "X{signals=[";
++    for (std::size_t index = 0; index < appraisal.semantic_signals.size(); ++index) {
++        const AppraisalSignal& signal = appraisal.semantic_signals[index];
++        output << appraisal_signal_name(signal.kind)
++               << "{intensity=" << signal.intensity
++               << ", relevance=" << signal.goal_relevance
++               << ", congruence=" << signal.goal_congruence
++               << ", controllability=" << signal.controllability
++               << ", source=" << signal.source << '}';
++        if (index + 1 < appraisal.semantic_signals.size()) {
++            output << ", ";
++        }
++    }
++    output << "], tags=[";
+     for (std::size_t index = 0; index < appraisal.tags.size(); ++index) {
+         output << appraisal.tags[index];
+@@
+     output << "]}";
+     return output.str();
+ }
+
+diff --git a/Demo codex-generated/Src/state.cpp b/Demo codex-generated/Src/state.cpp
+--- a/Demo codex-generated/Src/state.cpp
++++ b/Demo codex-generated/Src/state.cpp
+@@
+ void append_value(std::ostringstream& output, const char* label, double value) {
+     output << label << '=' << std::fixed << std::setprecision(2) << value;
+ }
++
++// U: explicit state updater for structured X. Only one slice is migrated in
++// v0 on purpose. Other demo fields may still use legacy direct deltas until a
++// real data/ablation need justifies moving them.
++StateDelta semantic_delta(const Appraisal& appraisal,
++                          const Personality& personality) {
++    StateDelta delta;
++    for (const AppraisalSignal& signal : appraisal.semantic_signals) {
++        const double strength = std::clamp(signal.intensity, 0.0, 1.0);
++        switch (signal.kind) {
++        case AppraisalSignalKind::GoalCompletion:
++            // Preserve the old demo response while moving ownership from X
++            // into U. This is still a placeholder coefficient, not evidence.
++            delta.task_pressure -= 0.85 * strength;
++            delta.anxiety -= 0.55 * strength;
++            delta.satisfaction += 0.32 * strength;
++            break;
++        }
++    }
++    (void)personality; // reserved for signal-specific response modulation
++    return delta;
++}
+ } // namespace
+
+ StateUpdate update_state(CharacterState& state,
+@@
+     const CharacterState before = state;
+     StateUpdate update;
++    update.semantic_contribution = semantic_delta(appraisal, personality);
+     StateDelta& delta = update.requested;
+     delta.elapsed_minutes = elapsed_minutes;
+     const double time_scale = static_cast<double>(elapsed_minutes) / 30.0;
++    const double raw_task_pressure_delta =
++        appraisal.task_pressure_delta + update.semantic_contribution.task_pressure;
+
+     // The fields intentionally have different simple time terms. These are
+     // placeholders for later per-field dynamics, not psychological claims.
+-    delta.boredom = appraisal.boredom_delta + 0.01 * time_scale;
+-    delta.fatigue = appraisal.fatigue_delta + 0.012 * time_scale;
+-    delta.task_pressure = appraisal.task_pressure_delta;
+-    delta.satisfaction = appraisal.satisfaction_delta - 0.01 * time_scale;
+-    delta.hunger = appraisal.hunger_delta + 0.025 * time_scale;
+-    delta.bathroom_urge = appraisal.bathroom_urge_delta + 0.020 * time_scale;
+-    delta.screen_strain = appraisal.screen_strain_delta - 0.030 * time_scale;
+-    delta.purchase_urge = appraisal.purchase_urge_delta - 0.018 * time_scale;
+-    delta.anxiety = appraisal.anxiety_delta
++    delta.boredom = appraisal.boredom_delta
++                  + update.semantic_contribution.boredom + 0.01 * time_scale;
++    delta.fatigue = appraisal.fatigue_delta
++                  + update.semantic_contribution.fatigue + 0.012 * time_scale;
++    delta.task_pressure = raw_task_pressure_delta;
++    delta.satisfaction = appraisal.satisfaction_delta
++                       + update.semantic_contribution.satisfaction - 0.01 * time_scale;
++    delta.hunger = appraisal.hunger_delta
++                 + update.semantic_contribution.hunger + 0.025 * time_scale;
++    delta.bathroom_urge = appraisal.bathroom_urge_delta
++                        + update.semantic_contribution.bathroom_urge + 0.020 * time_scale;
++    delta.screen_strain = appraisal.screen_strain_delta
++                        + update.semantic_contribution.screen_strain - 0.030 * time_scale;
++    delta.purchase_urge = appraisal.purchase_urge_delta
++                        + update.semantic_contribution.purchase_urge - 0.018 * time_scale;
++    delta.anxiety = appraisal.anxiety_delta + update.semantic_contribution.anxiety
+                   + std::max(0.0, state.task_pressure - 0.55) * 0.08 * time_scale * personality.task_anxiety_sensitivity;
+
+     // P modulates response curves; it does not force a particular action.
+-    if (appraisal.task_pressure_delta > 0.0) {
++    if (raw_task_pressure_delta > 0.0) {
+         delta.task_pressure += 0.06 * personality.procrastination;
+         delta.anxiety += 0.05 * personality.task_anxiety_sensitivity;
+     }
+-    if (appraisal.task_pressure_delta < 0.0) {
++    if (raw_task_pressure_delta < 0.0) {
+         delta.task_pressure *= 0.70 + 0.30 * personality.self_control;
+     }
+-    delta.fatigue += std::max(0.0, appraisal.screen_strain_delta) * 0.10 * personality.screen_strain_sensitivity;
+-    if (appraisal.fatigue_delta < 0.0) {
++    const double raw_screen_strain_delta =
++        appraisal.screen_strain_delta + update.semantic_contribution.screen_strain;
++    delta.fatigue += std::max(0.0, raw_screen_strain_delta)
++                   * 0.10 * personality.screen_strain_sensitivity;
++    if (appraisal.fatigue_delta + update.semantic_contribution.fatigue < 0.0) {
+         delta.fatigue *= 0.70 + 0.30 * personality.rest_preference;
+     }
+-    if (appraisal.hunger_delta < 0.0 || appraisal.bathroom_urge_delta < 0.0) {
++    if (appraisal.hunger_delta + update.semantic_contribution.hunger < 0.0
++        || appraisal.bathroom_urge_delta + update.semantic_contribution.bathroom_urge < 0.0) {
+         delta.satisfaction += 0.04 * personality.need_response;
+     }
+@@
+ std::string state_update_summary(const StateUpdate& update) {
+-    return "StateUpdate{requested=" + state_delta_summary(update.requested)
++    return "StateUpdate{semantic_U=" + state_delta_summary(update.semantic_contribution)
++         + ", requested=" + state_delta_summary(update.requested)
+          + ", applied=" + state_delta_summary(update.applied) + '}';
+ }
+
+diff --git a/Demo codex-generated/Inc/candidate_scoring.h b/Demo codex-generated/Inc/candidate_scoring.h
+new file mode 100644
+--- /dev/null
++++ b/Demo codex-generated/Inc/candidate_scoring.h
+@@
++#pragma once
++
++#include "personality.h"
++#include "state.h"
++
++#include <string>
++#include <vector>
++
++// External replay policy head. It deliberately does not depend on ActionType:
++// a dataset keeps its own factual candidate strings/IDs while Character
++// Dynamics supplies persistent S-derived drives.
++//
++// CandidateSemantics is a compiled semantic interface, not ground truth and
++// not a universal ontology. A dataset adapter/semantic audit may fill these
++// fields only from prediction-time information.
++struct CandidateSemantics {
++    double goal_progress = 0.0;
++    double stimulation = 0.0;
++    double recovery = 0.0;
++    double hunger_relief = 0.0;
++    double bathroom_relief = 0.0;
++    double short_term_reward = 0.0;
++    double environment_control = 0.0;
++};
++
++struct ExternalCandidate {
++    std::string id;
++    CandidateSemantics semantics;
++    double bias = 0.0;
++};
++
++struct ExternalCandidateScore {
++    std::string id;
++    double activation = 0.0;
++    double probability = 0.0;
++};
++
++inline constexpr const char* kExternalCandidateScorerVersion = "drive-linear-v0";
++
++std::vector<ExternalCandidateScore> score_external_candidates(
++    const std::vector<ExternalCandidate>& candidates,
++    const CharacterState& state,
++    const Personality& personality);
+
+diff --git a/Demo codex-generated/Src/candidate_scoring.cpp b/Demo codex-generated/Src/candidate_scoring.cpp
+new file mode 100644
+--- /dev/null
++++ b/Demo codex-generated/Src/candidate_scoring.cpp
+@@
++#include "candidate_scoring.h"
++
++#include <algorithm>
++#include <cmath>
++#include <limits>
++#include <stdexcept>
++
++std::vector<ExternalCandidateScore> score_external_candidates(
++    const std::vector<ExternalCandidate>& candidates,
++    const CharacterState& state,
++    const Personality& personality) {
++    if (candidates.empty()) {
++        throw std::invalid_argument("external candidate set is empty");
++    }
++
++    // Same persistent-state drives used by the room demo, but no room
++    // ActionType is assumed here.
++    const double distraction = state.boredom * 0.65
++                             + personality.procrastination * 0.25
++                             + personality.stimulation_seeking * 0.20;
++    const double task_drive = state.task_pressure
++                            * (0.70 + personality.self_control * 0.80)
++                            + state.anxiety * 0.20;
++    const double recovery_drive = state.fatigue * 0.75
++                                + state.screen_strain * 0.50
++                                + personality.rest_preference * 0.18;
++    const double hunger_drive = state.hunger
++                              * (0.85 + personality.need_response * 0.25);
++    const double bathroom_drive = state.bathroom_urge
++                                * (0.90 + personality.need_response * 0.20);
++
++    std::vector<ExternalCandidateScore> scores;
++    scores.reserve(candidates.size());
++    const double temperature = std::max(0.05, 0.45 + personality.action_noise);
++    double max_logit = -std::numeric_limits<double>::infinity();
++
++    for (const ExternalCandidate& candidate : candidates) {
++        const CandidateSemantics& f = candidate.semantics;
++        const double activation =
++            candidate.bias
++            + f.goal_progress * task_drive
++            + f.stimulation * distraction
++            + f.recovery * recovery_drive
++            + f.hunger_relief * hunger_drive
++            + f.bathroom_relief * bathroom_drive
++            + f.short_term_reward * (0.35 + state.purchase_urge * 0.65)
++            + f.environment_control * (0.15 * task_drive + 0.10 * recovery_drive);
++        scores.push_back({candidate.id, activation, 0.0});
++        max_logit = std::max(max_logit, activation / temperature);
++    }
++
++    double normalizer = 0.0;
++    for (ExternalCandidateScore& score : scores) {
++        score.probability = std::exp(score.activation / temperature - max_logit);
++        normalizer += score.probability;
++    }
++    if (!std::isfinite(normalizer) || normalizer <= 0.0) {
++        throw std::logic_error("external candidate scorer produced invalid normalization");
++    }
++    for (ExternalCandidateScore& score : scores) {
++        score.probability /= normalizer;
++    }
++    return scores;
++}
+
+diff --git a/Demo codex-generated/tests/core_experiment_smoke.cpp b/Demo codex-generated/tests/core_experiment_smoke.cpp
+new file mode 100644
+--- /dev/null
++++ b/Demo codex-generated/tests/core_experiment_smoke.cpp
+@@
++#include "candidate_scoring.h"
++
++#include <cmath>
++#include <iostream>
++
++int main() {
++    Personality personality;
++    CharacterState state;
++
++    // X -> U -> S must be inspectable independently of the room demo.
++    Appraisal completion;
++    completion.semantic_signals.push_back({
++        AppraisalSignalKind::GoalCompletion,
++        1.0, 1.0, 1.0, 1.0, "fixture"
++    });
++    const double before_pressure = state.task_pressure;
++    const StateUpdate update = update_state(state, completion, personality, 0);
++    if (!(update.semantic_contribution.task_pressure < 0.0
++          && state.task_pressure < before_pressure)) {
++        std::cerr << "semantic X -> U -> S smoke failed\n";
++        return 1;
++    }
++
++    // External policy must accept dataset-native candidate IDs and normalize
++    // without ActionType.
++    state.task_pressure = 0.90;
++    state.boredom = 0.10;
++    const std::vector<ExternalCandidate> candidates = {
++        {"source-action-work", CandidateSemantics{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 0.0},
++        {"source-action-scroll", CandidateSemantics{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}, 0.0},
++    };
++    const auto scores = score_external_candidates(candidates, state, personality);
++    if (scores.size() != 2) {
++        std::cerr << "external candidate scorer size failed\n";
++        return 1;
++    }
++    const double sum = scores[0].probability + scores[1].probability;
++    if (std::abs(sum - 1.0) > 1e-9) {
++        std::cerr << "external candidate scorer normalization failed\n";
++        return 1;
++    }
++    std::cout << "core experiment smoke OK\n";
++    return 0;
++}
+
+diff --git a/Demo codex-generated/CMakeLists.txt b/Demo codex-generated/CMakeLists.txt
+--- a/Demo codex-generated/CMakeLists.txt
++++ b/Demo codex-generated/CMakeLists.txt
+@@
+     Src/appraisal.cpp
+     Src/state.cpp
++    Src/candidate_scoring.cpp
+     Src/decision.cpp
+     Src/simulation.cpp
+ )
+@@
+ enable_testing()
+ add_test(NAME character_dynamics_reference_smoke
+          COMMAND character_dynamics_reference --verify)
++
++add_executable(character_dynamics_core_smoke
++    tests/core_experiment_smoke.cpp
++    Src/state.cpp
++    Src/candidate_scoring.cpp
++)
++target_include_directories(character_dynamics_core_smoke PRIVATE Inc)
++if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
++    target_compile_options(character_dynamics_core_smoke PRIVATE -Wall -Wextra -Wpedantic)
++elseif(MSVC)
++    target_compile_options(character_dynamics_core_smoke PRIVATE /W4)
++endif()
++if(MINGW)
++    target_link_options(character_dynamics_core_smoke PRIVATE
++        -static
++        -static-libgcc
++        -static-libstdc++)
++endif()
++add_test(NAME character_dynamics_core_experiment_smoke
++         COMMAND character_dynamics_core_smoke)
