@@ -1,0 +1,19 @@
+{
+  "schema_version": "replay_adapter_manifest_v0",
+  "dataset": "ClubFloyd",
+  "role": "dev_structure_slice",
+  "split_id": "clubfloyd_dev_2026-09-06",
+  "source_url": "https://raw.githubusercontent.com/princeton-nlp/calm-textgame/master/calm/lm_data.zip",
+  "source_repository": "https://github.com/princeton-nlp/calm-textgame",
+  "source_revision": "calm-textgame@3c111c0102c27e258f596ace18540db22f97f1da",
+  "archive_sha256": "CBD6CEA0A97B2BFDE73A357B3795EBBA0578266D3B2ECD15FB67232D6236A3DB",
+  "raw_file_glob": "cleaned_corpora/*.html",
+  "parser": "02_实验/Replay/clubfloyd_adapter.py",
+  "trajectory_limit": 30,
+  "trajectory_count": 30,
+  "step_count": 30388,
+  "output_sha256": "2299f31ee35975a058a03dd97758c21b472db9848c5f128f76b5b84c9a5f9265",
+  "provenance_policy": "Observed transcript strings only; missing W/persona/candidates/state remain null.",
+  "semantic_audit": "pending",
+  "mechanism_use": false
+}
