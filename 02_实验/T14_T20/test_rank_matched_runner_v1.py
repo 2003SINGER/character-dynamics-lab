@@ -15,6 +15,11 @@ def test_current_state_uses_same_t_update_and_unscorable_step():
     rows=runner.state_rows(rec(),RULES); t2=[r for r in rows if r["horizon_index"]==2 and r["kind"]=="theory"][0]
     assert t2["state"] > 0.0
 
+def test_confirmed_effect_is_included_at_same_prediction_t():
+    r=rec(); r["steps"][1]["source_action_A_star"]="look"; r["steps"][1]["candidate_set_factual"]=["look","hug sword"]
+    row=[x for x in runner.state_rows(r,RULES) if x["horizon_index"]==1 and x["kind"]=="theory"][0]
+    assert abs(row["state"]-0.35)<1e-12
+
 def test_permutation_has_no_self_donor_and_is_seeded():
     a=runner.cyclic_donors(["a","b","c"], 7); b=runner.cyclic_donors(["a","b","c"], 7)
     assert a==b and all(k!=v for k,v in a.items())
