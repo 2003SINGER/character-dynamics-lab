@@ -22,7 +22,7 @@ def main():
       for r in csv.DictReader(h):
         if r.get("validity") not in {"1","1.0"}: continue
         k=(r.get("[control]player_id"),r.get("[control]session_id"),r.get("[control]game")); t=fnum(r.get("[control]time_stamp")); a=fnum(r.get("arousal_value"))
-        if t is not None and a is not None: ann[k].append((t,a,r.get("[control]video_name")))
+        if t is not None and a is not None: ann[k].append((t/1000.0,a,r.get("[control]video_name")))
     for v in ann.values(): v.sort()
     grouped=defaultdict(list); all_keys=[]
     with (raw/"raw_data.csv").open(encoding="utf-8-sig",newline="") as h:
@@ -30,7 +30,14 @@ def main():
         k=(r.get("[control]player_id"),r.get("[control]session_id"),r.get("[control]game"))
         if k not in grouped: all_keys.append(k)
         grouped[k].append(r)
-    keys=all_keys[:args.limit_sessions] if args.limit_sessions else all_keys
+    if args.limit_sessions:
+      by_game=defaultdict(list)
+      for k in all_keys: by_game[k[2]].append(k)
+      keys=[]
+      while len(keys)<args.limit_sessions and any(by_game.values()):
+        for game in sorted(by_game):
+          if by_game[game] and len(keys)<args.limit_sessions: keys.append(by_game[game].pop(0))
+    else: keys=all_keys
     replay=args.out/"AGAIN_dev.replay.jsonl"; review=[]; steps=0; aligned=0; future_guard=True
     with replay.open("w",encoding="utf-8") as out:
       for k in keys:
@@ -44,6 +51,6 @@ def main():
           if len(review)<300 and (i in {0,len(rows)//2,len(rows)-1} or match): review.append({"review_id":f"again::{k[0]}::{k[1]}::{k[2]}::step-{i}","source_dataset":"AGAIN","source_record_ref":f"{k[0]}:{k[1]}:{k[2]}:step:{i}","raw":{"telemetry":r,"annotation_match":match},"transformed":step,"mapping_notes":{"source_arousal_proxy":"latest valid annotation at or before telemetry time; never future value","source_O":"null","source_action_A_star":"null","state_label":"null"}})
         out.write(json.dumps({"trajectory_id":f"again::{k[0]}::{k[1]}::{k[2]}","subject_id":k[0],"source_dataset":"AGAIN","split_id":"again_dev","source_episode_context":{"game":k[2],"session_id":k[1],"boundary":"dataset session key; no invented gameplay boundary"},"steps":st},ensure_ascii=False,separators=(",",":"))+"\n"); steps+=len(st)
     rp=args.out/"AGAIN_dev_review_v0.jsonl"; rp.write_text("".join(json.dumps(x,ensure_ascii=False,separators=(",",":"))+"\n" for x in review),encoding="utf-8")
-    manifest={"schema_version":"replay_adapter_manifest_v0","dataset":"AGAIN","role":"telemetry_with_causal_arousal_proxy","session_count":len(keys),"step_count":steps,"aligned_step_count":aligned,"review_fixture_count":len(review),"source_O":"null","source_action_A_star":"null","state_label":"null","causal_alignment":"latest valid annotation time_stamp <= telemetry time_stamp within session; no future interpolation","future_guard_pass":future_guard,"replay_sha256":hashlib.sha256(replay.read_bytes()).hexdigest(),"review_sha256":hashlib.sha256(rp.read_bytes()).hexdigest()}
+    manifest={"schema_version":"replay_adapter_manifest_v0","dataset":"AGAIN","role":"telemetry_with_causal_arousal_proxy","session_count":len(keys),"games":sorted({k[2] for k in keys}),"step_count":steps,"aligned_step_count":aligned,"review_fixture_count":len(review),"source_O":"null","source_action_A_star":"null","state_label":"null","annotation_time_unit":"milliseconds in raw annotation; divided by 1000 to session seconds","causal_alignment":"latest valid annotation time_stamp <= telemetry time_stamp within session; no future interpolation","future_guard_pass":future_guard,"replay_sha256":hashlib.sha256(replay.read_bytes()).hexdigest(),"review_sha256":hashlib.sha256(rp.read_bytes()).hexdigest()}
     (args.out/"AGAIN_dev.manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); (args.out/"AGAIN_dev.qa.json").write_text(json.dumps({"manifest":manifest,"hard_checks":{"future_annotation_never_used":future_guard,"source_O_all_null":True,"source_action_A_star_all_null":True,"state_label_all_null":True}},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 if __name__=="__main__": main()
