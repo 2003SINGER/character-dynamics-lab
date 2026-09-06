@@ -13,6 +13,13 @@ def record(e: dict, idx: int, split_id: str) -> dict:
         actor = e.get("character", (None,) * len(actions))[t]
         context = e.get("context", (None,) * len(actions))[t]
         candidates = e.get("available_actions", (None,) * len(actions))[t]
+        agents = e.get("agents", []) or []
+        agent_names = {str(a.get("name") if isinstance(a, dict) else a).strip().casefold() for a in agents}
+        flags = []
+        if actor and str(actor).strip().casefold() not in agent_names:
+            flags.append("actor_not_in_source_agents")
+        if candidates and str(action).strip().casefold() not in {str(c).strip().casefold() for c in candidates}:
+            flags.append("action_not_in_candidates_casefold")
         steps.append({
             "t": t,
             "source_O": context,
@@ -27,6 +34,7 @@ def record(e: dict, idx: int, split_id: str) -> dict:
                 "carrying": e.get("carrying", (None,) * len(actions))[t],
                 "wearing": e.get("wearing", (None,) * len(actions))[t],
                 "wielding": e.get("wielding", (None,) * len(actions))[t],
+                "source_anomaly_flags": flags,
             },
             "W": None,
             "state_label": None,
@@ -42,6 +50,7 @@ def record(e: dict, idx: int, split_id: str) -> dict:
             },
         })
     agents = e.get("agents", [])
+    anomaly_flags = sorted({f for s in steps for f in s["source_step_context"].get("source_anomaly_flags", [])})
     return {
         "trajectory_id": f"light::episode-{idx:05d}",
         "subject_id": None,
@@ -61,6 +70,8 @@ def record(e: dict, idx: int, split_id: str) -> dict:
             "source_environment_fields": ["setting", "room_objects", "room_agents", "all_descriptions"],
             "observation_boundary": "Only context is used as actor-available O; environment fields remain source context.",
             "candidate_semantics": "Source-provided available-action list; relation to A^W/A^O unresolved.",
+            "source_anomaly_flags": anomaly_flags,
+            "quarantine": bool(anomaly_flags),
         },
         "steps": steps,
     }

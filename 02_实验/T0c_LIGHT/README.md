@@ -22,3 +22,5 @@ py -3 02_实验/T0c_LIGHT/export_replay.py outputs/external_assets_2026-09-06/LI
 py -3 tools/validate_replay_record.py outputs/external_assets_2026-09-06/LIGHT/light_dev_50.replay.json
 py -3 02_实验/T0c_LIGHT/extract_full.py outputs/external_assets_2026-09-06/LIGHT/light_data.pkl outputs/external_assets_2026-09-06/LIGHT
 ```
+
+全量 QA 已标记两个 source alignment anomaly episode（486、778：actor 不在 source agents，且 A* 在 case-normalized 后不在 candidates）；这两个 episode quarantine，不进入 mechanism loop。

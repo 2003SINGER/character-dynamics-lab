@@ -14,4 +14,4 @@
 
 JSONL 输出 SHA-256：`56fa742e898ef4c2362336fc6e0606428abf75a610d21e6b842b3e7c8b129ed7`。
 
-处理仍是 lossless：`[STATE] → source_O`、`[ACTION] → source_action_A_star`，不生成 `X/S/W/P` 或候选集。review generator 对每条 trajectory 取首/中/尾及最长 state/action，最多 300 steps；完整语义审核仍待人工完成。
+处理仍是 lossless：`[STATE] → source_O`、`[ACTION] → source_action_A_star`，不生成 `X/S/W/P` 或候选集。`source_action_A_star` 只表示 source-labeled action；已加入 command-like / chat/commentary-like / meta-command / ambiguous 质量审计，不能直接视为 `verified_action_A_star`。本轮计数：command-like 218,575；ambiguous 219,524；chat/commentary-like 47；meta-command 42。

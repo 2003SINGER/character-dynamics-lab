@@ -5,6 +5,7 @@
 - 42 participants；29,328 non-empty telemetry lines
 - 122 `Event:SessionStart`-切分的 session trajectories
 - 10,844 strong action-proxy steps
+- QA hard assertion：每个 `source_event.source_order` 均严格小于当前 action 的 `source_order`；session-local slice 不再使用 participant-global index
 - 792 `Quests:QuestBoardState:Accept` nested records 已按 source 结构解析，不再计为 ambiguous
 - survey 原文置于 `source_episode_context.survey_raw`，不映射到 `P`
 - `source_O = null`；telemetry history 不自动宣布为角色观察

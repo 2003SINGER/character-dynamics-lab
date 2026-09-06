@@ -1,10 +1,10 @@
 # ClubFloyd dev slice｜初步语义审计 v0
 
-审计对象：`clubfloyd_dev_30.replay.json`，30 条 trajectory / 30,388 steps。这里是 adapter 的逐字段审计记录，不是机制实验结果。
+审计对象：全量 `clubfloyd_full.replay.jsonl`（425 条 trajectory / 438,188 steps）及 300 条 review fixture。这里是 adapter 的逐字段审计记录，不是机制实验结果。
 
 ## 结论
 
-**结构上可进入人工语义复核；当前准入状态：restricted dev only，未冻结 semantic annotation。**
+**结构上可进入人工语义复核；当前准入状态：source-labeled only，未冻结 semantic annotation。**
 
 | 检查 | 结果 | 说明 |
 |---|---|---|
@@ -16,6 +16,7 @@
 | candidate sets | 保持 unknown | CALM transcript 没有可复核的当步合法候选集 |
 | provenance | 通过 | `source_O` 与 `source_action_A_star` 均标为 `observed`，无 LLM 推断 |
 | future leakage | 格式检查通过，语义复核待人工 | parser 只读 action 前的 state；仍需人工抽查 HTML 异常和 transcript 边界 |
+| source action quality | 已完成机械分层 | command-like 218,575；ambiguous 219,524；chat/commentary-like 47；meta-command 42；不得直接等同 `verified_action_A_star` |
 
 ## 不应过度解释
 

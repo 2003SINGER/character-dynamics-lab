@@ -28,7 +28,7 @@ def is_action(e): return e["event_class"] in ACTION_TYPES and not (e["event_type
 
 def sessions(events):
     out=[]; cur=[]
-    for e in events:
+    for local_i, e in enumerate(events):
         if e["event_class"]=="Event" and e["event_type"]=="SessionStart" and cur: out.append(cur); cur=[]
         cur.append(e)
     if cur: out.append(cur)
@@ -36,14 +36,18 @@ def sessions(events):
 
 def make_record(pid,si,events,source):
     steps=[]; prev_action=-1; algorithm=None; location=None
-    for e in events:
+    for local_i, e in enumerate(events):
         if e["event_class"]=="QuestAlgorithm": algorithm=e["event_type"]
         if e["event_class"]=="Transition": location=e["event_type"]
         if not is_action(e): continue
-        preceding=events[prev_action+1:e["source_order"]]
+        # events is session-local; source_order remains participant-global.
+        preceding=events[prev_action+1:local_i]
+        if any(x["source_order"] >= e["source_order"] for x in preceding):
+            raise AssertionError(f"future leakage at {pid} session {si}: {e['source_order']}")
         action={"class":e["event_class"],"type":e["event_type"],"value":e["value"],"raw":e["raw"]}
-        steps.append({"t":len(steps),"source_O":None,"source_event":preceding,"source_action_A_star":action,"source_step_context":{"event_index":e["source_order"],"preceding_source_events":preceding,"quest_algorithm":algorithm,"current_location":location,"raw_timestamp":e["raw_timestamp"],"timestamp_semantics":"unusable_for_ordering"},"W":None,"state_label":None,"candidate_set_factual":None,"candidate_set_expanded":None,"timestamp":None,"provenance":"observed","provenance_detail":"Telemetry event documented as player action proxy; timestamp is retained as raw metadata only.","field_provenance":{"source_action_A_star":{"kind":"observed","source_ref":f"{pid}:event:{e['source_order']}","uncertainty":"action proxy, not independently verified command"},"source_event":{"kind":"observed","source_ref":f"{pid}:events:{prev_action+1}-{e['source_order']-1}"}}})
-        prev_action=e["source_order"]
+        source_ref = (f"{pid}:events:{preceding[0]['source_order']}-{preceding[-1]['source_order']}" if preceding else f"{pid}:events:empty-before-{e['source_order']}")
+        steps.append({"t":len(steps),"source_O":None,"source_event":preceding,"source_action_A_star":action,"source_step_context":{"event_index":e["source_order"],"preceding_source_events":preceding,"quest_algorithm":algorithm,"current_location":location,"raw_timestamp":e["raw_timestamp"],"timestamp_semantics":"unusable_for_ordering"},"W":None,"state_label":None,"candidate_set_factual":None,"candidate_set_expanded":None,"timestamp":None,"provenance":"observed","provenance_detail":"Telemetry event documented as player action proxy; timestamp is retained as raw metadata only.","field_provenance":{"source_action_A_star":{"kind":"observed","source_ref":f"{pid}:event:{e['source_order']}","uncertainty":"action proxy, not independently verified command"},"source_event":{"kind":"observed","source_ref":source_ref}}})
+        prev_action=local_i
     return {"trajectory_id":f"farmquest::{pid}::session-{si:03d}","subject_id":pid,"group_id":None,"split_id":"farmquest_full_2026-09-06","source_dataset":"FarmQuest","source_revision":"kristenYu/FarmQuest-Player-Telemetry-Dataset@main","source_record_id":f"{pid}:session:{si}","source_license":"Repository LICENSE (MIT); survey/privacy and redistribution boundaries require separate review.","persona_P":None,"source_episode_context":{"participant_id":pid,"survey_raw":{k:source.get(k) for k in ("demographic_data","short_survey_1_data","short_survey_2_data","comparison_data")},"timestamp_semantics":"unusable_for_ordering","source_order_authority":"telemetry line index","session_boundary":"Event:SessionStart"},"steps":steps}
 
 def main():

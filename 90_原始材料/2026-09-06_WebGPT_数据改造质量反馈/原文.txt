@@ -1,0 +1,384 @@
+看完了。这次我**真的看到了 raw → parsed → transformed 的实际样本**，所以现在可以评价数据改造质量了，不再只是看 adapter 代码。
+
+当前 `webgpt-sync` HEAD：
+
+```text
+0c94387  Add FarmQuest extraction and adapter review fixtures
+```
+
+现在仓库里已经有三份真正可审的数据：
+
+```text
+ClubFloyd_review_v0.jsonl   300 条
+LIGHT_review_v0.jsonl       303 条
+FarmQuest_review_v0.jsonl   250 条
+```
+
+这套 review fixture 非常值——因为它已经直接抓出来一个**严重真 bug**。
+
+## 1. FarmQuest：现在全量结果必须重跑
+
+Luna 已经跑了：
+
+```text
+42 participants
+29,328 telemetry lines
+122 session trajectories
+10,844 action-proxy steps
+```
+
+但是 `export_replay.py` 有一个索引错误。
+
+现在代码是：
+
+```python
+for e in events:
+    ...
+    preceding = events[prev_action + 1 : e["source_order"]]
+```
+
+问题在于：
+
+* `events` 已经是 **session-local list**
+* `e["source_order"]` 却还是 **participant 全局 telemetry index**
+
+第一段 session 从 0 开始，碰巧比较正常。
+
+第二、第三段 session 就炸了。
+
+### 实际已经出现 future leakage
+
+我扫了 250 条 review，其中有 231 条是 action transformed record。
+
+其中：
+
+> **36 / 231 条明确包含未来事件。**
+
+例如：
+
+```text
+当前 action:
+event_index = 50
+
+source_event 实际包含:
+source_order = 48 ... 97
+```
+
+也就是预测 `event 50` 时：
+
+> **51～97 的未来事件已经被塞进历史。**
+
+这是我们 Paper-0 最不能接受的那种 leakage。
+
+还有另一种错误：
+
+```text
+provenance 声称:
+events:368-378
+
+实际 source_event:
+[]
+```
+
+所以它同时造成：
+
+```text
+有些 step → 偷看未来
+有些 step → 丢掉历史
+```
+
+### 修法很简单
+
+必须同时维护：
+
+```python
+prev_action_local = -1
+
+for local_i, e in enumerate(events):
+
+    if not is_action(e):
+        continue
+
+    preceding = events[prev_action_local + 1 : local_i]
+
+    ...
+
+    prev_action_local = local_i
+```
+
+而 provenance 仍然用原始 `source_order`：
+
+```python
+if preceding:
+    source_ref = (
+        preceding[0]["source_order"],
+        preceding[-1]["source_order"]
+    )
+```
+
+不要拿 global source index 去 slice local array。
+
+**所以 FarmQuest 当前 10,844 steps 全部标记废弃，修脚本后从 raw 全量重生成。**
+
+这正好证明我们之前说的策略是对的：
+
+> raw 不动 → adapter 修 → generated dataset 全删 → 重跑。
+
+---
+
+# 2. LIGHT：整体转换相当干净，但抓出了 source 异常
+
+303 条 review 我检查了：
+
+```text
+raw context → source_O                0 mismatch
+raw action → source_action_A_star     0 mismatch
+available_actions → candidate set     0 mismatch
+empty context                         0
+```
+
+所以 Luna 的 **mechanical transformation 本身目前看是对的**。
+
+而且我们之前要求修的：
+
+```text
+agents ≠ persona_P
+```
+
+已经修了：
+
+```text
+persona_P = null
+agents/persona → source_episode_context
+```
+
+很好。
+
+但 review 抓到了 LIGHT source 里三个重要 case。
+
+### Case 1：只是大小写
+
+```text
+action:
+get Coconut
+
+candidate:
+get coconut
+```
+
+这是正常 normalization 问题，不算真正 candidate mismatch。
+
+### Case 2：明显异常
+
+```text
+episode 486 turn 4
+
+actor:
+mariner
+
+source agents:
+student
+resting travelers
+
+action:
+get cargo
+
+available_actions:
+hug resting travelers
+get statue
+hit resting travelers
+```
+
+更离谱的是 context 里面：
+
+```text
+Meditation room
+statues
+resting travelers
+```
+
+**根本没有 cargo。**
+
+### Case 3：更明显
+
+```text
+episode 778 turn 0
+
+actor:
+friend of farmer
+
+source agents:
+a powerful but aged wizard
+the king
+
+action:
+get eggs
+
+available_actions:
+get king's flagon
+get comfortable cushion
+...
+```
+
+context 里也根本没有 eggs。
+
+speech 却是：
+
+```text
+Thank you for the eggs!
+```
+
+这很像 processed LIGHT 中某些字段出现了**跨记录/对齐异常**，而不是我们的 adapter 转错。
+
+303 条 review 中：
+
+```text
+actor 不属于 source agents：2 条
+case-insensitive A* ∉ candidates：2 条
+```
+
+而且恰好就是这两个异常 episode。
+
+所以 LIGHT 下一步不是改 adapter 去“修”它们，而应该：
+
+```text
+source anomaly flag = true
+```
+
+全量 QA 增加：
+
+```text
+actor ∉ source agents
+A* ∉ candidates（case-normalized）
+action target/object 不在当前 observable context（后续语义检查）
+```
+
+这类 case 暂时 quarantine，不进入机制实验。
+
+这反而是好事——说明 review fixture 真抓到了源数据脏点。
+
+---
+
+# 3. ClubFloyd：机械转换没问题，但“A*”语义没有想象中干净
+
+300 条 review：
+
+```text
+raw [STATE] → source_O       0 mismatch
+raw [ACTION] → action        0 mismatch
+```
+
+parser 复制是干净的。
+
+但我实际看了 action，里面出现了这种东西：
+
+```text
+don't you understand standard code if protocols?
+```
+
+还有：
+
+```text
+thanks inventory never was able to finish this game! ...
+```
+
+甚至有很长的自然语言聊天/注释。
+
+这意味着：
+
+> `[ACTION]` 是 source 标成 action 的内容，但不能未经审核就说每一条都是“玩家真实游戏命令 A*”。
+
+CALM 官方确实把 ClubFloyd 数据描述成 context-action pairs，并用它训练 next-action generation；但我们现在看到真实 review 后，明显存在 source noise。
+
+所以我建议语义再收紧一层：
+
+```text
+source_action_A_star
+```
+
+当前可以理解成：
+
+> source-labeled action
+
+而真正进入 Paper-0：
+
+```text
+verified_action_A_star
+```
+
+之前先做过滤/审核：
+
+```text
+command-like
+chat/commentary-like
+meta-command
+ambiguous
+```
+
+**不要修改原字符串。**
+
+---
+
+# 4. 现在三个数据集的真实状态
+
+```text
+ClubFloyd
+425 trajectories
+438,188 source-labeled steps
+机械转换 ✅
+A* 语义纯度 ⚠️ 待过滤
+
+LIGHT
+7,258 trajectories
+25,001 physical-action steps
+机械转换 ✅
+少量 source alignment anomaly ⚠️
+
+FarmQuest
+122 trajectories
+10,844 projected steps
+机械转换 ❌ 有 session-index bug + future leakage
+必须修后全量重跑
+```
+
+PowerWash / AGAIN 目前还没进仓库。
+
+---
+
+## 最重要的结论
+
+我们刚才坚持让 Luna 推：
+
+```text
+raw
+→ parsed
+→ transformed
+```
+
+**完全是对的。**
+
+如果只看：
+
+```text
+validator passed ✅
+10,844 steps ✅
+0 ambiguous events ✅
+```
+
+FarmQuest 看起来漂亮得不得了。
+
+但一看真实转换结果，立刻发现：
+
+> **36/231 个 sampled transformed steps 已经出现明确 future leakage。**
+
+所以以后所有 adapter 都保持这套制度。
+
+现在我会直接让 Luna：
+
+1. **立即修 FarmQuest local/global index bug，全量 10,844 重跑；**
+2. 新 QA 加硬断言：`∀ source_event.source_order < current_action.source_order`；
+3. LIGHT 把两个异常 episode 自动标 quarantine；
+4. ClubFloyd 增加 source-action semantic quality audit，不修改 raw；
+5. 然后再做 PowerWash、AGAIN。
+
+这次已经真正进入“数据改造审计”了，不是看 README 了。
