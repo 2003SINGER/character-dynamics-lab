@@ -37,4 +37,4 @@ C++ 框架侧同步新增 `Demo codex-generated/Inc/scene_snapshot.h` 与 `Src/s
 
 ### Scene-aware v1 paired diagnostic (same 41 trajectories / 140 steps)
 
-`run_compiled_semantics_v0.py --scene-aware` 现在将 candidate target 与当前 LIGHT scene labels、actor observation 和 inventory 做最小绑定，并对不在 scene/不可见/已携带的 target 调整 candidate semantics/bias。结果与 verb-only v0 保存在 `LIGHT_v0_v1_paired_comparison.json`：v1 stateful NLL **1.416932**（v0 1.422254），但 v1 no-history NLL **1.416552**，改善更大；因此当前不能归因于 persistent S，且仍只是 dev diagnostic。
+`run_compiled_semantics_v0.py --scene-aware` 现在先调用 `compile_light_step()` 生成 canonical `SceneSnapshot`，再将 candidate target 与 snapshot 的 entities、actor observation 和 possessions 做最小绑定，并对不在 scene/不可见/已携带的 target 调整 candidate semantics/bias。结果与 verb-only v0 保存在 `LIGHT_v0_v1_paired_comparison.json`：canonical-snapshot v1 stateful NLL **1.419149**（v0 1.422254），但 v1 no-history NLL **1.419183**；stateful 仅比 no-history 好 **0.000034**，因此当前不能归因于 persistent S，且仍只是 dev diagnostic。
