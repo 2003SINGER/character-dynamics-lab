@@ -5,7 +5,7 @@ This is an orchestration/dev-smoke tool, not a formal LIGHT evaluation.  All
 world/scene/transition/appraisal definitions remain frozen in Replay modules.
 """
 from __future__ import annotations
-import argparse, hashlib, json, random, sys
+import argparse, hashlib, json, random, sys, csv
 from pathlib import Path
 import numpy as np
 
@@ -35,20 +35,21 @@ def state_rows(rec, rules):
     snaps=[scene.compile_light_step(rec,s) for s in rec.get("steps",[])]
     previous={"theory":0.0,"activity":0.0,"support":0.0}; rows=[]
     for i, step in enumerate(rec.get("steps",[])):
-        action=step.get("source_action_A_star"); candidates=step.get("candidate_set_factual")
-        if not isinstance(candidates,list) or not candidates or action is None: continue
-        gold=base.gold_index(candidates,action)
-        if gold is None: continue
         cur=snaps[i]; prior=snaps[i-1] if i else cur; prev_action=rec.get("steps",[])[i-1].get("source_action_A_star") if i else None
         x=ta.appraise_transition(prior,cur,prev_action) if i else {"positive_conduciveness":0.0}
         events=ta.diff_scene_snapshots(prior,cur) if i else []
         support=1.0 if ta.expected_effect(prev_action,prior) else 0.0
         signals={"theory":float(x.get("positive_conduciveness",0.0)),"activity":float(bool(events)),"support":support}
+        # Decision boundary: evolve S_t from X_t before admitting A*_t.
+        for kind in previous: previous[kind]=previous[kind]+ETA*(signals[kind]-previous[kind])
+        action=step.get("source_action_A_star"); candidates=step.get("candidate_set_factual")
+        if not isinstance(candidates,list) or not candidates or action is None: continue
+        gold=base.gold_index(candidates,action)
+        if gold is None: continue
         states={k:previous[k] for k in previous}
         compiled=[rf.vectorize(rf.compile_candidate_v1(c,cur,rules)[0]) for c in candidates]
         for kind in previous:
             rows.append({"trajectory_id":str(rec["trajectory_id"]),"horizon_index":i,"t":int(step["t"]),"features":compiled,"gold_index":gold,"state":states[kind],"kind":kind})
-        for kind in previous: previous[kind]=previous[kind]+ETA*(signals[kind]-previous[kind])
     return rows
 
 def split(records):
@@ -56,14 +57,16 @@ def split(records):
     n=len(ids); ntr=max(1,int(round(n*.70))); nv=max(1,int(round(n*.15))) if n>=3 else 0
     return {"train":ids[:ntr],"validation":ids[ntr:ntr+nv],"test":ids[ntr+nv:]}, ids
 
-def pick_lambda(train, valid, stateful):
-    best=None
+def pick_lambda(train, valid, stateful, means, scales, condition):
+    best=None; trials=[]
     for lam in probe.LAMBDA_GRID:
-        model=(probe.fit_stateful(train,lam) if stateful else probe.fit_no_state(train,lam))
+        model=(probe.fit_stateful(train,lam,means,scales) if stateful else probe.fit_no_state(train,lam,means,scales))
         score=probe.evaluate(model,valid)
+        trials.append({"condition":condition,"lambda":lam,"train_data_nll":model["optimizer"]["final_data_nll"],"train_regularized_objective":model["optimizer"]["final_objective"],"validation_nll":score,"optimizer":model["optimizer"]})
         key=(score,-lam)
         if best is None or key<best[0]: best=(key,lam,model,score)
-    return best[1],best[2],best[3]
+    for t in trials: t["selected"]=bool(t["lambda"]==best[1])
+    return best[1],best[2],best[3],trials
 
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("replay",type=Path); ap.add_argument("output",type=Path); ap.add_argument("--max-trajectories",type=int,default=50); ap.add_argument("--dev-smoke",action="store_true"); args=ap.parse_args()
@@ -71,30 +74,46 @@ def main():
     split_map, shuffled=split(records); by_id={str(r["trajectory_id"]):r for r in records}; all_rows={k:[] for k in ("activity","support","theory")}
     for rec in records:
         for row in state_rows(rec,rules): all_rows[row["kind"]].append(row)
+    keys=lambda kind: [(r["trajectory_id"],r["horizon_index"],r["t"],r["gold_index"],r["features"]) for r in all_rows[kind]]
+    assert keys("activity")==keys("support")==keys("theory"), "condition rows/features diverged"
+    assert all(np.isfinite(np.asarray(r["features"],float)).all() for r in all_rows["theory"]), "non-finite feature"
     def rows_for(kind, part): return [r for r in all_rows[kind] if r["trajectory_id"] in split_map[part]]
     args.output.mkdir(parents=True,exist_ok=True)
     (args.output/"split.json").write_text(json.dumps({"seed":SEED,"trajectory_order":shuffled,"partitions":split_map,"dev_smoke":args.dev_smoke},indent=2)+"\n",encoding="utf8")
-    models={}; summary={}
+    models={}; summary={}; all_trials=[]
+    common_train=[r for r in all_rows["theory"] if r["trajectory_id"] in split_map["train"]]
+    _, _, means, scales = probe._design(common_train)
+    (args.output/"feature_stats.json").write_text(json.dumps({"feature_version":rf.FEATURE_VERSION,"feature_names":list(rf.FEATURE_NAMES),"means":means.tolist(),"stds":scales.tolist(),"zero_variance_features":[n for n,s in zip(rf.FEATURE_NAMES,scales) if s==1.0],"train_candidate_count":sum(len(r["features"]) for r in common_train),"missing_nonfinite_replacements":0},indent=2)+"\n",encoding="utf8")
     # Fit a common base feature normalization and lambda selection per condition.
     for kind in ("activity","support","theory"):
         tr,va,te=rows_for(kind,"train"),rows_for(kind,"validation"),rows_for(kind,"test")
-        lam,model,val_nll=pick_lambda(tr,va,True)
+        lam,model,val_nll,trials=pick_lambda(tr,va,True,means,scales,kind); all_trials.extend(trials)
         models[f"{kind}_s"] = model; summary[f"{kind}-S"]={"train_rows":len(tr),"validation_rows":len(va),"test_rows":len(te),"lambda":lam,"validation_nll":val_nll,"test_nll":probe.evaluate(model,te)}
     tr,va,te=rows_for("theory","train"),rows_for("theory","validation"),rows_for("theory","test")
-    lam,model,val_nll=pick_lambda(tr,va,False); models["retrained_no_s"]=model; summary["retrained-no-S"]={"lambda":lam,"validation_nll":val_nll,"test_nll":probe.evaluate(model,te)}
+    lam,model,val_nll,trials=pick_lambda(tr,va,False,means,scales,"retrained-no-S"); all_trials.extend(trials); models["retrained_no_s"]=model; summary["retrained-no-S"]={"lambda":lam,"validation_nll":val_nll,"test_nll":probe.evaluate(model,te)}
     theory=models["theory_s"]
     summary["Theory zeroed-S"]={"test_nll":probe.evaluate(theory,te,lambda r:0.0)}
-    pools={}
-    for r in te: pools.setdefault(r["horizon_index"],[]).append(r["state"])
-    rng=random.Random(SEED); perm={k:list(v) for k,v in pools.items()}
-    for vals in perm.values(): rng.shuffle(vals)
-    counters={k:0 for k in perm}
-    def perm_state(r):
-        k=r["horizon_index"]; i=counters[k]; counters[k]+=1; return perm[k][i%len(perm[k])] if perm.get(k) else 0.0
-    summary["Theory permuted-S"]={"test_nll":probe.evaluate(theory,te,perm_state),"permutation_seed":SEED}
+    by_h={}
+    for r in te: by_h.setdefault(r["horizon_index"],{}).setdefault(r["trajectory_id"],r["state"])
+    rng=random.Random(SEED); donor_map={}; perm_rows=[]
+    for h, states in by_h.items():
+        tids=list(states); rng.shuffle(tids)
+        if len(tids)>1:
+            rotated=tids[1:]+tids[:1]
+            for recipient, donor in zip(tids,rotated):
+                donor_map[(recipient,h)]=states[donor]
+                perm_rows.append({"trajectory_id":recipient,"horizon_index":h,"donor_trajectory_id":donor,"donor_state":states[donor],"seed":SEED})
+    (args.output/"permutation_map.jsonl").write_text("".join(json.dumps(x)+"\n" for x in perm_rows),encoding="utf8")
+    paired=[r for r in te if (r["trajectory_id"],r["horizon_index"]) in donor_map]
+    summary["Theory permuted-S"]={"test_nll":probe.evaluate(theory,paired,lambda r:donor_map[(r["trajectory_id"],r["horizon_index"])]),"permutation_seed":SEED,"eligible_paired_rows":len(paired)}
     summary["uniform"]={"test_nll":float(np.mean([np.log(len(r["features"])) for r in te]))}
-    (args.output/"feature_stats.json").write_text(json.dumps({"feature_version":rf.FEATURE_VERSION,"feature_names":list(rf.FEATURE_NAMES),"normalization":"train-only means/std; zero std=1"},indent=2)+"\n",encoding="utf8")
+    (args.output/"lambda_sweep.json").write_text(json.dumps(all_trials,indent=2)+"\n",encoding="utf8")
     for name,model in models.items(): (args.output/f"{name}.model.json").write_text(json.dumps(model,indent=2)+"\n",encoding="utf8")
+    with (args.output/"learned_weights.csv").open("w",newline="",encoding="utf8") as fh:
+        w=csv.writer(fh); w.writerow(["condition","feature","theta","w"])
+        for name,model in models.items():
+            for feature,theta,wgt in zip(rf.FEATURE_NAMES,model["weights_theta"],model["weights_w"]): w.writerow([name,feature,theta,wgt])
     manifest={"schema_version":"character_dynamics_rank_matched_probe_manifest_v1","probe_version":probe.PROBE_VERSION,"feature_version":rf.FEATURE_VERSION,"git_revision":__import__('subprocess').check_output(["git","rev-parse","HEAD"],text=True).strip(),"source_replay_sha256":hashlib.sha256(args.replay.read_bytes()).hexdigest(),"semantic_rules_sha256":hashlib.sha256((HERE.parent.parent/"T0c_LIGHT"/"compiled_semantics_v1.json").read_bytes()).hexdigest(),"eta":ETA,"seed":SEED,"dev_smoke":args.dev_smoke,"frozen_boundaries":["ReplayRecord","SceneSnapshot","transition compiler","expected-effect","appraisal X","candidate support","gold boundary"],"learnable_parameters":["theta","w"],"temperature":1.0}
+    manifest.update({"evaluation_status":"development_only","formal_test":False,"split_seed":SEED,"permutation_seed":SEED,"optimizer_seed":None,"optimizer_deterministic":True,"lambda_grid":list(probe.LAMBDA_GRID),"selection_rule":"minimum validation NLL; ties choose larger lambda","initialization":"zeros","trajectory_counts":{"total":len(records),"train":len(split_map["train"]),"validation":len(split_map["validation"]),"dev_holdout":len(split_map["test"])},"row_counts":{k:len(v) for k,v in all_rows.items()}})
     (args.output/"training_manifest.json").write_text(json.dumps(manifest,indent=2)+"\n",encoding="utf8"); (args.output/"dev_comparison.summary.json").write_text(json.dumps(summary,indent=2)+"\n",encoding="utf8"); print(json.dumps(summary,indent=2))
 if __name__=="__main__": main()
