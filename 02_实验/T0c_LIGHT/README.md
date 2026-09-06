@@ -41,6 +41,6 @@ C++ 框架侧同步新增 `Demo codex-generated/Inc/scene_snapshot.h` 与 `Src/s
 
 ### Transition theory-S diagnostic
 
-`run_transition_theory_s_v0.py` 在同一 140 steps 上执行 `SceneSnapshot(t-1,t) → transition → appraisal X → AppraisalTraceStateV0 → candidate scorer`，并输出 zero-S、theory-S、trajectory-permuted-S 三组 trace。固定 `eta=0.35`、离散 replay boundary `Δt=1`；replay scorer 现在只接收候选语义和显式 `ReplayPolicyConfig`，不读取 RoomDemo `CharacterState/Personality`。结果与 transition audit 位于 `outputs/experiments/LIGHT_transition_theory_s_v0/`。本轮只作机制 smoke，不调 eta 或 scorer。
+`run_transition_theory_s_v0.py` 在同一 140 steps 上执行 `SceneSnapshot(t-1,t) → transition → appraisal X → AppraisalTraceStateV0 → candidate scorer`，并输出 zero-S、theory-S、trajectory-permuted-S 三组 trace。固定 `eta=0.35`、离散 replay boundary `Δt=1`；replay scorer 现在只接收候选语义和显式 `ReplayPolicyConfig`，不读取 RoomDemo `CharacterState/Personality`。neutral scorer 的冻结结果见 `LIGHT_transition_theory_s_replay_neutral_v0.summary.json` 与同名 manifest；旧 `drive-linear-v0` 结果保留为带版本名的历史 smoke。运行 trace 位于 `outputs/experiments/LIGHT_transition_theory_s_replay_neutral_v0/`。本轮只作机制 smoke，不调 eta 或 scorer。
 
 neutral scorer 重跑后（按 decision-index 分层 permutation）结果为：zero-S `1.438298`、theory-S `1.436894`、permuted-S `1.441893`、uniform `1.412648`。正确历史现已优于 permutation，但仍输给 uniform；negative channel 本轮非零率为 0，expected effect 41 条中 15 条 confirmed、26 条 unconfirmed。
