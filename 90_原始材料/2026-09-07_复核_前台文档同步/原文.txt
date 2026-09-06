@@ -1,0 +1,445 @@
+看完整体后，我的判断是：
+
+> **现在已经不是“AI 屎山仓库”了。代码主链其实挺克制；真正重新冒头的是“AI 写太快导致前台文档不同步”。**
+
+最新还是 `webgpt-sync@efdcf69`。
+
+### 先给个整体体感
+
+| 区域               | 状态                           |         屎山风险 |
+| ---------------- | ---------------------------- | -----------: |
+| C++ RoomDemo     | 结构基本清楚，但 `simulation.cpp` 巨大 |         3/10 |
+| Replay / T14-T20 | 边界清楚、实验审计很好                  |       2.5/10 |
+| `00_研究设计` 前台文档   | **开始明显漂移**                   |     **6/10** |
+| `01_文献`          | 很大，但大多是有来源的研究资产              |         3/10 |
+| `90_原始材料`        | 巨大，但已经正确隔离                   |         1/10 |
+| 整仓               | **可维护，没必要再大扫除**              | **约 3.5/10** |
+
+仓库现在一共约 **335 个 tracked 文件**。其中：
+
+```text
+00_研究设计   28 files / 328 KB
+01_文献       98 files / 142 MB（82 个 PDF 占绝大多数）
+02_实验       84 files / 6.9 MB
+90_原始材料   80 files / 2.15 MB
+Demo          38 files / 185 KB
+```
+
+这个量本身完全不离谱。
+
+---
+
+## 真正好的地方
+
+最重要的是，**之前最危险的 AI 行为已经被控制住了**。
+
+`90_原始材料` 虽然里面有几十万字的聊天原文，但它现在明确只是 archive，不参与前台 truth。这个千万别因为“看着大”去删。那是 provenance，不是屎。
+
+`00_研究设计/README.md` 也已经建立了 ownership：
+
+```text
+机制 → 完整机制说明
+问题 → 前台问题
+未决 → 未决问题
+行动 → TODO
+实现事实 → 当前实现进度
+历史 → 归档
+```
+
+这个治理思路是对的。
+
+而最新 Replay 侧甚至比普通学生科研仓库规范很多：
+
+```text
+raw source
+→ ReplayRecord
+→ SceneSnapshot
+→ transition/appraisal
+→ S
+→ raw features
+→ fixed probe
+→ optimization
+→ intervention
+→ manifest
+```
+
+再加：
+
+```text
+goldless prediction boundary
+dev/test 区分
+field provenance
+lambda sweep
+optimizer trace
+module hashes
+dirty-worktree
+permutation controls
+```
+
+这些不是 AI 堆功能，反而是在**限制 AI 乱动**。
+
+---
+
+# 现在最大的 AI 屎山：文档 truth 漂移
+
+这里我已经找到几个实锤。
+
+### 顶层 README 自己就过期了
+
+现在写着：
+
+> `00_研究设计`：六份活动文档
+
+但 `00_研究设计/README.md` 明确写的是：
+
+> 当前只保留十一份活动文档
+
+这就是典型 AI 多处维护同一事实后开始不同步。
+
+---
+
+### `Paper-0问题卡.md` 还把 T14/T20 指向 v0
+
+它现在写：
+
+```text
+正式训练前冻结协议见 rank-matched probe v0
+```
+
+但我们刚刚花了一晚上真正冻结并实现的是：
+
+```text
+T14_T20_rank_matched_probe_v1.md
+replay_features_v1.py
+replay_probe_v1.py
+run_rank_matched_probe_v1.py
+```
+
+而 v0 已经是历史协议。
+
+这个比“六份/十一份”严重，因为**会影响研究解释**。
+
+---
+
+### `当前实现进度.md` 已经明显落后于代码
+
+顶部还是：
+
+```text
+核对日期：2026-09-05
+代码基线：T42 ...
+```
+
+全文主体仍在讲 C++ RoomDemo、T25/T42。
+
+它几乎没有反映今天已经实际完成的：
+
+```text
+LIGHT Replay transition
+rank-matched 1D states
+raw feature v1
+conditional linear probe
+L-BFGS
+gradient harness
+zeroed/permuted intervention
+ready-for-dev-run
+```
+
+于是现在出现了一个很危险的情况：
+
+> **README 告诉 AI：“具体版本与证据只在当前实现进度维护”，但这个“唯一 truth”本身已经不是最新的。**
+
+这是真正需要处理的。
+
+---
+
+### `项目现状速览_通俗版.md` 也已经过期
+
+它还写：
+
+```text
+代码：1 个 C++ 参考实现，24 文件
+文档：6 份主文档 + 6 份核读页
+待办：35 项，完成 1 项
+正式实验：0
+```
+
+最后一条“正式实验 0”目前仍然成立。
+
+但前几条显然已经不适合拿来描述今天的项目，而且它还说：
+
+> 下一步冻结文献阅读，先跑通第一个 held-out 预测实验
+
+现在我们已经把 LIGHT external replay + gradient harness 搭到 dev-run 前夜了。
+
+所以这页已经从“通俗入口”变成了**历史快照伪装成当前入口**。
+
+---
+
+# 第二个风险：实验区缺一个总路由
+
+我确认了：
+
+```text
+02_实验/README.md
+```
+
+**不存在。**
+
+现在 `02_实验` 已经有：
+
+```text
+T0b SOTOPIA
+T0c LIGHT
+T0d OPeRA
+T0f FarmQuest
+T0g PowerWash
+T0h AGAIN
+Replay/
+T14_T20/
+各种 v0/v1 protocol
+```
+
+目前你还记得每个是干嘛的，所以没问题。
+
+再过两周：
+
+> `LIGHT_transition_theory_s_replay_neutral_v0`
+>
+> `LIGHT_scene_aware_v1`
+>
+> `compiled_semantics_v0`
+>
+> `compiled_semantics_v1`
+>
+> `rank_matched_probe_v0`
+>
+> `rank_matched_probe_v1`
+
+很容易变成 AI 的“考古现场”。
+
+这个地方**值得新增一个非常短的 README**，只做路由：
+
+```text
+当前主线是什么
+历史 diagnostic 是什么
+哪些 dataset paused
+哪个 runner 是当前入口
+哪些 artifact 是旧 v0
+```
+
+不要写新理论。
+
+---
+
+# 代码侧反而没那么屎
+
+当前最大文件：
+
+```text
+simulation.cpp                  58.2 KB
+world.cpp                       24.1 KB
+run_compiled_semantics_v0.py    16.9 KB
+observation.cpp                 16.5 KB
+run_rank_matched_probe_v1.py    15.8 KB
+```
+
+你自己那个 `repo_health_check.py` 设的是：
+
+```text
+> 50 KB code file → warning
+TODO > 27 KB → warning
+```
+
+所以现在至少肯定会报：
+
+```text
+simulation.cpp 58 KB
+TODO.md 31 KB
+```
+
+但我**不建议现在拆 simulation.cpp**。
+
+因为它虽然大，却有明确 ownership：
+
+```text
+orchestration
+batch
+verify
+E0
+profile
+```
+
+而且 `ARCHITECTURE_RULES.md` 已经明确把它登记成：
+
+> known debt；不要因为 cleanup 做大重构。
+
+这就是健康技术债，不是失控屎山。
+
+---
+
+## Replay 这里有一个“历史双轨”，但目前还能接受
+
+现在仍然存在旧 C++：
+
+```cpp
+ReplayPolicyConfig {
+    task_drive = .70;
+    ...
+    temperature = .45;
+}
+```
+
+以及：
+
+```text
+replay-core-v0
+replay-neutral-v0
+```
+
+与此同时，真正当前 T14/T20 已经是 Python：
+
+```text
+z = theta^T f + S w^T f
+```
+
+这意味着仓库里同时有：
+
+```text
+旧 hand-weighted replay diagnostic
+新 learned replay probe
+```
+
+**现在还不算屎山**，因为 v0 是历史 smoke/repro path，而 v1 才是当前实验。
+
+但最好在 `02_实验/README.md` 里非常明确写一句：
+
+```text
+replay_core_cli / replay-neutral-v0:
+historical diagnostic only;
+NOT the current T14/T20 policy.
+```
+
+别删，也别重构。
+
+只要语义身份清楚就行。
+
+---
+
+# 文献区其实比我预想健康
+
+`01_文献` 有 142 MB，看起来吓人，但 **82 个 PDF 本身就占绝大多数**。
+
+真正 Markdown 只有十来份主要审计/核读。
+
+而且：
+
+```text
+专题核读_X维度与状态动力学
+专题核读_工程可复用资产
+A* 可行性审计
+全量近邻精读
+```
+
+这些有各自 evidence scope，不属于“AI 每聊一次生成一份总结”。
+
+所以这里**不要再整理**。
+
+最多以后论文阶段建立真正 literature matrix。
+
+---
+
+# `TODO.md` 是现在第二明显的 AI 膨胀点
+
+31 KB。
+
+它已经从：
+
+> 下一动作清单
+
+逐渐长成：
+
+> 行动 + 历史解释 + 文献发现 + 自我纠错记录 + 项目哲学
+
+比如 T15、T24、T35 附近已经是整段研究笔记了。
+
+这和 `ARCHITECTURE_RULES` 自己写的：
+
+> TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
+
+其实已经有点冲突。
+
+但我也**不建议今晚整理**。
+
+现在第一次 dev run 比整理 TODO 重要得多。
+
+---
+
+# 所以现在千万不要再来一轮“大扫除”
+
+如果让我决定，只做 **3 个极小同步动作**：
+
+1. 把 `Paper-0问题卡` 的 T14/T20 protocol 链接从 v0 更新到 v1，并明确 v0=history。
+2. 更新 `当前实现进度` 顶部，加入 `efdcf69 / T14-T20 optimization harness ready-for-dev-run`；同时把 `项目现状速览` 标为过期或同步关键数字。
+3. 新建一个 **很短的 `02_实验/README.md`**，做当前实验路由和 v0/v1 身份说明。
+
+然后停止。
+
+**不要：**
+
+```text
+拆 simulation.cpp
+重命名整个实验目录
+把所有 v0 搬走
+合并所有文献笔记
+重写 TODO
+重新设计 Replay
+```
+
+这些现在都会重新掉进“AI 觉得架构还能更漂亮”的坑。
+
+---
+
+## 从整个项目角度看
+
+其实我现在比昨晚更放心。
+
+之前最大的问题是：
+
+> 概念很多 → 文献很多 → 数据集很多 → demo 很复杂 → 但没有一个能杀死想法的实验。
+
+而现在已经收敛到了：
+
+```text
+Paper-0 question
+↓
+LIGHT restricted dev
+↓
+same candidate support
+↓
+Activity / ActionSupport / Theory S
+↓
+same probe family
+↓
+gradient fitting
+↓
+correct / zeroed / permuted
+↓
+NLL
+```
+
+这是**科研主线越来越窄**，不是越来越散。
+
+所以现在项目最大的危险已经不是“AI 写出来一个没人懂的系统”。
+
+而是：
+
+> **AI 很勤快，导致周边文档不断刷新，最终“哪个文件才是真的”再次模糊。**
+
+这很好解决：**实验往前走，文档停止增殖，只同步 canonical truth。**
+
+我的总体评价会是：
+
+> **代码层已经从 AI 原型进入“能做实验”的状态；研究层也终于有可证伪主链。当前真正需要治理的是文档状态漂移，而不是再做架构清洗。**
+
+今晚做到这里，我觉得屎山回顾可以结束了。明天第一优先级应该是**跑数据，不是再整理仓库**。
