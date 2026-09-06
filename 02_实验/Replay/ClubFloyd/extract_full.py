@@ -35,10 +35,16 @@ def main() -> int:
             for s in rec["steps"]:
                 if not s["source_action_A_star"].strip(): anomalies.append({"file":p.name,"t":s["t"],"kind":"empty_action"})
                 quality=action_quality(s["source_action_A_star"]); quality_counts[quality]+=1; s.setdefault("source_step_context",{})["source_action_quality"]=quality
-            picks={0, max(0,n//2), max(0,n-1)}
-            if n: picks |= {max(range(n),key=lambda i:len(rec["steps"][i]["source_O"])), max(range(n),key=lambda i:len(rec["steps"][i]["source_action_A_star"]))}
+            picks=set()
+            if n:
+                picks={0, n//2, n-1}
+                picks |= {max(range(n),key=lambda i:len(rec["steps"][i]["source_O"])), max(range(n),key=lambda i:len(rec["steps"][i]["source_action_A_star"]))}
+                picks |= {i for i,s in enumerate(rec["steps"]) if action_quality(s["source_action_A_star"]) in {"chat/commentary-like","meta-command"}}
             for i in sorted(picks):
-                if len(review)<args.review_limit:
+                quality = action_quality(rec["steps"][i]["source_action_A_star"])
+                # Keep every mechanically flagged special case in review; fill the
+                # remainder with the ordinary deterministic trajectory picks.
+                if quality in {"chat/commentary-like", "meta-command"} or len(review)<args.review_limit:
                     step=rec["steps"][i]
                     review.append({"review_id":f"clubfloyd::{rec['source_record_id']}::step-{i}","source_dataset":"ClubFloyd","source_record_ref":f"{rec['source_record_id']}#step-{i}","generator_sha256":generator_sha256,"raw":{"source_file":rec["source_record_id"],"raw_state":step["source_O"],"raw_action":step["source_action_A_star"]},"parsed":{"format":"CALM_markers","state_marker":"[STATE]","action_marker":"[ACTION]","state_text":step["source_O"],"action_text":step["source_action_A_star"]},"transformed":step,"mapping_notes":{"source_O":"Copied from raw [STATE] segment before this action.","source_action_A_star":"Copied from raw [ACTION] segment; no action ontology normalization.","W":"unknown because transcript does not provide authoritative world state.","persona_P":"null because transcript does not provide Character Dynamics response parameters."}})
             out.write(json.dumps(rec,ensure_ascii=False,separators=(",",":"))+"\n")

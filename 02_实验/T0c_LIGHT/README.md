@@ -23,4 +23,6 @@ py -3 tools/validate_replay_record.py outputs/external_assets_2026-09-06/LIGHT/l
 py -3 02_实验/T0c_LIGHT/extract_full.py outputs/external_assets_2026-09-06/LIGHT/light_data.pkl outputs/external_assets_2026-09-06/LIGHT
 ```
 
-全量 QA 已标记两个 source alignment anomaly episode（486、778：actor 不在 source agents，且 A* 在 case-normalized 后不在 candidates）；这两个 episode quarantine，不进入 mechanism loop。
+全量 QA 已标记两个 source alignment anomaly episode（486、778：actor 不在 source agents，且 A* 在 case-normalized 后不在 candidates）；这两个 episode quarantine，不进入 mechanism loop。候选统计同时报告 exact miss=3、casefold miss=2（24,999/25,001 casefold 命中）。
+
+机制开发视图必须用 `py -3 02_实验/Replay/build_mechanism_dev_view.py <full.replay.jsonl> <mechanism_dev.replay.jsonl>` 生成；脚本会硬排除 `source_episode_context.quarantine == true` 的 trajectory。
