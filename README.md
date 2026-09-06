@@ -16,6 +16,8 @@
 | 文献 PDF、职责级阅读与证据 | [文献库](01_文献/README.md) |
 | 用户原话、模型提案、对话与来源 | [原始材料](90_原始材料/README.md) |
 
+仓库治理护栏：[ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md)；廉价健康检查可运行 `python tools/repo_health_check.py`，ReplayRecord 样例可用 `python tools/validate_replay_record.py <record.json>` 校验。护栏只预警文件膨胀/重复归档，明确的 schema、CTest 和 provenance 错误才阻断对应检查。
+
 新想法只在直接服务“维护行为相关状态／预测生成行为”时进入当前主线。效率—效果与可控性是第二评价维度，比较对象必须包含强 summary，不能用便宜或能跑替代研究证明。
 
 ## 代码与材料的归属
