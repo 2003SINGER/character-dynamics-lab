@@ -37,31 +37,36 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 25. During mechanism identification, dev data may guide changes to fields, updaters, utility, timing, or ontology. After freeze, test data must not guide those changes.
 26. Generalization evaluations must separate frozen mechanism + fixed semantics, frozen mechanism + live LLM semantics, and LLM-direct/no-dynamics baselines.
 27. If a semantic LLM replaces a hand-written rule, remove the redundant rule only after dev ablation/sensitivity evidence; do not retain duplicate mechanisms indefinitely for compatibility.
+28. Stage 0/1 may use hand-written, AI-assisted semantic rules compiled into a versioned deterministic rule table; runtime experiments must not call an LLM in this stage.
+29. Semantic rules may be revised from dev failures, but must be reusable causal/contextual hypotheses—not per-trajectory patches keyed to `A*` or future events.
+30. Freeze the semantic rule table together with `X`, `S`, `U`, utility, parameters, and timing before testing generalization.
+31. Only after freeze may a live LLM replace the fixed semantic frontend; keep dynamics identical so the semantic substitution is the tested variable.
+32. The future minimum comparison is `fixed semantics + frozen dynamics` vs `LLM semantics + same frozen dynamics`, plus `LLM-direct/no-dynamics` and literature baselines.
 
 ## Scope control
 
-28. Define one small public ReplayRecord contract; do not build `IAdapter`, factories, registries, plugin managers, or dependency injection.
-29. Do not create one independent experiment universe per dataset.
-30. Apply the Rule of Three: only extract a shared helper after the same logic appears three times.
-31. Do not add a field because it sounds psychological. Add it only with a stated input, updater, consumer, ablation, and evidence need.
-32. Do not add a parameter merely to fit one episode.
-33. Do not expand `simulation.cpp` with new datasets or measurements.
-34. Do not split files solely to make them look clean; split when ownership or reuse is real.
+33. Define one small public ReplayRecord contract; do not build `IAdapter`, factories, registries, plugin managers, or dependency injection.
+34. Do not create one independent experiment universe per dataset.
+35. Apply the Rule of Three: only extract a shared helper after the same logic appears three times.
+36. Do not add a field because it sounds psychological. Add it only with a stated input, updater, consumer, ablation, and evidence need.
+37. Do not add a parameter merely to fit one episode.
+38. Do not expand `simulation.cpp` with new datasets or measurements.
+39. Do not split files solely to make them look clean; split when ownership or reuse is real.
 
 ## Tests and guards
 
-35. CTest and `--verify` remain regression gates for the existing reference runtime.
-36. Schema/provenance validators may fail on invalid records; size, duplication, and complexity checks warn only.
-37. A warning is not evidence that a mechanism is wrong; it is a prompt for review.
-38. Every new adapter needs a small schema-validating dev slice before larger downloads or model comparisons.
-39. Preserve negative results, raw outputs, configuration, and errors.
+40. CTest and `--verify` remain regression gates for the existing reference runtime.
+41. Schema/provenance validators may fail on invalid records; size, duplication, and complexity checks warn only.
+42. A warning is not evidence that a mechanism is wrong; it is a prompt for review.
+43. Every new adapter needs a small schema-validating dev slice before larger downloads or model comparisons.
+44. Preserve negative results, raw outputs, configuration, and errors.
 
 ## Documentation and review
 
-40. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
-41. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
-42. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
-43. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
+45. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
+46. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
+47. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
+48. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
 
 ## Current known baseline
 

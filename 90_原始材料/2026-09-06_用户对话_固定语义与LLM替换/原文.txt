@@ -1,0 +1,1020 @@
+现在这三条线其实已经从“想法”变成了一个比较清楚的三线并行路线，只是成熟度不同。
+
+第一条：公开论文数据集复用
+
+状态：已经完成资产层梳理，进入 adapter 前准备。
+
+目前仓库里已经明确登记了：
+
+OPeRA：真人 A*，但更适合作为受限比较资产，不是核心唯一数据集；
+LIGHT / LIGHT-WILD：最接近 character/world/action，应该是后续角色域的重要数据源；
+HEART-Bench：memory/state baseline；
+PersonaX：长历史压缩/表征 baseline；
+DYNToM 等：更偏状态链/语义结构参照。
+
+这条线接下来不是继续搜十个数据集，而是：
+
+ReplayRecord v0
+↓
+LIGHT 小切片 adapter
+↓
+检查 W/O/A*/candidate 能恢复多少
+↓
+再决定是否正式纳入 dev
+
+OPeRA 已经先做过准入审计，所以它相当于 adapter #0 / data audit prototype。
+
+第二条：玩家游戏日志 / 互动剧情日志
+
+状态：已经找到真正值得做的一批，下一步最应该动这一条。
+
+目前优先级我还是这样排：
+
+ClubFloyd
+↓
+PowerWash
+↓
+AGAIN
+↓
+FarmQuest
+↓
+MineRL / BASALT 等重型数据
+
+但它们用途不同。
+
+ClubFloyd 最适合测试：
+
+自然语言 O
+→ 真人 action A*
+→ next O
+
+以及测试我们的 LLM semantic adapter、factual/expanded scene。
+
+PowerWash 最适合：
+
+跨 session / 跨天行为
++
+主观 wellbeing / focus / enjoyment 等
+
+帮助我们判断 persistent S 的时间尺度、字段是否值得存在。
+
+AGAIN 最适合直接测试某类动态状态：
+
+telemetry
+→ event/X
+→ S dynamics
+↔ 真人 continuous arousal
+
+尤其是 decay / lag / saturation。
+
+所以这条线不是“再找游戏日志”，而已经是：
+
+开始取第一个真实小切片。
+
+目前最合理还是 ClubFloyd 先，因为它轻，最快暴露 ReplayRecord 和 scene reconstruction 的问题。
+
+第三条：外部轨迹 → 反向纠错机制
+
+状态：理论和工程边界已经基本搭好了，但还没有真正开始跑。
+
+这条现在已经不是我们最开始那个模糊循环了，而变成：
+
+外部 dev trajectory
+↓
+dataset adapter
+↓
+factual scene
++
+expanded diagnostic scene
+↓
+LLM semantic interpretation
+↓
+X
+↓
+当前显式 S / updater / utility
+↓
+π(A)
+↓
+对 A* / state proxy / diagnostics
+↓
+sensitivity / ablation / failure analysis
+↓
+删字段 / 改函数 / 改时间尺度 / 改 coupling
+↓
+重新 dev
+
+这就是我们真正的 mechanism identification loop。
+
+现在仓库还把最重要的长期边界也定了：
+
+Phase I
+数据 + LLM 帮助拟合机制
+
+Phase II
+freeze
+
+Phase III
+新数据 generalization
+
+而 Phase III 同时比较：
+
+Frozen mechanism + fixed semantics
+Frozen mechanism + live LLM semantics
+LLM-direct / no dynamics
+literature baselines
+
+所以第三条已经从“我们以后可以这样调参数”升级成了整个实验方法论。
+
+三条线现在的关系
+
+不是三个独立课题，而是：
+
+            第一条
+      公开论文数据集
+             \
+              \
+               → 多来源 dev data
+              /
+             /
+            第二条
+       玩家真实日志
+               ↓
+        第三条机制识别循环
+               ↓
+       Character Dynamics v1
+               ↓
+             freeze
+               ↓
+     新数据 + 文献方法泛化比较
+
+所以真正的主线其实已经很清楚：
+
+1、2 是数据来源；3 才是研究发动机。
+
+我现在会稍微修正我们之前的执行顺序
+
+不是同时把所有数据都接进去。
+
+应该是：
+
+修掉刚发现的 Replay validator 小 bug；
+ClubFloyd 小切片，第一次真实验证 ReplayRecord + factual/expanded scene；
+再接一个完全不同的数据类型，比如 AGAIN 或 PowerWash；
+两种数据域都能进统一接口后，再正式启动第一次 mechanism-identification loop；
+LIGHT 随后进入 character/world 域；
+OPeRA 留作外部行为比较资产。
+
+这样第一个阶段不会被 5 个数据集同时拖死。
+
+而且到 第 4 步——第一次真的要根据外部数据修改 S/U/utility 之前，就是之前你让我提醒你的那个节点：
+
+这次我们最想分清哪两种可能？
+
+那时候先把 competing explanations 和失败条件写下来，再让 Luna 开始调机制。现在还只是把实验场子搭好。
+
+外部轨迹 → 反向纠错机制
+
+状态：理论和工程边界已经基本搭好了，但还没有真正开。具体讲讲
+
+具体来说，这条线不是“拿数据调几个参数”，而是把现在这套：
+
+$$ W\rightarrow O\rightarrow X\rightarrow S\rightarrow \pi(A) $$
+
+当成一个尚未定型的显式动力系统假设，然后让外部真实轨迹不断给它施压。仓库现在已经把这个方向写成：开发阶段允许用多数据集 + LLM 语义解释去修改字段、updater、utility、timing；机制冻结以后，新测试数据不能再反向修改它。
+
+1. 一条外部轨迹进来之后，到底发生什么
+
+比如 ClubFloyd 某一段真人文字冒险：
+
+O_t:
+你站在厨房，桌上有钥匙，门锁着。
+
+历史:
+刚才一直在寻找出口。
+
+真人下一步:
+take key
+
+第一步不是马上让我们的机制预测，而是 adapter 先把它转成统一记录：
+
+source_O
+source_event
+A*_t = take key
+history
+persona?         缺就空
+W?               缺就空
+candidate_set?   能恢复多少算多少
+
+原始内容始终保留，LLM 推出来的字段单独标 llm_inferred。现在 ReplayRecord 已经支持按字段记录 provenance，所以同一步里真人动作可以是 observed，而推断出来的 W/X 可以是 llm_inferred。
+
+接下来才进入我们自己的场景。
+
+2. 同一条数据要造两个 scene
+
+这是这条路线非常关键的一点。
+
+Factual scene
+
+尽量只包含数据中能证明当时存在的：
+
+room
+door
+key
+...
+
+然后问：
+
+在当时真实可恢复的环境里，我们的机制给真人 A* 多大概率？
+
+这是预测部分。
+
+Expanded diagnostic scene
+
+再人为加入合理但原数据未必明确记录的选择：
+
+window
+food
+chair
+book
+phone
+leave-room-alternative
+...
+
+于是人物不再只有：
+
+take key
+
+一个显然正确的动作。
+
+现在我们可以观察：
+
+take key      0.42
+inspect door  0.20
+eat food      0.14
+sit           0.08
+...
+
+如果加入两个无关 object 后 take key 从 0.6 掉到 0.05，那机制很可能根本没抓住“当前目标/承诺/状态”，只是 action space 小的时候碰巧看起来正确。
+
+candidate_set_factual 和 candidate_set_expanded 现在已经在 ReplayRecord 里明确分开，expanded 不允许冒充真人当时真实拥有的候选集。
+
+3. 然后真正跑 Character Dynamics
+
+当前理想链是：
+
+$$ O_t,\Delta O_t,S_t,P \rightarrow X_t \rightarrow U \rightarrow S_{t+1} \rightarrow \pi(A) $$
+
+LLM 最适合插在 X。
+
+比如原始事件：
+
+“角色努力了十分钟，但任务进度几乎没有变化。”
+
+LLM 不应该直接输出：
+
+anxiety += 0.37
+task_pressure += 0.21
+
+而应该输出类似：
+
+goal_relevance = high
+progress_appraisal = poor
+perceived_control = low
+frustration_signal = medium
+interruption = false
+
+这就是 X。
+
+然后我们的显式动力学：
+
+X + old S + P
+↓
+U_k
+↓
+new S
+
+决定：
+
+task_pressure
+anxiety
+commitment
+fatigue
+...
+
+怎么更新。
+
+仓库现在已经明确禁止把这一语义层优化掉，也要求以后 LLM 只能读角色合法可知的 O/ΔO/S/P，不能偷看隐藏 W 或未来。
+
+4. “反向纠错”真正纠的是什么
+
+一次 dev run 完以后，我们不会只看：
+
+真人动作预测错没错。
+
+我们还要把整条 trace 展开：
+
+ΔO
+↓
+X
+↓
+requested ΔS
+↓
+applied ΔS
+↓
+S_t
+↓
+utility / score
+↓
+π(A)
+↓
+A*
+
+然后定位到底哪一层错。
+
+例如真实动作是继续学习，但模型突然跑去睡觉。
+
+可能有完全不同的原因：
+
+X 错了：LLM 把“小进度”理解成重大失败；
+updater 错了：一点失败就把 task_pressure 推太高；
+decay 错了：fatigue 长时间不恢复；
+state 定义错了：anxiety 和 task_pressure 实际高度重复；
+decision coupling 错了：fatigue 对睡觉 utility 权重过大；
+action support 错了：真实环境里其实根本不能睡；
+当前数据根本不支持我们假设的那个 state。
+
+所以“预测错”不是直接改权重。
+
+而是：
+
+先找错误发生在哪个计算边界。
+
+这也是为什么中间链不能被 LLM 黑盒化。
+
+5. 接着做 sensitivity，而不是凭感觉改
+
+比如怀疑 fatigue 太强。
+
+固定同一时刻其他变量：
+
+$$ fatigue = 0.2,\;0.4,\;0.6,\;0.8 $$
+
+看：
+
+$$ \pi(A) $$
+
+怎么变化。
+
+如果从 0.2 到 0.8：
+
+SleepAtBed 几乎完全不变
+
+那有几种可能：
+
+fatigue 根本没接进 decision；
+权重太小；
+被别的变量压死；
+或者这个字段就是没用。
+
+如果一从：
+
+0.49 → 0.51
+
+就让睡觉概率：
+
+0.1 → 0.8
+
+那就是响应曲线过陡。
+
+再做 ablation：
+
+full model
+vs
+remove fatigue
+
+如果预测和 expanded diagnostic 都不受影响，
+
+删。
+
+不是说：
+
+“fatigue 在心理学上应该存在，所以保留。”
+
+6. 不只是调参数，还允许改“结构”
+
+这才是这条路线最有意思的部分。
+
+循环里允许改变的不只有：
+
+α = 0.2 → 0.3
+
+还可以是：
+
+删除字段
+合并字段
+改变 updater 形式
+新增 lag
+加入 decay
+把线性函数改成阈值/饱和函数
+改变 X→S coupling
+改变 S→π coupling
+删除已经被 LLM semantic layer 替代的手写语义 rule
+
+比如一开始我们有：
+
+task_pressure
+anxiety
+frustration
+
+跑几个 dev 数据集之后发现：
+
+frustration 和 anxiety 高度共线
+删 frustration 没损失
+
+那最终机制就变成两个字段。
+
+甚至可能最后只剩：
+
+fatigue
+goal/commitment
+affective pressure
+
+三个真正有用的 persistent dimensions。
+
+这反而是成功。
+
+我们的目标不是把 Character Dynamics 做得越来越大，而是让外部数据把它削成一个比较小、但行为上真的有作用的系统。
+
+7. 不同数据集负责纠不同部分
+
+这也是为什么我们前面要找多种数据。
+
+ClubFloyd 更适合纠：
+
+O / semantic X / action choice
+
+因为有：
+
+文字情境 → 真人 action
+
+AGAIN 更适合纠：
+
+X → affect-like S
+lag
+decay
+saturation
+
+因为它有连续 arousal proxy。
+
+PowerWash 更适合纠：
+
+长时间尺度 S
+跨 session persistence
+progress / interruption / enjoyment / competence
+
+LIGHT 更适合纠：
+
+world/object/action
+affordance
+角色环境中的 action competition
+
+所以不是每个数据集都必须拥有完整：
+
+$$ W,O,X,S,P,A $$
+
+它们分别给不同边施压。
+
+8. 一个完整 dev iteration 长什么样
+
+真正执行时，可以压成这一轮：
+
+取一批 dev trajectories；
+adapter 转 ReplayRecord；
+构建 factual + expanded scenes；
+LLM 生成结构化 semantic X；
+当前 mechanism v0 跑完整 trace；
+计算真实 A* 的 NLL/rank，并看 expanded-scene robustness；
+对 S 字段和参数做 sensitivity / ablation / permutation；
+LLM + 我们阅读 failure traces，提出机制解释；
+只改有证据支持的部分；
+在同一 dev 或另一个 dev split 重跑；
+反复几轮后，开始删掉无效机制；
+最终冻结成 v1。
+
+这时候“LLM + 我们诊断”不是让 LLM直接说：
+
+“把 anxiety 改成 0.38。”
+
+而是让它帮助提出：
+
+“可能是 task_pressure 和 anxiety 重复。”
+
+“可能是 updater 无衰减。”
+
+“可能是 X 把轻微失败映射得太严重。”
+
+然后我们用实验验证。
+
+9. 什么时候停止继续调
+
+这个也很重要。
+
+不能永远：
+
+测试
+→ 不爽
+→ 改一点
+→ 再测试
+
+否则永远是过拟合。
+
+所以最终要到一个时间点：
+
+S fields frozen
+X schema frozen
+U frozen
+utility form frozen
+parameters frozen
+timing frozen
+
+得到：
+
+Character Dynamics v1
+
+从此新 test dataset 只能前向跑。
+
+仓库现在已经明确这一点：任何参与字段、updater、utility、timing、ontology 保留/删除决策的数据都自动属于 dev；机制 freeze 后 test 不能反向参与修改。
+
+10. 最后才是真正厉害的部分：新数据来了
+
+比如我们此前从没碰过一个新游戏日志数据集。
+
+这时同时跑：
+
+A. Frozen v1 + fixed/rule semantics
+
+B. Frozen v1 + live LLM semantic X
+
+C. LLM direct
+   O + history + P → action
+   不用我们的 S
+
+D. v1 - S / permuted S
+
+E. literature baselines
+
+如果结果：
+
+$$ B > C $$
+
+并且这种优势在多个新域都存在，
+
+那说明：
+
+通用 LLM 负责理解新语义，而显式 persistent dynamics 真的贡献了 LLM 单独读 history 没得到的东西。
+
+如果：
+
+$$ B\approx C $$
+
+那我们就得接受：
+
+这套显式 dynamics 在该任务里没什么额外价值。
+
+如果甚至：
+
+$$ C>B $$
+
+那更说明机制结构可能在妨碍模型。
+
+这才是整个项目最终有研究价值的地方。
+
+而且现在确实已经快到第一次真正开始这条循环的节点了。到我们准备拿第一个外部 dev slice 真的修改 S/U/utility 时，我会先问你之前约好的那个问题：
+
+这一次我们最想分清哪两种可能？
+
+因为从那一步开始，就不是继续搭工程，而是真的开始做实验了。
+
+emmm一上来可以先不用llm。也就是llm的语义判断部分先让你或者luna来直接写一个一一对应的映射就得了，一百个就写一百个固定规则，然后循环改这个规则（也可以知道后续真正引入llm的时候提示词需要往哪个方向引导或者约束，如果一次就好那就直接说明llm确实可以很好的判断这里的语义，但是注意这里llm不直接参与机制，而是把llm的判断保存成死程序然后跑），当然非llm语义部分的参数或者机制修改也要在loop里面由你或者luna根据实验记录来调整到一个比较好的机制版本。
+
+对，这样反而更适合作为第一阶段。你这里实际上把 “LLM 帮我们设计机制” 和 **“LLM 是机制运行时的一部分”**彻底分开了。
+
+前期我建议明确叫成 compiled semantics / frozen semantic mapping：
+
+外部 dev 数据
+↓
+你 + 我 / Luna 阅读事件与上下文
+↓
+设计确定性的语义映射规则
+↓
+把这些判断“编译”成死规则
+↓
+关闭 LLM
+↓
+整批跑 Character Dynamics
+↓
+看 trace / A* / sensitivity / ablation
+↓
+再修改语义规则 + dynamics
+↓
+下一轮
+
+也就是说，即使某一条语义判断最初是 Luna 看了自然语言以后提出的，真正跑实验时 Luna 不在环里。
+
+例如 Luna 判断：
+
+“做到一半被消息打断”
+
+应该对应：
+
+goal_relevance = high
+interruption = true
+progress = partial
+control_loss = medium
+
+那我们把它固化成：
+
+Rule #37
+input pattern: ...
+output X: ...
+
+然后实验从头到尾只跑这个确定性版本。
+
+这点非常重要。
+
+第一阶段其实可以完全没有 runtime LLM
+
+甚至我现在会建议：
+
+Mechanism v0.x
+ΔO / context
+↓
+Fixed Semantic Rule Table
+↓
+X
+↓
+Explicit U
+↓
+S
+↓
+Explicit utility / π(A)
+
+所以整个系统完全 deterministic/replayable。
+
+LLM只是我们的研究助手：
+
+帮忙看失败案例；
+帮忙解释某事件语义；
+帮忙提出规则；
+帮忙改函数；
+帮忙发现冗余变量。
+
+但它不是被评测系统的一部分。
+
+这比一上来接 API 干净太多。
+
+这样 loop 里其实同时优化两块
+
+不是只调 S 参数。
+
+A. Semantic mapping
+
+比如：
+
+raw ΔO
+→ X
+
+我们可能发现：
+
+Rule 12:
+任务完成
+→ relief = high
+→ achievement = high
+
+但外部轨迹显示某类人物任务完成后根本不改变行为。
+
+那我们可能改成：
+
+if high commitment:
+    relief = high
+else:
+    relief = low
+
+或者干脆发现：
+
+achievement 这个维度对后面完全没作用。
+
+那就删。
+
+B. Dynamics / mechanism
+
+也就是：
+
+X + S + P
+→ S'
+→ π(A)
+
+这里继续修改：
+
+参数大小
+decay
+lag
+threshold
+response curve
+字段
+字段之间 coupling
+S→utility 权重
+
+所以完整循环其实是：
+
+Dataset
+↓
+固定 semantic rules R_sem
+↓
+X
+↓
+当前 dynamics M
+↓
+S / π(A)
+↓
+A* + diagnostic observations
+↓
+failure analysis
+↓
+┌───────────────────────┐
+│ 改 R_sem              │
+│ 改 S fields           │
+│ 改 U                  │
+│ 改 utility            │
+│ 改 timing / decay     │
+│ 删除无效机制          │
+└───────────────────────┘
+↓
+新版本
+
+这才是真正的 mechanism identification。
+
+而且你说“一百个就写一百个”我认为可以
+
+早期完全没必要追求漂亮。
+
+如果数据里真的出现 100 类语义事件，我们甚至可以明确维护：
+
+semantic_rules_v0
+001 ...
+002 ...
+003 ...
+...
+100 ...
+
+比让一个 LLM 每次动态猜更适合研究。
+
+但我建议不要散落成：
+
+if (...)
+if (...)
+if (...)
+
+塞进 appraisal.cpp 一千行。
+
+最好只是一个简单、显式、可版本化的 rule table，比如概念上：
+
+rule_id: task_interrupted_01
+conditions:
+  event_type: task_interruption
+  prior_commitment: active
+output:
+  goal_relevance: high
+  interruption: true
+  perceived_progress: stalled
+
+然后一个很简单的 deterministic interpreter。
+
+不是为了架构美观，而是为了以后我们能比较：
+
+semantic_rules_v0
+semantic_rules_v1
+semantic_rules_v2
+
+知道到底改了哪些语义假设。
+
+但是有一个边界必须守：不能把 A* 偷进规则
+
+假设这条数据最后真人选择：
+
+继续学习
+
+我们不能因此专门写：
+
+trajectory_037:
+    task_importance = 0.9
+
+然后成功预测继续学习。
+
+那就是人工泄漏答案。
+
+规则只能依赖预测时真正可得到的：
+
+O_t
+ΔO_t
+S_t
+P
+past history
+
+不能依赖：
+
+A*_t
+future events
+trajectory 的后半段
+
+所以即使“一百条数据写一百条规则”，最好也是：
+
+为一百种语义模式写规则，
+
+而不是：
+
+为一百个样本写答案。
+
+开发数据当然允许我们看到 A* 后修改规则，但修改必须成为可复用的语义假设，然后整批重新跑，而不是给这个样本打补丁。
+
+这还能非常自然地教我们以后怎么写 LLM prompt
+
+这点你说得特别对。
+
+假设经过十轮 rule iteration，我们最后发现 X 真正常用的只有：
+
+goal_relevance
+progress
+control
+interruption
+urgency
+social_relevance
+valence
+uncertainty
+
+而且发现最容易错的是：
+
+区分“客观失败”与“角色感知失败”
+区分“任务中断”和“主动放弃”
+判断事件是否影响当前 commitment
+
+那以后 LLM prompt 根本不需要凭感觉设计。
+
+我们直接告诉 LLM：
+
+你必须重点判断这几个变量；
+特别注意这三个混淆；
+不知道就输出 unknown；
+不允许从隐藏 W 推断。
+
+也就是说：
+
+前期人工 fixed rules
+
+不只是临时替代品。
+
+它还是未来：
+
+LLM semantic interface specification
+
+的经验来源。
+
+然后会出现一个非常有价值的实验
+
+等我们的 fixed semantic rules 已经比较成熟以后：
+
+条件 A
+Fixed rule semantics
+→ X
+→ frozen dynamics
+条件 B
+LLM semantics
+→ X
+→ SAME frozen dynamics
+
+这时候 dynamics、S、utility 全部一模一样。
+
+唯一替换：
+
+semantic parser
+
+那我们就能很干净地问：
+
+LLM 是否真的能替代我们花很多轮人工得到的语义映射？
+
+如果：
+
+$$ B \approx A $$
+
+那很好。
+
+说明：
+
+这个 semantic task 确实是 LLM 很擅长、一次提示就能完成的。
+
+我们可以删掉大量手工语义规则。
+
+如果：
+
+$$ B < A $$
+
+就能看错在哪里，再改 prompt/schema。
+
+如果：
+
+$$ B > A $$
+
+也很好，说明我们的人工 rule 太僵，LLM 提供了真实的跨语境能力。
+
+甚至可以进一步测“提示词是不是我们从 loop 里学出来的”
+
+比如：
+
+LLM naive prompt
+
+vs
+
+LLM prompt informed by mechanism-identification loop
+
+如果后者明显好，
+
+那说明前面的 rule engineering 没白做：
+
+它帮我们识别出了 semantic interface 真正需要哪些判断。
+
+这虽然可能不是主论文 claim，但非常有分析价值。
+
+我现在会把整个流程改成四个阶段
+Stage 0 — Fixed semantics bootstrapping
+
+没有 runtime LLM。
+
+data
+→ handcrafted/AI-assisted fixed rules
+→ X
+→ current mechanism
+
+我/Luna 可以帮助写规则，但写完以后 LLM 离线。
+
+Stage 1 — Joint mechanism identification
+
+反复修改：
+
+semantic rule table
++
+S
++
+U
++
+utility
++
+timing
++
+parameters
+
+所有参与修改的数据都是 dev。
+
+目标不是把分数调到最高，而是得到：
+
+最小、稳定、可解释、跨 dev trajectory 有效的机制。
+
+Stage 2 — Freeze
+
+冻结：
+
+semantic schema
+fixed semantic rules
+S fields
+U
+utility
+parameters
+timing
+
+得到：
+
+Character Dynamics v1-fixed
+Stage 3 — LLM substitution + generalization
+
+在新数据上同时跑：
+
+Fixed semantics + frozen dynamics
+
+LLM semantics + frozen dynamics
+
+LLM direct / no dynamics
+
+literature baselines
+
+这时候 LLM 第一次真正成为系统组件。
+
+而不是研究助手。
+
+其实这样比我们刚才那个“前期就 LLM semantics”方案更强，因为变量控制干净很多：
+
+先把语义映射和动力学都变成可重复的死程序，找到一个稳定机制；再单独替换语义前端。
+
+最后如果 LLM 一次就把 fixed rule table 替代得很好，我们也能很明确地说：
+
+复杂的显式语义规则不需要长期保留；LLM 足以承担语义映射，而真正需要显式建模的是跨时间 dynamics。
+
+这反而可能把最终系统削得更漂亮。

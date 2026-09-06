@@ -52,9 +52,11 @@ Episode:
 - LLM 输出结构化 `X`，不直接任意修改 `S`；正式运行记录 model/version、prompt version、decoding config、input hash、structured output 和 raw response/reference。
 - 机制识别阶段允许用多个 dev 数据集迭代字段、updater、utility、timing；冻结后不得用 test 反向修改。
 - 泛化阶段至少区分：`frozen mechanism + fixed semantics`、`frozen mechanism + live LLM semantics`、`LLM-direct/no-dynamics`，另保留 state ablation/permutation。
+- 第一阶段先采用 `compiled semantics`：由人工/离线 AI 辅助形成版本化、确定性的语义规则表，运行时关闭 LLM；规则可依据 dev 失败迭代，但不得按单条 `A*` 或未来信息打补丁。
+- 冻结时同时冻结语义规则表、`X` schema、`S` 字段、`U`、utility、参数和 timing。冻结后才允许用 live LLM 替换语义前端，并保持动力学完全相同。
 
 这是一条接口与实验边界，不是本轮真实 LLM 调用授权。
 
 ## 当前不做
 
-不冻结 40 类继承体系，不启动大规模下载，不把 OPeRA action subtype 直接升级为 Paper-0 目标。先以数据资产登记和小型 adapter 骨架验证字段可映射性。
+不冻结 40 类继承体系，不启动大规模下载，不把 OPeRA action subtype 直接升级为 Paper-0 目标，不在当前阶段接入 runtime LLM。先以数据资产登记、小型 adapter 骨架和版本化 compiled semantic rules 验证字段可映射性。
