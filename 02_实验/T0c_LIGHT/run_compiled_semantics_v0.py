@@ -69,6 +69,30 @@ def compile_candidate(action, context, rules):
     )
     return feat, matched
 
+def compile_candidate_scene_aware(action, step, rules):
+    """v1 placeholder: bind candidate target to the current source scene/O."""
+    feat, matched = compile_candidate(action, step.get("source_O"), rules)
+    tokens = words(action)
+    target = set(w for w in tokens[1:] if w not in STOP)
+    ctx = step.get("source_step_context") or {}
+    scene_labels = [str(x) for x in (ctx.get("room_objects") or []) + (ctx.get("room_agents") or [])]
+    scene_words = set(words(scene_labels))
+    obs_words = set(words(step.get("source_O")))
+    inventory_words = set(words((ctx.get("carrying") or []) + (ctx.get("wearing") or []) + (ctx.get("wielding") or [])))
+    matched_scene = bool(target) and bool(target & scene_words)
+    visible = bool(target) and target.issubset(obs_words)
+    carried = bool(target) and target.issubset(inventory_words)
+    bias = 0.0
+    if target and not matched_scene:
+        bias -= 0.35
+    if visible:
+        feat["context_relevance"] = max(feat["context_relevance"], 1.0)
+        bias += 0.08
+    if carried and tokens and tokens[0] in {"get", "take", "steal"}:
+        feat["goal_progress"] *= 0.25
+        bias -= 0.12
+    return feat, matched, bias, {"target_in_scene": matched_scene, "target_visible_in_O": visible, "target_in_inventory": carried}
+
 def source_action_semantics(action, context, rules):
     feat, _ = compile_candidate(action, context, rules)
     return {key: feat[key] for key in FEATURES}
@@ -83,7 +107,7 @@ def gold_index(candidates, action):
             if str(c).strip().casefold() == folded]
     return hits[0] if len(hits) == 1 else None
 
-def protocol_for(selected, rules, stateful: bool):
+def protocol_for(selected, rules, stateful: bool, scene_aware: bool = False):
     lines = []
     meta = {}
     counts = Counter()
@@ -95,10 +119,11 @@ def protocol_for(selected, rules, stateful: bool):
 
         for step in rec.get("steps", []):
             action = step.get("source_action_A_star")
-            current_history = (
-                source_action_semantics(action, step.get("source_O"), rules)
-                if action is not None else zero_semantics()
-            )
+            if action is not None and scene_aware:
+                current_history = compile_candidate_scene_aware(action, step, rules)[0]
+            else:
+                current_history = (source_action_semantics(action, step.get("source_O"), rules)
+                                   if action is not None else zero_semantics())
 
             candidates = step.get("candidate_set_factual")
             if not isinstance(candidates, list) or not candidates or action is None:
@@ -124,10 +149,16 @@ def protocol_for(selected, rules, stateful: bool):
 
             compiled = []
             groups = []
+            biases = []
             for candidate in candidates:
-                feat, group = compile_candidate(candidate, step.get("source_O"), rules)
+                if scene_aware:
+                    feat, group, bias, scene_flags = compile_candidate_scene_aware(candidate, step, rules)
+                else:
+                    feat, group = compile_candidate(candidate, step.get("source_O"), rules)
+                    bias, scene_flags = 0.0, {}
                 compiled.append(feat)
                 groups.append(group)
+                biases.append(bias)
                 counts["candidate_total"] += 1
                 if group is None:
                     tok = words(candidate)
@@ -144,9 +175,9 @@ def protocol_for(selected, rules, stateful: bool):
                     gold
                 )
             )
-            for feat in compiled:
+            for feat, bias in zip(compiled, biases):
                 lines.append(
-                    "C\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t0".format(
+                    "C\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
                         feat["goal_progress"],
                         feat["stimulation"],
                         feat["recovery"],
@@ -155,6 +186,7 @@ def protocol_for(selected, rules, stateful: bool):
                         feat["short_term_reward"],
                         feat["environment_control"],
                         feat["context_relevance"],
+                        bias,
                     )
                 )
 
@@ -176,6 +208,7 @@ def protocol_for(selected, rules, stateful: bool):
                 "candidate_semantics": compiled,
                 "candidate_semantic_groups": groups,
                 "latest_update_semantics": dict(current_history),
+                "scene_aware": scene_aware,
             }
             previous = current_history
             counts["scored_steps"] += 1
@@ -247,6 +280,7 @@ def main() -> int:
     ap.add_argument("--rules", type=Path,
                     default=Path(__file__).with_name("compiled_semantics_v0.json"))
     ap.add_argument("--max-trajectories", type=int, default=50)
+    ap.add_argument("--scene-aware", action="store_true")
     args = ap.parse_args()
 
     rules = json.loads(args.rules.read_text(encoding="utf-8"))
@@ -264,8 +298,8 @@ def main() -> int:
     if not selected:
         raise SystemExit("no non-quarantined LIGHT trajectories selected")
 
-    stateful_protocol, meta, counts = protocol_for(selected, rules, True)
-    nohist_protocol, meta_nh, _ = protocol_for(selected, rules, False)
+    stateful_protocol, meta, counts = protocol_for(selected, rules, True, args.scene_aware)
+    nohist_protocol, meta_nh, _ = protocol_for(selected, rules, False, args.scene_aware)
     if set(meta) != set(meta_nh):
         raise RuntimeError("stateful/no-history scored-step sets differ")
 
@@ -277,7 +311,7 @@ def main() -> int:
     rows = []
     for key, source in meta.items():
         row = dict(source)
-        row["semantic_rules_version"] = rules["version"]
+        row["semantic_rules_version"] = rules["version"] + ("+scene-aware-v1" if args.scene_aware else "")
         row["stateful"] = stateful[key]
         row["no_history"] = nohist[key]
         row["uniform_nll"] = math.log(len(row["candidate_set_factual"]))
@@ -325,7 +359,8 @@ def main() -> int:
         "source_replay_sha256": sha256(args.replay),
         "semantic_rules": str(args.rules),
         "semantic_rules_sha256": sha256(args.rules),
-        "semantic_rules_version": rules["version"],
+        "semantic_rules_version": rules["version"] + ("+scene-aware-v1" if args.scene_aware else ""),
+        "semantic_frontend": "scene-aware-v1" if args.scene_aware else "verb-only-v0",
         "replay_core_version": core_version,
         "selected_trajectory_count": len(selected),
         "max_trajectories": args.max_trajectories,
