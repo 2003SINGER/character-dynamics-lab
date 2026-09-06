@@ -49,7 +49,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | **T0c** | **待可行性审计（低于 T0d）** | 对 LIGHT 做 30–50 条轻量数据审计：恢复 actor/turn/persona/当前世界/既往历史/真实动作/候选集；检查能否按角色重建 `O` 而不泄漏未来，并先核验物理动作长度 | 只做准入审计，**不训练、不重写动作 ontology**。通过才可考虑人类 replay；失败则记录原因，不用 LIGHT 宣称可用。详见[近邻与路线审计](../01_文献/专题审计_Paper0近邻与LIGHT路线_2026-09-05.md)。 |
 | **T0e** | **进行中：跨数据集接口草案** | 用十来个字段定义 `ReplayRecord v0`，先支持 schema 校验、缺失字段和 provenance；不冻结大框架 | [接口草案](../02_实验/跨数据集Replay接口_v0.md) 与 [JSON Schema](../02_实验/Replay/replay_record_v0.schema.json)；完成前不写大型 adapter 继承体系 |
 | **T0f** | **待启动：玩家日志小切片审计** | 先核验 ClubFloyd、PowerWash、AGAIN、FarmQuest 的下载入口、许可证、时间/主体/动作字段和可否重建 factual scene；每个数据集只取小 dev slice | [数据资产登记](../01_文献/数据资产登记_玩家日志与公开轨迹_2026-09-06.md)；审计结果必须区分 observed、annotated、llm_inferred、synthetic_diagnostic |
-| **T0g** | **待设计：机制识别与冻结分层** | 明确 Phase I（多数据集 dev + LLM-assisted semantics + 显式动力学迭代）、Phase II（冻结 `S/X/U/utility/timing`）、Phase III（新数据上的 fixed-semantics/live-LLM/direct-LLM 对照）；不在本行启动真实 LLM 调用 | [Replay 接口语义边界](../02_实验/跨数据集Replay接口_v0.md#semantic-frontend-boundary)；test 不得反向改机制 |
+| **T0g** | **已完成边界设计；待具体实验 protocol** | Phase I（多数据集 dev + LLM-assisted semantics + 显式动力学迭代）、Phase II（冻结 `S/X/U/utility/timing`）、Phase III（新数据上的 fixed-semantics/live-LLM/direct-LLM 对照）已写入架构与 Replay 边界；不在本行启动真实 LLM 调用 | [Replay 接口语义边界](../02_实验/跨数据集Replay接口_v0.md#semantic-frontend-boundary)；test 不得反向改机制 |
 
 - [x] T13：**已冻结 Paper-0 问题卡**：[一页问题卡](Paper-0问题卡.md)。局部可观测、可回放的单角色 Forward；`P` 固定、`D` 导出；分别定义信息边界、预测近似充分性、状态必要性三条主张、外部 `A*`、baseline、split、NLL 口径与 no-go。E0 只验证控制链。
 - [ ] T14：建立 persona only、raw history、**结构化 history**、强 summary、`no-S`、`naive-S`、state 与置换-S基线；相同信息权限和模型条件；区分开发/测试，并报告 `S + history` 的残余收益。

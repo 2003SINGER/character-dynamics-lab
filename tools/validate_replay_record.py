@@ -49,7 +49,12 @@ def main() -> int:
         print(f"FAIL {args.path}: cannot read JSON: {exc}")
         return 1
     records = data if isinstance(data, list) else [data]
-    errors = [e for i, rec in enumerate(records) if isinstance(rec, dict) for e in validate(rec, f"{args.path}[{i}]")]
+    errors: list[str] = []
+    for i, rec in enumerate(records):
+        if not isinstance(rec, dict):
+            errors.append(f"{args.path}[{i}]: record must be an object")
+            continue
+        errors.extend(validate(rec, f"{args.path}[{i}]") )
     if not isinstance(data, (dict, list)):
         errors.append(f"{args.path}: root must be an object or list")
     if errors:
