@@ -5,18 +5,29 @@
 #include <string>
 #include <vector>
 
-enum class AppraisalSignalKind { GoalCompletion };
+// X vocabulary. A field may legitimately be present but have no effect in a
+// particular scene. That is an explicit no-op, not a missing mechanism slot.
+enum class AppraisalSignalKind {
+    GoalProgress,
+    GoalCompletion,
+    GoalObstruction,
+    Stimulation,
+    Recovery,
+    ShortTermReward,
+    EnvironmentControl
+};
+
 struct AppraisalSignal {
-    AppraisalSignalKind kind = AppraisalSignalKind::GoalCompletion;
+    AppraisalSignalKind kind = AppraisalSignalKind::GoalProgress;
     double intensity = 0.0;
     double goal_relevance = 0.0;
     double goal_congruence = 0.0;
-    double controllability = 0.0;
+    double controllability = 0.0; // intentionally a no-op in updater v0
     std::string source;
 };
 
-// X: structured meaning of the observed world change. These values are
-// illustrative rules, not claims about real psychology.
+// X: structured meaning of observed change. Numeric *_delta fields remain as
+// legacy/demo channels while semantic slices are migrated incrementally.
 struct Appraisal {
     double boredom_delta = 0.0;
     double fatigue_delta = 0.0;

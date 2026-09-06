@@ -49,9 +49,8 @@ struct StateDelta {
     int elapsed_minutes = 0;
 };
 
-// Requested is the model's unconstrained update; applied is the actual
-// before/after difference after W-independent range constraints.  Logging
-// both prevents provenance from claiming an impossible state transition.
+// semantic_contribution is the explicit U(X,P) contribution. requested then
+// adds legacy/demo direct deltas and time dynamics; applied is post-clamp.
 struct StateUpdate {
     StateDelta semantic_contribution;
     StateDelta requested;
@@ -59,9 +58,9 @@ struct StateUpdate {
 };
 
 StateUpdate update_state(CharacterState& state,
-                        const Appraisal& appraisal,
-                        const Personality& personality,
-                        int elapsed_minutes);
+                         const Appraisal& appraisal,
+                         const Personality& personality,
+                         int elapsed_minutes);
 std::string state_summary(const CharacterState& state);
 std::string state_delta_summary(const StateDelta& delta);
 std::string state_update_summary(const StateUpdate& update);
