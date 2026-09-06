@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Project PowerWash event tables into ReplayRecord state/event trajectories.
+"""DEPRECATED: use ``pilot_bucket_pipeline.py`` instead.
 
-This dataset is state/event-centric: no synthetic next-action is created.
+This SQLite/chunk adapter must not be used for research outputs: it projects
+telemetry into subjective ``source_O``, labels events as state, and treats
+storage chunks as trajectories. It is retained only as historical provenance.
 """
 from __future__ import annotations
 import argparse, csv, hashlib, json, sqlite3, time
@@ -11,6 +13,7 @@ EVENT_FILES = ["player_logged_in","game_saved","subtask_completed","task_complet
 STATE_FIELDS = {"CurrentPosition","CrouchState","CurrentWasher","CurrentNozzle","CurrentExtension","CurrentGameMode","CurrentJobName","LevelProgressionAmount","CampaignProgressionAmount","CurrentSessionLength","IsIdleInGame","IsInMenu"}
 
 def main() -> int:
+    raise SystemExit("Deprecated. Use pilot_bucket_pipeline.py.")
     ap=argparse.ArgumentParser(); ap.add_argument("raw_dir",type=Path); ap.add_argument("out_dir",type=Path); ap.add_argument("--review-limit",type=int,default=300); ap.add_argument("--reuse-index",action="store_true"); args=ap.parse_args()
     args.out_dir.mkdir(parents=True,exist_ok=True); index_path=args.out_dir/"powerwash_index.sqlite"; db=sqlite3.connect(index_path); db.execute("PRAGMA journal_mode=OFF"); db.execute("PRAGMA synchronous=OFF"); db.execute("PRAGMA temp_store=FILE"); existing=db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='ev'").fetchone()
     if not (args.reuse_index and existing):

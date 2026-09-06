@@ -34,7 +34,7 @@ def main():
         by_file[stem]=count
     finally:
       for h in handles.values(): h.close()
-    replay=args.out_dir/"PowerWash_dev_100.replay.jsonl"; review=[]; review_seen=set(); anchors=[]; trajectories=steps=0; normal_sessions=orphan_segments=0; event_classes=defaultdict(int)
+    replay=args.out_dir/"PowerWash_dev_100.replay.jsonl"; review=[]; review_seen=set(); orphan_review_seen=defaultdict(int); orphan_available=defaultdict(int); anchors=[]; trajectories=steps=0; normal_sessions=orphan_segments=0; event_classes=defaultdict(int)
     with replay.open("w",encoding="utf-8",newline="\n") as out:
       for bp in sorted(part_dir.glob("bucket=*.jsonl")):
         rows=[json.loads(x) for x in bp.open(encoding="utf-8")]; rows.sort(key=lambda r:(r["pid"],r["Time_utc"] or "",r["source_file"],r["source_row"]))
@@ -48,7 +48,7 @@ def main():
             while j<len(pr) and pr[j]["Time_utc"]==pr[i]["Time_utc"]: j+=1
             bundles.append(pr[i:j]); i=j
           def emit(bundle_list,closed,boundary_status="complete",normal=True):
-            nonlocal trajectories,steps,session_no,segment_no,review,review_seen,normal_sessions,orphan_segments
+            nonlocal trajectories,steps,session_no,segment_no,review,review_seen,orphan_review_seen,orphan_available,normal_sessions,orphan_segments
             if not bundle_list: return
             status="complete" if closed else "partial"
             if not normal: status=boundary_status
@@ -61,15 +61,18 @@ def main():
               step={"t":t,"source_O":None,"source_event":evs,"source_action_A_star":None,"source_step_context":{"source_state_fields":state or None,"within_timestamp_order":"unknown" if len(bundle)>1 else "not_applicable","time_utc":bundle[0]["Time_utc"],"source_row_keys":[r["source_row_key"] for r in bundle]},"W":None,"state_label":None,"candidate_set_factual":None,"candidate_set_expanded":None,"timestamp":bundle[0]["Time_utc"],"provenance":"observed","provenance_detail":"PowerWash source event/state projection; no subjective O, action, P, S or W inferred.","field_provenance":{"source_O":{"kind":"not_mapped","reason":"source game state is not assumed to be subjective observation"},"source_action_A_star":{"kind":"not_available"}}}
               st.append(step)
               names={e["event_name"] for e in evs}; required=set(EVENT_FILES); special=bool(names & required - review_seen)
-              if len(review)<300 or special:
+              orphan_kind="pre_login_orphan" if boundary_status=="pre_login_orphan" else "post_exit_orphan"
+              force_orphan=(not normal and orphan_review_seen[orphan_kind] < 8)
+              if len(review)<300 or special or force_orphan:
                 kind="session" if normal else "orphan"; idx=session_no if normal else segment_no
                 review.append({"review_id":f"powerwash::{pid}::{kind}-{idx}::step-{t}","source_dataset":"PowerWash","source_record_ref":f"{pid}:{kind}:{idx}:step:{t}","raw":bundle,"parsed":{"timestamp":bundle[0]["Time_utc"],"events":evs},"transformed":step,"mapping_notes":{"source_O":"null in pilot; telemetry state retained under source_step_context.source_state_fields.","source_action_A_star":"null; no direct command field.","state_label":"null; event_name stays in source_event.","within_timestamp_order":"serialization order is not causal order."}}); review_seen.update(names & required)
+                if not normal: orphan_review_seen[orphan_kind]+=1
               for anchor_name in {"mood_reported","study_prompt_answered"} & {e["event_name"] for e in evs}:
                 anchors.append({"pid":pid,"session":session_no if normal else None,"segment":segment_no,"t":t,"timestamp":bundle[0]["Time_utc"],"anchor_target_event":anchor_name,"anchor_events":evs,"co_timestamp_events":[e for e in evs if e["event_name"]!=anchor_name],"co_timestamp_order":"unknown","past_event_window":[x for x in st[max(0,t-20):t] if x["timestamp"] < bundle[0]["Time_utc"]]})
             rec={"trajectory_id":f"powerwash::{pid}::{'session' if normal else 'orphan'}-{session_no if normal else segment_no}","subject_id":pid,"group_id":None,"split_id":"powerwash_dev_100_2026-09-06","source_dataset":"PowerWash","source_revision":"OSF WPEH6","source_record_id":f"{pid}:{'session' if normal else 'orphan'}:{session_no if normal else segment_no}","source_license":"CC-0 data/codebook per OSF record; verify study terms before redistribution.","persona_P":None,"source_episode_context":{"session_boundary_status":status,"participant_sequence_index":session_no if normal else None,"participant_segment_index":segment_no,"event_order":"Time_utc; equal timestamps bundled, no causal order claimed","source_tables":EVENT_FILES,"observation_boundary":"source game state is retained as telemetry, not subjective O","action_semantics":"source_action_A_star=null"},"steps":st}
             out.write(json.dumps(rec,ensure_ascii=False,separators=(",",":"))+"\n"); trajectories+=1; steps+=len(st); segment_no+=1
             if normal: normal_sessions+=1; session_no+=1
-            else: orphan_segments+=1
+            else: orphan_segments+=1; orphan_available[boundary_status]+=1
           active=[]; orphan=[]; mode="pre_login"
           for bundle in bundles:
             names={r["event_name"] for r in bundle}
@@ -88,14 +91,15 @@ def main():
     anchor_path=args.out_dir/"PowerWash_dev_100.anchors.jsonl"; anchor_path.write_text("".join(json.dumps(x,ensure_ascii=False,separators=(",",":"))+"\n" for x in anchors),encoding="utf-8")
     # Compute QA from the emitted replay; do not write a passing QA file unless
     # every invariant is actually observed in the artifact.
-    qa={"source_O_all_null":True,"source_action_A_star_all_null":True,"state_label_all_null":True,"equal_timestamp_bundled":True,"bundle_never_split_across_sessions":True,"boundary_bundle_closed_together":True,"orphan_segments_separate":True,"participant_sequence_monotonic":True,"anchor_past_strictly_prior":all(all(x["timestamp"] < a["timestamp"] for x in a["past_event_window"]) for a in anchors)}
-    boundaries=defaultdict(list); seqs=defaultdict(list)
+    qa={"source_O_all_null":True,"source_action_A_star_all_null":True,"state_label_all_null":True,"equal_timestamp_bundled":True,"bundle_never_split_across_sessions":True,"boundary_bundle_closed_together":True,"orphan_segments_separate":True,"participant_sequence_monotonic":True,"anchor_past_strictly_prior":all(all(x["timestamp"] < a["timestamp"] for x in a["past_event_window"]) for a in anchors),"orphan_review_coverage":all(orphan_review_seen[k]>=min(5,orphan_available[k]) for k in ("pre_login_orphan","post_exit_orphan"))}
+    boundaries=defaultdict(list); seqs=defaultdict(list); seen_timestamps={}
     for line in replay.open(encoding="utf-8"):
       rec=json.loads(line); ctx=rec["source_episode_context"]; normal=ctx["session_boundary_status"] in {"complete","partial"}; seqs[rec["subject_id"]].append(ctx["participant_sequence_index"] if normal else -1)
       if not normal: qa["orphan_segments_separate"] &= ctx["participant_sequence_index"] is None
       if normal: qa["boundary_bundle_closed_together"] &= bool(rec["steps"]) and any(e["event_name"]=="player_logged_in" for e in rec["steps"][0]["source_event"]) and not any(any(e["event_name"]=="exited_game" for e in s["source_event"]) for s in rec["steps"][:-1])
       for s in rec["steps"]:
         qa["source_O_all_null"] &= s["source_O"] is None; qa["source_action_A_star_all_null"] &= s["source_action_A_star"] is None; qa["state_label_all_null"] &= s["state_label"] is None
+        key=(rec["subject_id"],s["timestamp"]); loc=(rec["trajectory_id"],s["t"]); qa["equal_timestamp_bundled"] &= key not in seen_timestamps or seen_timestamps[key]==loc; seen_timestamps[key]=loc
       if rec["steps"]: boundaries[rec["subject_id"]].append((rec["steps"][0]["timestamp"],rec["steps"][-1]["timestamp"],{e["event_name"] for e in rec["steps"][-1]["source_event"]},{e["event_name"] for e in rec["steps"][0]["source_event"]}))
     for pid,items in boundaries.items():
       items.sort(key=lambda x:(x[0],x[1])); qa["bundle_never_split_across_sessions"] &= all(not (items[i][1]==items[i+1][0] and ({"exited_game","player_logged_in"}&(items[i][2]|items[i+1][3]))) for i in range(len(items)-1))
