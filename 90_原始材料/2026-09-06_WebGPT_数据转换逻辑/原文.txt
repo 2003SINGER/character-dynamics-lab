@@ -1,0 +1,967 @@
+写，你可以用伪代码或者啥都行，让luna看得懂就行
+
+可以，直接把下面整段给 Luna。这里我把转换逻辑本身写出来，不是再让她自己设计。
+
+下面按这个逻辑实现。目标不是让所有数据集长得一样，而是：
+
+immutable raw
+→ source-native lossless intermediate
+→ ReplayRecord projection
+→ review fixture(raw + parsed + transformed)
+
+任何不确定的语义都保留 unknown，不要猜。
+
+0. 所有 adapter 共用骨架
+
+建议每个数据集至少有：
+
+inspect_source.py
+export_replay.py
+extract_full.py
+build_review_fixture.py
+README.md
+
+逻辑统一：
+
+def adapt_dataset(raw):
+    source_records = lossless_parse(raw)
+
+    for episode in split_into_episodes(source_records):
+        replay = project_to_replayrecord(episode)
+
+        validate_schema(replay)
+        write_jsonl(replay)
+
+    run_automatic_qa()
+    build_review_fixture()
+
+硬规则：
+
+raw source        # immutable
+parsed source     # 只做机械解析
+ReplayRecord      # projection，不覆盖 source
+semantic X        # 现在不生成
+S/P               # 除非 source 真有对应 ground truth，否则不生成
+
+每个 review fixture：
+
+{
+  "raw": {},
+  "parsed": {},
+  "transformed": {},
+  "mapping_notes": {}
+}
+1. ClubFloyd
+
+当前逻辑基本保留。
+
+源：
+
+[STATE] ...
+[ACTION] ...
+[STATE] ...
+[ACTION] ...
+
+转换：
+
+for each STATE/ACTION pair:
+    step = {
+        "source_O": raw_state,
+        "source_action_A_star": raw_action,
+
+        "source_event": None,
+        "W": None,
+        "persona_P": None,
+        "state_label": None,
+        "candidate_set_factual": None,
+        "timestamp": None
+    }
+
+不要做：
+
+ACTION → 我们自己的 ActionType
+STATE → W
+STATE → X
+history → persona
+
+但 parser QA 要加强。
+
+检查：
+
+assert action occurs after current STATE
+assert next STATE is not included in current source_O
+assert trajectory boundary == source file boundary
+
+detect:
+    empty STATE
+    empty ACTION
+    repeated STATE
+    repeated ACTION
+    strange marker nesting
+    ultra-long action
+    ultra-long state
+
+review fixture 每条必须保存：
+
+{
+  "raw": {
+    "raw_state": "...",
+    "raw_action": "..."
+  },
+  "transformed": {
+    "source_O": "...",
+    "source_action_A_star": "..."
+  }
+}
+2. LIGHT
+
+当前已有逻辑基础，按下面固定。
+
+episode source
+
+原字段：
+
+agents
+setting
+all_descriptions
+character[]
+context[]
+action[]
+available_actions[]
+speech[]
+emote[]
+room_objects[]
+room_agents[]
+carrying[]
+wearing[]
+wielding[]
+转换
+
+只有 physical action turn 才成为 A* step：
+
+for t in turns:
+
+    if action[t] is None or empty:
+        continue
+
+    step = {
+        "source_O": context[t],
+
+        "source_action_A_star": action[t],
+
+        "candidate_set_factual":
+            available_actions[t],
+
+        "W": None,
+        "state_label": None,
+        "timestamp": None,
+
+        "source_step_context": {
+            "actor": character[t],
+            "speech": speech[t],
+            "emote": emote[t],
+            "room_objects": room_objects[t],
+            "room_agents": room_agents[t],
+            "carrying": carrying[t],
+            "wearing": wearing[t],
+            "wielding": wielding[t]
+        }
+    }
+
+episode：
+
+episode = {
+    "persona_P": None,
+
+    "source_episode_context": {
+        "source_agents": agents,
+        "setting": setting,
+        "all_descriptions": all_descriptions,
+        "character_sequence": character
+    }
+}
+
+注意：
+
+agents ≠ persona_P
+
+只能先保存为 source persona/agent description。
+
+也不要：
+
+setting / room graph → O
+setting / room graph → W
+
+因为 source 有这些信息不代表角色当时知道。
+
+available_actions 暂时允许：
+
+candidate_set_factual
+
+但必须写 metadata：
+
+source-provided candidate list;
+relation to A^W / A^O unresolved
+
+重点自动检查：
+
+A_star_in_candidates = A_star in available_actions
+
+统计：
+hit rate
+miss examples
+candidate count distribution
+actor distribution
+action distribution
+context length
+
+特别：
+
+A* ∉ available_actions
+
+的所有 case 自动进入 review fixture。
+
+3. FarmQuest
+
+这个不能直接照 ClubFloyd 改。
+
+先做两层：
+
+FarmQuest raw telemetry
+→ FarmQuestEvent
+→ ReplayRecord action projection
+3.1 raw participant
+
+原始 participant 类似：
+
+participant
+├── demographic_data
+├── short_survey_1_data
+├── short_survey_2_data
+├── comparison_data
+└── telemetry_data
+
+这些 survey 不放 P。
+
+先全部放：
+
+source_episode_context["survey_raw"]
+
+以后是否映射 P/S 另说。
+
+3.2 telemetry 解析
+
+例如：
+
+Interaction:HarvestMushroom; timestamp
+Shop:BoughtRed Bed; timestamp
+Quest:Accept:Harvest 4 Mushroom; timestamp
+Quest:PositionQuest:Harvest 4 Mushroom:Left; timestamp
+
+禁止按 timestamp 排序。
+
+FarmQuest timestamp 不能用于时间顺序。
+
+权威顺序：
+
+event_index = telemetry line index
+
+timestamp：
+
+raw_timestamp = original_timestamp
+timestamp = None
+
+并记录：
+
+timestamp_semantics = unusable_for_ordering
+3.3 事件 parser 不要纯 split(":") 猜
+
+维护 source event-type vocabulary，然后做 longest-prefix matching。
+
+伪代码：
+
+EVENT_TYPES = {
+    "Event": [
+        "SessionStart",
+        "Day"
+    ],
+
+    "QuestAlgorithm": [
+        "Passage",
+        "RLAID",
+        "Random"
+    ],
+
+    "Transition": [
+        "Home",
+        "Main",
+        "QuestBoard",
+        "Shop",
+        "TutorialQuestBoard",
+        "TutorialShop",
+        "Tutorial"
+    ],
+
+    "Interaction": [
+        "Plant",
+        "HarvestCrop",
+        "HarvestMushroom",
+        "HarvestBerry",
+        "PlaceFurniture",
+        "RotateFurniture",
+        "PickupFurniture",
+        "Cook"
+    ],
+
+    "Shop": [
+        "StartCoins",
+        "Bought",
+        "TriedBought",
+        "Sold",
+        "Pay",
+        "TriedPay",
+        "AvailableFurniture",
+        "AvailableSeed",
+        "AvailableRecipe"
+    ],
+
+    "Quest": [
+        "PositionQuest",
+        "AvailableQuest",
+        "Accept",
+        "Submit"
+    ],
+
+    "QuestBoardState": [
+        "Submit",
+        "Accept",
+        "accept"
+    ]
+}
+
+parser：
+
+def parse_event(raw_line):
+
+    payload, raw_timestamp = split_last_semicolon(raw_line)
+
+    event_class, rest = split_first_colon(payload)
+
+    event_type = longest_known_prefix(
+        rest,
+        EVENT_TYPES[event_class]
+    )
+
+    value = rest[len(event_type):]
+
+    return {
+        "raw": raw_line,
+        "event_class": event_class,
+        "event_type": event_type,
+        "value": value or None,
+        "raw_timestamp": raw_timestamp,
+        "source_order": event_index
+    }
+
+对于奇怪格式：
+
+Quest:PositionQuest:Harvest 4 Mushroom:Left
+
+如果 parser 无法无损确认：
+
+不要修
+不要猜
+preserve raw
+parse_status = ambiguous
+
+进入 review fixture。
+
+3.4 session
+
+只根据：
+
+Event:SessionStart
+
+切 session。
+
+sessions = split_at_session_start(events)
+
+不要复制原作者那些为了特定分析写的脆弱 session hack。
+
+保存：
+
+participant_id
+session_index
+source event order
+QuestAlgorithm
+3.5 哪些是玩家 action
+
+分三类。
+
+source observation/context events
+QuestAlgorithm
+Day
+Shop.Available*
+Shop.StartCoins
+Quest.PositionQuest / AvailableQuest
+QuestBoardState
+
+这些不是 A*。
+
+强 action proxy
+Interaction.Plant
+Interaction.Harvest*
+Interaction.PlaceFurniture
+Interaction.RotateFurniture
+Interaction.PickupFurniture
+Interaction.Cook
+
+Shop.Bought
+Shop.TriedBought
+Shop.Sold
+Shop.Pay
+Shop.TriedPay
+
+Quest.Accept
+Quest.Submit
+
+这些可以成为：
+
+source_action_A_star
+
+但 metadata 标：
+
+source action proxy / telemetry event
+暂时模糊
+Transition.*
+
+它可能是玩家动作的结果，也可能只是引擎事件。
+
+第一版：
+
+source_event
+
+不要直接当 A*。
+
+3.6 FarmQuest ReplayRecord
+
+以每个 strong action proxy 作为 step：
+
+for action_event in action_events:
+
+    preceding = events_between(
+        previous_action,
+        action_event
+    )
+
+    step = {
+        "t": action_number,
+
+        "source_O": None,
+
+        "source_event": preceding,
+
+        "source_action_A_star": {
+            "class": action_event.class,
+            "type": action_event.type,
+            "value": action_event.value,
+            "raw": action_event.raw
+        },
+
+        "source_step_context": {
+            "event_index": action_event.event_index,
+            "preceding_source_events": preceding,
+            "quest_algorithm": current_algorithm,
+            "current_location": last_transition_if_known
+        },
+
+        "W": None,
+        "candidate_set_factual": None,
+        "timestamp": None
+    }
+
+注意：
+
+telemetry history ≠ O。
+
+所以第一版 source_O=null 是合理的。
+
+不要把所有前序 telemetry 自动宣布成角色 observation。
+
+4. PowerWash Simulator
+
+这个也分两层：
+
+cleaned PWS tables
+→ event stream
+→ 两种 projection
+
+不要只生成一种 next-action dataset。
+
+我们需要：
+
+A. action/event replay
+B. state-proxy trajectory
+4.1 原始 event stream
+
+以 cleaned release 为准。
+
+核心字段保留：
+
+pid
+Timestamp
+EventName
+
+CurrentJobName
+CurrentSessionLength
+LevelProgressionAmount
+CampaignProgressionAmount
+
+CurrentCareerJobsInProgress
+CurrentFreeplayJobsInProgress
+...
+
+LastItemPurchased
+LastTaskCompleted
+LastSubtaskCompleted
+LastJobCompleted
+
+CurrentGameMode
+CumulativeTimeSpentInLevel
+CurrentPosition
+CurrentNozzle
+CurrentWasher
+CurrentExtension
+
+IsIdleInGame
+IsInMenu
+...
+
+不要把这些全部塞进 O。
+
+先生成：
+
+PwsEvent {
+    participant
+    timestamp
+    event_name
+    raw_state_fields
+    raw_event_fields
+}
+4.2 session
+
+优先显式事件：
+
+player_logged_in
+...
+exited_game
+
+切 session。
+
+如果存在缺失 logout：
+
+不要按任意 30min gap 自作主张切
+
+先：
+
+session_boundary_confidence = uncertain
+4.3 event 分类
+
+不要：
+
+A_star = EventName
+
+所有 event 都这样做是错的。
+
+先分类：
+
+EVENT_ROLE = {
+
+    # 更像玩家行为/行为代理
+    "job_started": "action_proxy",
+    "job_resumed": "action_proxy",
+    "job_exited": "action_proxy",
+    "item_purchased": "action_proxy",
+
+    # 更像世界结算/结果
+    "job_completed": "outcome",
+    "task_completed": "outcome",
+    "subtask_completed": "outcome",
+
+    # snapshot
+    "update_current_state": "state_snapshot",
+    "game_saved": "state_snapshot",
+
+    # 主观状态 proxy
+    "mood_reported": "state_proxy",
+
+    # survey
+    "study_prompt_answered": "survey_response",
+
+    "player_logged_in": "session_boundary",
+    "exited_game": "session_boundary"
+}
+
+遇到未知 EventName：
+
+role = unknown
+
+不擅自分类。
+
+4.4 两个输出 view
+PWS-A：event/action replay
+
+只对明确 action_proxy 建 A*：
+
+step = {
+    "source_O": None,
+
+    "source_event":
+        source events since previous action,
+
+    "source_action_A_star":
+        raw action-proxy event,
+
+    "source_step_context":
+        latest state snapshot available before action,
+
+    "W": None,
+
+    "state_label": None
+}
+
+仍然不要说 latest state snapshot 就是 O。
+
+PWS-B：state proxy window
+
+这个反而可能对 Character Dynamics 更重要。
+
+对：
+
+mood_reported
+study_prompt_answered
+
+建立 anchor：
+
+for proxy in state_proxy_events:
+
+    history = events_before(
+        proxy.timestamp,
+        window = configurable
+    )
+
+    record = {
+        "subject": pid,
+        "anchor_time": proxy.timestamp,
+
+        "history_events": history,
+
+        "source_state_proxy": proxy.raw_response,
+
+        "latest_game_state":
+            latest_snapshot_before(proxy),
+
+        "future_events":
+            DO_NOT_INCLUDE_IN_MODEL_INPUT
+    }
+
+mood_reported：
+
+不是 S ground truth
+
+只能标：
+
+source_state_proxy
+
+以后可以用它检查：
+
+lag
+decay
+state persistence
+
+但不能说“模型预测到了真实 S”。
+
+5. AGAIN
+
+AGAIN 第一刀也不要猜列名。
+
+写一个 schema-role config。
+
+例如：
+
+participant_id: REQUIRED
+game_id: REQUIRED
+session_id: OPTIONAL
+
+time:
+  telemetry_time: REQUIRED
+  arousal_time: REQUIRED
+
+proxy:
+  arousal_value: REQUIRED
+
+telemetry:
+  event_type: OPTIONAL
+  event_value: OPTIONAL
+
+adapter 先做：
+
+assert required_roles_exist()
+
+找不到就报错，不静默猜：
+
+"maybe this is participant_id"
+5.1 AGAIN 的核心资产不是 A*
+
+主要资产：
+
+time-varying arousal proxy
+
+所以先输出：
+
+participant
+game/session
+time
+telemetry
+raw arousal
+
+而不是强行：
+
+next action benchmark
+5.2 时间对齐必须 causal
+
+这是最重要的一条。
+
+假设：
+
+telemetry event at t
+arousal samples at t0,t1,t2...
+
+prediction-time proxy 只能使用：
+
+latest arousal sample where arousal_time <= t
+
+或者：
+
+past_window = arousal[t-W : t]
+
+绝对不要：
+
+linear_interpolate(
+    arousal_before_t,
+    arousal_after_t
+)
+
+然后拿这个值做 prediction-time state。
+
+因为 after_t 是未来。
+
+如果为了画图做 interpolation：
+
+noncausal_visualization_only = true
+
+不能进入机制实验。
+
+5.3 AGAIN 输出
+
+第一版：
+
+step = {
+    "t": source_time,
+
+    "source_O": None,
+
+    "source_event":
+        current telemetry event,
+
+    "source_action_A_star":
+        explicit action only if source really records one,
+
+    "source_step_context": {
+        "past_arousal_samples": causal_window,
+        "current_arousal_proxy":
+            latest_sample_at_or_before_t
+    },
+
+    "state_label": None,
+
+    "W": None
+}
+
+另外生成专门 dynamics sequence：
+
+{
+  "participant": "...",
+  "game": "...",
+
+  "samples": [
+    {
+      "t": ...,
+      "raw_arousal": ...,
+      "preceding_events": [...]
+    }
+  ]
+}
+
+以后主要拿它判断：
+
+instant response?
+lag?
+decay?
+saturation?
+hysteresis?
+
+而不是拿它直接证明 next-action accuracy。
+
+6. Review fixture 必须跟 adapter 同时实现
+
+所有 adapter 都写：
+
+def review_item(raw, parsed, transformed):
+    return {
+        "raw": raw,
+        "parsed": parsed,
+        "transformed": transformed,
+        "mapping_notes": ...
+    }
+
+GitHub 必须至少让我直接看到：
+
+ClubFloyd_review_v0
+LIGHT_review_v0
+FarmQuest_review_v0
+
+PowerWash / AGAIN 开始真实数据处理后也一样。
+
+review sampling 规则：
+
+normal examples
++
+long/short
++
+rare event/action
++
+missing values
++
+parser anomalies
++
+boundary cases
++
+all known suspicious cases
+
+不是纯随机 300 条。
+
+7. 每个 dataset 的研究职责暂时固定
+
+不要把它们弄成一个东西：
+
+ClubFloyd
+→ long human action sequences
+→ history / next-action
+
+LIGHT
+→ persona + environment + physical action + candidates
+→ O/action/world boundary
+
+FarmQuest
+→ structured behavioral telemetry
+→ choices / repeated habits / quest strategy
+
+PowerWash
+→ long-timescale event + state snapshot + subjective proxy
+→ persistence / progress / interruption / state dynamics
+
+AGAIN
+→ continuous affect proxy
+→ lag / decay / saturation / temporal dynamics
+8. 现在绝对不要做的 mapping
+
+禁止：
+
+survey → P
+arousal → S
+mood → S
+agents/persona text → P
+telemetry state → O
+available_actions → A^O
+EventName → A*
+all world fields → W
+
+这些全部需要后续单独论证。
+
+现在只允许：
+
+source field
+→ source-preserving field
+
+以及少数非常明确的：
+
+human command
+→ source_action_A_star
+
+explicit physical action
+→ source_action_A_star
+
+source-provided candidate list
+→ candidate_set_factual
+  + unresolved semantics
+9. 推荐实际实现顺序
+
+现在按这个顺序做：
+
+1. FarmQuest
+   最容易，repo 里直接有 processed.json
+   → event parser
+   → session split
+   → action-proxy ReplayRecord
+   → review fixture
+
+2. PowerWash
+   → 下载 cleaned release
+   → inspect tables/schema
+   → event-role classification
+   → event replay + state-proxy window
+
+3. AGAIN
+   → 拿真实 release
+   → inspect schema
+   → causal alignment adapter
+   → dynamics sequence
+
+4. 再回头根据 review fixture 修 LIGHT / ClubFloyd
+
+不要先抽象 AdapterFactory。
+
+三个脚本有重复代码没事。
+
+Rule of Three 之后再决定抽不抽。
+
+10. 完成后 push
+
+推到：
+
+webgpt-sync
+
+不要 merge main。
+
+我下一轮要看到的不是一句：
+
+adapter passed validation
+
+而是能直接打开：
+
+raw
+→ parsed
+→ transformed
+
+真实样本。
+
+如果我发现某一类 mapping 系统性错：
+
+改 adapter
+→ 删除 generated output
+→ 从 immutable raw 全量重跑
+
+不要手修 generated JSON。
+
+这里面我认为最关键的新决定其实是 FarmQuest 和 PowerWash：我们不再假设“一个 dataset = 一堆 O→A*”。FarmQuest 先保留完整事件流再挑强 action proxy；PowerWash 更应该同时产出 action replay 和 state-proxy window。这才跟它们实际能回答的问题对应。
