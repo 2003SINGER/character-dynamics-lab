@@ -26,7 +26,7 @@ def test_positive_negative_channels():
     assert s["positive_conduciveness_trace"] > 0 and s["negative_conduciveness_trace"] > 0
 def test_update_does_not_change_current_neutral_policy_probability():
     # End-to-end: UPDATE changes emitted trace state, not current prediction.
-    exe = Path(__file__).parents[2] / "Demo codex-generated" / "replay_core_static.exe"
+    exe = Path(__file__).parents[3] / "Demo codex-generated" / "replay_core_static.exe"
     assert exe.exists(), f"replay core executable missing: {exe}"
     def run(update):
         p = "RESET\tt\n" + (update or "") + "PREDICT\tt\t1\t2\n" \
