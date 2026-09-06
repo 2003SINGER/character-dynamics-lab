@@ -103,6 +103,7 @@
 另有两份**工程对照清单**，做 T18 查新或任何"机制新颖"表述前，先过一遍：
 
 - [Paper-0 近邻与 LIGHT 路线审计](专题审计_Paper0近邻与LIGHT路线_2026-09-05.md)：冻结首篇的三项可失败检验，并把 LIGHT 定为 **30–50 条准入审计候选**，不是已可用数据源；PersonaForge、ThinkPersona、AdaMARP 仅按职责登记为待复核近邻。
+- [公开轨迹与玩家日志数据资产登记](数据资产登记_玩家日志与公开轨迹_2026-09-06.md)：登记 LIGHT、OPeRA、ClubFloyd、PowerWash、AGAIN、FarmQuest、HEART-BENCH、PersonaX 等候选的可核验规模、用途和访问边界；不等于已准入。
 
 - [三方向近邻核读 §2](专题核读_三方向近邻_2026-09-05.md)：项目当前的 π(A)、承诺惯性、目标优先级、对象动作、前置条件校验 与 2005–2013 年 utility-AI / GOAP 实践的逐条对应物。
 - [工程三空白核读 §5](专题核读_工程三空白_2026-09-05.md)：**`W ≠ O` 的先例清单**。Talk of the Town 已实现 ground-truth 与 belief facet 的显式分离、错误信念、证据来源追踪与 Accuracy 对照；HTN 的 world state 与 ETQ 的 context object 是另外两条佐证。**这一条比上一轮清单更硬，直接覆盖原本认为最站得住的那条差异。**

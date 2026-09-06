@@ -2,7 +2,7 @@
 
 > 2026-09-06 代码结构审计后的实验化边界：`prepare_decision` 已与 `settle_action` 分开，运行轨迹记录统一命名为 `StepRecord`；`FactKey` 与 `known_int/known_bool` 已提供最小 typed 读取。World/Decision/State 暂不做大拆分；verify/E0 的物理 tests/experiments 目录迁移留到真实 replay 需要时再做，不阻塞 T0d。
 
-更新时间：2026-09-05
+更新时间：2026-09-06
 
 这是唯一行动清单，不保存整篇设计论证。“待决策”不等于授权实现；以下次序是依赖建议，没有新增用户 deadline。代码项仅在其边界、验收和实际状态可复核时更新。
 
@@ -47,6 +47,8 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | **T0b** | **已完成：结构通过，研究准入未过** | 从 SOTOPIA-π 公开 dump 导出 30 个 episode 的开发切片，核验 action、turn order、private/public information、provenance 与 episode-level split | 30/30 保留自身 goal 与对方 `Unknown`，但 provenance 在 dump 内未知，且动作表面高度坍缩为 `said/did nothing/left`，无法冻结不丢语义的有限动作 ontology。见 [T0b 结果](../01_文献/专题审计_行为真值A星可行性_2026-09-05.md#t0b-实测结果2026-09-05)。**不得据此启动 T14–T17。** |
 | **T0d** | **已完成全量准入审计：暂缓 pilot** | [T0d+ 全量审计结果](../02_实验/T0d_OPeRA/2026-09-06_准入审计结果.md)：527 条 filtered session；真人 `A*`、O/action 时间序与有限粗标签可用，但官方 split 有 12 user overlap，exact target 无枚举候选集，rationale 时间位置未证实；一次 deterministic user-disjoint 候选 split 的长轨迹 test 池偏小，不能提升为数据集固有属性 | **先明确 OPeRA 要回答的 estimand 及能检验 persistent state 的标签层级，再决定是否写 protocol；暂不训练、不把它写成当前 `A^O` 等价。** |
 | **T0c** | **待可行性审计（低于 T0d）** | 对 LIGHT 做 30–50 条轻量数据审计：恢复 actor/turn/persona/当前世界/既往历史/真实动作/候选集；检查能否按角色重建 `O` 而不泄漏未来，并先核验物理动作长度 | 只做准入审计，**不训练、不重写动作 ontology**。通过才可考虑人类 replay；失败则记录原因，不用 LIGHT 宣称可用。详见[近邻与路线审计](../01_文献/专题审计_Paper0近邻与LIGHT路线_2026-09-05.md)。 |
+| **T0e** | **进行中：跨数据集接口草案** | 用十来个字段定义 `ReplayRecord v0`，先支持 schema 校验、缺失字段和 provenance；不冻结大框架 | [接口草案](../02_实验/跨数据集Replay接口_v0.md) 与 [JSON Schema](../02_实验/Replay/replay_record_v0.schema.json)；完成前不写大型 adapter 继承体系 |
+| **T0f** | **待启动：玩家日志小切片审计** | 先核验 ClubFloyd、PowerWash、AGAIN、FarmQuest 的下载入口、许可证、时间/主体/动作字段和可否重建 factual scene；每个数据集只取小 dev slice | [数据资产登记](../01_文献/数据资产登记_玩家日志与公开轨迹_2026-09-06.md)；审计结果必须区分 observed、annotated、llm_inferred、synthetic_diagnostic |
 
 - [x] T13：**已冻结 Paper-0 问题卡**：[一页问题卡](Paper-0问题卡.md)。局部可观测、可回放的单角色 Forward；`P` 固定、`D` 导出；分别定义信息边界、预测近似充分性、状态必要性三条主张、外部 `A*`、baseline、split、NLL 口径与 no-go。E0 只验证控制链。
 - [ ] T14：建立 persona only、raw history、**结构化 history**、强 summary、`no-S`、`naive-S`、state 与置换-S基线；相同信息权限和模型条件；区分开发/测试，并报告 `S + history` 的残余收益。
