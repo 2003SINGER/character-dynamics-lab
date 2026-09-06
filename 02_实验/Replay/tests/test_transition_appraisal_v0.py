@@ -24,10 +24,10 @@ def test_unconfirmed_not_obstruction():
 def test_positive_negative_channels():
     s=ta.zero_state(); s=ta.update_state(s,{"goal_relevance":1,"positive_conduciveness":1,"negative_conduciveness":1})
     assert s["positive_conduciveness_trace"] > 0 and s["negative_conduciveness_trace"] > 0
-def test_current_ast_cannot_change_prior_appraisal():
+def test_update_does_not_change_current_neutral_policy_probability():
     # End-to-end: UPDATE changes emitted trace state, not current prediction.
     exe = Path(__file__).parents[2] / "Demo codex-generated" / "replay_core_static.exe"
-    if not exe.exists(): return
+    assert exe.exists(), f"replay core executable missing: {exe}"
     def run(update):
         p = "RESET\tt\n" + (update or "") + "PREDICT\tt\t1\t2\n" \
             "C\t1\t0\t0\t0\t0\t0\t0\t0\t0\nC\t0\t1\t0\t0\t0\t0\t0\t0\t0\n"
