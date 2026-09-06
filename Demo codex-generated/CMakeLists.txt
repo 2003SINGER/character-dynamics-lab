@@ -26,6 +26,7 @@ add_executable(character_dynamics_reference
     Src/simulation_time.cpp
     Src/object.cpp
     Src/scene.cpp
+    Src/scene_snapshot.cpp
     Src/world_primitive.cpp
     Src/world.cpp
     Src/observation.cpp
@@ -60,6 +61,7 @@ add_test(NAME character_dynamics_reference_smoke
 add_executable(character_dynamics_core_smoke
     tests/core_experiment_smoke.cpp
     Src/action.cpp Src/simulation_time.cpp Src/object.cpp Src/scene.cpp
+    Src/scene_snapshot.cpp
     Src/world_primitive.cpp Src/world.cpp Src/observation.cpp Src/appraisal.cpp
     Src/state.cpp Src/candidate_scoring.cpp Src/decision.cpp Src/simulation.cpp)
 target_include_directories(character_dynamics_core_smoke PRIVATE Inc)

@@ -1,21 +1,11 @@
 #pragma once
 
+#include "semantic_types.h"
 #include "personality.h"
 #include "state.h"
 
 #include <string>
 #include <vector>
-
-struct CandidateSemantics {
-    double goal_progress = 0.0;
-    double stimulation = 0.0;
-    double recovery = 0.0;
-    double hunger_relief = 0.0;
-    double bathroom_relief = 0.0;
-    double short_term_reward = 0.0;
-    double environment_control = 0.0;
-    double context_relevance = 0.0;
-};
 
 struct ExternalCandidate {
     std::string id;
