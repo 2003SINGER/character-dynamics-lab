@@ -30,3 +30,5 @@ py -3 02_实验/T0c_LIGHT/extract_full.py outputs/external_assets_2026-09-06/LIG
 ## Batch 4–5 dev diagnostic (2026-09-06)
 
 已用 41 条非 quarantine trajectory / 140 steps 跑通 fixed compiled semantics → replay core → candidate scorer → held-out `A*` 链，并生成单事件 remove counterfactual（20 条 trajectory、52 对）。结果位于 `outputs/experiments/LIGHT_compiled_semantics_v0/`；该结果仍是 dev diagnostic，不构成 semantic admission 或 Paper-0 结论。
+
+本轮补上的桥接层是 `02_实验/Replay/scene_snapshot_v0.py`：它把 LIGHT 每个 ReplayRecord step 投影为 source-preserving `canonical_scene_snapshot_v0`（setting、objects、agents、actor inventory、actor observation、source candidates、provenance）。当前明确保持 `world_projection_status=deferred`、`candidate_status=observed_source_only_not_A_O`；因此旧 Batch 4–5 scorer 仍只是 smoke，尚未宣称 scene-aware semantics。
