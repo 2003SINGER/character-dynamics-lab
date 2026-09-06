@@ -7,9 +7,12 @@ At prediction t:
 - A*_t is used only after candidate features/probabilities exist, to score p(A*).
 """
 from __future__ import annotations
-import argparse, hashlib, json, math, re, statistics, subprocess
+import argparse, hashlib, json, math, re, statistics, subprocess, sys
 from collections import Counter
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Replay"))
+from scene_snapshot_v0 import compile_light_step
 
 TOKEN_RE = re.compile(r"[A-Za-z][A-Za-z'-]*")
 STOP = {"a","an","the","to","from","at","in","on","with","of","for","into","onto",
@@ -69,16 +72,16 @@ def compile_candidate(action, context, rules):
     )
     return feat, matched
 
-def compile_candidate_scene_aware(action, step, rules):
-    """v1 placeholder: bind candidate target to the current source scene/O."""
-    feat, matched = compile_candidate(action, step.get("source_O"), rules)
+def compile_candidate_scene_aware(action, snapshot, rules):
+    """v1 diagnostic: bind candidate target through canonical SceneSnapshot."""
+    feat, matched = compile_candidate(action, snapshot.get("actor_observation"), rules)
     tokens = words(action)
     target = set(w for w in tokens[1:] if w not in STOP)
-    ctx = step.get("source_step_context") or {}
-    scene_labels = [str(x) for x in (ctx.get("room_objects") or []) + (ctx.get("room_agents") or [])]
+    entities = snapshot.get("entities") or []
+    scene_labels = [str(x.get("label", "")) for x in entities]
     scene_words = set(words(scene_labels))
-    obs_words = set(words(step.get("source_O")))
-    inventory_words = set(words((ctx.get("carrying") or []) + (ctx.get("wearing") or []) + (ctx.get("wielding") or [])))
+    obs_words = set(words(snapshot.get("actor_observation")))
+    inventory_words = set(words([p.get("entity", "") for p in snapshot.get("possessions") or []]))
     matched_scene = bool(target) and bool(target & scene_words)
     visible = bool(target) and target.issubset(obs_words)
     carried = bool(target) and target.issubset(inventory_words)
@@ -91,7 +94,15 @@ def compile_candidate_scene_aware(action, step, rules):
     if carried and tokens and tokens[0] in {"get", "take", "steal"}:
         feat["goal_progress"] *= 0.25
         bias -= 0.12
-    return feat, matched, bias, {"target_in_scene": matched_scene, "target_visible_in_O": visible, "target_in_inventory": carried}
+    target_entity_id = next((x.get("id") for x in entities if target & set(words(x.get("label")))), None)
+    return feat, matched, bias, {
+        "target_entity_id": target_entity_id,
+        "target_in_scene": matched_scene,
+        "target_visible_in_O": visible,
+        "target_in_inventory": carried,
+        "affordance_source": "source_candidate_only" if snapshot.get("source_candidates") else "none",
+        "scene_bias": bias,
+    }
 
 def source_action_semantics(action, context, rules):
     feat, _ = compile_candidate(action, context, rules)
@@ -118,9 +129,10 @@ def protocol_for(selected, rules, stateful: bool, scene_aware: bool = False):
         previous = zero_semantics()
 
         for step in rec.get("steps", []):
+            snapshot = compile_light_step(rec, step) if scene_aware else None
             action = step.get("source_action_A_star")
             if action is not None and scene_aware:
-                current_history = compile_candidate_scene_aware(action, step, rules)[0]
+                current_history = compile_candidate_scene_aware(action, snapshot, rules)[0]
             else:
                 current_history = (source_action_semantics(action, step.get("source_O"), rules)
                                    if action is not None else zero_semantics())
@@ -150,15 +162,17 @@ def protocol_for(selected, rules, stateful: bool, scene_aware: bool = False):
             compiled = []
             groups = []
             biases = []
+            scene_bindings = []
             for candidate in candidates:
                 if scene_aware:
-                    feat, group, bias, scene_flags = compile_candidate_scene_aware(candidate, step, rules)
+                    feat, group, bias, scene_flags = compile_candidate_scene_aware(candidate, snapshot, rules)
                 else:
                     feat, group = compile_candidate(candidate, step.get("source_O"), rules)
                     bias, scene_flags = 0.0, {}
                 compiled.append(feat)
                 groups.append(group)
                 biases.append(bias)
+                scene_bindings.append(scene_flags)
                 counts["candidate_total"] += 1
                 if group is None:
                     tok = words(candidate)
@@ -209,6 +223,7 @@ def protocol_for(selected, rules, stateful: bool, scene_aware: bool = False):
                 "candidate_semantic_groups": groups,
                 "latest_update_semantics": dict(current_history),
                 "scene_aware": scene_aware,
+                "candidate_scene_bindings": scene_bindings if scene_aware else None,
             }
             previous = current_history
             counts["scored_steps"] += 1
