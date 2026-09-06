@@ -86,8 +86,8 @@ int main(int argc, char* argv[]) {
                 update_state(state, update_x, personality, 0);
                 continue;
             }
-            if (f[0] != "PREDICT" || f.size() != 10) {
-                throw std::runtime_error("PREDICT expects 9 arguments");
+            if (f[0] != "PREDICT" || f.size() != 5) {
+                throw std::runtime_error("PREDICT expects trajectory, t, candidate_count, gold_index");
             }
             if (f[1] != active_trajectory) {
                 throw std::runtime_error("PREDICT trajectory differs from active RESET");
@@ -95,8 +95,8 @@ int main(int argc, char* argv[]) {
 
             const int t = std::stoi(f[2]);
 
-            const int candidate_count = std::stoi(f[8]);
-            const int gold_index = std::stoi(f[9]);
+            const int candidate_count = std::stoi(f[3]);
+            const int gold_index = std::stoi(f[4]);
             if (candidate_count <= 0 || gold_index < 0 || gold_index >= candidate_count) {
                 throw std::runtime_error("invalid candidate_count/gold_index");
             }

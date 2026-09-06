@@ -135,21 +135,11 @@ def protocol_for(selected, rules, stateful: bool):
                 else:
                     counts["candidate_semantic_mapped"] += 1
 
-            # UPDATE has already applied the current action; prediction uses
-            # the state after actions through t-1, so emit the prediction
-            # before the current action update and apply the update afterwards.
-            # The protocol builder therefore uses the previous history below.
             history = previous if stateful else zero_semantics()
             t = int(step["t"])
-            # replay_core STEP consumes previous-action X before scoring current A*
             lines.append(
-                "PREDICT\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                "PREDICT\t{}\t{}\t{}\t{}".format(
                     tid, t,
-                    history["goal_progress"],
-                    history["stimulation"],
-                    history["recovery"],
-                    history["short_term_reward"],
-                    history["environment_control"],
                     len(candidates),
                     gold
                 )
@@ -185,7 +175,7 @@ def protocol_for(selected, rules, stateful: bool):
                 "gold_index": gold,
                 "candidate_semantics": compiled,
                 "candidate_semantic_groups": groups,
-                "previous_action_semantics_used_for_S": dict(history),
+                "latest_update_semantics": dict(current_history),
             }
             previous = current_history
             counts["scored_steps"] += 1

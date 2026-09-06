@@ -38,6 +38,11 @@ set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
 
 add_library(character_dynamics_runtime STATIC ${CHARACTER_DYNAMICS_RUNTIME_SOURCES})
 target_include_directories(character_dynamics_runtime PUBLIC Inc)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(character_dynamics_runtime PRIVATE -Wall -Wextra -Wpedantic)
+elseif(MSVC)
+    target_compile_options(character_dynamics_runtime PRIVATE /W4)
+endif()
 
 add_executable(character_dynamics_reference Src/main.cpp)
 target_link_libraries(character_dynamics_reference PRIVATE character_dynamics_runtime)

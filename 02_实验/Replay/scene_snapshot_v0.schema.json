@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "character-dynamics/scene_snapshot_v0",
+  "title": "Canonical SceneSnapshot v0",
+  "type": "object",
+  "required": ["schema_version", "dataset", "trajectory_id", "t", "place", "actor", "entities", "possessions", "affordance_evidence", "actor_observation", "source_candidates", "provenance"],
+  "properties": {
+    "schema_version": {"const": "canonical_scene_snapshot_v0"},
+    "dataset": {"type": "string"},
+    "trajectory_id": {"type": "string"},
+    "t": {"type": "integer"},
+    "place": {"type": ["string", "null"]},
+    "setting": {"type": ["object", "null"]},
+    "actor": {"type": ["string", "null"]},
+    "entities": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
+    "possessions": {"type": "array", "items": {"type": "object", "required": ["actor", "entity", "relation"], "properties": {"actor": {"type": ["string", "null"]}, "entity": {"type": "string"}, "relation": {"enum": ["carrying", "wearing", "wielding"]}}}},
+    "affordance_evidence": {"type": "array"},
+    "actor_observation": {"type": ["string", "null"]},
+    "source_candidates": {"type": ["array", "null"]},
+    "provenance": {"type": "object"}
+  },
+  "$defs": {
+    "entity": {"type": "object", "required": ["id", "label", "kind", "description", "facts"], "properties": {"id": {"type": "string"}, "label": {"type": "string"}, "kind": {"type": "string"}, "description": {}, "facts": {"type": "object"}}}
+  }
+}

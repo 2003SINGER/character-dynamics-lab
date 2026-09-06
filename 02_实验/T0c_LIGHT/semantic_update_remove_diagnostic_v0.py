@@ -44,11 +44,9 @@ def build_protocol_with_removal(rec, rules, runner, remove_t: int):
                 ]
                 history = previous
                 lines.append(
-                    "PREDICT\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                    "PREDICT\t{}\t{}\t{}\t{}".format(
                         rec["trajectory_id"], t,
-                        history["goal_progress"], history["stimulation"],
-                        history["recovery"], history["short_term_reward"],
-                        history["environment_control"], len(candidates), gold
+                        len(candidates), gold
                     )
                 )
                 for feat in compiled:
@@ -60,18 +58,19 @@ def build_protocol_with_removal(rec, rules, runner, remove_t: int):
                             feat["context_relevance"]
                         )
                     )
-                if action is not None and t != remove_t:
-                    lines.append("UPDATE\t{}\t{}\t{}\t{}\t{}\t{}".format(
-                        rec["trajectory_id"], current_history["goal_progress"],
-                        current_history["stimulation"], current_history["recovery"],
-                        current_history["short_term_reward"], current_history["environment_control"]))
                 meta[t] = {
                     "source_action_A_star": action,
                     "candidate_set_factual": candidates,
                     "gold_index": gold,
                 }
 
-        # Remove the selected action only from future state history.
+        # Apply every source action update, including unscored steps; remove
+        # exactly the selected update for the ablation condition.
+        if action is not None and t != remove_t:
+            lines.append("UPDATE\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                rec["trajectory_id"], current_history["goal_progress"],
+                current_history["stimulation"], current_history["recovery"],
+                current_history["short_term_reward"], current_history["environment_control"]))
         previous = runner.zero_semantics() if t == remove_t else current_history
 
     return "\n".join(lines) + "\n", meta
