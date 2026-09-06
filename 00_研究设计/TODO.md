@@ -58,13 +58,13 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | **T0j** | **待启动：首个反事实 replay smoke test** | 第一个真实 adapter 完成语义审核并接通 canonical replay 后，只实现一个单事件 `remove` 或 `replace`，输出 `ΔO/ΔX/ΔS/Δπ` 与 trace 元数据 | 同一 mechanism/semantic-rule/初始状态/随机种子，仅改变一个历史输入；不实现通用 engine，不进入新心理机制 |
 
 - [x] T13：**已冻结 Paper-0 问题卡**：[一页问题卡](Paper-0问题卡.md)。局部可观测、可回放的单角色 Forward；`P` 固定、`D` 导出；分别定义信息边界、预测近似充分性、状态必要性三条主张、外部 `A*`、baseline、split、NLL 口径与 no-go。E0 只验证控制链。
-- [ ] T14：建立 persona only、raw history、**结构化 history**、强 summary、`no-S`、`naive-S`、state 与置换-S基线；相同信息权限和模型条件；区分开发/测试，并报告 `S + history` 的残余收益。
+- [ ] T14：建立 persona only、raw history、**结构化 history**、强 summary、`no-S`、rank-matched 1D `Activity-S`/`ActionSupport-S`/`Theory-S`、state 与置换-S基线；相同信息权限和模型条件；区分开发/测试，并报告 `S + history` 的残余收益。首个 state-necessity protocol 已冻结于 [T14/T20 rank-matched probe](../02_实验/T14_T20_rank_matched_probe_v0.md)，正式训练待独立行为真值准入。
 - [ ] T15：真实下一行为揭晓前输出概率/排名，做 Replay；控制身份泄漏、叙事 framing 和动作支持集。**2026-09-05 新增依据（迄今对"用 held-out NLL 而非人类评分"最强的一条支持）**：Game AI Pro V3 C04 是全套 146 章里**唯一的真人受试实验**——22 个 AI 对手、同日完成、顺序随机化、五点量表 + 开放式短答。结果：**「83% of players were unable to recognize an AI that was literally nothing more than a random number generator」**；享受度与实际/感知难度、智力、真实感**均不相关**，一个纯随机 AI 在"最好玩"上并列第二；且**「players invent stories for the nonplayer-controlled characters… They see cheating, bias, motivations, and desires where none exist」**。**人类评分测的是叙事可读性，不是机制保真度**，故只能作次要指标。同一来源还给出反向警告：**「In game AI, words sometimes speak louder than actions」**——这与 AI Town 的爆火互相印证（见资产页 §3.4）。
 - [ ] T16：做小消融再收缩机制；若 state 不优且无效率/可控性收益，接受更简单表示。
 - [ ] T17：接入有成本推断后，预先冻结质量容差，测总维护+决策 token/调用/延迟/成本，不只比较 prompt 长度。
 - [ ] T18：围绕最终窄问题做可复现职责级查新，记录数据库、检索式、时间、全文访问限制、引文追溯与等价先例。**起手先过一遍[研究问题页 §6.1](前台问题与候选创新.md) 的重合表**。⚠️ **2026-09-05 晚间修正**：原写「状态→分数→采样、承诺惯性、目标分桶、SmartObject、前置条件校验这五项…**不得再作为新颖性主张**」，**该约束力现已暂停**。理由：这些判定是在概念标签层做的比对，属用户批评过的错误方法（见[方法复核 §0](审核_文献比较方法与阶段缺口_2026-09-05.md)）。**T35 完成重审前，该五项只作提示，不作新颖性约束。**查新范围须显式纳入 GDC / Game AI Pro 等非学术来源（不在任何学术索引内，本次仅取到 2 篇，覆盖严重不足）。
 - [ ] T19：多 horizon 曲线。在约 20 / 100 / 500 决策点分别比较 raw history、强 summary 与 S 的 held-out NLL 或排名，找交叉点；不存在交叉点也原样记为结论。
-- [ ] T20：等维度对照消融。增设 naive-S（维度数与 theory-S 相同、维度非理论选定），与 theory-S 同成本比较；结论限定为当前数据、容量与 baseline 条件下的证据，不表述为心理机制已成立。判据见 D.2。
+- [ ] T20：等容量对照消融。当前先做 rank-matched 1D `Activity-S`、`ActionSupport-S` 与 `Theory-S`，三者使用同一 EMA 与同一 conditional linear probe；待 appraisal 经验维度真正超过一维后，再升级 3D structural/hashed naive-S。结论限定为当前数据、容量与 baseline 条件下的证据，不表述为心理机制已成立。协议见 [T14/T20 rank-matched probe](../02_实验/T14_T20_rank_matched_probe_v0.md)。
 - [ ] T21：噪声填充消融。在 trace 中注入与行为无关的填充事件，观察 S 相对 raw history 的优势是否增大，检验正则化假设。
 - [ ] T22：把"引入心理学"落成可证伪链：选定 N 个 appraisal 维度 → 固定函数形式 → 等维度非理论对照 → 预先写定 ΔNLL 判定阈值。四步完成前，不把心理学贡献写进任何结论，见[Q09](未决问题与机制候选.md#q09-字段和理论怎么选收益怎么判)。
 - [x] T23a：**T18 的前置**——Game AI Pro 覆盖。已从 10 篇扩到 **A 级 43 章全部下载完毕**（4 卷共 146 章，官网免费 PDF，**不在任何学术索引内**）。已按相关度分级：A 级 43（定向核读）/ B 级 30（按需回查）/ C 级 73（不读，寻路·转向·人群·赛车·摄像机·动画·MCTS 等，与机制链无对应）。完整清单见[Game AI Pro 全景与工程 Gap](../01_文献/专题核读_GameAIPro全景与工程Gap_2026-09-05.md) §5 附录。

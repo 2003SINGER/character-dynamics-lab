@@ -1,0 +1,665 @@
+对，我们趁 Luna 干活把这个设计到**以后不会因为公平性问题推倒重来**。
+
+我先给一个核心判断：**现在还不适合直接做“3 维 theory-S vs 3 维 naive-S”。** 因为我们现在 LIGHT 里的 theory-S 名义上三维：
+
+```text
+relevance_trace
+positive_conduciveness_trace
+negative_conduciveness_trace
+```
+
+但真实数据里：
+
+```text
+relevance_trace == positive_conduciveness_trace
+negative_conduciveness_trace == 0
+```
+
+所以它实际上只有 **1 个自由度**：
+
+> “过去有没有被观察确认的 expected effect，以及这个信号衰减到多少。”
+
+如果我们现在拿它跟一个真正三维、三维都活动的 naive-S 比，然后说“等维度”，其实不公平。
+
+---
+
+# 我建议把下一阶段拆成两层
+
+## 第一层：先做一个 **rank-matched 1D experiment**
+
+这是现在就能做、而且很干净的。
+
+当前 theory-S 压成一个真正有意义的状态：
+
+$$
+S_t^{theory} = \text{confirmed-effect trace}
+$$
+
+也就是：
+
+```text
+上一动作有 expected effect
+        +
+下一 O 中确认这个 effect
+        ↓
+x_t = 1
+        ↓
+S_{t+1} = S_t + η(x_t-S_t)
+```
+
+其他时候：
+
+```text
+x_t = 0
+```
+
+这就是当前数据真正支撑的理论状态。
+
+然后给它两个**完全不心理学**的一维 naive 对照。
+
+---
+
+## naive-1：Activity Trace
+
+只问：
+
+> “最近世界有没有发生变化？”
+
+```text
+x_t^activity =
+    1   if ΔScene/O has any transition
+    0   otherwise
+```
+
+然后使用和 theory-S **完全一样的 U**：
+
+$$
+S_{t+1}^{activity}
+=
+S_t^{activity}
++
+\eta(x_t^{activity}-S_t^{activity})
+$$
+
+同一个：
+
+```text
+eta = 0.35
+```
+
+这就是一个纯粹的：
+
+> 最近环境活动强度记忆
+
+没有 appraisal。
+
+---
+
+## naive-2：Action-support Trace
+
+这个更重要。
+
+只问：
+
+> “上一动作是不是属于我们能解析 expected effect 的动作类型？”
+
+比如：
+
+```text
+take sword → 1
+drop sword → 1
+hug knight → 0
+look → 0
+```
+
+完全不检查后果有没有真的发生。
+
+即：
+
+```text
+x_t^support =
+    1 if A_{t-1} has supported expected-effect template
+    0 otherwise
+```
+
+同样 EMA。
+
+于是我们有三个非常漂亮的 1D 状态：
+
+```text
+Activity-S
+    最近有没有发生东西
+
+Action-Support-S
+    最近有没有做可解析的行为
+
+Theory-S
+    最近行为的预期后果有没有被 O 真正确认
+```
+
+这三个是**同容量、同 U、同时间常数、同合法历史权限**。
+
+差异只在：
+
+> 哪种历史信息被选择进入状态。
+
+这个比较我很喜欢。
+
+---
+
+# 为什么这比“随便随机三维 naive-S”好？
+
+因为它能逐层问：
+
+```text
+任何历史痕迹有用吗？
+        ↓
+行为类别历史有用吗？
+        ↓
+“行为 → 后果确认”的 appraisal 结构额外有用吗？
+```
+
+如果结果：
+
+```text
+Theory > Activity
+Theory > ActionSupport
+```
+
+我们才能开始说：
+
+> 不是“只要存点历史就行”，而是 outcome/appraisal-aware history compression 有额外信息。
+
+反过来如果：
+
+```text
+Theory ≈ ActionSupport
+```
+
+那就非常重要：
+
+> 当前收益可能只是“记住最近做过 take/drop 这类动作”，并不来自后果 appraisal。
+
+这就是我们之前差点被骗进去的地方。
+
+---
+
+# 但是这里还有一个更大的公平性问题：S 怎么进入 action？
+
+这个必须现在解决。
+
+当前我们手写的是类似：
+
+$$
+goal\_progress'_a =
+goal\_progress_a
+(1+0.2 S_t)
+$$
+
+这个公式天然是为 theory-S 设计的。
+
+如果我们拿：
+
+```text
+Activity-S
+```
+
+也硬塞到 `goal_progress` 上：
+
+> “最近世界很活跃 → goal_progress 权重上升”
+
+就没有语义。
+
+那样 theory-S 天生占便宜。
+
+---
+
+# 所以正式 `theory-S vs naive-S` 不应该继续用手写 S→action head
+
+这里我建议第一次引入一个**极小的 learned linear probe**。
+
+不是训练 Character Dynamics。
+
+只是训练一把统一的“测量尺”。
+
+现在每个 candidate 已经有固定：
+
+$$
+\phi_t(a)
+$$
+
+例如：
+
+```text
+goal_progress
+stimulation
+recovery
+short_term_reward
+environment_control
+context_relevance
+scene bias
+...
+```
+
+我们让所有表示都通过完全同一个形式：
+
+$$
+z_{t,a}
+=
+\beta^\top\phi_t(a)
++
+\phi_t(a)^\top W S_t
+$$
+
+然后：
+
+$$
+\pi(a)=softmax(z_{t,a})
+$$
+
+---
+
+## 1D 时特别简单
+
+如果 S 只有一个数：
+
+$$
+z_{t,a}
+=
+\beta^\top\phi_t(a)
++
+S_t\cdot w^\top\phi_t(a)
+$$
+
+解释就是：
+
+> 当前 candidate 本身有哪些性质，以及历史状态会怎样改变这些性质的权重。
+
+参数规模很小。
+
+假如 candidate semantics 8 维：
+
+```text
+β : 8 parameters
+w : 8 parameters
+```
+
+总共才十几个参数。
+
+---
+
+# 这有一个巨大的好处
+
+对于：
+
+```text
+Activity-S
+ActionSupport-S
+Theory-S
+```
+
+我们都分别训练**同样结构、同样参数量、同样正则化、同样 train split** 的 probe。
+
+这样就不存在：
+
+> 我们手工给 theory-S 写了一个特别合适的行为出口。
+
+模型自己只在训练集里学习：
+
+> 这个 state 与 candidate feature 应该如何交互。
+
+然后在完全 held-out trajectory 上看 NLL。
+
+这才是一个很干净的 **representation test**。
+
+---
+
+# 而且这个 probe 其实不是黑箱神经网络
+
+把：
+
+$$
+S_t\phi_t(a)
+$$
+
+看成一个新 feature 就行：
+
+```text
+candidate.goal_progress
+candidate.stimulation
+...
+
+S × goal_progress
+S × stimulation
+S × recovery
+...
+```
+
+然后做一个普通 conditional logistic regression。
+
+整个东西仍然是线性的。
+
+完全可打印权重：
+
+```text
+S × goal_progress     +0.37
+S × recovery          -0.12
+...
+```
+
+甚至比现在手写 `0.20` 更容易审。
+
+---
+
+# 这样我们把两个问题彻底分开
+
+### Representation question
+
+> 哪种 S 包含更有用的历史信息？
+
+比较：
+
+```text
+Activity-S
+ActionSupport-S
+Theory-S
+```
+
+全部使用同一种 probe。
+
+### Psychology/policy question
+
+以后才问：
+
+> 心理学是否不仅应该决定 S 表示，还应该限制 S→A 的机制？
+
+那时候再拿：
+
+```text
+learned generic probe
+vs
+psychology-constrained policy
+```
+
+比较。
+
+**不要现在把两个问题同时做。**
+
+---
+
+# permuted-S 也要重新定义得更漂亮
+
+在 learned probe 体系下，我建议做两个不同的 permutation，职责完全不同。
+
+### Necessity permutation
+
+先用**正确 theory-S**训练 probe。
+
+测试时：
+
+```text
+保持：
+O_t
+candidate semantics
+probe weights
+candidate set
+全部不变
+
+只把：
+S_t → 其他 trajectory 同 horizon 的 S
+```
+
+看：
+
+$$
+\Delta NLL =
+NLL(S_{perm})-NLL(S_{correct})
+$$
+
+这回答：
+
+> 模型是不是实际需要“这个时刻正确的历史状态”。
+
+这个就是 Paper-0 necessity。
+
+---
+
+### 不要把“重新用 permuted-S 训练一个模型”当主要 permutation
+
+因为模型可能学会：
+
+> 这个随机变量没用，忽略它。
+
+那测试的是另一回事。
+
+所以：
+
+```text
+train correct S
+→ evaluate correct S
+→ evaluate permuted S
+```
+
+才是最干净的干预。
+
+---
+
+# 下一步再升级到真正 3D naive-S
+
+等我们的 appraisal 数据真正能出现：
+
+```text
+relevance ≠ positive
+negative > 0
+```
+
+也就是说 theory-S 的 empirical rank 真正接近 3 以后，再做正式：
+
+```text
+Theory-S 3D
+vs
+Naive-S 3D
+```
+
+我建议 naive-S 到时候用两种。
+
+---
+
+## Naive-A：Structural Trace 3D
+
+完全不心理学：
+
+```text
+S1 = entity/scene transition trace
+S2 = possession transition trace
+S3 = observation transition trace
+```
+
+相同：
+
+```text
+U
+eta
+clamp
+dimension
+```
+
+这其实是一个挺强的 baseline。
+
+因为它也保存历史，但只是：
+
+> 世界发生过什么类型的变化。
+
+没有：
+
+> 这些变化对角色意味着什么。
+
+于是：
+
+```text
+Structural-S
+vs
+Appraisal-S
+```
+
+就是非常漂亮的比较。
+
+---
+
+## Naive-B：Hashed Trace 3D
+
+把 transition event type：
+
+```text
+PossessionAdded
+EntityEntered
+ObservedEntityLost
+...
+```
+
+用固定 hash：
+
+```text
+hash(event_type, seed) % 3
+```
+
+扔到三个 channel 里，然后同样 EMA。
+
+而且用比如：
+
+```text
+16 / 32 个预注册 seed
+```
+
+得到一个 naive-S distribution，而不是赌某一个随机 hash。
+
+这样我们可以问：
+
+> Theory-S 是不是明显超过“随便把历史压成三个平滑通道”。
+
+这个对心理学 claim 杀伤力很强。
+
+---
+
+# 到时候完整层级应该是
+
+我很喜欢下面这一串：
+
+```text
+                   No-S
+                     │
+        ┌────────────┴────────────┐
+        ↓                         ↓
+Activity-S                 ActionSupport-S
+        │                         │
+        └────────────┬────────────┘
+                     ↓
+             Structural-S
+                     ↓
+              Hashed-S × N
+                     ↓
+               Theory-S
+                     ↓
+              Permuted-S
+```
+
+当然不是说期待 NLL 一定按这个顺序越来越好。
+
+而是每个对照在杀一个解释。
+
+| 对照                | 杀掉什么解释              |
+| ----------------- | ------------------- |
+| no-S              | 状态根本没用              |
+| activity-S        | 只要存“最近有事情发生”就够      |
+| action-support-S  | 只是在记上一动作类别          |
+| structural-S      | 只要保存世界变化类别就够        |
+| hashed-S          | 任意低维压缩都一样           |
+| theory-S          | appraisal 结构是否有额外价值 |
+| permuted theory-S | 正确历史归属是否重要          |
+
+这已经很像一篇真正论文的实验逻辑了。
+
+---
+
+# Raw history / strong summary 暂时别和这个实验混一起
+
+它们回答的是另一个问题：
+
+$$
+S \stackrel{?}{\approx} H
+$$
+
+也就是**近似充分性**。
+
+而：
+
+```text
+theory-S vs naive-S
+```
+
+回答的是：
+
+> **为什么是这种 S？理论结构是否有价值？**
+
+Paper-0 两个主张应该分开测：
+
+### Experiment A — Necessity / structure
+
+```text
+no-S
+naive-S
+theory-S
+permuted-S
+```
+
+### Experiment B — Sufficiency
+
+```text
+theory-S
+raw history
+structured history
+strong summary
+S + history
+```
+
+这样结果会特别好解释。
+
+---
+
+## 我现在最推荐我们先冻结的就是这一个小实验
+
+**不要马上写代码，先把逻辑写死：**
+
+```text
+当前 LIGHT 140-step 机制 smoke：
+
+1D Theory-S:
+    confirmed-effect trace
+
+1D Naive-A:
+    any-transition trace
+
+1D Naive-B:
+    supported-previous-action trace
+
+三者：
+    同 eta
+    同 decay
+    同时间边界
+    同合法输入
+    同 candidate semantics
+
+正式比较时：
+    同一 conditional linear probe family
+    同参数量
+    同训练流程
+    trajectory-disjoint evaluation
+
+另有：
+    zero-S
+    correct-theory-S → test-time permuted-S
+```
+
+**我觉得这是我们现在最值得定下来的实验。**
+
+而且有个很爽的地方：如果最后 `ActionSupport-S ≈ Theory-S`，那我们能非常明确地把自己的心理学故事砍掉一截；如果 Theory-S 真明显赢，才值得继续加第二、第三个 appraisal 维度。这样就不容易再掉进“概念很好，所以肯定有现象”的坑。
