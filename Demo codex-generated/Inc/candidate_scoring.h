@@ -2,7 +2,7 @@
 
 #include "semantic_types.h"
 #include "personality.h"
-#include "state.h"
+#include "state_types.h"
 
 #include <string>
 #include <vector>

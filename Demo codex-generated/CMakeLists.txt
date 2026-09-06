@@ -20,8 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(character_dynamics_reference
-    Src/main.cpp
+set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
     Src/action.cpp
     Src/simulation_time.cpp
     Src/object.cpp
@@ -37,7 +36,12 @@ add_executable(character_dynamics_reference
     Src/simulation.cpp
 )
 
-target_include_directories(character_dynamics_reference PRIVATE Inc)
+add_library(character_dynamics_runtime STATIC ${CHARACTER_DYNAMICS_RUNTIME_SOURCES})
+target_include_directories(character_dynamics_runtime PUBLIC Inc)
+
+add_executable(character_dynamics_reference Src/main.cpp)
+target_link_libraries(character_dynamics_reference PRIVATE character_dynamics_runtime)
+
 target_compile_definitions(character_dynamics_reference PRIVATE
     CHARACTER_DYNAMICS_GIT_REVISION="${CHARACTER_DYNAMICS_GIT_REVISION}")
 
@@ -58,13 +62,8 @@ enable_testing()
 add_test(NAME character_dynamics_reference_smoke
          COMMAND character_dynamics_reference --verify)
 
-add_executable(character_dynamics_core_smoke
-    tests/core_experiment_smoke.cpp
-    Src/action.cpp Src/simulation_time.cpp Src/object.cpp Src/scene.cpp
-    Src/scene_snapshot.cpp
-    Src/world_primitive.cpp Src/world.cpp Src/observation.cpp Src/appraisal.cpp
-    Src/state.cpp Src/candidate_scoring.cpp Src/decision.cpp Src/simulation.cpp)
-target_include_directories(character_dynamics_core_smoke PRIVATE Inc)
+add_executable(character_dynamics_core_smoke tests/core_experiment_smoke.cpp)
+target_link_libraries(character_dynamics_core_smoke PRIVATE character_dynamics_runtime)
 if(MINGW)
     target_link_options(character_dynamics_core_smoke PRIVATE
         -static -static-libgcc -static-libstdc++)

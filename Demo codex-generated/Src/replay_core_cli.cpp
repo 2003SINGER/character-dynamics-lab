@@ -1,4 +1,5 @@
 #include "candidate_scoring.h"
+#include "state.h"
 
 #include <algorithm>
 #include <cmath>
@@ -72,21 +73,27 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-            if (f[0] != "STEP" || f.size() != 10) {
-                throw std::runtime_error("STEP expects 9 arguments");
+            if (f[0] == "UPDATE") {
+                if (f.size() != 7 || f[1] != active_trajectory) {
+                    throw std::runtime_error("UPDATE expects trajectory plus 5 semantic values");
+                }
+                Appraisal update_x;
+                append_signal(update_x, AppraisalSignalKind::GoalProgress, number(f[2]), true);
+                append_signal(update_x, AppraisalSignalKind::Stimulation, number(f[3]), false);
+                append_signal(update_x, AppraisalSignalKind::Recovery, number(f[4]), false);
+                append_signal(update_x, AppraisalSignalKind::ShortTermReward, number(f[5]), false);
+                append_signal(update_x, AppraisalSignalKind::EnvironmentControl, number(f[6]), false);
+                update_state(state, update_x, personality, 0);
+                continue;
+            }
+            if (f[0] != "PREDICT" || f.size() != 10) {
+                throw std::runtime_error("PREDICT expects 9 arguments");
             }
             if (f[1] != active_trajectory) {
-                throw std::runtime_error("STEP trajectory differs from active RESET");
+                throw std::runtime_error("PREDICT trajectory differs from active RESET");
             }
 
             const int t = std::stoi(f[2]);
-            Appraisal history_x;
-            append_signal(history_x, AppraisalSignalKind::GoalProgress, number(f[3]), true);
-            append_signal(history_x, AppraisalSignalKind::Stimulation, number(f[4]), false);
-            append_signal(history_x, AppraisalSignalKind::Recovery, number(f[5]), false);
-            append_signal(history_x, AppraisalSignalKind::ShortTermReward, number(f[6]), false);
-            append_signal(history_x, AppraisalSignalKind::EnvironmentControl, number(f[7]), false);
-            update_state(state, history_x, personality, 0);
 
             const int candidate_count = std::stoi(f[8]);
             const int gold_index = std::stoi(f[9]);

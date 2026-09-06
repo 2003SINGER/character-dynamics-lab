@@ -28,9 +28,9 @@ Conditions:
 - no-history state;
 - uniform candidate baseline.
 
-The counterfactual runner additionally removes exactly one previous action update
+The history-update diagnostic runner additionally removes exactly one previous action update
 while holding the source trajectory, initial state, semantic rules, scorer, and all
 other history fixed. It emits `Delta-S`, `Delta-p(A*)`, and `Delta-NLL`.
 
-This is still a development/smoke stage, not a Paper-0 conclusion. Negative or flat
+This is still a development/smoke stage, not a Scene counterfactual or Paper-0 conclusion. Negative or flat
 effects must be preserved.

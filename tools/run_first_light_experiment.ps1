@@ -41,8 +41,8 @@ py -3 $Runner `
     --rules $Rules --max-trajectories $MaxTrajectories
 
 Write-Host "=== 7 single-event remove counterfactual ==="
-$Counter = Join-Path $OutputDir "LIGHT_counterfactual_remove_v0.trace.jsonl"
-py -3 "02_实验\T0c_LIGHT\run_counterfactual_remove_v0.py" `
+$Counter = Join-Path $OutputDir "LIGHT_semantic_update_remove_diagnostic_v0.trace.jsonl"
+py -3 "02_实验\T0c_LIGHT\semantic_update_remove_diagnostic_v0.py" `
     $ReplayPath $Core $Counter `
     --rules $Rules --runner $Runner `
     --max-trajectories $CounterfactualTrajectories
@@ -54,4 +54,4 @@ Write-Host "  LIGHT_candidate_verb_audit.json"
 Write-Host "  LIGHT_compiled_semantics_v0.summary.json"
 Write-Host "  LIGHT_compiled_semantics_v0.manifest.json"
 Write-Host "  LIGHT_compiled_semantics_v0.trace.jsonl"
-Write-Host "  LIGHT_counterfactual_remove_v0.trace.jsonl"
+Write-Host "  LIGHT_semantic_update_remove_diagnostic_v0.trace.jsonl"

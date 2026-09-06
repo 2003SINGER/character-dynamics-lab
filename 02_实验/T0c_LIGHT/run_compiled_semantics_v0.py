@@ -103,12 +103,22 @@ def protocol_for(selected, rules, stateful: bool):
             candidates = step.get("candidate_set_factual")
             if not isinstance(candidates, list) or not candidates or action is None:
                 counts["skip_missing_candidate_or_action"] += 1
+                if stateful and action is not None:
+                    lines.append("UPDATE\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                        tid, current_history["goal_progress"], current_history["stimulation"],
+                        current_history["recovery"], current_history["short_term_reward"],
+                        current_history["environment_control"]))
                 previous = current_history
                 continue
 
             gold = gold_index(candidates, action)
             if gold is None:
                 counts["skip_gold_not_unique_in_candidates"] += 1
+                if stateful and action is not None:
+                    lines.append("UPDATE\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                        tid, current_history["goal_progress"], current_history["stimulation"],
+                        current_history["recovery"], current_history["short_term_reward"],
+                        current_history["environment_control"]))
                 previous = current_history
                 continue
 
@@ -125,11 +135,15 @@ def protocol_for(selected, rules, stateful: bool):
                 else:
                     counts["candidate_semantic_mapped"] += 1
 
+            # UPDATE has already applied the current action; prediction uses
+            # the state after actions through t-1, so emit the prediction
+            # before the current action update and apply the update afterwards.
+            # The protocol builder therefore uses the previous history below.
             history = previous if stateful else zero_semantics()
             t = int(step["t"])
             # replay_core STEP consumes previous-action X before scoring current A*
             lines.append(
-                "STEP\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                "PREDICT\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
                     tid, t,
                     history["goal_progress"],
                     history["stimulation"],
@@ -153,6 +167,13 @@ def protocol_for(selected, rules, stateful: bool):
                         feat["context_relevance"],
                     )
                 )
+
+            if stateful and action is not None:
+                lines.append("UPDATE\t{}\t{}\t{}\t{}\t{}\t{}".format(
+                    tid, current_history["goal_progress"],
+                    current_history["stimulation"], current_history["recovery"],
+                    current_history["short_term_reward"],
+                    current_history["environment_control"]))
 
             meta[(tid, t)] = {
                 "trajectory_id": tid,

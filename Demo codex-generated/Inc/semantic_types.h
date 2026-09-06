@@ -14,12 +14,3 @@ struct CandidateSemantics {
     double environment_control = 0.0;
     double context_relevance = 0.0;
 };
-
-struct AppraisalSignalInput {
-    std::string kind;
-    double intensity = 0.0;
-    double goal_relevance = 0.0;
-    double goal_congruence = 0.0;
-    double controllability = 0.0;
-    std::string source;
-};

@@ -1,4 +1,4 @@
-#include "scene_snapshot.h"
+#include "room_scene_projection.h"
 
 #include "scene.h"
 
@@ -7,10 +7,11 @@ SceneSnapshot project_room_scene(const Scene& scene,
                                  const std::string& actor_id) {
     SceneSnapshot snapshot;
     snapshot.dataset = "RoomDemo";
-    snapshot.actor_id = actor_id;
+    snapshot.actor = actor_id;
     const Room* room = scene.room_by_id(room_id);
     if (!room) return snapshot;
     snapshot.place = room->label;
+    snapshot.setting = room->label;
     for (const Object& object : room->objects) {
         snapshot.entities.push_back({object.id, object.label, "object", {}});
         for (ActionType action : object.affordances) {

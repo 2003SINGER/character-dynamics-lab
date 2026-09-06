@@ -31,18 +31,23 @@ def compile_light_step(rec: dict, step: dict) -> dict:
     episode = rec.get("source_episode_context") or {}
     setting = episode.get("setting") or {}
     descriptions = episode.get("all_descriptions") or {}
-    objects = []
+    entities = []
     for label in ctx.get("room_objects") or []:
-        objects.append({
+        entities.append({
             "id": object_id(str(label)),
             "label": label,
+            "kind": "object",
             "description": descriptions.get(label),
-            "state": {},
-            "affordances": [],
-            "affordance_status": "not_projected",
+            "facts": {},
         })
-    agents = [{"id": "light.agent." + str(a).casefold().replace(" ", "-"),
-               "label": a} for a in (ctx.get("room_agents") or [])]
+    entities.extend({"id": "light.agent." + str(a).casefold().replace(" ", "-"),
+                     "label": a, "kind": "agent", "description": None,
+                     "facts": {}} for a in (ctx.get("room_agents") or []))
+    possessions = []
+    for relation in ("carrying", "wearing", "wielding"):
+        for label in ctx.get(relation) or []:
+            possessions.append({"actor": ctx.get("actor"), "entity": object_id(str(label)),
+                                "relation": relation})
     return {
         "schema_version": "canonical_scene_snapshot_v0",
         "dataset": "LIGHT",
@@ -50,14 +55,10 @@ def compile_light_step(rec: dict, step: dict) -> dict:
         "t": step.get("t"),
         "place": setting.get("name"),
         "setting": setting,
-        "objects": objects,
-        "agents": agents,
         "actor": ctx.get("actor"),
-        "actor_inventory": {
-            "carrying": ctx.get("carrying") or [],
-            "wearing": ctx.get("wearing") or [],
-            "wielding": ctx.get("wielding") or [],
-        },
+        "entities": entities,
+        "possessions": possessions,
+        "affordance_evidence": [],
         "actor_observation": step.get("source_O"),
         "source_candidates": step.get("candidate_set_factual"),
         "provenance": {

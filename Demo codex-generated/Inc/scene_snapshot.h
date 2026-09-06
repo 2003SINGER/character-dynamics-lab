@@ -19,22 +19,24 @@ struct SceneAffordanceEvidence {
     std::string source_ref;
 };
 
+struct ScenePossession {
+    std::string actor;
+    std::string entity;
+    std::string relation;
+};
+
 struct SceneSnapshot {
     std::string schema_version = "canonical_scene_snapshot_v0";
     std::string dataset;
     std::string trajectory_id;
     int t = 0;
     std::string place;
-    std::string actor_id;
+    std::string setting;
+    std::string actor;
     std::vector<SceneEntity> entities;
-    std::vector<std::string> actor_inventory;
+    std::vector<ScenePossession> possessions;
     std::vector<SceneAffordanceEvidence> affordance_evidence;
     std::string actor_observation;
     std::vector<std::string> source_candidates;
     std::string provenance_ref;
 };
-
-struct Scene;
-SceneSnapshot project_room_scene(const Scene& scene,
-                                 const std::string& room_id,
-                                 const std::string& actor_id);

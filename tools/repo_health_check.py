@@ -35,11 +35,15 @@ def main() -> int:
     for digest, paths in hashes.items():
         if len(paths) > 1:
             print("WARN duplicate content:"); [print(f"  {p.relative_to(root)}") for p in paths]; warnings += 1
-    required = {"purpose", "git_revision"}
+    required_by_schema = {
+        "character_dynamics_experiment_manifest_v0": {"purpose", "git_revision"},
+        "replay_adapter_manifest_v0": {"dataset", "role"},
+    }
     for p in files:
-        if p.name != "manifest.json": continue
+        if not (p.name == "manifest.json" or p.name.endswith(".manifest.json")): continue
         try: data = json.loads(p.read_text(encoding="utf-8"))
         except Exception: continue
+        required = required_by_schema.get(data.get("schema_version"), set())
         missing = sorted(required - set(data))
         if missing: print(f"WARN manifest missing {', '.join(missing)}: {p.relative_to(root)}"); warnings += 1
     print(f"Health check completed with {warnings} warning(s); no warning is a failure.")
