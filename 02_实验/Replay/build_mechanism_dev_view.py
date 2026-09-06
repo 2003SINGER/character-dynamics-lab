@@ -33,6 +33,8 @@ def main() -> int:
         "quarantined_trajectory_count": quarantined,
         "output_sha256": hashlib.sha256(args.output.read_bytes()).hexdigest(),
         "filter": "exclude when source_episode_context.quarantine == true",
+        "not_a_semantic_admission_filter": True,
+        "does_not_use_source_action_quality": True,
         "mechanism_use": "dev_only; semantic admission remains pending",
     }
     manifest_path = args.output.with_suffix(args.output.suffix + ".manifest.json")

@@ -11,6 +11,6 @@
 | action ∈ source available_actions | 24,998 / 25,001（99.988%） |
 | parse failures / duplicate ids | 0 / 0 |
 
-JSONL 输出 SHA-256：`1abdf89dca7f31e9ea23c7c6bfe8fc934b9835b0e265cc2bb64038ed1216f8d8`。
+JSONL 输出 SHA-256：`1b0ac05678333be8733c384e1785091825d662b54f26842d3736e65fbede2825`。
 
 `persona_P` 保持 `null`；source agents/persona 原样留在 `source_episode_context`。`source_O` 只取 actor-specific `context`；setting、room objects、room agents 等留在 source context，`W` 保持 `null`。`available_actions` 只记录为 source-provided candidate list，不能直接当作 `A^O`。review generator 每条 trajectory 取首/中/尾及长 context，最多 300 steps；future leakage 与 actor/time alignment 仍需人工语义审核。

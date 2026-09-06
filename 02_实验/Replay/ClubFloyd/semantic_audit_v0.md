@@ -24,4 +24,4 @@ ClubFloyd 的 `source_O` 是文字游戏反馈，不等同于本项目定义的�
 
 ## 下一步
 
-对 30 条逐条人工抽查：确认异常 marker、重复 transcript、跨 episode 拼接、动作是否确为玩家命令；通过后再生成冻结的 semantic annotation 文件。未完成前不扩大批量。
+对 `ClubFloyd_review_v0.jsonl` 的 375 条分层夹具进行人工抽查：覆盖全部 47 条 chat/commentary-like、42 条 meta-command，以及 command-like/ambiguous 分层样本；确认异常 marker、重复 transcript、跨 episode 拼接、动作是否确为玩家命令。通过后再生成冻结的 semantic annotation 文件。未完成前不进入 mechanism loop。
