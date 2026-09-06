@@ -18,7 +18,7 @@ def build(rec, rules, condition, donor_states=None):
     for i, step in enumerate(steps):
         cur=ss[i]; prior=ss[i-1] if i else cur
         action=steps[i-1].get("source_action_A_star") if i else None
-        x=ta.appraise_transition(prior,cur,action) if i else {"goal_relevance":0.0,"positive_conduciveness":0.0,"negative_conduciveness":0.0,"evidence":[],"matched_transition_events":[],"expected_effect":None}
+        x=ta.appraise_transition(prior,cur,action) if i else {"goal_relevance":0.0,"positive_conduciveness":0.0,"negative_conduciveness":0.0,"evidence":[],"transition_events":[],"matched_effect_events":[],"expected_effect":None}
         before=dict(prev); after=ta.update_state(prev,x) if condition=="theory-S" else ta.zero_state()
         if condition=="permuted-S" and donor_states is not None:
             after=dict(donor_states[i] if i < len(donor_states) else donor_states[-1]) if donor_states else ta.zero_state()
@@ -31,10 +31,10 @@ def build(rec, rules, condition, donor_states=None):
             feat, group, bias, flags=base.compile_candidate_scene_aware(c,cur,rules)
             if condition in {"theory-S","permuted-S"}: feat=ta.apply_state_to_candidate(feat,after)
             compiled.append(feat); bindings.append({"id":c,"scene":flags,"scene_bias":bias})
-        lines.append(f"PREDICT\t{rec['trajectory_id']}\t{step['t']}\t{len(candidates)}\t{gold}")
+        lines.append(f"PREDICT\t{rec['trajectory_id']}\t{step['t']}\t{len(candidates)}")
         for feat, binding in zip(compiled, bindings):
             lines.append("C\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(feat['goal_progress'],feat['stimulation'],feat['recovery'],feat['hunger_relief'],feat['bathroom_relief'],feat['short_term_reward'],feat['environment_control'],feat['context_relevance'],binding['scene_bias']))
-        rows.append({"trajectory_id":rec["trajectory_id"],"t":step["t"],"snapshot_prev_ref":i-1,"snapshot_current_ref":i,"previous_action":action,"transition_events":x["matched_transition_events"],"expected_effect":x["expected_effect"],"X":x,"S_before":before,"S_after":after,"candidate_scene_bindings":bindings,"candidate_semantics":compiled,"gold_index":gold})
+        rows.append({"trajectory_id":rec["trajectory_id"],"t":step["t"],"snapshot_prev_ref":i-1,"snapshot_current_ref":i,"previous_action":action,"transition_events":x["transition_events"],"matched_effect_events":x["matched_effect_events"],"expected_effect":x["expected_effect"],"X":x,"S_before":before,"S_after":after,"candidate_scene_bindings":bindings,"candidate_semantics":compiled,"gold_index":gold})
     return "\n".join(lines)+"\n", rows
 
 def main():
@@ -61,6 +61,7 @@ def main():
     args.out.mkdir(parents=True,exist_ok=True); summaries={}
     for cond in protocols:
         result=base.run_core(args.core,"".join(protocols[cond])); rows=[]
+        result=base.score_results(result, {(r["trajectory_id"], int(r["t"])): r for r in all_rows[cond]})
         for row in all_rows[cond]:
             row=dict(row); row.update(result[(row["trajectory_id"],int(row["t"]))]); rows.append(row)
         trace=args.out/f"LIGHT_{cond.replace('-','_')}.trace.jsonl"; trace.write_text("".join(json.dumps(x,ensure_ascii=False,separators=(",",":"))+"\n" for x in rows),encoding="utf8")

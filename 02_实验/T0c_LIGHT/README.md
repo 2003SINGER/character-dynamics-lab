@@ -41,6 +41,6 @@ C++ 框架侧同步新增 `Demo codex-generated/Inc/scene_snapshot.h` 与 `Src/s
 
 ### Transition theory-S diagnostic
 
-`run_transition_theory_s_v0.py` 在同一 140 steps 上执行 `SceneSnapshot(t-1,t) → transition → appraisal X → AppraisalTraceStateV0 → candidate scorer`，并输出 zero-S、theory-S、trajectory-permuted-S 三组 trace。固定 `eta=0.35`、离散 replay boundary `Δt=1`，不消费 RoomDemo Personality；结果与 transition audit 位于 `outputs/experiments/LIGHT_transition_theory_s_v0/`。本轮只作机制 smoke，不调 eta 或 scorer。
+`run_transition_theory_s_v0.py` 在同一 140 steps 上执行 `SceneSnapshot(t-1,t) → transition → appraisal X → AppraisalTraceStateV0 → candidate scorer`，并输出 zero-S、theory-S、trajectory-permuted-S 三组 trace。固定 `eta=0.35`、离散 replay boundary `Δt=1`；它不使用 RoomDemo state/personality 作为历史状态，但底层 external scorer 仍包含跨条件恒定的 RoomDemo-derived default drives，仅作 dev scorer scaffolding。结果与 transition audit 位于 `outputs/experiments/LIGHT_transition_theory_s_v0/`。本轮只作机制 smoke，不调 eta 或 scorer。
 
 完整性修复后（按 decision-index 分层 permutation）结果为：zero-S `1.419183`、theory-S `1.418215`、permuted-S `1.419085`、uniform `1.412648`。正确历史现已略优于 permutation，但仍输给 uniform；negative channel 本轮非零率为 0，expected effect 41 条中 15 条 confirmed、26 条 unconfirmed。

@@ -86,8 +86,8 @@ int main(int argc, char* argv[]) {
                 update_state(state, update_x, personality, 0);
                 continue;
             }
-            if (f[0] != "PREDICT" || f.size() != 5) {
-                throw std::runtime_error("PREDICT expects trajectory, t, candidate_count, gold_index");
+            if (f[0] != "PREDICT" || f.size() != 4) {
+                throw std::runtime_error("PREDICT expects trajectory, t, candidate_count");
             }
             if (f[1] != active_trajectory) {
                 throw std::runtime_error("PREDICT trajectory differs from active RESET");
@@ -96,9 +96,8 @@ int main(int argc, char* argv[]) {
             const int t = std::stoi(f[2]);
 
             const int candidate_count = std::stoi(f[3]);
-            const int gold_index = std::stoi(f[4]);
-            if (candidate_count <= 0 || gold_index < 0 || gold_index >= candidate_count) {
-                throw std::runtime_error("invalid candidate_count/gold_index");
+            if (candidate_count <= 0) {
+                throw std::runtime_error("invalid candidate_count");
             }
 
             std::vector<ExternalCandidate> candidates;
@@ -124,26 +123,13 @@ int main(int argc, char* argv[]) {
             }
 
             const auto scores = score_external_candidates(candidates, state, personality);
-            const double p_gold = scores[static_cast<std::size_t>(gold_index)].probability;
-            const double nll = -std::log(std::max(p_gold, 1e-300));
-            int rank = 1;
-            for (const auto& item : scores) {
-                if (item.probability > p_gold + 1e-12) ++rank;
-            }
-
             std::cout << "RESULT\t" << active_trajectory
                       << '\t' << t
-                      << '\t' << std::setprecision(17) << p_gold
-                      << '\t' << nll
-                      << '\t' << rank
-                      << '\t' << state.boredom
-                      << '\t' << state.fatigue
-                      << '\t' << state.task_pressure
-                      << '\t' << state.satisfaction
-                      << '\t' << state.hunger
-                      << '\t' << state.bathroom_urge
-                      << '\t' << state.anxiety
-                      << '\t' << state.screen_strain
+                      << '\t' << std::setprecision(17)
+                      << state.boredom << '\t' << state.fatigue
+                      << '\t' << state.task_pressure << '\t' << state.satisfaction
+                      << '\t' << state.hunger << '\t' << state.bathroom_urge
+                      << '\t' << state.anxiety << '\t' << state.screen_strain
                       << '\t' << state.purchase_urge
                       << '\t';
             for (std::size_t i = 0; i < scores.size(); ++i) {

@@ -183,10 +183,8 @@ def protocol_for(selected, rules, stateful: bool, scene_aware: bool = False):
             history = previous if stateful else zero_semantics()
             t = int(step["t"])
             lines.append(
-                "PREDICT\t{}\t{}\t{}\t{}".format(
-                    tid, t,
-                    len(candidates),
-                    gold
+                "PREDICT\t{}\t{}\t{}".format(
+                    tid, t, len(candidates)
                 )
             )
             for feat, bias in zip(compiled, biases):
@@ -238,27 +236,28 @@ def run_core(executable: Path, protocol: str):
         if not line.startswith("RESULT\t"):
             continue
         f = line.split("\t")
-        if len(f) != 16:
+        if len(f) != 13:
             raise RuntimeError(f"unexpected RESULT field count: {len(f)}")
-        probs = [float(x) for x in f[15].split(",")] if f[15] else []
+        probs = [float(x) for x in f[12].split(",")] if f[12] else []
         result[(f[1], int(f[2]))] = {
-            "gold_probability": float(f[3]),
-            "nll": float(f[4]),
-            "rank": int(f[5]),
             "state_at_decision": {
-                "boredom": float(f[6]),
-                "fatigue": float(f[7]),
-                "task_pressure": float(f[8]),
-                "satisfaction": float(f[9]),
-                "hunger": float(f[10]),
-                "bathroom_urge": float(f[11]),
-                "anxiety": float(f[12]),
-                "screen_strain": float(f[13]),
-                "purchase_urge": float(f[14]),
+                "boredom": float(f[3]), "fatigue": float(f[4]), "task_pressure": float(f[5]),
+                "satisfaction": float(f[6]), "hunger": float(f[7]), "bathroom_urge": float(f[8]),
+                "anxiety": float(f[9]), "screen_strain": float(f[10]), "purchase_urge": float(f[11]),
             },
             "candidate_probabilities": probs,
         }
     return result
+
+def score_results(raw, meta):
+    out = {}
+    for key, item in raw.items():
+        gold = meta[key]["gold_index"]
+        probs = item["candidate_probabilities"]
+        p = probs[gold]
+        rank = 1 + sum(x > p + 1e-12 for x in probs)
+        out[key] = dict(item, gold_probability=p, nll=-math.log(max(p, 1e-300)), rank=rank)
+    return out
 
 def git_meta():
     try:
@@ -318,8 +317,8 @@ def main() -> int:
     if set(meta) != set(meta_nh):
         raise RuntimeError("stateful/no-history scored-step sets differ")
 
-    stateful = run_core(args.core_exe, stateful_protocol)
-    nohist = run_core(args.core_exe, nohist_protocol)
+    stateful = score_results(run_core(args.core_exe, stateful_protocol), meta)
+    nohist = score_results(run_core(args.core_exe, nohist_protocol), meta_nh)
     if set(meta) != set(stateful) or set(meta) != set(nohist):
         raise RuntimeError("replay_core results do not match protocol step keys")
 

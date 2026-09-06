@@ -60,13 +60,14 @@ def expected_effect(action, previous):
 def appraise_transition(previous, current, action):
     events = diff_scene_snapshots(previous, current)
     effect = expected_effect(action, previous)
-    x = {"goal_relevance": 0.0, "positive_conduciveness": 0.0, "negative_conduciveness": 0.0, "evidence": [], "matched_transition_events": events, "expected_effect": effect}
+    x = {"goal_relevance": 0.0, "positive_conduciveness": 0.0, "negative_conduciveness": 0.0, "evidence": [], "transition_events": events, "matched_effect_events": [], "expected_effect": effect}
     if not effect:
         return x
     matches = [e for e in events if e.get("kind") == effect["effect_kind"] and e.get("entity_id") == effect["target_entity"] and (not effect.get("relation") or e.get("relation") == effect["relation"])]
-    x["goal_relevance"] = 1.0
     if matches:
+        x["goal_relevance"] = 1.0
         x["positive_conduciveness"] = 1.0
+        x["matched_effect_events"] = matches
         x["evidence"].append("expected_effect_observed")
     else:
         x["evidence"].append("expected_effect_unconfirmed_not_obstruction")

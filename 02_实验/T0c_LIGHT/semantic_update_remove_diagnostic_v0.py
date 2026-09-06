@@ -44,9 +44,8 @@ def build_protocol_with_removal(rec, rules, runner, remove_t: int):
                 ]
                 history = previous
                 lines.append(
-                    "PREDICT\t{}\t{}\t{}\t{}".format(
-                        rec["trajectory_id"], t,
-                        len(candidates), gold
+                    "PREDICT\t{}\t{}\t{}".format(
+                        rec["trajectory_id"], t, len(candidates)
                     )
                 )
                 for feat in compiled:
@@ -110,7 +109,7 @@ def main() -> int:
             continue
 
         factual_protocol, factual_meta, _ = runner.protocol_for([rec], rules, True)
-        factual = runner.run_core(args.core_exe, factual_protocol)
+        factual = runner.score_results(runner.run_core(args.core_exe, factual_protocol), factual_meta)
 
         for idx in range(1, len(steps)):
             remove_t = int(steps[idx-1]["t"])
@@ -122,7 +121,8 @@ def main() -> int:
             cf_protocol, cf_meta = build_protocol_with_removal(
                 rec, rules, runner, remove_t
             )
-            counter = runner.run_core(args.core_exe, cf_protocol)
+            cf_meta_full = {(str(rec["trajectory_id"]), int(t)): value for t, value in cf_meta.items()}
+            counter = runner.score_results(runner.run_core(args.core_exe, cf_protocol), cf_meta_full)
             if key not in counter:
                 continue
 
