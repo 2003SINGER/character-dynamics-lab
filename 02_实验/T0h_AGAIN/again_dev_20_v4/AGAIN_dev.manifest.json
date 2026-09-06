@@ -1,0 +1,28 @@
+{
+  "schema_version": "replay_adapter_manifest_v0",
+  "dataset": "AGAIN",
+  "role": "telemetry_with_causal_arousal_proxy",
+  "session_count": 20,
+  "games": [
+    "ApexSpeed",
+    "Endless",
+    "Heist!",
+    "Pirates!",
+    "Run'N'Gun",
+    "Shootout",
+    "Solid",
+    "TinyCars",
+    "TopDown"
+  ],
+  "step_count": 9302,
+  "aligned_step_count": 9302,
+  "review_fixture_count": 300,
+  "source_O": "null",
+  "source_action_A_star": "null",
+  "state_label": "null",
+  "annotation_time_unit": "milliseconds in raw annotation; divided by 1000 to session seconds",
+  "causal_alignment": "latest valid annotation time_stamp <= telemetry time_stamp within session; no future interpolation",
+  "future_guard_pass": true,
+  "replay_sha256": "aae756b4f2fa1bb0c885414c64e618dfc29c31bfd9c53b57f987de37df757558",
+  "review_sha256": "55ee5d1bffc14d7c390915c0a7aeb78aa864097f34724fd229cefae6402835c9"
+}
