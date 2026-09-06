@@ -37,7 +37,7 @@ C++ 框架侧同步新增 `Demo codex-generated/Inc/scene_snapshot.h` 与 `Src/s
 
 ### Scene-aware v1 paired diagnostic (same 41 trajectories / 140 steps)
 
-`run_compiled_semantics_v0.py --scene-aware` 现在先调用 `compile_light_step()` 生成 canonical `SceneSnapshot`，再将 candidate target 与 snapshot 的 entities、actor observation 和 possessions 做最小绑定，并对不在 scene/不可见/已携带的 target 调整 candidate semantics/bias。当前 neutral replay scorer 下，verb-only 与 scene-aware v1 均为 stateful/no-history NLL **1.438298**；因此当前不能归因于 persistent S，且仍只是 dev diagnostic。
+`run_compiled_semantics_v0.py --scene-aware` 现在先调用 `compile_light_step()` 生成 canonical `SceneSnapshot`，再将 candidate target 与 snapshot 的 entities、actor observation 和 possessions 做最小绑定，并对不在 scene/不可见/已携带的 target 调整 candidate semantics/bias。当前 neutral replay scorer 下，verb-only v0 的 stateful/no-history NLL 均为 **1.444400**，scene-aware v1 的 stateful/no-history NLL 均为 **1.438298**；scene-aware frontend 相对 verb-only 改善约 0.00610，但各自 stateful 与 no-history 相同，因此该差异不能归因于 persistent S，且仍只是 dev diagnostic。
 
 ### Transition theory-S diagnostic
 
