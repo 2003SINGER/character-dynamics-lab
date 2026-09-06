@@ -68,6 +68,13 @@ def pick_lambda(train, valid, stateful, means, scales, condition):
     for t in trials: t["selected"]=bool(t["lambda"]==best[1])
     return best[1],best[2],best[3],trials
 
+def metrics(model, rows, state_override=None):
+    if not rows: return {"nll":None}
+    nll=0.; ranks=[]; top=0
+    for r in rows:
+        p=probe.predict(model,r["features"],r.get("state",0.) if state_override is None else state_override(r)); order=sorted(range(len(p)),key=lambda i:p[i],reverse=True); rank=order.index(int(r["gold_index"]))+1; nll-=np.log(max(p[int(r["gold_index"])],1e-300)); ranks.append(rank); top+=rank==1
+    return {"nll":float(nll/len(rows)),"bits_per_action":float(nll/len(rows)/np.log(2)),"top1":top/len(rows),"mrr":float(np.mean([1/r for r in ranks])),"mean_rank":float(np.mean(ranks)),"rows":len(rows)}
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("replay",type=Path); ap.add_argument("output",type=Path); ap.add_argument("--max-trajectories",type=int,default=50); ap.add_argument("--dev-smoke",action="store_true"); args=ap.parse_args()
     rules=json.loads((HERE.parent.parent/"T0c_LIGHT"/"compiled_semantics_v1.json").read_text(encoding="utf8")); records=load_records(args.replay,args.max_trajectories)
@@ -107,6 +114,7 @@ def main():
     paired=[r for r in te if (r["trajectory_id"],r["horizon_index"]) in donor_map]
     summary["Theory permuted-S"]={"test_nll":probe.evaluate(theory,paired,lambda r:donor_map[(r["trajectory_id"],r["horizon_index"])]),"permutation_seed":SEED,"eligible_paired_rows":len(paired)}
     summary["uniform"]={"test_nll":float(np.mean([np.log(len(r["features"])) for r in te]))}
+    summary["diagnostics"]={"Activity-S":metrics(models["activity_s"],rows_for("activity","test")),"ActionSupport-S":metrics(models["support_s"],rows_for("support","test")),"Theory-S":metrics(theory,te),"Theory zeroed-S":metrics(theory,te,lambda r:0.0),"Theory permuted-S":metrics(theory,paired,lambda r:donor_map[(r["trajectory_id"],r["horizon_index"])]),"paired_intervention_rows":len(paired)}
     (args.output/"lambda_sweep.json").write_text(json.dumps(all_trials,indent=2)+"\n",encoding="utf8")
     for name,model in models.items(): (args.output/f"{name}.model.json").write_text(json.dumps(model,indent=2)+"\n",encoding="utf8")
     with (args.output/"learned_weights.csv").open("w",newline="",encoding="utf8") as fh:
