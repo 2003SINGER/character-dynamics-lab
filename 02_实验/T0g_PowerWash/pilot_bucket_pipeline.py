@@ -14,9 +14,10 @@ def bucket(pid,n=256):
 def row_key(source_file,row):
     return hashlib.sha256((source_file+"\0"+json.dumps(row,ensure_ascii=False,sort_keys=True,separators=(",",":"))).encode()).hexdigest()[:20]
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("raw_dir",type=Path); ap.add_argument("out_dir",type=Path); ap.add_argument("--participants",type=int,default=100); ap.add_argument("--buckets",type=int,default=256); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("raw_dir",type=Path); ap.add_argument("out_dir",type=Path); ap.add_argument("--participants",type=int,default=100,help="0 selects all participants"); ap.add_argument("--buckets",type=int,default=256); args=ap.parse_args()
     args.out_dir.mkdir(parents=True,exist_ok=True); part_file=args.raw_dir/"demographics.csv"; pids=[]
-    with part_file.open(encoding="utf-8",newline="") as f: pids=sorted({r["pid"] for r in csv.DictReader(f) if r.get("pid")})[:args.participants]
+    with part_file.open(encoding="utf-8",newline="") as f:
+      all_pids=sorted({r["pid"] for r in csv.DictReader(f) if r.get("pid")}); pids=all_pids if args.participants==0 else all_pids[:args.participants]
     wanted=set(pids); part_dir=args.out_dir/"partitioned"; shutil.rmtree(part_dir,ignore_errors=True); part_dir.mkdir()
     total=0; by_file={}
     handles={}
@@ -65,7 +66,7 @@ def main():
               force_orphan=(not normal and orphan_review_seen[orphan_kind] < 8)
               if len(review)<300 or special or force_orphan:
                 kind="session" if normal else "orphan"; idx=session_no if normal else segment_no
-                review.append({"review_id":f"powerwash::{pid}::{kind}-{idx}::step-{t}","source_dataset":"PowerWash","source_record_ref":f"{pid}:{kind}:{idx}:step:{t}","raw":bundle,"parsed":{"timestamp":bundle[0]["Time_utc"],"events":evs},"transformed":step,"mapping_notes":{"source_O":"null in pilot; telemetry state retained under source_step_context.source_state_fields.","source_action_A_star":"null; no direct command field.","state_label":"null; event_name stays in source_event.","within_timestamp_order":"serialization order is not causal order."}}); review_seen.update(names & required)
+                review.append({"review_id":f"powerwash::{pid}::{kind}-{idx}::step-{t}","source_dataset":"PowerWash","source_record_ref":f"{pid}:{kind}:{idx}:step:{t}","boundary_status":boundary_status if not normal else "normal_session","raw":bundle,"parsed":{"timestamp":bundle[0]["Time_utc"],"events":evs},"transformed":step,"mapping_notes":{"source_O":"null in pilot; telemetry state retained under source_step_context.source_state_fields.","source_action_A_star":"null; no direct command field.","state_label":"null; event_name stays in source_event.","within_timestamp_order":"serialization order is not causal order."}}); review_seen.update(names & required)
                 if not normal: orphan_review_seen[orphan_kind]+=1
               for anchor_name in {"mood_reported","study_prompt_answered"} & {e["event_name"] for e in evs}:
                 anchors.append({"pid":pid,"session":session_no if normal else None,"segment":segment_no,"t":t,"timestamp":bundle[0]["Time_utc"],"anchor_target_event":anchor_name,"anchor_events":evs,"co_timestamp_events":[e for e in evs if e["event_name"]!=anchor_name],"co_timestamp_order":"unknown","past_event_window":[x for x in st[max(0,t-20):t] if x["timestamp"] < bundle[0]["Time_utc"]]})
