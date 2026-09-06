@@ -34,3 +34,7 @@ py -3 02_实验/T0c_LIGHT/extract_full.py outputs/external_assets_2026-09-06/LIG
 本轮补上的桥接层是 `02_实验/Replay/scene_snapshot_v0.py`：它把 LIGHT 每个 ReplayRecord step 投影为 source-preserving `canonical_scene_snapshot_v0`（setting、objects、agents、actor inventory、actor observation、source candidates、provenance）。当前明确保持 `world_projection_status=deferred`、`candidate_status=observed_source_only_not_A_O`；因此旧 Batch 4–5 scorer 仍只是 smoke，尚未宣称 scene-aware semantics。
 
 C++ 框架侧同步新增 `Demo codex-generated/Inc/scene_snapshot.h` 与 `Src/scene_snapshot.cpp`。它定义不依赖数据集动作枚举的最小快照，并提供 RoomDemo → SceneSnapshot 投影；`CandidateSemantics` 已抽到 `Inc/semantic_types.h`，external scorer 不再从该类型头文件引入 demo `ActionType`。
+
+### Scene-aware v1 paired diagnostic (same 41 trajectories / 140 steps)
+
+`run_compiled_semantics_v0.py --scene-aware` 现在将 candidate target 与当前 LIGHT scene labels、actor observation 和 inventory 做最小绑定，并对不在 scene/不可见/已携带的 target 调整 candidate semantics/bias。结果与 verb-only v0 保存在 `LIGHT_v0_v1_paired_comparison.json`：v1 stateful NLL **1.416932**（v0 1.422254），但 v1 no-history NLL **1.416552**，改善更大；因此当前不能归因于 persistent S，且仍只是 dev diagnostic。
