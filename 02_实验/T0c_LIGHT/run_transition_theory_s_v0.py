@@ -1,6 +1,6 @@
 """140-step transition -> appraisal -> persistent theory-S diagnostic."""
 from __future__ import annotations
-import argparse, importlib.util, json, random
+import argparse, hashlib, importlib.util, json, random, statistics, subprocess
 from pathlib import Path
 
 HERE = Path(__file__).resolve()
@@ -48,10 +48,16 @@ def main():
         protocols[cond]=[]; all_rows[cond]=[]
         for rec in selected:
             p,r=build(rec,rules,cond); protocols[cond].append(p); all_rows[cond].extend(r)
-    traces={rec["trajectory_id"]: build(rec,rules,"theory-S")[1] for rec in selected}; ids=list(traces); random.Random(20260906).shuffle(ids); donor={ids[i]:traces[ids[(i+1)%len(ids)]] for i in range(len(ids))}
+    traces={rec["trajectory_id"]: build(rec,rules,"theory-S")[1] for rec in selected}; ids=list(traces)
+    # Permute states within decision index, preserving each index's marginal.
+    rng=random.Random(20260906); donor={tid:[] for tid in ids}; max_len=max((len(v) for v in traces.values()), default=0)
+    for i in range(max_len):
+        pool=[traces[tid][i]["S_after"] for tid in ids if i < len(traces[tid])]; rng.shuffle(pool)
+        eligible=[tid for tid in ids if i < len(traces[tid])]
+        for tid, state in zip(eligible, pool): donor[tid].append(state)
     protocols["permuted-S"]=[]; all_rows["permuted-S"]=[]
     for rec in selected:
-        ds=[r["S_after"] for r in donor[rec["trajectory_id"]]]; p,r=build(rec,rules,"permuted-S",ds); protocols["permuted-S"].append(p); all_rows["permuted-S"].extend(r)
+        ds=donor[rec["trajectory_id"]]; p,r=build(rec,rules,"permuted-S",ds); protocols["permuted-S"].append(p); all_rows["permuted-S"].extend(r)
     args.out.mkdir(parents=True,exist_ok=True); summaries={}
     for cond in protocols:
         result=base.run_core(args.core,"".join(protocols[cond])); rows=[]
@@ -59,6 +65,18 @@ def main():
             row=dict(row); row.update(result[(row["trajectory_id"],int(row["t"]))]); rows.append(row)
         trace=args.out/f"LIGHT_{cond.replace('-','_')}.trace.jsonl"; trace.write_text("".join(json.dumps(x,ensure_ascii=False,separators=(",",":"))+"\n" for x in rows),encoding="utf8")
         summaries[cond]={"scored_steps":len(rows),"mean_nll":sum(x["nll"] for x in rows)/len(rows),"mean_rank":sum(x["rank"] for x in rows)/len(rows),"permutation_seed":20260906 if cond=="permuted-S" else None}
+    rows_for_metrics=all_rows["theory-S"]
+    summaries["transition_metrics"]={
+        "expected_effect_supported":sum(r["expected_effect"] is not None for r in rows_for_metrics),
+        "expected_effect_confirmed":sum(r["X"]["positive_conduciveness"]>0 for r in rows_for_metrics),
+        "expected_effect_unconfirmed":sum(r["expected_effect"] is not None and r["X"]["positive_conduciveness"]==0 for r in rows_for_metrics),
+        "positive_conduciveness_nonzero":sum(r["X"]["positive_conduciveness"]>0 for r in rows_for_metrics),
+        "negative_conduciveness_nonzero":sum(r["X"]["negative_conduciveness"]>0 for r in rows_for_metrics),
+        "channel_stats":{k:{"mean":statistics.fmean(r["S_after"][k] for r in rows_for_metrics),"variance":statistics.pvariance(r["S_after"][k] for r in rows_for_metrics),"nonzero":sum(r["S_after"][k]>0 for r in rows_for_metrics)} for k in ta.zero_state()}
+    }
+    revision=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
+    manifest={"schema_version":"character_dynamics_transition_experiment_manifest_v0","git_revision":revision,"git_worktree_dirty":bool(subprocess.check_output(["git","status","--porcelain"],text=True).strip()),"source_replay":str(args.replay),"source_replay_sha256":hashlib.sha256(args.replay.read_bytes()).hexdigest(),"semantic_rules_sha256":hashlib.sha256((HERE.parent/"compiled_semantics_v0.json").read_bytes()).hexdigest(),"replay_core_version":subprocess.check_output([str(args.core),"--version"],text=True).strip(),"eta":0.35,"delta_t":"1 decision boundary","interaction_coefficient":0.20,"permutation_seed":20260906,"conditions":["zero-S","theory-S","permuted-S","uniform"]}
+    (args.out/"LIGHT_transition_theory_s_v0.manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf8")
     summaries["uniform"]={"mean_nll":1.4126475597150339,"note":"same candidate support; analytic baseline from paired v0/v1 runs"}
     (args.out/"LIGHT_transition_theory_s_v0.summary.json").write_text(json.dumps(summaries,ensure_ascii=False,indent=2)+"\n",encoding="utf8"); print(json.dumps(summaries,ensure_ascii=False,indent=2))
 if __name__=="__main__": main()
