@@ -1,0 +1,19 @@
+{
+  "version": "light-compiled-semantics-v1",
+  "status": "protocol_candidate_dev_only",
+  "matching": "casefolded first alphabetic token",
+  "feature_version": "replay-raw-features-v1",
+  "semantic_policy": "group membership emits binary tags; amplitudes are not encoded here",
+  "groups": [
+    {"name":"movement", "verbs":["go","enter","leave","follow","approach","flee","travel"], "features":{"goal_progress":1,"stimulation":1}},
+    {"name":"manipulation", "verbs":["get","take","give","put","drop","steal","use","wield","wear","remove"], "features":{"goal_progress":1,"environment_control":1}},
+    {"name":"environment_control", "verbs":["open","close","lock","unlock","light","extinguish"], "features":{"goal_progress":1,"environment_control":1}},
+    {"name":"social_physical", "verbs":["hug","kiss","pat","bow","wave","point"], "features":{"stimulation":1,"short_term_reward":1}},
+    {"name":"conflict", "verbs":["hit","attack","fight","kick","punch","kill"], "features":{"goal_progress":1,"stimulation":1}},
+    {"name":"recovery", "verbs":["sit","rest","sleep","lie"], "features":{"recovery":1}},
+    {"name":"consume", "verbs":["eat","drink"], "features":{"short_term_reward":1,"recovery":1}},
+    {"name":"inspect", "verbs":["look","examine","inspect","listen"], "features":{"stimulation":1}}
+  ],
+  "feature_order":["goal_progress","stimulation","recovery","hunger_relief","bathroom_relief","short_term_reward","environment_control","context_relevance","has_target","target_in_scene","target_visible_in_O","target_in_inventory","repeated_acquire"],
+  "notes":["No scene_bias; scene facts remain raw booleans.","No current A* is an input to feature construction.","candidate support and W/O/transition/appraisal boundaries remain frozen."]
+}
