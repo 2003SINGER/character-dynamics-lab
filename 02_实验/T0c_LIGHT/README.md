@@ -1,0 +1,22 @@
+# LIGHT T0c｜准入审计与 Replay slice
+
+原始资产位于被 Git 忽略的 `outputs/external_assets_2026-09-06/LIGHT/`，与 ClubFloyd 和 runtime 分离。来源为 ParlAI LIGHT 的 `light-dialog-processed-small7.pkl`，文件 SHA-256 记录在 manifest 中。
+
+## 已完成
+
+- 审计前 50 个 episode：41 个含至少一个非空 physical action，共 140 个 physical action turns；606 个 turn 提供 `available_actions`。
+- 导出 41 条 eligible trajectory / 140 steps，已通过 ReplayRecord v0 validator。
+- 每步只把 processed record 的 actor-specific `context` 作为 `source_O`；setting、room objects、room agents 保留在 episode/step source context，不把整个 world graph 复制进 `W` 或 `O`。
+- `action`、persona、候选列表和 turn actor 原样保留；dialogue-only turns 不冒充 `A*`。
+
+## 当前准入判断
+
+**受限 dev 资产，不能作为已通过研究准入的真人行为 benchmark。** 数据结构能支持字段映射，但 actor、角色可见信息和环境 world state 的时间对齐仍需人工 semantic audit；当前 `W`、state label、timestamp 保持 unknown。候选列表仅按 source 的 `available_actions` 记录为 observed，不等同于角色实际可知集合 `A^O`。
+
+复现：
+
+```powershell
+py -3 02_实验/T0c_LIGHT/audit_slice.py outputs/external_assets_2026-09-06/LIGHT/light_data.pkl outputs/external_assets_2026-09-06/LIGHT/light_audit_50.json --limit 50
+py -3 02_实验/T0c_LIGHT/export_replay.py outputs/external_assets_2026-09-06/LIGHT/light_data.pkl outputs/external_assets_2026-09-06/LIGHT/light_dev_50.replay.json --limit 50
+py -3 tools/validate_replay_record.py outputs/external_assets_2026-09-06/LIGHT/light_dev_50.replay.json
+```
