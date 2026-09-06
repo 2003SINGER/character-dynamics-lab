@@ -24,30 +24,43 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 15. Untouched test data must remain untouched after the mechanism is frozen.
 16. Experiment metadata should record git revision, dataset/source revision, split definition, role, and purpose.
 
+## Semantic-stage preservation
+
+17. Preserve the research chain `ΔO/O/S/P → semantic interpretation X → explicit updater U → S' → π(A)` even when the current implementation is rule-based.
+18. `X` is an inspectable intermediate product; do not permanently fold semantic interpretation into `event → numeric StateDelta`.
+19. A future LLM or hybrid semantic frontend may replace the rule placeholder without changing the `U`/`S` boundary. Do not introduce a provider/factory framework just to reserve this hook.
+20. A character-internal semantic frontend may read only legally available `O`, `ΔO`, `S`, and `P`; it must not read hidden `W` or future outcomes.
+21. LLM semantics should emit structured `X`, not arbitrary direct writes to `S`; this keeps semantic errors separable from dynamics errors.
+22. Semantic outputs must be traceable and replayable: model/version, prompt version, decoding config, input hash, structured output, and raw response/reference when available.
+23. Keep rule-only, LLM-only, and hybrid semantic conditions independently switchable in future dev/test experiments.
+24. During mechanism identification, dev data may guide changes to fields, updaters, utility, timing, or ontology. After freeze, test data must not guide those changes.
+25. Generalization evaluations must separate frozen mechanism + fixed semantics, frozen mechanism + live LLM semantics, and LLM-direct/no-dynamics baselines.
+26. If a semantic LLM replaces a hand-written rule, remove the redundant rule only after dev ablation/sensitivity evidence; do not retain duplicate mechanisms indefinitely for compatibility.
+
 ## Scope control
 
-17. Define one small public ReplayRecord contract; do not build `IAdapter`, factories, registries, plugin managers, or dependency injection.
-18. Do not create one independent experiment universe per dataset.
-19. Apply the Rule of Three: only extract a shared helper after the same logic appears three times.
-20. Do not add a field because it sounds psychological. Add it only with a stated input, updater, consumer, ablation, and evidence need.
-21. Do not add a parameter merely to fit one episode.
-22. Do not expand `simulation.cpp` with new datasets or measurements.
-23. Do not split files solely to make them look clean; split when ownership or reuse is real.
+27. Define one small public ReplayRecord contract; do not build `IAdapter`, factories, registries, plugin managers, or dependency injection.
+28. Do not create one independent experiment universe per dataset.
+29. Apply the Rule of Three: only extract a shared helper after the same logic appears three times.
+30. Do not add a field because it sounds psychological. Add it only with a stated input, updater, consumer, ablation, and evidence need.
+31. Do not add a parameter merely to fit one episode.
+32. Do not expand `simulation.cpp` with new datasets or measurements.
+33. Do not split files solely to make them look clean; split when ownership or reuse is real.
 
 ## Tests and guards
 
-24. CTest and `--verify` remain regression gates for the existing reference runtime.
-25. Schema/provenance validators may fail on invalid records; size, duplication, and complexity checks warn only.
-26. A warning is not evidence that a mechanism is wrong; it is a prompt for review.
-27. Every new adapter needs a small schema-validating dev slice before larger downloads or model comparisons.
-28. Preserve negative results, raw outputs, configuration, and errors.
+34. CTest and `--verify` remain regression gates for the existing reference runtime.
+35. Schema/provenance validators may fail on invalid records; size, duplication, and complexity checks warn only.
+36. A warning is not evidence that a mechanism is wrong; it is a prompt for review.
+37. Every new adapter needs a small schema-validating dev slice before larger downloads or model comparisons.
+38. Preserve negative results, raw outputs, configuration, and errors.
 
 ## Documentation and review
 
-29. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
-30. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
-31. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
-32. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
+39. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
+40. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
+41. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
+42. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
 
 ## Current known baseline
 

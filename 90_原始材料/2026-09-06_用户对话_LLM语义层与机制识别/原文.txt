@@ -1,0 +1,817 @@
+另外还有一个问题，就是我们设计的某些环节是最好利用llm的语义判断的，这个到时候怎么搞？到时候别把中间链条优化掉了不给llm接口了。同时正式引入这个机制之后可能别的机制可以删掉一点。
+
+对，这个必须现在就加进长期架构约束里。否则很容易出现一种“优化成功、研究问题被优化没了”的情况：
+
+ΔO
+→ 一堆 if/权重
+→ ΔS
+
+然后以后我们想把 LLM 放回“这件事对这个人物意味着什么”的位置，发现 X 这一层已经被代码折叠掉了。
+
+我建议把原则定成：
+
+机制可以删，语义职责边界不能因为当前实现简单而提前删。
+
+也就是说，我们现在不一定真的调用 LLM，但要保留几个semantic hook。
+
+最重要的是 X 这一层
+
+长期还是：
+
+$$ \Delta O_t,O_t,S_t,P_i \rightarrow X_t \rightarrow U(S_t,X_t,P_i) \rightarrow S_{t+1} $$
+
+当前可能是：
+
+X = rule_based_appraisal(...)
+
+以后可以变：
+
+X = llm_appraisal(...)
+
+甚至：
+
+X = hybrid_appraisal(...)
+
+但不要变成：
+
+if (task_completed)
+    state.satisfaction += 0.3;
+
+然后 X 消失。
+
+因为这里真正适合 LLM 的就是：
+
+“完成作业”对这个人物，此时究竟意味着 relief、achievement、regret、nothing-important，还是多个意义同时存在？
+
+这是语义判断，不适合全靠固定阈值。
+
+但千万别现在造 ISemanticBackendFactory
+
+我们只需要保留一个明确函数边界 + 明确记录结构。
+
+概念上类似：
+
+SemanticAppraisal interpret_change(
+    const ObservationDelta& delta_o,
+    const Observation& observation,
+    const CharacterState& state,
+    const Personality& personality
+);
+
+现在里面全是 rule。
+
+以后把实现换成 LLM。
+
+接口存在即可。
+
+不用现在搞：
+
+ISemanticProvider
+LLMProviderFactory
+BackendRegistry
+PromptStrategyManager
+
+那又会变另一种 AI 屎山。
+
+LLM 接口还要遵守四条硬规则
+1. 不能偷看 W
+
+如果这一层在角色脑内：
+
+X = semantic_interpretation(...)
+
+它能看到的只能是：
+
+O
+ΔO
+S
+P
+
+不能为了“LLM 判断更准”把：
+
+真实 wallet
+隐藏任务完成
+未知人物状态
+
+塞进 prompt。
+
+否则我们辛苦建立的 W/O 边界直接废掉。
+
+2. LLM 不直接修改 S
+
+最好永远不要：
+
+LLM:
+"fatigue += 0.37
+anxiety -= 0.12"
+
+LLM 更适合输出：
+
+meaning:
+  task_progress: positive
+  goal_relevance: high
+  control: medium
+  interruption: false
+  relief: high
+
+然后：
+
+X
+↓
+显式 updater U_k
+↓
+ΔS
+
+这样以后才能问：
+
+是语义判断错了？
+
+还是：
+
+X→S 的动力学函数错了？
+
+如果 LLM 一步从 event 直接写 S，这两个问题永远缠在一起。
+
+这也是为什么不能优化掉中间链条。
+
+3. LLM 输出必须可回放
+
+正式实验时不能今天调用一次 GPT 得 A，明天得到 B，然后说 mechanism changed。
+
+所以正式引入以后至少保存：
+
+model
+model/version
+prompt_version
+decoding config
+input hash
+structured output
+raw response/reference
+timestamp
+
+最好在开发期间就做 cache：
+
+相同 semantic input
+→ 默认复用已有输出
+
+这样我们改：
+
+U_k
+utility
+state structure
+
+的时候，不会同时因为 LLM 输出漂移导致结果变掉。
+
+4. semantic output 必须能记录在 StepRecord
+
+也就是以后 trace 至少能清楚看到：
+
+ΔO
+↓
+X = ...
+↓
+requested ΔS
+↓
+applied ΔS
+↓
+S
+↓
+π(A)
+
+这条链最好一直是能 inspect 的。
+
+因为以后你说的：
+
+“某个参数改不改都没用”
+
+我们才可以追：
+
+ΔO 正常
+X 正常
+ΔS 正常
+S 变化了
+π 没变化
+
+→ 问题在 decision。
+
+或者：
+
+ΔO 明明不同
+X 完全相同
+
+→ 语义层有问题。
+
+这就是可诊断性。
+
+然后你后半句话也非常重要
+
+正式引入 LLM semantic mechanism 后，其他机制可能可以删一点。
+
+完全对。
+
+这甚至应该是我们的预期，而不是意外。
+
+现在很多 rule 其实是在替未来 LLM 做语义工作。
+
+比如可能出现：
+
+deadline_event → task_pressure +0.2
+task_completed → satisfaction +0.3
+rejected_action → anxiety +0.1
+...
+
+有些 rule 是：
+
+A. 真正的 dynamics
+
+例如：
+
+fatigue 随时间恢复
+commitment 有惯性
+压力长期累积/衰减
+
+这些适合程序。
+
+但另一些可能只是：
+
+B. 手工 semantic parser
+
+例如：
+
+事件 A 意味着 failure
+事件 B 意味着 relief
+事件 C 与 goal 有关
+
+这些以后 LLM 正式接入以后可能就应该删掉。
+
+所以未来会形成一个很自然的分工：
+
+               LLM 强
+自然语言 → 意义解释
+模糊 context → semantic X
+复杂人物语境判断
+action / event semantic normalization
+
+               程序强
+时间积累
+decay
+inertia
+threshold
+clamp
+state transition
+world settlement
+合法性
+概率计算
+
+我觉得这就是我们这个项目真正很漂亮的切法：
+
+LLM 负责难形式化的语义映射，显式动力学负责可测、可干预的时间演化。
+
+而且以后可以直接通过 ablation 决定谁该删
+
+例如原来：
+
+rule X
++
+LLM X
+
+两套都存在。
+
+我们可以比较：
+
+rules only
+LLM only
+hybrid
+
+如果：
+
+LLM only ≈ hybrid > rules
+
+那某些旧 rule 就可以删。
+
+如果：
+
+hybrid > LLM only
+
+说明一些结构化先验还确实有用。
+
+同样：
+
+LLM X
+→ complex U
+
+如果发现：
+
+LLM X
+→ simple U
+
+效果一样，
+
+那就删复杂 updater。
+
+这正是我们刚才说的：
+
+让数据不断把机制削薄，而不是不断加机制。
+
+最终我反而希望得到的是：
+
+很少的 persistent S
++
+很少的动力学 operator
++
+几个关键 LLM semantic interfaces
+
+而不是一个 50 字段心理模拟器。
+
+我建议你给 Luna 那份 anti-patch-debt 任务再追加一条硬规则：
+
+在 ARCHITECTURE_RULES.md 中再增加一节：
+
+Semantic-stage preservation / LLM hooks
+
+Character Dynamics 中部分职责长期预期由 LLM 承担，尤其是自然语言/复杂上下文到结构化语义的映射。当前 rule-based placeholder 不得因为代码简化或性能优化而把这些语义阶段永久折叠掉。
+
+当前至少保留：
+
+ΔO / O / S / P
+→ semantic interpretation X
+→ explicit state updater U
+→ S'
+→ decision π(A)
+
+约束：
+
+X 是明确的中间产物，必须能进入 StepRecord / trace；不得长期退化成 event → 直接 numeric StateDelta。
+semantic stage 当前可以 rule-based，未来允许替换为 LLM 或 hybrid；本轮不要为此建立 factory/plugin/provider framework，只保留清楚函数/数据边界。
+角色内部 semantic LLM 只能读取该角色依法可获得的 O / ΔO / S / P，禁止为了提高判断质量读取隐藏 W。
+LLM semantic output 不应直接任意修改 S；原则上先输出结构化 X，再由显式 updater 完成时间动力学，以便区分“语义判断错误”和“动力学错误”。
+正式实验中的 LLM semantic output 必须可复现/可回放，记录 model、prompt version、decoding config、input hash 与 structured output；同一输入原则上支持缓存。
+新机制不得为了方便把 semantic stage 与 dynamics stage 合并成不可消融的黑盒。
+正式引入 LLM semantic mechanism 后，允许通过 dev-set sensitivity / ablation 删除当前承担相同语义职责的手工 rule；不要为了兼容历史代码永久叠加两套重复机制。
+机制删除依据应来自诊断/消融，而不是“旧代码已经存在所以保留”。
+长期目标允许机制随着数据变得更简单：
+semantic LLM
++ small explicit persistent state
++ minimal transparent dynamics
+
+而不是默认持续增加心理字段、规则和权重。
+
+本轮只把这些写成架构护栏，不实现真实 LLM 调用。
+
+这一条我认为非常值得现在就写进去。
+
+因为 anti-patch-debt 不应该只防：
+
+“AI 加太多代码。”
+
+还应该防另一种更隐蔽的债：
+
+AI 为了眼前实现方便，把我们未来真正需要实验的计算边界给优化没了。
+
+我们要保留的是可替换、可消融的研究接口，不是保留所有当前代码。
+
+就是数据集没关系，数据集直接llm来弄语义，然后直接调函数，相当于在循环中，从数据集里面用llm拟合出一套机制，然后最后一个比较完善的机制对比其它原有文献方法。但是泛化的时候或者引入新的文献测试集的时候一定要同时弄已有固定机制和llm语义真正插入的实验！当然有无llm本身就能对比
+
+对，这次我完全理解你的意思了，而且我觉得这比我前面一直把“LLM semantic adapter”和“机制本体”分得过死更准确。
+
+你真正想做的其实是：
+
+先允许 LLM 帮我们从外部数据里“识别/拟合”出一套比较合理的显式人物动力学机制；然后冻结机制，再拿新数据和已有方法检验它到底能不能泛化。
+
+这已经不是单纯“拿数据测一个预先写死的 S”，而更像：
+
+$$ \text{data} \rightarrow \text{LLM-assisted mechanism identification} \rightarrow \text{explicit dynamics} \rightarrow \text{frozen model} \rightarrow \text{generalization test} $$
+
+这个定位我支持。
+
+第一阶段：LLM 可以深度参与“拟合机制”
+
+这里不需要假装我们的：
+
+task_pressure += 0.2
+fatigue *= 0.97
+
+一开始就有什么理论权威性。
+
+我们完全可以：
+
+数据集轨迹
+↓
+LLM 做语义解释
+↓
+生成 X / 事件意义
+↓
+当前显式机制跑 S
+↓
+预测真实行为 / 对照动态标签
+↓
+看 failure
+↓
+LLM + 我们分析 failure
+↓
+改：
+  字段
+  updater
+  函数形式
+  参数
+  coupling
+  decay
+↓
+再跑
+
+反复循环。
+
+所以这里的 LLM 不只是“格式转换器”。
+
+它实际上可以承担两个角色：
+
+语义测量器
+
+比如：
+
+raw event
+→ goal relevance
+→ interruption
+→ perceived failure
+→ relief
+→ uncertainty
+机制研究助手
+
+看到：
+
+某参数变化完全不影响行为
+
+可以提出：
+
+coupling 太弱 / 字段冗余 / updater 错 / 时间尺度错。
+
+然后我们改函数。
+
+所以可以很明确地说：
+
+这一阶段是在用数据 + LLM 辅助拟合一个显式动力系统。
+
+不是普通 gradient fitting，但本质上仍然是 model fitting / system identification。
+
+但这样一来，有一个特别重要的研究身份变化
+
+所有参与这个循环的数据：
+
+OPeRA
+LIGHT slice
+ClubFloyd slice
+PowerWash subset
+AGAIN subset
+...
+
+只要我们看过结果并据此改机制，
+
+全部变成：
+
+development data
+
+哪怕从来没训练神经网络。
+
+所以最后真正有价值的是：
+
+mechanism v0
+→ 大量 dev iteration
+→ mechanism v1
+→ FREEZE
+
+然后才开始问：
+
+v1 到新数据上还能不能工作？
+
+第二阶段：冻结后的泛化实验正好要做你说的“两种”
+
+而且我建议以后把这两种明确命名。
+
+假设我们最终得到：
+
+$$ M^* $$
+
+即已经拟合好的显式 Character Dynamics 机制。
+
+Condition A：Frozen mechanism
+
+新数据集来了以后：
+
+新 dataset
+↓
+最小必要 schema mapping
+↓
+固定 semantic representation / 非自适应转换
+↓
+冻结的 M*
+↓
+预测
+
+不能根据新测试数据结果继续调 M*。
+
+这回答：
+
+我们学出来的显式机制本身有没有跨数据集泛化能力？
+
+这是最硬的结果。
+
+Condition B：Frozen mechanism + live LLM semantics
+
+还是同一个：
+
+$$ M^* $$
+
+参数、字段、updater 全部冻结。
+
+但是：
+
+新数据原始自然语言 / logs
+↓
+LLM semantic interpretation
+↓
+X
+↓
+冻结 M*
+↓
+S
+↓
+behavior
+
+这里 LLM 可以真正在线工作。
+
+这回答另一个现实得多的问题：
+
+如果让通用 LLM 负责跨域语义理解，我们的显式 dynamics 能不能作为稳定的时间动力学骨架迁移到新领域？
+
+这个实验我觉得非常重要。
+
+因为我们的最终系统本来就可能不是：
+
+完全 handcrafted。
+
+而是：
+
+$$ \boxed{ \text{LLM semantic frontend} + \text{explicit persistent dynamics} } $$
+而且你说得对：有无 LLM 本身就是一个非常自然的消融
+
+以后在同一新数据集上直接：
+
+条件	Semantic	Dynamics
+A	固定/规则	M*
+B	LLM	M*
+C	LLM	无 S / 无 dynamics
+D	LLM	M* + S permutation/ablation
+
+这里 C 特别重要。
+
+因为否则如果：
+
+LLM + M*
+
+表现很好，
+
+我们不知道到底是：
+
+LLM 本身就会预测，
+
+还是：
+
+persistent dynamics 真提供了额外价值。
+
+所以强 baseline 必须包括类似：
+
+LLM:
+O + history + persona
+→ next action
+
+也就是没有我们的显式 S。
+
+然后比较：
+
+$$ \text{LLM direct} $$
+
+vs
+
+$$ \text{LLM semantics} + M^* $$
+
+这才真正能说明显式机制有没有价值。
+
+再加已有论文方法，实验矩阵就变得很清楚了
+
+最终我们不是只测：
+
+ours vs no-ours。
+
+而是可能是：
+
+Raw-history LLM
+Strong summary / PersonaX-like
+Literature state/memory baseline
+Our frozen mechanism, no live LLM
+Our frozen mechanism + live LLM semantic layer
+Our mechanism - S
+Our mechanism permuted-S
+
+在多个新数据集上跑。
+
+这才是你说的：
+
+“最后一个比较完善的机制对比其它原有文献方法。”
+
+完全正确。
+
+这里我还想把“LLM 参与”和“机制拟合”拆成两个正交维度
+
+这一点以后论文设计会非常有用。
+
+不要写成：
+
+our system with GPT
+
+太糊。
+
+实际上有两个 axis。
+
+Axis 1：机制是不是 adaptive
+
+开发期：
+
+mechanism fitting = YES
+
+泛化测试：
+
+mechanism fitting = NO
+Axis 2：语义 frontend 有没有 LLM
+
+测试时：
+
+LLM semantics = OFF / ON
+
+所以真正的泛化实验是：
+
+mechanism frozen
+×
+LLM semantic frontend {off, on}
+
+而不是让 LLM 在 test 里继续偷偷帮我们改机制。
+
+还有一个非常重要的泄漏边界
+
+LLM 可以看完整 dev 数据来帮助我们分析为什么机制失败。
+
+但是到了 test：
+
+在预测：
+
+$$ A_t^* $$
+
+之前，LLM semantic layer 只能看：
+
+$$ O_{\le t},H_{<t},P,S_t $$
+
+绝对不能看：
+
+A*_t
+future observation
+后面的 action
+完整 trajectory summary
+
+否则：
+
+LLM semantics
+
+会偷偷变成：
+
+LLM answer extractor
+
+尤其是小说/游戏日志非常危险。
+
+比如你把整段 transcript 给 LLM：
+
+“请提取 t 时刻的角色语义状态。”
+
+但 transcript 里其实有 t+1、t+2，
+
+那已经泄漏了。
+
+所以 test adapter 必须严格 causal。
+
+更妙的是：LLM 也可以成为机制收缩工具
+
+你之前那句：
+
+“正式引入这个机制之后可能别的机制可以删掉一点。”
+
+放在这里就更清楚了。
+
+开发循环可能是：
+
+早期：
+大量 handcrafted semantic rules
++ complex dynamics
+
+↓ 数据 + LLM
+
+中期：
+LLM semantic X
++ fewer hand rules
++ simplified dynamics
+
+↓ ablation
+
+最终：
+LLM semantic X
++ small persistent S
++ minimal dynamics
+
+所以我们的研究目标不是：
+
+最后造出越来越复杂的 Character Dynamics。
+
+而可能恰恰是：
+
+从复杂候选系统中识别出最小必要动力学。
+
+我很喜欢这个方向。
+
+我会把整个研究路线重新命名成三阶段
+Phase I — Mechanism identification
+
+用多个 dev dataset：
+
+external data
+→ LLM-assisted semantics
+→ explicit model
+→ failures
+→ modify model
+
+目标：
+
+找到一套 reasonably small explicit dynamics。
+
+Phase II — Mechanism freeze
+
+冻结：
+
+S fields
+X schema
+U_k
+utility form
+parameters
+timing
+
+产生：
+
+Character Dynamics v1
+
+从这里开始 test 不再反向修改它。
+
+Phase III — Generalization
+
+新 dataset：
+
+同时跑：
+
+Frozen v1 + fixed semantics
+Frozen v1 + LLM semantics
+LLM direct
+literature baselines
+state ablations
+
+回答三件完全不同的事情：
+
+显式机制自己能不能泛化？
+LLM semantic frontend 能不能帮助它跨域？
+LLM 本身是不是已经足够，根本不需要我们的 dynamics？
+
+第三个尤其重要。
+
+如果最后：
+
+$$ \text{LLM direct} \approx \text{LLM}+M^* $$
+
+那我们就得承认：
+
+在这个任务上显式 dynamics 没提供额外价值。
+
+如果：
+
+$$ \text{LLM}+M^* > \text{LLM direct} $$
+
+而且跨数据集成立，
+
+那就很有意思了。
+
+而且我们现在正好到了之前说的“实验思维训练”的节点。
+
+这次你已经自己给出了一个非常清楚的 competing possibilities：
+
+可能 A：LLM 只需要理解语义，真正跨时间有用的是我们拟合出来的显式 dynamics。
+
+可能 B：LLM 自己读 history 就够了，我们显式 dynamics 只是多此一举。
+
+这已经是真正能长成实验的问题了。
+
+所以这一轮我不会再把你的想法压回“OPeRA 怎么做”。
+
+现在我们研究路线已经明显比一个数据集大很多了。

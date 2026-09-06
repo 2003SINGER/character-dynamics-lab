@@ -36,6 +36,18 @@ Episode:
 - factual replay 与 expanded diagnostic 分开报告，后者不能用于证明真人选择。
 - 任何根据某批数据改过机制的批次都降为 dev；untouched test 不得回看调参。
 
+## Semantic frontend boundary
+
+长期可替换链条保持为：`ΔO/O/S/P → X（semantic interpretation）→ U（explicit updater）→ S' → π(A)`。
+
+- 当前 `X` 可以是 rule-based placeholder；未来可以替换为 LLM 或 hybrid，但不得折叠成 event 直接写数值 `StateDelta`。
+- LLM 只读取角色可获得的 `O`、`ΔO`、`S`、`P`，不得读取隐藏 `W`、未来 observation 或后续 action。
+- LLM 输出结构化 `X`，不直接任意修改 `S`；正式运行记录 model/version、prompt version、decoding config、input hash、structured output 和 raw response/reference。
+- 机制识别阶段允许用多个 dev 数据集迭代字段、updater、utility、timing；冻结后不得用 test 反向修改。
+- 泛化阶段至少区分：`frozen mechanism + fixed semantics`、`frozen mechanism + live LLM semantics`、`LLM-direct/no-dynamics`，另保留 state ablation/permutation。
+
+这是一条接口与实验边界，不是本轮真实 LLM 调用授权。
+
 ## 当前不做
 
 不冻结 40 类继承体系，不启动大规模下载，不把 OPeRA action subtype 直接升级为 Paper-0 目标。先以数据资产登记和小型 adapter 骨架验证字段可映射性。
