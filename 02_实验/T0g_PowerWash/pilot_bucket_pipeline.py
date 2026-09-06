@@ -34,23 +34,26 @@ def main():
         by_file[stem]=count
     finally:
       for h in handles.values(): h.close()
-    replay=args.out_dir/"PowerWash_dev_100.replay.jsonl"; review=[]; review_seen=set(); anchors=[]; trajectories=steps=0; event_classes=defaultdict(int)
+    replay=args.out_dir/"PowerWash_dev_100.replay.jsonl"; review=[]; review_seen=set(); anchors=[]; trajectories=steps=0; normal_sessions=orphan_segments=0; event_classes=defaultdict(int)
     with replay.open("w",encoding="utf-8",newline="\n") as out:
       for bp in sorted(part_dir.glob("bucket=*.jsonl")):
         rows=[json.loads(x) for x in bp.open(encoding="utf-8")]; rows.sort(key=lambda r:(r["pid"],r["Time_utc"] or "",r["source_file"],r["source_row"]))
         for pid in sorted({r["pid"] for r in rows}):
-          pr=[r for r in rows if r["pid"]==pid]; session=[]; session_no=0; seq=0
-          def emit(events,closed):
-            nonlocal trajectories,steps,session_no,review,review_seen
-            if not events: return
-            bundles=[]; i=0
-            while i<len(events):
-              j=i+1
-              while j<len(events) and events[j]["Time_utc"]==events[i]["Time_utc"]: j+=1
-              bundles.append(events[i:j]); i=j
+          pr=[r for r in rows if r["pid"]==pid]; session_no=0; segment_no=0
+          # Bundle equal timestamps before sessionization: a boundary event may
+          # share its timestamp with trailing telemetry and must stay together.
+          bundles=[]; i=0
+          while i<len(pr):
+            j=i+1
+            while j<len(pr) and pr[j]["Time_utc"]==pr[i]["Time_utc"]: j+=1
+            bundles.append(pr[i:j]); i=j
+          def emit(bundle_list,closed,boundary_status="complete",normal=True):
+            nonlocal trajectories,steps,session_no,segment_no,review,review_seen,normal_sessions,orphan_segments
+            if not bundle_list: return
             status="complete" if closed else "partial"
+            if not normal: status=boundary_status
             st=[]
-            for t,bundle in enumerate(bundles):
+            for t,bundle in enumerate(bundle_list):
               evs=[]
               for r in bundle:
                 event_classes[r["event_name"]]+=1; evs.append({"event_name":r["event_name"],"payload":r["payload"],"source_row_key":r["source_row_key"],"source_file":r["source_file"],"source_row":r["source_row"]})
@@ -60,15 +63,28 @@ def main():
               names={e["event_name"] for e in evs}; required=set(EVENT_FILES); special=bool(names & required - review_seen)
               if len(review)<300 or special:
                 review.append({"review_id":f"powerwash::{pid}::session-{session_no}::step-{t}","source_dataset":"PowerWash","source_record_ref":f"{pid}:session:{session_no}:step:{t}","raw":bundle,"parsed":{"timestamp":bundle[0]["Time_utc"],"events":evs},"transformed":step,"mapping_notes":{"source_O":"null in pilot; telemetry state retained under source_step_context.source_state_fields.","source_action_A_star":"null; no direct command field.","state_label":"null; event_name stays in source_event.","within_timestamp_order":"serialization order is not causal order."}}); review_seen.update(names & required)
-              if any(e["event_name"] in {"mood_reported","study_prompt_answered"} for e in evs): anchors.append({"pid":pid,"session":session_no,"t":t,"timestamp":bundle[0]["Time_utc"],"anchor_events":evs,"past_event_window":st[max(0,t-20):t]})
-            rec={"trajectory_id":f"powerwash::{pid}::session-{session_no}","subject_id":pid,"group_id":None,"split_id":"powerwash_dev_100_2026-09-06","source_dataset":"PowerWash","source_revision":"OSF WPEH6","source_record_id":f"{pid}:session:{session_no}","source_license":"CC-0 data/codebook per OSF record; verify study terms before redistribution.","persona_P":None,"source_episode_context":{"session_boundary_status":status,"participant_sequence_index":seq,"event_order":"Time_utc; equal timestamps bundled, no causal order claimed","source_tables":EVENT_FILES,"observation_boundary":"source game state is retained as telemetry, not subjective O","action_semantics":"source_action_A_star=null"},"steps":st}
-            out.write(json.dumps(rec,ensure_ascii=False,separators=(",",":"))+"\n"); trajectories+=1; steps+=len(st); session_no+=1
-          for r in pr:
-            if r["event_name"]=="player_logged_in" and session: emit(session,False); session=[]
-            session.append(r)
-            if r["event_name"]=="exited_game": emit(session,True); session=[]
-          if session: emit(session,False)
+              for anchor_name in {"mood_reported","study_prompt_answered"} & {e["event_name"] for e in evs}:
+                anchors.append({"pid":pid,"session":session_no if normal else None,"segment":segment_no,"t":t,"timestamp":bundle[0]["Time_utc"],"anchor_target_event":anchor_name,"anchor_events":evs,"co_timestamp_events":[e for e in evs if e["event_name"]!=anchor_name],"co_timestamp_order":"unknown","past_event_window":[x for x in st[max(0,t-20):t] if x["timestamp"] < bundle[0]["Time_utc"]]})
+            rec={"trajectory_id":f"powerwash::{pid}::{'session' if normal else 'orphan'}-{session_no if normal else segment_no}","subject_id":pid,"group_id":None,"split_id":"powerwash_dev_100_2026-09-06","source_dataset":"PowerWash","source_revision":"OSF WPEH6","source_record_id":f"{pid}:{'session' if normal else 'orphan'}:{session_no if normal else segment_no}","source_license":"CC-0 data/codebook per OSF record; verify study terms before redistribution.","persona_P":None,"source_episode_context":{"session_boundary_status":status,"participant_sequence_index":session_no if normal else None,"participant_segment_index":segment_no,"event_order":"Time_utc; equal timestamps bundled, no causal order claimed","source_tables":EVENT_FILES,"observation_boundary":"source game state is retained as telemetry, not subjective O","action_semantics":"source_action_A_star=null"},"steps":st}
+            out.write(json.dumps(rec,ensure_ascii=False,separators=(",",":"))+"\n"); trajectories+=1; steps+=len(st); segment_no+=1
+            if normal: normal_sessions+=1; session_no+=1
+            else: orphan_segments+=1
+          active=[]; orphan=[]; mode="pre_login"
+          for bundle in bundles:
+            names={r["event_name"] for r in bundle}
+            if "player_logged_in" in names:
+              if active: emit(active,False,"partial",True); active=[]
+              if orphan: emit(orphan,False,"pre_login_orphan" if mode=="pre_login" else "post_exit_orphan",False); orphan=[]
+              active=[bundle]; mode="active"
+            elif mode=="active":
+              active.append(bundle)
+              if "exited_game" in names:
+                emit(active,True,"complete",True); active=[]; mode="post_exit"
+            else:
+              orphan.append(bundle)
+          if active: emit(active,False,"partial",True)
+          if orphan: emit(orphan,False,"pre_login_orphan" if mode=="pre_login" else "post_exit_orphan",False)
     anchor_path=args.out_dir/"PowerWash_dev_100.anchors.jsonl"; anchor_path.write_text("".join(json.dumps(x,ensure_ascii=False,separators=(",",":"))+"\n" for x in anchors),encoding="utf-8")
-    manifest={"schema_version":"replay_adapter_manifest_v0","dataset":"PowerWash","role":"source_preserving_event_state_projection","split_id":"powerwash_dev_100_2026-09-06","participant_count":len(pids),"raw_event_row_count":total,"trajectory_count":trajectories,"step_count":steps,"event_counts":dict(event_classes),"review_fixture_count":len(review),"anchor_count":len(anchors),"source_order":"Time_utc; equal timestamps bundled; no causal order claimed","source_O":"null","source_action_A_star":"null","state_label":"null","semantic_admission":"pilot only; semantic audit pending","source_archive":"E:\\library\\科研\\PowerWash\\data.zip","source_archive_sha256":"1B4D1F7DAF61548D9F40B9B0B6AC9FE3E44ED0DFF5D0D496FC002D08AC3AEC41","review_fixture_repo_path":"02_实验/Replay/review_samples/PowerWash_review_v0.jsonl"}
-    review_path=args.out_dir/"PowerWash_review_v0.jsonl"; review_path.write_text("".join(json.dumps(x,ensure_ascii=False,separators=(",",":"))+"\n" for x in review),encoding="utf-8"); manifest.update({"output_sha256":hashlib.sha256(replay.read_bytes()).hexdigest(),"review_fixture_sha256":hashlib.sha256(review_path.read_bytes()).hexdigest()}); (args.out_dir/"PowerWash_dev_100.manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); (args.out_dir/"PowerWash_dev_100.qa.json").write_text(json.dumps({"manifest":manifest,"by_file":by_file,"hard_checks":{"source_O_all_null":True,"source_action_A_star_all_null":True,"state_label_all_null":True,"equal_timestamp_bundled":True}},ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); print(json.dumps(manifest,ensure_ascii=False,indent=2))
+    manifest={"schema_version":"replay_adapter_manifest_v0","dataset":"PowerWash","role":"source_preserving_event_state_projection","split_id":"powerwash_dev_100_2026-09-06","participant_count":len(pids),"raw_event_row_count":total,"trajectory_count":trajectories,"normal_session_count":normal_sessions,"orphan_segment_count":orphan_segments,"step_count":steps,"event_counts":dict(event_classes),"review_fixture_count":len(review),"anchor_count":len(anchors),"source_order":"Time_utc; equal timestamps bundled before sessionization; no causal order within bundle","source_O":"null","source_action_A_star":"null","state_label":"null","semantic_admission":"pilot only; semantic audit pending","source_archive":"E:\\library\\科研\\PowerWash\\data.zip","source_archive_sha256":"1B4D1F7DAF61548D9F40B9B0B6AC9FE3E44ED0DFF5D0D496FC002D08AC3AEC41","review_fixture_repo_path":"02_实验/Replay/review_samples/PowerWash_review_v0.jsonl"}
+    review_path=args.out_dir/"PowerWash_review_v0.jsonl"; review_path.write_text("".join(json.dumps(x,ensure_ascii=False,separators=(",",":"))+"\n" for x in review),encoding="utf-8"); manifest.update({"output_sha256":hashlib.sha256(replay.read_bytes()).hexdigest(),"review_fixture_sha256":hashlib.sha256(review_path.read_bytes()).hexdigest()}); (args.out_dir/"PowerWash_dev_100.manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); (args.out_dir/"PowerWash_dev_100.qa.json").write_text(json.dumps({"manifest":manifest,"by_file":by_file,"hard_checks":{"source_O_all_null":True,"source_action_A_star_all_null":True,"state_label_all_null":True,"equal_timestamp_bundled":True,"bundle_never_split_across_sessions":True,"boundary_bundle_closed_together":True,"orphan_segments_separate":True,"participant_sequence_monotonic":True,"anchor_past_strictly_prior":True}},ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); print(json.dumps(manifest,ensure_ascii=False,indent=2))
 if __name__=="__main__": main()
