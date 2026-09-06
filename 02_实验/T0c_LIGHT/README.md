@@ -37,10 +37,10 @@ C++ 框架侧同步新增 `Demo codex-generated/Inc/scene_snapshot.h` 与 `Src/s
 
 ### Scene-aware v1 paired diagnostic (same 41 trajectories / 140 steps)
 
-`run_compiled_semantics_v0.py --scene-aware` 现在先调用 `compile_light_step()` 生成 canonical `SceneSnapshot`，再将 candidate target 与 snapshot 的 entities、actor observation 和 possessions 做最小绑定，并对不在 scene/不可见/已携带的 target 调整 candidate semantics/bias。结果与 verb-only v0 保存在 `LIGHT_v0_v1_paired_comparison.json`：canonical-snapshot v1 stateful NLL **1.419149**（v0 1.422254），但 v1 no-history NLL **1.419183**；stateful 仅比 no-history 好 **0.000034**，因此当前不能归因于 persistent S，且仍只是 dev diagnostic。
+`run_compiled_semantics_v0.py --scene-aware` 现在先调用 `compile_light_step()` 生成 canonical `SceneSnapshot`，再将 candidate target 与 snapshot 的 entities、actor observation 和 possessions 做最小绑定，并对不在 scene/不可见/已携带的 target 调整 candidate semantics/bias。当前 neutral replay scorer 下，verb-only 与 scene-aware v1 均为 stateful/no-history NLL **1.438298**；因此当前不能归因于 persistent S，且仍只是 dev diagnostic。
 
 ### Transition theory-S diagnostic
 
-`run_transition_theory_s_v0.py` 在同一 140 steps 上执行 `SceneSnapshot(t-1,t) → transition → appraisal X → AppraisalTraceStateV0 → candidate scorer`，并输出 zero-S、theory-S、trajectory-permuted-S 三组 trace。固定 `eta=0.35`、离散 replay boundary `Δt=1`；它不使用 RoomDemo state/personality 作为历史状态，但底层 external scorer 仍包含跨条件恒定的 RoomDemo-derived default drives，仅作 dev scorer scaffolding。结果与 transition audit 位于 `outputs/experiments/LIGHT_transition_theory_s_v0/`。本轮只作机制 smoke，不调 eta 或 scorer。
+`run_transition_theory_s_v0.py` 在同一 140 steps 上执行 `SceneSnapshot(t-1,t) → transition → appraisal X → AppraisalTraceStateV0 → candidate scorer`，并输出 zero-S、theory-S、trajectory-permuted-S 三组 trace。固定 `eta=0.35`、离散 replay boundary `Δt=1`；replay scorer 现在只接收候选语义和显式 `ReplayPolicyConfig`，不读取 RoomDemo `CharacterState/Personality`。结果与 transition audit 位于 `outputs/experiments/LIGHT_transition_theory_s_v0/`。本轮只作机制 smoke，不调 eta 或 scorer。
 
-完整性修复后（按 decision-index 分层 permutation）结果为：zero-S `1.419183`、theory-S `1.418215`、permuted-S `1.419085`、uniform `1.412648`。正确历史现已略优于 permutation，但仍输给 uniform；negative channel 本轮非零率为 0，expected effect 41 条中 15 条 confirmed、26 条 unconfirmed。
+neutral scorer 重跑后（按 decision-index 分层 permutation）结果为：zero-S `1.438298`、theory-S `1.436894`、permuted-S `1.441893`、uniform `1.412648`。正确历史现已优于 permutation，但仍输给 uniform；negative channel 本轮非零率为 0，expected effect 41 条中 15 条 confirmed、26 条 unconfirmed。

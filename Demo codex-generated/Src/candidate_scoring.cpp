@@ -5,6 +5,39 @@
 #include <limits>
 #include <stdexcept>
 
+std::vector<ExternalCandidateScore> score_replay_candidates(
+    const std::vector<ExternalCandidate>& candidates,
+    const ReplayPolicyConfig& config) {
+    if (candidates.empty()) throw std::invalid_argument("external candidate set is empty");
+    const double temperature = std::max(0.05, config.temperature);
+    std::vector<ExternalCandidateScore> out;
+    out.reserve(candidates.size());
+    double max_logit = -std::numeric_limits<double>::infinity();
+    for (const auto& candidate : candidates) {
+        const auto& f = candidate.semantics;
+        const double activation = candidate.bias
+            + f.goal_progress * config.task_drive
+            + f.stimulation * config.distraction_drive
+            + f.recovery * config.recovery_drive
+            + f.hunger_relief * config.hunger_drive
+            + f.bathroom_relief * config.bathroom_drive
+            + f.short_term_reward * config.reward_drive
+            + f.environment_control * config.environment_drive
+            + f.context_relevance * config.context_drive;
+        out.push_back({candidate.id, activation, 0.0});
+        max_logit = std::max(max_logit, activation / temperature);
+    }
+    double normalizer = 0.0;
+    for (auto& item : out) {
+        item.probability = std::exp(item.activation / temperature - max_logit);
+        normalizer += item.probability;
+    }
+    if (!std::isfinite(normalizer) || normalizer <= 0.0)
+        throw std::logic_error("replay scorer produced invalid normalizer");
+    for (auto& item : out) item.probability /= normalizer;
+    return out;
+}
+
 std::vector<ExternalCandidateScore> score_external_candidates(
     const std::vector<ExternalCandidate>& candidates,
     const CharacterState& state,

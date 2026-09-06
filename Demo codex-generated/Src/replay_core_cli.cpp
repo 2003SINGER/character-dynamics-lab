@@ -51,7 +51,7 @@ void append_signal(Appraisal& appraisal,
 
 int main(int argc, char* argv[]) {
     if (argc > 1 && std::string(argv[1]) == "--version") {
-        std::cout << kReplayCoreVersion << "|" << kExternalCandidateScorerVersion << '\n';
+        std::cout << kReplayCoreVersion << "|" << kReplayCandidateScorerVersion << '\n';
         return 0;
     }
 
@@ -122,7 +122,9 @@ int main(int argc, char* argv[]) {
                 candidates.push_back({std::to_string(i), s, number(c[9])});
             }
 
-            const auto scores = score_external_candidates(candidates, state, personality);
+            // Prediction is dataset-neutral: RoomDemo state is retained only
+            // for the teacher-forced transition trace emitted below.
+            const auto scores = score_replay_candidates(candidates);
             std::cout << "RESULT\t" << active_trajectory
                       << '\t' << t
                       << '\t' << std::setprecision(17)

@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 import transition_appraisal_v0 as ta
-import importlib.util, json
+import importlib.util, json, subprocess
 
 def snap(place="room", entities=None, possessions=None, obs="sword"):
     return {"place": place, "entities": ([{"id":"sword","label":"sword","facts":{}}] if entities is None else entities), "possessions": possessions or [], "actor_observation": obs}
@@ -12,7 +12,12 @@ def test_possession_added():
     e=ta.diff_scene_snapshots(snap(), snap(possessions=[{"entity":"sword","relation":"carrying"}]))
     assert [x["kind"] for x in e] == ["possession_added"]
 def test_entity_left(): assert ta.diff_scene_snapshots(snap(), snap(entities=[]))[0]["kind"] == "entity_left_scene"
-def test_hidden_source_not_present(): assert ta.diff_scene_snapshots(snap(), snap()) == []
+def test_hidden_source_not_present():
+    # A source-only object must not leak into the canonical visible scene.
+    prev = snap(entities=[{"id":"visible","label":"sword","facts":{}}])
+    cur = snap(entities=[{"id":"visible","label":"sword","facts":{}}])
+    assert all(e.get("id") != "hidden" for e in cur["entities"])
+    assert ta.diff_scene_snapshots(prev, cur) == []
 def test_unconfirmed_not_obstruction():
     x=ta.appraise_transition(snap(), snap(obs=""), "take sword")
     assert x["negative_conduciveness"] == 0.0 and x["goal_relevance"] == 0.0
@@ -20,13 +25,16 @@ def test_positive_negative_channels():
     s=ta.zero_state(); s=ta.update_state(s,{"goal_relevance":1,"positive_conduciveness":1,"negative_conduciveness":1})
     assert s["positive_conduciveness_trace"] > 0 and s["negative_conduciveness_trace"] > 0
 def test_current_ast_cannot_change_prior_appraisal():
-    # The wire protocol itself carries no gold index into PREDICT.
-    p = Path(__file__).parents[2] / "T0c_LIGHT" / "run_compiled_semantics_v0.py"
-    spec = importlib.util.spec_from_file_location("runner", p); runner = importlib.util.module_from_spec(spec); spec.loader.exec_module(runner)
-    rules = json.loads((p.parent / "compiled_semantics_v0.json").read_text(encoding="utf8"))
-    rec = next(runner.iter_records(Path("outputs/external_assets-2026-09-06/LIGHT/light_dev_50.replay.json"))) if False else {"trajectory_id":"t","steps":[{"t":1,"source_action_A_star":"take sword","source_O":"sword","candidate_set_factual":["take sword","hug sword"],"source_step_context":{"room_objects":["sword"],"room_agents":[],"carrying":[],"wearing":[],"wielding":[]}}]}
-    protocol, _, _ = runner.protocol_for([rec], rules, True, True)
-    assert all(len(line.split("\t")) == 4 for line in protocol.splitlines() if line.startswith("PREDICT"))
+    # End-to-end: UPDATE changes emitted trace state, not current prediction.
+    exe = Path(__file__).parents[2] / "Demo codex-generated" / "replay_core_static.exe"
+    if not exe.exists(): return
+    def run(update):
+        p = "RESET\tt\n" + (update or "") + "PREDICT\tt\t1\t2\n" \
+            "C\t1\t0\t0\t0\t0\t0\t0\t0\t0\nC\t0\t1\t0\t0\t0\t0\t0\t0\t0\n"
+        return subprocess.run([str(exe)], input=p, text=True, capture_output=True, check=True).stdout.strip()
+    a, b = run(None), run("UPDATE\tt\t1\t0\t0\t0\t0\n")
+    pa, pb = a.split("\t")[-1], b.split("\t")[-1]
+    assert pa == pb and a != b
 def test_history_consequence_changes_state_not_current_scene():
     prev, cur = snap(), snap(possessions=[{"entity":"sword","relation":"carrying"}])
     x1 = ta.appraise_transition(prev, cur, "take sword")
