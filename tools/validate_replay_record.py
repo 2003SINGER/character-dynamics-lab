@@ -1,4 +1,4 @@
-"""Small stdlib-only validator for ReplayRecord v0 JSON files."""
+"""Small stdlib-only validator for ReplayRecord v0 JSON and JSONL files."""
 from __future__ import annotations
 import argparse, json, sys
 from pathlib import Path
@@ -44,11 +44,16 @@ def main() -> int:
     ap.add_argument("path", type=Path)
     args = ap.parse_args()
     try:
-        data = json.loads(args.path.read_text(encoding="utf-8"))
+        text = args.path.read_text(encoding="utf-8")
+        try:
+            data = json.loads(text)
+            records = data if isinstance(data, list) else [data]
+        except json.JSONDecodeError:
+            records = [json.loads(line) for line in text.splitlines() if line.strip()]
+            data = records
     except Exception as exc:
-        print(f"FAIL {args.path}: cannot read JSON: {exc}")
+        print(f"FAIL {args.path}: cannot read JSON/JSONL: {exc}")
         return 1
-    records = data if isinstance(data, list) else [data]
     errors: list[str] = []
     for i, rec in enumerate(records):
         if not isinstance(rec, dict):
@@ -56,7 +61,7 @@ def main() -> int:
             continue
         errors.extend(validate(rec, f"{args.path}[{i}]") )
     if not isinstance(data, (dict, list)):
-        errors.append(f"{args.path}: root must be an object or list")
+        errors.append(f"{args.path}: root must be an object, list, or JSONL")
     if errors:
         print("\n".join(f"FAIL {e}" for e in errors)); return 1
     print(f"OK {args.path}: {len(records)} ReplayRecord(s)"); return 0
