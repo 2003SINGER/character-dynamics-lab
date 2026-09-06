@@ -46,8 +46,6 @@ elseif(MSVC)
     target_compile_options(character_dynamics_reference PRIVATE /W4)
 endif()
 
-# Keep the reference executable runnable from CTest or Explorer without
-# requiring every parent process to inherit MinGW's DLL directory.
 if(MINGW)
     target_link_options(character_dynamics_reference PRIVATE
         -static
@@ -66,6 +64,26 @@ add_executable(character_dynamics_core_smoke
     Src/state.cpp Src/candidate_scoring.cpp Src/decision.cpp Src/simulation.cpp)
 target_include_directories(character_dynamics_core_smoke PRIVATE Inc)
 if(MINGW)
-    target_link_options(character_dynamics_core_smoke PRIVATE -static -static-libgcc -static-libstdc++)
+    target_link_options(character_dynamics_core_smoke PRIVATE
+        -static -static-libgcc -static-libstdc++)
 endif()
-add_test(NAME character_dynamics_core_experiment_smoke COMMAND character_dynamics_core_smoke)
+add_test(NAME character_dynamics_core_experiment_smoke
+         COMMAND character_dynamics_core_smoke)
+
+add_executable(character_dynamics_replay_core
+    Src/replay_core_cli.cpp
+    Src/state.cpp
+    Src/candidate_scoring.cpp
+)
+target_include_directories(character_dynamics_replay_core PRIVATE Inc)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(character_dynamics_replay_core PRIVATE -Wall -Wextra -Wpedantic)
+elseif(MSVC)
+    target_compile_options(character_dynamics_replay_core PRIVATE /W4)
+endif()
+if(MINGW)
+    target_link_options(character_dynamics_replay_core PRIVATE
+        -static -static-libgcc -static-libstdc++)
+endif()
+add_test(NAME character_dynamics_replay_core_version
+         COMMAND character_dynamics_replay_core --version)
