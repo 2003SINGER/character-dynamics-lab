@@ -18,6 +18,10 @@
 
 T0d 只抽 30–50 个 session，逐项审计 session 长度、动作 ontology/click subtype、user grouping、observation 完整性、rationale 时间位置、split 与未来泄漏，并确认 finite candidate/ranking/NLL 可计算。动作不是独立样本，后续统计须按 session/user 聚类；未通过则保留负结果，不训练、不重写 ontology。
 
+### T0d 结果（2026-09-06）
+
+[30-session 准入审计](../02_实验/T0d_OPeRA/2026-09-06_准入审计结果.md)得出**条件通过**：真人 action、HTML/URL、时间序和 finite action-type/click-type 标签可复核；但 filtered 官方 train/test 有 12 位 user overlap，exact UI target 缺少逐步枚举 candidate set，rationale 的预测前可得性也未被 release 证明。故 OPeRA 只进入「user-disjoint、受限标签」pilot protocol 设计，尚不进入训练或 Paper-0 baseline。
+
 ## 近邻的职责边界
 
 | 近邻 | 当前可确认的关系 | 对 Paper-0 的动作 |
