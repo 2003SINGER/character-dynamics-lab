@@ -20,7 +20,7 @@ def main():
     lengths = sessions.action_count.astype(int)
     thresholds = {f'>={k}': int((lengths >= k).sum()) for k in (10,20,30,50,100)}
     user_counts = sessions.groupby('user_id').size()
-    user_long = {str(k): int((lengths[sessions.user_id == k] >= int(k)).sum()) for k in (10,20,30)}
+    user_long = {str(k): int(sessions.loc[lengths >= k, 'user_id'].nunique()) for k in (10,20,30)}
     user_order = sorted(user_counts.index, key=lambda u: (hashlib.sha256(str(u).encode()).hexdigest(), str(u)))
     test_users = set(user_order[:max(1, round(len(user_order)*0.2))]); split = sessions.user_id.map(lambda u: 'test' if u in test_users else 'train')
     long_label = actions.session_id.isin(set(sessions.loc[lengths >= 20, 'session_id']))

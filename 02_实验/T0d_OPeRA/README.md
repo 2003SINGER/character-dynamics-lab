@@ -14,7 +14,7 @@ $env:PYTHONPATH = Resolve-Path ..\..\outputs\opera_t0d_2026-09-06\python_package
 全量统计复现：
 
 ```powershell
-& "C:\Users\2003SINGER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" .\long_trajectory_stats.py --raw-dir ..\..\outputs\opera_t0d_2026-09-06\raw --out-dir ..\..\outputs\opera_t0d_2026-09-06\slice
+& "C:\Users\2003SINGER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" .\long_trajectory_stats.py --raw-dir ..\..\outputs\opera_t0d_2026-09-06\raw --out ..\..\outputs\opera_t0d_2026-09-06\slice\long_trajectory_stats.json
 ```
 
 结果：[2026-09-06_准入审计结果.md](2026-09-06_准入审计结果.md)；机器可读 JSON 位于 Git 忽略的 `outputs/opera_t0d_2026-09-06/slice/long_trajectory_stats.json`。全量结果显示 69 条 session ≥20 actions，但 user-disjoint test 仅 10 条；因此当前不授权直接进入 Paper-0 pilot。
