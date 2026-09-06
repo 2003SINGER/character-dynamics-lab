@@ -133,9 +133,7 @@ Appraisal appraise(const Observation& observation,
     const auto apply_observation_update = [&](const ObservationFact& update) {
         if (update.key == "task.coursework.status" && update.value == "completed"
             && update.status == KnowledgeStatus::Known) {
-            appraisal.task_pressure_delta -= 0.85;
-            appraisal.anxiety_delta -= 0.55;
-            appraisal.satisfaction_delta += 0.32;
+            appraisal.semantic_signals.push_back({AppraisalSignalKind::GoalCompletion, 1.0, 1.0, 1.0, 1.0, "task.coursework.status=completed"});
             appraisal.tags.push_back("task_completed");
         } else if (update.key == "task.coursework.deadline" && update.value == "passed"
                    && update.status == KnowledgeStatus::Known && coursework_pending) {
@@ -182,7 +180,12 @@ Appraisal appraise(const Observation& observation,
 
 std::string appraisal_summary(const Appraisal& appraisal) {
     std::ostringstream output;
-    output << "X{tags=[";
+    output << "X{signals=[";
+    for (std::size_t i=0; i<appraisal.semantic_signals.size(); ++i) {
+        const auto& s=appraisal.semantic_signals[i]; output << appraisal_signal_name(s.kind) << "{intensity=" << s.intensity << ", source=" << s.source << '}';
+        if (i+1<appraisal.semantic_signals.size()) output << ", ";
+    }
+    output << "], tags=[";
     for (std::size_t index = 0; index < appraisal.tags.size(); ++index) {
         output << appraisal.tags[index];
         if (index + 1 < appraisal.tags.size()) {
@@ -191,4 +194,9 @@ std::string appraisal_summary(const Appraisal& appraisal) {
     }
     output << "]}";
     return output.str();
+}
+
+const char* appraisal_signal_name(AppraisalSignalKind kind) {
+    switch (kind) { case AppraisalSignalKind::GoalCompletion: return "goal_completion"; }
+    return "unknown";
 }

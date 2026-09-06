@@ -31,6 +31,7 @@ add_executable(character_dynamics_reference
     Src/observation.cpp
     Src/appraisal.cpp
     Src/state.cpp
+    Src/candidate_scoring.cpp
     Src/decision.cpp
     Src/simulation.cpp
 )
@@ -57,3 +58,14 @@ endif()
 enable_testing()
 add_test(NAME character_dynamics_reference_smoke
          COMMAND character_dynamics_reference --verify)
+
+add_executable(character_dynamics_core_smoke
+    tests/core_experiment_smoke.cpp
+    Src/action.cpp Src/simulation_time.cpp Src/object.cpp Src/scene.cpp
+    Src/world_primitive.cpp Src/world.cpp Src/observation.cpp Src/appraisal.cpp
+    Src/state.cpp Src/candidate_scoring.cpp Src/decision.cpp Src/simulation.cpp)
+target_include_directories(character_dynamics_core_smoke PRIVATE Inc)
+if(MINGW)
+    target_link_options(character_dynamics_core_smoke PRIVATE -static -static-libgcc -static-libstdc++)
+endif()
+add_test(NAME character_dynamics_core_experiment_smoke COMMAND character_dynamics_core_smoke)

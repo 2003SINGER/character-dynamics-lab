@@ -53,6 +53,7 @@ struct StateDelta {
 // before/after difference after W-independent range constraints.  Logging
 // both prevents provenance from claiming an impossible state transition.
 struct StateUpdate {
+    StateDelta semantic_contribution;
     StateDelta requested;
     StateDelta applied;
 };

@@ -12,6 +12,19 @@ double clamp_unit(double value) {
 void append_value(std::ostringstream& output, const char* label, double value) {
     output << label << '=' << std::fixed << std::setprecision(2) << value;
 }
+
+StateDelta semantic_delta(const Appraisal& appraisal) {
+    StateDelta delta;
+    for (const auto& signal : appraisal.semantic_signals) {
+        const double strength = std::clamp(signal.intensity, 0.0, 1.0);
+        if (signal.kind == AppraisalSignalKind::GoalCompletion) {
+            delta.task_pressure -= 0.85 * strength;
+            delta.anxiety -= 0.55 * strength;
+            delta.satisfaction += 0.32 * strength;
+        }
+    }
+    return delta;
+}
 } // namespace
 
 StateUpdate update_state(CharacterState& state,
@@ -20,6 +33,7 @@ StateUpdate update_state(CharacterState& state,
                         int elapsed_minutes) {
     const CharacterState before = state;
     StateUpdate update;
+    update.semantic_contribution = semantic_delta(appraisal);
     StateDelta& delta = update.requested;
     delta.elapsed_minutes = elapsed_minutes;
     const double time_scale = static_cast<double>(elapsed_minutes) / 30.0;
@@ -28,21 +42,22 @@ StateUpdate update_state(CharacterState& state,
     // placeholders for later per-field dynamics, not psychological claims.
     delta.boredom = appraisal.boredom_delta + 0.01 * time_scale;
     delta.fatigue = appraisal.fatigue_delta + 0.012 * time_scale;
-    delta.task_pressure = appraisal.task_pressure_delta;
-    delta.satisfaction = appraisal.satisfaction_delta - 0.01 * time_scale;
+    delta.task_pressure = appraisal.task_pressure_delta + update.semantic_contribution.task_pressure;
+    delta.satisfaction = appraisal.satisfaction_delta + update.semantic_contribution.satisfaction - 0.01 * time_scale;
     delta.hunger = appraisal.hunger_delta + 0.025 * time_scale;
     delta.bathroom_urge = appraisal.bathroom_urge_delta + 0.020 * time_scale;
     delta.screen_strain = appraisal.screen_strain_delta - 0.030 * time_scale;
     delta.purchase_urge = appraisal.purchase_urge_delta - 0.018 * time_scale;
-    delta.anxiety = appraisal.anxiety_delta
+    delta.anxiety = appraisal.anxiety_delta + update.semantic_contribution.anxiety
                   + std::max(0.0, state.task_pressure - 0.55) * 0.08 * time_scale * personality.task_anxiety_sensitivity;
 
     // P modulates response curves; it does not force a particular action.
-    if (appraisal.task_pressure_delta > 0.0) {
+    const double raw_task_pressure_delta = delta.task_pressure;
+    if (raw_task_pressure_delta > 0.0) {
         delta.task_pressure += 0.06 * personality.procrastination;
         delta.anxiety += 0.05 * personality.task_anxiety_sensitivity;
     }
-    if (appraisal.task_pressure_delta < 0.0) {
+    if (raw_task_pressure_delta < 0.0) {
         delta.task_pressure *= 0.70 + 0.30 * personality.self_control;
     }
     delta.fatigue += std::max(0.0, appraisal.screen_strain_delta) * 0.10 * personality.screen_strain_sensitivity;
@@ -120,6 +135,7 @@ std::string state_delta_summary(const StateDelta& delta) {
 }
 
 std::string state_update_summary(const StateUpdate& update) {
-    return "StateUpdate{requested=" + state_delta_summary(update.requested)
+    return "StateUpdate{semantic_U=" + state_delta_summary(update.semantic_contribution)
+         + ", requested=" + state_delta_summary(update.requested)
          + ", applied=" + state_delta_summary(update.applied) + '}';
 }
