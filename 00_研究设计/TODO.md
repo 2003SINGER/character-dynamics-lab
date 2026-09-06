@@ -52,6 +52,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | **T0g** | **已完成边界设计；待具体实验 protocol** | Phase I（多数据集 dev + LLM-assisted semantics + 显式动力学迭代）、Phase II（冻结 `S/X/U/utility/timing`）、Phase III（新数据上的 fixed-semantics/live-LLM/direct-LLM 对照）已写入架构与 Replay 边界；不在本行启动真实 LLM 调用 | [Replay 接口语义边界](../02_实验/跨数据集Replay接口_v0.md#semantic-frontend-boundary)；test 不得反向改机制 |
 | **T0h** | **待启动：compiled semantics 小切片** | 第一个真实 adapter 先由人工/离线 AI 建立版本化固定语义规则表；运行时关闭 LLM，按 `X → U → S` 跑 dev；记录规则修改、失败原因与未来 LLM prompt 约束线索 | 规则不可按单条 `A*`/未来打补丁；待 ClubFloyd 小切片后再决定规则表字段与 protocol |
 | **T0i** | **待启动：首个 adapter 语义审核（结构切片已准备）** | 对已导出的 30 条 ClubFloyd trajectory 逐条审 W/O/X/S 归属、future leakage、字段损失和 provenance；审核后冻结 semantic annotation 文件 | schema validator 已通过，但 semantic audit 尚未完成；未完成前不扩大批量、不进入 mechanism loop |
+| **T0j** | **待启动：首个反事实 replay smoke test** | 第一个真实 adapter 完成语义审核并接通 canonical replay 后，只实现一个单事件 `remove` 或 `replace`，输出 `ΔO/ΔX/ΔS/Δπ` 与 trace 元数据 | 同一 mechanism/semantic-rule/初始状态/随机种子，仅改变一个历史输入；不实现通用 engine，不进入新心理机制 |
 
 - [x] T13：**已冻结 Paper-0 问题卡**：[一页问题卡](Paper-0问题卡.md)。局部可观测、可回放的单角色 Forward；`P` 固定、`D` 导出；分别定义信息边界、预测近似充分性、状态必要性三条主张、外部 `A*`、baseline、split、NLL 口径与 no-go。E0 只验证控制链。
 - [ ] T14：建立 persona only、raw history、**结构化 history**、强 summary、`no-S`、`naive-S`、state 与置换-S基线；相同信息权限和模型条件；区分开发/测试，并报告 `S + history` 的残余收益。

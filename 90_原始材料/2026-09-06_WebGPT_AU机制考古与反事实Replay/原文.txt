@@ -1,0 +1,784 @@
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+
+我翻了一轮，主要看了 90_原始材料/2026-09-01_动态人物世界模拟探索、WebGPT_创新点与防跑偏、WebGPT_数据流视角，再和现在的 前台问题与候选创新.md、完整机制说明_v0.md、未决问题与机制候选.md 对照。
+
+结论是：你记得对。早期 AU 那批想法绝大多数不是另一条研究路线，而是在补 Character Dynamics 这个框架的机制细节。仓库其实已经吸收得相当多了。
+
+A. 已经完整吸收，不用重新发明
+
+这些早期想法现在已经是正式框架的一部分：
+
+W ≠ O，角色只能通过感知/信息入口获得世界信息；
+O 不是一帧 snapshot，而是可以 stale / unknown / wrong 的持续主观世界；
+X 把“发生了什么”转成“这对角色意味着什么”，再由 U_k 更新 S；
+每个 S 字段可以有自己的触发、累积、恢复、衰减、饱和和时间尺度；
+P 不只是静态 persona 文本，而是调制 O→X、X→S、S→A；
+微动作很重要，角色的一致性不只在“大剧情选择”中体现；
+Object/Scene 给出 affordance，人物级组合动作再展开成世界 primitive；
+replay 和自主 NPC 本质上用同一套 forward mechanism，只是 π(A) 后一个拿真实 A* 对照，一个采样执行；
+行为应该是条件分布，不是“这个人格一定做 X”；
+世界随机性、语义/认知不确定性、decision sampling randomness 不能全塞进一个 temperature。
+
+所以这些不用再从 AU 里捞回来，已经活在现有设计里。
+
+B. 已经记住了，但现在还没有真正做——这批最值得保留
+
+这里有几条我觉得尤其重要。
+
+1. 反事实“删掉一段历史”再 replay
+
+早期数据流材料里明确提到：
+
+provenance 不只是为了 debug，还应该支持反事实移除某事件。
+
+我们现在已经有：
+
+event
+→ ΔO
+→ X
+→ ΔS
+→ π(A)
+
+也有 replay/provenance。
+
+但当前 loop 更多是：
+
+改参数
+改规则
+做 ablation
+
+还没有把这种实验正式写成一类标准诊断：
+
+原 trajectory H
+→ π(A)
+
+删除/替换 event e_k
+→ replay
+→ π'(A)
+
+比较 ΔS、Δπ
+
+这个我认为很值得补进未来 mechanism loop。
+
+因为它直接回答：
+
+某一段经历到底有没有真的通过 S 留到未来？
+
+甚至比单纯看某字段非零更接近我们母问题。
+
+2. “误解 → 行动 → 变成客观社会事实”
+
+这是早期材料里一个很有意思、现在被压得比较深的想法。
+
+原来的链不是简单：
+
+A 对 B 有错误 belief
+
+而是：
+
+A 误解了某件事
+↓
+形成 X / S / 决策
+↓
+A 因误解做出行为
+↓
+这个行为真实改变 W
+↓
+B / C 再观察到新的客观事实
+↓
+原本主观的错误认识
+通过行动产生了真实社会后果
+
+这和单纯 ToM benchmark 很不一样。
+
+现在仓库已经有：
+
+W relationship facts
+R_i[j]
+O_i
+二阶 knowledge
+
+所以地基在。
+
+但**“subjective misconception causally crystallizes into objective social state”** 这条动态模式，目前没有被特别突出。
+
+它明显是未来多人 Character Dynamics 很漂亮的一种 demo / experiment。
+
+不过 Paper-0 绝对别碰。
+
+3. Forward–Inverse 对偶
+
+这个没有丢，现在正式文档已经明确：
+
+Forward:
+S → behavior prediction
+
+Inverse:
+new behavior evidence → revise latent-state estimate
+
+但目前我们全部精力放在 Forward，这完全正确。
+
+早期更大胆的版本里还包括：
+
+预测用户行为
+→ 用户反馈/真实行为
+→ 修正画像
+→ 下一轮预测
+
+甚至说到“反向传播”。
+
+现在已经正确降级成：
+
+inverse planning / Bayesian update / latent-state estimation 等候选，不承诺神经网络 backprop。
+
+所以这一条属于：
+
+保留得很好，暂时不要实现。
+
+C. 有一条老机制我觉得以后应该重新认真看：Action Quality
+
+这也是我翻当前 Q06 后觉得很值得注意的。
+
+目前我们的 S 主要决定：
+
+做什么。
+
+比如：
+
+学习
+玩手机
+睡觉
+
+但早期讨论里其实隐含过另一种作用：
+
+同样做“学习”，人物状态会影响怎么做、投入多少、效果如何。
+
+也就是：
+
+S / commitment / O
+↓
+ActionQuality / Engagement
+↓
+A payload
+↓
+W settlement
+
+例如：
+
+StudyFocused
+StudyHalfhearted
+
+现在其实已经往这方向走了一点。
+
+这个机制现在被正确放在 Q06，没有硬塞入 W，让 W 偷读 S。
+
+我觉得它以后可能会重新变重要，因为我们现在找到的玩家数据里：
+
+PowerWash；
+AGAIN；
+FarmQuest；
+
+很多信息不只是：
+
+选了哪个 action
+
+还有：
+
+持续多久
+投入多少
+操作模式
+中断
+效率
+完成度
+arousal
+
+所以真实人物 dynamics 可能不仅改变：
+
+$$ P(A) $$
+
+还改变：
+
+$$ P(Quality,\ Duration,\ Effort\mid A,S) $$
+
+这不是现在要加，但确实是早期框架里值得留着的一颗种子。
+
+D. LLM 过冲 / 自强化这个老问题，现在有了新的位置
+
+早期有一个很明确的担忧：
+
+LLM 看到一点负面信息，就顺着故事越解释越极端，状态一直负向累积，又不会恢复。
+
+这现在已经写成 R04。
+
+但经过我们今天决定：
+
+前期不用 runtime LLM
+→ fixed semantics
+
+以后它的位置变得更漂亮了。
+
+等 mechanism v1-fixed 做出来后，可以专门比较：
+
+fixed semantic rules
+vs
+live LLM semantics
+
+然后看 LLM 有没有：
+
+semantic overshoot
+path dependence
+negative reinforcement
+recovery failure
+
+所以早期这个想法没有废掉，只是从：
+
+“我们现在为什么要限制 LLM”
+
+变成：
+
+未来 LLM semantic frontend 的一个明确 stress test。
+
+这个转化挺好的。
+
+E. 还有一个早期想法已经吸收，但我觉得 loop 里可以更强调
+
+就是：
+
+状态不是为了完整记录过去，而是为了保存过去中对未来行为还有用的后果。
+
+这个现在已经成为 Paper-0 的 approximate sufficiency。
+
+但结合我们刚刚设计的 mechanism identification loop，可以进一步用在删机制：
+
+比如某个旧事件：
+
+e_17
+
+已经过去 50 步。
+
+我们做：
+
+full history
+vs
+remove e_17
+
+如果真实 future behavior prediction 明显变：
+
+说明这个经历还重要。
+
+如果我们的 S：
+
+with e_17
+vs
+without e_17
+
+却完全一样，
+
+说明：
+
+S 没保留这个有用后果。
+
+反过来，如果删掉一个完全无关的早期事件，S 和 π 大幅变化：
+
+状态机制记了不该记的东西。
+
+这其实可以把：
+
+历史压缩
++
+反事实 replay
++
+mechanism diagnosis
+
+三件事真正接起来。
+
+我觉得这是这次翻早期材料后，最值得重新拿出来服务当前 loop 的东西。
+
+F. 明确后置，不要现在复活
+
+早期还有不少很有趣的，但我建议继续封存：
+
+P 随长期 S 改变
+multi-agent
+二阶 ToM runtime
+关系图 dynamics
+Inverse state estimation
+用户画像在线学习
+行动酝酿 / preparation layer
+专门训练模型
+开放世界自动生成
+
+这里有些未来肯定会回来，尤其二阶和多人。
+
+但现在把它们放进 loop 会直接把实验复杂度炸掉。
+
+所以这次“AU 机制考古”我的实际收获
+
+不是发现了一堆漏掉的模块。
+
+反而证明：
+
+现有框架已经把早期核心思想保存得很好。
+
+真正值得补回当前 mechanism-loop 思维的，我只挑 两条：
+
+① Event-level counterfactual replay
+删除/替换一段历史
+→ replay
+→ 看 ΔX / ΔS / Δπ
+
+用来判断：
+
+S 到底记住了什么，又忘掉了什么。
+
+② 机制不仅可以控制 Action Choice，未来还可以控制 Action Quality
+S
+→ choose A
+
+之外保留未来：
+
+S
+→ quality / effort / duration / interruption of A
+
+但第二条现在只留 Q06，不实现。
+
+至于那个 “误解经由行为变成真实社会事实”，我会把它当作未来多人版本里非常值得保留的一条设计主线，不让它在 ToM 那一堆术语里消失。
+
+所以这次没必要给 Luna 下一个“把 AU 全部重新整理进框架”的大任务。那反而会制造重复文档。旧思想目前保存状况比我预想的好。
+
+你建议先保存还是可以把某些东西先加进系统里面？
+
+我建议不是“全保存”也不是“现在就往系统里加机制”，而是分三档。
+
+现在可以加的，只加“实验能力”，不加新的心理机制。
+
+最值得现在加进去的是刚才翻出来的 event-level counterfactual replay。它和我们当前的 mechanism loop 是直接同方向的，而且不会改变 W/O/X/S/π 本体：
+
+原轨迹 H
+→ 正常 replay
+→ 得到 S / π
+
+H - event_k
+或替换 event_k
+→ counterfactual replay
+→ 比较 ΔX / ΔS / Δπ
+
+这个可以直接写进 Luna 正在整理的 loop 指导里，作为一种诊断工具。以后外部数据来了，我们能问：
+
+某段经历到底有没有被 S 保留下来？
+某个旧事件删掉以后，未来行为分布应该变化但没变化，是不是 S 忘错了？
+无关事件删掉以后却大幅影响 π，是不是机制记了不该记的东西？
+
+它服务的是我们当前母问题，所以我支持现在纳入实验流程。
+
+但注意：现在只要定义这种 intervention 和 trace 要求，不急着写复杂通用 counterfactual engine。真正第一批数据 adapter 接通后，再写最小实现。
+
+第二类是应该保存成明确候选，但暂时不要实现。
+
+最典型是 ActionQuality / Engagement：
+
+S
+→ 选什么动作
+
+未来可能扩展为
+
+S
+→ 动作质量 / effort / duration / interruption
+
+这个很可能以后有用，尤其 PowerWash / AGAIN / FarmQuest 这种数据不只告诉你“做了什么”，还会有持续时间、操作方式、状态 proxy 等。但目前如果现在实现，就会凭空增加：
+
+quality
+engagement
+effort
+duration coupling
+
+一堆自由参数。
+
+所以保持在 Q06 最好，等数据真的告诉我们“仅预测 action type 不够”再升格。
+
+第三类我建议纯保存，当前系统完全别碰：
+
+误解 → 行为 → 变成客观社会事实
+Inverse latent-state correction
+P drift
+多人关系 dynamics
+二阶 ToM runtime
+行动酝酿/preparation layer
+专门训练模型
+
+这些不是坏想法，甚至有些未来很有意思，但现在它们一进 runtime，我们就会从“验证 persistent S”重新变成“大型人物模拟器”。
+
+尤其“误解变成社会事实”我会单独保住，因为它是未来多人版本里非常漂亮的一条因果链：
+
+错误 O
+→ X/S
+→ action
+→ W 被真实改变
+→ 其他角色再观察
+
+但它必须等单人 Forward 先站住。
+
+所以我的原则很简单：
+
+现在允许增加“更好地打击现有机制”的工具，不增加“让现有机制看起来更丰富”的模块。
+
+按照这个标准：
+
+counterfactual replay：现在加到 loop 设计里
+ActionQuality：保存候选，等数据触发
+多人/Inverse/P drift/ToM/专门模型：只保存
+
+这也最符合你导师说的“不让问题漂移”：我们不是把旧想法都丢掉，而是只允许那些能让当前问题更可证伪的东西进入主线。
+
+那你把第一类的列出来，指导一下luna怎么做，剩下的它维护进别的md文件就行
+
+可以。我建议现在真正进入主线的“第一类”只放增强检验/诊断能力、但不增加人物心理机制的东西。核心其实就围绕 counterfactual replay + history contribution diagnosis 展开，不要趁机扩成因果推断框架。
+
+你可以把下面这段直接给 Luna：
+
+基于当前 webgpt-sync，把早期 AU / 2026-09-01~09-02 对话里的机制想法做一次最小归档和主线吸收。
+
+目标不是重新设计 Character Dynamics，也不是把旧想法全部实现。只做两件事：
+
+把直接增强当前 Paper-0 / mechanism-identification loop 可证伪性的实验能力加入 loop 指导；
+其余旧想法集中维护到单独的后置候选文档，不进入当前 runtime / TODO 主链。
+一、现在允许进入主线的实验能力
+
+原则：
+
+只允许增加“更好地攻击、诊断现有机制”的能力，不增加“让角色模型更丰富”的新心理模块。
+
+A1. Event-level counterfactual replay
+
+在现有 factual replay 基础上增加一种诊断：
+
+original trajectory H
+→ replay
+→ X / S / π(A)
+
+counterfactual H'
+→ replay
+→ X' / S' / π'(A)
+
+其中 H' 只允许对过去输入轨迹做明确干预，例如：
+
+remove(event_k)
+replace(event_k, alternative_event)
+mask_observation(event_k)
+delay_observation(event_k)
+
+目的不是生成“另一条真实历史”，而是检查：
+
+某一段过去经历到底有没有通过当前机制持续影响未来状态和行为分布？
+
+必须保持：
+
+same mechanism revision；
+same semantic-rule version；
+same initial state/personality；
+same random seeds where applicable；
+除 intervention 外其余输入不变。
+
+输出至少比较：
+
+ΔO difference
+X difference
+S difference
+π(A) difference
+
+不能只看最终 chosen action。
+
+明确用途
+
+例如某个早期事件 e17：
+
+H                 → π_t(A)
+H - e17           → π'_t(A)
+
+如果外部行为/后续数据表明 e17 对未来仍应重要，但：
+
+S_t ≈ S'_t
+π_t ≈ π'_t
+
+则当前状态机制可能忘掉了行为相关历史后果。
+
+反过来，如果删除一个显然无关事件却导致：
+
+large ΔS / large Δπ
+
+则机制可能保留了不该保留的历史噪声。
+
+这和 Paper-0 的 approximate sufficiency / state necessity 是同一主问题下的诊断，不是新研究方向。
+
+A2. History-contribution probe
+
+在 counterfactual replay 上增加一个轻量诊断概念：
+
+event/history contribution to future behavior
+
+不要求现在定义复杂的 causal attribution 指标，也不要引入 SHAP、causal graph framework 等。
+
+初期只需要能够对一个事件或一段历史报告：
+
+intervention_id
+affected_time_range
+ΔS by field
+Δπ
+Δlog p(A*)
+
+如果已有真实 A*，记录：
+
+Δ log p(A*)
+
+没有真实 A* 时只作为 diagnostic，不冒充预测证据。
+
+后续可把这种 probe 用于：
+
+判断哪些经历真的被 S 保存；
+判断哪些 S 字段承载了这些历史后果；
+找 dead field；
+找过度敏感字段；
+找错误的 decay / persistence；
+比较 semantic_rules_vN 改动前后，哪些历史影响发生变化。
+A3. Semantic-rule counterfactual / version comparison
+
+当前 Stage 0/1 使用 fixed semantic mapping，因此 loop 要支持：
+
+same raw trajectory
+same dynamics
+semantic_rules_v0
+vs
+semantic_rules_v1
+
+然后比较：
+
+X
+S
+π(A)
+A* likelihood/rank
+
+用途是区分：
+
+failure 来自 raw event → X 的语义映射，
+
+还是：
+
+failure 来自 X → S → π 的 dynamics。
+
+不要让 semantic rule 修改和 dynamics 参数修改在同一次实验中混在一起，除非明确标记为 joint iteration。
+
+至少保存：
+
+semantic_rule_version
+mechanism_revision
+dataset_revision
+trajectory_id
+intervention/version comparison
+A4. Counterfactual replay 必须沿用 canonical runtime
+
+不要为上述实验复制一套：
+
+counterfactual_simulation.cpp
+special_replay_pipeline.py
+
+来重写 O→X→S→π。
+
+正确方向是：
+
+ReplayRecord
+→ apply one explicit intervention to replay input
+→ canonical runtime/replay path
+→ trace
+→ compare
+
+目前若真实 replay API 尚未完成，只在 loop/protocol 中定义接口与输出要求。
+
+本轮不要实现通用 counterfactual engine。
+
+等第一个 ClubFloyd/LIGHT adapter 真正接通后，再做一个最小实际用例。
+
+二、第一类当前不要扩展成这些东西
+
+以下都不是本轮授权：
+
+自动搜索最优 counterfactual；
+causal discovery；
+causal graph framework；
+learned attribution model；
+用 LLM 自动生成“最合理的反事实历史”；
+为每条 trajectory 建复杂 intervention DSL；
+为了 counterfactual replay 大拆 runtime；
+新增心理字段来配合 counterfactual。
+
+目标只是：
+
+给现有机制增加“删掉/替换一段过去，再看未来发生什么”的实验探针。
+
+三、剩余 AU 想法集中维护，不进入主线实现
+
+新建一个短文档，例如：
+
+00_研究设计/后置机制候选_AU考古.md
+
+或如果现有分支文档已有合适位置，可并入，但不要把 TODO 再撑大。
+
+只登记以下内容及其状态，不实现。
+
+B1. Action Quality / Engagement
+
+候选链：
+
+O / S / commitment
+→ action quality / engagement / duration / interruption
+→ action payload
+→ W settlement
+
+意义：
+
+当前主要研究 S → action choice，未来可能研究同一 action 的执行质量、持续时间和投入程度。
+
+PowerWash / AGAIN / FarmQuest 等数据未来可能触发该需求。
+
+当前状态：
+
+保存
+对应 Q06
+等待数据证明仅 action type 不足
+不实现
+B2. 主观误解经行为转化为客观社会事实
+
+候选链：
+
+wrong/stale O_i
+→ X_i / S_i
+→ action_i
+→ W genuinely changes
+→ other agents observe new W
+
+这是未来多人 Character Dynamics 的重要动态模式。
+
+当前状态：
+
+保存
+多人阶段再研究
+Paper-0 禁止进入
+
+不要压缩成普通“ToM”。
+
+B3. Forward–Inverse 对偶
+Forward:
+latent/persistent state → behavior distribution
+
+Inverse:
+revealed behavior → revise estimate of latent state
+
+必须区分：
+
+角色真的因为事件改变
+
+和：
+
+系统只是根据新行为修正了对角色的估计
+
+当前状态：
+
+正式保留后续分支
+Paper-0 只做 Forward
+不实现 inverse learner
+B4. P drift / personality plasticity
+
+长期：
+
+long-term S/history
+→ sparse P change
+
+当前：
+
+P frozen
+保存后置
+不实现
+B5. Multi-agent / relationship dynamics / second-order knowledge runtime
+
+保留：
+
+R_i[j]
+misconception / private attitudes
+second-order knowledge
+interaction consequences
+
+但当前只维护概念边界，不接入 Paper-0 mechanism loop。
+
+B6. Action preparation / incubation layer
+
+早期提出的“行动酝酿 / preparation / pending action tendency”层。
+
+当前：
+
+保存
+不与 S/D 混写
+没有外部证据前不实现
+B7. Specialized learned semantic model
+
+未来如果 Character Dynamics 成熟并积累：
+
+raw O/ΔO
+→ X labels
+
+的大量高质量数据，可能训练专门 semantic model。
+
+当前：
+
+纯长期想象
+不影响当前接口
+不做训练计划
+四、文档维护原则
+
+后置机制候选_AU考古.md 每项只记录：
+
+idea
+why it may matter
+current status
+trigger for reconsideration
+current prohibition
+
+不要重新复制完整聊天。
+
+原始依据继续链接 90_原始材料/...。
+
+不要把这些候选重新加入当前 TODO，除非其触发条件真实发生。
+
+五、本轮完成判据
+Luna 正在修改的 mechanism-identification loop 指导中加入：
+event-level counterfactual replay；
+history-contribution probe；
+semantic-rule version comparison；
+canonical-runtime / no-new-framework 边界。
+新增/补充一个短的 AU 后置候选文档，登记 B1–B7。
+不修改：
+S 字段；
+U_k；
+utility；
+action ontology；
+runtime behavior；
+Paper-0 frozen claims。
+不实现 counterfactual engine。
+
+如果需要新增 TODO，只允许一个非常小的后续项：
+
+第一个真实 dataset adapter 接通后，实现一个单事件 remove/replace counterfactual replay smoke test。
+
+提交到 webgpt-sync，不要合并 main。
+
+我这里实际上把“第一类”收成了三个互相连着的实验能力：
+
+事件反事实 replay → 历史贡献诊断 → semantic-rule 版本对照。
+
+它们刚好都能直接服务我们现在这个 loop，而且不会偷偷把框架变复杂。其余老想法则让 Luna集中维护成“后置机制候选”，这样以后不会丢，但也不会突然窜回 Paper-0。
