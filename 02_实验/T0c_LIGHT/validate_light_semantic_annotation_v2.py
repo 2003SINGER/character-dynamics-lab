@@ -67,6 +67,13 @@ def main() -> None:
             errors.append(f"line {line_number}: reject requires reason code")
         if row["label"] == "AMBIGUOUS" and not any(x in {"ENTITY_RELATION_UNCLEAR", "ACTOR_VISIBILITY_OR_OWNERSHIP_UNCLEAR", "OBSERVATION_INSUFFICIENT", "ACTION_ENTITY_OR_RELATION_UNOBSERVED"} for x in row["reasons"]):
             errors.append(f"line {line_number}: ambiguous requires uncertainty reason")
+        if row["label"] == "ADMIT" and (row["a_star_alignment"] != "YES" or row["candidate_usability"] != "USABLE"):
+            errors.append(f"line {line_number}: admit requires YES alignment and USABLE candidates")
+        if row["label"] == "AMBIGUOUS" and row["a_star_alignment"] != "UNCLEAR" and row["candidate_usability"] != "UNCLEAR":
+            errors.append(f"line {line_number}: ambiguous requires an UNCLEAR axis")
+        explicit_reject_reasons = {"ACTION_CANDIDATE_MISMATCH", "ACTOR_ACTION_CONTRADICTION", "MALFORMED_ACTION", "CANDIDATE_SEMANTIC_CONTRADICTION", "CANDIDATE_SET_MALFORMED"}
+        if row["label"] == "REJECT" and row["a_star_alignment"] != "NO" and row["candidate_usability"] != "NOT_USABLE" and not any(code in explicit_reject_reasons for code in row["reasons"]):
+            errors.append(f"line {line_number}: reject lacks explicit contradiction or unusable-candidate basis")
         counts[row["label"]] += 1
     if ids != expected:
         errors.append("outputs are not the exact ordered sequence for completed whole tasks")
