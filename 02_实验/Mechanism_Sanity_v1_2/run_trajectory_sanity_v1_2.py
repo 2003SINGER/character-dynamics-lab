@@ -41,53 +41,92 @@ def _step(state: TheoryState, x: dict[str, float], candidates: list[dict]) -> di
             "top_action": max(pi, key=lambda row: float(row["probability"]))["action_id"]}
 
 
-def _trajectory(name: str, xs: list[dict[str, float]], candidates: list[dict]) -> dict:
-    state = BASELINE_S
-    steps = []
+def _series(rows: list[dict], field: str) -> list[float]:
+    return [float(row["S_t_plus_1"][field]) for row in rows]
+
+
+def _relaxation_check(rows: list[dict], field: str) -> dict:
+    values = _series(rows, field)
+    deltas = [values[i + 1] - values[i] for i in range(len(values) - 1)]
+    nonzero = [abs(delta) for delta in deltas if abs(delta) > 1e-10]
+    direction = 1 if sum(deltas) >= 0 else -1
+    same_direction = all(direction * delta >= -1e-10 for delta in deltas)
+    shrinking = all(b <= a + 1e-10 for a, b in zip(nonzero, nonzero[1:])) if len(nonzero) > 1 else True
+    return {"values": values, "step_deltas": deltas, "same_direction": same_direction,
+            "step_magnitude_nonincreasing": shrinking, "pass": same_direction and shrinking}
+
+
+def _phase_rows(state: TheoryState, xs: list[dict[str, float]], candidates: list[dict]) -> tuple[list[dict], TheoryState]:
+    rows = []
     for x in xs:
         row = _step(state, x, candidates)
-        steps.append(row)
+        rows.append(row)
         state = TheoryState(**row["S_t_plus_1"])
-    fatigue = [row["S_t_plus_1"]["fatigue"] for row in steps]
-    engagement = [row["S_t_plus_1"]["engagement"] for row in steps]
-    tension = [row["S_t_plus_1"]["tension"] for row in steps]
-    checks = {"support_fixed": True}
-    if name == "continuous_effort":
-        checks["fatigue_accumulates"] = all(b >= a for a, b in zip(fatigue, fatigue[1:]))
-        checks["stimulation_mass_nonincreasing"] = all(
-            b <= a + 1e-12 for a, b in zip([r["family_mass"].get("inspect", 0.0) for r in steps],
-                                             [r["family_mass"].get("inspect", 0.0) for r in steps][1:]))
+    return rows, state
+
+
+def _trajectory(name: str, phases: list[tuple[str, list[dict[str, float]]]], candidates: list[dict]) -> dict:
+    state = BASELINE_S
+    all_rows: list[dict] = []
+    phase_rows = []
+    for phase_name, xs in phases:
+        rows, state = _phase_rows(state, xs, candidates)
+        phase_rows.append({"phase": phase_name, "steps": rows})
+        all_rows.extend(rows)
+
+    checks: dict[str, object] = {"support_fixed": True}
+    if name == "effort_build_up_recovery":
+        build = phase_rows[0]["steps"]
+        recover = phase_rows[1]["steps"]
+        checks["fatigue_builds"] = _series(build, "fatigue")[-1] > _series(build, "fatigue")[0]
+        checks["fatigue_recovers"] = _series(recover, "fatigue")[-1] < _series(recover, "fatigue")[0]
+        checks["fatigue_relaxation_build"] = _relaxation_check(build, "fatigue")
+        checks["fatigue_relaxation_recovery"] = _relaxation_check(recover, "fatigue")
+        checks["stimulation_mass_declines_on_build"] = _mass(build[-1]["pi_t"]).get("inspect", 0) <= _mass(build[0]["pi_t"]).get("inspect", 0)
+        checks["posture_mass_tracks_recovery"] = _mass(recover[-1]["pi_t"]).get("posture", 0) <= _mass(recover[0]["pi_t"]).get("posture", 0)
     elif name == "positive_progress":
-        checks["engagement_accumulates"] = all(b >= a for a, b in zip(engagement, engagement[1:]))
-        checks["social_mass_non_decreasing"] = all(
-            b >= a - 1e-12 for a, b in zip([r["family_mass"].get("social_communication", 0.0) for r in steps],
-                                             [r["family_mass"].get("social_communication", 0.0) for r in steps][1:]))
-    elif name == "repeated_obstruction":
-        checks["tension_accumulates"] = all(b >= a for a, b in zip(tension, tension[1:]))
-        checks["conflict_mass_non_decreasing"] = all(
-            b >= a - 1e-12 for a, b in zip([r["family_mass"].get("physical_conflict", 0.0) for r in steps],
-                                             [r["family_mass"].get("physical_conflict", 0.0) for r in steps][1:]))
+        checks["engagement_builds"] = _series(all_rows, "engagement")[-1] > _series(all_rows, "engagement")[0]
+        checks["engagement_relaxation"] = _relaxation_check(all_rows, "engagement")
+        checks["social_mass_rises"] = _mass(all_rows[-1]["pi_t"]).get("social_communication", 0) >= _mass(all_rows[0]["pi_t"]).get("social_communication", 0)
+        checks["cross_effect_tension_declines"] = _series(all_rows, "tension")[-1] <= _series(all_rows, "tension")[0]
+    elif name == "obstruction_build_up_decay":
+        build = phase_rows[0]["steps"]
+        decay = phase_rows[1]["steps"]
+        checks["tension_builds"] = _series(build, "tension")[-1] > _series(build, "tension")[0]
+        checks["tension_decays"] = _series(decay, "tension")[-1] < _series(decay, "tension")[0]
+        checks["tension_relaxation_build"] = _relaxation_check(build, "tension")
+        checks["tension_relaxation_decay"] = _relaxation_check(decay, "tension")
+        checks["conflict_mass_rises_on_build"] = _mass(build[-1]["pi_t"]).get("physical_conflict", 0) >= _mass(build[0]["pi_t"]).get("physical_conflict", 0)
+        checks["conflict_mass_returns_on_decay"] = _mass(decay[-1]["pi_t"]).get("physical_conflict", 0) <= _mass(decay[0]["pi_t"]).get("physical_conflict", 0)
+        checks["cross_effect_fatigue_reported"] = _series(build, "fatigue")[-1] >= _series(build, "fatigue")[0]
     else:
-        checks["fatigue_recovers"] = all(b <= a for a, b in zip(fatigue, fatigue[1:]))
-        checks["tension_recovers"] = all(b <= a for a, b in zip(tension, tension[1:]))
-    checks["all_pass"] = all(checks.values())
-    return {"trajectory": name, "steps": steps, "checks": checks}
+        checks["fatigue_recovers"] = _series(all_rows, "fatigue")[-1] < _series(all_rows, "fatigue")[0]
+        checks["tension_recovers"] = _series(all_rows, "tension")[-1] < _series(all_rows, "tension")[0]
+        checks["fatigue_relaxation"] = _relaxation_check(all_rows, "fatigue")
+        checks["tension_relaxation"] = _relaxation_check(all_rows, "tension")
+    checks["all_pass"] = all(value if isinstance(value, bool) else value["pass"] for value in checks.values())
+    return {"trajectory": name, "phases": phase_rows, "checks": checks,
+            "cross_effects": {field: {"values": _series(all_rows, field),
+                                        "net_change": _series(all_rows, field)[-1] - _series(all_rows, field)[0]}
+                               for field in ("fatigue", "engagement", "tension")}}
 
 
 def main() -> int:
-    scene = _scene()
-    candidates = generate_action_candidates(scene)
-    xs = {
-        "continuous_effort": [{"effort_load": 0.9, "goal_relevance": 0.2} for _ in range(6)],
-        "positive_progress": [{"goal_relevance": 0.9, "positive_conduciveness": 0.9, "social_opportunity": 0.2} for _ in range(6)],
-        "repeated_obstruction": [{"goal_relevance": 0.9, "negative_conduciveness": 0.9} for _ in range(6)],
-        "rest_recovery": [{"recovery_cue": 0.9} for _ in range(6)],
+    candidates = generate_action_candidates(_scene())
+    trajectories = {
+        "effort_build_up_recovery": [("build_up", [{"effort_load": 0.9} for _ in range(6)]),
+                                     ("recovery", [{"recovery_cue": 0.9} for _ in range(8)])],
+        "positive_progress": [("progress", [{"positive_conduciveness": 0.9, "social_opportunity": 0.9} for _ in range(6)])],
+        "obstruction_build_up_decay": [("obstruction", [{"negative_conduciveness": 0.9} for _ in range(6)]),
+                                        ("neutral_decay", [{} for _ in range(8)])],
+        "rest_recovery": [("recovery", [{"recovery_cue": 0.9} for _ in range(8)])],
     }
-    results = [_trajectory(name, values, candidates) for name, values in xs.items()]
+    results = [_trajectory(name, phases, candidates) for name, phases in trajectories.items()]
     payload = {"protocol": "Mechanism_Sanity_v1.2", "status": "controlled_trajectory_sanity_only",
                "candidate_action_ids": [c["action_id"] for c in candidates],
                "results": results, "invariants": {"A_O_fixed": True, "A_star_read": False,
-               "P_fixed": True, "new_state_fields": False, "formal_prediction": False}}
+               "P_fixed": True, "new_state_fields": False, "formal_prediction": False,
+               "cross_effects_reported": True}}
     (OUT / "trajectory_results.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({"trajectory_count": len(results), "all_pass": all(r["checks"]["all_pass"] for r in results)}))
     return 0
