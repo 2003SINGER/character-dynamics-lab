@@ -2,9 +2,19 @@
 
 > 2026-09-06 代码结构审计后的实验化边界：`prepare_decision` 已与 `settle_action` 分开，运行轨迹记录统一命名为 `StepRecord`；`FactKey` 与 `known_int/known_bool` 已提供最小 typed 读取。World/Decision/State 暂不做大拆分；verify/E0 的物理 tests/experiments 目录迁移留到真实 replay 需要时再做，不阻塞 T0d。
 
-更新时间：2026-09-07（Run 4 后复核）
+更新时间：2026-09-07（Theory-S 结果边界复核后）
 
 这是唯一行动清单，不保存整篇设计论证。“待决策”不等于授权实现；以下次序是依赖建议，没有新增用户 deadline。代码项仅在其边界、验收和实际状态可复核时更新。
+
+## 2026-09-07 主线纠偏：先验收机制表达力，再做正式实验
+
+来源原件：[Theory-S 与机制纠偏对话](../90_原始材料/2026-09-07_用户对话_Theory-S与机制纠偏/README.md)。
+
+- [ ] **M0 mechanism sandbox**：固定 `W/O/P/A^O`，构造少量可审计场景；只做 `do(S=s_1)` / `do(S=s_2)`，验收 `π_1(A) ≠ π_2(A)` 且方向符合预注册预期。失败时先修 coupling/utility/字段，不把现实数据结果解释成机制能力。
+- [ ] **M1 Theory-S v1 设计**：逐篇核验心理学、计算情绪与游戏 AI 来源，形成字段、更新源、时间尺度、可证伪预测；当前一维 EMA 只保留为 development probe，不升格为正式 Theory-S。
+- [ ] **M2 场景与候选编译器**：从 `scene → object/affordance → A^O` 独立生成合理候选；冻结候选规则后才揭晓外部 `A*`，将 `A* ∉ A^O` 记录为 support miss，不为覆盖 gold action 添加候选。
+- [ ] **M3 dataset→capability matrix**：逐数据集登记可测的 `W/O/X/S/P/A` 子集与不可声称部分；LIGHT 不再被默认当作 persistent-S 的唯一或必然合适材料。
+- [ ] **M4 formal experiment gate**：M0–M3 未完成前，Run1–4 仅保留为 development identifiability diagnostics，不启动正式 test 或把结果写成 Theory-S 结论。
 
 ## 本轮 development diagnostic 封口
 
