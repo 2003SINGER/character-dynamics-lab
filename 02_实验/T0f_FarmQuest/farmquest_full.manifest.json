@@ -1,0 +1,22 @@
+{
+  "schema_version": "replay_adapter_manifest_v0",
+  "dataset": "FarmQuest",
+  "role": "full_lossless_event_projection",
+  "source_artifact": "processed.json",
+  "source_repository_revision": "kristenYu/FarmQuest-Player-Telemetry-Dataset@main",
+  "parser": "02_实验/T0f_FarmQuest/export_replay.py",
+  "inspect_script": "02_实验/T0f_FarmQuest/inspect_source.py",
+  "participant_count": 42,
+  "telemetry_line_count": 29328,
+  "session_trajectory_count": 122,
+  "action_step_count": 10844,
+  "ambiguous_event_count": 0,
+  "review_fixture": "02_实验/Replay/review_samples/FarmQuest_review_v0.jsonl",
+  "review_fixture_count": 250,
+  "review_fixture_sha256": "AC6162960012A55BA0ECBEEF247787DF462227789984497AC532D1031B75632E",
+  "review_fixture_generator_sha256": "8916BF731779D8ED27321DDEA1AD8EC4050E851A512602250C659D13BCA9CB33",
+  "output_sha256": "5c3452b2cfe242e95bb65d3351e066e344d8eb0cce9adc55016b40cd39f4ba38",
+  "timestamp_semantics": "unusable_for_ordering",
+  "semantic_audit": "pending",
+  "mechanism_use": false
+}

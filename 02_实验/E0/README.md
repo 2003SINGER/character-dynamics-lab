@@ -5,5 +5,5 @@
 - [2026-09-05 首组三组 fixture 结果](2026-09-05_E0-1-3_paired-fixtures.md)
 - [2026-09-05 原始 stdout](2026-09-05_E0-1-3_stdout.txt)
 - 运行入口：`character_dynamics_reference.exe --e0`
-- 代码 revision：`752fbcc`
+- 代码 revision：`576b28b`（本次 stdout 的实际 run commit）
 - 固定条件：world seed `42`、procrastinating personality、初始 `S` 相同；本轮 `action_sampling=none`

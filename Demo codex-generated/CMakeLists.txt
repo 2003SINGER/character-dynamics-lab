@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.20)
 
 project(CharacterDynamicsReference LANGUAGES CXX)
 
+set(CHARACTER_DYNAMICS_GIT_REVISION "" CACHE STRING "Revision recorded in generated experiment provenance")
 find_package(Git QUIET)
-if(GIT_FOUND)
+if(NOT CHARACTER_DYNAMICS_GIT_REVISION AND GIT_FOUND)
     execute_process(
         COMMAND "${GIT_EXECUTABLE}" -C "${CMAKE_CURRENT_SOURCE_DIR}" rev-parse --short HEAD
         OUTPUT_VARIABLE CHARACTER_DYNAMICS_GIT_REVISION
@@ -19,22 +20,33 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(character_dynamics_reference
-    Src/main.cpp
+set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
     Src/action.cpp
     Src/simulation_time.cpp
     Src/object.cpp
     Src/scene.cpp
+    Src/scene_snapshot.cpp
     Src/world_primitive.cpp
     Src/world.cpp
     Src/observation.cpp
     Src/appraisal.cpp
     Src/state.cpp
+    Src/candidate_scoring.cpp
     Src/decision.cpp
     Src/simulation.cpp
 )
 
-target_include_directories(character_dynamics_reference PRIVATE Inc)
+add_library(character_dynamics_runtime STATIC ${CHARACTER_DYNAMICS_RUNTIME_SOURCES})
+target_include_directories(character_dynamics_runtime PUBLIC Inc)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(character_dynamics_runtime PRIVATE -Wall -Wextra -Wpedantic)
+elseif(MSVC)
+    target_compile_options(character_dynamics_runtime PRIVATE /W4)
+endif()
+
+add_executable(character_dynamics_reference Src/main.cpp)
+target_link_libraries(character_dynamics_reference PRIVATE character_dynamics_runtime)
+
 target_compile_definitions(character_dynamics_reference PRIVATE
     CHARACTER_DYNAMICS_GIT_REVISION="${CHARACTER_DYNAMICS_GIT_REVISION}")
 
@@ -44,8 +56,6 @@ elseif(MSVC)
     target_compile_options(character_dynamics_reference PRIVATE /W4)
 endif()
 
-# Keep the reference executable runnable from CTest or Explorer without
-# requiring every parent process to inherit MinGW's DLL directory.
 if(MINGW)
     target_link_options(character_dynamics_reference PRIVATE
         -static
@@ -56,3 +66,30 @@ endif()
 enable_testing()
 add_test(NAME character_dynamics_reference_smoke
          COMMAND character_dynamics_reference --verify)
+
+add_executable(character_dynamics_core_smoke tests/core_experiment_smoke.cpp)
+target_link_libraries(character_dynamics_core_smoke PRIVATE character_dynamics_runtime)
+if(MINGW)
+    target_link_options(character_dynamics_core_smoke PRIVATE
+        -static -static-libgcc -static-libstdc++)
+endif()
+add_test(NAME character_dynamics_core_experiment_smoke
+         COMMAND character_dynamics_core_smoke)
+
+add_executable(character_dynamics_replay_core
+    Src/replay_core_cli.cpp
+    Src/state.cpp
+    Src/candidate_scoring.cpp
+)
+target_include_directories(character_dynamics_replay_core PRIVATE Inc)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(character_dynamics_replay_core PRIVATE -Wall -Wextra -Wpedantic)
+elseif(MSVC)
+    target_compile_options(character_dynamics_replay_core PRIVATE /W4)
+endif()
+if(MINGW)
+    target_link_options(character_dynamics_replay_core PRIVATE
+        -static -static-libgcc -static-libstdc++)
+endif()
+add_test(NAME character_dynamics_replay_core_version
+         COMMAND character_dynamics_replay_core --version)

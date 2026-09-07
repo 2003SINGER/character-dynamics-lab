@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Character Dynamics ReplayRecord v0 (draft)",
+  "type": "object",
+  "required": ["trajectory_id", "source_dataset", "split_id", "steps"],
+  "properties": {
+    "trajectory_id": {"type": "string"},
+    "subject_id": {"type": ["string", "null"]},
+    "group_id": {"type": ["string", "null"]},
+    "split_id": {"type": "string"},
+    "source_dataset": {"type": "string"},
+    "source_revision": {"type": ["string", "null"]},
+    "source_record_id": {"type": ["string", "null"]},
+    "source_license": {"type": ["string", "null"]},
+    "persona_P": {},
+    "source_episode_context": {},
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["t", "source_action_A_star", "provenance"],
+        "properties": {
+          "t": {"type": "integer", "minimum": 0},
+          "source_O": {},
+          "source_event": {},
+          "source_action_A_star": {},
+          "source_step_context": {},
+          "W": {},
+          "state_label": {},
+          "candidate_set_factual": {},
+          "candidate_set_expanded": {},
+          "timestamp": {},
+          "provenance": {
+            "type": "string",
+            "enum": ["observed", "annotated", "llm_inferred", "synthetic_diagnostic", "unknown"]
+          },
+          "provenance_detail": {},
+          "field_provenance": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["kind"],
+              "properties": {
+                "kind": {"type": "string", "enum": ["observed", "annotated", "llm_inferred", "synthetic_diagnostic", "unknown"]},
+                "source_ref": {"type": ["string", "null"]},
+                "model": {"type": ["string", "null"]},
+                "prompt_version": {"type": ["string", "null"]},
+                "confidence": {},
+                "uncertainty": {}
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

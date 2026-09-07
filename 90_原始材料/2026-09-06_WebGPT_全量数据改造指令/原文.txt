@@ -1,0 +1,564 @@
+看完了，这次仓库确实往前跨了一大步。现在远端 HEAD 已经是：
+```
+ba0d886  Add LIGHT dataset audit and replay slice
+```
+而且前面还有：
+```
+9b1c27b  Add ClubFloyd ReplayRecord dev adapter
+fbf24fb  Document counterfactual replay diagnostics
+```
+所以现在不是“准备做两条数据线”了，而是：
+```
+ClubFloyd：真实 adapter 已落地
+LIGHT：真实 adapter + 结构审计已落地
+```
+LIGHT 官方本身就是 crowdworker 在文本世界里同时进行 dialogue 和 action 的数据，确实适合我们现在做 character/world/action 这条适配线。
+Luna 拉的是：
+```
+light-dialog-processed-small7.pkl
+```
+前 50 episode 实测：
+```
+50 episodes audited
+41 episodes 含 physical action
+140 physical-action steps
+606 turns 有 available_actions
+```
+然后真正导出了：
+```
+41 ReplayRecord trajectories
+140 steps
+```
+而且不是把 LIGHT 整个 world graph 粗暴塞进角色：
+```
+source_O = processed record 的 actor-specific context
+
+setting
+room_objects
+room_agents
+all_descriptions
+→ 只留 source context
+```
+W 直接留 null。
+这一刀是对的。至少没出现我们最怕的“数据集有 world → 角色就全知道”的错误。
+available_actions 也只是：
+```
+candidate_set_factual
+```
+并且 README 明确写了：
+不等于角色实际知道的 A^O
+这一点也比较克制。
+不是大翻车，不过最好在 semantic audit 前修/澄清。
+代码现在：
+```
+agents = e.get("agents", [])
+...
+"persona_P": agents,
+```
+这个在语义层面有点越界。
+哪怕 LIGHT 的 agents 里面确实包含 persona 描述，它也是：
+```
+source 提供的角色描述
+```
+而我们现在的 P 是：
+```
+长期 response parameters
+```
+两者不能因为都叫 persona 就直接等价。
+更干净应该是：
+```
+persona_P = null
+```
+然后：
+```
+source_episode_context:
+  source_agents/persona = 原始 agents
+```
+以后再明确做：
+```
+source persona
+→ compiled semantic mapping
+→ P
+```
+否则以后很容易不知不觉把：
+“LIGHT 给了一段角色介绍”
+当成：
+“Character Dynamics 的 P 已经有 ground truth”。
+这应该修。
+audit_slice.py 里面直接写：
+```
+"has_future_outcome_field": False
+```
+它不是检查出来的，是常量。
+这个字段应该删掉，或者真的检查 source keys / schema。
+更重要的是：
+future leakage 不一定有一个叫 future_outcome 的字段。
+真正危险的是：
+```
+context_t
+```
+里面是不是已经包含了 action_t 之后才发生的信息。
+所以这必须靠后面的真实 semantic audit 判断。
+目前 README 写“仍需人工 semantic audit”是对的，但这个硬编码 False 会制造一种虚假的“程序已经检查过”的感觉。
+我看到三个写法：
+```
+facebookresearch/LIGHT@main-shallow-2026-09-06
+light-dialog-processed-small7.pkl
+light-dialog-processed-small7
+```
+分别出现在 audit / ReplayRecord / manifest。
+这不应该继续漂。
+其实这类下载数据最可靠的是：
+```
+dataset/repository revision
++
+exact archive SHA256
++
+parser revision
+```
+尤其 manifest 已经有：
+```
+7C83CF49...
+```
+所以统一一下即可。
+这属于 reproducibility 小债，不是机制问题。
+现在这里同时存在三种语义：
+```
+source 提供的 candidate list
+A^W：世界真实可执行
+A^O：角色认为可执行
+```
+LIGHT 的 available_actions 到底属于哪一个，目前还没有完全证明。
+所以现在这么存：
+```
+candidate_set_factual
+```
+作为“source-supported candidate set”可以。
+但是mechanism loop 绝对不能直接消费它当 A^O。
+README 已经写了这个警告，所以暂时不用改 schema。
+等人工看 30–50 条之后再决定：
+```
+ReplayRecord 是否真的需要区分
+source_candidate_set
+candidate_set_AW
+candidate_set_AO
+```
+现在不要预造。
+这条比我上次看的时候已经前进非常多：
+```
+30 trajectories
+30,388 observed steps
+```
+而且 adapter 很克制：
+```
+[STATE] → source_O
+[ACTION] → source_action_A_star
+
+W = null
+persona = null
+candidate set = null
+state = null
+timestamp = null
+```
+不乱猜。
+这一点我很满意。
+而且没有把文字游戏玩家命令硬压成我们的 16 个动作：
+```
+open door
+take key
+ask ...
+```
+都原样留下。
+这正是我们要的 lossless layer。
+我们原来说：
+第一批 20–50 trajectory 几乎逐条审核。
+现在一看：
+```
+30 trajectories
+= 30,388 steps
+```
+那就不能机械理解成：
+30,388 步全部人工看一遍。
+太蠢了。
+这里应该改成：
+```
+30 trajectories 全部做 trajectory-level audit
++
+每条分层抽 step
++
+异常全审
+```
+例如：
+```
+每条：
+前几步
+中间随机若干
+最后几步
+
+以及：
+最长 STATE
+最长 ACTION
+空/异常 marker
+重复 action
+特殊命令
+罕见 action
+连续重复 state
+极短 state
+parser 边界附近
+```
+这样才能验证：
+```
+STATE/ACTION pairing
+episode boundary
+future leakage
+command provenance
+```
+而不是人工读 3 万多条文字。
+所以 T0i 的“逐条审”现在应该根据数据真实形态稍微解释一下，不是降低审核标准，而是从笨穷举变成结构化 semantic QA。
+```
+                 ReplayRecord v0
+                      │
+          ┌───────────┴───────────┐
+          ↓                       ↓
+     ClubFloyd                  LIGHT
+          │                       │
+   raw data ✅                raw data ✅
+          │                       │
+   parser ✅                  audit parser ✅
+          │                       │
+30 traj / 30388 steps       50 ep audited
+          │                 41 ep / 140 steps
+          │                       │
+schema valid ✅             schema valid ✅
+          │                       │
+semantic audit ⏳          semantic audit ⏳
+          └───────────┬───────────┘
+                      ↓
+               frozen semantic_v0
+                      ↓
+               mechanism loop
+```
+这才算我们真正开始“研究数据改造”了。
+这两笔不是假进度。
+特别重要的是，它们已经第一次让 ReplayRecord 经受两种完全不同的真实数据：
+ClubFloyd：
+```
+自然语言游戏反馈
+→ 真人命令
+→ 下一状态
+```
+LIGHT：
+```
+persona/world/context
++ dialogue/emote/action
++ available actions
+```
+而 ReplayRecord 没有立刻崩掉，也没有逼 Luna 给每个数据集造一套类。
+这是好迹象。
+但现在不要急着 T0h 开始写 semantic rules。
+我建议顺序是：
+```
+① 修 LIGHT 的 persona_P 语义问题
+② 清掉/修正 has_future_outcome_field=False 假审计
+③ 统一 LIGHT source revision
+④ 真正做 LIGHT 41 条的 semantic audit
+⑤ ClubFloyd 做 trajectory-level + stratified step audit
+⑥ 两边审核结果摆一起
+⑦ 再决定 semantic_rules_v0 到底需要哪些字段
+```
+因为现在终于有真实数据告诉我们：
+我们的语义层究竟需要理解什么。
+这个时候再定义 X/semantic rule table，比前几小时纯靠脑补靠谱得多。
+所以它推了改造后的数据集吗？你能看到了？我觉得先让luna大批量改数据集没坏事，刚好我要午休了。我让它再推一下结果然后你看看数据集改造有没有啥需要注意的，直接让他大规模改
+已调用工具
+对，大规模跑没问题，但要把“大规模”限定在“无损抽取/结构改造”这一层。ClubFloyd 和 LIGHT 现在已经证明 adapter 基本能工作，完全可以趁你午休让 Luna 把全量/大批量 ReplayRecord 跑出来。
+但我不建议现在就全量做 X 语义标注。原因很简单：LIGHT 的 persona_P、候选集语义、future leakage 检查还有几个小坑。先全量抽取，后分层审核，审核发现系统性错误就重跑脚本，成本很低。
+而且现在远端确实还没推改造后的 JSON 数据本体，只有 adapter、manifest 和说明。所以这次让 Luna 专门生成“可供我审核的 review slice”。
+你直接把这段给它：
+现在停止继续扩写流程设计，直接扩大真实数据改造。
+当前目标：
+ClubFloyd + LIGHT 先进行大规模 deterministic/lossless extraction，生成 ReplayRecord；同时生成可提交、可人工/AI审核的分层 review slice。暂时不要大规模生成 X/S semantic annotation。
+现有提交：
+- 9b1c27b Add ClubFloyd ReplayRecord dev adapter
+- ba0d886 Add LIGHT dataset audit and replay slice
+当前：
+```
+persona_P = agents
+```
+语义过强。
+LIGHT 的 source persona/agent description 是源数据角色描述，不等价于 Character Dynamics 中作为 response parameters 的 P。
+改为优先：
+```
+persona_P = null
+```
+源 persona 原样放入：
+```
+source_episode_context.source_agents
+source_episode_context.source_persona
+```
+以后若需要：
+```
+source persona
+→ explicit semantic mapping
+→ P
+```
+另做 provenance。
+不要在 lossless adapter 阶段偷完成这一步。
+```
+has_future_outcome_field: False
+```
+当前这是常量，不是审计结果。
+future leakage 的真正问题是：
+```
+context_t
+```
+是否包含 action_t 之后的信息，而不是有没有名叫 future_outcome 的字段。
+如果无法静态证明，就：
+```
+future_leakage_static_check = unresolved
+semantic_audit_required = true
+```
+不要输出假的 False。
+当前 audit/export/manifest 对 LIGHT revision 有不同写法。
+统一记录至少：
+```
+source_dataset
+source_artifact_name
+source_repository_revision if known
+source_artifact_sha256
+adapter_revision/git_commit
+```
+SHA256 作为最终数据资产身份依据之一。
+现在已有 30 trajectory / 30,388 steps。
+继续处理可合法取得的全部 ClubFloyd/CALM cleaned corpora。
+只进行：
+```
+[STATE] → source_O
+[ACTION] → source_action_A_star
+```
+以及 source ids / provenance / split metadata。
+保持：
+```
+W = null
+persona_P = null
+candidate sets = null
+state label = null
+timestamp = null
+```
+除非源数据明确提供。
+不要：
+- 映射到当前 16 ActionType；
+- 用 AI 猜 W；
+- 用 AI 猜 persona；
+- 用 A* 反推 X；
+- 做大规模 semantic annotation。
+本地 ignored 目录保存完整 ReplayRecord，例如：
+```
+outputs/external_assets_2026-09-06/ClubFloyd/
+  clubfloyd_full.replay.jsonl
+```
+建议 JSONL，避免一个巨大 JSON array 难以流式处理。
+输出 manifest：
+```
+trajectory_count
+step_count
+source files
+source revision
+source archive sha256
+output sha256
+parser revision
+min/median/max steps per trajectory
+empty/failed trajectory count
+marker parse anomaly count
+```
+修完上述三个问题后，对更大的 LIGHT physical-action 数据批次执行 adapter。
+仍保持：
+```
+source_O = source actor-specific context
+source_action_A_star = source action
+source environment = source_episode/step_context
+W = null unless independently justified
+```
+available_actions 可以暂时保留为：
+```
+candidate_set_factual
+```
+但 metadata 必须明确：
+source-provided available-action list; semantic relation to Character Dynamics A^W/A^O unresolved.
+runtime/mechanism 禁止直接把它当 A^O。
+统计：
+```
+episode count
+episodes with physical action
+physical action steps
+available_actions coverage
+actor values
+persona/source-agent coverage
+context/action alignment anomalies
+candidate-set sizes
+null/empty rates
+```
+完整 raw/converted dataset 继续留在 ignored external-assets。
+尤其 ClubFloyd / LIGHT 的再分发许可尚未完全冻结时，不要为了让我审核而把几万/几十万条原文全 push 到仓库。
+Git 中提交：
+```
+adapter code
+manifest
+aggregate audit report
+review slice
+semantic audit report
+```
+这是本轮很重要的输出。
+ClubFloyd 和 LIGHT 各生成一个分层抽样 review 文件。
+例如：
+```
+02_实验/Replay/review_samples/
+  clubfloyd_review_v0.jsonl
+  light_review_v0.jsonl
+```
+如果许可证不允许提交源文本，则不要违反许可；改成只提交允许公开的审计摘要，并明确记录本地 review 文件路径和 SHA，之后由用户单独提供给 WebGPT。
+如果允许提交小型开发摘录，则每条必须包含 source 与 transformed 结果，供语义核对。
+不要把“审 30 trajectory”理解成手工看 30,388 steps。
+30 trajectory 全部做 trajectory-level 检查，再分层抽 step：
+```
+每条 trajectory:
+- 前若干步
+- 中部样本
+- 末若干步
+
+额外必抽：
+- 最长/最短 STATE
+- 最长/最短 ACTION
+- 空白/特殊字符
+- parser marker 边界附近
+- 连续重复 action
+- 连续重复 state
+- 罕见 action
+- 非标准 command
+- parse anomaly
+```
+目标 review 规模控制在人工/AI 真能逐条看的量，例如数百步，而不是 3 万步全部 dump。
+41 条当前 eligible trajectory 优先全部覆盖 trajectory-level。
+step-level 分层抽：
+```
+不同 actor
+不同 physical action
+不同 candidate-set size
+有/无 speech
+有/无 emote
+carrying/wearing/wielding 变化
+room_objects / room_agents 复杂情况
+context 特别长/短
+candidate action 特别多/少
+episode 首/中/末
+```
+重点审核：
+```
+source_O 是否真是 prediction-time information
+actor 是否对齐
+persona/source agent 是否对齐
+action 是否属于当前 actor
+available_actions 是什么语义
+current context 是否偷含未来反馈
+room/world fields 是否越界进入 O
+```
+新增轻量统计/校验即可，不造 framework。
+至少检查：
+```
+t strictly increasing
+trajectory ids unique
+source ids resolvable
+A* nonempty
+field provenance present
+source_O/action pairing
+null/unknown rates
+candidate-set duplicate entries
+A* ∈ candidate_set_factual?  # 只统计，不强制，因为语义仍未确定
+action/context length outliers
+duplicate trajectories
+exact duplicate steps
+```
+LIGHT 尤其统计：
+```
+P(A* in available_actions)
+```
+但不要因为不在就自动修数据。
+这可能正好暴露 candidate semantics。
+当前允许：
+```
+full deterministic ReplayRecord extraction
++
+automatic QA
++
+stratified semantic review
+```
+当前不要：
+```
+full dataset
+→ AI annotate X
+→ freeze semantics
+```
+原因是首轮 semantic audit 还没验证 ontology。
+正确顺序：
+```
+大规模 lossless extraction
+↓
+统计错误模式
+↓
+review slice
+↓
+WebGPT / Luna semantic audit
+↓
+修 adapter
+↓
+必要时全量重跑
+↓
+确定 semantic_rules_v0
+↓
+再考虑大规模 semantic annotation
+```
+可以趁运行时间并行做真实字段审计和小 slice，但不要直接把它们按 ClubFloyd/LIGHT 的 next-action schema 强行全量转换。
+因为它们承担的研究职责不同：
+```
+ClubFloyd/LIGHT
+→ next behavior / action structure
+
+AGAIN
+→ temporal arousal / lag / decay
+
+PowerWash
+→ long-timescale persistence / progress / subjective proxy
+
+FarmQuest
+→ telemetry adapter development
+```
+本轮可以：
+- 下载/校验；
+- 读真实 schema；
+- 做字段统计；
+- 取小 slice；
+- 判断如何进入 ReplayRecord。
+不要因为“批量处理方便”就把 1500 万 PowerWash events 直接硬塞进一个错误的 step ontology。
+完成一轮后 push webgpt-sync，不要 merge main。
+至少提交：
+```
+1. LIGHT adapter 修正
+2. ClubFloyd full extraction manifest
+3. LIGHT expanded extraction manifest
+4. 两个 aggregate QA reports
+5. 两个 review-slice 生成器
+6. 能合法提交的话，两份小型 review slice
+7. PowerWash/AGAIN/FarmQuest 若已实际审计，则提交各自真实字段审计，不只写计划
+```
+提交信息可以拆成几笔，不要求一个巨型 commit。
+最后更新 TODO 时只能写真实状态：
+```
+full extraction complete
+semantic audit pending
+```
+不得把 schema-valid 写成 semantic-valid，也不得把大批量转换写成 mechanism-ready。
+完成后 push webgpt-sync。
+我这边特别赞成你说的“趁午休直接多跑数据”，只是我会把它拆成：
+现在大胆扩大“无损数据加工”；语义加工先别一口气放大。
+因为无损 adapter 如果发现错了，全量重跑很便宜；但如果现在把几十万条都打成错误的 X/P/O 标签，后面反而要清理一大堆“伪 ground truth”。
+Luna 下一次 push 后，我重点看它生成的 review slices 和全量统计。那时我就不只是审代码，而是真的开始看“改造后的数据长什么样”。

@@ -1,0 +1,518 @@
+看完了。Luna 这轮可以算把我们前面的工程收尾做完了。 最新 HEAD：
+
+dee7221  Correct LIGHT neutral result documentation
+
+前面连续几刀也都接上了：
+
+178c8e3  Make replay regression test mandatory
+f09c7c9  Freeze replay policy config in transition manifest
+37a0e4e  Version neutral replay experiment artifacts
+c6b3db8  Fix replay executable test path
+dee7221  Correct LIGHT neutral result documentation
+现在真正完成的东西
+
+之前我卡的几个问题基本都修掉了：
+
+replay-neutral-v0 有独立、机器可读的 summary / manifest；
+旧 drive-linear-v0 没被覆盖，作为历史 smoke 留着；
+manifest 冻结了 scorer version、全部 policy config、eta=0.35、interaction_coefficient=0.2、seed、source/rule hash；
+regression test 不再静默 return；
+test 名字也改成了它真正测试的东西；
+exe 路径修正；
+README 把我上次指出的错误数字纠正了；
+T0c-SC 已正式改成 “已完成最小 bridge”，不再假装 snapshot→scene semantics 还没接。
+
+所以我现在赞成：
+
+停止继续补 plumbing。
+
+最新结果也终于能干净解释了
+
+neutral scorer 下：
+
+verb-only:
+NLL = 1.444400
+top1 = 0.5143
+MRR  = 0.6818
+
+scene-aware:
+NLL = 1.438298
+top1 = 0.4857
+MRR  = 0.6635
+
+这里有一个很重要的细节：
+
+scene-aware 的 NLL 好了约 0.00610，但 top1 和 MRR 反而变差。
+
+所以不能笼统写：
+
+scene-aware 更好。
+
+更准确是：
+
+scene-aware 改善了 gold probability 的平均校准/NLL，但没有改善 ranking，反而使 top1/MRR 下降。
+
+这个现象其实挺值得以后保留，说明我们现在的 scene semantics 可能在“把概率拉得更合理”，但并没有把正确 action 排得更靠前。
+
+transition theory-S：
+
+zero-S      1.438298
+theory-S    1.436894
+permuted-S  1.441893
+uniform     1.412648
+
+因此：
+
+theory vs zero      ≈ -0.001404 NLL
+theory vs permuted  ≈ -0.004999 NLL
+
+方向目前是：
+
+correct S
+<
+zero S
+<
+wrong S
+
+但是：
+
+mean rank 三组都是 2.3
+
+所以还是同一个判断：
+
+S 当前主要影响 probability calibration，没有改变 action ordering。
+
+以及 uniform 仍然最好。
+
+现在我反而不建议再让 Luna修几个小债
+
+还有两个东西我看得到，但不值得继续开工程阶段：
+
+ReplayPolicyConfig 还叫：
+
+task_drive
+distraction_drive
+recovery_drive
+...
+
+从 dataset-neutral 的命名来说，未来改成：
+
+goal_progress_weight
+stimulation_weight
+recovery_weight
+...
+
+会更干净。
+
+另外 hidden-source invariant 那个测试仍然不算特别强的 ReplayRecord→Snapshot end-to-end test。
+
+但这俩现在都不是研究 blocker。
+
+不要再因为这些把 Luna 留在“整理仓库”模式里。
+
+所以我们刚才设计的下一实验，现在正好可以接上
+
+而且仓库现状反而进一步支持我们的判断：
+
+当前 theory-S：
+
+relevance_trace
+positive_conduciveness_trace
+negative_conduciveness_trace
+
+实际：
+
+relevance == positive
+negative == 0
+
+所以 empirical rank 基本就是 1D。
+
+这意味着我们刚才设计的第一轮应该真就做：
+
+zero-S
+
+Activity-S
+= 最近是否发生任何 transition
+
+ActionSupport-S
+= 最近是否做了有 expected-effect template 的 action
+
+Theory-S
+= 最近是否观察确认了 expected effect
+
+Permuted Theory-S
+
+全部：
+
+1D
+same eta
+same decay
+same time boundary
+same legal history
+我现在更确定：不要用当前手写 0.2 × S × goal_progress 做正式公平比较
+
+因为这已经是一个给 Theory-S 有语义优势的出口。
+
+正式比较应该上我们刚刚讨论的同构 linear probe：
+
+$$ z_{t,a} = \beta^\top\phi_t(a) + S_t\,w^\top\phi_t(a) $$
+
+其中：
+
+φ(a)
+=
+现有 CandidateSemantics + scene features
+
+对：
+
+Activity-S
+ActionSupport-S
+Theory-S
+
+分别训练同样结构、同样参数量、同样正则化的 probe。
+
+这样我们终于真正问：
+
+在容量、U、policy family 都相同的时候，“动作后果被确认”这种 appraisal-informed history selection 是否比普通历史压缩更好？
+
+我现在会把实验问题冻结成这一句
+
+Does an appraisal-informed persistent trace of confirmed action consequences provide predictive value beyond equally compact non-theoretical traces of environmental activity or recent action type?
+
+中文就是：
+
+把“已确认的行为后果”作为持久状态保存，相比同容量的“环境最近发生过变化”和“最近做过哪类动作”状态，是否带来额外的下一行为预测价值？
+
+这个问题已经非常具体了。
+
+而且无论答案是哪一个都有东西：
+
+Theory > ActionSupport > Activity
+→ outcome/appraisal structure 有增量价值
+
+Theory ≈ ActionSupport
+→ 当前收益主要来自 action history，不是 consequence appraisal
+
+Theory ≈ Activity
+→ 只要有平滑历史痕迹就够，心理结构暂时没价值
+
+都 ≈ zero
+→ 当前 1D persistent compression 基本没预测价值
+
+现在是真正可以开始做这个实验了。
+
+我觉得这一刻和前几天很不一样：前几天是在“把我们的想法接通”；现在已经到了可以让一个公平对照直接把我们的想法打死或留下的阶段。这个才是下一步。
+
+又提交了一份
+已调用工具
+已调用工具
+已调用工具
+
+这份提交我觉得是对的，而且比“直接写代码跑起来”更重要。
+
+最新是：
+
+20a5638  Freeze rank-matched state comparison protocol
+
+Luna 没擅自开始训练，而是先把我们刚才讨论的东西冻结成了正式协议：
+
+02_实验/T14_T20_rank_matched_probe_v0.md
+
+核心都落对了：
+
+Theory-S         = confirmed-effect trace
+Activity-S       = any-transition trace
+ActionSupport-S  = supported previous-action trace
+
+三者：
+1D
+同 eta=0.35
+同 EMA
+同历史权限
+同 candidate semantics
+同 probe family
+
+统一 probe 也写成了：
+
+$$ z(t,a)=\beta^\top \phi(t,a)+S_t\,w^\top\phi(t,a) $$
+
+而且明确写了：
+
+不再给 theory-S 手写专用 S → goal_progress head。
+
+这一点非常关键。
+
+permuted-S 也写对了：
+
+train correct Theory-S probe
+↓
+test correct Theory-S
+vs
+test permuted Theory-S
+
+不重新训练 permuted 模型
+
+所以它测的是正确历史状态是否真的被模型利用，而不是“随机特征能不能重新学会”。
+
+还有一个我很赞成的地方
+
+Luna 把当前事实正式写进协议了：
+
+relevance_trace == positive_conduciveness_trace
+negative_conduciveness_trace == 0
+
+所以：
+
+当前不宣称 3D theory-S，只做 empirical rank≈1 的 rank-matched 比较。
+
+这个比“理论上设计了三维，所以就拿三维比较”严谨很多。
+
+并且明确写了：
+
+等 appraisal 真的出现：
+relevance ≠ positive
+negative > 0
+
+之后才升级：
+
+3D structural-S
+3D hashed-S
+3D theory-S
+
+这个顺序非常合理。
+
+但正式训练前，我认为协议还差 4 个必须冻结的点
+
+这些不是推翻设计，是把最后的统计公平性封死。
+
+1. phi(t,a) 必须精确列出来
+
+现在只写：
+
+frozen candidate semantics（含 scene bias 的固定字段）
+
+还不够。
+
+正式协议必须明确类似：
+
+phi =
+[
+  goal_progress,
+  stimulation,
+  recovery,
+  hunger_relief,
+  bathroom_relief,
+  short_term_reward,
+  environment_control,
+  context_relevance,
+  scene_bias
+]
+
+以及：
+
+是否标准化
+是否加 intercept
+缺失值如何处理
+scene_bias 是单独 feature 还是提前加到 logit
+
+否则以后完全可能出现：
+
+看到结果不好 → 偷偷改 phi。
+
+所以 phi 本身也必须 versioned。
+
+2. regularization / optimizer 还没冻结
+
+协议现在只写：
+
+same regularization
+same optimization
+same training budget
+
+但没写具体是什么。
+
+正式开跑前至少冻结：
+
+loss = conditional multinomial NLL
+
+optimizer = ?
+L2 lambda = ?
+max iterations = ?
+convergence tolerance = ?
+random seed = ?
+
+如果 λ 要调：
+
+train
+↓
+validation 选 λ
+↓
+test 只跑一次
+
+而且三种 S 必须用同一 λ grid 和同一选择规则。
+
+不能每种 S 单独人工挑一个最好看的 λ。
+
+3. 当前 140 steps 绝对不能成为正式 test
+
+这个尤其重要。
+
+这 140 steps 我们已经反复看过：
+
+verb-only
+scene-aware
+theory-S
+permuted-S
+
+而且正是根据它发现：
+
+empirical rank≈1
+
+然后设计了这个 protocol。
+
+所以它已经是：
+
+development set
+
+不可能再叫 held-out test。
+
+Luna 的协议现在也写了“正式训练待独立行为真值准入”，这个判断是正确的。
+
+正式实验需要：
+
+train
+validation
+untouched test
+
+并且至少 trajectory/episode-disjoint。
+
+如果角色/persona 在多个 trajectory 重复出现，还得审：
+
+persona identity leakage
+
+是否需要 persona-grouped split。
+
+4. no-S 最好分成两个不同概念
+
+这个我刚重新想了一下，挺重要。
+
+目前协议里的：
+
+no-S
+
+如果单独训练：
+
+$$ z=\beta^\top\phi $$
+
+只有 β。
+
+而 S 模型有：
+
+$$ \beta + w $$
+
+所以参数量更多。
+
+这并不意味着 no-S baseline 错，但它回答的是：
+
+最优的无状态模型 vs 最优的有状态模型。
+
+而necessity最好再加一个更硬的 intervention：
+
+trained Theory-S → test-time zero-S
+
+训练：
+
+correct Theory-S
+
+测试时只把：
+
+S_t := 0
+
+其余：
+
+β
+w
+phi
+candidate set
+
+全部不变。
+
+于是最终最好有三个不同东西：
+
+Retrained no-S
+    → 最强无状态模型
+
+Theory probe + zeroed S
+    → 同一模型里移除状态信息
+
+Theory probe + permuted S
+    → 同一模型里换错历史状态
+
+这三个作用完全不同：
+
+条件	回答什么
+retrained no-S	状态模型整体是否优于最佳无状态模型
+zeroed-S intervention	当前 probe 是否真的消费 S
+permuted-S intervention	是否需要正确归属的历史 S
+
+这个会让 Paper-0 necessity 非常漂亮。
+
+Activity-S 还有一个小语义注意点
+
+现在定义：
+
+x=1 iff ΔScene/O contains any transition event
+
+这是可以的。
+
+但我们已有：
+
+ObservedEntityGained/Lost
+
+是通过 observation 文本里的 entity label matching 推出来的，噪声比较大。
+
+所以协议最好明确：
+
+Activity-S 使用与 Theory-S 同一个 frozen transition compiler 输出，不另加/删 event 类型。
+
+这样即使它很 noisy，也是预先冻结的 naive baseline，不是后来为结果服务。
+
+至于仓库卫生
+
+这次 Luna 还把我们刚才整段讨论原文保存到了：
+
+90_原始材料/
+2026-09-07_复核_rank-matched_1D与learned_probe/
+
+里面有 665 行 原文.txt。
+
+这个我不认为是 AI 屎山，因为它放在明确的 90_原始材料 归档区，而且主设计只提炼成 39 行 protocol；这正符合我们之前定的：
+
+raw reasoning archive
+≠
+foreground design docs
+
+所以这里不用再清。
+
+总体评价
+
+这份提交已经把我们刚才聊天里的想法真正变成了一个可证伪实验协议，不是“灵感备忘录”。
+
+现在只需要再冻结：
+
+1. exact phi feature vector
+2. optimizer / regularization / hyperparameter rule
+3. train-val-test grouping
+4. retrained no-S vs zeroed-S vs permuted-S 三种不同对照
+
+然后才值得让 Luna实现 probe。
+
+尤其第 4 点，我建议一定补进去。因为它能把：
+
+“加了状态以后模型参数更多”
+
+和
+
+“正确的历史状态本身真的有用”
+
+彻底拆开。

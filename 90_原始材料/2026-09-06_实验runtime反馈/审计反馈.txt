@@ -1,0 +1,211 @@
+再看看仓库
+已调用工具
+已调用工具
+已调用工具
+看了，最新 HEAD 已经到 e7ca0e1 — Regenerate PowerWash pilot after provenance fix。
+这次改动很明确：我上一轮指出的 PowerWash“生成器已修、仓库资产还是旧的”问题已经真正收掉了。
+现在仓库里的 PowerWash_review_v0.jsonl 已经变成：
+```ini
+source_O.kind = "unknown"
+source_action_A_star.kind = "unknown"
+```
+不再是非法的：
+```
+not_mapped
+not_available
+```
+同时 pilot 重新生成后，manifest/hash 也更新了：
+```
+output_sha256
+78728869...
+
+review_fixture_sha256
+ae647518...
+```
+原来的两个旧 hash 已经被替换。QA 仍然全部通过，包括：
+```ini
+source_O_all_null = true
+source_action_A_star_all_null = true
+state_label_all_null = true
+equal_timestamp_bundled = true
+bundle_never_split_across_sessions = true
+boundary_bundle_closed_together = true
+orphan_segments_separate = true
+participant_sequence_monotonic = true
+anchor_past_strictly_prior = true
+orphan_review_coverage = true
+```
+所以现在可以把上一轮这个问题正式划掉：
+PowerWash 新代码 / 旧 artifact 不一致
+已经修好。
+不过注意：从 74bf5c1 到现在 只有这一个新 commit。
+所以目前总体进度实际上是：
+```javascript
+ReplayRecord schema          ✅
+JSON / JSONL validator       ✅
+AGAIN provenance             ✅
+AGAIN artifact-derived QA    ✅
+PowerWash provenance         ✅
+PowerWash artifact regenerate✅
+PowerWash QA                 ✅
+```
+也就是说，数据基础设施这一层现在基本封口了。
+这挺关键的，我现在已经不会再要求你继续修 ReplayRecord 这些外围东西。
+但“今晚把系统修到能直接实验”那个目标的核心部分还没有新进展。
+我核过最新 commit，它没有碰：
+```
+X
+U
+S
+decision
+external replay runtime
+candidate scorer
+counterfactual runtime
+```
+所以前面剩下的几个真正 blocker 一个都还在：
+当前还是大致：
+```
+action / observation
+→ Appraisal 内直接生成 boredom_delta / fatigue_delta / ...
+→ update_state
+```
+而不是严格的：
+```
+semantic X
+→ updater U
+→ numeric ΔS
+```
+这个是今晚要修的核心机制之一。
+现在 adapter 只是：
+```
+raw
+→ ReplayRecord
+```
+还没有：
+```
+ReplayRecord
+→ O
+→ X
+→ U
+→ S
+→ scorer
+```
+所以还没有第一条真实人物轨迹真正跑过 Character Dynamics。
+这仍然是最大实验接口问题：
+```python-repl
+π:
+UsePhone
+StudyFocused
+OpenCurtain
+...
+```
+而 LIGHT / ClubFloyd 使用自己的动作空间。
+还没有 dataset-neutral：
+```scss
+score(candidate | O,S,P)
+```
+这一层。
+当前仓库仍没有：
+```css
+A*
+p(A*)
+NLL
+rank
+```
+来自真实 external replay 的结果。
+所以 Paper-0 的三条刀里面：
+-  information boundary：已有 E0 instrumentation； 
+-  sufficiency：还没开始实测； 
+-  necessity：还没开始实测。 
+仓库有：
+机制识别循环与反事实诊断_v0.md
+但还没有真正的：
+```scss
+remove(event_k)
+→ rerun
+→ ΔX
+→ ΔS
+→ Δπ
+→ Δlog p(A*)
+```
+这一轮以后，别再碰 AGAIN、PowerWash 了。
+这两块已经足够干净，继续修它们现在就是旁支。
+今晚下一刀应该直接进核心：
+```
+             ┌────────────────── 小房间 policy
+O → X → U → S┤
+             └────────────────── external candidate scorer
+```
+然后优先拿 LIGHT 小切片第一次跑：
+```bash
+真实 O/history
+→ X
+→ U
+→ S
+→ 对 source candidate set 打分
+→ π
+→ human A*
+→ NLL
+```
+只要这条出来，哪怕先跑 20–50 个真实 step，仓库性质就会发生变化：
+现在是：
+实验基础设施已准备。
+下一阶段会变成：
+Character Dynamics 已经开始接受真实行为数据检验。
+所以这次仓库更新我给 通过。PowerWash 的旧资产债已经清掉了。现在该停止修数据管线，正式开实验 runtime 了。
+注意我们小房间demo只是个demo，然后有的机制确实是需要占位然后在这个房间的场景下退化到无作用的。但是我们好像留了占位？你的意思是我们连占位都没有？算了，继续推进！该怎么改就弄好
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已分析
+对，你说得对：我们不是“没留占位”，而是有些占位还没有成为真正可实验的责任边界。 Appraisal/X、StepRecord、prepare_decision、InformationAccess 这些都已经是有效占位；我这次只补最关键的两层，不改“小房间只是 demo”这个定位。
+我已经把最小改造做成 patch，并单独编译 smoke 验过核心代码：
+下载 experiment-runtime-v0 patch
+它具体做了：
+- 第一次真正拆出 X → U → S 
+  -  先只迁移 task_completed 这一条； 
+  - X 不再直接写 task_pressure -= 0.85； 
+  -  而是输出 GoalCompletion semantic signal； 
+  - U 再负责把它变成 Δtask_pressure / Δanxiety / Δsatisfaction； 
+  -  旧 demo 其余 *_delta 暂时保留，避免一晚上重写九个状态。 
+- 保留“机制占位但当前场景可 no-op” 
+  - goal_relevance / congruence / controllability 都有接口； 
+  -  当前小房间不需要消费的可以就是 no-op； 
+  -  不是为了“看起来完整”硬塞效果。 
+- 新增 dataset-neutral candidate scorer 
+  -  完全不依赖小房间 ActionType； 
+  -  candidate ID 可以直接是 LIGHT 自己的字符串； 
+  - S/P 产生 drive，再对数据集原生候选打分； 
+  -  所以以后不需要把 LIGHT/ClubFloyd 压成 UsePhone/StudyFocused 那 16 类。 
+- 新增独立 core smoke 
+  -  验证 semantic X → U → S 真有作用； 
+  -  验证任意字符串 candidate 可以得到归一化 π(A)； 
+  -  不依赖小房间 world。 
+我本来准备直接写进 webgpt-sync，但当前 GitHub 连接对仓库写操作返回 403，只读，所以没法替你 push。你本地直接：
+```
+git apply character-dynamics-experiment-runtime-v0.patch
+```
+或者把这个 patch 交给 Codex，让它在项目根目录 apply，然后：
+```css
+cmake --build <你的build目录>
+ctest --test-dir <你的build目录> --output-on-failure
+```
+接下来就不要再继续改 demo 机制了。下一刀直接是：
+```css
+LIGHT ReplayRecord
+→ prediction-time O/history
+→ compiled semantics v0
+→ X
+→ U
+→ S
+→ LIGHT source candidate set
+→ external scorer
+→ π(A)
+→ human A*
+→ NLL / rank
+```
+这时候小房间仍然只是 demo；它只是一个使用 Character Dynamics 核心机制的 frontend，而不再定义 Character Dynamics 的实验动作空间。
+这一步 apply + CTest 通过以后，我们就该直接接 LIGHT 的 20–50 个 step，跑第一份真实 NLL。
+user：不不不，要弄直接弄好了啊！不是太多就不弄了，而是很多，所以一个一个分批来！另外，你推送不了的确实可以直接弄个文件直接给我下载  

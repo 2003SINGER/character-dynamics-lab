@@ -1,0 +1,300 @@
+看仓库
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+看完了。最新 webgpt-sync 是：
+```
+e8223b8  chore: add anti patch-debt repository guards
+```
+前一笔：
+```
+039029b  register cross-dataset replay and player log assets
+```
+方向对，护栏也没有被 Luna 过度工程化。可以保留。
+它没有趁机：
+-  拆 World 
+-  搞 AdapterFactory 
+-  搞插件系统 
+-  改 S 
+-  把 dataset 塞进 C++ runtime 
+这一点很好。
+而且现在已经有：
+```
+ARCHITECTURE_RULES.md
+architecture_audit_policy.md
+ReplayRecord v0
+repo_health_check.py
+validate_replay_record.py
+玩家日志数据资产登记
+```
+基本就是我们要的“雷达”，而不是新框架。
+但在第一个真正 adapter 开工前，我会卡 3 个必须修复 + 2 个建议。
+当前每个 step 只有：
+```
+"provenance": "observed"
+```
+但现实中同一步完全可能是：
+```
+source_O                  observed
+source_action_A_star      observed
+W                         llm_inferred
+state_label               annotated
+candidate_set_factual     observed
+candidate_set_expanded    synthetic_diagnostic
+```
+所以：
+一个 step 一个 provenance 不够。
+这个必须在 ClubFloyd/LIGHT adapter 前改，不然第一个数据集就会逼 schema 打补丁。
+最小改法不是造复杂对象体系，而是：
+```
+field_provenance:
+  source_O:
+    kind: observed
+    source_ref: ...
+  source_action_A_star:
+    kind: observed
+    source_ref: ...
+  W:
+    kind: llm_inferred
+    model: ...
+    prompt_version: ...
+    confidence: ...
+  candidate_set_expanded:
+    kind: synthetic_diagnostic
+```
+可以保留一个 episode/step 级 provenance 作为“记录来源”，但ground-truth 身份必须按字段记录。
+现在 validator 里：
+```
+if p == "llm_inferred" ...
+```
+也是因为粒度太粗才写得很别扭。
+文档：
+```
+steps:
+  - source_context: optional
+```
+Schema 却是：
+```
+"source_context": {}
+```
+放在 episode 顶层。
+这就是我们刚建立 anti-schema-drift 护栏后，第一例真实 schema drift 😂
+倒也挺好，说明 guard 的必要性马上出现了。
+实际上两者都可能有：
+```
+episode_context
+step_context
+```
+但不要模糊叫一个 source_context。
+例如：
+```
+source_episode_context:
+source_step_context:
+```
+哪个数据集没有就空。
+ARCHITECTURE_RULES.md 已经规定：
+dataset/source revision 要进 experiment metadata。
+但是 ReplayRecord 本身只有：
+```
+source_dataset
+source_license
+```
+没有：
+```
+source_revision
+```
+对于：
+```
+OPeRA pinned HF revision
+LIGHT release
+ClubFloyd dump/version
+```
+这以后非常重要。
+建议 episode 顶层直接加：
+```
+source_revision: optional/required_or_unknown
+source_record_id: optional
+```
+不用更复杂。
+这个不是 Luna 做错了——因为 e8223b8 是你刚才给它第一版治理任务后做的，而我们后面才继续聊到：
+LLM semantic frontend + mechanism identification + freeze/generalization。
+所以现在 ARCHITECTURE_RULES.md 里确实还没有这一层。
+但下一笔必须补。
+尤其需要冻结：
+```
+raw data
+↓
+LLM semantic interpretation
+↓
+X
+↓
+explicit dynamics
+↓
+S
+↓
+π
+```
+以及最关键的：
+允许：
+```
+LLM 看 dev failure
+→ 改字段
+→ 改 updater
+→ 改函数
+→ 调参数
+→ 删机制
+```
+这是：
+mechanism identification。
+新数据绝不能再反向改机制。
+同时至少跑：
+```
+Frozen mechanism + fixed semantics
+Frozen mechanism + live LLM semantics
+LLM-direct / no explicit dynamics
+```
+然后再加 literature baselines。
+这个现在应该写进规则，不然以后 Luna 很容易把：
+“LLM 调机制”
+和：
+“LLM 在测试时做 semantic interpretation”
+混成同一件事。
+这两个科研意义完全不同。
+我们刚规定：
+不要普通 review 动不动归档整段聊天。
+结果这两笔 commit：
+总新增：
+```
+963 lines
+```
+其中：
+```
+817 lines
+```
+是完整聊天归档。
+总新增：
+```
+801 lines
+```
+其中：
+```
+620 lines
+```
+又是完整聊天归档。
+也就是说：
+防 AI 屎山的 commit，77% 本身就是 AI 聊天原文。
+不过这两次我暂时不判违规。
+因为这里确实包含了你本人比较重要的研究决策：
+-  多数据集路线； 
+-  factual / expanded scene； 
+-  mechanism-identification； 
+-  anti-patch-debt 治理授权。 
+按我们规则属于“重大决策可保存完整原文”。
+但这个规则目前还是太宽松：
+“有用户决定”几乎可以解释所有聊天。
+以后最好进一步收紧成：
+完整原文仅在“产生新的研究路线/问题定义/实验纪律”时存。
+普通：
+```
+看仓库
+→ 发现三个 bug
+→ Luna 修了
+```
+只存 20 行摘要。
+否则 90_原始材料 还是会膨胀。
+它没有把“公开”偷换成“已准入”。
+现在明确分了：
+```
+LIGHT              character/world/action
+OPeRA              真人 A* 外部比较
+ClubFloyd          文本玩家轨迹
+PowerWash          长期玩家动态/主观 proxy
+AGAIN              continuous arousal dynamics
+FarmQuest          小型 telemetry dev
+HEART              memory baseline
+PersonaX           representation comparison
+MineRL/BASALT      后置开放世界
+```
+而且 JerichoWorld 也没有因为有：
+```
+state → action → next_state
+```
+就硬说成真人行为。
+它明确标：
+walkthrough/data-collection agent，不是真人 A*。
+这个判断是对的。
+Luna已经落实你刚才特别强调的：
+```
+candidate_set_factual
+candidate_set_expanded
+```
+这很好。
+也就是说以后：
+```
+真人当时可复核的选择
+```
+和：
+```
+我们人为扩展出来用于机制诊断的 object/action
+```
+不会混起来。
+这是必须长期守住的。
+它目前：
+-  大代码文件：WARN； 
+-  TODO 太大：WARN； 
+-  重复原文：WARN； 
+-  manifest provenance：WARN。 
+没有：
+```
+simulation.cpp > 500 lines → FAIL
+```
+这种蠢规则。
+很好。
+当前 simulation.cpp 也没有继续被改动，所以这一轮没有新 C++ patch debt。
+现在：
+```
+685c319
+↓
+039029b   数据资产 / Replay 草案
+↓
+e8223b8   anti-patch-debt 护栏
+```
+整体健康。
+但 ReplayRecord v0 还真的只能叫：
+v0 草案
+现在千万别让 Luna直接开始写 ClubFloyd adapter。
+先做一个很小的修订：
+1.  field-level provenance； 
+2.  修 source_context schema drift； 
+3.  加 source_revision； 
+4.  把我们刚才定下的 LLM semantic hook + mechanism identification → freeze → generalization 三阶段写进 architecture rules； 
+5.  validator 同步。 
+然后再停。
+这次不用大评审，改动应该很小。等这个修完，第一个 ClubFloyd adapter 就可以真的开工了。
+注意你们两有一个延迟，因为我刚把更新的llm消融发给它他还没干没提交呢。完整聊天提交算了，没啥关系，反正有存储空间
+对，这个延迟我记住了。以后我看仓库时会区分三种状态：
+- 已经提交到 webgpt-sync 的事实：我按实际代码/文档审； 
+- 你刚发给 Luna、但它还没提交的要求：我只标成“待落地”，不会误判成“Luna漏做了”； 
+- 我们刚在当前对话里新定的东西：默认视为下一轮输入，不拿来苛责当前 HEAD。 
+所以刚才那个“LLM semantic hook + mechanism identification / freeze / generalization 消融还没进规则”这条，应该从“缺失”改成：
+已决定、待 Luna 下一提交落地。
+这不是当前仓库问题。
+完整聊天归档也可以放宽。既然你不在乎存储空间，而且这些对话确实经常包含研究路线、实验纪律和你本人的判断，那就保留。以后我不会再把“聊天原文很多”本身当技术债，只看两件事：有没有错误重复/错归档导致 provenance 混乱，以及正式研究文档是不是被聊天原文替代了。
+也就是说：
+```
+90_原始材料 很大
+```
+本身没事；
+真正有问题的是：
+```
+关键结论只存在聊天里
+正式设计页没同步
+```
+或者：
+```
+同一份原文被错误复制成多个不同 review
+```
+这种。
+所以后续审仓库，我会以这个标准来。

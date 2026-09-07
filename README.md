@@ -12,9 +12,11 @@
 | 研究问题、Forward/Inverse、候选创新及评价边界 | [研究问题](00_研究设计/前台问题与候选创新.md) |
 | 尚未定下的计算、具体机制/实现缺口 | [未决问题](00_研究设计/未决问题与机制候选.md) |
 | 下一动作、依赖与验收 | [TODO](00_研究设计/TODO.md) |
-| 实验导出器、切片与可复现记录 | [02_实验](02_实验/T0b_sotopia/README.md) |
+| 实验导出器、切片与可复现记录 | [02_实验](02_实验/T0b_sotopia/README.md)；[跨数据集 Replay 接口草案](02_实验/跨数据集Replay接口_v0.md)；[机制识别循环与反事实诊断](02_实验/机制识别循环与反事实诊断_v0.md) |
 | 文献 PDF、职责级阅读与证据 | [文献库](01_文献/README.md) |
 | 用户原话、模型提案、对话与来源 | [原始材料](90_原始材料/README.md) |
+
+仓库治理护栏：[ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md)；廉价健康检查可运行 `python tools/repo_health_check.py`，ReplayRecord 样例可用 `python tools/validate_replay_record.py <record.json>` 校验。护栏只预警文件膨胀/重复归档，明确的 schema、CTest 和 provenance 错误才阻断对应检查。
 
 新想法只在直接服务“维护行为相关状态／预测生成行为”时进入当前主线。效率—效果与可控性是第二评价维度，比较对象必须包含强 summary，不能用便宜或能跑替代研究证明。
 

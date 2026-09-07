@@ -1,0 +1,817 @@
+所以你快干活啊！那这三个方向分别怎么推进？我们本地的文献库你去仓库继续读！还有别的文献找公开数据，然后去调研有无开源的游戏日志给我们，尤其是玩家的。然后“然后拿外部数据做一个循环：
+
+外部轨迹
+↓
+adapter 转换
+↓
+跑当前机制
+↓
+看 trace / sensitivity / failure
+↓
+LLM + 我们诊断
+↓
+删无效变量
+改更新函数
+修 timing
+↓
+重新在 dev 上验证”
+已调用工具
+已调用工具
+
+对，这次我已经把仓库现有文献和外部公开资源都往“数据资产”这个角度重新过了一遍。结论比我们之前只盯 OPeRA 丰富得多。
+
+我建议三条线同时推进，但职责明确：
+
+1. 公开论文数据集 → 我们的统一 Replay 格式
+
+先不“改造数据本体”，而是建立一个最小 ReplayRecord v0：
+
+trajectory_id
+subject_id
+time
+
+source_O          # 原始可观测信息
+source_event      # 原数据中的事件
+source_action A*  # 原始真实/标注动作
+source_context
+
+P?                # 有就填
+W?                # 有就填
+state_label?      # 数据原本有的主观状态
+candidate_set?    # 原本有才填
+
+provenance:
+    observed / annotated / llm_inferred
+
+最关键的是：
+
+缺什么就留空，不让 LLM 给我们伪造 ground truth。
+
+LLM 可以把：
+
+"player clicked the review tab"
+
+标准化成：
+
+action.family = click
+action.semantic = inspect_review
+
+但原始 action 永远保留。
+
+我现在给公开论文数据排的优先级
+数据	最适合干什么	优先级
+LIGHT / LIGHT-WILD	Character/world/action 域迁移	高
+OPeRA	真人 next-action 外部比较	已接入
+PersonaX	长历史→压缩表示强 baseline	高
+HEART-Bench	episodic memories→behavior，对 memory/state baseline 很强	高
+DYNToM	belief→emotion→intention→action 的结构参照	中高
+BehaviorChain	连续 behavior benchmark	等开放
+SOTOPIA	合成 social trajectory	低于真人数据
+
+LIGHT 本身公开了约 11,000 个人类互动 episode，663 个地点、3462 个对象、1755 种角色；WILD 还有 41,131+ episode，而且 LIGHT 的游戏引擎和对象图也是公开的。它应该继续做我们的 character-domain adapter。
+
+HEART-Bench 也值得重新重视：它已经公开 raw episodic memories、scenarios、MCQ 和 expert ground truth，而且原作者自己就比较 no-memory、RAG、memory system、PersonaDB。它不是动态轨迹，但特别适合作为：
+
+“我们的 S 到底比已有 memory compression 多了什么？”
+
+的强基线资产。
+
+DYNToM 数据也公开，直接有时间连接的 social stages，以及 belief / emotion / intention / action 问题。它不是独立真人行为真值，但可以拿来验证我们的 O→X→S 语义映射到底是不是胡编。
+
+2. 游戏/小说玩家日志 → 这是我这轮找到最值钱的一批
+
+这条我现在反而认为非常重要。
+
+第一优先：PowerWash Simulator
+
+这个非常强。
+
+公开数据：
+
+11,080 真人玩家
+222 天
+15,772,514 gameplay events
+21,202,667 status records
+726,316 psychological survey responses
+CC0
+玩家反复回答：
+wellbeing
+enjoyment
+focus
+autonomy
+competence
+immersion
+
+同时游戏记录：
+
+job_started
+job_completed
+job_resumed
+job_exited
+item_purchased
+task_completed
+subtask_completed
+position
+equipment
+progress
+...
+
+这东西对我们不是主要拿来预测：
+
+下一帧按哪个键。
+
+而是可以第一次认真研究：
+
+外部经历/进度/行为历史和人的动态主观状态之间到底有什么时间关系。
+
+例如：
+
+连续完成 subtask
+↓
+competence / enjoyment 怎么变化？
+
+长时间无进展
+↓
+focus 怎么变化？
+
+退出 → 隔天回来
+↓
+某些状态有没有 persistence？
+
+这对我们决定：
+
+S 有什么字段
+字段时间尺度
+decay 有没有必要
+哪些字段其实高度重复
+
+比 LLM 猜心理数值强不知道多少。
+
+第二优先：AGAIN
+
+这个可能是我们做 S dynamics 最直接的数据。
+
+它有：
+
+124 真人
+9 个游戏
+1116 play sessions
+每局约 2 min
+gameplay telemetry 约 4 Hz
+连续 self-reported arousal
+raw logs + cleaned logs
+MIT license
+
+而且日志专门记录玩家能看到的 enemies / projectiles / objects，不是简单全局真值，这一点居然跟我们的 O 思想很接近。
+
+这可以直接拿来干：
+
+event history
+↓
+我们生成 X
+↓
+我们更新 S_arousal_proxy
+↓
+和真人 continuous arousal 比
+
+注意不是说：
+
+arousal = 我们的所有 S。
+
+而是终于有一个字段可以有真人动态标签。
+
+这特别适合调：
+
+update magnitude
+decay
+lag
+saturation
+
+而不是让 LLM 拍脑袋。
+
+第三优先：ClubFloyd
+
+这个简直是“小说/互动剧情日志”现成版本。
+
+公开数据：
+
+426 份真人 gameplay transcripts
+覆盖约 590 个文字冒险游戏
+223,527 个 context-action pairs
+
+格式就是：
+
+observation
+action
+next observation
+next action
+
+这个和我们特别合：
+
+自然语言 O
+→ 真人 action A*
+→ 新 O
+
+而且是真人在剧情世界里做选择。
+
+问题是：
+
+W 不完整；
+玩家不是“扮演稳定角色人格”；
+action language 开放；
+游戏来源很多。
+
+但这正好适合测试我们的 LLM semantic adapter。
+
+我会把它当：
+
+第一份“文本剧情玩家日志 adapter”
+
+而不是拿电影剧本硬造行为。
+
+第四：FarmQuest
+
+这个规模不大，但域特别好：
+
+cozy farming game；
+32 名玩家；
+每人玩两次；
+64 playthroughs；
+30 种 telemetry event；
+survey sentiment；
+原论文甚至做了 next-action prediction。
+
+它最大的缺陷是论文自己承认 timestamp 记录有 bug。
+
+但它很适合拿来做adapter 开发集：
+
+数据小、事件语义高、不是 FPS 每帧按键，而且比较像你最初想要的“日常小行为”。
+
+第五：玩家动作大数据
+
+这些先登记，后面再碰：
+
+MineRL / BASALT
+
+Minecraft 真人轨迹：
+
+原 MineRL：6000 万+ state-action pairs；
+BEDD：约 14,000 真人视频、2600 万 image-action pairs。
+
+优点：
+
+真正开放世界 + 真人行为。
+
+缺点：
+
+数据太重，动作太低层，前期接它会把我们拖进 computer vision / control。
+
+所以放后面。
+
+Atari-HEAD
+
+4 个真人玩家，数百万 frame-level action，还有 gaze、reaction time、reward。
+
+可以当一个很有意思的负面对照：
+
+如果我们的“心理 persistent S”连 Atari 逐帧动作都声称大幅提升，那可能反而有问题。
+
+还有两个很新的/工程型资产
+EgoCS-400K
+
+2026 年的新数据，来自真人专业 CS/CS2 replay：
+
+1000+ matches
+40,000+ rounds
+10,000+ hours
+per-tick game state
+keyboard/mouse
+camera
+weapon events
+
+非常强，但目前完整 Hugging Face release 仍标着持续发布中，所以先登记，不作为马上使用的数据。
+
+StarCraft II ladder replays
+
+Blizzard 官方发布匿名真人 ladder replay packs，PySC2 能从 replay 重放观察和动作。
+
+比视频强，因为 replay 是可执行世界轨迹。
+
+但版本、游戏安装、授权条款和 action semantics 都比较麻烦。
+
+3. 最关键：把你说的“外部数据纠错机制”正式化
+
+这个我现在认为应该成为我们接下来真正的开发循环。
+
+不是：
+
+数据
+→ fit 参数
+→ accuracy
+
+而是：
+
+外部数据 DEV
+↓
+adapter
+↓
+当前 Character Dynamics v0
+↓
+诊断
+↓
+提出机制修改
+↓
+重新 DEV
+↓
+冻结 v1
+↓
+untouched TEST
+Step 1：先拿小 dev slice
+
+每个数据集都不需要全量开搞。
+
+例如：
+
+ClubFloyd     30 trajectories
+LIGHT         30 episodes
+AGAIN         30 sessions
+PowerWash     50 users × 若干时间段
+OPeRA         已有 slice
+
+先看我们能不能映射。
+
+Step 2：LLM 做 semantic adapter
+
+分两层。
+
+确定性层
+
+程序直接抽：
+
+timestamp
+action
+score
+position
+event
+inventory
+task progress
+LLM 层
+
+LLM 只负责：
+
+原 action → semantic action family
+原 event → event category
+自然语言 O → structured observations
+事件是否可能与某 state field 有关
+
+输出必须带：
+
+source
+confidence
+reason
+model
+prompt_version
+
+并允许：
+
+UNKNOWN
+
+绝对不能要求“每个字段必须填”。
+
+Step 3：当前 S 机制跑进去
+
+比如 AGAIN：
+
+game telemetry
+↓
+ΔO
+↓
+X
+↓
+当前 arousal-like S
+↓
+预测/追踪
+
+PowerWash：
+
+progress / completion / interruption
+↓
+X
+↓
+competence/focus/enjoyment candidate S
+
+ClubFloyd：
+
+text O
+↓
+X
+↓
+S
+↓
+next human action
+
+不同数据集不必用完全相同 S。
+
+反而可以看：
+
+哪些 state field 是跨域的，哪些只是 task-specific。
+
+Step 4：以后每个字段都做“体检”
+
+这是我们现在最缺的。
+
+例如 task_pressure。
+
+我要它至少报告：
+
+更新次数
+非零比例
+值域
+均值/方差
+clamp 饱和率
+典型 half-life
+
+然后：
+
+sensitivity
+
+把：
+
+task_pressure = s
+
+改成：
+
+s - δ
+s
+s + δ
+
+看：
+
+$$ \pi(A) $$
+
+有没有变化。
+
+如果没有：
+
+dead field / dead parameter。
+
+ablation
+
+直接删：
+
+with task_pressure
+vs
+without task_pressure
+
+如果 dev NLL / ranking / state tracking 都几乎不变：
+
+删掉。
+
+permutation
+
+保留分布，只把 state 和 trajectory 错配。
+
+如果性能不掉：
+
+这个 state 内容没被真正使用。
+
+redundancy
+
+例如：
+
+anxiety
+task_pressure
+
+总是一起涨一起跌，而且删一个没影响：
+
+考虑合并。
+
+saturation
+
+如果：
+
+80% 时间 task_pressure = 1.0
+
+那当前：
+
+clamp / update scale
+
+显然有问题。
+
+lag / decay
+
+AGAIN 这种 4Hz continuous state 特别适合做：
+
+事件发生
+↓
+多久后 arousal 上升？
+↓
+多久恢复？
+
+然后我们才谈：
+
+state += ...
+state *= decay
+
+多少合理。
+
+不是让 Luna 写：
+
+anxiety -= 0.03;
+
+然后看着顺眼。
+
+Step 5：让 LLM 做诊断，不让它做裁判
+
+LLM 输入可以是：
+
+该字段 trace
+对应外部 event
+真人 state proxy
+行为预测 residual
+ablation 结果
+sensitivity curve
+
+然后让多个 AI 回答：
+
+为什么这个 field 没用？
+
+候选：
+
+字段定义错
+updater 错
+时间尺度错
+policy 没消费
+与另一字段冗余
+数据集根本不需要该变量
+
+然后它可以提出修改。
+
+但：
+
+修改后是否保留，还是 dev 数据说了算。
+
+Step 6：建立明确的删改规则
+
+我建议以后 mechanism evolution 直接有这种表：
+
+现象	默认动作
+字段几乎不变化	查 updater；无理论/数据需求则删
+字段变化但 π 不变	查 policy coupling；仍无增益则删
+大量 clamp	改尺度/函数
+与其他字段高度冗余	merge / remove
+只在一个数据集有效	标记 domain-specific
+跨数据集方向一致	提升为 core candidate
+真人 state proxy 明显不同	改 updater/lag
+加 history 后仍大幅提升	S 表示不足
+random/permuted S 一样	S 没实际作用
+
+这样我们以后改机制就不是：
+
+“我觉得这样更真实。”
+
+而是：
+
+“这个数据现象要求我们修改这个假设。”
+
+这正是你想要的。
+
+所以我现在会把路线排成这样
+                 ┌─ OPeRA
+                 ├─ LIGHT
+公开论文数据 ────┼─ HEART
+                 ├─ DYNToM
+                 └─ PersonaX
+
+                 ┌─ ClubFloyd
+                 ├─ PowerWash
+玩家日志 ────────┼─ AGAIN
+                 ├─ FarmQuest
+                 ├─ MineRL
+                 └─ replay datasets
+
+                       ↓
+
+             Unified ReplayRecord
+                       ↓
+               LLM Semantic Adapter
+                       ↓
+              Character Dynamics v0
+                       ↓
+       trace / sensitivity / ablation
+                       ↓
+          LLM + 人 做 failure diagnosis
+                       ↓
+            删字段 / 改 U_k / 改函数
+                       ↓
+                      v1
+                       ↓
+                    freeze
+                       ↓
+              untouched 多数据集 test
+
+这下我觉得我们的路线才真的开始有“研究味”了。
+
+我建议接下来仓库不要继续加角色机制，而是做这四件非常具体的事
+把 PowerWash、AGAIN、ClubFloyd、FarmQuest 登记进文献/数据资产库；
+做一个只有十来个字段的 ReplayRecord v0，不要造大框架；
+先写 ClubFloyd adapter——文本数据最轻，而且最贴剧情/小说；
+同时对 PowerWash + AGAIN 做字段审计，看它们到底能不能为我们的 S 提供真实动态约束。
+
+然后 LIGHT 接上作为 character/world 侧的第二个文本 adapter。
+
+这几条比现在继续折腾 OPeRA 的 action subtype 有价值多了。
+
+但是我们就要为了循环一一构建和数据集对应的场景，但是object要超过数据集已有的object，不然谁知道角色是没得选还是机制成立？同时更多object可能导致机制选择其他，但是没关系，我们要在循环中找到一个比较合理的参数或者机制结构
+
+对，而且你这一步其实把“只是做 replay”推进成了更像真正的 mechanism identification。
+
+因为如果我们只是照着数据集把当时出现过的 object 原样还原，确实有一个很严重的问题：
+
+角色选了 A，到底是因为机制真的偏向 A，还是因为现场根本没别的可选？
+
+这个问题不解决，π(A) 再漂亮也可能只是被 action support 限死了。
+
+所以我现在会把每个数据集对应的场景构造分成两层，而不是只做一个 faithful replay。
+
+第一层是 factual scene：尽可能忠实还原数据里当时确实存在、角色确实能接触到的东西。这个层只负责回答“我们的机制能不能解释真实行为”。
+
+第二层是 expanded diagnostic scene：在不破坏原任务语义的前提下，加入一批额外但合理的 object / affordance / actions，让机制真的有选择。这个层负责回答“机制为什么选这个，而不是只是没得选”。
+
+这两层不能混着当 ground truth。
+
+比如原日志是：
+
+宿舍
+电脑
+手机
+作业
+→ 玩家最后去玩手机
+
+如果我们只重建：
+
+电脑
+手机
+作业
+
+然后机制也选手机，这说明不了太多。
+
+expanded scene 可以加：
+
+床
+零食
+书
+音乐播放器
+洗澡
+聊天对象
+出门
+
+甚至一些和原行为竞争但语义不同的选项。
+
+然后看：
+
+当前 S / P / O
+↓
+为什么手机仍然高？
+为什么床不是第一？
+为什么学习不是第一？
+
+这时候我们才真正开始观察 mechanism structure。
+
+但这里有一个很重要的边界：
+
+新加 object 不能被当成“真实人当时也有这些选择”的事实。
+
+它们是diagnostic interventions。
+
+所以以后每个 episode 应该同时有：
+
+factual_support
+expanded_support
+
+而不是只有一个 A^O。
+
+我甚至建议明确写成：
+
+A_factual
+A_expanded
+
+前者来自数据，后者来自我们为了诊断机制构造的合理超集。
+
+然后实验分别问两件事：
+
+factual replay:
+真实动作 A* 在不在高概率区域？
+
+expanded diagnostic:
+加入其他合理选择后，机制是否仍表现出合理偏好结构？
+
+第二个没有真人 ground truth，所以不能用来证明“人真的会这样选”，但非常适合调机制。
+
+这正好对应你说的“循环中找到比较合理的参数或者机制结构”。
+
+其实这已经很像 system identification / model selection 了。
+
+我们不是在问：
+
+哪个参数最像心理学真值？
+
+而是在问：
+
+哪一套结构在多种外部轨迹和受控选择扩展下，既能解释真实行为，又不会因为加几个合理 alternative 就崩掉？
+
+这才是很有意义的 criterion。
+
+具体可以这样循环：
+
+1. 从外部数据恢复 factual scene
+2. 构建 expanded scene
+3. 跑当前机制
+4. 看真实 A* 排名
+5. 看新增 object 是否把 π 搅乱
+6. 做 sensitivity / ablation
+7. 找 dead field / dominant field / saturated field
+8. 改 updater / utility / timing / field structure
+9. 在 dev episodes 上重跑
+10. 换一批 episode 再验
+
+这里“更多 object 导致机制选择别的”不是坏事，反而是我们最想看到的诊断信号。
+
+比如加入：
+
+bed
+phone
+snack
+friend_message
+
+以后机制从：
+
+study 0.55
+phone 0.35
+
+变成：
+
+bed 0.60
+study 0.20
+phone 0.15
+
+那我们就要问：
+
+是 fatigue 权重太大？
+recovery action 的 utility 曲线太陡？
+task_pressure 没有参与竞争？
+还是本来这个状态下休息就应该是合理行为？
+
+这才是机制研究。
+
+而且 object 超集最好不是 LLM 随便凭空造。
+
+我建议来源分三级：
+
+Level 1：数据中真实出现
+Level 2：同一游戏/场景 ontology 中存在，但该 episode 未使用
+Level 3：LLM 提出的 plausible diagnostic object
+
+Level 3 可以用，但必须标成 synthetic diagnostic。
+
+这样以后我们知道：
+
+哪些选择是环境真实提供的，哪些是我们为了测试机制故意塞进去的。
+
+最后还有一个很关键的事情。
+
+我们不能每次为了让真实 A* 排第一就调参数。
+
+那样会变成：
+
+看答案 → 调函数 → 把答案顶上去。
+
+正确目标应该是多目标的：
+
+factual A* prediction 不差；
+expanded scene 下不被无关 distractor 随便扰乱；
+有意义 alternative 出现时概率能合理变化；
+字段 sensitivity 不为零；
+ablation 能说明哪些字段真的有用；
+不同数据集上不需要完全重写机制；
+参数不要极端依赖单一 episode。
+
+所以真正要找的不是“能拟合动作的参数”，而是：
+
+跨 episode、跨场景、跨数据集还能保持合理响应结构的一套最小机制。
+
+这就很接近我们现在真正该做的研究对象了。
+
+我觉得接下来代码层最好直接围绕这个设计：
+
+DatasetAdapter
+→ SceneBuilder
+   ├─ factual_scene
+   └─ expanded_scene
+→ CharacterDynamics
+→ Trace
+→ DiagnosticReport
+
+而不是继续在 C++ room 里手写更多固定物体。
+
+这条路线我现在非常认可。

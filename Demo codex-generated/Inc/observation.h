@@ -6,6 +6,16 @@
 #include <string>
 #include <vector>
 
+namespace FactKey {
+inline constexpr const char* WalletBalance = "wallet.balance";
+inline constexpr const char* RoomLight = "room.light";
+inline constexpr const char* RoomCurtain = "room.curtain";
+inline constexpr const char* RoomAlarm = "room.alarm";
+inline constexpr const char* RoomTemperature = "room.temperature";
+inline constexpr const char* ClockTime = "clock.time";
+inline constexpr const char* MessageUnreadCount = "message.unread_count";
+}
+
 enum class KnowledgeStatus {
     Known,
     Stale,
@@ -59,6 +69,8 @@ struct Observation {
 
 const ObservationFact* find_fact(const Observation& observation, const std::string& key);
 bool has_known_fact(const Observation& observation, const std::string& key, const std::string& value);
+bool known_bool(const Observation& observation, const std::string& key, bool& value);
+bool known_int(const Observation& observation, const std::string& key, int& value);
 Observation refresh_observation(Observation previous,
                                 const World& world,
                                 const WorldOutcome& previous_outcome,

@@ -1,0 +1,359 @@
+你看看仓库的数据集改造进度？
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+我刚看了最新 webgpt-sync。数据集改造本体这几分钟其实没有继续往前跑，推进的是“怎么改造、怎么审核”的流程规范。 最新 HEAD 是：
+```
+4ba603c  define adapter semantic audit workflow
+```
+也就是说现在已经把你刚才说的：
+```
+脚本抽取
+→ AI/人工语义审核
+→ 修脚本/标注
+→ 冻结中间数据
+→ runtime 不再调用审核模型
+```
+正式写进仓库了，但还没有新的真实 dataset adapter / ReplayRecord slice 出现。
+现在实际状态还是：
+```
+SOTOPIA
+✅ 真下载、真切了 30 episode
+✅ 有 export_slice.py
+✅ 做过结构审计
+❌ 研究准入失败
+→ 保留作格式/O-boundary参考
+```
+```
+OPeRA
+✅ 真下载 parquet
+✅ 30 session 审计
+✅ 527 session 全量统计
+✅ revision / SHA / split / action结构都核了
+⚠️ 只能作受限外部资产
+❌ 还没有 raw → ReplayRecord adapter
+```
+```
+LIGHT
+✅ 论文/数据资产定位
+✅ 已经知道要核哪些字段
+❌ 30–50 episode 实际审计还没开始
+❌ 没有 ReplayRecord slice
+❌ 没有 semantic annotation
+```
+所以论文线真正的“数据加工流水线”还没开始。现在最接近下一步的是 LIGHT T0c。
+这一条依旧比论文线晚一步：
+```
+ClubFloyd
+✅ 论文和规模核过
+✅ 已定为第一优先级文本玩家 adapter
+✅ 现在连 semantic audit 验收方法都已经定了
+❌ raw transcript 还没正式审
+❌ 20–50 trajectory slice 还没产出
+❌ adapter 还没写
+```
+```
+PowerWash
+✅ 数据价值和用途判断完成
+❌ 实际字段审计没做
+❌ slice 没做
+❌ adapter 没做
+```
+```
+AGAIN
+✅ 已知道适合 lag / decay / arousal dynamics
+❌ 实际字段审计没做
+❌ adapter 没做
+```
+```
+FarmQuest
+✅ 已知规模、事件类型、timestamp bug
+❌ 实际 slice / adapter 没做
+```
+JerichoWorld 是唯一额外实际摸过数据包结构的，但因为不是独立真人 A*，现在只是：
+```
+state / next_state / action / valid actions
+→ adapter接口参考
+```
+不进入真人行为证据线。
+现在 TODO 已经把第一个真实 adapter 的门槛写得非常具体了：
+```
+T0h compiled semantics
+T0i adapter semantic audit
+```
+第一批 20–50 条必须：
+```
+脚本生成 ReplayRecord
+↓
+逐条看：
+W/O/X/S 有没有放错
+有没有 future leakage
+动作有没有被压坏
+provenance 对不对
+factual/expanded 有没有混
+↓
+冻结 semantic annotation
+```
+而且明确规定：
+schema validator 通过 ≠ adapter 通过。
+这点现在已经正式固化了。
+所以如果用流水线表示目前位置：
+```
+数据资产发现               ✅
+        ↓
+ReplayRecord schema          ✅ 基本可用了
+        ↓
+field provenance             ✅
+        ↓
+compiled-semantics规则       ✅ 已定流程
+        ↓
+semantic audit流程           ✅ 刚刚完成
+        ↓
+══════════════════════════════
+        ↓
+第一个真实 adapter           ← 我们现在就在这里
+        ↓
+20–50条真实 ReplayRecord
+        ↓
+AI/人工逐条审核
+        ↓
+semantic_v0
+        ↓
+factual / expanded scene
+        ↓
+mechanism loop
+```
+所以现在可以说，基础设施阶段基本封口了，再继续写设计文档就开始过量了。下一步应该真的碰数据。
+我会优先建议：
+```
+玩家线：ClubFloyd 20–50 条
+论文线：LIGHT 30–50 条
+```
+这两个一旦各出来一份 ReplayRecord，我们才真正开始检验“跨数据集改造”这个想法，而不是继续设计它。
+命令luna做！
+可以，直接把这段发给 Luna。重点是：现在停止继续补设计文档，真正开始两条数据改造线。
+现在开始真正推进两条数据集改造线，不再继续扩写数据路线设计文档。
+当前 webgpt-sync 已经具备：
+- ReplayRecord v0
+- field-level provenance
+- compiled semantics 边界
+- adapter semantic audit 流程
+- schema validator
+- dev/test 污染规则
+这些基础设施已经足够。下一步必须碰真实数据。
+并行推进两个首批 adapter：
+```
+A. ClubFloyd：20–50 条 trajectory
+B. LIGHT：30–50 条 episode
+```
+目标不是一次把整个数据集改完，而是：
+用两个结构差异很大的真实数据源，实际检验 ReplayRecord v0 和 semantic-audit 流程是否成立。
+优先级最高。
+先核：
+- 原始 ClubFloyd transcript 的公开获取位置；
+- 数据/转录文本的许可或使用边界；
+- 对应论文、仓库、release/dump 版本；
+- 是否能稳定记录 source revision。
+不要只引用论文统计后直接假设原始数据可自由重新分发。
+如果原始 transcript 无法合法/稳定获取：
+- 记录阻塞原因；
+- 不伪造；
+- 再考虑 CALM release、官方处理版本或其他可追溯入口。
+先写最小脚本，例如：
+```
+02_实验/T0f_ClubFloyd/
+  README.md
+  extract_slice.py
+```
+脚本只负责：
+- 读原始 transcript；
+- 切 trajectory；
+- 保留 game / transcript / turn / actor 等原字段；
+- 按原始顺序恢复 observation → human action → next observation；
+- 生成稳定 trajectory/source id；
+- 保存 source revision / source reference；
+- 输出 20–50 条 dev slice；
+- 映射到 ReplayRecord v0；
+- 跑 validate_replay_record.py。
+不要让 extractor 做开放语义判断。
+尤其不要自动猜：
+- W；
+- 心理状态；
+- X/appraisal；
+- 人格；
+- hidden information；
+- 不存在于 source 的 candidate set。
+缺失就 unknown/null。
+ClubFloyd 的真实玩家输入是重要 A*。
+首批不要为了适配当前房间 demo，把：
+```
+take key
+open door
+ask wizard about ...
+```
+硬压成现有 16 个 ActionType。
+至少同时保留：
+```
+source_action_A_star
+normalized_action?  # 如有则另存
+```
+normalized_action 不是 observed ground truth，必须有单独 provenance。
+20–50 条导出完成后，先不要扩大数据量。
+逐条审核：
+1. source_O 是否真的只包含预测时已经可得的信息；
+2. source_action_A_star 是否对应真人实际下一动作；
+3. 有没有把 next observation 偷进当前 O；
+4. action mapping 是否损失关键语义；
+5. W 如果不能恢复，是否老实 unknown；
+6. candidate_set_factual 是否真有 source/engine 依据；
+7. 任何 inferred 字段是否标为 llm_inferred/annotated；
+8. trajectory 切分有没有跨 episode 泄漏；
+9. transcript 中系统文本、玩家命令、游戏反馈有没有被混成一种字段。
+第一版尽量近乎逐条审。
+可以由你先审，之后把 slice/审核结果提交，我会再复核。
+和 ClubFloyd 并行，但不要为追求进度写大框架。
+建立例如：
+```
+02_实验/T0c_LIGHT/
+  README.md
+  audit_slice.py
+  export_replay.py   # 如通过准入再加
+```
+逐条恢复：
+```
+actor
+turn
+persona
+setting / room
+objects
+history
+current observation/context
+true next action
+candidate actions（若 source 明确提供）
+```
+重点不是 dialogue 文本，而是优先找：
+有实际 physical/action trajectory 的 episode。
+先统计：
+- 每个 episode 有多少物理 action；
+- action 是否足够丰富；
+- 是否有合法候选集；
+- persona/world/action 是否同一时点可对齐；
+- actor-specific O 是否能在不看未来的情况下恢复。
+LIGHT 有丰富世界信息，但不能因为 dataset 有完整 world graph，就全部塞给角色。
+必须区分：
+```
+source world / environment information
+vs
+character-available observation
+```
+如果 source 无法证明某 world field 当时角色知道：
+```
+W = observed/source-supported
+O = unknown / only explicitly exposed subset
+```
+不能直接 W → O 全复制。
+如果 LIGHT/engine 真能给某步合法动作集：
+```
+candidate_set_factual
+```
+可以记录。
+但必须区分：
+- engine/world-valid actions；
+- character-known actions；
+- 我们后来为了诊断增加的 expanded actions。
+不能把 engine A^W 自动当 A^O。
+两边都必须输出同一个 ReplayRecord v0，不创建：
+```
+ClubFloydRecord
+LIGHTRecord
+DatasetReplayBase
+AdapterFactory
+```
+之类新体系。
+dataset-specific parser 可以不同，但统一输出 contract。
+每个首批 slice 至少保存：
+```
+source_dataset
+source_revision
+source_record_id
+trajectory_id
+subject_id if available
+split_id = dev
+source_episode_context
+steps:
+  t
+  source_O
+  source_event
+  source_action_A_star
+  source_step_context
+  W if source-supported
+  candidate_set_factual if source-supported
+  field_provenance
+```
+如果脚本无法完成某些语义归类：
+可以由你/AI人工辅助标注，但：
+```
+raw
+→ human/AI-assisted annotation
+→ 保存成冻结文件
+→ runtime 只读文件
+```
+不允许实验运行时重新询问 LLM。
+第一批甚至可以先只做：
+- lossless ReplayRecord；
+- semantic-audit notes。
+等我们实际看到 20–50 条以后，再决定 semantic_rules_v0 应该有哪些字段。
+不要提前造一百条假想规则。
+本轮禁止：
+- 大规模下载全量数据后直接批处理；
+- 重写当前 Action ontology；
+- 修改 S 字段；
+- 修改 U_k / utility；
+- 接入 live LLM；
+- 实现 factual/expanded scene engine；
+- 开 mechanism-identification loop；
+- 为两个 adapter 抽象公共继承体系；
+- 因数据不匹配而修改 ReplayRecord 成巨大万能 schema；
+- 用 A* 反推当前 step 的语义标签后假装预测时可得。
+当前只做：
+raw data → small ReplayRecord slice → semantic audit → 修 adapter。
+ClubFloyd：
+- 找到并记录可追溯 raw source / license
+- 20–50 trajectory dev slice
+- schema 全通过
+- human A* provenance 明确
+- 完成逐条 semantic audit
+- 记录 adapter 发现的 schema/语义问题
+LIGHT：
+- 30–50 episode 准入切片
+- action trajectory 长度统计
+- actor/persona/world/history/action 可恢复性结果
+- O 可否无泄漏重建的明确结论
+- candidate set 的来源和语义边界
+- 若准入通过，再导出 ReplayRecord；若失败，保留负结果
+最后提交一个短总结：
+```
+ClubFloyd:
+  可用 / 受限 / 不可用
+  哪些字段 observed
+  哪些字段 missing
+  哪些语义问题需要人工审核
+
+LIGHT:
+  可用 / 受限 / 不可用
+  哪些字段 observed
+  哪些字段 missing
+  哪些语义问题需要人工审核
+
+ReplayRecord:
+  哪些字段设计经真实数据验证
+  哪些地方暴露不足
+  是否真的需要改 schema
+```
+提交到 webgpt-sync。
+不要 merge main。
+这轮优先交付真实 slice 和审计结果，不要再用大量设计文档代替数据工作。
+等 Luna 第一批 ClubFloyd / LIGHT 切片提交以后，我来做第一次真正的 adapter semantic review。

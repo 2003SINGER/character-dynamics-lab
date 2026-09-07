@@ -1,0 +1,137 @@
+{
+  "version": "light-compiled-semantics-v0",
+  "status": "dev_diagnostic_only",
+  "matching": "casefolded first alphabetic token",
+  "groups": [
+    {
+      "name": "movement",
+      "verbs": [
+        "go",
+        "enter",
+        "leave",
+        "follow",
+        "approach",
+        "flee",
+        "travel"
+      ],
+      "features": {
+        "goal_progress": 0.45,
+        "stimulation": 0.1
+      }
+    },
+    {
+      "name": "manipulation",
+      "verbs": [
+        "get",
+        "take",
+        "give",
+        "put",
+        "drop",
+        "steal",
+        "use",
+        "wield",
+        "wear",
+        "remove"
+      ],
+      "features": {
+        "goal_progress": 0.6,
+        "environment_control": 0.2
+      }
+    },
+    {
+      "name": "environment_control",
+      "verbs": [
+        "open",
+        "close",
+        "lock",
+        "unlock",
+        "light",
+        "extinguish"
+      ],
+      "features": {
+        "goal_progress": 0.4,
+        "environment_control": 0.8
+      }
+    },
+    {
+      "name": "social_physical",
+      "verbs": [
+        "hug",
+        "kiss",
+        "pat",
+        "bow",
+        "wave",
+        "point"
+      ],
+      "features": {
+        "stimulation": 0.45,
+        "short_term_reward": 0.25
+      }
+    },
+    {
+      "name": "conflict",
+      "verbs": [
+        "hit",
+        "attack",
+        "fight",
+        "kick",
+        "punch",
+        "kill"
+      ],
+      "features": {
+        "goal_progress": 0.45,
+        "stimulation": 0.35
+      }
+    },
+    {
+      "name": "recovery",
+      "verbs": [
+        "sit",
+        "rest",
+        "sleep",
+        "lie"
+      ],
+      "features": {
+        "recovery": 0.85
+      }
+    },
+    {
+      "name": "consume",
+      "verbs": [
+        "eat",
+        "drink"
+      ],
+      "features": {
+        "short_term_reward": 0.65,
+        "recovery": 0.25
+      }
+    },
+    {
+      "name": "inspect",
+      "verbs": [
+        "look",
+        "examine",
+        "inspect",
+        "listen"
+      ],
+      "features": {
+        "stimulation": 0.35
+      }
+    }
+  ],
+  "default_features": {
+    "goal_progress": 0.0,
+    "stimulation": 0.0,
+    "recovery": 0.0,
+    "hunger_relief": 0.0,
+    "bathroom_relief": 0.0,
+    "short_term_reward": 0.0,
+    "environment_control": 0.0
+  },
+  "notes": [
+    "All current candidates are featurized before the held-out A* is identified for scoring.",
+    "Unmapped verbs remain zero and are counted, never repaired from A*.",
+    "candidate_set_factual remains a source candidate list and is not relabelled A^O.",
+    "This is dev diagnostic semantics, not a psychology claim."
+  ]
+}

@@ -1,6 +1,8 @@
 # TODO
 
-更新时间：2026-09-05
+> 2026-09-06 代码结构审计后的实验化边界：`prepare_decision` 已与 `settle_action` 分开，运行轨迹记录统一命名为 `StepRecord`；`FactKey` 与 `known_int/known_bool` 已提供最小 typed 读取。World/Decision/State 暂不做大拆分；verify/E0 的物理 tests/experiments 目录迁移留到真实 replay 需要时再做，不阻塞 T0d。
+
+更新时间：2026-09-06
 
 这是唯一行动清单，不保存整篇设计论证。“待决策”不等于授权实现；以下次序是依赖建议，没有新增用户 deadline。代码项仅在其边界、验收和实际状态可复核时更新。
 
@@ -43,17 +45,26 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 |---|---|---|---|
 | **T0** | **已完成审计；路线 B 待 pilot** | 审计独立 `A*` 来源；不要用本项目规则采样的动作自评 | [审计记录](../01_文献/专题审计_行为真值A星可行性_2026-09-05.md)：BehaviorChain 完整数据因版权暂不可得；CharacterBox 不构成独立 `A*`；SOTOPIA 可进入 30 episode 外部合成轨迹 pilot。**未通过 pilot 前不得启动正式 baseline 比较。** |
 | **T0b** | **已完成：结构通过，研究准入未过** | 从 SOTOPIA-π 公开 dump 导出 30 个 episode 的开发切片，核验 action、turn order、private/public information、provenance 与 episode-level split | 30/30 保留自身 goal 与对方 `Unknown`，但 provenance 在 dump 内未知，且动作表面高度坍缩为 `said/did nothing/left`，无法冻结不丢语义的有限动作 ontology。见 [T0b 结果](../01_文献/专题审计_行为真值A星可行性_2026-09-05.md#t0b-实测结果2026-09-05)。**不得据此启动 T14–T17。** |
-| **T0d** | **最高优先：待可行性审计** | 对 OPeRA 抽 30–50 个 session，核验 session 长度、动作 ontology/click subtype、user grouping、observation 完整性、rationale 位置、split 与未来泄漏；确认 finite candidate/ranking/NLL 可计算 | OPeRA 是人类 persona/history/observation→next action 候选，**官方统计与细节须独立复核**；只做准入审计，不训练。通过后优先于 LIGHT 进入 pilot。 |
-| **T0c** | **待可行性审计（低于 T0d）** | 对 LIGHT 做 30–50 条轻量数据审计：恢复 actor/turn/persona/当前世界/既往历史/真实动作/候选集；检查能否按角色重建 `O` 而不泄漏未来，并先核验物理动作长度 | 只做准入审计，**不训练、不重写动作 ontology**。通过才可考虑人类 replay；失败则记录原因，不用 LIGHT 宣称可用。详见[近邻与路线审计](../01_文献/专题审计_Paper0近邻与LIGHT路线_2026-09-05.md)。 |
+| **D02** | **已完成全量准入审计：暂缓 pilot** | [OPeRA 全量审计结果](../02_实验/T0d_OPeRA/2026-09-06_准入审计结果.md)：527 条 filtered session；真人 `A*`、O/action 时间序与有限粗标签可用，但官方 split 有 12 user overlap，exact target 无枚举候选集，rationale 时间位置未证实 | **先明确 OPeRA estimand 及能检验 persistent state 的标签层级；暂不训练、不把它写成当前 `A^O` 等价。** |
+| **D01** | **进行中：LIGHT 全量无损抽取已完成** | 已审计前 50 episode；全量扫描 10,268 episode，导出 7,258 条 trajectory / 25,001 physical-action steps，并生成聚合 QA 与分层 review slice。下一步人工核 actor/turn/persona/world/history/action 对齐、O 可见边界和候选集语义 | 当前仅为 restricted dev；不训练、不重写动作 ontology、不把 `available_actions` 自动当 `A^O`。详见 [LIGHT](../02_实验/T0c_LIGHT/README.md)。 |
+| **T0c-SC** | **已完成最小 bridge：外部 Replay 的 Scene Projection** | 已新增 Python source-preserving snapshot 编译器，并将 snapshot 投影接入 scene-aware candidate semantics；C++ `SceneSnapshot`/RoomDemo projection 与 dataset-neutral `CandidateSemantics` 已通过 smoke。后续转为人工 semantic audit，并为对象 affordance 增加可审计的 source/inferred 区分 | 仍不把 setting/objects 提升为 W，不把 source candidates 提升为 `A^O`；scene-aware v1 结果与 neutral scorer 工件见 [LIGHT](../02_实验/T0c_LIGHT/README.md) |
+| **T0c-TR** | **进行中：Scene transition → appraisal → theory-S** | 已在 41 trajectories / 140 steps 跑通 transition audit、固定 `eta=0.35` 的 three-condition smoke，并加入 T1–T6 最小边界测试；下一步独立审查 expected-effect 覆盖与 transition trace，再决定是否扩展 | 当前 `AppraisalTraceStateV0` 是历史结构化摘要，不是心理变量；不调参、不扩大 LIGHT、不把结果写成机制成立 |
+| **T0e** | **进行中：跨数据集接口草案** | 用十来个字段定义 `ReplayRecord v0`，先支持 schema 校验、缺失字段和 provenance；不冻结大框架 | [接口草案](../02_实验/跨数据集Replay接口_v0.md) 与 [JSON Schema](../02_实验/Replay/replay_record_v0.schema.json)；完成前不写大型 adapter 继承体系 |
+| **D03** | **进行中：ClubFloyd 全量无损抽取已完成** | 425 条 trajectory / 438,188 steps；375 条 quality-stratified review fixture。PowerWash 已下载并外挂到 `E:\library\科研\PowerWash`，待增量导出；AGAIN 受官方条款表单阻塞 | [数据资产登记](../01_文献/数据资产登记_玩家日志与公开轨迹_2026-09-06.md)；[ClubFloyd adapter](../02_实验/Replay/ClubFloyd/README.md)；semantic audit 仍未完成 |
+| **D04** | **进行中：FarmQuest 全量 event projection 已完成** | 42 participants / 29,328 telemetry lines / 122 sessions / 10,844 action-proxy steps；已生成 raw+parsed+transformed review fixture。timestamp 不用于排序，`source_O` 保持 null | [FarmQuest](../02_实验/T0f_FarmQuest/README.md)；semantic audit 仍未完成，不进入 mechanism loop |
+| **T0g** | **已完成边界设计；待具体实验 protocol** | Phase I（多数据集 dev + LLM-assisted semantics + 显式动力学迭代）、Phase II（冻结 `S/X/U/utility/timing`）、Phase III（新数据上的 fixed-semantics/live-LLM/direct-LLM 对照）已写入架构与 Replay 边界；不在本行启动真实 LLM 调用 | [Replay 接口语义边界](../02_实验/跨数据集Replay接口_v0.md#semantic-frontend-boundary)；test 不得反向改机制 |
+| **T0h** | **待启动：compiled semantics 小切片** | 第一个真实 adapter 先由人工/离线 AI 建立版本化固定语义规则表；运行时关闭 LLM，按 `X → U → S` 跑 dev；记录规则修改、失败原因与未来 LLM prompt 约束线索 | 规则不可按单条 `A*`/未来打补丁；待 ClubFloyd 小切片后再决定规则表字段与 protocol |
+| **T0i** | **待启动：首个 adapter 语义审核（结构切片已准备）** | 对 ClubFloyd 的 375 条 quality-stratified review fixture 逐条审 W/O/X/S 归属、动作语义、字段损失和 provenance；审核后冻结 semantic annotation 文件 | schema validator 已通过，但 semantic audit 尚未完成；未完成前不扩大批量、不进入 mechanism loop |
+| **T0j** | **待启动：首个反事实 replay smoke test** | 第一个真实 adapter 完成语义审核并接通 canonical replay 后，只实现一个单事件 `remove` 或 `replace`，输出 `ΔO/ΔX/ΔS/Δπ` 与 trace 元数据 | 同一 mechanism/semantic-rule/初始状态/随机种子，仅改变一个历史输入；不实现通用 engine，不进入新心理机制 |
 
 - [x] T13：**已冻结 Paper-0 问题卡**：[一页问题卡](Paper-0问题卡.md)。局部可观测、可回放的单角色 Forward；`P` 固定、`D` 导出；分别定义信息边界、预测近似充分性、状态必要性三条主张、外部 `A*`、baseline、split、NLL 口径与 no-go。E0 只验证控制链。
-- [ ] T14：建立 persona only、raw history、**结构化 history**、强 summary、`no-S`、`naive-S`、state 与置换-S基线；相同信息权限和模型条件；区分开发/测试，并报告 `S + history` 的残余收益。
+- [ ] T14：建立 persona only、raw history、**结构化 history**、强 summary、`no-S`、rank-matched 1D `Activity-S`/`ActionSupport-S`/`Theory-S`、state 与置换-S基线；相同信息权限和模型条件；区分开发/测试，并报告 `S + history` 的残余收益。v0 为设计历史；v1 raw-feature/probe 候选协议与一键 dev runner 见 [T14/T20 v1](../02_实验/T14_T20_rank_matched_probe_v1.md)，正式训练待独立行为真值准入。
 - [ ] T15：真实下一行为揭晓前输出概率/排名，做 Replay；控制身份泄漏、叙事 framing 和动作支持集。**2026-09-05 新增依据（迄今对"用 held-out NLL 而非人类评分"最强的一条支持）**：Game AI Pro V3 C04 是全套 146 章里**唯一的真人受试实验**——22 个 AI 对手、同日完成、顺序随机化、五点量表 + 开放式短答。结果：**「83% of players were unable to recognize an AI that was literally nothing more than a random number generator」**；享受度与实际/感知难度、智力、真实感**均不相关**，一个纯随机 AI 在"最好玩"上并列第二；且**「players invent stories for the nonplayer-controlled characters… They see cheating, bias, motivations, and desires where none exist」**。**人类评分测的是叙事可读性，不是机制保真度**，故只能作次要指标。同一来源还给出反向警告：**「In game AI, words sometimes speak louder than actions」**——这与 AI Town 的爆火互相印证（见资产页 §3.4）。
 - [ ] T16：做小消融再收缩机制；若 state 不优且无效率/可控性收益，接受更简单表示。
 - [ ] T17：接入有成本推断后，预先冻结质量容差，测总维护+决策 token/调用/延迟/成本，不只比较 prompt 长度。
 - [ ] T18：围绕最终窄问题做可复现职责级查新，记录数据库、检索式、时间、全文访问限制、引文追溯与等价先例。**起手先过一遍[研究问题页 §6.1](前台问题与候选创新.md) 的重合表**。⚠️ **2026-09-05 晚间修正**：原写「状态→分数→采样、承诺惯性、目标分桶、SmartObject、前置条件校验这五项…**不得再作为新颖性主张**」，**该约束力现已暂停**。理由：这些判定是在概念标签层做的比对，属用户批评过的错误方法（见[方法复核 §0](审核_文献比较方法与阶段缺口_2026-09-05.md)）。**T35 完成重审前，该五项只作提示，不作新颖性约束。**查新范围须显式纳入 GDC / Game AI Pro 等非学术来源（不在任何学术索引内，本次仅取到 2 篇，覆盖严重不足）。
 - [ ] T19：多 horizon 曲线。在约 20 / 100 / 500 决策点分别比较 raw history、强 summary 与 S 的 held-out NLL 或排名，找交叉点；不存在交叉点也原样记为结论。
-- [ ] T20：等维度对照消融。增设 naive-S（维度数与 theory-S 相同、维度非理论选定），与 theory-S 同成本比较；结论限定为当前数据、容量与 baseline 条件下的证据，不表述为心理机制已成立。判据见 D.2。
+- [ ] T20：等容量对照消融。当前先做 rank-matched 1D `Activity-S`、`ActionSupport-S` 与 `Theory-S`，三者使用同一 EMA 与同一 raw-feature conditional linear probe；待 appraisal 经验维度真正超过一维后，再升级 3D structural/hashed naive-S。结论限定为当前数据、容量与 baseline 条件下的证据，不表述为心理机制已成立。v0 为设计历史，v1 候选协议见 [T14/T20 rank-matched probe v1](../02_实验/T14_T20_rank_matched_probe_v1.md)。
 - [ ] T21：噪声填充消融。在 trace 中注入与行为无关的填充事件，观察 S 相对 raw history 的优势是否增大，检验正则化假设。
 - [ ] T22：把"引入心理学"落成可证伪链：选定 N 个 appraisal 维度 → 固定函数形式 → 等维度非理论对照 → 预先写定 ΔNLL 判定阈值。四步完成前，不把心理学贡献写进任何结论，见[Q09](未决问题与机制候选.md#q09-字段和理论怎么选收益怎么判)。
 - [x] T23a：**T18 的前置**——Game AI Pro 覆盖。已从 10 篇扩到 **A 级 43 章全部下载完毕**（4 卷共 146 章，官网免费 PDF，**不在任何学术索引内**）。已按相关度分级：A 级 43（定向核读）/ B 级 30（按需回查）/ C 级 73（不读，寻路·转向·人群·赛车·摄像机·动画·MCTS 等，与机制链无对应）。完整清单见[Game AI Pro 全景与工程 Gap](../01_文献/专题核读_GameAIPro全景与工程Gap_2026-09-05.md) §5 附录。

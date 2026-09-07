@@ -146,12 +146,6 @@ const char* task_status_name(TaskStatus status) {
     return "unknown";
 }
 
-struct TaskSnapshot {
-    double effort = 0.0;
-    double target = 0.0;
-    std::string status = "missing";
-};
-
 TaskSnapshot coursework_snapshot(const World& world) {
     if (const WorldTask* task = world.task_by_id("coursework")) {
         return {task->effort_done, task->effort_target, task_status_name(task->status)};
@@ -159,48 +153,64 @@ TaskSnapshot coursework_snapshot(const World& world) {
     return {};
 }
 
-struct StepTrace {
-    std::string decision_time;
-    std::string world_before;
-    Observation observation_at_decision;
+struct DecisionSnapshot {
+    Observation observation;
     Appraisal appraisal;
     StateUpdate state_update;
     CharacterState state_at_decision;
-    TaskSnapshot task_before;
     DecisionContext decision;
-    ActionType chosen_action = ActionType::Idle;
-    CharacterActionPlan action_plan;
-    WorldOutcome outcome;
-    CharacterState state_after_settlement;
-    TaskSnapshot task_after;
-    std::string sleep_observation_updates;
-    std::string world_after;
 };
 
-StepTrace advance_one_decision(World& world,
+DecisionSnapshot prepare_decision(World& world,
+                                  CharacterState& state,
+                                  Observation& observation,
+                                  const WorldOutcome& previous_outcome,
+                                  const Personality& personality,
+                                  const InformationAccess& information_access = {}) {
+    observation = refresh_observation(std::move(observation), world, previous_outcome, information_access);
+    DecisionSnapshot snapshot;
+    snapshot.observation = observation;
+    snapshot.appraisal = appraise(observation, state, personality);
+    clear_pending_appraisal_updates(observation);
+    snapshot.state_update = update_state(state, snapshot.appraisal, personality, previous_outcome.elapsed_minutes);
+    snapshot.state_at_decision = state;
+    snapshot.decision = decide(observation, state, personality);
+    return snapshot;
+}
+
+WorldOutcome settle_action(World& world,
+                           CharacterState& state,
+                           Observation& observation,
+                           ActionType action,
+                           const InformationAccess& information_access) {
+    const WorldOutcome outcome = world.settle(action);
+    apply_self_action_feedback(observation, outcome, world.time_summary(),
+                               information_access.self_task_completion_observable);
+    update_commitment(state, observation, total_minutes(world.time));
+    return outcome;
+}
+
+StepRecord advance_one_decision(World& world,
                                CharacterState& state,
                                Observation& observation,
                                WorldOutcome& previous_outcome,
                                std::mt19937& action_rng,
                                const Personality& personality,
                                const InformationAccess& information_access = {}) {
-    StepTrace trace;
-    observation = refresh_observation(std::move(observation), world, previous_outcome, information_access);
-    trace.observation_at_decision = observation;
+    StepRecord trace;
+    const DecisionSnapshot snapshot = prepare_decision(world, state, observation, previous_outcome,
+                                                       personality, information_access);
+    trace.observation_at_decision = snapshot.observation;
     trace.decision_time = world.time_summary();
     trace.world_before = world.summary();
-    trace.appraisal = appraise(observation, state, personality);
-    clear_pending_appraisal_updates(observation);
-    trace.state_update = update_state(state, trace.appraisal, personality, previous_outcome.elapsed_minutes);
-    trace.state_at_decision = state;
+    trace.appraisal = snapshot.appraisal;
+    trace.state_update = snapshot.state_update;
+    trace.state_at_decision = snapshot.state_at_decision;
     trace.task_before = coursework_snapshot(world);
-    trace.decision = decide(observation, state, personality);
+    trace.decision = snapshot.decision;
     trace.chosen_action = sample_action(trace.decision, action_rng);
     trace.action_plan = world.expand_action(trace.chosen_action);
-    trace.outcome = world.settle(trace.chosen_action);
-    apply_self_action_feedback(observation, trace.outcome, world.time_summary(),
-                               information_access.self_task_completion_observable);
-    update_commitment(state, observation, total_minutes(world.time));
+    trace.outcome = settle_action(world, state, observation, trace.chosen_action, information_access);
     trace.state_after_settlement = state;
     trace.task_after = coursework_snapshot(world);
     if (!trace.outcome.sleeping_sensory_events.empty()) {
@@ -309,7 +319,7 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
             std::mt19937 action_rng(action_seed);
 
             for (int step = 1; step <= kBatchStepsPerRun; ++step) {
-                const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome,
+                const StepRecord trace = advance_one_decision(world, state, observation, previous_outcome,
                                                              action_rng, personality, scenario.information_access);
                 std::ostringstream event_ids;
                 for (std::size_t event_index = 0; event_index < trace.outcome.events.size(); ++event_index) {
@@ -890,7 +900,7 @@ std::string Simulation::run_profile(const Personality& personality,
     for (int step = 1; step <= steps_per_run; ++step) {
         const std::vector<ActionType> world_actions = world.available_actions();
         const bool was_observation_frozen = previous_outcome.observation_frozen_during_action;
-        const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome,
+        const StepRecord trace = advance_one_decision(world, state, observation, previous_outcome,
                                                      rng, personality, scenario.information_access);
 
         if (verbose_trace) {

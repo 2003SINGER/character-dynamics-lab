@@ -1,0 +1,37 @@
+{
+  "manifest": {
+    "schema_version": "replay_adapter_manifest_v0",
+    "dataset": "AGAIN",
+    "role": "telemetry_with_causal_arousal_proxy",
+    "session_count": 20,
+    "games": [
+      "ApexSpeed",
+      "Endless",
+      "Heist!",
+      "Pirates!",
+      "Run'N'Gun",
+      "Shootout",
+      "Solid",
+      "TinyCars",
+      "TopDown"
+    ],
+    "step_count": 9302,
+    "aligned_step_count": 9302,
+    "review_fixture_count": 300,
+    "source_O": "null",
+    "source_action_A_star": "null",
+    "state_label": "null",
+    "annotation_time_unit": "milliseconds in raw annotation; divided by 1000 to session seconds",
+    "causal_alignment": "latest valid annotation time_stamp <= telemetry time_stamp within session; no future interpolation",
+    "future_guard_pass": true,
+    "replay_sha256": "bb2707c1fac1a6f8b5c265953ccf49147d7bfda9c6c237a2a29a0fd6aaef870c",
+    "review_sha256": "3b1479a5d6aed53e7c908301b85f811c6816d0a89962e85d43c70210bff37feb"
+  },
+  "hard_checks": {
+    "future_annotation_never_used": true,
+    "source_O_all_null": true,
+    "source_action_A_star_all_null": true,
+    "state_label_all_null": true,
+    "artifact_step_count_matches_manifest": true
+  }
+}

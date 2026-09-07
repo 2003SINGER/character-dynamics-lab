@@ -23,7 +23,7 @@
 
 ## 首轮比较与报告
 
-`persona-only`、raw history、结构化 history、strong summary、`no-S`、`naive-S`、theory-S、permuted-S；统一 finite candidate set 与 O 权限。主指标为 held-out action NLL（同时报告 Δbits、按候选集分层的原始 NLL 与预注册分母归一化值），辅以 ranking、support 命中和成本/延迟。报告 session/user split，禁止未来泄漏、身份泄漏与叙事 framing 泄漏。
+`persona-only`、raw history、结构化 history、strong summary、`no-S`、rank-matched 1D `Activity-S`/`ActionSupport-S`/`Theory-S`、permuted-S；统一 finite candidate set 与 O 权限。T14/T20 的 1D 条件统一使用同一 conditional linear probe，不为 theory-S 手写专用 action head；正式训练前冻结协议见 [rank-matched probe](../02_实验/T14_T20_rank_matched_probe_v0.md)。主指标为 held-out action NLL（同时报告 Δbits、按候选集分层的原始 NLL 与预注册分母归一化值），辅以 ranking、support 命中和成本/延迟。报告 session/user split，禁止未来泄漏、身份泄漏与叙事 framing 泄漏。
 
 ## 失败条件与 no-go
 

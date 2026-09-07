@@ -1,0 +1,620 @@
+它在工作的时候你看看仓库哪些ai补丁式的屎山又出现了。然后长期怎么解决呢？还是周期性的让你看一遍吗？
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+看了一圈。现在仓库还没到“屎山”，但AI 补丁式开发的几个典型病灶已经很清楚了。而且下一阶段开始接多个 dataset adapter、scene builder、diagnostic loop 后，如果不管，恶化速度会比之前快很多。
+第一还是 simulation.cpp。现在已经 58 KB，而整个 C++ 源码/头文件加起来才约 151 KB，它一个文件就占接近四成。它同时还管 batch 输出、runtime、verify()、E0、fixture、CSV serialization、profile run 等。前面虽然把 prepare_decision / settle_action 拆出来了，但只是逻辑拆开，还没有职责拆开。
+尤其 Simulation::verify() 还是典型 AI 补丁坟场：
+```
+const bool reproducible = ...
+const bool profile_sensitive = ...
+const bool validates_world = ...
+const bool preserves_rejected_feedback = ...
+const bool ...
+...
+return a && b && c && d && ...
+```
+每发现一个 bug，Luna 最自然的动作就是：
+在 verify() 下面再塞一个 fixture + 一个 bool。
+这个是当前代码里最需要盯住的地方。不用现在大重构，但以后不许再往里面无限追加新数据集/实验逻辑。
+第二是 Observation 的 typed 化只做了一半。我们已经有：
+```
+FactKey::WalletBalance
+known_int(...)
+known_bool(...)
+```
+但 observation.cpp 仍然大量存在：
+```
+"object." + object.id
+"room.light"
+"task." + task.id + ".status"
+"message.unread_count"
+"outside.weather"
+```
+这不是马上要全改，而是典型的“AI 修到报错点就停”。以后 dataset adapter 一来，如果每个 adapter 又各造自己的字符串 ontology，很快会变成：
+```
+task.status
+task_state
+task.coursework.status
+objective.status
+```
+然后没人知道是不是同一件事。
+第三，实验脚本已经开始长出各自为政的苗头。现在 OPeRA 就有：
+```
+audit_opera.py
+audit_local_parquet.py
+long_trajectory_stats.py
+```
+每个都自己：
+```
+读 parquet
+拼 train/test
+做 split
+统计
+写 json
+```
+目前只有三个，所以没问题。但刚刚我们已经准备接：
+```
+LIGHT
+ClubFloyd
+PowerWash
+AGAIN
+FarmQuest
+...
+```
+如果 Luna 按现在这个风格继续，它非常可能变成：
+```
+light_adapter.py
+light_stats.py
+light_audit.py
+clubfloyd_adapter.py
+clubfloyd_stats.py
+clubfloyd_scene.py
+powerwash_audit.py
+powerwash_clean.py
+...
+```
+然后每个都有自己的一套 split/provenance/hash/schema。
+这会是下一轮真正的大屎山来源。
+第四，90_原始材料 已经明显 AI 化膨胀了。现在是：
+```
+53 个文件
+约 1.55 MB
+```
+而全部 C++ 源码才约：
+```
+151 KB
+```
+更夸张的是我直接查到了三个完全相同的 blob：
+```
+2026-09-06_WebGPT_E0_provenance复核/复核原文.txt
+2026-09-06_WebGPT_代码结构审计/审计原文.txt
+2026-09-06_WebGPT_阶段封口复核/复核原文.txt
+```
+它们 Git blob SHA 完全一样。
+也就是说 Luna 在归档时真的出现了：
+“这轮有 WebGPT review → 新建目录 → 把一整坨原文再复制进去”
+这种机器式流程。
+这个东西对科研没有危害，但典型 AI 垃圾增殖。以后半年会非常难找东西。
+第五，TODO.md 已经 26.9 KB。它原本应该是行动清单，现在逐渐同时承担：
+```
+任务
+研究结论
+文献论证
+实验历史
+边界声明
+旧错误纠正
+```
+这个也是 AI 特别喜欢的模式：
+不敢删旧内容 → 每次加一条解释 → TODO 变成第二份论文。
+目前还能用，但以后要控制。
+685c319 把我刚指出的：
+```
+--out 参数错误
+user_long 统计 bug
+T0d 状态不同步
+```
+都修了。
+所以这一轮新增代码不是问题。
+真正的问题是结构性：
+Luna 很会解决局部问题，但它天然不会知道“这个局部问题已经是第七次往同一个地方塞东西了”。
+这正是 AI coding 最危险的地方。
+周期性让我审当然很有用，但如果完全靠这个，会变成：
+```
+Luna 堆 3 天
+↓
+WebGPT 清一次
+↓
+Luna 再堆
+↓
+WebGPT 再清
+```
+本质上只是我当垃圾回收器。
+更好的模式是三层防线。
+- 第一层：仓库自己防。 给 Luna 一个很短的 ARCHITECTURE_RULES.md / agent rule，只写硬约束。例如：实验不得复制 runtime pipeline；dataset adapter 必须输出统一 ReplayRecord；原始字段和 LLM 推断字段必须有 provenance；不能向 Simulation::verify() 继续塞跨数据集实验；同一数据读取逻辑出现第三次就抽公共函数；任何 test 数据参与机制修改后立即降级为 dev；禁止为了“架构优雅”建 factory/plugin/DI。这个不是设计完整框架，而是防止 AI 自由生长。 
+- 第二层：机器能检查的就自动查。 至少加几个廉价 guard：CTest 必须过；Python adapter 有一个 schema validator；检查重复原始材料 blob；记录文件大小/函数长度趋势；experiment output 必须带 revision、dataset revision、split/provenance。以后甚至可以让 CI 警告“simulation.cpp 又增加 500 行”“新 adapter 没有 ReplayRecord validator”，不一定阻止 merge，但会亮灯。 
+- 第三层：我做阶段性 architecture audit。 不按“每三天”死周期，而是按阶段门：接入第一个新 adapter 后看一次；新增第二种数据域后看一次；第一次真正改 S/U_k 后看一次；准备 freeze v1 前彻底看一次；准备合并 main 前再看一次。平时小 bug 不需要我每 commit 审结构。 
+我更推荐这种 事件触发审计，而不是固定周检。
+我们马上要开始：
+```
+外部数据
+→ adapter
+→ scene
+→ mechanism
+→ diagnostics
+→ mechanism revision
+```
+这里最容易出现的 AI 屎山，不是 C++ 本体。
+而是：
+所以在 Luna 真正开写 ClubFloyd / LIGHT / PowerWash 之前，我认为只需要先定一个非常小的公共接口，不要搞框架：
+```
+ReplayRecord
+```
+或者 Python dataclass：
+```
+trajectory_id
+subject_id
+step
+observation
+event
+true_action
+persona?
+world?
+candidate_actions?
+provenance
+```
+然后：
+```
+OPeRA adapter ─┐
+LIGHT adapter ─┤
+ClubFloyd ─────┼→ ReplayRecord
+PowerWash ─────┤
+AGAIN ─────────┘
+```
+之后 scene builder 才读这个。
+只统一输出，不统一所有内部实现。
+不需要：
+```
+IAdapterFactory
+AbstractDataset
+PluginManager
+AdapterRegistry
+```
+这些全是另一种 AI 屎山。
+完整聊天不是不能存，但不要每次 review 都存。
+以后分成：
+```
+重要研究决策 / 用户原创思考
+→ 保存完整原文
+
+普通 WebGPT code review
+→ 只记录：
+   commit
+   发现的问题
+   结论
+   后续动作
+```
+Git 本身已经保存了历史。
+没必要再让 Luna把我的一千行回复复制三遍。
+目前这三份重复 blob甚至可以以后清掉两个，但现在不值得为这个单独开清理任务。
+平时：
+“看最新推送。”
+我主要做 correctness / research validity review。
+到了比较大的节点，你明确说：
+“做一次结构审计，专门找 AI patch debt。”
+我就不管研究方向，只看：
+```
+重复实现
+职责膨胀
+隐藏 coupling
+旁路
+实验/runtime 分叉
+数据 schema 漂移
+provenance
+测试缺口
+文档重复
+死抽象
+```
+大概每 5–10 个实质 commit 或每完成一个 milestone 看一次就已经很够了，不需要每个 commit 都扫。
+而且现在我已经有一个很明确的基准点：685c319 可以当下一轮 architecture audit 的 baseline。
+以后我可以直接比较：
+从 685c319 到现在，哪些文件在膨胀、哪些职责新增、哪些逻辑被复制了。
+这样比每次凭感觉说“这里好像有点屎”强得多。
+所以答案是：**对，长期还是让我周期性看，但把它变成“仓库自动守底线 + Luna遵守硬规则 + 我在阶段门做结构审计”。**这样 AI coding 才能一直保持高速度，而不是速度越快技术债越快。
+支持，你设计一下怎么弄，然后我交给luna
+可以，我给你一份直接丢给 Luna 的实施任务。核心原则是：防 AI patch debt，但绝不为了防屎山造另一套“企业级架构屎山”。
+请基于当前 webgpt-sync@685c319 做一次小而明确的仓库治理改造，目标不是重构 Character Dynamics 本身，而是建立长期防止 AI 连续补丁式技术债的护栏。
+当前开发模式会长期由 AI 高频修改，所以需要形成三层防线：
+1. Agent 可读的架构硬规则
+2. 机器可自动检查的廉价 guard
+3. 阶段性人工 architecture audit
+这次只实现前两层所需的最小基础设施，并记录第三层流程。
+严禁趁机：
+- 大拆 World
+- 重写 Decision
+- 插件化 State
+- 建 factory / DI / registry / plugin manager
+- 建复杂 schema framework
+- 大规模搬文件
+- 为“clean code”进行无研究收益重构
+当前目标是 让未来 AI 不容易越补越乱，不是让仓库看起来像企业项目。
+新增：
+```
+ARCHITECTURE_RULES.md
+```
+或放在仓库现有 agent/rules 最容易被 Codex/Luna 自动读取的位置；如果仓库已有明确项目级 agent instructions，则优先整合进去而不是造第二套冲突规则。
+内容必须短、硬、可执行，建议控制在 100–180 行以内。
+至少冻结以下规则。
+实验代码不得手工复制：
+```
+O refresh
+→ appraisal X
+→ state update
+→ decision π
+→ settlement
+```
+正式 runtime 和 replay/experiment 必须尽量共享同一 canonical pipeline / record。
+如果实验需要不同流程，必须明确写：
+- 为什么不同；
+- 哪一步不同；
+- 是否会造成行为语义不一致。
+以后不得继续把跨数据集实验、adapter、baseline 塞进：
+```
+Simulation::verify()
+Simulation::run_e0()
+```
+verify = invariant / regression test。
+experiment = measurement / dataset comparison。
+两者不能继续混长。
+prepare_decision / settle_action 当前可以继续留在匿名 namespace，直到真实 replay 需要跨文件调用；不要为了架构美观提前抽出去。
+我们即将接：
+```
+OPeRA
+LIGHT
+ClubFloyd
+PowerWash
+AGAIN
+FarmQuest
+其他游戏日志
+```
+禁止每个数据集独立发展成一套实验宇宙。
+但也禁止现在建：
+```
+AbstractDataset
+IAdapter
+AdapterFactory
+PluginManager
+Registry
+```
+只定义一个最小数据契约。
+建议新增文档：
+```
+03_数据/ReplayRecord_v0.md
+```
+如果当前目录结构更适合别处，可调整位置，但只能有一个 canonical 定义。
+ReplayRecord v0 至少定义：
+```
+trajectory_id
+subject_id
+step_index
+timestamp?
+
+observation
+event?
+true_action
+
+persona?
+world?
+candidate_actions?
+
+source_dataset
+source_revision
+provenance
+```
+重点不是字段名字必须完全一样，而是语义必须固定。
+其中每个字段应明确三种来源之一：
+```
+observed
+annotated
+llm_inferred
+```
+允许：
+```
+unknown / missing
+```
+严禁 LLM 为了填满 schema 把不存在的：
+```
+W
+O
+candidate set
+persona
+```
+伪造成 ground truth。
+每个 dataset adapter：
+```
+raw source
+↓
+dataset-specific parser
+↓
+ReplayRecord v0
+```
+dataset-specific 内部实现不需要统一。
+只统一输出契约。
+LLM 可以做：
+```
+自然语言 action → semantic action family
+event → event category
+日志 → structured O
+日志改写/规范化
+候选 semantic mapping
+异常诊断
+```
+但任何 LLM 生成/推断的内容必须保留：
+```
+source_raw / source_reference
+model
+prompt_version
+confidence 或 uncertainty
+provenance = llm_inferred
+```
+并允许模型返回：
+```
+UNKNOWN
+```
+不要设计“所有字段必须有值”的 schema。
+LLM 推断出的：
+```
+W
+belief
+state
+intent
+```
+不能改名后当成原数据 ground truth。
+新增一条明确研究规则：
+任何数据只要被用于：
+- 修改 S 字段
+- 修改 updater
+- 修改 utility
+- 调参数
+- 修改 timing
+- 选择 action ontology
+- 根据结果决定保留/删除机制
+它就已经是 dev，不能继续作为 untouched test。
+以后 experiment metadata 至少要能记录：
+```
+dataset_revision
+split_definition
+role = dev / test / audit
+mechanism_revision
+git_revision
+```
+不要现在造数据库，先形成文档规范和简单 validator 即可。
+现在 CMake 已有：
+```
+CTest --verify
+```
+保留。
+再增加一个非常轻的仓库 health check，建议：
+```
+tools/repo_health_check.py
+```
+或其他合适路径。
+它只做廉价、稳定、不会误伤科研开发的检查。
+对代码文件：
+```
+*.cpp
+*.h
+*.py
+```
+输出最大的若干文件。
+建议警告而不是 fail，例如：
+```
+WARN simulation.cpp > 50 KB
+```
+当前 simulation.cpp ≈58 KB 已知，不要求本轮把它降下来。
+目标是以后能看到：
+```
+58 KB → 71 KB → 94 KB
+```
+这种趋势。
+当前已存在重复归档：
+```
+2026-09-06_WebGPT_E0_provenance复核/复核原文.txt
+2026-09-06_WebGPT_代码结构审计/审计原文.txt
+2026-09-06_WebGPT_阶段封口复核/复核原文.txt
+```
+三者内容完全相同。
+health check 至少能报告：
+```
+WARN duplicate content:
+A
+B
+C
+```
+本轮不要求清历史。
+以后阻止继续无限复制即可。
+对于正式标记为实验结果的 metadata / manifest，尽量检查是否包含：
+```
+git_revision
+dataset/source revision
+purpose
+split / role
+```
+注意：
+- E0 synthetic fixture 没有 dataset revision 很正常；
+- 不要写死一个所有实验都一样的 schema；
+- 可以按 experiment manifest 类型做最小检查。
+等 ReplayRecord v0 定义后，增加一个很小的 validator：
+```
+tools/validate_replay_record.py
+```
+或者 JSON Schema，如果更简单。
+只检查：
+- 必需字段存在；
+- provenance 合法；
+- true_action 不能来自 llm_inferred 而又被声明为真人 ground truth；
+- unknown/missing 合法；
+- 不检查具体业务 ontology。
+不要上 Pydantic 大体系，除非仓库已有依赖。
+health check 的以下项目默认只 WARN：
+```
+文件太大
+函数太长
+TODO 太长
+重复原文
+```
+不要因为：
+```
+simulation.cpp > 500 lines
+```
+直接 CI fail。
+科研 prototype 有时大 switch / 显式实现反而比抽象层更透明。
+真正应该 fail 的是：
+```
+validator 明确失败
+CTest regression
+实验 provenance 缺失关键字段
+ReplayRecord 非法
+```
+代码美观类只警告。
+不要立刻清历史。
+新增简短规则：
+- 用户原创研究推理
+- 重大方向转折
+- 关键机制争论
+- 会影响论文 provenance 的 review
+- 用户明确要求保存
+- 普通 bug review
+- 一次性 code review
+- provenance 小修
+- TODO 同步
+- 单纯“同意/通过”型复核
+这类以后只记录：
+```
+reviewed_commit
+issue
+decision
+follow-up
+```
+几十行以内即可。
+Git history 本身已经保存代码变化，不需要重复保存一千行 AI 回复。
+TODO.md 现在已经约 27 KB。
+以后它只负责：
+```
+ID
+状态
+下一动作
+完成条件
+关键依赖/链接
+```
+不要再往 TODO 里塞完整文献论证、长研究讨论、完整实验解释。
+长论证放对应：
+```
+研究设计
+文献审计
+实验结果
+```
+TODO 只链接过去。
+当前历史内容不用大清洗。
+只从此以后停止继续膨胀。
+把：
+```
+685c319
+```
+记录为本轮 anti-patch-debt baseline。
+新增一个很短的：
+```
+00_研究设计/architecture_audit_policy.md
+```
+记录未来何时触发人工审计。
+不是固定每几天。
+采用 milestone trigger：
+```
+1. 第一个新 dataset adapter 完成后
+2. 第二种不同数据域接入后
+3. 第一次因外部 dev 数据修改 S/U_k/utility 后
+4. mechanism v1 freeze 前
+5. 合并 main 前
+6. 或距上次审计累计 5–10 个实质 commit 后
+```
+人工 audit 重点检查：
+```
+重复 pipeline
+职责膨胀
+dataset schema 漂移
+实验/runtime 分叉
+hidden side-channel
+字符串 ontology 漂移
+provenance 丢失
+dev/test 污染
+无意义抽象
+dead helper / dead field
+文档重复
+```
+记录即可：
+Demo codex-generated/Src/simulation.cpp
+约 58 KB。
+已知包含：
+- runtime orchestration
+- batch
+- CSV
+- verify
+- E0
+- profile run
+未来若 Replay/新 experiments 继续进入该文件，则需要职责拆分。
+本轮不主动大拆。
+Observation string keys
+当前 typed FactKey 只部分覆盖。
+未来新 adapter 不得直接把 dataset ontology 塞进 runtime Observation string namespace。
+等出现真实跨数据集需求再扩 typed/central key layer。
+Python experiment scripts
+目前：
+```
+audit_opera.py
+audit_local_parquet.py
+long_trajectory_stats.py
+```
+还可接受。
+以后如果第三次出现完全重复的：
+```
+read split
+hash IDs
+write manifest
+revision metadata
+```
+再抽一个小公共 helper。
+遵循：
+Rule of Three
+不要第一次重复就抽象。
+完成后必须给出：
+1. 新增/修改文件清单；
+2. 每条 guard 是：
+   - WARN
+   - FAIL
+   - documentation-only
+3. health check 实际运行一次；
+4. CTest / --verify 仍通过；
+5. 不改变 Character Dynamics runtime 行为；
+6. 不新增大型依赖；
+7. 不引入 factory/plugin/DI；
+8. 不开始 ClubFloyd/LIGHT/PowerWash adapter；
+9. 不修改 S 数值机制；
+10. 不合并 main。
+提交到：
+```
+webgpt-sync
+```
+提交信息建议：
+```
+chore: add anti patch-debt repository guards
+```
+完成后停下，等 WebGPT 做 architecture review。
+这个任务我建议你整段直接给 Luna。这次我特意没让它顺便清 simulation.cpp，因为最怕 Luna 看见“技术债”三个字以后开始做一场 2000 行的重构。
+我们现在要的其实不是“消灭技术债”，而是建立一个技术债雷达：
+哪块又开始长了，我们能看见；
+ 真影响实验可信度的时候再动刀。
+以后我做结构审计时也会以 685c319 为基准，不再每次从零凭感觉看。

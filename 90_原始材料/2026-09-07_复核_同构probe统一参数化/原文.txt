@@ -1,0 +1,725 @@
+看看同构 linear probe  能不能用到别的计算部分？这样可以快速梯度确定出一套合适的比较好的参数！
+
+可以，而且我觉得这甚至可能成为我们系统一个很漂亮的工程/研究分层：
+
+符号机制负责“什么能看见、发生了什么、状态表示什么”；可微 probe 负责“这些量应该以多大权重影响行为”。
+
+这样我们就不用继续手填 0.70 / 0.25 / 0.35 / 0.20 这种明显只是占位的数字了。
+
+现在其实已经有一大片计算天然是线性的。比如 candidate 预测可以统一写成：
+
+$$ z_{t,a} = \beta^\top\phi_{t,a} + \gamma^\top b_{t,a} + S_t^\top W\phi_{t,a} $$
+
+其中：
+
+\(\phi_{t,a}\)：action semantics，比如 goal_progress / stimulation / recovery / reward / environment_control ...
+\(b_{t,a}\)：Scene binding，例如 target_in_scene / visible / already_carried
+\(S_t\)：persistent state
+\(\beta\)：动作语义的基础权重
+\(\gamma\)：Scene/O 对动作的影响
+\(W\)：S 对不同动作语义的调制
+最后 softmax 得 \(\pi(A)\)
+
+然后直接用真人 A*：
+
+$$ L=-\sum_t\log \pi(A_t^*) $$
+
+梯度一次性把这些参数学出来。
+
+这会比现在这种：
+
+goal_progress * 0.70
+stimulation * 0.25
+recovery * 0.50
+
+visible → +0.08
+not in scene → -0.35
+
+S influence → 0.20
+
+科学得多。
+
+我尤其想把 current scene 的手工 bias 也干掉
+
+现在我们有类似：
+
+target 不在 scene    → -0.35
+visible              → +0.08
+already carried      → -0.12
+
+这些其实根本没必要写死。
+
+直接暴露：
+
+target_in_scene
+target_visible
+target_in_inventory
+verb_target_match
+...
+
+作为 candidate features。
+
+然后：
+
+$$ z_a = \cdots +\gamma_1 I_{\text{scene}} +\gamma_2 I_{\text{visible}} +\gamma_3 I_{\text{inventory}} $$
+
+让 train split 自己学：
+
+γ_scene
+γ_visible
+γ_inventory
+
+这样 SceneSnapshot → candidate 的结构仍然是我们设计的，但“visible 到底值 +0.08 还是 +0.37”不需要拍脑袋。
+
+连 U 都能做一部分可微
+
+我们现在：
+
+$$ S_{t+1} = S_t+\eta(X_t-S_t) $$
+
+其实就是：
+
+$$ S_{t+1} = (1-\eta)S_t+\eta X_t $$
+
+完全可微。
+
+令：
+
+$$ \eta=\sigma(\rho) $$
+
+那么 ρ 是任意实数，而 η 永远自动限制在 \(0,1\)。
+
+于是可以：
+
+trajectory
+↓
+X1 → S1
+↓
+X2 → S2
+↓
+...
+↓
+π(A)
+↓
+NLL
+
+直接 backprop through time，把 η 也学出来。
+
+以后多维甚至可以升级：
+
+$$ S_{t+1} = A S_t + B X_t $$
+
+其中：
+
+A = persistence / decay
+B = appraisal 写入状态的方式
+
+这就是一个很小的可解释线性 state-space model。
+
+例如：
+
+positive_conduciveness
+        ↓ B
+satisfaction-like state
+
+negative_conduciveness
+        ↓ B
+tension-like state
+
+再由 held-out behavior 决定这些 coupling 有没有预测价值。
+
+这就开始很有意思了。
+
+但是这里有一道必须守死的线
+
+不是所有东西都应该梯度学。
+
+我会这样切：
+
+部分	是否适合 gradient fit	原因
+Candidate semantic 权重 \(\beta\)	非常适合	纯 policy calibration
+Scene/O feature 权重 \(\gamma\)	非常适合	替代人工 +0.08/-0.35
+\(S\times action\) interaction \(W\)	非常适合	我们正在设计的同构 probe
+softmax temperature	适合	纯概率校准
+EMA \(\eta\)	可以，但要谨慎	已进入 state dynamics
+多维 \(A,B\) updater	可以，后期做	可作为 constrained dynamics
+appraisal event → X 的具体结构	主实验不要随便学	这是 theory-S 的核心定义
+W→O 可见性边界	不能用 A 调*	会产生信息泄漏
+affordance / world legality	不能靠 NLL 学	是世界规则，不是人物偏好
+gold candidate support	不能学	数据评测边界
+
+最重要的一句就是：
+
+参数可以学，但“哪些变量存在、谁能看到什么、哪个事件属于哪个 appraisal”不能全部一起用 A 学。*
+
+不然最后会变成一个普通 latent-state predictor，而不是 Character Dynamics。
+
+而且我们可以设计两种模式
+
+这个我觉得特别适合我们。
+
+diagnostic / research mode
+
+为了检验 theory-S：
+
+X definition      frozen
+state dimension   frozen
+U form            frozen
+candidate features frozen
+
+只学：
+
+$$ \beta,W,T $$
+
+必要时学少量共享参数。
+
+这样能够公平回答：
+
+这个 representation 到底有用没用？
+
+best-system mode
+
+等论文消融已经做完以后，我们可以让更多参数一起优化：
+
+$$ \theta = \{\beta,\gamma,W,\eta,A,B,T,\dots\} $$
+
+在 train 上端到端最小化 held-out-style action NLL。
+
+于是变成：
+
+symbolic W/O/X skeleton
++
+differentiable dynamics
++
+differentiable policy
+
+这时候我们就真的得到一套数据拟合出来的人物动力学参数。
+
+不是：
+
+“我觉得 fatigue decay 应该 0.12。”
+
+而是：
+
+“在训练轨迹中，约束为正且稳定的一阶动力学最优时间常数对应 η=xxx；在未见轨迹上冻结评测。”
+
+这个就像正经模型了。
+
+对我们现在这个实验，我甚至建议更严格一点
+
+不要一上来把所有参数都 joint-train。
+
+先分两阶段：
+
+Stage 1:
+no-S 数据
+→ 学 β、scene γ、temperature
+→ 得到一个合理的 state-independent base policy
+→ 冻结
+
+Stage 2:
+加入 S
+→ 只学 W
+→ 比较 Activity / ActionSupport / Theory
+
+这样非常漂亮。
+
+因为：
+
+$$ z_{t,a} = \underbrace{\beta^\top\phi+\gamma^\top b}_{固定 base policy} + \underbrace{S_t\,w^\top\phi}_{状态新增信息} $$
+
+此时 Theory-S 好一点，就很难说是：
+
+“因为 Theory 条件重新把整个 action scorer 训练得更好了。”
+
+它只能通过 S × φ 那条新增通路获得收益。
+
+这个比我们刚才说“每个 S 独立训练整个 β+w”还要更强。
+
+当然可以两套都报告：
+
+A. shared frozen β + fit only w
+   → 最纯的 representation incremental test
+
+B. each condition refits same probe family
+   → 每种 representation 的 best achievable performance
+
+A 我会作为主结果。
+
+η 怎么处理也能非常漂亮
+
+这里不能给 Theory-S 单独梯度找一个最优 eta，然后 Activity-S 固定 0.35。
+
+否则又不公平。
+
+我推荐：
+
+$$ \eta \in [0,1] $$
+
+做一个共享 η。
+
+例如训练目标直接是三种 representation validation loss 的平均：
+
+$$ L(\eta) = \frac13( L_{Theory} + L_{Activity} + L_{ActionSupport} ) $$
+
+学出一个共同的 η，然后全部冻结。
+
+或者更简单：
+
+eta = {0.05, 0.1, 0.2, 0.35, 0.5, 0.8}
+
+validation 上按预注册规则选一个共同 eta。
+
+我甚至更喜欢后者，因为一维参数没必要拿 Adam 干，它还能直接给我们画：
+
+NLL vs memory timescale
+
+这本身就是一个很好的 diagnostic。
+
+再往以后，P 也能这样接
+
+比如 Personality 不是直接：
+
+self_control = 0.8
+→ task weight += 手写公式
+
+而可以：
+
+$$ z_a = \beta^\top\phi_a + S^\top W_S\phi_a + P^\top W_P\phi_a + (S\otimes P)^\top W_{SP}\phi_a $$
+
+仍然是可解释的。
+
+可以直接看到：
+
+P_self_control × goal_progress   +0.62
+P_rest_preference × recovery     +0.44
+
+但这肯定是以后，Paper-0 的 P 还是固定。
+
+所以你这个想法我觉得非常对。
+
+甚至我现在会重新定义我们的架构：
+
+        非可微 / 结构层
+W → O → event → appraisal X
+        │
+        ↓
+   可微动力学层
+      Uθ → S
+        │
+        ↓
+   可微决策层
+ φ(O,a) + S
+        ↓
+      πθ(A)
+
+而且：
+
+先固定结构，梯度找参数；再做结构消融。
+
+这比“结构和参数全靠我们手填”强非常多，也比“直接扔神经网络让它全学”保留了我们 Character Dynamics 最核心的可解释性。
+
+我甚至觉得下一步除了 rank-matched probe，我们应该顺手把 ReplayPolicyConfig、scene bias、S interaction 全部重写成显式 feature vector + linear weights。这样以后同一个优化器就能吃掉这整块，不再到处散落 magic numbers。
+
+先看看仓库，在统一改！
+已调用工具
+已调用工具
+已调用工具
+
+看完最新仓库了。HEAD 已到 bafa83e Freeze probe statistics and clarify LIGHT metrics。现在正适合统一改，因为正式 train/test 还没开始；但我看完发现，不能只是把 ReplayPolicyConfig 改成可训练权重，应该一次把整个 replay 决策侧的参数边界理顺。
+
+而且我抓到两个统计上的关键点：
+
+现在协议里的全局 beta_0 对同一个 candidate set 中每个 action 都一样，进 softmax 后会完全抵消，实际上不可识别，应删除。
+linear probe 里如果同时学 weights 和 temperature，也存在整体尺度不可识别。probe 直接固定 T=1，尺度吸收到 weights 里，不要一起学 temperature。
+现在仓库里的 magic numbers 分四类
+
+第一类是 纯 policy 权重，最应该学：
+
+ReplayPolicyConfig
+0.70 / 0.25 / 0.50 / 0.35 / 0.15 / 0.25 ...
+
+这些全部可以被 linear probe 取代。
+
+第二类是 Scene→candidate 的人工 bias：
+
+target not in scene  -> -0.35
+visible              -> +0.08
+already carried      -> goal_progress *= 0.25
+already carried      -> -0.12
+
+这个也不该继续提前算成 scene_bias。应该拆成原始特征：
+
+target_in_scene
+target_visible_in_O
+target_in_inventory
+repeated_acquire
+target_present
+
+然后让 probe 自己学权重。否则我们虽然说“参数用梯度学”，实际上 scene_bias 已经偷偷包含了一套人工参数。
+
+第三类是 theory-S 的：
+
+goal_progress *= 1 + 0.20 * S
+
+这个当然直接删除。现在的
+
+$$ S\cdot w^\top\phi $$
+
+就是它的正规替代。
+
+第四类最隐蔽：compiled_semantics_v0.json 里面：
+
+movement:
+  goal_progress = 0.45
+  stimulation = 0.10
+
+manipulation:
+  goal_progress = 0.60
+  environment_control = 0.20
+...
+
+这些也是人工幅度。
+
+我建议保留语义拓扑，去掉人工强度。例如：
+
+movement → goal_progress, stimulation
+manipulation → goal_progress, environment_control
+recovery → recovery
+
+仍是我们的结构定义；但输出改成 binary semantic tags：
+
+goal_progress = 1
+stimulation = 1
+...
+
+具体“movement 的 goal_progress 到底应该是 0.45 还是别的”，交给 learned policy。
+
+这样我们没有让 A* 决定：
+
+什么叫 goal_progress。
+
+只是让 A* 决定：
+
+goal_progress 对选择行为有多大预测权重。
+
+这个边界非常干净。
+
+我建议统一成一个模型
+
+正式 replay 决策侧只剩：
+
+$$ z_{t,a} = \theta^\top f_{t,a} + S_t\,w^\top f_{t,a} $$
+
+其中 f 是完全不含人工 policy 权重的原始可解释 feature vector。
+
+我建议 v1：
+
+semantic:
+  goal_progress
+  stimulation
+  recovery
+  hunger_relief
+  bathroom_relief
+  short_term_reward
+  environment_control
+
+context:
+  context_relevance
+
+scene:
+  has_target
+  target_in_scene
+  target_visible_in_O
+  target_in_inventory
+  repeated_acquire
+
+这里 semantic 前 7 个先用 {0,1} 标签。
+
+这样：
+
+candidate semantic topology
+scene binding facts
+         ↓
+      raw f(t,a)
+         ↓
+θ · f + S w · f
+         ↓
+       softmax
+
+再也没有 scene_bias、ReplayPolicyConfig、0.20 interaction 三套平行手工参数。
+
+什么绝对不能跟着梯度学
+
+这几层继续冻结：
+
+W → O visibility boundary
+transition compiler
+expected-effect template
+X 的定义
+Theory/Activity/ActionSupport 三种 x_t 定义
+candidate support
+gold boundary
+
+否则会变成：
+
+A* → 反向改 appraisal / observation
+
+那我们就不再是在检验 Character Dynamics，而是在训练一个普通 latent predictor。
+
+η 先不要一起学
+
+虽然：
+
+$$ S_{t+1}=(1-\eta)S_t+\eta x_t $$
+
+完全可微，而且从 [0,1] 出发、x∈[0,1]、η∈[0,1] 时其实连 clamp 都不需要。
+
+但第一轮 rank-matched experiment 还是固定 η=0.35。
+
+因为我们目前要检验的是：
+
+哪种历史信息选择更好？
+
+不是：
+
+哪个 representation 配哪个最佳 memory timescale？
+
+后面可以单独做：
+
+shared eta ∈ {0.05, 0.1, 0.2, 0.35, 0.5, 0.8}
+
+在 validation 上给三种 S 共同选择一个 η。
+
+再以后 best-system mode 才允许直接 gradient 学：
+
+$$ A,B $$
+
+这种真正的线性 state-space dynamics。
+
+还有一点：不要为了统一去动 RoomDemo
+
+现在应该统一的是：
+
+external/replay research path
+
+不要用 LIGHT 学出来的权重去替换 RoomDemo 的：
+
+boredom
+fatigue
+purchase_urge
+...
+
+RoomDemo 是一个机制演示环境。
+
+以后架构可以是：
+
+RoomDemo
+→ hand-designed / game policy
+
+Replay research
+→ learned linear policy
+
+共享：
+W/O/X/S 接口与 CandidateSemantics 概念
+
+这比“一套权重统治所有世界”合理。
+
+给 Luna 的统一修改要求
+
+基于当前 webgpt-sync HEAD bafa83e 做一次只针对 external/replay research path 的统一参数化改造。不要改 RoomDemo 行为策略，不跑正式 test，不覆盖任何已有 v0 diagnostic artifact。
+
+目标：把 replay prediction 中散落的手工 policy/scoring 系数统一为一个可训练、可审计的 conditional linear policy，同时保持 W/O/X/transition/expected-effect 等结构层冻结。
+
+1. 保留所有现有 v0
+
+不要覆盖：
+
+replay-neutral-v0
+compiled_semantics_v0
+现有 LIGHT 140-step summaries/manifests
+drive-linear 历史 smoke
+
+新实现全部 version bump 为 v1。
+
+2. 新建 raw candidate feature v1
+
+不要再把 Scene 信息提前压成 scene_bias。
+
+定义显式有序 feature vector：
+
+semantic:
+goal_progress
+stimulation
+recovery
+hunger_relief
+bathroom_relief
+short_term_reward
+environment_control
+
+context:
+context_relevance
+
+scene:
+has_target
+target_in_scene
+target_visible_in_O
+target_in_inventory
+repeated_acquire
+
+要求：
+
+输出 feature names/version；
+trace 中保存 raw feature vector；
+provenance 可追溯；
+不包含任何 current A*_t。
+3. compiled semantics v1 去除人工幅度
+
+保留当前 verb→semantic-dimension 的结构映射，但把诸如：
+
+0.45 / 0.60 / 0.85 / 0.25 ...
+
+改成 binary semantic tags {0,1}。
+
+例如 movement 仍标记：
+
+goal_progress
+stimulation
+
+但不再人工指定强弱。
+
+不要利用单条或未来 A* 修改 semantic topology。
+
+context_relevance 继续保持当前可审计的 lexical-overlap 连续定义。
+
+4. 删除 replay v1 中预加权 Scene heuristic
+
+v1 不再做：
+
+target missing    -> -0.35
+visible           -> +0.08
+already carried   -> goal_progress *= 0.25
+already carried   -> -0.12
+
+这些条件只生成 raw boolean features，由 probe 学权重。
+
+旧 v0 行为保留供历史复现。
+
+5. 删除 theory-S 专用 0.20 action head
+
+正式 rank-matched v1 不调用：
+
+apply_state_to_candidate()
+
+Theory-S / Activity-S / ActionSupport-S 全部通过同一模型：
+
+z(t,a) = theta^T f(t,a) + S_t * w^T f(t,a)
+pi(a) = softmax(z(t,a))
+
+注意：
+
+不需要全局 beta_0，它对同一 choice set 所有 candidate 相同，会在 softmax 中抵消；
+probe 固定 temperature = 1，不与 weights 联合学习，避免尺度不可识别；
+不增加 theory-S 专属 feature 或 interaction。
+6. 训练层放 Python，不要把训练逻辑塞进 C++ replay core
+
+实现独立的 replay probe trainer/evaluator，建议：
+
+conditional multinomial NLL
+L2
+L-BFGS
+使用当前冻结的 lambda grid / train-only normalization / validation selection / seed 规则
+保存 feature means/stds、weights、lambda、optimizer status、iteration count、git revision、source hashes 到 manifest/model JSON。
+
+以后需要 runtime 时再把 frozen learned weights export 给 C++；本轮不要为训练重构 RoomDemo C++。
+
+7. 当前 rank-matched experiment 仍固定 eta=0.35
+
+不要因为可微就联合学习 eta。
+
+Theory-S / Activity-S / ActionSupport-S：
+
+同一 1D EMA
+同 eta
+同 history boundary
+同 candidate features
+同 optimizer family
+同 regularization rule
+
+后续另做 shared-eta validation experiment；本轮不做。
+
+8. 三类 no/necessity control 分开
+
+实现协议接口，但当前 140-step slice 仅用于 dev smoke：
+
+retrained-no-S
+
+z = theta^T f
+trained Theory probe + zeroed-S
+同一 theta/w
+test 时只置 S=0
+trained Theory probe + permuted-S
+同一 theta/w
+仅替换为同 horizon 其他 trajectory 的 S
+不重新训练
+9. 不允许梯度进入以下结构
+
+明确代码边界/测试保证 optimizer 无法修改：
+
+ReplayRecord / source candidate support
+W→O / SceneSnapshot
+transition compiler
+expected-effect templates
+appraisal X definition
+Theory/Activity/ActionSupport 的 x_t
+gold reveal/evaluation boundary
+10. 更新协议版本
+
+当前 T14_T20_rank_matched_probe_v0.md 已冻结旧 phi；不要悄悄改它。
+
+新增/升级到 v1 协议，明确：
+
+probe_feature_version
+raw feature order
+binary semantics policy
+no scene_bias
+no global intercept
+T=1
+eta fixed 0.35
+learnable parameter set仅 {theta,w}
+
+并在 TODO 中说明：v0 是设计历史，v1 是正式训练候选协议，尚未通过独立行为真值准入，因此不得启动正式 test。
+
+11. 验收
+
+只跑 dev/synthetic regression，不调参数追求 LIGHT 140-step NLL。
+
+至少测试：
+
+修改 current A*_t 不改变任何 pre-reveal feature/S/logit；
+v1 feature vector 不含 scene_bias；
+scene flags 的变化只改变对应 raw feature，不提前改变其他 semantic feature；
+three 1D states 相同 eta/update form；
+global constant added to all candidate logits leaves probabilities unchanged；
+zeroed/permuted intervention 不改变 learned weights；
+old v0 artifacts可复现且不被覆盖。
+
+提交后报告：
+
+新增/修改文件；
+所有 learnable parameters；
+所有 frozen structural components；
+仍存在的 magic numbers，并说明为什么保留。
+
+我觉得这次统一以后，整个研究链会明显干净：
+
+结构是谁定义的？
+→ 我们 + 文献 + source
+
+参数多大？
+→ train/validation 梯度确定
+
+结构有没有价值？
+→ held-out test + naive/permutation 消融
+
+这才是“心理学提供 inductive bias，数据决定参数”的正确形态，而不是心理学论文顺便替我们发明 0.45。

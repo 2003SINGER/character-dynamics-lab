@@ -1,0 +1,639 @@
+看了这段，也看了仓库现在的 `6cd5a8c`。**SQLite 放弃是对的，但 Luna 最后说“直接 CSV 多路归并”还差一刀，而且当前 PowerWash adapter 有语义问题，不能直接继续全量跑。**
+
+最关键的技术点是：18 张 CSV **不能默认已经各自按 `(pid, Time_utc)` 有序**。官方清洗过程中确实做过排序，但最后是 DuckDB 分表后 `EXPORT DATABASE` 导出，survey 表还经过重新覆盖；不能把“文件当前行序”当研究意义上的时序。因此裸 k-way merge 仍然有风险。
+
+更稳的路线是：
+
+```text
+18 张 raw CSV
+      ↓ 一次顺序扫描
+按 pid hash / pid number 分成 256 个 bucket
+      ↓
+每个 bucket 独立排序
+(pid, Time_utc)
+      ↓
+按 participant + session 整理
+      ↓
+Replay projection
+      ↓
+review fixture
+```
+
+这不需要 22GB SQLite 索引，也不需要把 8GB 数据一次装内存。平均一个 bucket 只有全量的约 `1/256`。
+
+而且 PowerWash 当前代码这里我认为**必须先改**：
+
+```python
+"source_O": state or None
+```
+
+不对。
+
+`CurrentPosition / CurrentJobName / LevelProgressionAmount / CurrentNozzle / IsIdleInGame ...` 是**源 telemetry/game-state 字段**，不能自动等同角色主观 `O`。我们之前给 FarmQuest 定的原则在这里也适用：
+
+```text
+telemetry state ≠ O
+```
+
+第一版应该：
+
+```python
+source_O = None
+source_step_context.source_state_fields = {...}
+```
+
+以后逐字段审：
+
+```text
+CurrentNozzle        → 玩家明确可知？可能
+CurrentJobName       → 玩家明确可知？可能
+LevelProgression     → UI 是否显示？待核
+CurrentPosition      → 引擎知道 ≠ 玩家显式知道
+...
+```
+
+再决定哪些能进入 O。
+
+另外：
+
+```python
+"state_label": event
+```
+
+也不合理。`job_completed`、`mood_reported` 是事件类型，不是 Character Dynamics 的 state label。
+
+应该：
+
+```python
+state_label = None
+
+source_event.event_name = "job_completed"
+```
+
+所以我现在会把 PowerWash 的机制覆盖重新评价成：
+
+| 环节                | PowerWash 实际支持                              |
+| ----------------- | ------------------------------------------- |
+| 长历史 / `Δt`        | **很强**                                      |
+| outcome           | **很强**，task/subtask/job completion、exit 等   |
+| source game state | **很强**                                      |
+| `W`               | 中等代理，不是完整 authoritative W                   |
+| `O`               | **未知/待逐字段审计**，不能直接说强                        |
+| `X`               | 无                                           |
+| `S`               | 无 ground truth；mood/survey 可作外部 state proxy |
+| `P`               | 无                                           |
+| `D/U`             | 无直接观测                                       |
+| `A*`              | 很弱/基本没有真正 command-level A*                  |
+
+所以它不是“一个数据集覆盖我们大半条机制”。
+
+它真正厉害的是：
+
+> **长时间经历 → 事件/进度/完成 → 主观 proxy 的时间变化**
+
+也就是给 `S` 的 persistence / lag / decay / interruption 这一块提供外部数据压力测试。
+
+LIGHT / ClubFloyd 才更偏动作侧；AGAIN 以后补连续 affect proxy。**几个数据集拼起来覆盖机制，而不是逼 PowerWash 一个人包办。**
+
+你可以直接把下面给 Luna，让它别再试数据库索引方案：
+
+停止继续优化 `powerwash_index.sqlite`。
+
+当前 `6cd5a8c` 的 SQLite 路线废弃。22GB index 暂时保留，等新路线通过 review 后再删除；不要再花时间查询或重建它。
+
+PowerWash 接下来改为：
+
+```text
+raw CSV
+→ pid bucket partition
+→ bucket-local sort
+→ participant/session projection
+→ review fixture
+→ QA
+```
+
+## 一、先修当前 adapter 的语义边界
+
+当前：
+
+```python
+source_O = state_fields
+```
+
+改为：
+
+```python
+source_O = None
+```
+
+以下字段：
+
+```text
+CurrentPosition
+CrouchState
+CurrentWasher
+CurrentNozzle
+CurrentExtension
+CurrentGameMode
+CurrentJobName
+LevelProgressionAmount
+CampaignProgressionAmount
+CurrentSessionLength
+IsIdleInGame
+IsInMenu
+...
+```
+
+第一版全部只保存为：
+
+```python
+source_step_context["source_state_fields"]
+```
+
+或：
+
+```python
+source_event["state_fields"]
+```
+
+它们是 source game-state/telemetry，不自动等于角色主观 O。
+
+以后另做 visibility audit 再决定：
+
+```text
+source field → O
+```
+
+不要现在提前映射。
+
+同时：
+
+```python
+state_label = None
+```
+
+不要：
+
+```python
+state_label = EventName
+```
+
+EventName 应只留在：
+
+```python
+source_event.event_name
+```
+
+保持：
+
+```python
+source_action_A_star = None
+persona_P = None
+W = None
+candidate sets = None
+```
+
+`mood_reported` / `study_prompt_answered` 只能标：
+
+```text
+source_state_proxy
+source_survey_response
+```
+
+不能标 S/P。
+
+---
+
+## 二、不要裸做 CSV k-way merge
+
+不能假定 18 张 exported CSV 已经分别按：
+
+```text
+pid, Time_utc
+```
+
+可靠有序。
+
+因此先 partition，再局部 sort。
+
+优先使用 DuckDB 作为**扫描/Parquet 分桶工具**，不是数据库索引。
+
+不要：
+
+```text
+CSV
+→ SQLite 22GB
+→ global ORDER BY
+```
+
+改为：
+
+```text
+CSV
+→ 256 pid buckets
+→ Parquet
+```
+
+如果 cleaned pid 是：
+
+```text
+p1
+p2
+...
+```
+
+则：
+
+```python
+bucket = (int(pid[1:]) - 1) % 256
+```
+
+不是 `p<number>` 时才使用稳定 crc32/hash。
+
+目标目录例如：
+
+```text
+E:\library\科研\PowerWash\partitioned\
+  bucket=000\
+  bucket=001\
+  ...
+  bucket=255\
+```
+
+允许把 DuckDB temp 放 D 盘：
+
+```text
+D:\tmp\powerwash_duckdb\
+```
+
+输出仍放 E 盘。
+
+---
+
+## 三、第一遍只做一次 raw scan
+
+读取所有实际事件 CSV。
+
+每条至少保留：
+
+```text
+pid
+EventName
+Time
+Time_utc
+source_file
+event-specific source fields
+```
+
+额外生成稳定：
+
+```text
+source_row_key
+```
+
+可以基于：
+
+```text
+source_file
++
+canonical raw row content
+```
+
+做 hash。
+
+不要依赖 SQLite rowid。
+
+raw CSV 本身仍是唯一 source of truth。
+
+---
+
+## 四、每个 bucket 单独排序
+
+对：
+
+```text
+bucket=NNN
+```
+
+执行：
+
+```text
+ORDER BY pid, Time_utc
+```
+
+内存只需要处理一个 bucket。
+
+不要再全局排序 3700 万条。
+
+如果 256 bucket 中仍有单 bucket 太大：
+
+```text
+256 → 512 / 1024
+```
+
+即可，不改语义。
+
+---
+
+## 五、相同 timestamp 不要伪造因果顺序
+
+当前代码：
+
+```text
+ORDER BY pid,time_utc,source_file,row_no
+```
+
+虽然 deterministic，但：
+
+```text
+source_file alphabetical order
+```
+
+不是研究意义上的事件先后。
+
+所以对于完全相同：
+
+```text
+pid + Time_utc
+```
+
+的事件：
+
+```text
+within_timestamp_order = unknown
+```
+
+最好形成一个 event bundle：
+
+```json
+{
+  "t": 123,
+  "timestamp": "...",
+  "source_O": null,
+
+  "source_event": [
+    {...},
+    {...}
+  ],
+
+  "source_step_context": {
+    "within_timestamp_order": "unknown"
+  },
+
+  "source_action_A_star": null,
+  "W": null,
+  "state_label": null
+}
+```
+
+不要因为 serialization 需要稳定顺序，就把：
+
+```text
+source_file A
+→ source_file B
+```
+
+解释成真实因果顺序。
+
+内部可以按 source_file 排列保证 JSON deterministic，但 metadata 必须明确：
+
+```text
+serialization_order_only
+```
+
+---
+
+## 六、不要再按任意 50,000 events 当 trajectory
+
+当前：
+
+```text
+powerwash::{pid}::chunk-0001
+```
+
+属于 storage chunk，不是语义 trajectory。
+
+优先按：
+
+```text
+player_logged_in
+→
+...
+→
+exited_game
+```
+
+形成 session。
+
+例如：
+
+```text
+trajectory_id =
+powerwash::{pid}::session-{n}
+```
+
+如果：
+
+* 缺失 login；
+* 缺失 exit；
+* 数据从中间开始；
+
+则：
+
+```text
+session_boundary_status = partial
+```
+
+不要猜。
+
+同时保留：
+
+```text
+participant_sequence_index
+```
+
+以后可以跨 session 做长期状态分析。
+
+如果出于文件大小仍需 chunk：
+
+```text
+storage_chunk_id
+```
+
+必须与：
+
+```text
+semantic/session trajectory
+```
+
+分开，不能把 50,000-event chunk 冒充独立 trajectory。
+
+---
+
+## 七、PowerWash 第一版输出两种 view
+
+### A. Event/state replay
+
+```text
+participant/session
+→ ordered timestamp bundles
+→ source event + source state telemetry
+```
+
+不做 next-action benchmark。
+
+### B. State-proxy anchor view
+
+以：
+
+```text
+mood_reported
+study_prompt_answered
+```
+
+为 anchor。
+
+每个 anchor 记录：
+
+```text
+participant
+session
+anchor timestamp
+source proxy/response
+
+past event window
+past state telemetry
+```
+
+注意：
+
+```text
+future events
+```
+
+可以保存在 evaluation asset 中，但禁止进入 prediction-time input。
+
+不要做：
+
+```text
+mood = S
+```
+
+只能：
+
+```text
+mood = source_state_proxy
+```
+
+---
+
+## 八、不要一上来再跑 3700 万条到终点
+
+新 pipeline 完成后先跑：
+
+```text
+100 participants
+```
+
+生成：
+
+```text
+PowerWash_review_v0.jsonl
+PowerWash_dev_100.manifest.json
+PowerWash_dev_100.qa.json
+```
+
+review 至少 300 条，覆盖：
+
+```text
+player_logged_in
+job_started
+job_resumed
+job_exited
+job_completed
+task_completed
+subtask_completed
+item_purchased
+update_current_state
+mood_reported
+study_prompt_answered
+exited_game
+```
+
+同时覆盖：
+
+* 同 timestamp 多事件；
+* session 开头；
+* session 结尾；
+* 长 session；
+* state 字段变化；
+* missing state；
+* mood/survey anchor。
+
+每条：
+
+```text
+raw
+→ parsed
+→ transformed
+```
+
+推到 `webgpt-sync` 给 WebGPT 审。
+
+**100 人 review 通过后再全量跑。**
+
+---
+
+## 九、硬 QA
+
+必须自动检查：
+
+```text
+participant 内 Time_utc 非递减
+相同 Time_utc 不假装有 causal order
+不存在未来事件进入过去 history
+session 不跨 pid
+session login/exit boundary 有状态标记
+source_action_A_star 全部 null
+persona_P 全部 null
+W 全部 null
+source_O 第一版全部 null
+survey/mood 不进入 S
+每个 transformed record 可回溯 source row key
+```
+
+任何一项失败：
+
+```text
+停止全量 admission
+```
+
+不要“跑完后再看”。
+
+---
+
+## 十、命名修正
+
+当前 manifest：
+
+```text
+full_lossless_event_state_projection
+```
+
+如果 transformed output 没保存每个 raw 字段的完整值，就不要叫 lossless。
+
+改成类似：
+
+```text
+source_preserving_event_state_projection
+```
+
+raw source 才是 lossless truth。
+
+完成 100-participant pilot + review fixture 后先 push `webgpt-sync`。
+
+不要继续跑 full export，先让我审核这批真实 raw→transformed。
+
+我觉得这次**别让 Luna 再“跑到卡住才换架构”**了。PowerWash 数据量大到足以把任何一个错误假设放大成几个小时和几十 GB 的浪费，所以第一批 100 人非常有价值。
+
+另外你前面问“这么大的数据到底覆盖我们机制多少环节”，现在我会更保守地说：**它覆盖的不是环节数量多，而是时间跨度和重复经历特别强。**这正好是我们最需要拿来打 `S` 是否真的保存历史后果的地方。
