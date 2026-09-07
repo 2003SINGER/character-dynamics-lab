@@ -27,3 +27,18 @@ metadata, ensure at most one row per trajectory in a reviewer-visible task,
 define executable label and reason-code rules, and validate strict shard
 completion/checkpoint provenance. This remains development model-assisted
 annotation and must not be described as a human semantic audit.
+
+## V2 smoke and containment correction
+
+The v2 calibration smoke uses 60 globally trajectory-distinct rows in three
+20-row tasks, opaque IDs, and only the five allowed reviewer fields. It passed
+strict schema validation and demonstrated use of `AMBIGUOUS` under the revised
+rubric (13 ADMIT / 47 AMBIGUOUS / 0 REJECT).
+
+An attempted v2 full prefix of 400 rows is retained only as a diagnostic. The
+input files are task-isolated, but one persistent Terra session processed
+multiple tasks, so it could retain evidence from earlier tasks and encounter a
+trajectory again later in the same session. It is therefore not an admissible
+strict current-step run. A full strict v2 run requires one fresh reviewer
+session per task (or another mechanism that makes model context nonpersistent),
+not merely one trajectory per JSONL file.
