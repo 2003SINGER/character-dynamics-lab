@@ -1,18 +1,21 @@
-"""Dataset-neutral SceneSnapshot -> affordance -> generated A^O.
+"""Auditable canonical SceneSnapshot -> generated A^O compiler.
 
-The generator deliberately accepts only a canonical snapshot projection.  In
-particular, ``source_candidates`` and the recorded action are not read here;
-they are labels/diagnostics for a later support check.  Missing object facts
-never get promoted to portability, ownership, or success preconditions.
+The compiler consumes only a canonical scene projection. Source A* /
+available_actions fields are deliberately not part of its read path; they are
+accepted only by support_diagnostic after compilation. Missing facts remain
+unknown and therefore do not license an action.
 """
 from __future__ import annotations
 
 import re
 from typing import Any
 
-TOKEN_RE = re.compile(r"[A-Za-z][A-Za-z'-]*")
+TOKEN_RE = re.compile(r"[A-Za-z][A-Za-z0-9'-]*")
 ARTICLES = {"a", "an", "the"}
-GENERATOR_VERSION = "scene-affordance-action-v1"
+GENERATOR_VERSION = "scene-affordance-action-v1.1"
+
+SUPPORTED_VERBS = {"inspect", "take", "get", "drop", "give", "wear", "wield", "talk", "hug", "hit", "sit", "use"}
+VERB_ALIASES = {"get": "take"}
 
 
 def _bare_label(value: Any) -> str:
@@ -23,8 +26,6 @@ def _bare_label(value: Any) -> str:
 
 
 def _display_label(value: Any) -> str:
-    # Preserve the source label's words but drop a leading article so the
-    # generated action remains readable and deterministic.
     raw = str(value or "").strip()
     parts = raw.split()
     if parts and parts[0].casefold() in ARTICLES:
@@ -32,70 +33,223 @@ def _display_label(value: Any) -> str:
     return " ".join(parts) or "object"
 
 
-def _unique_entities(snapshot: dict, kind: str) -> list[dict]:
-    seen: set[str] = set()
-    result: list[dict] = []
-    for entity in snapshot.get("entities") or []:
-        if entity.get("kind") != kind:
+def _fact(entity: dict[str, Any], key: str) -> Any:
+    facts = entity.get("facts")
+    return facts.get(key) if isinstance(facts, dict) else None
+
+
+def _truth(entity: dict[str, Any], key: str) -> bool:
+    return _fact(entity, key) is True
+
+
+def _entities(snapshot: dict[str, Any], kind: str, *, room_only: bool = False) -> list[dict[str, Any]]:
+    """Return canonical entities in stable source order, preserving duplicates."""
+    result: list[dict[str, Any]] = []
+    seen_ids: dict[str, int] = {}
+    for index, raw in enumerate(snapshot.get("entities") or []):
+        if not isinstance(raw, dict) or raw.get("kind") != kind:
             continue
-        label = _bare_label(entity.get("label"))
-        if not label or label in seen:
+        location = str(raw.get("location") or "room").casefold()
+        if room_only and location not in {"room", "visible", "scene"}:
             continue
-        seen.add(label)
+        entity = dict(raw)
+        base_id = str(entity.get("id") or f"{kind}.{index:04d}")
+        seen_ids[base_id] = seen_ids.get(base_id, 0) + 1
+        entity["id"] = base_id if seen_ids[base_id] == 1 else f"{base_id}#{seen_ids[base_id]}"
+        entity.setdefault("facts", {})
+        entity.setdefault("type", "unknown")
+        entity.setdefault("description", "")
+        entity.setdefault("provenance", {})
         result.append(entity)
     return result
 
 
-def generate_affordances(snapshot: dict) -> list[dict]:
-    """Derive transparent affordance records from entity *types* only.
+def _possessions(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    """Materialize carrying/wearing/wielding as explicit possession records."""
+    records: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    direct = snapshot.get("possessions") or []
+    for relation, values in [("carrying", direct), ("carrying", snapshot.get("carrying") or []),
+                             ("wearing", snapshot.get("wearing") or []),
+                             ("wielding", snapshot.get("wielding") or [])]:
+        if not isinstance(values, list):
+            values = [values]
+        for index, raw in enumerate(values):
+            item = dict(raw) if isinstance(raw, dict) else {"label": raw}
+            label = item.get("label") or item.get("name") or item.get("item")
+            if not label:
+                continue
+            key = (relation, _bare_label(label))
+            if key in seen:
+                continue
+            seen.add(key)
+            item["id"] = str(item.get("id") or f"possession.{relation}.{index:04d}")
+            item["label"] = str(label)
+            item["kind"] = "object"
+            item["location"] = "carried"
+            item["possession_relation"] = relation
+            item.setdefault("facts", {})
+            item.setdefault("type", "unknown")
+            item.setdefault("description", "")
+            item.setdefault("provenance", {"source_field": relation})
+            records.append(item)
+    return records
 
-    ``inspect`` is the only object affordance because no source fact licenses
-    a portability/ownership inference.  For another visible agent we expose
-    generic contact affordances; these are candidates, not claims that the
-    action succeeds or is socially appropriate.
-    """
+
+def _aliases(entity: dict[str, Any]) -> set[str]:
+    values = [entity.get("label"), entity.get("id"), entity.get("type")]
+    raw_aliases = entity.get("aliases") or []
+    values.extend(raw_aliases if isinstance(raw_aliases, list) else [raw_aliases])
+    return {_bare_label(value) for value in values if _bare_label(value)}
+
+
+def _evidence(entity: dict[str, Any], source: str, facts: list[str] | None = None) -> dict[str, Any]:
+    return {"source": source, "entity_id": entity.get("id"), "label": entity.get("label"),
+            "type": entity.get("type", "unknown"), "description": entity.get("description", ""),
+            "facts": dict(entity.get("facts") or {}), "provenance": dict(entity.get("provenance") or {}),
+            "matched_facts": list(facts or [])}
+
+
+def _record(verb: str, entities: list[dict[str, Any]], family: str, rule_id: str,
+            required: list[str], unknown: list[str], evidence: list[dict[str, Any]],
+            target_ids: list[str]) -> dict[str, Any]:
+    labels = [_display_label(next(e["label"] for e in entities if e["id"] == tid)) for tid in target_ids]
+    action = f"{verb} {' to '.join(labels) if verb == 'give' else ' '.join(labels)}".strip()
+    return {"action_id": f"{verb}:{'|'.join(target_ids)}", "action": action,
+            "target": labels[0] if len(labels) == 1 else labels, "targets": list(target_ids),
+            "target_entity_id": target_ids[0] if len(target_ids) == 1 else None,
+            "semantic_family": family, "rule_id": rule_id, "required_facts": required,
+            "supporting_evidence": evidence, "unknown_preconditions": unknown}
+
+
+def _text(entity: dict[str, Any]) -> str:
+    return " ".join(str(entity.get(key) or "") for key in ("type", "description", "label")).casefold()
+
+
+def _use_supported(entity: dict[str, Any]) -> bool:
+    if _truth(entity, "usable"):
+        return True
+    # Small, auditable ontology: no broad commonsense inference from a bare object.
+    return bool(re.search(r"\b(lantern|horn|scale|key|lever|button|door|weapon|sword|book)\b", _text(entity)))
+
+
+def _sit_supported(entity: dict[str, Any]) -> bool:
+    return bool(re.search(r"\b(chair|stool|seat)\b", _text(entity)))
+
+
+def _make_action(verb: str, entity: dict[str, Any], family: str, rule_id: str,
+                 required: list[str], unknown: list[str], source: str,
+                 facts: list[str] | None = None, others: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    targets = [entity] + list(others or [])
+    return _record(verb, targets, family, rule_id, required, unknown,
+                   [_evidence(item, source, facts if item is entity else None) for item in targets],
+                   [item["id"] for item in targets])
+
+
+def generate_affordances(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    """Compile candidates from visible entities and explicit possession facts."""
+    objects = _entities(snapshot, "object", room_only=True)
+    agents = _entities(snapshot, "agent", room_only=True)
+    possessions = _possessions(snapshot)
     actor = _bare_label(snapshot.get("actor"))
-    affordances: list[dict] = []
-    for entity in _unique_entities(snapshot, "object"):
-        label = _display_label(entity.get("label"))
-        affordances.append({
-            "action_id": f"inspect:{entity['id']}",
-            "action": f"inspect {label}",
-            "target_entity_id": entity.get("id"),
-            "kind": "object_inspection",
-            "semantic_family": "inspect",
-            "source": "entity_type_only",
-            "required_facts": [],
-        })
-    for entity in _unique_entities(snapshot, "agent"):
-        if _bare_label(entity.get("label")) == actor:
-            continue
-        label = _display_label(entity.get("label"))
-        for verb, kind in (("hug", "social_contact"), ("hit", "physical_conflict")):
-            affordances.append({
-                "action_id": f"{verb}:{entity['id']}",
-                "action": f"{verb} {label}",
-                "target_entity_id": entity.get("id"),
-                "kind": kind,
-                "semantic_family": kind,
-                "source": "agent_presence_only",
-                "required_facts": [],
-            })
-    return affordances
+    visible_agents = [a for a in agents if _bare_label(a.get("label")) != actor]
+    actions: list[dict[str, Any]] = []
+    for obj in objects:
+        actions.append(_make_action("inspect", obj, "inspect", "O.inspect.visible_object", ["object.visible"],
+                                    ["inspection_success"], "canonical.entities[kind=object,location=room]"))
+        if _truth(obj, "portable"):
+            actions.append(_make_action("take", obj, "acquisition", "O.take.explicit_portable",
+                                        ["object.visible", "object.portable=true"], ["ownership", "take_success"],
+                                        "entity.facts.portable", ["portable"]))
+        if _sit_supported(obj):
+            actions.append(_make_action("sit", obj, "posture", "O.sit.seat_lexeme",
+                                        ["object.visible", "chair_or_stool_or_seat_evidence"],
+                                        ["permission", "sit_success"], "entity.type_or_description"))
+        if _use_supported(obj):
+            actions.append(_make_action("use", obj, "object_use", "O.use.explicit_use_support",
+                                        ["object.visible", "type_or_description_supports_use"],
+                                        ["use_success", "permission"], "entity.type_or_description"))
+    for agent in visible_agents:
+        actions.append(_make_action("talk", agent, "social_communication", "O.talk.visible_agent",
+                                    ["agent.visible"], ["language", "conversation_success"],
+                                    "canonical.entities[kind=agent,location=room]"))
+        actions.append(_make_action("hug", agent, "social_contact", "O.hug.generic_contact",
+                                    ["agent.visible"], ["social_permission", "appropriateness", "contact_success"],
+                                    "canonical.entities[kind=agent,location=room]"))
+        actions.append(_make_action("hit", agent, "physical_conflict", "O.hit.generic_contact",
+                                    ["agent.visible"], ["appropriateness", "harm", "contact_success"],
+                                    "canonical.entities[kind=agent,location=room]"))
+    for item in possessions:
+        actions.append(_make_action("drop", item, "release", "O.drop.actor_holds", ["actor.holds(object)"],
+                                    ["drop_success", "destination"], "canonical.possessions", ["possession_relation"]))
+        for agent in visible_agents:
+            actions.append(_record("give", [item, agent], "transfer", "O.give.holds_visible_agent",
+                                   ["actor.holds(object)", "agent.visible"], ["ownership", "consent", "transfer_success"],
+                                   [_evidence(item, "canonical.possessions", ["possession_relation"]),
+                                    _evidence(agent, "canonical.entities[kind=agent]")], [item["id"], agent["id"]]))
+        if _truth(item, "wearable"):
+            actions.append(_make_action("wear", item, "equipment", "O.wear.explicit_wearable",
+                                        ["actor.holds(object)", "object.wearable=true"], ["wear_success", "fit"],
+                                        "possession.facts.wearable", ["wearable"]))
+        if _truth(item, "wieldable"):
+            actions.append(_make_action("wield", item, "equipment", "O.wield.explicit_wieldable",
+                                        ["actor.holds(object)", "object.wieldable=true"], ["wield_success", "appropriateness"],
+                                        "possession.facts.wieldable", ["wieldable"]))
+    return actions
 
 
-def generate_action_candidates(snapshot: dict) -> list[dict]:
-    """Return generated A^O; no current A* support or source action is read."""
+def generate_action_candidates(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
     return generate_affordances(snapshot)
 
 
-def support_diagnostic(generated: list[dict], source_candidates: list[str] | None) -> dict:
-    """Compare after generation, for diagnosis only."""
-    generated_actions = [item["action"] for item in generated]
+def _source_parts(action: str) -> tuple[str, str]:
+    tokens = str(action or "").strip().casefold().split()
+    return (tokens[0] if tokens else "", " ".join(tokens[1:]))
+
+
+def _miss_reason(action: str, generated: list[dict], snapshot: dict[str, Any] | None) -> str:
+    verb, target = _source_parts(action)
+    canonical_verb = VERB_ALIASES.get(verb, verb)
+    if not verb or canonical_verb not in {VERB_ALIASES.get(v, v) for v in SUPPORTED_VERBS}:
+        return "ontology"
+    if snapshot is None:
+        return "other"
+    entities = _entities(snapshot, "object") + _entities(snapshot, "agent") + _possessions(snapshot)
+    target_key = _bare_label(target)
+    aliases = [e for e in entities if target_key in _aliases(e) or target_key == _bare_label(e.get("label"))]
+    if not aliases:
+        raw_objects = snapshot.get("room_objects") or []
+        raw_agents = snapshot.get("room_agents") or []
+        if any(target_key == _bare_label(x.get("label") if isinstance(x, dict) else x)
+               for x in list(raw_objects) + list(raw_agents)):
+            return "object extraction"
+        return "entity binding"
+    if canonical_verb in {"take", "wear", "wield"}:
+        return "hidden/unknown fact"
+    if canonical_verb in {"drop", "give"}:
+        return "hidden/unknown fact"
+    if canonical_verb == "sit" and not any(_sit_supported(e) for e in aliases):
+        return "ontology"
+    if canonical_verb == "use" and not any(_use_supported(e) for e in aliases):
+        return "ontology"
+    return "insufficient O"
+
+
+def support_diagnostic(generated: list[dict], source_candidates: list[str] | None,
+                      snapshot: dict[str, Any] | None = None) -> dict:
+    """Post-hoc support hit/miss report; never feeds generation."""
+    generated_actions = {str(item["action"]).casefold() for item in generated}
     source = list(source_candidates or [])
-    return {
-        "generated_count": len(generated_actions),
-        "source_count": len(source),
-        "source_action_support_hit": {action: action in generated_actions for action in source},
-        "source_candidates_used_for_generation": False,
-    }
+    rows = []
+    for action in source:
+        hit = str(action).casefold() in generated_actions
+        rows.append({"source_action": action, "hit": hit,
+                     "miss_reason": None if hit else _miss_reason(action, generated, snapshot)})
+    counts: dict[str, int] = {}
+    for row in rows:
+        if row["miss_reason"]:
+            counts[row["miss_reason"]] = counts.get(row["miss_reason"], 0) + 1
+    return {"generated_count": len(generated), "source_count": len(source),
+            "source_action_support_hit": {row["source_action"]: row["hit"] for row in rows},
+            "support_rows": rows, "miss_reason_counts": counts,
+            "source_candidates_used_for_generation": False}

@@ -11,9 +11,9 @@
 来源原件：[Theory-S 与机制纠偏对话](../90_原始材料/2026-09-07_用户对话_Theory-S与机制纠偏/README.md)。
 
 - [x] **M0 mechanism sandbox（工程 sanity 完成）**：固定 Scene/O/P/generated `A^O`，在 5 个 LIGHT development fixtures 上做 `do(S=s_1)` / `do(S=s_2)`；结果显示 π 改变且 support 不变。结果不是现实数据机制证据，见[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md)。
-- [x] **M1 Theory-S v1 设计（工程冻结）**：核验 EMA/Broekens/MAMID/FAtiMA/TCN 与 Game-AI 对照，冻结 `fatigue/engagement/tension` 三字段、X 输入、字段级惯性/恢复/饱和/P 调制和 score coupling；一维 EMA 仍仅为 development probe，不升格为正式理论。
-- [x] **M2 场景与候选编译器（最小切片完成）**：从 canonical SceneSnapshot 的 objects/agents 独立生成 affordance 与 `A^O`；生成后才做 source `available_actions` support hit/miss，且不为覆盖 `A*` 添加候选。正式跨数据集 ontology/实例绑定仍未完成。
-- [~] **M3 dataset→capability matrix（LIGHT 结论完成，矩阵待扩）**：本轮记录 LIGHT 适合接口 sanity 但不适合 persistent-S；PowerWash/FarmQuest/AGAIN 当前缺 subject-facing O 与 action truth，未硬构造 fixture。完整逐数据集矩阵仍待各 adapter semantic audit。
+- [~] **M1 Theory-S candidate implementation**：核验 EMA/Broekens/MAMID/FAtiMA/TCN 与 Game-AI 可搬形式，暂用 `fatigue/engagement/tension` 三字段及 hand-set coupling；它们仍是 candidate mechanism / engineering hypotheses，不是冻结或心理学验证的 Theory-S。
+- [~] **M2 minimal candidate compiler**：从 canonical SceneSnapshot 的 objects/agents/possessions/facts 独立生成带 provenance 的 affordance 与 `A^O`；生成后才做 source `available_actions` support hit/miss。当前 ontology、实例绑定和前置条件仍是最小 development slice。
+- [~] **M3 dataset→capability matrix**：当前 LIGHT projection、可验证字段与 ontology 尚不足以支撑 persistent-S identification，最终适用性未决；PowerWash/FarmQuest/AGAIN 仍待各自 semantic audit。不得把 source `available_actions` 当作 `A^O`。
 - [ ] **M4 formal experiment gate**：M0–M3 未完成前，Run1–4 仅保留为 development identifiability diagnostics，不启动正式 test 或把结果写成 Theory-S 结论。
 
 ## 本轮 development diagnostic 封口
