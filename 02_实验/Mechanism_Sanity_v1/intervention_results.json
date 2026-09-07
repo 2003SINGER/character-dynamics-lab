@@ -1,0 +1,666 @@
+{
+  "protocol": "Mechanism_Sanity_v1",
+  "theory_version": "theory-s-v1",
+  "generator_version": "scene-affordance-action-v1",
+  "dataset": "LIGHT",
+  "status": "engineering_sanity_only",
+  "fixture_count": 5,
+  "results": [
+    {
+      "fixture_id": "light::episode-00001::turn-3",
+      "place": "Port Tavern",
+      "generated_action_count": 6,
+      "source_candidates": [
+        "hit thief",
+        "hug thief",
+        "get barnacle",
+        "get stool"
+      ],
+      "before_S": {
+        "fatigue": 0.05,
+        "engagement": 0.95,
+        "tension": 0.05
+      },
+      "after_S": {
+        "fatigue": 0.95,
+        "engagement": 0.05,
+        "tension": 0.95
+      },
+      "generated_A_O_before_after_identical": true,
+      "before": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect fluid",
+          "score": 0.41550000000000004,
+          "probability": 0.16473116188624462
+        },
+        {
+          "action_id": "inspect:fixture.object.1",
+          "action": "inspect stool",
+          "score": 0.41550000000000004,
+          "probability": 0.16473116188624462
+        },
+        {
+          "action_id": "inspect:fixture.object.2",
+          "action": "inspect wooden bar",
+          "score": 0.41550000000000004,
+          "probability": 0.16473116188624462
+        },
+        {
+          "action_id": "inspect:fixture.object.3",
+          "action": "inspect barnacle",
+          "score": 0.41550000000000004,
+          "probability": 0.16473116188624462
+        },
+        {
+          "action_id": "hug:fixture.agent.1",
+          "action": "hug thief",
+          "score": 0.49755000000000005,
+          "probability": 0.1961518867053299
+        },
+        {
+          "action_id": "hit:fixture.agent.1",
+          "action": "hit thief",
+          "score": 0.35528875,
+          "probability": 0.14492346574969148
+        }
+      ],
+      "after": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect fluid",
+          "score": 0.3345,
+          "probability": 0.17810006231649728
+        },
+        {
+          "action_id": "inspect:fixture.object.1",
+          "action": "inspect stool",
+          "score": 0.3345,
+          "probability": 0.17810006231649728
+        },
+        {
+          "action_id": "inspect:fixture.object.2",
+          "action": "inspect wooden bar",
+          "score": 0.3345,
+          "probability": 0.17810006231649728
+        },
+        {
+          "action_id": "inspect:fixture.object.3",
+          "action": "inspect barnacle",
+          "score": 0.3345,
+          "probability": 0.17810006231649728
+        },
+        {
+          "action_id": "hug:fixture.agent.1",
+          "action": "hug thief",
+          "score": 0.23745000000000002,
+          "probability": 0.14487280904725858
+        },
+        {
+          "action_id": "hit:fixture.agent.1",
+          "action": "hit thief",
+          "score": 0.23043625000000006,
+          "probability": 0.14272694168675232
+        }
+      ],
+      "delta_probability": {
+        "inspect fluid": 0.013368900430252656,
+        "inspect stool": 0.013368900430252656,
+        "inspect wooden bar": 0.013368900430252656,
+        "inspect barnacle": 0.013368900430252656,
+        "hug thief": -0.051279077658071326,
+        "hit thief": -0.002196524062939159
+      },
+      "before_rank": {
+        "hug thief": 1,
+        "inspect fluid": 2,
+        "inspect stool": 3,
+        "inspect wooden bar": 4,
+        "inspect barnacle": 5,
+        "hit thief": 6
+      },
+      "after_rank": {
+        "inspect fluid": 1,
+        "inspect stool": 2,
+        "inspect wooden bar": 3,
+        "inspect barnacle": 4,
+        "hug thief": 5,
+        "hit thief": 6
+      },
+      "tv_distance": 0.053475601721010554,
+      "direction_explanation": "fatigue/low engagement lowers inspection/social stimulation; higher tension raises conflict salience and environment-control preference; support is unchanged",
+      "engineering_threshold": {
+        "max_key_delta": 0.1,
+        "tv_delta": 0.015
+      },
+      "engineering_trigger": true,
+      "support_diagnostic": {
+        "generated_count": 6,
+        "source_count": 4,
+        "source_action_support_hit": {
+          "hit thief": true,
+          "hug thief": true,
+          "get barnacle": false,
+          "get stool": false
+        },
+        "source_candidates_used_for_generation": false
+      }
+    },
+    {
+      "fixture_id": "light::episode-00002::turn-2",
+      "place": "Prison room",
+      "generated_action_count": 5,
+      "source_candidates": [
+        "hug fairy",
+        "get lantern",
+        "hit fairy",
+        "get dirty wooden bucket"
+      ],
+      "before_S": {
+        "fatigue": 0.05,
+        "engagement": 0.95,
+        "tension": 0.05
+      },
+      "after_S": {
+        "fatigue": 0.95,
+        "engagement": 0.05,
+        "tension": 0.95
+      },
+      "generated_A_O_before_after_identical": true,
+      "before": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect dirty wooden bucket",
+          "score": 0.41550000000000004,
+          "probability": 0.19721933151277204
+        },
+        {
+          "action_id": "inspect:fixture.object.1",
+          "action": "inspect lantern",
+          "score": 0.41550000000000004,
+          "probability": 0.19721933151277204
+        },
+        {
+          "action_id": "inspect:fixture.object.2",
+          "action": "inspect small bed",
+          "score": 0.41550000000000004,
+          "probability": 0.19721933151277204
+        },
+        {
+          "action_id": "hug:fixture.agent.0",
+          "action": "hug fairy",
+          "score": 0.49755000000000005,
+          "probability": 0.2348368306763241
+        },
+        {
+          "action_id": "hit:fixture.agent.0",
+          "action": "hit fairy",
+          "score": 0.35528875,
+          "probability": 0.17350517478535976
+        }
+      ],
+      "after": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect dirty wooden bucket",
+          "score": 0.3345,
+          "probability": 0.2166931205986781
+        },
+        {
+          "action_id": "inspect:fixture.object.1",
+          "action": "inspect lantern",
+          "score": 0.3345,
+          "probability": 0.2166931205986781
+        },
+        {
+          "action_id": "inspect:fixture.object.2",
+          "action": "inspect small bed",
+          "score": 0.3345,
+          "probability": 0.2166931205986781
+        },
+        {
+          "action_id": "hug:fixture.agent.0",
+          "action": "hug fairy",
+          "score": 0.23745000000000002,
+          "probability": 0.17626575012960544
+        },
+        {
+          "action_id": "hit:fixture.agent.0",
+          "action": "hit fairy",
+          "score": 0.23043625000000006,
+          "probability": 0.17365488807436022
+        }
+      ],
+      "delta_probability": {
+        "inspect dirty wooden bucket": 0.01947378908590605,
+        "inspect lantern": 0.01947378908590605,
+        "inspect small bed": 0.01947378908590605,
+        "hug fairy": -0.05857108054671867,
+        "hit fairy": 0.00014971328900045822
+      },
+      "before_rank": {
+        "hug fairy": 1,
+        "inspect dirty wooden bucket": 2,
+        "inspect lantern": 3,
+        "inspect small bed": 4,
+        "hit fairy": 5
+      },
+      "after_rank": {
+        "inspect dirty wooden bucket": 1,
+        "inspect lantern": 2,
+        "inspect small bed": 3,
+        "hug fairy": 4,
+        "hit fairy": 5
+      },
+      "tv_distance": 0.05857108054671864,
+      "direction_explanation": "fatigue/low engagement lowers inspection/social stimulation; higher tension raises conflict salience and environment-control preference; support is unchanged",
+      "engineering_threshold": {
+        "max_key_delta": 0.1,
+        "tv_delta": 0.015
+      },
+      "engineering_trigger": true,
+      "support_diagnostic": {
+        "generated_count": 5,
+        "source_count": 4,
+        "source_action_support_hit": {
+          "hug fairy": true,
+          "get lantern": false,
+          "hit fairy": true,
+          "get dirty wooden bucket": false
+        },
+        "source_candidates_used_for_generation": false
+      }
+    },
+    {
+      "fixture_id": "light::episode-00010::turn-2",
+      "place": "Underground Chamber",
+      "generated_action_count": 4,
+      "source_candidates": [
+        "hit mystical lion",
+        "hug mystical lion",
+        "hug lion",
+        "hit lion",
+        "get crystal"
+      ],
+      "before_S": {
+        "fatigue": 0.05,
+        "engagement": 0.95,
+        "tension": 0.05
+      },
+      "after_S": {
+        "fatigue": 0.95,
+        "engagement": 0.05,
+        "tension": 0.95
+      },
+      "generated_A_O_before_after_identical": true,
+      "before": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect lion",
+          "score": 0.41550000000000004,
+          "probability": 0.24567025497065736
+        },
+        {
+          "action_id": "inspect:fixture.object.1",
+          "action": "inspect crystal",
+          "score": 0.41550000000000004,
+          "probability": 0.24567025497065736
+        },
+        {
+          "action_id": "hug:fixture.agent.1",
+          "action": "hug mystical lion",
+          "score": 0.49755000000000005,
+          "probability": 0.29252925474507774
+        },
+        {
+          "action_id": "hit:fixture.agent.1",
+          "action": "hit mystical lion",
+          "score": 0.35528875,
+          "probability": 0.2161302353136076
+        }
+      ],
+      "after": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect lion",
+          "score": 0.3345,
+          "probability": 0.27663885802240845
+        },
+        {
+          "action_id": "inspect:fixture.object.1",
+          "action": "inspect crystal",
+          "score": 0.3345,
+          "probability": 0.27663885802240845
+        },
+        {
+          "action_id": "hug:fixture.agent.1",
+          "action": "hug mystical lion",
+          "score": 0.23745000000000002,
+          "probability": 0.22502770595392269
+        },
+        {
+          "action_id": "hit:fixture.agent.1",
+          "action": "hit mystical lion",
+          "score": 0.23043625000000006,
+          "probability": 0.2216945780012604
+        }
+      ],
+      "delta_probability": {
+        "inspect lion": 0.030968603051751087,
+        "inspect crystal": 0.030968603051751087,
+        "hug mystical lion": -0.06750154879115505,
+        "hit mystical lion": 0.0055643426876528235
+      },
+      "before_rank": {
+        "hug mystical lion": 1,
+        "inspect lion": 2,
+        "inspect crystal": 3,
+        "hit mystical lion": 4
+      },
+      "after_rank": {
+        "inspect lion": 1,
+        "inspect crystal": 2,
+        "hug mystical lion": 3,
+        "hit mystical lion": 4
+      },
+      "tv_distance": 0.06750154879115502,
+      "direction_explanation": "fatigue/low engagement lowers inspection/social stimulation; higher tension raises conflict salience and environment-control preference; support is unchanged",
+      "engineering_threshold": {
+        "max_key_delta": 0.1,
+        "tv_delta": 0.015
+      },
+      "engineering_trigger": true,
+      "support_diagnostic": {
+        "generated_count": 4,
+        "source_count": 5,
+        "source_action_support_hit": {
+          "hit mystical lion": true,
+          "hug mystical lion": true,
+          "hug lion": false,
+          "hit lion": false,
+          "get crystal": false
+        },
+        "source_candidates_used_for_generation": false
+      }
+    },
+    {
+      "fixture_id": "light::episode-00017::turn-6",
+      "place": "Castle",
+      "generated_action_count": 4,
+      "source_candidates": [
+        "hit visitor",
+        "hug visitor",
+        "put red brick in kings throne",
+        "drop red brick",
+        "give red brick to visitor"
+      ],
+      "before_S": {
+        "fatigue": 0.05,
+        "engagement": 0.95,
+        "tension": 0.05
+      },
+      "after_S": {
+        "fatigue": 0.95,
+        "engagement": 0.05,
+        "tension": 0.95
+      },
+      "generated_A_O_before_after_identical": true,
+      "before": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect big chandelier",
+          "score": 0.41550000000000004,
+          "probability": 0.24567025497065736
+        },
+        {
+          "action_id": "inspect:fixture.object.2",
+          "action": "inspect kings throne",
+          "score": 0.41550000000000004,
+          "probability": 0.24567025497065736
+        },
+        {
+          "action_id": "hug:fixture.agent.1",
+          "action": "hug visitor",
+          "score": 0.49755000000000005,
+          "probability": 0.29252925474507774
+        },
+        {
+          "action_id": "hit:fixture.agent.1",
+          "action": "hit visitor",
+          "score": 0.35528875,
+          "probability": 0.2161302353136076
+        }
+      ],
+      "after": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect big chandelier",
+          "score": 0.3345,
+          "probability": 0.27663885802240845
+        },
+        {
+          "action_id": "inspect:fixture.object.2",
+          "action": "inspect kings throne",
+          "score": 0.3345,
+          "probability": 0.27663885802240845
+        },
+        {
+          "action_id": "hug:fixture.agent.1",
+          "action": "hug visitor",
+          "score": 0.23745000000000002,
+          "probability": 0.22502770595392269
+        },
+        {
+          "action_id": "hit:fixture.agent.1",
+          "action": "hit visitor",
+          "score": 0.23043625000000006,
+          "probability": 0.2216945780012604
+        }
+      ],
+      "delta_probability": {
+        "inspect big chandelier": 0.030968603051751087,
+        "inspect kings throne": 0.030968603051751087,
+        "hug visitor": -0.06750154879115505,
+        "hit visitor": 0.0055643426876528235
+      },
+      "before_rank": {
+        "hug visitor": 1,
+        "inspect big chandelier": 2,
+        "inspect kings throne": 3,
+        "hit visitor": 4
+      },
+      "after_rank": {
+        "inspect big chandelier": 1,
+        "inspect kings throne": 2,
+        "hug visitor": 3,
+        "hit visitor": 4
+      },
+      "tv_distance": 0.06750154879115502,
+      "direction_explanation": "fatigue/low engagement lowers inspection/social stimulation; higher tension raises conflict salience and environment-control preference; support is unchanged",
+      "engineering_threshold": {
+        "max_key_delta": 0.1,
+        "tv_delta": 0.015
+      },
+      "engineering_trigger": true,
+      "support_diagnostic": {
+        "generated_count": 4,
+        "source_count": 5,
+        "source_action_support_hit": {
+          "hit visitor": true,
+          "hug visitor": true,
+          "put red brick in kings throne": false,
+          "drop red brick": false,
+          "give red brick to visitor": false
+        },
+        "source_candidates_used_for_generation": false
+      }
+    },
+    {
+      "fixture_id": "light::episode-00019::turn-2",
+      "place": "Bazaar",
+      "generated_action_count": 7,
+      "source_candidates": [
+        "get oak wood",
+        "hit an assistant",
+        "get a scale",
+        "hug Bazaar",
+        "get gold bar",
+        "hug an assistant",
+        "hit Bazaar"
+      ],
+      "before_S": {
+        "fatigue": 0.05,
+        "engagement": 0.95,
+        "tension": 0.05
+      },
+      "after_S": {
+        "fatigue": 0.95,
+        "engagement": 0.05,
+        "tension": 0.95
+      },
+      "generated_A_O_before_after_identical": true,
+      "before": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect a scale",
+          "score": 0.41550000000000004,
+          "probability": 0.1414327763150664
+        },
+        {
+          "action_id": "inspect:fixture.object.1",
+          "action": "inspect gold bar",
+          "score": 0.41550000000000004,
+          "probability": 0.1414327763150664
+        },
+        {
+          "action_id": "inspect:fixture.object.2",
+          "action": "inspect oak wood",
+          "score": 0.41550000000000004,
+          "probability": 0.1414327763150664
+        },
+        {
+          "action_id": "inspect:fixture.object.3",
+          "action": "inspect big wooden table",
+          "score": 0.41550000000000004,
+          "probability": 0.1414327763150664
+        },
+        {
+          "action_id": "inspect:fixture.object.5",
+          "action": "inspect aisle",
+          "score": 0.41550000000000004,
+          "probability": 0.1414327763150664
+        },
+        {
+          "action_id": "hug:fixture.agent.1",
+          "action": "hug an assistant",
+          "score": 0.49755000000000005,
+          "probability": 0.16840958078915677
+        },
+        {
+          "action_id": "hit:fixture.agent.1",
+          "action": "hit an assistant",
+          "score": 0.35528875,
+          "probability": 0.12442653763551119
+        }
+      ],
+      "after": [
+        {
+          "action_id": "inspect:fixture.object.0",
+          "action": "inspect a scale",
+          "score": 0.3345,
+          "probability": 0.151175666663067
+        },
+        {
+          "action_id": "inspect:fixture.object.1",
+          "action": "inspect gold bar",
+          "score": 0.3345,
+          "probability": 0.151175666663067
+        },
+        {
+          "action_id": "inspect:fixture.object.2",
+          "action": "inspect oak wood",
+          "score": 0.3345,
+          "probability": 0.151175666663067
+        },
+        {
+          "action_id": "inspect:fixture.object.3",
+          "action": "inspect big wooden table",
+          "score": 0.3345,
+          "probability": 0.151175666663067
+        },
+        {
+          "action_id": "inspect:fixture.object.5",
+          "action": "inspect aisle",
+          "score": 0.3345,
+          "probability": 0.151175666663067
+        },
+        {
+          "action_id": "hug:fixture.agent.1",
+          "action": "hug an assistant",
+          "score": 0.23745000000000002,
+          "probability": 0.12297156555818804
+        },
+        {
+          "action_id": "hit:fixture.agent.1",
+          "action": "hit an assistant",
+          "score": 0.23043625000000006,
+          "probability": 0.12115010112647684
+        }
+      ],
+      "delta_probability": {
+        "inspect a scale": 0.009742890348000605,
+        "inspect gold bar": 0.009742890348000605,
+        "inspect oak wood": 0.009742890348000605,
+        "inspect big wooden table": 0.009742890348000605,
+        "inspect aisle": 0.009742890348000605,
+        "hug an assistant": -0.04543801523096873,
+        "hit an assistant": -0.00327643650903435
+      },
+      "before_rank": {
+        "hug an assistant": 1,
+        "inspect a scale": 2,
+        "inspect gold bar": 3,
+        "inspect oak wood": 4,
+        "inspect big wooden table": 5,
+        "inspect aisle": 6,
+        "hit an assistant": 7
+      },
+      "after_rank": {
+        "inspect a scale": 1,
+        "inspect gold bar": 2,
+        "inspect oak wood": 3,
+        "inspect big wooden table": 4,
+        "inspect aisle": 5,
+        "hug an assistant": 6,
+        "hit an assistant": 7
+      },
+      "tv_distance": 0.04871445174000305,
+      "direction_explanation": "fatigue/low engagement lowers inspection/social stimulation; higher tension raises conflict salience and environment-control preference; support is unchanged",
+      "engineering_threshold": {
+        "max_key_delta": 0.1,
+        "tv_delta": 0.015
+      },
+      "engineering_trigger": true,
+      "support_diagnostic": {
+        "generated_count": 7,
+        "source_count": 7,
+        "source_action_support_hit": {
+          "get oak wood": false,
+          "hit an assistant": true,
+          "get a scale": false,
+          "hug Bazaar": false,
+          "get gold bar": false,
+          "hug an assistant": true,
+          "hit Bazaar": false
+        },
+        "source_candidates_used_for_generation": false
+      }
+    }
+  ],
+  "global_invariants": {
+    "generator_does_not_read_A_star": true,
+    "S_intervention_does_not_change_generated_A_O": true,
+    "P_or_S_do_not_change_action_legality": true,
+    "source_available_actions_posthoc_only": true
+  }
+}

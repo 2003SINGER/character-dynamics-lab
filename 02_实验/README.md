@@ -2,6 +2,8 @@
 
 当前主线是 T14/T20 rank-matched 1D development harness：LIGHT Replay → SceneSnapshot → raw feature v1 → Activity/ActionSupport/Theory S → conditional linear probe → zeroed/permuted diagnostics。
 
+Mechanism 表达力与候选集边界的独立工程验收见 [Mechanism Sanity v1](Mechanism_Sanity_v1/README.md)。它不启动正式 NLL/Experiment B，不读取或修改 T14/T20 的 strict-v2 protocol/validator/shards/status/results。
+
 - **Run 1 / full-refit**：`T14_T20/run_rank_matched_probe_v1.py`，各 condition 同时拟合 `theta + w`。
 - **Run 1b / frozen-model intervention**：`T14_T20/run_rank_matched_intervention_v1.py`，复用 Run 1 模型，不训练，做 correct/zeroed/permuted。
 - **Run 2 / frozen-theta incremental**：`T14_T20/run_frozen_base_incremental_v1.py`，读取 Run 1 no-S 的 frozen `theta_0`，只拟合 `w`。

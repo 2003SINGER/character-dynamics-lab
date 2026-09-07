@@ -10,10 +10,10 @@
 
 来源原件：[Theory-S 与机制纠偏对话](../90_原始材料/2026-09-07_用户对话_Theory-S与机制纠偏/README.md)。
 
-- [ ] **M0 mechanism sandbox**：固定 `W/O/P/A^O`，构造少量可审计场景；只做 `do(S=s_1)` / `do(S=s_2)`，验收 `π_1(A) ≠ π_2(A)` 且方向符合预注册预期。失败时先修 coupling/utility/字段，不把现实数据结果解释成机制能力。
-- [ ] **M1 Theory-S v1 设计**：逐篇核验心理学、计算情绪与游戏 AI 来源，形成字段、更新源、时间尺度、可证伪预测；当前一维 EMA 只保留为 development probe，不升格为正式 Theory-S。
-- [ ] **M2 场景与候选编译器**：从 `scene → object/affordance → A^O` 独立生成合理候选；冻结候选规则后才揭晓外部 `A*`，将 `A* ∉ A^O` 记录为 support miss，不为覆盖 gold action 添加候选。
-- [ ] **M3 dataset→capability matrix**：逐数据集登记可测的 `W/O/X/S/P/A` 子集与不可声称部分；LIGHT 不再被默认当作 persistent-S 的唯一或必然合适材料。
+- [x] **M0 mechanism sandbox（工程 sanity 完成）**：固定 Scene/O/P/generated `A^O`，在 5 个 LIGHT development fixtures 上做 `do(S=s_1)` / `do(S=s_2)`；结果显示 π 改变且 support 不变。结果不是现实数据机制证据，见[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md)。
+- [x] **M1 Theory-S v1 设计（工程冻结）**：核验 EMA/Broekens/MAMID/FAtiMA/TCN 与 Game-AI 对照，冻结 `fatigue/engagement/tension` 三字段、X 输入、字段级惯性/恢复/饱和/P 调制和 score coupling；一维 EMA 仍仅为 development probe，不升格为正式理论。
+- [x] **M2 场景与候选编译器（最小切片完成）**：从 canonical SceneSnapshot 的 objects/agents 独立生成 affordance 与 `A^O`；生成后才做 source `available_actions` support hit/miss，且不为覆盖 `A*` 添加候选。正式跨数据集 ontology/实例绑定仍未完成。
+- [~] **M3 dataset→capability matrix（LIGHT 结论完成，矩阵待扩）**：本轮记录 LIGHT 适合接口 sanity 但不适合 persistent-S；PowerWash/FarmQuest/AGAIN 当前缺 subject-facing O 与 action truth，未硬构造 fixture。完整逐数据集矩阵仍待各 adapter semantic audit。
 - [ ] **M4 formal experiment gate**：M0–M3 未完成前，Run1–4 仅保留为 development identifiability diagnostics，不启动正式 test 或把结果写成 Theory-S 结论。
 
 ## 本轮 development diagnostic 封口
