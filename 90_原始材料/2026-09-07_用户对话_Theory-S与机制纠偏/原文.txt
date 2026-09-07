@@ -1,0 +1,667 @@
+正确 Theory-S vs zero ≈ 0  可能我们的机制就是不好的呢？梯度没有弄开。或者是没有生成符合数据集的合理的选项以至于角色一定会选择源数据集的action。实际上我们还没做正式实验
+
+对，完全可能就是我们的机制不好。而且我觉得你这句比我刚才把 Run4 讲成一个“有趣 failure mechanism”更重要：现在 Run1–4 根本还没有资格替 Theory-S 辩护。
+
+correct Theory-S ≈ zero 最直接的读法其实就是：
+
+在当前 LIGHT development setup + 当前 representation + 当前 probe 下，这个 Theory-S 没提供可测的净增量。
+
+至于“为什么”，现在至少有几种完全不同的解释，我们还没分开。
+
+第一种最简单：Theory-S 本身就设计得烂。 现在的 Theory-S 极窄，只认少数 expected-effect confirmed transition，而且还是一个标量 EMA。它可能根本没抓住 LIGHT 里影响下一动作的东西。那最后正式实验输掉，非常正常。
+
+第二种就是你说的 probe / 梯度没把作用弄开。现在 Run2 实际上是：
+
+$$ z(t,a)=\theta_0^\top f(t,a)+S_t\,w^\top f(t,a) $$
+
+只允许 Theory-S 通过一个标量去调制既有 action features。
+
+也就是说它不是：
+
+“给 S 足够表达能力，让它决定行为。”
+
+而是：
+
+“看看一个 1D state 能不能在 frozen base 上沿着已有 feature 方向产生增量。”
+
+如果真正需要的是：
+
+不同 state
+→ 不同 action 子空间
+→ 非线性 interaction
+→ 或不同语义 action head
+
+这个 probe 根本表达不了。
+
+所以 ≈0 也可能是：
+
+representation 有信息，但这个 readout 读不出来。
+
+但注意，这个解释现在也只是可能性，不能因为结果不好就自动怪 probe。
+
+第三个问题，我觉得你提得尤其关键：
+
+我们的 candidate set 根本不是我们自己根据 O 构造出来的合理 A^O。
+
+现在 LIGHT 的：
+
+candidate_set_factual = source available_actions
+
+本质上是数据集给的 source candidate set。
+
+而且 gold A* 本来就在这里面。
+
+于是整个任务可能更像：
+
+“在数据集已经提供的一组合法动作中重新排序 gold。”
+
+而不是：
+
+“角色根据自己的 O/S/P 形成合理候选，然后选择下一动作。”
+
+这两个问题差非常大。
+
+甚至可能出现你说的这种情况：
+
+source candidates 已经把动作空间限制得很死
++
+当前 O/features 已经足够指出 gold
+↓
+history / S 根本没有多少发挥空间
+
+那我们观察到：
+
+no-S 已经很强
+S≈0 gain
+
+不能直接说明“持续状态没用”。
+
+可能只是：
+
+这个 estimand 对持续状态不敏感。
+
+还有第四个混淆：
+
+LIGHT 本身未必有足够的“人物动力学信号”
+
+我们的母问题需要的是：
+
+过去发生了不同的事
+↓
+留下不同持续状态
+↓
+在当前条件相近时
+↓
+下一动作分布不同
+
+但 LIGHT 的 physical actions 可能主要由：
+
+当前场景 affordance；
+当前对象；
+当前对话局部语义；
+source candidate generation；
+
+决定。
+
+如果 dataset 里真正需要长程历史才能区分的 decision 很少，那么一个 perfect S 也未必赢。
+
+这不是机制失败，而是：
+
+数据里没有足够的可识别信号。
+
+所以现在我会把 Run1–4 降到一个更准确的位置：
+
+它们不是“我们的机制实验”
+
+它们其实是：
+
+development identifiability diagnostics。
+
+在问：
+
+当前这个很窄的 Theory-S，通过当前 rank-matched probe，在当前 LIGHT observed-source candidate task 上，有没有可见的历史信号？
+
+目前答案：
+
+净增量：没有明显看到
+错误历史：会稳定伤害
+
+就这些。
+
+不能再往上推成：
+
+Theory-S 有效
+或
+Theory-S 无效
+
+都不行。
+
+所以你说“实际上我们还没做正式实验”是对的
+
+而且是非常重要的边界。
+
+现在还缺至少三层：
+
+1. 数据任务本身先成立
+
+也就是 Terra 现在做的：
+
+这 24,999 条到底有多少能定义一个合理的 current-step source candidate prediction task？
+
+如果这一步都过不了，后面没必要讨论 S。
+
+2. Experiment B 真正比较表示
+
+至少：
+
+raw history
+structured history
+strong summary
+no-S
+Activity-S
+ActionSupport-S
+Theory-S
+S + history
+permuted-S
+
+这一步才开始真正碰：
+
+$$ S \stackrel{?}{\approx} H $$
+3. 最后还要独立 formal test
+
+LIGHT 我们已经看太多次了。
+
+所以即使 Experiment B 在 LIGHT 上非常漂亮，它也只能帮助我们：
+
+选 mechanism
+冻结 hypothesis
+冻结 ε
+冻结 metric
+冻结 representation
+
+然后拿新的、没看过的 cohort去测。
+
+那才是正式实验。
+
+所以现在其实有三种完全允许的最终结果：
+
+A. Theory-S 正式也输
+
+那就承认：
+
+当前理论构造没有产生预测价值。
+
+这是很正常的负结果。
+
+B. naive/activity state 赢，Theory-S 不赢
+
+那说明：
+
+persistent compression 可能有用，但我们选的“心理学式语义结构”没有贡献。
+
+这会直接砍掉一大块理论包装。
+
+C. Theory-S 在更合适的任务/readout下开始赢
+
+那才值得进一步问：
+
+是 theory dimension 真有价值，还是模型容量/先验/regularization 造成？
+
+然后再做等容量消融。
+
+我反而觉得现在最重要的是不要提前爱上 Theory-S。
+
+Theory-S 只是一个候选实现。
+
+真正母问题是：
+
+持续状态这种表示，是否能作为历史的紧凑、行为相关表示。
+
+就算最后结论是：
+
+Theory-S ❌
+Activity-S ✅
+Strong summary ✅✅
+
+那也是非常有价值的结果：
+
+“你不需要这套手写 appraisal state；一个更简单的摘要就够了。”
+
+这依然是在回答我们的研究问题，而不是研究失败。
+
+所以我现在会更严格地区分：
+
+Paper-0 研究的是 persistent state representation。Theory-S 只是被审判的一个具体机制，不是论文必须保护的主角。
+
+第一，Theory-S   设计还是得参考已有心理学或者游戏论文。第二机构我们应该把系统再完善一点，标准是，S比较能够影响行为为止！至于跑啥模拟可以具体谈谈，因为本身就是P确定大的行为列表不出错，S当前的状态更能决定在这些事件中做出一个选择出来。三，所以需要改，我都说了按照数据集的场景来构造一些object并生成相应合法合理action。。。这个不能交给codex干吗？难道codex只会搭建机制连一个场景都弄不出来？第四，太关注于一个数据集，我们不是说好了数据集有啥就输入啥嘛，没有那就算了呗，可能确实是这个数据集不适合作为S的实验材料。欸！！！
+已调用工具
+
+对，而且你这四点合起来，其实是在纠正我们最近一个越来越明显的偏差：我们把“用 LIGHT 证明当前这个简陋 Theory-S”当成主线了。实际上应该反过来——先把人物动力学机制做成一个像样、可干预、确实能影响选择的系统，再去问哪些数据集有资格测它。
+
+我逐条回应。
+
+1. Theory-S 不能是我们拍脑袋的一维 EMA
+
+这个我完全同意。现在这个：
+
+expected effect confirmed → x=1
+S_t = EMA(x)
+
+充其量是一个机制探针，不是我们真正想研究的 Theory-S。
+
+正式一点的 Theory-S 应该从已有计算心理学/游戏 agent 文献里选机制，再组合成我们自己的可检验版本，而不是“想到几个心理字段就塞进去”。
+
+几个很直接的来源已经很清楚：
+
+EMA：appraisal 应该是角色对“自己与环境关系”的解释，而不是世界事件直接变情绪；动态性来自 perception / inference / coping 的变化。
+MAMID：外部 cues、内部 interpretation、goal、当前 emotion 和稳定 trait 一起参与 appraisal；随后 affective state 进一步影响 action selection、goal selection、attention 等处理过程。这个尤其贴我们想要的 P + 当前 S → 行为选择。
+FAtiMA Modular：appraisal 与 affect derivation 分开，emotion 有 intensity 和 decay，personality/cultural bias 可以调制情绪强度，而且模块是可替换的。
+甚至 2024 年已经有 LLM game agent 明确走“context/memory → appraisal → emotion memory → behavior”的 Chain-of-Emotion 路线，所以我们更不能拿“LLM + appraisal”本身当创新。
+
+所以真正的 Theory-S 我更倾向：
+
+O / ΔO
+  ↓
+X: appraisal
+  - relevance
+  - goal congruence
+  - controllability
+  - agency/accountability
+  - novelty / expectation violation
+  ↓
+U_k(P, old S, X, Δt)
+  ↓
+S:
+  少量真正持续的行为相关状态
+  ↓
+π(A | O, P, S)
+
+注意：X 可以丰富，S 不一定要很多。
+
+比如一个 event 可以同时被 appraisal 为：
+
+高度相关
+目标受阻
+低控制
+他人导致
+意外
+
+但它最终可能只推动：
+
+tension ↑
+engagement ↓
+trust_j ↓
+
+这样比现在 confirmed → 1D EMA 像样得多。
+
+2. “把系统完善到 S 确实能影响行为”为止——对，但这是工程验收，不是实验结论
+
+这条我也同意，而且这里需要把两件事彻底拆开。
+
+我们应该主动设计模拟场景，让 S 有发挥空间。
+
+这不是作弊。
+
+例如固定：
+
+P = 偏认真、略内向
+O = 宿舍晚上，桌子、床、手机、电脑都可用
+
+合法动作始终有：
+
+认真学习
+敷衍学习
+玩手机
+休息
+洗澡
+出去走走
+
+然后只改变 S：
+
+Case A:
+fatigue 低
+stress 中
+engagement 高
+
+Case B:
+fatigue 高
+stress 高
+engagement 低
+
+我们就应该看到：
+
+P 决定长期稳定倾向
+→ “这个人总体比较愿意学习，不太爱出去社交”
+
+S 决定当前表达
+→ 今天是认真学 / 敷衍学 / 刷手机 / 先休息
+
+这正是你原来想的东西。
+
+但我会修正一个细节：
+
+P 不应该负责决定“合法动作列表”。
+
+严格来说应该：
+
+O + Object affordance
+→ 生成 A^O（此刻角色知道的合法/可设想动作）
+
+P
+→ 稳定 preference prior
+
+S
+→ 当前 transient modulation
+
+即：
+
+$$ \text{score}(a) = b(a,O) + g_P(P,a) + g_S(S,a) + g_{PS}(P,S,a) $$
+
+这样最好。
+
+否则如果：
+
+P = introvert
+→ 直接把“找人聊天”从候选列表删掉
+
+那我们以后根本分不清：
+
+P 是改变了选择偏好，还是偷偷改变了 action support。
+
+我们真正要的是：
+
+同样都能做，这个人平时更倾向什么；在当前状态下又更可能做什么。
+
+而“S 必须确实能造成明显 Δπ”完全可以作为 simulator 的 unit test：
+
+固定 W/O/P/A^O
+只干预 S
+→ π(A) 应发生预期方向且非微小变化
+
+这只是验收系统有表达能力。
+
+真正科研时才问：
+
+现实人物是不是也按照这种 S 变化？
+
+两者完全不同。
+
+3. Dataset 场景 → Object → 合法 Action：当然应该让 Codex 干
+
+对，这个我刚才确实想得过于保守了。
+
+Codex 完全可以做，而且这恰恰是工程 agent 最适合干的活。
+
+不是让 Codex“自由脑补剧情”，而是让它实现一个受约束的：
+
+Scene compiler + affordance generator
+
+比如 LIGHT 给我们：
+
+setting
+room objects
+room agents
+actor inventory
+actor observation
+
+Codex 可以编译成：
+
+SceneSnapshot
+
+room:
+  tavern
+
+objects:
+  sword:
+    visible = true
+    portable = true
+    affordances = [take, inspect]
+
+  chair:
+    visible = true
+    affordances = [sit, inspect]
+
+agents:
+  guard:
+    visible = true
+    affordances = [talk, give, hit, steal?]
+
+inventory:
+  coin
+
+然后通过我们冻结的 object/action ontology生成：
+
+A^O:
+take sword
+inspect sword
+sit on chair
+talk to guard
+give coin to guard
+...
+
+再让 W 或 source constraints 校验 A^W。
+
+最关键的一点：
+
+绝对不要为了保证 A* 在候选里，把 gold action 硬塞进去。
+
+流程必须是：
+
+scene
+↓
+独立 candidate generator
+↓
+A^O
+↓
+然后揭晓 source A*
+
+如果：
+
+A* ∉ A^O
+
+这就是一个结果：
+
+candidate generator support miss。
+
+然后回 dev 阶段分析为什么：
+
+object 没提取出来？
+affordance ontology 缺？
+source action 用到了 O 中没给的信息？
+数据本来就不适合我们的 observable-world formulation？
+
+这才是真正的实验。
+
+所以你说“难道 Codex 连一个场景都弄不出来”——是的，它当然应该弄，而且我们之前已经有 SceneSnapshot / Object / affordance 的骨架了。
+
+我们一直没真正让它发挥，是因为最近被“别污染数据”吓得太死。
+
+正确做法不是：
+
+不生成 scene/action。
+
+而是：
+
+可以生成，但生成规则在看到当前 row 的 A* 之前冻结，而且来源必须可审计。
+
+这就行了。
+
+4. 对，我们确实被 LIGHT 绑架了
+
+这点你突然意识到得很关键。
+
+我们之前说过的原则明明就是：
+
+数据集有什么就输入什么；没有的字段不编造。
+
+那对应到我们的系统，本来就应该是：
+
+Dataset A:
+有 O / action / objects
+→ 可以测 perception + candidate + S
+
+Dataset B:
+有 history/action，没 world objects
+→ 可以测 history compression
+→ 不测 W/O object mechanism
+
+Dataset C:
+有 telemetry/state，没有 A*
+→ 可以测 dynamics / state transition
+→ 不测 next-action prediction
+
+Dataset D:
+有 arousal
+→ 可以当 state proxy diagnostic
+→ 不当行为真值
+
+这才是跨数据集 Replay 的意义。
+
+不是每个数据集都必须完整覆盖 W-O-X-S-P-A。
+
+否则就变成：
+
+为了用 LIGHT，强行把整个 Paper-0 改造成 LIGHT 能测的问题。
+
+这确实是漂移。
+
+所以我现在会重新把项目切成“两条互相约束但不互相绑架的线”
+线 A：Mechanism sandbox
+
+我们自己构造少量、有意义的场景。
+
+目的不是证明人物理论正确，而是做到：
+
+P 决定稳定倾向
+S 决定当前选择
+O 决定知道什么
+Object 决定能做什么
+W 决定实际能不能成功
+
+并且：
+
+干预 S
+→ π 明显变化
+
+干预 P
+→ 长期 preference 变化
+
+隐藏 W
+→ π 不变化
+
+改变 O
+→ candidate / π 可变化
+
+这个 sandbox 要做到机制真正完整可用。
+
+线 B：External evidence
+
+每个数据集只问：
+
+它能验证哪一截？
+
+例如现在很可能：
+
+LIGHT
+→ scene/object/action candidate
+→ 局部物理行为
+→ 可以测 candidate semantics / 局部 S
+
+但如果最后发现：
+
+它的 physical action 主要由场景 affordance 决定，几乎没持续状态 signal，
+
+那就写：
+
+LIGHT unsuitable for persistent-S identification
+
+然后完事。
+
+不是失败。
+
+再找另一个：
+
+OPeRA / ClubFloyd / FarmQuest / AGAIN / PowerWash
+
+各自拿能用的部分。
+
+这还会改变我们接下来的顺序
+
+我现在不赞成：
+
+Terra 跑完
+→ 立刻 Experiment B
+
+而应该：
+
+Terra 继续跑，不打断
+
+与此同时：
+
+1. Theory-S v1 真正设计
+   ← 心理学 + computational emotion + game AI
+
+2. 完善 sandbox
+   P 稳定偏好
+   S 当前状态
+   Object → actions
+   π 显著受 S 干预
+
+3. 写 dataset → capability matrix
+   每个数据集到底能测 W/O/X/S/P/A 的哪些部分
+
+4. LIGHT annotation 跑完
+   ↓
+判断：
+它适不适合 persistent-S experiment？
+
+如果不适合：
+
+直接不让 LIGHT 承担这个实验。
+
+它可以继续当 scene/candidate/replay 数据集。
+
+而且我现在觉得一个非常重要的 Paper-0 设计原则应该补回来
+
+先证明 S 有“causal expressive capacity”，再测 S 有没有“empirical predictive validity”。
+
+即：
+
+Stage 0 — mechanism sanity
+$$ do(S=s_1),\,do(S=s_2) \Rightarrow \pi_1 \neq \pi_2 $$
+
+这是我们自己场景上的必要工程条件。
+
+Stage 1 — identification
+
+真实数据是否存在：
+
+$$ H \rightarrow S \rightarrow A $$
+
+的可辨识信号？
+
+Stage 2 — predictive validity
+$$ NLL(S) \stackrel{?}{<} NLL(noS) $$
+
+以及：
+
+$$ S \stackrel{?}{\approx} H $$
+Stage 3 — external test
+
+冻结以后换未见数据。
+
+这个顺序比我们最近：
+
+“拿一个非常简陋的 Theory-S 直接往 LIGHT 上撞，然后开始解释为什么撞不赢”
+
+合理多了。
+
+所以你这次四点我不是“小修一下”，而是会把它理解成一次主线纠偏：
+
+不是让数据集定义我们的角色动力学。先把角色动力学系统做成一个理论有依据、工程上有表达力的东西；再让不同数据集分别尝试证伪它能覆盖的那一部分。
+
+而且这样一来，Theory-S 输了我们也知道是在输什么，而不是现在这种：
+
+究竟是 Theory-S 烂、readout 烂、candidate set 烂、还是 LIGHT 根本没这个信号？
+
+四个因素全缠在一起。现在我们终于可以把它们拆开了。

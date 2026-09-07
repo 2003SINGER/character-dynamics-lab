@@ -1,0 +1,679 @@
+刚提交了一个新的仓库。你先看看。然后再讨论一下我们的下一步行动
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+
+看完了。你新提交的应该是 2003SINGER/intents-research。它不是一个新起的空仓库，而是把你之前那条“长程意图 / Intent Relation”研究线完整归档上来了。最新只有一个 Initial research project snapshot 提交，但内容本身很完整，包含研究设计、文献、数据、实验、代码、负结果和导师材料。
+
+而且我觉得它现在对 Character Dynamics 很有价值，不是因为要复活这个旧课题，而是因为它把你以前已经踩过的一类坑完整保存下来了。
+
+这个旧仓库真正留下了什么
+
+它当时最核心的研究拆分是：
+
+E = 关系有没有正确抽出来
+U = 抽出来的关系有没有真的进入行动
+
+候选 gap 是：
+
+E = 1
+U = 0
+
+但后来 v4r1 高密度实验里，普通 Direct / Reminder 全部 6/6 正确，反而有些时候关系抽取错了但行动还是对的：
+
+E = 0
+U = 1
+
+所以项目没有硬救 graph，而是承认：
+
+当前没稳定观察到“关系抽对但不会用”的现象，不能为了已有系统继续做方法。
+
+这个科研习惯非常值得直接迁到 Character Dynamics。
+
+它和我们现在的问题几乎同构
+
+我们现在其实也有三层，之前一直混在一起：
+
+① State formation
+历史 / O / X / U
+→ 有没有构造出一个合理的 S？
+
+② State use
+给定同一个 O、P、A^O
+改变 S
+→ π(A) 到底会不会明显改变？
+
+③ Predictive validity
+真实历史产生的正确 S
+→ 在真实 A* 上到底有没有预测价值？
+
+我们最近一上来就拿极简 Theory-S 撞 LIGHT，基本等于：
+
+①还很粗，②也没充分验收，就直接跑③。
+
+所以最后：
+
+Theory-S correct ≈ zero
+
+我们根本不知道是哪层坏了。
+
+这跟旧 intents 里“关系提取 / 关系使用 / 最终行动”不拆开，是同一种问题。
+
+所以我现在建议把 Character Dynamics 也明确设三道 gate
+Gate 0：机制表达能力
+
+这个是我们现在最应该先做的。
+
+不是看真实数据，不是 NLL。
+
+而是固定：
+
+W
+O
+P
+A^O
+
+只干预 S：
+
+$$ do(S=s_1)\rightarrow \pi_1 $$ $$ do(S=s_2)\rightarrow \pi_2 $$
+
+要求：
+
+S 的合理变化必须能够产生有意义、方向正确、幅度足够大的 Δπ。
+
+如果连这个都做不到，别碰真实数据。
+
+注意这不是说：
+
+“调到 S 一定赢”。
+
+而是说：
+
+我们设计的是“状态影响行为”的系统，那它至少得具有这种表达能力。
+
+就像汽车方向盘至少得能改变轮子方向，再谈真实道路表现。
+
+这正好对应你上一条说的第二点
+
+你说：
+
+P 确定大的行为倾向，S 当前状态决定这些事件中更具体的选择。
+
+我觉得这里稍微精确化一下会非常漂亮：
+
+Object + O
+→ 此刻有哪些可设想/合法行为 A^O
+
+P
+→ 稳定的 preference prior
+
+S
+→ 当前 transient modulation
+
+P × S
+→ 同一个人格在不同状态下的表达差异
+
+比如：
+
+场景：宿舍晚上
+
+Object 自动提供：
+
+desk:
+  study_focused
+  study_halfhearted
+
+bed:
+  sleep
+  lie_down
+
+phone:
+  browse_phone
+  reply_message
+
+door / corridor:
+  go_out
+  take_walk
+
+固定人格 P：
+
+conscientiousness 高
+sociability 低
+
+于是总体上：
+
+study > social
+
+但是：
+
+S1
+fatigue = low
+stress = medium
+engagement = high
+
+行为：
+
+study_focused ↑↑
+browse_phone ↓
+sleep ↓
+S2
+fatigue = high
+stress = high
+engagement = low
+
+同一个 P，同一间房，同样的动作列表：
+
+study_halfhearted ↑
+browse_phone ↑
+sleep ↑
+study_focused ↓↓
+
+这才是我们想要的 Character Dynamics。
+
+Gate 1：机制识别能力
+
+Gate 0 通过以后，再问：
+
+历史事件能不能通过 Theory-S 产生这些合理状态？
+
+也就是：
+
+历史
+↓
+appraisal X
+↓
+U
+↓
+S
+↓
+π
+
+例如：
+
+连续被打断学习
+→ goal obstruction
+→ frustration / tension ↑
+→ engagement ↓
+→ 半心半意学习、休息概率 ↑
+
+和：
+
+任务取得进展
+→ goal congruence / controllability ↑
+→ satisfaction / engagement ↑
+→ focused study ↑
+
+这一步我们就可以做人工构造的受控 trajectory。
+
+仍然不是正式行为真值实验。
+
+Gate 2：真实预测价值
+
+最后才拿真实数据：
+
+correct S
+zero S
+permuted S
+naive S
+summary
+history
+
+去看：
+
+$$ NLL $$
+
+这才是 Paper-0 真正的 scientific test。
+
+这三道 gate 正好吸收了 intents-research 最好的部分
+
+旧仓库告诉我们的不是“以后做意图”。
+
+而是：
+
+表示存在 ≠ 表示被使用 ≠ 表示有真实预测价值。
+
+Character Dynamics 应该把这三个东西永远分开。
+
+我甚至建议以后仓库里正式叫：
+
+Formation
+Use
+Validity
+
+或者：
+
+S-Formation
+S-Intervention
+S-Prediction
+
+这样以后不会再混。
+
+Theory-S 下一步也应该重做，但不是无限扩字段
+
+你上一条说得对：
+
+Theory-S 还是必须参考已有心理学或者游戏论文。
+
+现在的一维：
+
+confirmed expected effect → EMA
+
+只是 probe。
+
+下一版我认为应该叫：
+
+Theory-S v1
+
+来源先限定在我们已经有的那几条机制文献，不另开大规模搜索：
+
+EMA / appraisal theory
+Broekens
+MAMID
+FAtiMA
+可能再加我们已有的 game AI 状态/utility 文献
+
+然后只回答两个问题：
+
+X 应该描述什么？
+
+例如：
+
+goal relevance
+goal congruence / obstruction
+controllability
+agency
+expectation / novelty
+哪些东西值得跨时间成为 S？
+
+不要把 X 全复制成 S。
+
+比如最后可能只有：
+
+tension
+engagement
+fatigue
+satisfaction
+trust[target]   # 社交场景以后才用
+
+Paper-0 单人阶段甚至可以先只有前 4 个。
+
+然后每个字段拥有自己的：
+
+input X
+decay / recovery
+saturation
+P modulation
+
+这才符合你最早说的：
+
+每个 state field 自己有 dynamics。
+
+第三点：Codex 就应该开始真正“造场景”
+
+我现在明确赞成。
+
+我们已经有：
+
+SceneSnapshot
+Object
+affordance
+CandidateSemantics
+W settlement
+O boundary
+
+结果却一直拿 LIGHT 的 available_actions 当候选列表。
+
+这很荒诞。
+
+Codex 完全可以负责一个：
+
+Scene/Object/Affordance Compiler
+
+不是自由发挥剧情，而是严格工程任务。
+
+输入数据集给的：
+
+setting
+objects
+agents
+inventory
+source_O
+
+输出我们自己的：
+
+Scene
+Objects
+A^O
+
+例如 source 有：
+
+room: tavern
+objects: sword, chair
+agents: guard
+inventory: coin
+
+则：
+
+sword:
+  inspect
+  take
+
+chair:
+  inspect
+  sit
+
+guard:
+  talk
+  give
+  hit
+
+然后：
+
+A^O = 所有 O 中可知 object affordance 的实例化
+最关键规则
+
+生成候选时不能看 A*。
+
+生成完以后再揭晓 gold：
+
+A* ∈ A^O
+
+→ support hit。
+
+A* ∉ A^O
+
+→ support miss，作为结果。
+
+这个才是真正公平。
+
+第四点：旧 intents 仓库又提醒我们不要被一个数据集绑架
+
+它当时也踩过这个坑。
+
+一开始自己的合成 case 不出 failure，于是跑 GraphIF 官方数据；官方数据确实有 319/998 初筛失败，但进一步看发现混着：
+
+格式约束；
+长度要求；
+官方轨迹连锁；
+模糊 refine / coherence；
+
+所以最后也没有硬说：
+
+“看！这里有 319 个 relation-use failure！”
+
+这跟现在 LIGHT 非常像。
+
+LIGHT 能给什么，我们就用什么。
+
+不能给：
+
+持久人物状态的可辨识信号
+
+那就不要让它承担这个实验。
+
+它仍然可以非常适合：
+
+scene reconstruction
+object affordance
+candidate support
+local action prediction
+O boundary
+
+而别的数据可以测别的东西。
+
+所以我现在认为下一步不应该是“继续 Experiment B”
+
+Terra 继续跑即可。
+
+顺便最新仓库已经到：
+
+strict v2
+task 0001–0040
+800 / 24,999
+
+ADMIT      522
+AMBIGUOUS  249
+REJECT      29
+
+它自己继续做数据准入。
+
+我们另一条主线现在应该切到 mechanism sandbox。
+
+我建议下一步只做这一件事
+写一份 Mechanism Sanity v1 设计卡
+
+先不要 Codex 直接开改代码。
+
+设计卡只定义四样东西：
+
+Theory-S v1 最小字段和文献来源
+3 个受控场景
+每个场景的 Object → Action
+预注册的 S intervention → Δπ 方向
+
+比如：
+
+Scene A：宿舍学习
+
+测：
+
+fatigue
+engagement
+tension
+Scene B：等待重要结果
+
+测：
+
+tension
+satisfaction
+engagement
+Scene C：自由晚上
+
+同样 P、更多竞争行为，测 S 是否决定：
+
+work / entertainment / recovery
+
+然后每个场景写 4–6 个 intervention pair，例如：
+
+fatigue 0.2 → 0.8
+预期：
+P(sleep) ↑
+P(study_focused) ↓
+engagement 0.2 → 0.8
+预期：
+P(study_focused) ↑
+P(phone) ↓
+tension 0.2 → 0.8
+预期：
+不是单纯“所有负面动作 ↑”
+而是根据 controllability / P 决定 coping 分支
+验收
+
+不只是“方向对”。
+
+还得有最低效应幅度，例如先作为 engineering threshold：
+
+$$ TV(\pi_{s_1},\pi_{s_2}) > \delta $$
+
+或者至少：
+
+关键目标动作 probability 改变 > 0.1
+
+这个阈值只是 simulator sanity，不是论文阈值。
+
+这张设计卡冻结以后，再把它整包扔给 Codex：
+
+按当前 Character Dynamics architecture 实现这三个场景、object affordance、Theory-S v1 和 intervention test，不准读取 A*，不改 Paper-0。
+
+这样 Codex 当然能干，而且会比现在一直让它做 validator / shard / checkpoint 更发挥价值。
+
+我认为这是现在最正确的下一步。Terra 做它的数据审计，我们同时终于回去把人物动力学本体做得像样。
+
+不是哥们我说的是仓库的新推送，不是新仓库！你重新来，“这个旧仓库真正留下了什么  ”你确定真的有用吗。然后下一步我们要干啥！我让codexluna来
+已调用工具
+已调用工具
+已调用工具
+
+对，我刚才把旧 intents-research 的意义说重了。它最多只能提醒一个我们本来就知道的方法论原则：表示被构造出来 ≠ 表示真的影响行动。除此之外，它对现在 Character Dynamics 的具体机制、Theory-S、场景生成都没有直接帮助。 不该拿它来决定下一步，更不该把旧课题硬嫁接进来。
+
+现在最新 character-dynamics-lab 推送 ac29be4 也只是 strict-v2 checkpoint 到 800/24,999，没有新的机制改动。所以 Terra 继续标注；Luna 下一步应该直接去完善机制本体。
+
+我建议就给 Luna 一个明确任务：Mechanism Sanity v1：Theory-S + 场景/Object→Action + S→行为干预。 先不做正式实验。
+
+先暂停新增 LIGHT 标注相关工作；Terra 正在独立运行 strict-v2 annotation，不要修改它的 protocol、validator、shards、status 或结果。
+
+现在转到 Character Dynamics 的机制主线，完成一个 Mechanism Sanity v1。目标不是做正式实验，而是把当前系统完善到：在合理场景与合法候选动作下，固定 O/P/A^O，仅改变 S，就能产生明显、可解释的行为分布变化。
+
+先完整检查当前仓库已有机制，不要另起一套平行架构。重点阅读：
+
+00_研究设计/完整机制说明_v0.md
+00_研究设计/前台问题与候选创新.md
+00_研究设计/未决问题与机制候选.md
+01_文献/ 中现有 appraisal / EMA / Broekens / MAMID / FAtiMA / game AI 相关精读
+02_实验/Replay/scene_snapshot_v0.py
+02_实验/Replay/replay_features_v1.py
+Demo codex-generated/Inc/scene_snapshot.h
+Demo codex-generated/Inc/semantic_types.h
+Demo codex-generated/Src/scene_snapshot.cpp
+Demo codex-generated/Src/decision.cpp
+当前 CharacterState / Personality / appraisal / state updater 相关源码
+
+然后完成以下四件事。
+
+1. 设计 Theory-S v1
+
+当前 confirmed expected effect -> 1D EMA 只视为历史 probe，不继续沿用为正式 Theory-S。
+
+从仓库已有心理学 / computational emotion / game AI 文献中选择一个最小、可解释、可实现的 Theory-S v1。必须明确：
+
+每个 X/appraisal 维度来自哪篇已有文献、承担什么职责；
+哪些 appraisal 只属于瞬时 X，哪些变量值得跨时间进入 S；
+每个 S field 自己的 dynamics：输入、惯性/恢复/衰减、饱和、P 调制；
+S 如何进入行为评分，而不是只被记录。
+
+不要为了“心理学感”无限增加字段。优先控制在约 3–5 个真正行为相关的动态状态。允许例如 tension / engagement / fatigue / satisfaction 一类字段，但最终选择必须由现有文献和当前系统职责共同决定，不得凭空拍脑袋。
+
+P 保持稳定参数，S 表示当前动态状态。P 与 S 可以共同影响 action score，但不要让 P 或 S 偷偷改变动作是否合法。
+
+2. 实现 dataset-neutral 的 Scene/Object → Action candidate generation
+
+当前 LIGHT 的 candidate_set_factual 只能继续作为 source observed candidates，不能当作我们自己的 A^O。
+
+复用现有 SceneSnapshot / Object / affordance 结构，新增或完善一条明确的数据流：
+
+dataset fields -> SceneSnapshot -> Objects / agents / possessions / observable facts -> affordances -> generated A^O
+
+原则：
+
+数据集有什么就使用什么；
+数据集没有的事实保持 unknown，不脑补 world truth；
+Action 必须由 object / agent affordance 与当前 O 中已知条件生成；
+生成 A^O 时绝对不能读取当前真实 A*；
+A* 只在 candidate generation 完成以后用于检查 support hit；
+A* ∉ generated A^O 必须作为 support miss 保留，不能为了命中把 gold 塞回候选集；
+source available_actions 可以作为后验诊断/比较，不参与生成我们自己的候选集合。
+
+先用 LIGHT 里已有 setting / room objects / room agents / inventory / actor observation 做第一个 adapter smoke，但实现层保持 dataset-neutral，后续其他数据集有什么字段就输入什么。
+
+不要试图让每个数据集都恢复完整 W/O/S/P；缺什么就明确缺什么。
+
+3. 从真实数据场景选少量机制 sandbox fixture
+
+不要重新发明一个与数据无关的大房间 demo。
+
+从当前外部数据中选约 3–5 个信息较完整、动作竞争合理的场景，把它们编译成 Scene/Object/A^O fixture。
+
+选择标准：
+
+至少存在 4 个左右合理候选行为；
+不能只有一个明显正确动作；
+候选之间应该有“当前状态可以改变偏好”的空间；
+scene/object/action 都可由允许输入解释；
+不因为知道 A* 才选 affordance 或修改候选。
+
+如果 LIGHT 找不到足够适合 persistent-S 的场景，可以明确报告“不适合”，不要硬构造。
+
+4. 做 S-intervention engineering sanity test
+
+这不是行为真值实验，只验证系统有表达能力。
+
+对每个 fixture：
+
+固定 scene / O；
+固定 P；
+固定 generated A^O；
+不看 A*；
+只改变一个或少量 S field；
+比较完整 pi(A)。
+
+至少覆盖：
+
+fatigue 高/低；
+engagement 或等价状态高/低；
+tension/stress 或最终 Theory-S 中的对应状态高/低；
+如果设计中存在 satisfaction/recovery 等关键变量，再做对应 pair。
+
+输出每个 pair 的：
+
+S before / after
+generated A^O
+每个 action 的 score / probability
+Δprobability
+rank 变化
+total variation distance 或其他简单分布距离
+为什么根据当前 Theory-S 预期这个方向
+
+验收标准属于工程 sanity，不属于论文阈值：
+
+S 变化必须能造成非微小的 π 变化；
+至少部分合理 intervention 应改变主要动作的排序或显著概率质量；
+不允许靠改变 candidate support 达成；
+不允许针对外部 A* 调参；
+如果当前 S→π coupling 太弱，可以在这些 sandbox fixture 上调整 policy coupling，直到系统具备明确表达能力，但必须记录每次改动；一旦 sanity 通过，就冻结该版本，再进入外部 predictive evaluation。
+输出与边界
+
+先不要启动新的正式 NLL / Experiment B，也不要根据 Run1–4 调 Theory-S 去追当前 LIGHT 的结果。
+
+完成后提交：
+
+一份 Mechanism_Sanity_v1 设计/实验说明；
+Theory-S v1 的文献来源与字段表；
+SceneSnapshot → generated A^O 的实现；
+3–5 个 sandbox fixtures；
+S intervention 的机器可读结果与简短 readout；
+测试，确保 candidate generation 不读取 A*，S intervention 不改变 A^O。
+
+如果过程中发现当前架构本身阻碍这些目标，可以做最小必要重构；不要顺手大拆 World/Decision/State，也不要扩到 multi-agent、ToM、P drift、inverse 或新数据集。
+
+最后推送到 webgpt-sync，汇报：
+
+改了什么；
+Theory-S v1 最终是什么；
+S 是否已经明显影响行为；
+generated A^O 是否真正独立于 A*；
+哪些数据场景适合/不适合后续 S 实验；
+下一步建议，但不要自行启动正式实验。
+
+这就是我现在认为最合适的一刀。
+
+为什么不是先继续 Experiment B？ 因为我们已经确认当前 Theory-S 只是个 1D probe，而且我们甚至还在拿 source candidates 做排序。现在直接比较 S vs history，很可能只是继续测一个我们自己都不满意的机制。
+
+而这轮 Luna 做完之后，我们会得到两个很关键的东西：
+
+机制层：
+S 确实能够控制 π(A)        ← 必须先成立
+
+数据层：
+某个数据集是否提供足够场景/历史
+让这种 S 有机会被真实 A* 检验   ← 再决定用哪个数据
+
+然后才进入真正的下一阶段：冻结 Theory-S + candidate generator，再挑适合的数据做 development predictive experiment。
+
+所以现在不是继续围着 LIGHT 调实验，而是终于把 “人物状态是怎么真的变成行为差异的” 这一层补完整。

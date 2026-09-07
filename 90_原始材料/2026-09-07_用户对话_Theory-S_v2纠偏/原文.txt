@@ -1,0 +1,1301 @@
+Theory-S v2 = 文献定义变量与连接拓扑 + 梯度学习具体参数。  你确定没有过度偏移机制之嫌？我只是问问，不是说你一定有。然后我们之前是弄过梯度学习形式化的，但是好像没有彻底？
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+
+对，我重新翻了仓库后，结论是：你记得对，而且我上一条把“矩阵 topology”抬得有点太高了。它有一定机制偏移风险。
+
+不是说“矩阵 + 梯度”偏了，而是我把：
+
+文学/心理学决定连接拓扑，Theory-mask vs Permuted-mask
+
+差点重新包装成了我们的核心研究对象。
+
+这不应该。
+
+1. 我们原来的 Theory-S 核心其实不是“拓扑理论”
+
+前面已经定得比较稳定的是：
+
+$$ O_t\rightarrow X_t\rightarrow S_{t+1}\rightarrow \pi(A) $$
+
+其中：
+
+S 是行为相关、跨时间持续的状态；
+每个 state field 有自己的 dynamics；
+P 调 sensitivity / accumulation / recovery / decay / behavioral expression；
+具体数值目前只是 placeholder；
+最终看它是否能解释/预测后续行为。
+
+旧的《完整机制说明_v0》其实已经写得很清楚：
+
+P 控制相同 X 产生多大状态变化、状态如何恢复/累积/衰减，以及相同 S 怎样表现成行为；目前不承诺某个函数是心理学正确的。
+
+而 9 月 6 日那段原始讨论里我们更直接说过：
+
+当前 task_pressure += 0.xx / fatigue += 0.xx / utility = ... 是临时参数化；LLM/人工可以提参数，开发数据决定参数。
+
+所以我们原本就是：
+
+理论/设计
+→ 定义状态是什么、怎么更新的大体函数族
+
+数据
+→ 定具体参数
+
+不是现在突然发明出来的。
+
+2. 梯度其实也已经真的做过，但只做了“一半”
+
+T14/T20 已经有非常明确的梯度形式：
+
+$$ z(t,a) = \theta^\top f(t,a) + S_t\,w^\top f(t,a) $$
+
+其中：
+
+θ = O/action feature 本身的权重
+w = S 对不同 action feature 的调制
+
+而且不是嘴上说“以后可以训练”。
+
+仓库里已经真的用了：
+
+conditional multinomial NLL；
+L-BFGS；
+train/validation 选 λ；
+梯度优化 θ,w。
+
+Run2 更进一步：
+
+冻结 θ0
+只训练 w
+
+也就是明确问：
+
+在基础行为模型固定以后，S 能不能通过梯度学出额外的行为影响？
+
+所以你刚才说：
+
+“之前不是弄过梯度学习形式化吗？”
+
+是的。确实弄过，而且已经实现运行了。
+
+3. 但“不彻底”的地方非常明确
+
+当时梯度被故意截断在 S→行为这一侧。
+
+T14/T20 protocol 甚至明确规定：
+
+梯度不得进入 transition compiler、expected-effect、X 定义、S 构造等。
+
+所以实际是：
+
+history / transition
+↓
+人工固定规则
+↓
+x_t
+↓
+固定 eta=.35 EMA
+↓
+S_t
+↓
+          ← 梯度从这里才开始
+z = θf + S·wf
+↓
+NLL
+
+也就是说：
+
+已经学了
+$$ S\rightarrow A $$
+
+的权重。
+
+没学
+$$ X\rightarrow S $$
+
+的 dynamics。
+
+也没学：
+
+每个 state 自己的 decay；
+accumulation rate；
+recovery rate；
+P 对这些 rate 的 modulation；
+多维 Theory-S；
+整条 trajectory 上的反向传播。
+
+而且当时 S 还只是：
+
+Theory-S = 1D EMA
+
+所以那是一个很刻意的 rank-matched probe，不是完整 Theory-S 的训练形式。
+
+4. 所以现在最自然的下一步不是重新发明一个“Topology Theory-S v2”
+
+而是：
+
+把原来已经有的梯度形式化补完。
+
+这两个差别很重要。
+
+我现在会把之前那句话：
+
+Theory-S v2 = 文献定义变量与连接拓扑 + 梯度学习具体参数
+
+改成更保守也更贴我们原路线的：
+
+Theory-S v2 = 文献/机制定义 S 的语义和每个字段的 dynamics 形式；把其中原本 hand-set 的连续参数改为可学习参数。
+
+矩阵只是方便写，不是新的研究贡献。
+
+具体可以写成
+
+三个状态：
+
+$$ S_t= \begin{bmatrix} fatigue\\ engagement\\ tension \end{bmatrix} $$
+
+输入：
+
+$$ X_t= \begin{bmatrix} effort\\ goal\ relevance\\ positive\\ negative\\ social\\ recovery \end{bmatrix} $$
+
+然后把目前这种：
+
+fatigue_target =
+    .20
+    + .55 * effort
+    + .20 * negative
+    - .35 * recovery
+
+形式化成：
+
+$$ S_{t+1} = g( \alpha\odot S_t + BX_t+b ) $$
+
+就完了。
+
+这里：
+
+\(B\) 就是原来那些 .55/.20/-.35/... 的集合；
+\(\alpha\) 就是原来的 inertia / decay；
+以前手写；
+现在让开发数据学习。
+
+这其实不是换机制，是把原机制参数化。
+
+5. 而且“每个 field 自己有 dynamics”最好保留下来
+
+这点是你 9 月 2 日就明确拍板过的：
+
+每个 state field 自己附带 dynamics。
+
+因此第一版甚至没必要搞一个完全自由的：
+
+$$ 3\times3 $$
+
+S-to-S recurrent matrix。
+
+反而可以：
+
+$$ S_{t+1,j} = g_j( \alpha_jS_{t,j} + \beta_j^\top X_t ) $$
+
+即：
+
+FatigueUpdater
+  α_f
+  β_f
+
+EngagementUpdater
+  α_e
+  β_e
+
+TensionUpdater
+  α_t
+  β_t
+
+程序上把它堆起来就是矩阵：
+
+$$ B= \begin{bmatrix} \beta_f^\top\\ \beta_e^\top\\ \beta_t^\top \end{bmatrix} $$
+
+但概念上仍然是：
+
+三个有明确意义、各自有 dynamics 的状态。
+
+这比突然搞一个任意 recurrent latent state matrix 更符合我们的原设计。
+
+6. 行为端则直接推广我们已经做过的公式
+
+旧：
+
+$$ z(a)=\theta^\top f(a)+S\,w^\top f(a) $$
+
+现在 S 是 3D，最自然就是：
+
+$$ z(a) = \theta^\top f(a) + \sum_j S_j\,w_j^\top f(a) $$
+
+也就是：
+
+$$ z(a) = \theta^\top f(a) + S^\top Wf(a) $$
+
+这根本不算新机制。
+
+就是把：
+
+1 个 S scalar × w
+
+推广成：
+
+3 个 S fields × W
+
+而已。
+
+所以这条特别顺。
+
+7. 文献到底应该约束什么？
+
+这里我也要修正上一条。
+
+不应该逼文献告诉我们：
+
+“这个矩阵格子必须是 0，那个格子必须非 0。”
+
+心理学论文很多时候根本不会给这种级别的 topology。
+
+文献真正应该帮我们的是：
+
+变量语义
+
+例如：
+
+fatigue 是什么
+engagement 是什么
+tension 是什么
+updater 的候选输入
+
+比如有没有依据说：
+
+effort → fatigue
+recovery → fatigue recovery
+negative appraisal → tension
+dynamics family
+
+比如：
+
+persistence；
+decay；
+accumulation；
+saturation；
+appraisal-mediated update。
+P 的调制位置
+
+例如：
+
+sensitivity
+decay/recovery
+behavior expression
+
+这些。
+
+至于有证据不明确的：
+
+negative → fatigue
+goal relevance → tension
+
+我们可以：
+
+允许学习；
+或作为一个消融版本；
+或先置零；
+
+但不要把一个 M_XS mask 本身抬成论文主角。
+
+8. 那 Theory vs naive topology 还要不要？
+
+可以以后做，但它是 attribution experiment，不是现在重新定义 Theory-S。
+
+例如以后如果我们想问：
+
+“心理学选择这些状态/输入到底有贡献，还是随便三个 recurrent scalars 都行？”
+
+那非常适合比较：
+
+Theory-S
+vs
+equal-capacity generic 3D state
+
+这是 T20 类问题。
+
+但 Paper-0 的母问题仍然是：
+
+$$ p(A|H^{obs},O,P) \approx p(A|S,O,P) $$
+
+也就是：
+
+persistent S 能不能保存行为相关历史后果。
+
+不是：
+
+某个心理学稀疏矩阵结构是否优于另一张矩阵。
+
+后者不能反客为主。
+
+所以现在我认为最正确的“下一步”要微调
+
+不是马上让 Luna 实现我上一条那套庞大的 Theory-mask / Permuted-mask v2。
+
+而是先做一个很小但很重要的：
+
+Theory-S Gradient Formalization Consolidation
+
+把我们已经散落在不同阶段的东西合起来：
+
+旧机制：
+每个 S field 自己有 dynamics
+P 调 sensitivity / recovery / expression
+
+旧梯度：
+z = θf + S·wf
+conditional NLL
+Run2 frozen θ, learn w
+
+现在 v1.2：
+3D fatigue/engagement/tension
+X→S 有 accumulation/recovery
+但参数 hand-set
+
+合成成：
+
+$$ S_{t+1,j} = g_j(\alpha_j S_{t,j}+\beta_j^\top X_t) $$ $$ z_t(a) = \theta_0^\top f_t(a) + \sum_j S_{t,j}w_j^\top f_t(a) $$
+
+然后明确：
+
+可学习：
+α
+β
+W
+
+暂时固定：
+S 字段定义
+X 字段定义
+candidate generator
+action feature basis
+P（Paper-0 内）
+
+这就是把原来的洞补上。
+
+而且训练顺序我也会比上一条更保守：
+
+第一步
+
+继续复用 Run2 思想：
+
+先固定 base θ0
+第二步
+
+训练：
+
+$$ \beta,\alpha,W $$
+
+让 NLL 的梯度真正穿过：
+
+A*
+↓
+π
+↓
+W
+↓
+S_t
+↓
+α / β
+
+这才是我们之前一直没彻底做完的那一步。
+
+如果这个 end-to-end gradient 根本学不出来，或者学出来 S 语义崩掉，我们再讨论：
+
+sign constraint；
+topology mask；
+staged fitting；
+state supervision。
+
+而不是一开始就把这些东西全设计满。
+
+所以回答你两个问题：
+
+第一，存在过度偏移风险。 尤其是如果我们把“理论 topology vs permuted topology”变成新的核心课题。矩阵本身不偏，把矩阵拓扑升格成研究主问题才偏。
+
+第二，我们以前确实已经做过梯度形式化，但只彻底完成了 S→行为 的 readout 学习，没有完成 X→S→行为 整条动态链的可学习形式化。
+
+所以现在真正该做的不是“发明 Theory-S v2”，而是：
+
+把我们原本就想做的可学习动态状态机制补完。
+
+这条线我觉得比我上一条稳得多。
+
+看看现在仓库。把要改的具体说明！我交给codex
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+
+我看了最新仓库。现在必须修，而且不是推倒重来。 最新 HEAD a72f691 add Theory-S v2 trainable contract 已经把 end-to-end 梯度接口搭出来了，这是有用的；但它把我们刚才担心的“偏移”真的做进去了一部分：fixed signed topology 被提前冻结成 Theory-S 核心了。
+
+另外还发现几个实质实现问题：当前 sigmoid(alpha*S + BX) 并不是我们 v1.2 的一阶松弛 dynamics；synthetic smoke 用的是 binary BCE 而不是候选集 next-action NLL；它又新造了一套 4D action features；Permuted-S 基本是 latent state 重命名；capability matrix 里 AGAIN 的 A* 等描述和仓库已有审计冲突。
+
+所以我建议保留 Theory_S_v2/，做一次集中修正，别另开 v3。直接把下面整段给 Codex。
+
+基于最新 webgpt-sync HEAD：
+
+a72f6912922f84ab14cc5edb9a4b265412eaef43
+add Theory-S v2 trainable contract
+
+不要回滚整个 02_实验/Theory_S_v2/。现有 trainable module 有价值，但当前实现把“fixed signed topology”提前升格成 Theory-S 核心，并且在 dynamics、objective、action-feature basis、control 和 capability matrix 上存在需要修正的问题。
+
+本轮目标：
+
+把 Theory-S v2 改成“原有 Character Dynamics 机制的可学习参数化补完”，而不是新建一个 topology-learning 研究问题。
+
+完成后 push webgpt-sync，但不要启动任何真实 development training、Experiment B 或 formal test。
+
+0. 先重新确认研究边界
+
+Paper-0 母问题仍然是：
+
+p(A | H_obs, O, P) ≈ p(A | S, O, P)
+
+Theory-S 的核心职责仍然是：
+
+S 是行为相关、跨时间持续的动态状态；
+每个 S field 有自己的 dynamics；
+X 表示当前观察变化/事件的 appraisal 或结构化意义；
+P 是稳定长期响应参数，本 Paper-0 不漂移；
+S 影响同一合法候选集中的当前行为偏好；
+世界/观察/candidate generation 不受梯度偷偷重写。
+
+矩阵只是把原来的 updater 和 policy 参数化，不是新的论文母问题。
+
+不得把：
+
+“某张心理学 sparse topology 是否优于另一张 topology”
+
+改造成项目主线。若以后做 topology/naive-S 对照，它只是 T20 attribution experiment。
+
+1. 修正 Theory-S v2 的定位与文档状态
+
+当前 README：
+
+literature-constrained trainable slice
+fixed topology and signs
+
+以及 TODO：
+
+[x] M1 Theory-S v2 trainable contract
+
+都写得过强。
+
+修改为类似：
+
+Theory-S v2 trainable dynamics candidate / gradient formalization consolidation
+
+说明它是在合并三个已有东西：
+
+原机制：每个 S field 自己有 dynamics；
+v1/v1.2：fatigue / engagement / tension 的累积、恢复、S→π plumbing；
+T14/T20：z = θ^T f + S * w^T f 的 gradient readout。
+
+不要写成“新提出 fixed topology Theory-S”。
+
+TODO 中 M1 改回 [~]，原因：
+
+trainable operator 已实现；
+但 X/S semantic contract 尚未最终冻结；
+dynamics 参数尚未真实拟合；
+external predictive validity 未验证。
+
+M3 capability matrix 同样保持 [~]，不能因为做了一张 routing 表就写成完成。
+
+2. 不要把当前六维 X 宣称成“文献定义的 appraisal schema”
+
+当前：
+
+effort_load
+goal_relevance
+positive_conduciveness
+negative_conduciveness
+social_opportunity
+recovery_cue
+
+可以继续作为当前 compatibility input schema，但必须明确分类。
+
+参考已有：
+
+01_文献/专题核读_X维度与状态动力学_2026-09-05.md
+
+该文档已经明确：
+
+appraisal 文献中的 schema 并不等于当前六维；
+goal relevance 在不同论文里甚至有同名异义；
+positive/negative conduciveness 拆成两条单极通道有 Broekens 的 cancellation bug 依据；
+TCN 支持一阶 relaxation 的函数形式；
+FAtiMA 支持 state accumulation / decay / P modulation 的接口思想；
+“每个心理字段自己有 U_k”本身是项目设计，不是这些论文直接给出的机制。
+
+新增一个明确的 semantic table，例如：
+
+current X	role	literature status
+effort_load	resource/effort cue	project engineering input
+goal_relevance	appraisal candidate	term definition must be specified
+positive_conduciveness	appraisal	literature-motivated
+negative_conduciveness	appraisal	literature-motivated
+social_opportunity	contextual cue	project input, not standard appraisal dimension
+recovery_cue	resource/context cue	project input
+
+不要为了显得“theory-based”把工程 cue 改名成心理学维度。
+
+本轮不擅自把六维换成另一个 5/7/14 维 schema；先保留兼容性，并把最终 X schema 标为待后续选择。
+
+3. 明确定义三个 S，但不要宣称其心理学真实性已验证
+
+继续保留：
+
+fatigue
+engagement
+tension
+
+本轮不新增字段。
+
+定义写清。
+
+fatigue
+
+当前可用于行动选择的资源/疲劳状态，影响高 effort 与 recovery-oriented 行为之间的相对偏好。不是医学疲劳诊断。
+
+engagement
+
+定义为：
+
+broad behavioral engagement / involvement：角色当前投入并主动参与正在发生的情境及可行动机会的动态倾向，不带正负价值方向。
+
+因此：
+
+engagement 高可以增强探索；
+可以增强社交参与；
+在冲突情境下也可以增强冲突参与。
+
+不要把“engagement 高 → hit 概率可能上升”自动写成 bug。
+
+tension
+
+当前由威胁、受阻、紧迫等产生的动态张力/激活状态。具体哪些 X 输入 tension、tension 怎样表达成行为仍是待学习/待验证部分。
+
+文档必须区分：
+
+field semantic = 当前项目 candidate definition；
+dynamics family = 有文献形式支持；
+-具体参数 = 开发数据学习；
+predictive validity = 尚未验证。
+4. 修掉当前 transition 公式：现在不是我们原来的 dynamics
+
+当前：
+
+S_next = sigmoid(alpha * S + B X)
+
+有机制语义问题。
+
+例如当：
+
+X = 0
+S = 0.2
+alpha = 0.8
+
+则：
+
+sigmoid(0.16) > 0.5
+
+也就是说“没有事件”反而会把低状态自动推向 0.5 以上。
+
+这不等于 v1.2 已验证的一阶 relaxation / recovery。
+
+改成真正的一阶 target relaxation：
+
+target_t = g(b + B X_t)
+
+S_t = alpha ⊙ S_{t-1} + (1 - alpha) ⊙ target_t
+
+等价写法也可以：
+
+S_t = S_{t-1} + eta ⊙ (target_t - S_{t-1})
+
+其中：
+
+alpha = 1 - eta
+
+要求：
+
+每个 S field 有自己 alpha_j / eta_j；
+b_j 给该字段 neutral equilibrium；
+B_j 是该字段自己的 X sensitivity；
+g 负责 target bounded；
+convex relaxation 保证 S bounded；
+neutral event 可以朝 field-specific baseline 回归；
+repeated cue 能积累；
+cue removal 能产生 residual decay；
+recovery cue 能推动对应 target 回落。
+
+这才是把 TCN 一阶松弛 + 我们 v1.2 dynamics 参数化。
+
+不要增加自由的 S→S 3×3 recurrent matrix。
+
+保持：
+
+每个 state field 自己有 dynamics。
+
+5. 把当前 hand-set 数字降级成 initialization only
+
+v1/v1.2 中例如：
+
+.55 * effort
+.20 * negative
+-.35 * recovery
+action score 的 hand-set coefficient
+
+继续保留作为历史 sanity artifact，不删除旧结果。
+
+Theory-S v2 里：
+
+b
+B
+alpha/eta
+W_SA
+
+都应该是 trainable parameters。
+
+如果需要用 v1 数值初始化，必须标：
+
+engineering initialization only
+
+而不是：
+
+theory coefficient。
+
+具体参数最终由 development data 的 action NLL 学。
+
+6. 不要默认冻结 sparse signed topology
+
+当前：
+
+TOPOLOGY_XS
+TOPOLOGY_SA
+
+直接把很多 edge 固定为：
+
+positive
+negative
+zero
+
+这个过早。
+
+改成：
+
+Core model
+
+以可学习 B 和 W_SA 为核心。
+
+允许有 optional constraint metadata，但不要让 fixed sparse topology 成为 Theory-S 定义。
+
+每条 edge 可以有状态：
+
+strong_sign_prior
+free
+fixed_zero
+
+只有已有文献/机制有非常明确理由时才设 hard sign/fixed zero。
+
+证据不清楚的 edge：
+
+free
+
+而不是“因为我们暂时没写过这条关系”就固定为 0。
+
+例如：
+
+goal_relevance → tension
+negative_conduciveness → fatigue
+engagement 如何作用于 conflict
+
+都不能仅凭当前 v1 hand-set 规则固定成理论 topology。
+
+如果没有足够证据，保留自由参数并记录为 project uncertainty。
+
+7. 修正 constrained-weight 初始化
+
+当前 _signed_weight()：
+
+softplus(raw)
+
+但 raw=0 时：
+
+softplus(0) ≈ 0.693
+
+因此所谓“zero initialization”实际上会产生很大的非零有效权重。
+
+如果仍保留某些 hard sign-constrained parameter：
+
+初始化必须使 effective weight 接近 0；
+例如 raw 初始化为足够负的小值；
+并明确记录 effective initialization。
+
+不能出现：
+
+raw parameter = 0
+effective coupling ≈ 0.693
+
+这种隐藏强 prior。
+
+8. 删除新造的 4D action-feature basis
+
+当前 Theory-S v2 新定义：
+
+stimulation
+social
+conflict
+recovery
+
+这会产生新的、不兼容的 action representation。
+
+仓库已经有：
+
+02_实验/Replay/replay_features_v1.py
+
+其中 canonical v1：
+
+FEATURE_NAMES =
+
+goal_progress
+stimulation
+recovery
+hunger_relief
+bathroom_relief
+short_term_reward
+environment_control
+context_relevance
+has_target
+target_in_scene
+target_visible_in_O
+target_in_inventory
+repeated_acquire
+
+不要再造第四套 action features。
+
+Theory-S v2 应直接复用这套 feature basis。
+
+行为端推广旧 T14/T20：
+
+旧：
+
+z_t(a) = θ^T f_t(a) + S_t * w^T f_t(a)
+
+现在：
+
+z_t(a) = θ^T f_t(a) + Σ_j S_t[j] * w_j^T f_t(a)
+
+即：
+
+z_t(a) = θ^T f_t(a) + S_t^T W f_t(a)
+
+这就是 1D → 3D 的自然推广。
+
+不要新发明 policy。
+
+如果希望 S 只消费 SEMANTIC_FEATURES，可以用它作为 FEATURE_NAMES 的明确子集，但不能另造 social/conflict 等不兼容维度。
+
+9. 保留并复用旧 T14/T20 baseline
+
+必须明确关联：
+
+02_实验/T14_T20_rank_matched_probe_v1.md
+02_实验/Replay/replay_probe_v1.py
+
+不要另写一套完全不同的 baseline。
+
+Phase A：
+
+训练：
+
+z_base = θ^T f(O,a)
+
+使用 conditional multinomial next-action NLL。
+
+只学：
+
+θ
+
+不训练 S dynamics。
+
+Phase B：
+
+冻结 θ。
+
+训练：
+
+b
+B
+alpha/eta
+W_SA
+
+目标仍是 candidate-set conditional next-action NLL。
+
+这相当于 Run2：
+
+frozen θ0 incremental
+
+的多维、end-to-end dynamics 版本。
+
+README 当前写：
+
+Phase 1 fit z_base and transition parameters
+
+这是错的，改掉。
+
+Phase A 必须是 no-S baseline。
+
+10. 明确时间索引，禁止 current-A* future leakage
+
+把 sequence timing 写死。
+
+推荐定义：
+
+X_t = Appraise(O_{t-1}, A_{t-1}, O_t)
+
+然后：
+
+S_t = U(S_{t-1}, X_t, P)
+
+再：
+
+π_t = π(A_t | O_t, P, S_t, A_t^O)
+
+完成预测以后才 reveal：
+
+A*_t
+
+也就是说：
+
+past observed transition
+        ↓
+       X_t
+        ↓
+       S_t
+        ↓
+O_t + P + generated A^O_t
+        ↓
+       π_t
+        ↓
+------ gold boundary ------
+        ↓
+       A*_t
+
+当前 A*_t、current action outcome、future O_{t+1}：
+
+都不能进入 X_t 或 S_t。
+
+增加 regression test：
+
+修改 current A*_t 内容，不得改变：
+
+X_t
+S_t
+candidate features
+logits before reveal
+11. synthetic gradient smoke 必须改成真正的 candidate NLL
+
+当前：
+
+binary_cross_entropy_with_logits
+
+不符合本项目任务。
+
+我们预测的是：
+
+同一个 candidate set 中哪个 action 会被选。
+
+所以 smoke 使用：
+
+每个 decision 4–8 个 candidates；
+每个 candidate 有 canonical feature vector；
+每个 decision 一个 gold index；
+softmax；
+conditional multinomial NLL / cross entropy。
+
+与 T14/T20 目标一致。
+
+不要使用独立二分类 BCE。
+
+12. gradient smoke 必须真正 unroll trajectory
+
+当前只做：
+
+一个 step：
+X → S_next → logit → BCE
+
+这只能证明一跳有梯度。
+
+新增 synthetic multi-step trajectory，例如 6–10 steps：
+
+S0
+↓ X1
+S1
+↓ π1 / loss1
+↓ X2
+S2
+↓ π2 / loss2
+...
+
+总 loss：
+
+L = Σ_t NLL_t
+
+然后验证：
+
+梯度可以经过多个时间步到：
+
+W_SA
+B / W_XS
+alpha/eta
+baseline bias if trainable
+
+并检查：
+
+Phase B 时 θ 无梯度；
+earlier X 能通过 persistent S 影响 later loss；
+detach S history 后结果不同；
+sequence boundary 正确 reset S；
+不跨 trajectory 泄漏 hidden state。
+
+再做一个短 optimization smoke：
+
+synthetic train split；
+若干 optimizer steps；
+NLL 明显下降。
+
+仅作为 trainability regression，不写成研究结果。
+
+13. 保留 v1.2 的 dynamics sanity
+
+新可学习 transition 必须继续通过 v1.2 的行为性质：
+
+effort build-up → recovery
+
+fatigue：
+
+build-up；
+cue removal/recovery 后下降；
+无 overshoot；
+bounded。
+obstruction → neutral decay
+
+tension：
+
+build-up；
+neutral 后 residual decay；
+bounded。
+positive progress
+
+engagement：
+
+能在合理输入下累积。
+
+这些只是工程 regression。
+
+不要为了 synthetic NLL loss 下降而破坏原本的 dynamics interface。
+
+另外把 v1.2 README 中“half-life”统一改为：
+
+finite-horizon midpoint-crossing diagnostic
+
+或：
+
+steps to observed trajectory midpoint
+
+明确：
+
+not a dynamical half-life estimate
+
+不要把有限轨迹首尾中点叫真正 half-life。
+
+14. 当前 Permuted-S topology 对照要撤回/降级
+
+当前：
+
+permuted_s()
+
+只是把三个 state rows：
+
+(fatigue, engagement, tension)
+
+做 permutation，并同时 permutation X→S 与 S→A rows。
+
+这在很大程度上只是 latent dimension relabeling，不能作为有效的 equal-capacity theory control。
+
+不要再写：
+
+Permuted-S proves topology attribution.
+
+删除或改名为：
+
+row-permutation plumbing diagnostic only
+
+更推荐直接从 v2 主协议移除。
+
+Paper-0 真正重要的 permutation control 仍然是已经做过的：
+
+trajectory-permuted S at evaluation
+
+即：
+
+model weights 固定；
+candidate/O/P 不变；
+把当前 trajectory 的 S 换成同 horizon 另一 trajectory 的 S；
+no-self donor；
+看 NLL 是否恶化。
+
+这检验的是：
+
+正确历史归属是否必要。
+
+保留这个概念。
+
+“equal-capacity generic 3D state / naive-S”以后属于 T20 attribution，不要现在为了 topology 再开新主线。
+
+15. effective parameter count 不要用 raw nn.Parameter 总数冒充
+
+当前：
+
+parameter_count()
+
+会把 topology mask 为 zero 的 raw parameters 也算进去。
+
+这些参数虽然存在，但 effective weight 永远为 0、梯度也为 0。
+
+因此它不能用于声明：
+
+equal capacity
+
+如果以后有 sparse constrained model：
+
+至少报告：
+
+raw parameter count；
+effective trainable degree count；
+active edges；
+frozen edges。
+
+本轮若移除 topology-control 主张，这部分只需修正 reporting，不必复杂化。
+
+16. 修 capability matrix：当前有事实错误，而且列不够
+
+当前：
+
+02_实验/Theory_S_v2/capability_matrix.md
+
+必须依据仓库已有 audit 重写，不准重新猜。
+
+重点参考：
+
+01_文献/AGAIN_字段审计_2026-09-06.md
+01_文献/数据资产登记_玩家日志与公开轨迹_2026-09-06.md
+01_文献/专题审计_行为真值A星可行性_2026-09-05.md
+OPeRA/LIGHT/FarmQuest 各自已有 README/audit。
+
+当前明显错误包括：
+
+AGAIN
+
+现在 matrix 写：
+
+✓ audited event records under action/A*
+
+不对。
+
+已有 audit 明确：
+
+不从 key press 反推 source_action_A_star
+
+AGAIN 是：
+
+telemetry；
+continuous arousal proxy；
+persistence/time-series；
+
+不是 next-action A* benchmark。
+
+PowerWash
+
+不能把 telemetry events 当成独立 A*。
+
+当前已有结论：
+
+no action A*；适合 progress/state/temporal dynamics。
+
+FarmQuest
+
+是：
+
+action-proxy
+
+不能升级成 exact independent A*。
+
+SOTOPIA
+
+是 external synthetic actions；
+
+但已有 T0b 说明：
+
+dump 内 provenance unknown；
+action surface 大量坍缩为 said/did nothing/left；
+不可称人类 ground truth。
+
+重写 matrix，至少包括以下列：
+
+| dataset | ordered trajectory | legal observable history | ΔO/event | X constructibility | P/persona | independent next-action A* | finite source candidates | generated A^O possible | support evaluable | persistent-S identifiability | current role / blocking issue |
+
+严格区分：
+
+exact A*
+action proxy
+telemetry input
+synthetic action
+no A*
+
+“数据有什么就用什么，没有就留空。”
+
+M3 继续 [~]。
+
+17. P 当前不要扩张，但要把接口说明写正确
+
+Paper-0 内：
+
+P 固定，不学习 P、不做 persona drift。
+
+当前 v2 可以把：
+
+z_base(O,P,a)
+
+视为 stable/basic preference 的外部输入。
+
+不要这轮额外新增 P 网络。
+
+但 README 要写明：
+
+当前 trainable v2 slice 只显式学习 S dynamics；P 在 Paper-0 中固定，并通过 baseline/stable preference 接口进入。原完整机制中 P 还可以调制 sensitivity/recovery/expression，但这不是本轮必须实现的自由度。
+
+避免别人以为 P 已从系统删除。
+
+18. 增加完整 regression tests
+
+至少覆盖：
+
+neutral X 下，S 朝 field-specific baseline relaxation，不会因为 sigmoid(αS) 自动跳向 >0.5；
+repeated cue 有 build-up；
+cue removal 有 decay；
+recovery 能回落；
+bounded [0,1]；
+每个 S field 有独立 persistence parameter；
+current A* 改写不改变 pre-reveal X/S/logits；
+candidate generator/support 不读取 S/P；
+canonical action feature basis 与 Replay/replay_features_v1.py 完全一致；
+Phase A 只更新 θ；
+Phase B θ frozen；
+candidate-set multinomial NLL gradient reaches W_SA、B、alpha；
+earlier step loss/late loss 可通过 recurrence 回传到 earlier dynamics；
+trajectory boundary reset；
+synthetic optimizer smoke 确实降低 NLL；
+v1.2 build-up/recovery/decay regression 不被破坏；
+source candidates / A* 不进入 feature generation；
+no NaN / saturation explosion。
+19. 更新 README / TODO / 当前实现进度的证据等级
+
+最终状态建议：
+
+M0 mechanism sandbox [x]
+M1 Theory-S trainable dynamics candidate [~]
+M2 candidate compiler [~]
+M3 dataset capability routing/audit [~]
+M4 formal experiment gate [ ]
+M5 controlled trajectory sanity [x]
+
+新增一句关键定位：
+
+v2 does not introduce a new topology research question. It completes the learnable parameterization of the existing per-field dynamic-state mechanism.
+
+不要再写：
+
+fixed signed topology frozen as Theory-S
+
+除非之后我们真的通过文献/实验决定这么做。
+
+20. 完成后停止
+
+本轮只：
+
+修 trainable contract；
+修 objective；
+修 recurrence；
+复用 canonical features；
+修 semantic/document boundaries；
+修 capability matrix；
+补 tests。
+
+不要启动：
+
+LIGHT v2 training；
+OPeRA training；
+Experiment B；
+formal test；
+topology sweep；
+新 S 字段；
+新 X schema；
+P drift；
+multi-agent；
+新数据集。
+
+完成后 commit + push webgpt-sync。
+
+最后只汇报：
+
+transition 公式现在是什么；
+它如何保持每个 S field 自己的 dynamics；
+当前哪些参数可学习；
+action feature 是否完全复用旧 T14/T20；
+synthetic objective 是否改成 candidate-set NLL；
+是否真正完成 multi-step gradient through S；
+topology/sign 现在只是何种约束，而非何种“理论结论”；
+Permuted-S topology control 如何处理；
+capability matrix 修正了哪些错误；
+还有什么必须在真实 development training 前决定。
+
+不要自行开始下一阶段。
+
+这次最核心的其实不是“再增加功能”，而是把 a72f691 拉回我们的原路线：
+
+$$ \underbrace{S_{t,j} = \alpha_jS_{t-1,j} +(1-\alpha_j)g_j(b_j+\beta_j^\top X_t)}_{\text{每个 field 自己的 dynamics}} $$
+
+然后行为端直接继承已经做过的 Run2：
+
+$$ z_t(a) = \theta^\top f_t(a) + \sum_j S_{t,j}w_j^\top f_t(a) $$
+
+其中 \(\theta\) 先学、再冻结；\(\beta,\alpha,W\) 再通过真实 next-action NLL 学。
+
+这才是真正的“我们之前梯度形式化做了一半，现在把另一半补上”，而不是突然开一个新的“矩阵拓扑论文”。

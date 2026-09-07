@@ -1,0 +1,586 @@
+看了，最新 HEAD 是 514b98f Add Mechanism Sanity v1 engineering slice。
+这次方向基本对了，而且有几件事做得不错：Terra 的 strict-v2 完全没碰；没有偷偷拿 A* 塞 candidate；S intervention 前后 candidate support 保持一致；也没有继续跑正式 NLL。说明 Luna 知道这轮只是工程 sanity。
+但我不会接受 README 里现在这个“M0/M1/M2 都完成并冻结”的表述。它现在更准确地说只是：
+Mechanism Sanity v1 plumbing prototype 跑通了。
+现在的 candidate_generation_v1.py 实际规则非常贫：
+```
+object
+→ inspect object
+
+other agent
+→ hug agent
+→ hit agent
+```
+就这些。
+所以酒馆里看到：
+```
+stool
+barnacle
+bar
+thief
+```
+它生成的不是：
+```
+sit on stool
+take barnacle
+talk to thief
+give ...
+inspect ...
+```
+而基本是：
+```
+inspect stool
+inspect barnacle
+inspect bar
+hug thief
+hit thief
+```
+这离我们说的：
+Scene → Object state/affordance → 合法合理 A^O
+差得很远。
+更关键的是，LIGHT 明明还有 carrying / wearing / wielding，但它在 _snapshot() 里直接：
+```
+"possessions": []
+```
+给扔了。
+然后 README 又写：
+```
+entities + possessions + observable facts
+→ affordances
+```
+实际上 generator 根本没用 possessions，也几乎没用 facts。
+所以这是第一处我要 Luna 修的实质问题。
+它做的是一次极端联合干预：
+```
+before:
+fatigue=.05
+engagement=.95
+tension=.05
+
+after:
+fatigue=.95
+engagement=.05
+tension=.95
+```
+三维一起翻转。
+结果 TV：
+```
+0.049–0.068
+```
+当然会变化，因为 score 公式本来就手写了 S 系数。
+这只能证明：
+代码里的 S→score 接线没有断。
+还不能证明：
+-  fatigue 单独有合理作用； 
+-  engagement 单独有合理作用； 
+-  tension 单独有合理作用； 
+-  不同 S 状态真的会在同一场景里产生不同“当前选择”； 
+-  P 与 S 的职责真的分开了。 
+我们真正想要的 sanity 应该是：
+```
+固定 O/P/A^O
+只改 fatigue
+→ recovery 类动作上升、耗费类动作下降
+
+只改 engagement
+→ goal/stimulation 类动作重新排序
+
+只改 tension
+→ coping / avoidance / control 类动作发生有理论依据的改变
+```
+而且最好有rank flip，而不是仅仅概率抖 0.05。
+现在：
+```
+fatigue
+engagement
+tension
+```
+比旧的一维 confirmed → EMA 强太多，这点没问题。
+它也确实吸收了：
+-  appraisal 与 state 分离； 
+-  一阶 relaxation； 
+-  正负 conduciveness 不简单相消； 
+-  P 调动力学； 
+这些已有文献思想。
+但具体：
+```
+fatigue_target = 0.20 + ...
+engagement_target = 0.15 + ...
+tension_target = 0.10 + ...
+```
+以及所有系数、S→action score coupling，仍然都是我们的工程选择。
+甚至现在有一些语义我觉得很可疑，例如：
+```
+inspect
+→ environment_control = 1
+```
+“检查一个东西”不等于“环境控制”。
+然后：
+```
+tension ↑
+→ inspect ↑
+```
+可能有“信息搜寻/控制感”的解释，但这需要明确机制，而不是因为公式这么写。
+所以它应该叫：
+Theory-S v1 candidate / engineering hypothesis
+而不是现在 TODO 里的“工程冻结”。
+README 写：
+LIGHT 不适合 persistent-S identification。
+我认为应该降级成：
+当前 LIGHT projection + 当前可用字段，不足以支撑本轮 Theory-S persistent-state identification。
+这两句话差很多。
+因为我们刚刚才发现：
+-  possessions 甚至没接进去； 
+-  object affordance 还没真正做； 
+-  trajectory 的历史信息也没完成这种机制下的重新审计。 
+现在不能因为这个极简 generator 不够，就反过来说数据集不行。
+当然最终完全可能 LIGHT 真不适合，但证据还不够判死。
+可以保留，不需要回滚。
+它证明了三个底层不变量：
+```
+A* 没偷进 candidate generation       ✅
+S 不改变 action support              ✅
+S→π 接线确实存在                    ✅
+```
+但是：
+```
+合理 Object→Action ontology          ❌
+利用 possession/object facts        ❌
+逐 S-field 干预                     ❌
+场景内有意义 choice/rank flip        ❌
+P/S 职责实测                         ❌
+Theory-S 真正冻结                    ❌
+LIGHT 是否适合 S                     未决
+```
+不要跑 Experiment B。也先别再扩数据集。
+让 Luna 做 Mechanism Sanity v1.1，就修两件东西：
+1. 把 Scene/Object→Action 真正做出来：利用 object type/description、possession、agent、可见 facts，做一个小而合理的 affordance ontology；至少能产生 inspect/take/drop/give/talk/sit/use/... 这种场景相关动作，而不是 inspect + hug/hit。 
+2. 做逐字段 S intervention：固定同一 P/O/A^O，分别单独改 fatigue / engagement / tension，要求出现预先解释过的概率变化和至少若干真实 rank flip。 
+完成这两件，我才会说：
+我们的机制 sandbox 真正开始像一个 Character Dynamics 系统了。
+现在这个版本是很好的第一脚，但 Luna README 写得比实际实现走得快了一步。
+就这两个需要他改的吗？
+不是，只是两个最需要写代码的核心问题。如果让 Luna 现在修，我会一次把这一轮收完整，实际有 5 件事：
+1. Scene/Object → Action ontology 真正做起来
+ 这是最大工程问题。接入 possessions、object/agent facts、description/type，生成有场景意义的 take / drop / give / talk / sit / use / inspect ...，而不是现在的 inspect + hug/hit。 
+2. 逐字段 S intervention
+ 不再三维一起极端翻转。分别只改 fatigue / engagement / tension，检查概率方向、rank flip、support 不变。这是第二个核心代码问题。 
+3. 补 P vs S 的职责验证
+ 这个我刚才漏强调了。我们原始设想很重要的一点就是：
+   ```
+   P → 稳定行为倾向
+   S → 当前状态下的选择偏移
+   ```
+   所以至少做一个正交 sanity：
+   -  固定 S，改 P → 稳定偏好改变； 
+   -  固定 P，改 S → 当前选择改变； 
+   -  两者都不能改变 A^O。 
+   不然以后很容易变成 P/S 都只是两组任意权重。
+4. Theory-S 暂时不要写成“冻结完成”
+ 现在三字段可以保留为 Theory-S v1 candidate，但诸如
+   ```
+   inspect → environment_control
+   tension ↑ → inspect ↑
+   ```
+   这类 coupling 还需要逐项审计。
+ 所以 TODO 里的：
+   应该改成类似：
+   不是推倒重来，就是把证据等级写对。
+5. 把 “LIGHT 不适合 persistent-S” 降级成未决判断
+ 现在最多能说：
+   因为它现在连 possessions 都没真正接进去，candidate ontology 也非常残缺，不能这时候就给数据集判死刑。
+还有一个下一轮之后才该做的事情，不必 Luna 现在顺手展开：
+X → U → S 的时序 trajectory sanity。
+现在 scene_appraisal() 几乎只有 social_opportunity 有信号，其他全是 0。我们目前只是人工 do(S) 验了 S→π，还没真正验证：
+```
+事件 / ΔO
+→ X
+→ 各字段自己的 U
+→ S 随时间合理变化
+→ 行为偏移
+```
+这个应该是 Mechanism Sanity v1.2 / Gate 1，而不是现在一口气塞进去。
+所以我会这样切：
+```
+现在让 Luna 修 v1.1：
+① Object/affordance/action
+② 单字段 S intervention
+③ P/S orthogonality
+④ 修正文档证据等级
+⑤ 不提前判死 LIGHT
+
+v1.1 通过后：
+再做 X→U→S trajectory sanity
+```
+也就是说，真正需要它现在动手的是 3 个机制点 + 2 个研究表述修正。不是只有两个，但也不要再扩成十几项。这样这一刀比较完整。
+要改的全部列出来让他改
+可以，我把这一轮 需要 Luna 改的东西一次性收完整。这不是让它继续发散研究，而是把 Mechanism Sanity v1 从“接线 smoke”修到真正能作为后续机制开发基线的 v1.1。
+你直接把下面整段发给 Luna：
+检查最新 webgpt-sync，以当前 514b98f Add Mechanism Sanity v1 engineering slice 为基线，完成 Mechanism Sanity v1.1 修正。
+这轮目标不是正式实验，不跑新的 NLL / Experiment B，不根据 Run1–4 结果调参，也不要碰 Terra 正在运行的 strict-v2 annotation。
+严禁修改：
+- 02_实验/T0c_LIGHT/ 下 Terra strict-v2 protocol / validator / shards / annotations / status；
+- 已冻结的旧 Run1–4 结果；
+- Paper-0 母问题；
+- multi-agent / ToM / P drift / inverse / Scene Manager 等支线；
+- 不新增数据集；
+- 不为了覆盖 A* 而修改 candidate generator。
+当前 Mechanism Sanity v1 可以保留，不回滚；本轮是在它上面做 v1.1。
+当前 candidate_generation_v1.py 过于贫乏：
+- object 基本只有 inspect
+- agent 基本只有 hug / hit
+- possessions 没真正参与生成
+- object facts / description / visible context 基本没参与
+- README 描述的能力高于实际实现
+这部分需要真正做成一个小而可审计的 affordance ontology。
+优先使用当前数据已经有的字段：
+- room objects
+- room agents
+- actor
+- carrying
+- wearing
+- wielding
+- source_O / actor observation
+- setting / object descriptions
+- canonical SceneSnapshot
+- 已存在的 entity facts / possession relations
+不要把 possessions 再清空。
+数据集没有的事实保持 unknown，不能脑补：
+- portable
+- edible
+- openable
+- owned_by
+- usable
+- success condition
+- social permission
+除非有可审计依据。
+目标不是覆盖所有游戏动作，而是支持少量合理动作族。
+至少考虑并明确条件：
+- inspect(object)
+- take/get(object)：只有存在明确 portable / source-supported portability 证据时
+- drop(object)：actor 当前持有时
+- give(object, agent)：actor 持有 object，且 agent 可见时
+- wear(object)：有 wearable 证据时
+- wield(object)：有 wieldable / weapon-like 证据时
+- talk(agent)：可见其他 agent
+- hug(agent)：可以作为 generic social-contact candidate，但标明只是 affordance，不代表社会合适或成功
+- hit(agent)：同上，只表示 physically addressable candidate
+- sit(object)：仅 chair/stool/seat 类实体有明确类型/名称依据时
+- use(object)：只有 object type 或 source description 能支持时
+- 其他动作不要为了丰富候选随意新增
+如果某动作缺前置证据，应不生成，而不是自动猜。
+每个 generated candidate 至少保存：
+- action_id
+- human-readable action
+- target entity / entities
+- semantic family
+- affordance rule id
+- required facts
+- supporting evidence / provenance
+- unknown preconditions（如果存在）
+方便后面审计为什么这个动作被生成。
+必须保持：
+```
+SceneSnapshot
+→ generated A^O
+→ 完成生成
+→ 才允许读取 source A* / source available_actions 做诊断
+```
+生成函数本身不能访问：
+- source_action_A_star
+- candidate_set_factual
+- source_candidates
+不要因为 support miss 修改 ontology。
+A* ∉ generated A^O 是合法结果，记录：
+- object extraction miss
+- affordance ontology miss
+- insufficient O
+- entity binding miss
+- source action requires hidden/unknown fact
+- other
+不要自动救回 gold。
+当前 fixtures 主要因为“generated count ≥ 4”就被选中，这不够。
+重新选择/构造约 3–5 个 development sandbox fixtures，标准：
+1. 场景信息足够完整；
+2. generated A^O 至少约 4 个；
+3. 候选动作必须来自不同 semantic families，不能只是：
+   - inspect A
+   - inspect B
+   - inspect C
+   - inspect D
+4. 至少存在真正竞争的行为类型，例如：
+   - explore / inspect
+   - social
+   - conflict
+   - possession manipulation
+   - recovery / use / sit 等
+5. 同一场景里 S 的变化理论上应有机会改变行为偏好；
+6. fixture 选择不能依赖当前 A* 是否容易命中；
+7. source A* 只用于事后 support diagnostic。
+如果 LIGHT 当前字段无法找到 3 个足够丰富的 fixture，可以诚实报告不足，不为了达标脑补。
+当前：
+```
+fatigue
+engagement
+tension
+```
+可以继续作为 Theory-S v1 candidate，先不扩字段。
+但把当前状态改成：
+candidate mechanism / engineering hypothesis
+不要写成：
+Theory-S v1 已工程冻结
+因为：
+- 字段选择仍是项目工程选择；
+- 数值参数没有经验标定；
+- S→action coupling 还在 sanity 阶段；
+- 部分 semantic mapping 仍需要审计。
+更新：
+- 00_研究设计/TODO.md
+- 00_研究设计/当前实现进度.md
+- 02_实验/Mechanism_Sanity_v1/README.md
+- 其他把 M1 写成 completed/frozen 的地方
+准确区分：
+- literature-constrained form
+- project-chosen fields
+- hand-set engineering parameters
+- empirically unvalidated claims
+不要把当前 score coupling 当作天然正确。
+逐条检查：
+应该明确主要影响什么行为族：
+- high effort / conflict / sustained stimulation ↓
+- recovery-oriented / low-effort actions ↑
+不要出现无法解释的映射。
+主要影响：
+- goal/stimulation/social participation
+- 当前投入程度
+明确它与 P 中 stimulation_seeking 的区别：
+- P 是稳定倾向
+- engagement 是当前状态
+必须明确理论机制。
+不能只是：
+```
+tension ↑ → conflict ↑
+tension ↑ → inspect ↑
+```
+然后用“salience”解释所有东西。
+需要说明 tension 通过什么路径影响：
+- threat/coping
+- information seeking
+- environment control
+- confrontation / avoidance
+如果当前 ontology 没有足够行为族表达 avoidance / control，就不要硬写出强结论。
+特别审计当前这些映射：
+- inspect → environment_control = 1
+- tension ↑ → inspect preference ↑
+如果文献或机制逻辑不足，改掉或降级。
+当前：
+```
+before:
+fatigue=.05
+engagement=.95
+tension=.05
+
+after:
+fatigue=.95
+engagement=.05
+tension=.95
+```
+不能作为主要 sanity，因为无法知道是哪一个字段导致变化。
+新增独立 intervention：
+固定：
+- Scene
+- O
+- P
+- A^O
+- engagement
+- tension
+只改：
+```
+fatigue low → high
+```
+报告：
+- full π(A)
+- Δprob
+- rank
+- TV
+- semantic-family probability mass
+- direction check
+同理，只改：
+```
+engagement low → high
+```
+同理，只改：
+```
+tension low → high
+```
+可以保留原来的 joint extreme intervention 作为 stress test，但不再作为主要 evidence。
+对每个 fixture × 每个 S field，在跑之前写出 expected direction。
+例如：
+```
+fatigue ↑
+expected:
+high-effort/conflict/stimulation mass ↓
+low-effort/recovery mass ↑
+```
+实际 ontology 没有 recovery action 时，就明确写：
+当前 fixture 无法验证 recovery prediction
+不要事后根据结果再写 explanation。
+输出每个 intervention 的：
+- expected direction
+- observed direction
+- PASS / FAIL / NOT_TESTABLE
+不要只看 TV 是否 > threshold。
+当前 5 个 fixture：
+- TV ≈ .049–.068
+- 最大单 action Δp < .10
+这只能证明 coupling 接上了。
+v1.1 至少要求：
+1. S intervention 不改变 candidate support；
+2. 分布发生非微小变化；
+3. 在部分适合场景中出现：
+   - top-1 flip，或
+   - top-k rank 明显变化，或
+   - semantic-family probability mass 显著转移；
+4. 如果始终只有 0.03–0.05 概率抖动，没有任何选择层变化，明确判定 coupling 仍偏弱。
+工程 threshold 可以继续使用，但不能只靠很低的 TV 阈值宣布通过。
+不要为了制造 rank flip 逐 fixture 调系数。
+可以在 sandbox development 阶段整体调整统一 coupling，但每次修改必须记录原因，不能针对 A*。
+当前系统还需要验证：
+P 决定稳定 preference，S 决定当前 transient expression。
+新增至少一组正交 sanity。
+例如改变：
+- recovery_preference
+- stimulation_seeking
+- threat_sensitivity
+观察稳定偏好变化。
+观察当前状态带来的偏移。
+无论改 P 还是 S：
+```
+generated A^O 必须完全相同
+```
+P/S 都不能改变：
+- action legality
+- entity visibility
+- object existence
+- candidate support
+如果 P 调节 S 的作用，报告：
+```
+P × S interaction
+```
+但不要把它复杂化成大规模 personality model。
+scene_appraisal() 当前大部分：
+```
+effort_load = 0
+goal_relevance = 0
+positive_conduciveness = 0
+negative_conduciveness = 0
+recovery_cue = 0
+```
+实际上只剩 social_opportunity 有非零可能。
+因此不要写成：
+Theory-S 的完整 X→U→S dynamics 已验证
+本轮只需要：
+- 保留 update_state() 接口；
+- 检查代码结构合理；
+- 把字段/参数文档写清；
+- 不必现在强行从 LIGHT 推断 appraisal。
+明确说明：
+v1.1 验证的是 S → π 和 candidate generation；ΔO/event → X → U → S 的 trajectory sanity 是下一 gate。
+不要这轮顺手继续做 v1.2。
+当前 README：
+LIGHT 不适合 persistent-S identification
+证据还不足以这么强。
+改成更准确的：
+当前 LIGHT projection、当前可验证字段与当前 candidate ontology 尚不足以支持 persistent-S identification；是否最终适合仍待时序/字段 capability audit。
+原因：
+- possessions 当前还没完整接；
+- affordance ontology 还在开发；
+- trajectory-level history / event consequence 尚未按新 Theory-S 审计；
+- source available_actions ≠ A^O。
+不要为了保护 LIGHT，也不要提前判死 LIGHT。
+当前 TODO 里：
+```
+M0 [x]
+M1 [x]
+M2 [x]
+```
+需要按真实状态重写。
+建议：
+```
+M0 mechanism plumbing sanity        [x]
+M1 Theory-S candidate implementation [~]
+M2 minimal candidate compiler        [~]
+M3 dataset capability audit          [~]
+M4 formal experiment gate            [ ]
+```
+具体措辞可根据实现调整，但原则是：
+- 接线跑通 ≠ mechanism validated
+- candidate prototype ≠ ontology completed
+- literature constrained ≠ psychologically validated
+- LIGHT smoke ≠ persistent-S dataset verdict
+现有测试只验证：
+- generator 不读 source candidates
+- post-hoc support
+- S 改变分布
+v1.1 需要至少增加：
+1. A* / source candidates 无法被 generator 读取；
+2. possession 改变时，只有合法 possession-dependent actions 改变；
+3. P intervention 不改变 A^O；
+4. S intervention 不改变 A^O；
+5. 单字段 S intervention 确实改变相关 semantic-family score；
+6. irrelevant S field 不应该无差别影响所有 action；
+7. generated candidate 都有 provenance / rule id；
+8. 缺事实时不生成需要该事实的动作；
+9. support miss 不会触发 gold injection；
+10. duplicate entity / alias 处理可重复、确定。
+完成后至少提交：
+- 更新后的 candidate_generation_v1.py 或新 v1.1 实现；
+- 更新后的 Theory-S candidate；
+- 新 fixtures；
+- 单字段 S intervention 结果；
+- P/S orthogonality 结果；
+- candidate support diagnostic；
+- tests；
+- Mechanism Sanity v1.1 README/readout；
+- 更新 TODO / 当前实现进度。
+readout 必须区分：
+例如：
+- generated A^O 不读取 A*
+- S/P 不改变 support
+- 单字段 S 能改变 π
+- 某些场景出现 rank flip
+例如：
+- 这三个 S field 是真实心理状态
+- 当前参数合理
+- LIGHT 有 persistent-S signal
+- Theory-S 提高真实预测
+- S approximately sufficient
+- Paper-0 主命题成立
+v1.1 完成并测试通过后：
+- commit
+- push 到 webgpt-sync
+- 汇报
+只汇报：
+1. Scene/Object→Action 比 v1 新增了什么；
+2. possessions/facts 是否真正接入；
+3. 单字段 fatigue/engagement/tension 各自产生了什么行为变化；
+4. 是否出现 rank/top-action change；
+5. P 和 S 的职责是否能区分；
+6. 哪些 semantic coupling 被删掉/修改；
+7. LIGHT 现在只能支持什么、仍不能支持什么；
+8. 还有哪些问题必须留到 X→U→S trajectory sanity。
+不要自行启动：
+- v1.2
+- Experiment B
+- formal test
+- 新数据采集
+- 新模型调用
+- 新 Theory-S 字段扩展
+等 Web Sol 审核这轮结果再继续。
+这份基本就是我目前能看到的全部需要修的点。核心不是多堆功能，而是把现在三个混在一起的东西分别做实：
+```
+Scene → A^O        要合理
+P / S → π          要职责清楚
+工程 sanity        要和科学证据分级
+```
+这一轮修完，再看仓库时我们就能很明确地决定：下一步是继续补 X→U→S，还是某个基础设计本身还得重做。

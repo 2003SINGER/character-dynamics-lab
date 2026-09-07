@@ -1,6 +1,8 @@
 # 实验路由
 
-当前主线是 T14/T20 rank-matched 1D development harness：LIGHT Replay → SceneSnapshot → raw feature v1 → Activity/ActionSupport/Theory S → conditional linear probe → zeroed/permuted diagnostics。
+本目录是实验路由索引，不宣布全项目当前阶段。Canonical layers are: `Replay/` for source-neutral records/features/baselines, `Theory_S_v2/` for the single Python trainable dynamics candidate, and `T14_T20/` for the frozen 1D historical development harness. New external training must compose these layers rather than copy Theory-S per dataset.
+
+Mechanism 表达力与候选集边界的独立工程验收见 [Mechanism Sanity v1](Mechanism_Sanity_v1/README.md) 与 [v1.2 trajectory sanity](Mechanism_Sanity_v1_2/README.md)。它们不启动正式 NLL/Experiment B，不读取或修改 T14/T20 的 strict-v2 protocol/validator/shards/status/results。
 
 - **Run 1 / full-refit**：`T14_T20/run_rank_matched_probe_v1.py`，各 condition 同时拟合 `theta + w`。
 - **Run 1b / frozen-model intervention**：`T14_T20/run_rank_matched_intervention_v1.py`，复用 Run 1 模型，不训练，做 correct/zeroed/permuted。
@@ -11,4 +13,4 @@
 
 该 runner 输出 `development_only` 且 `formal_test=false`；正式行为真值准入前不得把 dev holdout 当 Paper-0 test。
 
-`T14_T20_rank_matched_probe_v1.md`、`Replay/replay_features_v1.py`、`Replay/replay_probe_v1.py` 是当前候选协议与训练设施；v0 协议、`drive-linear-v0` 与 C++ `replay_core_cli` 仅作历史 diagnostic/repro path，不是当前 T14/T20 policy。其他数据集按各自 README 的准入状态维护。
+`T14_T20_rank_matched_probe_v1.md`、`Replay/replay_features_v1.py`、`Replay/replay_probe_v1.py` 是既有 1D 候选协议与训练设施；`Theory_S_v2/` 是后续 trainable dynamics candidate，但尚未进入真实 development training。v0 协议、`drive-linear-v0` 与 C++ `replay_core_cli` 仅作历史 diagnostic/repro path。其他数据集按各自 README 的准入状态维护。

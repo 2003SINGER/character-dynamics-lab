@@ -33,6 +33,11 @@
 | [2026-09-02_ChatGPT_数据流与动态状态跟踪](2026-09-02_ChatGPT_数据流与动态状态跟踪/) | 附件导出的完整 ChatGPT 对话；包含数据流作为状态更新工具、Character Agent 与 task agent 的定位差异，以及动态用户意图跟踪的跨域方法桥 | [来源说明](2026-09-02_ChatGPT_数据流与动态状态跟踪/README.md)；[原文](2026-09-02_ChatGPT_数据流与动态状态跟踪/数据流与动态状态跟踪_原文.txt) |
 
 前台只维护 [00_研究设计/前台问题与候选创新.md](../00_研究设计/前台问题与候选创新.md)；原始对话不在这里改写或覆盖。
+
+| [2026-09-07_用户对话_Theory-S与机制纠偏](2026-09-07_用户对话_Theory-S与机制纠偏/) | 用户/ WebGPT 对 Run1–4 结果边界、Theory-S、机制 sandbox、场景候选生成和跨数据集分工的主线纠偏 | [来源说明](2026-09-07_用户对话_Theory-S与机制纠偏/README.md)；[原文](2026-09-07_用户对话_Theory-S与机制纠偏/原文.txt) |
+| [2026-09-07_用户对话_新推送与Mechanism-Sanity任务](2026-09-07_用户对话_新推送与Mechanism-Sanity任务/) | 最终任务：在当前仓库由 Luna 完成 Mechanism Sanity v1；不复活旧 intents 课题，不改 Terra strict-v2 | [来源说明](2026-09-07_用户对话_新推送与Mechanism-Sanity任务/README.md)；[原文](2026-09-07_用户对话_新推送与Mechanism-Sanity任务/原文.txt) |
+| [2026-09-07_复核_机制Sanity_v1.1修正](2026-09-07_复核_机制Sanity_v1.1修正/) | 对 `514b98f` 的复核与 v1.1 修正任务：真实 affordance ontology、逐字段 S intervention、P/S 正交性、证据等级和 LIGHT 未决边界 | [来源说明](2026-09-07_复核_机制Sanity_v1.1修正/README.md)；[原文](2026-09-07_复核_机制Sanity_v1.1修正/原文.txt) |
+| [2026-09-07_复核_机制Sanity_v1.1-patch](2026-09-07_复核_机制Sanity_v1.1-patch/) | 对 `9cee75f` 的小补丁：修复 possession relation、补 carrying/wearing/wielding 测试，并记录 fixture selection/coupling/P×S 边界；下一阶段才做 v1.2 trajectory sanity | [来源说明](2026-09-07_复核_机制Sanity_v1.1-patch/README.md)；[原文](2026-09-07_复核_机制Sanity_v1.1-patch/原文.txt) |
 # 2026-09-05 宏观五层复核
 
 见 [2026-09-05_宏观五层复核](2026-09-05_宏观五层复核/README.md)。原始附件未落盘，当前仅保存带附件 ID 的结论整理。

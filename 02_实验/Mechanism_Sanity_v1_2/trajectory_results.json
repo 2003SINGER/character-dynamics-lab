@@ -1,0 +1,4239 @@
+{
+  "protocol": "Mechanism_Sanity_v1.2",
+  "status": "controlled_trajectory_sanity_only",
+  "candidate_action_ids": [
+    "inspect:desk",
+    "inspect:stool",
+    "sit:stool",
+    "inspect:book",
+    "take:book",
+    "use:book",
+    "talk:friend",
+    "hug:friend",
+    "hit:friend"
+  ],
+  "results": [
+    {
+      "trajectory": "effort_build_up_recovery",
+      "phases": [
+        {
+          "phase": "build_up",
+          "steps": [
+            {
+              "X_t": {
+                "effort_load": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.25,
+                "engagement": 0.45,
+                "tension": 0.2
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.37460000000000004,
+                "engagement": 0.384,
+                "tension": 0.18200000000000002
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.23796304000000004,
+                  "probability": 0.10417462033954614
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.23796304000000004,
+                  "probability": 0.10417462033954614
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.1177236,
+                  "probability": 0.07974784962068902
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.23796304000000004,
+                  "probability": 0.10417462033954614
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06139090992061298
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.26333904,
+                  "probability": 0.11021793620593445
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.39604304,
+                  "probability": 0.14802148345982427
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.39604304,
+                  "probability": 0.14802148345982427
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.37121704,
+                  "probability": 0.1400764763144766
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06139090992061298,
+                "inspect": 0.3125238610186384,
+                "object_use": 0.11021793620593445,
+                "physical_conflict": 0.1400764763144766,
+                "posture": 0.07974784962068902,
+                "social_communication": 0.14802148345982427,
+                "social_contact": 0.14802148345982427
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "effort_load": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.37460000000000004,
+                "engagement": 0.384,
+                "tension": 0.18200000000000002
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.46431200000000006,
+                "engagement": 0.33252,
+                "tension": 0.16724000000000003
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.21588138880000002,
+                  "probability": 0.10416942982117244
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.21588138880000002,
+                  "probability": 0.10416942982117244
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.123644592,
+                  "probability": 0.08486383636207376
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.21588138880000002,
+                  "probability": 0.10416942982117244
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06447530529737991
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.24053666880000002,
+                  "probability": 0.1100360696058517
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3677837888,
+                  "probability": 0.14599605420189002
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3677837888,
+                  "probability": 0.14599605420189002
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.3362790688,
+                  "probability": 0.13612439086739722
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06447530529737991,
+                "inspect": 0.31250828946351733,
+                "object_use": 0.1100360696058517,
+                "physical_conflict": 0.13612439086739722,
+                "posture": 0.08486383636207376,
+                "social_communication": 0.14599605420189002,
+                "social_contact": 0.14599605420189002
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "effort_load": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.46431200000000006,
+                "engagement": 0.33252,
+                "tension": 0.16724000000000003
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.52890464,
+                "engagement": 0.2923656,
+                "tension": 0.15513680000000002
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.199290708736,
+                  "probability": 0.10413961412984399
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.199290708736,
+                  "probability": 0.10413961412984399
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.12790770624,
+                  "probability": 0.08886368336621445
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.199290708736,
+                  "probability": 0.10413961412984399
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06687760787986598
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.223383827136,
+                  "probability": 0.10986723755399838
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.346374580736,
+                  "probability": 0.14439974944542328
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.346374580736,
+                  "probability": 0.14439974944542328
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.309953614336,
+                  "probability": 0.1331731299195427
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06687760787986598,
+                "inspect": 0.312418842389532,
+                "object_use": 0.10986723755399838,
+                "physical_conflict": 0.1331731299195427,
+                "posture": 0.08886368336621445,
+                "social_communication": 0.14439974944542328,
+                "social_contact": 0.14439974944542328
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "effort_load": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.52890464,
+                "engagement": 0.2923656,
+                "tension": 0.15513680000000002
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.5754113408,
+                "engagement": 0.261045168,
+                "tension": 0.14521217600000003
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.18680574395392,
+                  "probability": 0.10410574611873674
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.18680574395392,
+                  "probability": 0.10410574611873674
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.13097714849279998,
+                  "probability": 0.09195907367319953
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.18680574395392,
+                  "probability": 0.10410574611873674
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06873670229749426
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.21046037630592,
+                  "probability": 0.10972453764846396
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.33013116411391996,
+                  "probability": 0.14315215790359292
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.33013116411391996,
+                  "probability": 0.14315215790359292
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.29006746830592,
+                  "probability": 0.13095813221744623
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06873670229749426,
+                "inspect": 0.3123172383562102,
+                "object_use": 0.10972453764846396,
+                "physical_conflict": 0.13095813221744623,
+                "posture": 0.09195907367319953,
+                "social_communication": 0.14315215790359292,
+                "social_contact": 0.14315215790359292
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "effort_load": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.5754113408,
+                "engagement": 0.261045168,
+                "tension": 0.14521217600000003
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.608896165376,
+                "engagement": 0.23661523103999998,
+                "tension": 0.13707398432
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.17739562270474238,
+                  "probability": 0.10407645001569735
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.17739562270474238,
+                  "probability": 0.10407645001569735
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.133187146914816,
+                  "probability": 0.09433805569415839
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.17739562270474238,
+                  "probability": 0.10407645001569735
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.07016946398966688
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.20070823593930237,
+                  "probability": 0.10961032021024182
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3177894504295424,
+                  "probability": 0.14218258040938514
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3177894504295424,
+                  "probability": 0.14218258040938514
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.27500693874058235,
+                  "probability": 0.1292876492400707
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.07016946398966688,
+                "inspect": 0.31222935004709207,
+                "object_use": 0.10961032021024182,
+                "physical_conflict": 0.1292876492400707,
+                "posture": 0.09433805569415839,
+                "social_communication": 0.14218258040938514,
+                "social_contact": 0.14218258040938514
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "effort_load": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.608896165376,
+                "engagement": 0.23661523103999998,
+                "tension": 0.13707398432
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.63300523907072,
+                "engagement": 0.21755988021119999,
+                "tension": 0.1304006671424
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.17029199705259213,
+                  "probability": 0.10405438279404151
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.17029199705259213,
+                  "probability": 0.10405438279404151
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.1347783457786675,
+                  "probability": 0.0961581708726382
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.17029199705259213,
+                  "probability": 0.10405438279404151
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.07127082191328003
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.19333783537554894,
+                  "probability": 0.10952213204908892
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3083991826779361,
+                  "probability": 0.14143192853350373
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3083991826779361,
+                  "probability": 0.14143192853350373
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.2635713416903649,
+                  "probability": 0.12802186971586085
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.07127082191328003,
+                "inspect": 0.31216314838212456,
+                "object_use": 0.10952213204908892,
+                "physical_conflict": 0.12802186971586085,
+                "posture": 0.0961581708726382,
+                "social_communication": 0.14143192853350373,
+                "social_contact": 0.14143192853350373
+              },
+              "top_action": "talk:friend"
+            }
+          ]
+        },
+        {
+          "phase": "recovery",
+          "steps": [
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.63300523907072,
+                "engagement": 0.21755988021119999,
+                "tension": 0.1304006671424
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.4557637721309184,
+                "engagement": 0.20269670656473598,
+                "tension": 0.106928547056768
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.18780624266790488,
+                  "probability": 0.10484462916735088
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.18780624266790488,
+                  "probability": 0.10484462916735088
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.12308040896064061,
+                  "probability": 0.09079864349884026
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.18780624266790488,
+                  "probability": 0.10484462916735088
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06907081800376523
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2106439965598112,
+                  "probability": 0.11030288659058976
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3241298474556732,
+                  "probability": 0.14194233393118377
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3241298474556732,
+                  "probability": 0.14194233393118377
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.289432352422515,
+                  "probability": 0.13140909654238453
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06907081800376523,
+                "inspect": 0.31453388750205263,
+                "object_use": 0.11030288659058976,
+                "physical_conflict": 0.13140909654238453,
+                "posture": 0.09079864349884026,
+                "social_communication": 0.14194233393118377,
+                "social_contact": 0.14194233393118377
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.4557637721309184,
+                "engagement": 0.20269670656473598,
+                "tension": 0.106928547056768
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.32814991593426124,
+                "engagement": 0.19110343112049408,
+                "tension": 0.08768140858654977
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.20021673845712157,
+                  "probability": 0.10540971452270335
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.20021673845712157,
+                  "probability": 0.10540971452270335
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.11465789445166125,
+                  "probability": 0.08715812830042237
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.20021673845712157,
+                  "probability": 0.10540971452270335
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06755409704124284
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.22289218649280848,
+                  "probability": 0.11085739931468339
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.33514915019158087,
+                  "probability": 0.14226686201344466
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.33514915019158087,
+                  "probability": 0.14226686201344466
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.30709202240508016,
+                  "probability": 0.1336675077486521
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06755409704124284,
+                "inspect": 0.31622914356811005,
+                "object_use": 0.11085739931468339,
+                "physical_conflict": 0.1336675077486521,
+                "posture": 0.08715812830042237,
+                "social_communication": 0.14226686201344466,
+                "social_contact": 0.14226686201344466
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.32814991593426124,
+                "engagement": 0.19110343112049408,
+                "tension": 0.08768140858654977
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.23626793947266808,
+                "engagement": 0.18206067627398537,
+                "tension": 0.07189875504097082
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.20899648180338698,
+                  "probability": 0.1058233972301367
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.20899648180338698,
+                  "probability": 0.1058233972301367
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10859368400519609,
+                  "probability": 0.08466093780808824
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.20899648180338698,
+                  "probability": 0.1058233972301367
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06650884953935687
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2315453312712228,
+                  "probability": 0.11126115605786305
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3428437629562652,
+                  "probability": 0.14248119746367455
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3428437629562652,
+                  "probability": 0.14248119746367455
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.31902756388412135,
+                  "probability": 0.13513646997693263
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06650884953935687,
+                "inspect": 0.31747019169041013,
+                "object_use": 0.11126115605786305,
+                "physical_conflict": 0.13513646997693263,
+                "posture": 0.08466093780808824,
+                "social_communication": 0.14248119746367455,
+                "social_contact": 0.14248119746367455
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.23626793947266808,
+                "engagement": 0.18206067627398537,
+                "tension": 0.07189875504097082
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.170112916420321,
+                "engagement": 0.1750073274937086,
+                "tension": 0.05895697913359607
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.215196362387561,
+                  "probability": 0.10613169112982339
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.215196362387561,
+                  "probability": 0.10613169112982339
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10422745248374118,
+                  "probability": 0.08293715187081646
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.215196362387561,
+                  "probability": 0.10613169112982339
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06578991463242889
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.23764646497247294,
+                  "probability": 0.1115608083951881
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.34819724168680605,
+                  "probability": 0.1426277660291842
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.34819724168680605,
+                  "probability": 0.1426277660291842
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.32698826114901725,
+                  "probability": 0.136061519653728
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06578991463242889,
+                "inspect": 0.31839507338947015,
+                "object_use": 0.1115608083951881,
+                "physical_conflict": 0.136061519653728,
+                "posture": 0.08293715187081646,
+                "social_communication": 0.1426277660291842,
+                "social_contact": 0.1426277660291842
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.170112916420321,
+                "engagement": 0.1750073274937086,
+                "tension": 0.05895697913359607
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.12248129982263112,
+                "engagement": 0.16950571544509271,
+                "tension": 0.048344722889548775
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.21956547940055934,
+                  "probability": 0.10636455744156177
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.21956547940055934,
+                  "probability": 0.10636455744156177
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10108376578829366,
+                  "probability": 0.08174296227945013
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.21956547940055934,
+                  "probability": 0.10636455744156177
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06529719809090467
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.24193855941679066,
+                  "probability": 0.11178645172682863
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.35190616525397045,
+                  "probability": 0.1427311552654103
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.35190616525397045,
+                  "probability": 0.1427311552654103
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.33220585263273633,
+                  "probability": 0.13661740504731062
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06529719809090467,
+                "inspect": 0.31909367232468533,
+                "object_use": 0.11178645172682863,
+                "physical_conflict": 0.13661740504731062,
+                "posture": 0.08174296227945013,
+                "social_communication": 0.1427311552654103,
+                "social_contact": 0.1427311552654103
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.12248129982263112,
+                "engagement": 0.16950571544509271,
+                "tension": 0.048344722889548775
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.0881865358722944,
+                "engagement": 0.1652144580471723,
+                "tension": 0.039642672769429996
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.2226373019839848,
+                  "probability": 0.10654226483443671
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.2226373019839848,
+                  "probability": 0.10654226483443671
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.09882031136757143,
+                  "probability": 0.08091448783591806
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.2226373019839848,
+                  "probability": 0.10654226483443671
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06496133192178549
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2449503043966452,
+                  "probability": 0.11195826961428897
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3544630369496454,
+                  "probability": 0.14280611013226455
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3544630369496454,
+                  "probability": 0.14280611013226455
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.3355447397327736,
+                  "probability": 0.1369268958601683
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06496133192178549,
+                "inspect": 0.3196267945033101,
+                "object_use": 0.11195826961428897,
+                "physical_conflict": 0.1369268958601683,
+                "posture": 0.08091448783591806,
+                "social_communication": 0.14280611013226455,
+                "social_contact": 0.14280611013226455
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.0881865358722944,
+                "engagement": 0.1652144580471723,
+                "tension": 0.039642672769429996
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.06349430582805196,
+                "engagement": 0.1618672772767944,
+                "tension": 0.0325069916709326
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.22479133974462304,
+                  "probability": 0.1066789702653874
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.22479133974462304,
+                  "probability": 0.1066789702653874
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.09719062418465142,
+                  "probability": 0.08033994151987983
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.22479133974462304,
+                  "probability": 0.1066789702653874
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06473407576283668
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.24705748162649815,
+                  "probability": 0.11209025130290698
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3562154130178383,
+                  "probability": 0.14286177335328368
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3562154130178383,
+                  "probability": 0.14286177335328368
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.3376091175214805,
+                  "probability": 0.13707527391164698
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06473407576283668,
+                "inspect": 0.3200369107961622,
+                "object_use": 0.11209025130290698,
+                "physical_conflict": 0.13707527391164698,
+                "posture": 0.08033994151987983,
+                "social_communication": 0.14286177335328368,
+                "social_contact": 0.14286177335328368
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.06349430582805196,
+                "engagement": 0.1618672772767944,
+                "tension": 0.0325069916709326
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.04571590019619741,
+                "engagement": 0.15925647627589962,
+                "tension": 0.02665573317016473
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.22629726082272872,
+                  "probability": 0.10678481657703492
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.22629726082272872,
+                  "probability": 0.10678481657703492
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.09601724941294904,
+                  "probability": 0.07994225911940371
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.22629726082272872,
+                  "probability": 0.10678481657703492
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.0645818200437026
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2485268514905913,
+                  "probability": 0.11219235347401706
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.35740803797583665,
+                  "probability": 0.14290399370559465
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.35740803797583665,
+                  "probability": 0.14290399370559465
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.33881928735220435,
+                  "probability": 0.13712113022058264
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.0645818200437026,
+                "inspect": 0.3203544497311048,
+                "object_use": 0.11219235347401706,
+                "physical_conflict": 0.13712113022058264,
+                "posture": 0.07994225911940371,
+                "social_communication": 0.14290399370559465,
+                "social_contact": 0.14290399370559465
+              },
+              "top_action": "talk:friend"
+            }
+          ]
+        }
+      ],
+      "checks": {
+        "support_fixed": true,
+        "fatigue_builds": true,
+        "fatigue_recovers": true,
+        "fatigue_relaxation_build": {
+          "values": [
+            0.37460000000000004,
+            0.46431200000000006,
+            0.52890464,
+            0.5754113408,
+            0.608896165376,
+            0.63300523907072
+          ],
+          "step_deltas": [
+            0.08971200000000001,
+            0.06459263999999998,
+            0.04650670079999997,
+            0.033484824575999994,
+            0.02410907369472004
+          ],
+          "same_direction": true,
+          "step_magnitude_nonincreasing": true,
+          "overshoot_absent": true,
+          "half_life_steps_to_trajectory_midpoint": 2,
+          "pass": true
+        },
+        "fatigue_relaxation_recovery": {
+          "values": [
+            0.4557637721309184,
+            0.32814991593426124,
+            0.23626793947266808,
+            0.170112916420321,
+            0.12248129982263112,
+            0.0881865358722944,
+            0.06349430582805196,
+            0.04571590019619741
+          ],
+          "step_deltas": [
+            -0.12761385619665716,
+            -0.09188197646159316,
+            -0.06615502305234708,
+            -0.047631616597689885,
+            -0.03429476395033672,
+            -0.02469223004424244,
+            -0.017778405631854552
+          ],
+          "same_direction": true,
+          "step_magnitude_nonincreasing": true,
+          "overshoot_absent": true,
+          "half_life_steps_to_trajectory_midpoint": 2,
+          "pass": true
+        },
+        "stimulation_mass_declines_on_build": true,
+        "posture_mass_tracks_recovery": true,
+        "all_pass": true
+      },
+      "cross_effects": {
+        "fatigue": {
+          "values": [
+            0.37460000000000004,
+            0.46431200000000006,
+            0.52890464,
+            0.5754113408,
+            0.608896165376,
+            0.63300523907072,
+            0.4557637721309184,
+            0.32814991593426124,
+            0.23626793947266808,
+            0.170112916420321,
+            0.12248129982263112,
+            0.0881865358722944,
+            0.06349430582805196,
+            0.04571590019619741
+          ],
+          "net_change": -0.3288840998038026
+        },
+        "engagement": {
+          "values": [
+            0.384,
+            0.33252,
+            0.2923656,
+            0.261045168,
+            0.23661523103999998,
+            0.21755988021119999,
+            0.20269670656473598,
+            0.19110343112049408,
+            0.18206067627398537,
+            0.1750073274937086,
+            0.16950571544509271,
+            0.1652144580471723,
+            0.1618672772767944,
+            0.15925647627589962
+          ],
+          "net_change": -0.2247435237241004
+        },
+        "tension": {
+          "values": [
+            0.18200000000000002,
+            0.16724000000000003,
+            0.15513680000000002,
+            0.14521217600000003,
+            0.13707398432,
+            0.1304006671424,
+            0.106928547056768,
+            0.08768140858654977,
+            0.07189875504097082,
+            0.05895697913359607,
+            0.048344722889548775,
+            0.039642672769429996,
+            0.0325069916709326,
+            0.02665573317016473
+          ],
+          "net_change": -0.1553442668298353
+        }
+      }
+    },
+    {
+      "trajectory": "positive_progress",
+      "phases": [
+        {
+          "phase": "progress",
+          "steps": [
+            {
+              "X_t": {
+                "positive_conduciveness": 0.9,
+                "social_opportunity": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.25,
+                "engagement": 0.45,
+                "tension": 0.2
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.236,
+                "engagement": 0.4731,
+                "tension": 0.18200000000000002
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.2742208,
+                  "probability": 0.10428359625033744
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.2742208,
+                  "probability": 0.10428359625033744
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.108576,
+                  "probability": 0.07216928352237599
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.2742208,
+                  "probability": 0.10428359625033744
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.05669774954587349
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.3008442,
+                  "probability": 0.11063950197808672
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.4429928,
+                  "probability": 0.15173915540712593
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.4429928,
+                  "probability": 0.15173915540712593
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.4199488,
+                  "probability": 0.1441643653883997
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.05669774954587349,
+                "inspect": 0.3128507887510123,
+                "object_use": 0.11063950197808672,
+                "physical_conflict": 0.1441643653883997,
+                "posture": 0.07216928352237599,
+                "social_communication": 0.15173915540712593,
+                "social_contact": 0.15173915540712593
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "positive_conduciveness": 0.9,
+                "social_opportunity": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.236,
+                "engagement": 0.4731,
+                "tension": 0.18200000000000002
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.22591999999999998,
+                "engagement": 0.49111800000000005,
+                "tension": 0.16724000000000003
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.27944224,
+                  "probability": 0.10441980294672754
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.27944224,
+                  "probability": 0.10441980294672754
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10791072,
+                  "probability": 0.07132437863382635
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.27944224,
+                  "probability": 0.10441980294672754
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.056116875890425535
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.30631789200000004,
+                  "probability": 0.11084612873194495
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.4503764,
+                  "probability": 0.1526691298565672
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.4503764,
+                  "probability": 0.1526691298565672
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.4212952,
+                  "probability": 0.1431149481904862
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.056116875890425535,
+                "inspect": 0.3132594088401826,
+                "object_use": 0.11084612873194495,
+                "physical_conflict": 0.1431149481904862,
+                "posture": 0.07132437863382635,
+                "social_communication": 0.1526691298565672,
+                "social_contact": 0.1526691298565672
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "positive_conduciveness": 0.9,
+                "social_opportunity": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.22591999999999998,
+                "engagement": 0.49111800000000005,
+                "tension": 0.16724000000000003
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.21866239999999998,
+                "engagement": 0.50517204,
+                "tension": 0.15513680000000002
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.28344383872000006,
+                  "probability": 0.10452894614742356
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.28344383872000006,
+                  "probability": 0.10452894614742356
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.1074317184,
+                  "probability": 0.07069154560681055
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.28344383872000006,
+                  "probability": 0.10452894614742356
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.05567820805115073
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.31051624728000005,
+                  "probability": 0.11101051622445383
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.45606448352000006,
+                  "probability": 0.15340254241593793
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.45606448352000006,
+                  "probability": 0.15340254241593793
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.42202854592000005,
+                  "probability": 0.14222780684343833
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.05567820805115073,
+                "inspect": 0.31358683844227064,
+                "object_use": 0.11101051622445383,
+                "physical_conflict": 0.14222780684343833,
+                "posture": 0.07069154560681055,
+                "social_communication": 0.15340254241593793,
+                "social_contact": 0.15340254241593793
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "positive_conduciveness": 0.9,
+                "social_opportunity": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.21866239999999998,
+                "engagement": 0.50517204,
+                "tension": 0.15513680000000002
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.213436928,
+                "engagement": 0.5161341912,
+                "tension": 0.14521217600000003
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.28651387609600004,
+                  "probability": 0.10461703196127511
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.28651387609600004,
+                  "probability": 0.10461703196127511
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.107086837248,
+                  "probability": 0.07021623940522138
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.28651387609600004,
+                  "probability": 0.10461703196127511
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.055346247742743555
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.31373975477280003,
+                  "probability": 0.1111419619269002
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.46044997904000007,
+                  "probability": 0.1539812806865851
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.46044997904000007,
+                  "probability": 0.1539812806865851
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.42235329760000007,
+                  "probability": 0.14148189366813937
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.055346247742743555,
+                "inspect": 0.3138510958838253,
+                "object_use": 0.1111419619269002,
+                "physical_conflict": 0.14148189366813937,
+                "posture": 0.07021623940522138,
+                "social_communication": 0.1539812806865851,
+                "social_contact": 0.1539812806865851
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "positive_conduciveness": 0.9,
+                "social_opportunity": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.213436928,
+                "engagement": 0.5161341912,
+                "tension": 0.14521217600000003
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.20967458816,
+                "engagement": 0.5246846691360001,
+                "tension": 0.13707398432
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.28887163431884805,
+                  "probability": 0.10468851729970678
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.28887163431884805,
+                  "probability": 0.10468851729970678
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10683852281856,
+                  "probability": 0.06985847528909686
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.28887163431884805,
+                  "probability": 0.10468851729970678
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.0550946422345711
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.31621721968675204,
+                  "probability": 0.11124749533454678
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.46383379461516805,
+                  "probability": 0.1544382345638809
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.46383379461516805,
+                  "probability": 0.1544382345638809
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.42241289230412804,
+                  "probability": 0.14085736611490315
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.0550946422345711,
+                "inspect": 0.31406555189912033,
+                "object_use": 0.11124749533454678,
+                "physical_conflict": 0.14085736611490315,
+                "posture": 0.06985847528909686,
+                "social_communication": 0.1544382345638809,
+                "social_contact": 0.1544382345638809
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "positive_conduciveness": 0.9,
+                "social_opportunity": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.20967458816,
+                "engagement": 0.5246846691360001,
+                "tension": 0.13707398432
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.20696570347520002,
+                "engagement": 0.53135404192608,
+                "tension": 0.1304006671424
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.29068413866275844,
+                  "probability": 0.10474677725435674
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.29068413866275844,
+                  "probability": 0.10474677725435674
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.1066597364293632,
+                  "probability": 0.06958873328770947
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.29068413866275844,
+                  "probability": 0.10474677725435674
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.05490371637054084
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.31812309524972354,
+                  "probability": 0.11133250357291333
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.46644662369388806,
+                  "probability": 0.15479924630761935
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.46644662369388806,
+                  "probability": 0.15479924630761935
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.422307041504128,
+                  "probability": 0.14033622239052745
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.05490371637054084,
+                "inspect": 0.3142403317630702,
+                "object_use": 0.11133250357291333,
+                "physical_conflict": 0.14033622239052745,
+                "posture": 0.06958873328770947,
+                "social_communication": 0.15479924630761935,
+                "social_contact": 0.15479924630761935
+              },
+              "top_action": "talk:friend"
+            }
+          ]
+        }
+      ],
+      "checks": {
+        "support_fixed": true,
+        "engagement_builds": true,
+        "engagement_relaxation": {
+          "values": [
+            0.4731,
+            0.49111800000000005,
+            0.50517204,
+            0.5161341912,
+            0.5246846691360001,
+            0.53135404192608
+          ],
+          "step_deltas": [
+            0.018018000000000034,
+            0.01405403999999999,
+            0.010962151199999992,
+            0.008550477936000056,
+            0.006669372790079953
+          ],
+          "same_direction": true,
+          "step_magnitude_nonincreasing": true,
+          "overshoot_absent": true,
+          "half_life_steps_to_trajectory_midpoint": 2,
+          "pass": true
+        },
+        "social_mass_rises": true,
+        "cross_effect_tension_declines": true,
+        "all_pass": true
+      },
+      "cross_effects": {
+        "fatigue": {
+          "values": [
+            0.236,
+            0.22591999999999998,
+            0.21866239999999998,
+            0.213436928,
+            0.20967458816,
+            0.20696570347520002
+          ],
+          "net_change": -0.02903429652479997
+        },
+        "engagement": {
+          "values": [
+            0.4731,
+            0.49111800000000005,
+            0.50517204,
+            0.5161341912,
+            0.5246846691360001,
+            0.53135404192608
+          ],
+          "net_change": 0.058254041926080025
+        },
+        "tension": {
+          "values": [
+            0.18200000000000002,
+            0.16724000000000003,
+            0.15513680000000002,
+            0.14521217600000003,
+            0.13707398432,
+            0.1304006671424
+          ],
+          "net_change": -0.05159933285760002
+        }
+      }
+    },
+    {
+      "trajectory": "obstruction_build_up_decay",
+      "phases": [
+        {
+          "phase": "obstruction",
+          "steps": [
+            {
+              "X_t": {
+                "negative_conduciveness": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.25,
+                "engagement": 0.45,
+                "tension": 0.2
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.2864,
+                "engagement": 0.384,
+                "tension": 0.2711
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.24833536000000006,
+                  "probability": 0.10337643835115917
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.24833536000000006,
+                  "probability": 0.10337643835115917
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.1119024,
+                  "probability": 0.07633966901271652
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.24833536000000006,
+                  "probability": 0.10337643835115917
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.05953240056249808
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.27371136000000007,
+                  "probability": 0.10937345056067826
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.40641536000000006,
+                  "probability": 0.1468873484698732
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.40641536000000006,
+                  "probability": 0.1468873484698732
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.41839576,
+                  "probability": 0.15085046787088324
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.05953240056249808,
+                "inspect": 0.3101293150534775,
+                "object_use": 0.10937345056067826,
+                "physical_conflict": 0.15085046787088324,
+                "posture": 0.07633966901271652,
+                "social_communication": 0.1468873484698732,
+                "social_contact": 0.1468873484698732
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {
+                "negative_conduciveness": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.2864,
+                "engagement": 0.384,
+                "tension": 0.2711
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.312608,
+                "engagement": 0.33252,
+                "tension": 0.32940200000000003
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.23372177920000003,
+                  "probability": 0.10273406512204887
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.23372177920000003,
+                  "probability": 0.10273406512204887
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.113632128,
+                  "probability": 0.0786712569585935
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.23372177920000003,
+                  "probability": 0.10273406512204887
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06111528666635351
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.25837705920000004,
+                  "probability": 0.108519867681605
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.38562417920000003,
+                  "probability": 0.14398435477363675
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.38562417920000003,
+                  "probability": 0.14398435477363675
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.42031330720000004,
+                  "probability": 0.15552268378002784
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06111528666635351,
+                "inspect": 0.3082021953661466,
+                "object_use": 0.108519867681605,
+                "physical_conflict": 0.15552268378002784,
+                "posture": 0.0786712569585935,
+                "social_communication": 0.14398435477363675,
+                "social_contact": 0.14398435477363675
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {
+                "negative_conduciveness": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.312608,
+                "engagement": 0.33252,
+                "tension": 0.32940200000000003
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.33147776,
+                "engagement": 0.2923656,
+                "tension": 0.37720964
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.222508109824,
+                  "probability": 0.10218347025239687
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.222508109824,
+                  "probability": 0.10218347025239687
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.11487753215999999,
+                  "probability": 0.08044637907213079
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.222508109824,
+                  "probability": 0.10218347025239687
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06232156161150419
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.246601228224,
+                  "probability": 0.1078035068030344
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.369591981824,
+                  "probability": 0.14168736484382125
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.369591981824,
+                  "probability": 0.14168736484382125
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.42289103478400003,
+                  "probability": 0.15950341206849755
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06232156161150419,
+                "inspect": 0.3065504107571906,
+                "object_use": 0.1078035068030344,
+                "physical_conflict": 0.15950341206849755,
+                "posture": 0.08044637907213079,
+                "social_communication": 0.14168736484382125,
+                "social_contact": 0.14168736484382125
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {
+                "negative_conduciveness": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.33147776,
+                "engagement": 0.2923656,
+                "tension": 0.37720964
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.34506398720000003,
+                "engagement": 0.261045168,
+                "tension": 0.4164119048
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.21389459273728,
+                  "probability": 0.10171742935264452
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.21389459273728,
+                  "probability": 0.10171742935264452
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.1157742231552,
+                  "probability": 0.08178987044074512
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.21389459273728,
+                  "probability": 0.10171742935264452
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06323622714463002
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.23754922508928,
+                  "probability": 0.10720731873704425
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.35722001289728,
+                  "probability": 0.13986806733635862
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.35722001289728,
+                  "probability": 0.13986806733635862
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.42575629104448,
+                  "probability": 0.16287816094692978
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06323622714463002,
+                "inspect": 0.3051522880579336,
+                "object_use": 0.10720731873704425,
+                "physical_conflict": 0.16287816094692978,
+                "posture": 0.08178987044074512,
+                "social_communication": 0.13986806733635862,
+                "social_contact": 0.13986806733635862
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {
+                "negative_conduciveness": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.34506398720000003,
+                "engagement": 0.261045168,
+                "tension": 0.4164119048
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.35484607078400004,
+                "engagement": 0.23661523103999998,
+                "tension": 0.448557761936
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.2072719138287616,
+                  "probability": 0.10132637210906796
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.2072719138287616,
+                  "probability": 0.10132637210906796
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.116419840671744,
+                  "probability": 0.08280208300846442
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.2072719138287616,
+                  "probability": 0.10132637210906796
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06392704179431162
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.23058452706332158,
+                  "probability": 0.1067140173491883
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.34766574155356156,
+                  "probability": 0.13842560010276983
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.34766574155356156,
+                  "probability": 0.13842560010276983
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.4286684823254656,
+                  "probability": 0.1657265413152922
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06392704179431162,
+                "inspect": 0.30397911632720387,
+                "object_use": 0.1067140173491883,
+                "physical_conflict": 0.1657265413152922,
+                "posture": 0.08280208300846442,
+                "social_communication": 0.13842560010276983,
+                "social_contact": 0.13842560010276983
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {
+                "negative_conduciveness": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.35484607078400004,
+                "engagement": 0.23661523103999998,
+                "tension": 0.448557761936
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.36188917096448003,
+                "engagement": 0.21755988021119999,
+                "tension": 0.47491736478752
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.20217524666188594,
+                  "probability": 0.10100024611277655
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.20217524666188594,
+                  "probability": 0.10100024611277655
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.11688468528365568,
+                  "probability": 0.08356195834092173
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.20217524666188594,
+                  "probability": 0.10100024611277655
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.0644470932608532
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.22522108498484272,
+                  "probability": 0.10630750954189913
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.34028243228722993,
+                  "probability": 0.13728071039893275
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.34028243228722993,
+                  "probability": 0.13728071039893275
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.4314784474662392,
+                  "probability": 0.1681212797201308
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.0644470932608532,
+                "inspect": 0.30300073833832963,
+                "object_use": 0.10630750954189913,
+                "physical_conflict": 0.1681212797201308,
+                "posture": 0.08356195834092173,
+                "social_communication": 0.13728071039893275,
+                "social_contact": 0.13728071039893275
+              },
+              "top_action": "hit:friend"
+            }
+          ]
+        },
+        {
+          "phase": "neutral_decay",
+          "steps": [
+            {
+              "X_t": {},
+              "S_t": {
+                "fatigue": 0.36188917096448003,
+                "engagement": 0.21755988021119999,
+                "tension": 0.47491736478752
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.3165602030944256,
+                "engagement": 0.20269670656473598,
+                "tension": 0.4074322391257664
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.20417658238659644,
+                  "probability": 0.1019029430633797
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.20417658238659644,
+                  "probability": 0.1019029430633797
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.11389297340423209,
+                  "probability": 0.0833785080995128
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.20417658238659644,
+                  "probability": 0.1019029430633797
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06473455135837071
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.22701433627850276,
+                  "probability": 0.10720805501658968
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.34050018717436475,
+                  "probability": 0.1379597761730356
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.34050018717436475,
+                  "probability": 0.1379597761730356
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.4156942095848465,
+                  "probability": 0.16305050398931656
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06473455135837071,
+                "inspect": 0.3057088291901391,
+                "object_use": 0.10720805501658968,
+                "physical_conflict": 0.16305050398931656,
+                "posture": 0.0833785080995128,
+                "social_communication": 0.1379597761730356,
+                "social_contact": 0.1379597761730356
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {},
+              "S_t": {
+                "fatigue": 0.3165602030944256,
+                "engagement": 0.20269670656473598,
+                "tension": 0.4074322391257664
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.28392334622798643,
+                "engagement": 0.19110343112049408,
+                "tension": 0.35209443608312846
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.2054177830545795,
+                  "probability": 0.10262522559770337
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.2054177830545795,
+                  "probability": 0.10262522559770337
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.11173894085104712,
+                  "probability": 0.08333832781230331
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.2054177830545795,
+                  "probability": 0.10262522559770337
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.0650138161653709
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2280932310902664,
+                  "probability": 0.1079290050766025
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.34035019478903883,
+                  "probability": 0.1385087596083232
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.34035019478903883,
+                  "probability": 0.1385087596083232
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.40194327918499434,
+                  "probability": 0.1588256549359668
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.0650138161653709,
+                "inspect": 0.3078756767931101,
+                "object_use": 0.1079290050766025,
+                "physical_conflict": 0.1588256549359668,
+                "posture": 0.08333832781230331,
+                "social_communication": 0.1385087596083232,
+                "social_contact": 0.1385087596083232
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {},
+              "S_t": {
+                "fatigue": 0.28392334622798643,
+                "engagement": 0.19110343112049408,
+                "tension": 0.35209443608312846
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.26042480928415024,
+                "engagement": 0.18206067627398537,
+                "tension": 0.30671743758816533
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.20615563391355668,
+                  "probability": 0.1032039864726826
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.20615563391355668,
+                  "probability": 0.1032039864726826
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.11018803741275392,
+                  "probability": 0.08338314205962538
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.20615563391355668,
+                  "probability": 0.1032039864726826
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06527335087461922
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2287044833813925,
+                  "probability": 0.1085071462954383
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3400029150664349,
+                  "probability": 0.13895440857633948
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3400029150664349,
+                  "probability": 0.13895440857633948
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.3900938508565487,
+                  "probability": 0.15531558419959032
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06527335087461922,
+                "inspect": 0.3096119594180478,
+                "object_use": 0.1085071462954383,
+                "physical_conflict": 0.15531558419959032,
+                "posture": 0.08338314205962538,
+                "social_communication": 0.13895440857633948,
+                "social_contact": 0.13895440857633948
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {},
+              "S_t": {
+                "fatigue": 0.26042480928415024,
+                "engagement": 0.18206067627398537,
+                "tension": 0.30671743758816533
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.24350586268458818,
+                "engagement": 0.1750073274937086,
+                "tension": 0.26950829882229554
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.20656535190688316,
+                  "probability": 0.10366852615114015
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.20656535190688316,
+                  "probability": 0.10366852615114015
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10907138693718282,
+                  "probability": 0.08347484299882972
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.20656535190688316,
+                  "probability": 0.10366852615114015
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06550748724228132
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.22901545449179508,
+                  "probability": 0.10897164135839335
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.33956623120612817,
+                  "probability": 0.13931757927411614
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.33956623120612817,
+                  "probability": 0.13931757927411614
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.379970513083694,
+                  "probability": 0.15240529139884287
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06550748724228132,
+                "inspect": 0.3110055784534205,
+                "object_use": 0.10897164135839335,
+                "physical_conflict": 0.15240529139884287,
+                "posture": 0.08347484299882972,
+                "social_communication": 0.13931757927411614,
+                "social_contact": 0.13931757927411614
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {},
+              "S_t": {
+                "fatigue": 0.24350586268458818,
+                "engagement": 0.1750073274937086,
+                "tension": 0.26950829882229554
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.2313242211329035,
+                "engagement": 0.16950571544509271,
+                "tension": 0.23899680503428233
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.20676555185447132,
+                  "probability": 0.10404206112446522
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.20676555185447132,
+                  "probability": 0.10404206112446522
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10826739859477164,
+                  "probability": 0.08358887743868378
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.20676555185447132,
+                  "probability": 0.10404206112446522
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06571427958447354
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2291386318707026,
+                  "probability": 0.10934556701220467
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3391062377078824,
+                  "probability": 0.13961458532508056
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3391062377078824,
+                  "probability": 0.13961458532508056
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.3713813367836175,
+                  "probability": 0.14999592194108124
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06571427958447354,
+                "inspect": 0.31212618337339565,
+                "object_use": 0.10934556701220467,
+                "physical_conflict": 0.14999592194108124,
+                "posture": 0.08358887743868378,
+                "social_communication": 0.13961458532508056,
+                "social_contact": 0.13961458532508056
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {},
+              "S_t": {
+                "fatigue": 0.2313242211329035,
+                "engagement": 0.16950571544509271,
+                "tension": 0.23899680503428233
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.2225534392156905,
+                "engagement": 0.1652144580471723,
+                "tension": 0.21397738012811152
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.2068357541508014,
+                  "probability": 0.10434297215851841
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.2068357541508014,
+                  "probability": 0.10434297215851841
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10768852698823557,
+                  "probability": 0.0837098046517605
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.2068357541508014,
+                  "probability": 0.10434297215851841
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06589405818207449
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.22914875656346181,
+                  "probability": 0.10964717736602653
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3386614891164621,
+                  "probability": 0.13985824308083356
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3386614891164621,
+                  "probability": 0.13985824308083356
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.3641346157828974,
+                  "probability": 0.14800355716291616
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06589405818207449,
+                "inspect": 0.31302891647555525,
+                "object_use": 0.10964717736602653,
+                "physical_conflict": 0.14800355716291616,
+                "posture": 0.0837098046517605,
+                "social_communication": 0.13985824308083356,
+                "social_contact": 0.13985824308083356
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {},
+              "S_t": {
+                "fatigue": 0.2225534392156905,
+                "engagement": 0.1652144580471723,
+                "tension": 0.21397738012811152
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.21623847623529718,
+                "engagement": 0.1618672772767944,
+                "tension": 0.19346145170505144
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.206828625304731,
+                  "probability": 0.10458581645339356
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.206828625304731,
+                  "probability": 0.10458581645339356
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10727173943152961,
+                  "probability": 0.08382827996555972
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.206828625304731,
+                  "probability": 0.10458581645339356
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06604846410202295
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.22909476718660612,
+                  "probability": 0.10989092245469677
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3382526985779463,
+                  "probability": 0.14005867481625509
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3382526985779463,
+                  "probability": 0.14005867481625509
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.35804867279599095,
+                  "probability": 0.14635753448502964
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06604846410202295,
+                "inspect": 0.3137574493601807,
+                "object_use": 0.10989092245469677,
+                "physical_conflict": 0.14635753448502964,
+                "posture": 0.08382827996555972,
+                "social_communication": 0.14005867481625509,
+                "social_contact": 0.14005867481625509
+              },
+              "top_action": "hit:friend"
+            },
+            {
+              "X_t": {},
+              "S_t": {
+                "fatigue": 0.21623847623529718,
+                "engagement": 0.1618672772767944,
+                "tension": 0.19346145170505144
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.21169170288941397,
+                "engagement": 0.15925647627589962,
+                "tension": 0.1766383903981422
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.20677850642600645,
+                  "probability": 0.10478213671392378
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.20677850642600645,
+                  "probability": 0.10478213671392378
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10697165239070133,
+                  "probability": 0.08393899602339211
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.20677850642600645,
+                  "probability": 0.10478213671392378
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06617981546422383
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.22900809709386905,
+                  "probability": 0.1100882587693605
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3378892835791144,
+                  "probability": 0.1402239221399344
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3378892835791144,
+                  "probability": 0.1402239221399344
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.35295709165495726,
+                  "probability": 0.14499867532138347
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06617981546422383,
+                "inspect": 0.31434641014177134,
+                "object_use": 0.1100882587693605,
+                "physical_conflict": 0.14499867532138347,
+                "posture": 0.08393899602339211,
+                "social_communication": 0.1402239221399344,
+                "social_contact": 0.1402239221399344
+              },
+              "top_action": "hit:friend"
+            }
+          ]
+        }
+      ],
+      "checks": {
+        "support_fixed": true,
+        "tension_builds": true,
+        "tension_decays": true,
+        "tension_relaxation_build": {
+          "values": [
+            0.2711,
+            0.32940200000000003,
+            0.37720964,
+            0.4164119048,
+            0.448557761936,
+            0.47491736478752
+          ],
+          "step_deltas": [
+            0.05830200000000002,
+            0.047807639999999985,
+            0.0392022648,
+            0.03214585713599999,
+            0.026359602851520003
+          ],
+          "same_direction": true,
+          "step_magnitude_nonincreasing": true,
+          "overshoot_absent": true,
+          "half_life_steps_to_trajectory_midpoint": 2,
+          "pass": true
+        },
+        "tension_relaxation_decay": {
+          "values": [
+            0.4074322391257664,
+            0.35209443608312846,
+            0.30671743758816533,
+            0.26950829882229554,
+            0.23899680503428233,
+            0.21397738012811152,
+            0.19346145170505144,
+            0.1766383903981422
+          ],
+          "step_deltas": [
+            -0.05533780304263797,
+            -0.04537699849496313,
+            -0.03720913876586979,
+            -0.03051149378801321,
+            -0.025019424906170817,
+            -0.020515928423060076,
+            -0.01682306130690925
+          ],
+          "same_direction": true,
+          "step_magnitude_nonincreasing": true,
+          "overshoot_absent": true,
+          "half_life_steps_to_trajectory_midpoint": 3,
+          "pass": true
+        },
+        "conflict_mass_rises_on_build": true,
+        "conflict_mass_returns_on_decay": true,
+        "cross_effect_fatigue_reported": true,
+        "all_pass": true
+      },
+      "cross_effects": {
+        "fatigue": {
+          "values": [
+            0.2864,
+            0.312608,
+            0.33147776,
+            0.34506398720000003,
+            0.35484607078400004,
+            0.36188917096448003,
+            0.3165602030944256,
+            0.28392334622798643,
+            0.26042480928415024,
+            0.24350586268458818,
+            0.2313242211329035,
+            0.2225534392156905,
+            0.21623847623529718,
+            0.21169170288941397
+          ],
+          "net_change": -0.07470829711058602
+        },
+        "engagement": {
+          "values": [
+            0.384,
+            0.33252,
+            0.2923656,
+            0.261045168,
+            0.23661523103999998,
+            0.21755988021119999,
+            0.20269670656473598,
+            0.19110343112049408,
+            0.18206067627398537,
+            0.1750073274937086,
+            0.16950571544509271,
+            0.1652144580471723,
+            0.1618672772767944,
+            0.15925647627589962
+          ],
+          "net_change": -0.2247435237241004
+        },
+        "tension": {
+          "values": [
+            0.2711,
+            0.32940200000000003,
+            0.37720964,
+            0.4164119048,
+            0.448557761936,
+            0.47491736478752,
+            0.4074322391257664,
+            0.35209443608312846,
+            0.30671743758816533,
+            0.26950829882229554,
+            0.23899680503428233,
+            0.21397738012811152,
+            0.19346145170505144,
+            0.1766383903981422
+          ],
+          "net_change": -0.09446160960185782
+        }
+      }
+    },
+    {
+      "trajectory": "rest_recovery",
+      "phases": [
+        {
+          "phase": "recovery",
+          "steps": [
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.25,
+                "engagement": 0.45,
+                "tension": 0.2
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.18,
+                "engagement": 0.384,
+                "tension": 0.164
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.260848,
+                  "probability": 0.1047451562741911
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.260848,
+                  "probability": 0.1047451562741911
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.10488,
+                  "probability": 0.07406438343546495
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.260848,
+                  "probability": 0.1047451562741911
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.05866645478192031
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.28622400000000003,
+                  "probability": 0.11082156973051972
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.418928,
+                  "probability": 0.14883215668462726
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.418928,
+                  "probability": 0.14883215668462726
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.40578400000000003,
+                  "probability": 0.14454780986026713
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.05866645478192031,
+                "inspect": 0.3142354688225733,
+                "object_use": 0.11082156973051972,
+                "physical_conflict": 0.14454780986026713,
+                "posture": 0.07406438343546495,
+                "social_communication": 0.14883215668462726,
+                "social_contact": 0.14883215668462726
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.18,
+                "engagement": 0.384,
+                "tension": 0.164
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.1296,
+                "engagement": 0.33252,
+                "tension": 0.13448000000000002
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.25524352,
+                  "probability": 0.10524304957704106
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.25524352,
+                  "probability": 0.10524304957704106
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.1015536,
+                  "probability": 0.07479412039556702
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.25524352,
+                  "probability": 0.10524304957704106
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.05968403778647564
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2798988,
+                  "probability": 0.11117015374540956
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.40714592,
+                  "probability": 0.14750075906913462
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.40714592,
+                  "probability": 0.14750075906913462
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.39515104,
+                  "probability": 0.1436210212031554
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.05968403778647564,
+                "inspect": 0.3157291487311232,
+                "object_use": 0.11117015374540956,
+                "physical_conflict": 0.1436210212031554,
+                "posture": 0.07479412039556702,
+                "social_communication": 0.14750075906913462,
+                "social_contact": 0.14750075906913462
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.1296,
+                "engagement": 0.33252,
+                "tension": 0.13448000000000002
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.09331199999999999,
+                "engagement": 0.2923656,
+                "tension": 0.11027360000000001
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.2505164032,
+                  "probability": 0.10563551135293091
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.2505164032,
+                  "probability": 0.10563551135293091
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.09915859199999999,
+                  "probability": 0.07546310829172363
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.2505164032,
+                  "probability": 0.10563551135293091
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.060539223559959186
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2746095216,
+                  "probability": 0.11144540832924572
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3976002752,
+                  "probability": 0.1464739570945944
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3976002752,
+                  "probability": 0.1464739570945944
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.3858469696,
+                  "probability": 0.14269781157108993
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.060539223559959186,
+                "inspect": 0.3169065340587927,
+                "object_use": 0.11144540832924572,
+                "physical_conflict": 0.14269781157108993,
+                "posture": 0.07546310829172363,
+                "social_communication": 0.1464739570945944,
+                "social_contact": 0.1464739570945944
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.09331199999999999,
+                "engagement": 0.2923656,
+                "tension": 0.11027360000000001
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.06718463999999999,
+                "engagement": 0.261045168,
+                "tension": 0.09042435200000001
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.246573203968,
+                  "probability": 0.10594562682174695
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.246573203968,
+                  "probability": 0.10594562682174695
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.09743418624,
+                  "probability": 0.0760587424418408
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.246573203968,
+                  "probability": 0.10594562682174695
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.0612513294644828
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.27022783632,
+                  "probability": 0.11166372032562258
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.389898624128,
+                  "probability": 0.14568211328781056
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.389898624128,
+                  "probability": 0.14568211328781056
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.377824076416,
+                  "probability": 0.14182510072719182
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.0612513294644828,
+                "inspect": 0.31783688046524083,
+                "object_use": 0.11166372032562258,
+                "physical_conflict": 0.14182510072719182,
+                "posture": 0.0760587424418408,
+                "social_communication": 0.14568211328781056,
+                "social_contact": 0.14568211328781056
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.06718463999999999,
+                "engagement": 0.261045168,
+                "tension": 0.09042435200000001
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.048372940799999986,
+                "engagement": 0.23661523103999998,
+                "tension": 0.07414796864
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.24331315391487998,
+                  "probability": 0.10619130053617058
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.24331315391487998,
+                  "probability": 0.10619130053617058
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.0961926140928,
+                  "probability": 0.07657783362917038
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.24331315391487998,
+                  "probability": 0.10619130053617058
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06183974569771487
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.26662576714944,
+                  "probability": 0.11183761987996448
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.38370698163968,
+                  "probability": 0.14507175374432943
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.38370698163968,
+                  "probability": 0.14507175374432943
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.37098353108223997,
+                  "probability": 0.14102739169597964
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06183974569771487,
+                "inspect": 0.31857390160851173,
+                "object_use": 0.11183761987996448,
+                "physical_conflict": 0.14102739169597964,
+                "posture": 0.07657783362917038,
+                "social_communication": 0.14507175374432943,
+                "social_contact": 0.14507175374432943
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.048372940799999986,
+                "engagement": 0.23661523103999998,
+                "tension": 0.07414796864
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.034828517375999984,
+                "engagement": 0.21755988021119999,
+                "tension": 0.0608013342848
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.24063757952389123,
+                  "probability": 0.10638642983321996
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.24063757952389123,
+                  "probability": 0.10638642983321996
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.095298682146816,
+                  "probability": 0.07702289398235164
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.24063757952389123,
+                  "probability": 0.10638642983321996
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06232283259125862
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.263683417846848,
+                  "probability": 0.11197672124477069
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3787447651492352,
+                  "probability": 0.14460167401971447
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3787447651492352,
+                  "probability": 0.14460167401971447
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.3652026452683264,
+                  "probability": 0.14031491464253026
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06232283259125862,
+                "inspect": 0.3191592894996599,
+                "object_use": 0.11197672124477069,
+                "physical_conflict": 0.14031491464253026,
+                "posture": 0.07702289398235164,
+                "social_communication": 0.14460167401971447,
+                "social_contact": 0.14460167401971447
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.034828517375999984,
+                "engagement": 0.21755988021119999,
+                "tension": 0.0608013342848
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.025076532510719986,
+                "engagement": 0.20269670656473598,
+                "tension": 0.049857094113536005
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.2384550620472402,
+                  "probability": 0.10654181435883056
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.2384550620472402,
+                  "probability": 0.10654181435883056
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.09465505114570752,
+                  "probability": 0.07739962622112824
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.2384550620472402,
+                  "probability": 0.10654181435883056
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06271730418022774
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2612928159391465,
+                  "probability": 0.11208842798823444
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.3747786668350085,
+                  "probability": 0.1442400427323427
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.3747786668350085,
+                  "probability": 0.1442400427323427
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.36035187261406104,
+                  "probability": 0.13968911306923243
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06271730418022774,
+                "inspect": 0.31962544307649166,
+                "object_use": 0.11208842798823444,
+                "physical_conflict": 0.13968911306923243,
+                "posture": 0.07739962622112824,
+                "social_communication": 0.1442400427323427,
+                "social_contact": 0.1442400427323427
+              },
+              "top_action": "talk:friend"
+            },
+            {
+              "X_t": {
+                "recovery_cue": 0.9
+              },
+              "S_t": {
+                "fatigue": 0.025076532510719986,
+                "engagement": 0.20269670656473598,
+                "tension": 0.049857094113536005
+              },
+              "S_t_plus_1": {
+                "fatigue": 0.01805510340771839,
+                "engagement": 0.19110343112049408,
+                "tension": 0.04088281717309952
+              },
+              "pi_t": [
+                {
+                  "action_id": "inspect:desk",
+                  "action": "inspect desk",
+                  "semantic_family": "inspect",
+                  "score": 0.236683888410243,
+                  "probability": 0.10666586079998301
+                },
+                {
+                  "action_id": "inspect:stool",
+                  "action": "inspect stool",
+                  "semantic_family": "inspect",
+                  "score": 0.236683888410243,
+                  "probability": 0.10666586079998301
+                },
+                {
+                  "action_id": "sit:stool",
+                  "action": "sit stool",
+                  "semantic_family": "posture",
+                  "score": 0.09419163682490941,
+                  "probability": 0.07771526541230893
+                },
+                {
+                  "action_id": "inspect:book",
+                  "action": "inspect book",
+                  "semantic_family": "inspect",
+                  "score": 0.236683888410243,
+                  "probability": 0.10666586079998301
+                },
+                {
+                  "action_id": "take:book",
+                  "action": "take book",
+                  "semantic_family": "acquisition",
+                  "score": 0.0,
+                  "probability": 0.06303795186872362
+                },
+                {
+                  "action_id": "use:book",
+                  "action": "use book",
+                  "semantic_family": "object_use",
+                  "score": 0.2593593364459299,
+                  "probability": 0.11217846455130398
+                },
+                {
+                  "action_id": "talk:friend",
+                  "action": "talk friend",
+                  "semantic_family": "social_communication",
+                  "score": 0.37161630014470226,
+                  "probability": 0.14396222747295317
+                },
+                {
+                  "action_id": "hug:friend",
+                  "action": "hug friend",
+                  "semantic_family": "social_contact",
+                  "score": 0.37161630014470226,
+                  "probability": 0.14396222747295317
+                },
+                {
+                  "action_id": "hit:friend",
+                  "action": "hit friend",
+                  "semantic_family": "physical_conflict",
+                  "score": 0.3563049618676326,
+                  "probability": 0.13914628082180808
+                }
+              ],
+              "family_mass": {
+                "acquisition": 0.06303795186872362,
+                "inspect": 0.319997582399949,
+                "object_use": 0.11217846455130398,
+                "physical_conflict": 0.13914628082180808,
+                "posture": 0.07771526541230893,
+                "social_communication": 0.14396222747295317,
+                "social_contact": 0.14396222747295317
+              },
+              "top_action": "talk:friend"
+            }
+          ]
+        }
+      ],
+      "checks": {
+        "support_fixed": true,
+        "fatigue_recovers": true,
+        "tension_recovers": true,
+        "fatigue_relaxation": {
+          "values": [
+            0.18,
+            0.1296,
+            0.09331199999999999,
+            0.06718463999999999,
+            0.048372940799999986,
+            0.034828517375999984,
+            0.025076532510719986,
+            0.01805510340771839
+          ],
+          "step_deltas": [
+            -0.0504,
+            -0.036288,
+            -0.026127360000000002,
+            -0.018811699200000004,
+            -0.013544423424000002,
+            -0.009751984865279999,
+            -0.007021429103001596
+          ],
+          "same_direction": true,
+          "step_magnitude_nonincreasing": true,
+          "overshoot_absent": true,
+          "half_life_steps_to_trajectory_midpoint": 2,
+          "pass": true
+        },
+        "tension_relaxation": {
+          "values": [
+            0.164,
+            0.13448000000000002,
+            0.11027360000000001,
+            0.09042435200000001,
+            0.07414796864,
+            0.0608013342848,
+            0.049857094113536005,
+            0.04088281717309952
+          ],
+          "step_deltas": [
+            -0.02951999999999999,
+            -0.024206400000000003,
+            -0.019849248,
+            -0.016276383360000007,
+            -0.013346634355200004,
+            -0.010944240171263997,
+            -0.008974276940436482
+          ],
+          "same_direction": true,
+          "step_magnitude_nonincreasing": true,
+          "overshoot_absent": true,
+          "half_life_steps_to_trajectory_midpoint": 3,
+          "pass": true
+        },
+        "all_pass": true
+      },
+      "cross_effects": {
+        "fatigue": {
+          "values": [
+            0.18,
+            0.1296,
+            0.09331199999999999,
+            0.06718463999999999,
+            0.048372940799999986,
+            0.034828517375999984,
+            0.025076532510719986,
+            0.01805510340771839
+          ],
+          "net_change": -0.16194489659228162
+        },
+        "engagement": {
+          "values": [
+            0.384,
+            0.33252,
+            0.2923656,
+            0.261045168,
+            0.23661523103999998,
+            0.21755988021119999,
+            0.20269670656473598,
+            0.19110343112049408
+          ],
+          "net_change": -0.19289656887950593
+        },
+        "tension": {
+          "values": [
+            0.164,
+            0.13448000000000002,
+            0.11027360000000001,
+            0.09042435200000001,
+            0.07414796864,
+            0.0608013342848,
+            0.049857094113536005,
+            0.04088281717309952
+          ],
+          "net_change": -0.12311718282690048
+        }
+      }
+    }
+  ],
+  "invariants": {
+    "A_O_fixed": true,
+    "A_star_read": false,
+    "P_fixed": true,
+    "new_state_fields": false,
+    "formal_prediction": false,
+    "cross_effects_reported": true
+  }
+}

@@ -14,6 +14,17 @@
 
 **受限 dev 资产，不能作为已通过研究准入的真人行为 benchmark。** 数据结构能支持字段映射，但 actor、角色可见信息和环境 world state 的时间对齐仍需人工 semantic audit；当前 `W`、state label、timestamp 保持 unknown。候选列表仅按 source 的 `available_actions` 记录为 observed，不等同于角色实际可知集合 `A^O`。
 
+### Blind semantic admission 50（2026-09-07）
+
+已生成固定、model-blind 的 50 条跨 trajectory source package：
+`outputs/external_assets_2026-09-06/LIGHT/light_semantic_admission_blind50_20260907.csv`，以及可直接交给独立 LLM 填写的
+`light_semantic_admission_blind50_20260907_for_external_llm.md`。
+此前的 `*.reviewed.csv` / `*.readout.md` 只是 AI source-only diagnostic，不是人工 semantic admission，不能作为准入证据，也不应提供给独立 reviewer 作为输入。候选集仍只被定义为 observed-source candidate set，未据此宣称 `A^O` 已验证。
+
+### Full semantic annotation shards（2026-09-07）
+
+全量 mechanism-dev cohort 已按 source-only 当前步证据切成 **24,999 rows / 500 shards × 50**；协议见 `full_semantic_annotation_20260907_v1/protocol.md`，输入位于同目录 `shards/`。输入不包含 previous/future step、Run1–4 结果或其他 reviewer 输出；reviewer 只返回紧凑 JSONL 标签，逐 shard 校验后追加落盘，便于断点续跑。3×20 smoke 也已生成并通过结构检查。
+
 复现：
 
 ```powershell
