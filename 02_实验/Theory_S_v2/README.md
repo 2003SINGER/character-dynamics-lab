@@ -27,6 +27,18 @@ The action side directly reuses `Replay/replay_features_v1.py::FEATURE_NAMES`
 
 `z_t(a) = theta^T f_t(a) + S_t^T W f_t(a)`.
 
+In the implementation the state term is centered as `S_t - sigmoid(b)`. A
+field at its own neutral equilibrium therefore contributes zero state
+modulation and cannot silently re-fit a static action preference already owned
+by `theta`.
+
+State identity is protected only by a small soft semantic prior: effort and
+recovery anchor fatigue, negative and recovery anchor tension, and goal,
+positive, and social cues anchor engagement. Uncertain edges remain free. This
+is regularization metadata, not a hard topology or a claim that the literature
+dictates a sparse matrix; its weight is chosen only by a future protocol via
+`semantic_anchor_loss`.
+
 Candidate sets and support are upstream. The module receives O/P-derived
 candidate feature vectors and never reads source candidates or A*. P remains
 fixed in Paper-0; it enters through the stable/base preference interface and is
@@ -40,10 +52,14 @@ candidate set (`z_base = theta^T f`). Phase B freezes `theta` and fits `b`,
 candidate-set NLL. This is the multi-dimensional, end-to-end continuation of
 the earlier frozen-`theta_0` Run2 probe. Current-A* is revealed only after
 `X_t = Appraise(O_(t-1), A_(t-1), O_t)`, `S_t`, and policy logits are formed.
+Any semantic-anchor weight must be pre-registered on development data; the
+smoke uses `0.05` only as a regression fixture, not as a scientific setting.
 
 The synthetic smoke is only a regression: 10 time steps, four candidates per
 decision, multinomial NLL, multi-step backpropagation, Phase-B theta freezing,
-state bounds, and a short optimizer decrease. It is not development training.
+state bounds, b-gradient, and a short optimizer decrease. Tests additionally
+cover Phase-A theta-only updates, gold-boundary separation, and trajectory
+reset. It is not development training.
 
 ## Constraints and controls
 

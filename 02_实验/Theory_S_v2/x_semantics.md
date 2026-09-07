@@ -21,3 +21,9 @@ situation and available opportunities; it has no built-in positive valence.
 urgency. Field semantics are project definitions; the relaxation family is
 literature-motivated; numerical parameters are learned; predictive validity is
 not established.
+
+The implementation uses only soft identity anchors for a few relatively
+determinate relations (`effort/recovery → fatigue`, `negative/recovery →
+tension`, and `goal/positive/social → engagement`). These regularize state
+identity without turning uncertain edges into hard zeros or claiming a
+literature-derived topology.

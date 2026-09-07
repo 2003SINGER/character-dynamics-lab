@@ -6,7 +6,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| M1 | 进行中 | 维持 Theory-S trainable dynamics candidate；冻结前审查 X/S 语义、初始化和时间尺度 | [Theory-S v2](../02_实验/Theory_S_v2/README.md)；不得把候选实现写成心理学验证 |
+| M1 | 进行中（pre-training gate） | 冻结 Theory-S 前审查 X/S 语义、soft identity anchors、neutral-centered readout、初始化和时间尺度；完成后停止机制开发 | [Theory-S v2](../02_实验/Theory_S_v2/README.md)；不得把候选实现写成心理学验证 |
 | M2 | 进行中 | 完善 SceneSnapshot → affordance → generated `A^O` 的最小 ontology 与实例绑定 | 生成不读 source `A*`；source support 仅 post-hoc 诊断；[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md) |
 | M3 | 进行中 | 按 owner audit 完成数据集语义准入，而非继续扩张 routing 表 | [capability matrix](../02_实验/Theory_S_v2/capability_matrix.md)；proxy/telemetry 不升级为 A* |
 | T0d | 进行中 | 完成 OPeRA semantic admission；冻结 user/session-disjoint split 与第一轮标签口径 | 通过 O/action/candidate/provenance 审计后才可 pilot；[OPeRA README](../02_实验/T0d_OPeRA/README.md) |

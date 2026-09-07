@@ -20,6 +20,12 @@ FEATURE_NAMES = ("goal_progress", "stimulation", "recovery", "hunger_relief",
                  "context_relevance", "has_target", "target_in_scene",
                  "target_visible_in_O", "target_in_inventory", "repeated_acquire")
 FEATURE_VERSION = "replay-raw-features-v1"
+# Soft semantic identity anchors.  Zero means uncertain/free, not fixed zero.
+SEMANTIC_SIGN_PRIOR = torch.tensor([
+    [1, 0, 0, 0, 0, -1],  # fatigue: effort up, recovery down
+    [0, 1, 1, 0, 1, 0],   # engagement: goal/positive/social involvement
+    [0, 0, 0, 1, 0, -1],  # tension: negative up, recovery down
+], dtype=torch.float32)
 
 
 @dataclass(frozen=True)
@@ -51,6 +57,7 @@ class TheoryS(nn.Module):
         a = min(max(float(self.config.alpha_init), 1e-4), 1 - 1e-4)
         self.alpha_raw = nn.Parameter(torch.full((3,), torch.logit(torch.tensor(a))))
         self.w_sa = nn.Parameter(torch.zeros(3, d))
+        self.register_buffer("semantic_sign_prior", SEMANTIC_SIGN_PRIOR.clone())
 
     @property
     def alpha(self) -> Tensor:
@@ -59,6 +66,11 @@ class TheoryS(nn.Module):
     @property
     def eta(self) -> Tensor:
         return 1.0 - self.alpha
+
+    @property
+    def neutral_state(self) -> Tensor:
+        """Field-specific equilibrium used to center the behavioral modulation."""
+        return torch.sigmoid(self.b)
 
     def transition(self, state: Tensor, x: Tensor) -> Tensor:
         """S_t = alpha*S_(t-1) + (1-alpha)*sigmoid(b + beta*X_t)."""
@@ -73,8 +85,15 @@ class TheoryS(nn.Module):
         if state.shape[-1] != 3 or candidate_features.shape[-1] != len(FEATURE_NAMES):
             raise ValueError("state/features do not match the v1 replay contract")
         base = candidate_features @ self.theta
-        coupling = torch.einsum("bs,sd,bkd->bk", state, self.w_sa, candidate_features)
+        centered_state = state - self.neutral_state
+        coupling = torch.einsum("bs,sd,bkd->bk", centered_state, self.w_sa, candidate_features)
         return base + coupling if z_base is None else z_base + coupling
+
+    def semantic_anchor_loss(self, margin: float = 0.05) -> Tensor:
+        """Soft sign prior: anchors identity without making uncertain edges hard zeros."""
+        known = self.semantic_sign_prior != 0
+        signed = self.semantic_sign_prior * self.beta
+        return F.relu(torch.as_tensor(margin, device=self.beta.device, dtype=self.beta.dtype) - signed[known]).pow(2).mean()
 
     def conditional_nll(self, state: Tensor, candidate_features: Tensor,
                         gold_index: Tensor, z_base: Tensor | None = None) -> Tensor:
@@ -104,7 +123,7 @@ class TheoryS(nn.Module):
 
 def unroll(model: TheoryS, initial_state: Tensor, x_sequence: Tensor,
            candidate_features: Tensor, gold_index: Tensor,
-           detach_state: bool = False) -> tuple[Tensor, Tensor]:
+           detach_state: bool = False, semantic_anchor_weight: float = 0.0) -> tuple[Tensor, Tensor]:
     """Unroll [time,batch,*] and sum candidate-set NLL over time."""
     state = initial_state
     losses = []
@@ -115,7 +134,10 @@ def unroll(model: TheoryS, initial_state: Tensor, x_sequence: Tensor,
             state = state.detach()
         states.append(state)
         losses.append(model.conditional_nll(state, candidate_features[t], gold_index[t]))
-    return torch.stack(states), torch.stack(losses).sum()
+    total = torch.stack(losses).sum()
+    if semantic_anchor_weight:
+        total = total + float(semantic_anchor_weight) * model.semantic_anchor_loss()
+    return torch.stack(states), total
 
 
 def synthetic_gradient_smoke(seed: int = 7, steps: int = 10) -> dict[str, object]:
@@ -128,21 +150,23 @@ def synthetic_gradient_smoke(seed: int = 7, steps: int = 10) -> dict[str, object
     features = torch.rand(t, batch, candidates, d)
     gold = torch.randint(0, candidates, (t, batch))
     initial = torch.full((batch, 3), .2)
-    before_states, before_loss = unroll(model, initial, x, features, gold)
+    anchor_weight = 0.05
+    before_states, before_loss = unroll(model, initial, x, features, gold, semantic_anchor_weight=anchor_weight)
     optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad], lr=0.08)
     for _ in range(8):
-        optim.zero_grad(); _, loss = unroll(model, initial, x, features, gold); loss.backward(); optim.step()
-    after_states, after_loss = unroll(model, initial, x, features, gold)
-    optim.zero_grad(); _, final_loss = unroll(model, initial, x, features, gold); final_loss.backward()
+        optim.zero_grad(); _, loss = unroll(model, initial, x, features, gold, semantic_anchor_weight=anchor_weight); loss.backward(); optim.step()
+    after_states, after_loss = unroll(model, initial, x, features, gold, semantic_anchor_weight=anchor_weight)
+    optim.zero_grad(); _, final_loss = unroll(model, initial, x, features, gold, semantic_anchor_weight=anchor_weight); final_loss.backward()
     grad_norms = {name: float(param.grad.norm()) for name, param in
-                  (("beta", model.beta), ("alpha", model.alpha_raw), ("w_sa", model.w_sa))}
+                  (("b", model.b), ("beta", model.beta), ("alpha", model.alpha_raw), ("w_sa", model.w_sa))}
     assert float(after_loss.detach()) < float(before_loss.detach())
     assert bool(torch.all((after_states >= 0) & (after_states <= 1)))
     assert all(value > 0 for value in grad_norms.values())
     assert model.theta.grad is None
     return {"initial_nll": float(before_loss.detach()), "final_nll": float(after_loss.detach()),
             "gradient_path": grad_norms, "bounded_state": True, "candidate_nll": True,
-            "multi_step": True, "theta_frozen_in_phase_b": True}
+            "multi_step": True, "theta_frozen_in_phase_b": True,
+            "semantic_anchor_weight": anchor_weight}
 
 
 if __name__ == "__main__":
