@@ -52,8 +52,13 @@ def _relaxation_check(rows: list[dict], field: str) -> dict:
     direction = 1 if sum(deltas) >= 0 else -1
     same_direction = all(direction * delta >= -1e-10 for delta in deltas)
     shrinking = all(b <= a + 1e-10 for a, b in zip(nonzero, nonzero[1:])) if len(nonzero) > 1 else True
+    midpoint = values[0] + 0.5 * (values[-1] - values[0])
+    half_life = next((index for index, value in enumerate(values)
+                      if direction * (value - midpoint) >= -1e-10), None)
     return {"values": values, "step_deltas": deltas, "same_direction": same_direction,
-            "step_magnitude_nonincreasing": shrinking, "pass": same_direction and shrinking}
+            "step_magnitude_nonincreasing": shrinking, "overshoot_absent": same_direction,
+            "half_life_steps_to_trajectory_midpoint": half_life,
+            "pass": same_direction and shrinking and half_life is not None}
 
 
 def _phase_rows(state: TheoryState, xs: list[dict[str, float]], candidates: list[dict]) -> tuple[list[dict], TheoryState]:
