@@ -2,9 +2,15 @@
 
 > 2026-09-06 代码结构审计后的实验化边界：`prepare_decision` 已与 `settle_action` 分开，运行轨迹记录统一命名为 `StepRecord`；`FactKey` 与 `known_int/known_bool` 已提供最小 typed 读取。World/Decision/State 暂不做大拆分；verify/E0 的物理 tests/experiments 目录迁移留到真实 replay 需要时再做，不阻塞 T0d。
 
-更新时间：2026-09-06
+更新时间：2026-09-07（Run 4 后复核）
 
 这是唯一行动清单，不保存整篇设计论证。“待决策”不等于授权实现；以下次序是依赖建议，没有新增用户 deadline。代码项仅在其边界、验收和实际状态可复核时更新。
+
+## 本轮 development diagnostic 封口
+
+- [x] T14/T20 development chain：Run 1 full-refit、Run 1b frozen-model intervention、Run 2 frozen-`theta_0` incremental、Run 3 trajectory bootstrap、Run 3b permutation-assignment robustness、Run 4 Theory failure decomposition 均已完成并推送。该链只支持当前 LIGHT development cohort 下的结构诊断，不等于独立行为真值上的 formal result。
+- [ ] Run 4 后停止继续围绕 Theory-S 加诊断、调 `eta`、扩 coverage 或修改 representation；除非重新明确母问题与验收标准。
+- [ ] 下一阶段回到 Paper-0 的 Experiment B：独立 `A*` 准入后，比较 `S` 与 raw legal history / structured history / strong summary，并报告 `S + history` residual gain。
 
 ## 本轮完成
 
