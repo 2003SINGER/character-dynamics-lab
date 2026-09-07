@@ -16,11 +16,10 @@
 
 ### Blind semantic admission 50（2026-09-07）
 
-已生成固定、model-blind 的 50 条跨 trajectory 审阅包：
-`outputs/external_assets_2026-09-06/LIGHT/light_semantic_admission_blind50_20260907.csv`。
-source-only 人工复核读出见同目录的
-`light_semantic_admission_blind50_20260907.readout.md`；结果为 ADMIT 44、AMBIGUOUS 6、REJECT 0。
-6 条 ambiguity 均因 A* 依赖 `source_O` 未显式观察到的实体或 malformed/underspecified relation；候选集只被判为 observed-source candidate set，未据此宣称 `A^O` 已验证。下一步可按同一标准扩展到 blind 300。
+已生成固定、model-blind 的 50 条跨 trajectory source package：
+`outputs/external_assets_2026-09-06/LIGHT/light_semantic_admission_blind50_20260907.csv`，以及可直接交给独立 LLM 填写的
+`light_semantic_admission_blind50_20260907_for_external_llm.md`。
+此前的 `*.reviewed.csv` / `*.readout.md` 只是 AI source-only diagnostic，不是人工 semantic admission，不能作为准入证据，也不应提供给独立 reviewer 作为输入。候选集仍只被定义为 observed-source candidate set，未据此宣称 `A^O` 已验证。
 
 复现：
 
