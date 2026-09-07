@@ -52,7 +52,6 @@ def main():
         correct=[nll(model,r,r["state"]) for r in paired]; zero=[nll(model,r,0.0) for r in paired]; perm=[nll(model,r,donor[(r["trajectory_id"],r["horizon_index"])]) for r in paired]
         # Base no-S is represented by zeroed state in the same paired rows.
         deltas={"zero_minus_correct":trajectory_bootstrap(paired,[z-c for z,c in zip(zero,correct)],SEED,args.replicates),"perm_minus_correct":trajectory_bootstrap(paired,[p-c for p,c in zip(perm,correct)],SEED+1,args.replicates)}
-        if kind=="activity": deltas["activity_incremental_base_minus_correct"]=trajectory_bootstrap(paired,[z-c for z,c in zip(zero,correct)],SEED+2,args.replicates)
         summary[kind]={"paired_rows":len(paired),"deltas":deltas}
     args.output.mkdir(parents=True,exist_ok=True)
     manifest={"schema_version":"character_dynamics_trajectory_bootstrap_manifest_v1","run":"Run 3","fitted":False,"source_run2":str(args.run2_output),"source_replay_sha256":hashlib.sha256(args.replay.read_bytes()).hexdigest(),"split":split,"bootstrap_unit":"trajectory_id","replicates":args.replicates,"seed":SEED,"condition_count":len(KINDS),"git_revision":__import__('subprocess').check_output(["git","rev-parse","HEAD"],text=True).strip(),"runner_sha256":hashlib.sha256(HERE.read_bytes()).hexdigest(),"numpy_version":np.__version__}
