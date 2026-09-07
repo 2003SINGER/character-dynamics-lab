@@ -68,31 +68,37 @@ def _possessions(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
     """Materialize carrying/wearing/wielding as explicit possession records."""
     records: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
-    direct = snapshot.get("possessions") or []
-    for relation, values in [("carrying", direct), ("carrying", snapshot.get("carrying") or []),
-                             ("wearing", snapshot.get("wearing") or []),
-                             ("wielding", snapshot.get("wielding") or [])]:
-        if not isinstance(values, list):
-            values = [values]
-        for index, raw in enumerate(values):
-            item = dict(raw) if isinstance(raw, dict) else {"label": raw}
-            label = item.get("label") or item.get("name") or item.get("item")
-            if not label:
-                continue
-            key = (relation, _bare_label(label))
-            if key in seen:
-                continue
-            seen.add(key)
-            item["id"] = str(item.get("id") or f"possession.{relation}.{index:04d}")
-            item["label"] = str(label)
-            item["kind"] = "object"
-            item["location"] = "carried"
-            item["possession_relation"] = relation
-            item.setdefault("facts", {})
-            item.setdefault("type", "unknown")
-            item.setdefault("description", "")
-            item.setdefault("provenance", {"source_field": relation})
-            records.append(item)
+    def as_list(value: Any) -> list[Any]:
+        if value is None:
+            return []
+        return value if isinstance(value, list) else [value]
+
+    entries: list[tuple[str, Any, int]] = []
+    for index, raw in enumerate(as_list(snapshot.get("possessions"))):
+        relation = str(raw.get("possession_relation") or "carrying") if isinstance(raw, dict) else "carrying"
+        entries.append((relation, raw, index))
+    for relation in ("carrying", "wearing", "wielding"):
+        for index, raw in enumerate(as_list(snapshot.get(relation))):
+            entries.append((relation, raw, index))
+    for relation, raw, index in entries:
+        item = dict(raw) if isinstance(raw, dict) else {"label": raw}
+        label = item.get("label") or item.get("name") or item.get("item")
+        if not label:
+            continue
+        key = (relation, _bare_label(label))
+        if key in seen:
+            continue
+        seen.add(key)
+        item["id"] = str(item.get("id") or f"possession.{relation}.{index:04d}")
+        item["label"] = str(label)
+        item["kind"] = "object"
+        item["location"] = relation
+        item["possession_relation"] = relation
+        item.setdefault("facts", {})
+        item.setdefault("type", "unknown")
+        item.setdefault("description", "")
+        item.setdefault("provenance", {"source_field": relation})
+        records.append(item)
     return records
 
 
@@ -106,6 +112,7 @@ def _aliases(entity: dict[str, Any]) -> set[str]:
 def _evidence(entity: dict[str, Any], source: str, facts: list[str] | None = None) -> dict[str, Any]:
     return {"source": source, "entity_id": entity.get("id"), "label": entity.get("label"),
             "type": entity.get("type", "unknown"), "description": entity.get("description", ""),
+            "possession_relation": entity.get("possession_relation"),
             "facts": dict(entity.get("facts") or {}), "provenance": dict(entity.get("provenance") or {}),
             "matched_facts": list(facts or [])}
 
@@ -180,18 +187,20 @@ def generate_affordances(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
                                     ["agent.visible"], ["appropriateness", "harm", "contact_success"],
                                     "canonical.entities[kind=agent,location=room]"))
     for item in possessions:
-        actions.append(_make_action("drop", item, "release", "O.drop.actor_holds", ["actor.holds(object)"],
-                                    ["drop_success", "destination"], "canonical.possessions", ["possession_relation"]))
-        for agent in visible_agents:
-            actions.append(_record("give", [item, agent], "transfer", "O.give.holds_visible_agent",
-                                   ["actor.holds(object)", "agent.visible"], ["ownership", "consent", "transfer_success"],
-                                   [_evidence(item, "canonical.possessions", ["possession_relation"]),
-                                    _evidence(agent, "canonical.entities[kind=agent]")], [item["id"], agent["id"]]))
-        if _truth(item, "wearable"):
+        relation = item.get("possession_relation", "carrying")
+        if relation == "carrying":
+            actions.append(_make_action("drop", item, "release", "O.drop.actor_holds", ["actor.holds(object)"],
+                                        ["drop_success", "destination"], "canonical.possessions", ["possession_relation"]))
+            for agent in visible_agents:
+                actions.append(_record("give", [item, agent], "transfer", "O.give.holds_visible_agent",
+                                       ["actor.holds(object)", "agent.visible"], ["ownership", "consent", "transfer_success"],
+                                       [_evidence(item, "canonical.possessions", ["possession_relation"]),
+                                        _evidence(agent, "canonical.entities[kind=agent]")], [item["id"], agent["id"]]))
+        if relation == "carrying" and _truth(item, "wearable"):
             actions.append(_make_action("wear", item, "equipment", "O.wear.explicit_wearable",
                                         ["actor.holds(object)", "object.wearable=true"], ["wear_success", "fit"],
                                         "possession.facts.wearable", ["wearable"]))
-        if _truth(item, "wieldable"):
+        if relation == "carrying" and _truth(item, "wieldable"):
             actions.append(_make_action("wield", item, "equipment", "O.wield.explicit_wieldable",
                                         ["actor.holds(object)", "object.wieldable=true"], ["wield_success", "appropriateness"],
                                         "possession.facts.wieldable", ["wieldable"]))

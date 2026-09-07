@@ -30,7 +30,7 @@
 
 ## 3. Development fixtures
 
-fixture 只按 canonical scene 的对象、代理、持有关系和生成候选数选择，不按 `A*` 覆盖率选取。当前 5 个 LIGHT fixtures 的 generated `A^O` 大小为 5–10；均包含 inspect、social communication、social contact、physical conflict，另有 carrying、seat 或 use 的场景。fixture 原始 snapshot 与 generated records 在 [`fixtures.jsonl`](fixtures.jsonl)，每条候选包含 `action_id`、human-readable action、targets、semantic family、rule id、required facts、supporting evidence/provenance 和 unknown preconditions。
+fixture 只按 canonical scene 的对象、代理、持有关系和生成候选数选择，不按 `A*` 覆盖率选取。当前 5 个 LIGHT fixtures 的 generated `A^O` 大小为 5–10；均包含 inspect、social communication、social contact、physical conflict，另有 carrying、seat 或 use 的场景。它们是 **mechanism-enriched engineering sandbox**，并非 LIGHT 的自然代表性样本；强制包含这些 family 会放大 engagement/tension 可见变化，不能外推为一般场景效果。fixture 原始 snapshot 与 generated records 在 [`fixtures.jsonl`](fixtures.jsonl)，每条候选包含 `action_id`、human-readable action、targets、semantic family、rule id、required facts、supporting evidence/provenance 和 unknown preconditions。
 
 ## 4. S intervention
 
@@ -48,7 +48,11 @@ TV 不是唯一成功标准：本轮同时要求方向检查和非微小变化�
 
 ## 5. P/S orthogonality
 
-固定 S 改 `recovery_preference`、`stimulation_seeking`、`threat_sensitivity`，固定 P 改每个 S 字段。两类干预都重新使用同一个 generated `A^O`，并检查 action ids、required facts、对象存在/可见性和 legality 不变；结果也记录每个 `P×S` 的 difference-in-differences interaction。stimulation/threat 在有相应 family 的 fixture 上产生稳定偏好变化；recovery 只有 posture family 存在时才可测试。此处可区分的是“P 调 operator、S 调 transient preference”的工程接口，不是 personality model。
+固定 S 改 `recovery_preference`、`stimulation_seeking`、`threat_sensitivity`，固定 P 改每个 S 字段。两类干预都重新使用同一个 generated `A^O`，并检查 action ids、required facts、对象存在/可见性和 legality 不变；结果也记录每个 `P×S` 的 difference-in-differences interaction。stimulation/threat 在有相应 family 的 fixture 上产生稳定偏好变化；recovery 只有 posture family 存在时才可测试。当前 interaction 指标固定取候选列表首项，只是 plumbing metric，不是预注册的行为目标；未来若研究 P×S，应改按 semantic family、top candidate 或预注册目标行为测量。此处可区分的是“P 调 operator、S 调 transient preference”的工程接口，不是 personality model。
+
+## 5.1 待审计的 semantic coupling
+
+当前 `engagement` 仍通过 stimulation 项影响包含 `physical_conflict` 的候选，而 `tension` 通过 conflict 项影响同一 family。它可以被解释为总体参与/激活，但若把 engagement 定义为目标投入度，则 `engagement ↑ → hit ↑` 可能不合理。该 coupling 保留为 candidate hypothesis，必须在后续 Theory-S semantic audit 中单独审查；本轮不因 top-action flip 漂亮就冻结它。已删除 `inspect → environment_control` 与 `tension → inspect` 的无充分依据映射。
 
 ## 6. LIGHT 当前边界
 

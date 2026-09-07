@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from candidate_generation_v1 import generate_action_candidates, support_diagnostic
+from candidate_generation_v1 import _possessions, generate_action_candidates, support_diagnostic
 from theory_s_v1 import TheoryPersonality, TheoryState, score_candidates
 
 
@@ -33,6 +33,32 @@ class MechanismSanityTests(unittest.TestCase):
         self.assertTrue(all(x["rule_id"] and x["supporting_evidence"] is not None for x in generated))
         self.assertTrue(any(x["action"].startswith("drop red brick") for x in generated))
         self.assertTrue(any(x["action"].startswith("give red brick to fairy") for x in generated))
+
+    def test_wearing_and_wielding_relations_are_not_recast_as_carrying(self):
+        scene = snapshot()
+        scene["possessions"] = [
+            {"id": "coat", "label": "a coat", "possession_relation": "wearing",
+             "facts": {"wearable": True}},
+            {"id": "sword", "label": "a sword", "possession_relation": "wielding",
+             "facts": {"wieldable": True}},
+            {"id": "cloak", "label": "a cloak", "possession_relation": "carrying",
+             "facts": {"wearable": True}},
+        ]
+        scene["wearing"] = [{"id": "coat", "label": "a coat", "facts": {"wearable": True}}]
+        scene["wielding"] = [{"id": "sword", "label": "a sword", "facts": {"wieldable": True}}]
+        generated = generate_action_candidates(scene)
+        actions = {x["action"] for x in generated}
+        self.assertNotIn("drop coat", actions)
+        self.assertNotIn("give coat to fairy", actions)
+        self.assertNotIn("drop sword", actions)
+        self.assertNotIn("give sword to fairy", actions)
+        self.assertIn("wear cloak", actions)
+        equipped = [x for x in generated if x["action"] in {"drop coat", "give coat to fairy", "drop sword", "give sword to fairy"}]
+        self.assertFalse(equipped)
+        relations = {e.get("possession_relation") for e in _possessions(scene)
+                     if e.get("id") in {"coat", "sword"}}
+        self.assertIn("wearing", relations)
+        self.assertIn("wielding", relations)
 
     def test_unknown_portability_does_not_generate_take(self):
         generated = generate_action_candidates(snapshot())
