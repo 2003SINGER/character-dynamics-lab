@@ -14,6 +14,14 @@
 
 **受限 dev 资产，不能作为已通过研究准入的真人行为 benchmark。** 数据结构能支持字段映射，但 actor、角色可见信息和环境 world state 的时间对齐仍需人工 semantic audit；当前 `W`、state label、timestamp 保持 unknown。候选列表仅按 source 的 `available_actions` 记录为 observed，不等同于角色实际可知集合 `A^O`。
 
+### Blind semantic admission 50（2026-09-07）
+
+已生成固定、model-blind 的 50 条跨 trajectory 审阅包：
+`outputs/external_assets_2026-09-06/LIGHT/light_semantic_admission_blind50_20260907.csv`。
+source-only 人工复核读出见同目录的
+`light_semantic_admission_blind50_20260907.readout.md`；结果为 ADMIT 44、AMBIGUOUS 6、REJECT 0。
+6 条 ambiguity 均因 A* 依赖 `source_O` 未显式观察到的实体或 malformed/underspecified relation；候选集只被判为 observed-source candidate set，未据此宣称 `A^O` 已验证。下一步可按同一标准扩展到 blind 300。
+
 复现：
 
 ```powershell
