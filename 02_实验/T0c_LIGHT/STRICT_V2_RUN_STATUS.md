@@ -5,13 +5,13 @@ separate fresh Terra reviewer session; no session processed more than one task.
 The older v1 6,800-row prefix and v2 persistent-session 400-row prefix remain
 diagnostics and are not merged here.
 
-## Checkpoint — 2026-09-07
+## Checkpoint — 2026-09-07 (fresh-session strict run)
 
-- Completed: `task-0001.jsonl`–`task-0003.jsonl`
-- Rows: 60 / 24,999
-- Next task: `task-0004.jsonl`
+- Completed: `task-0001.jsonl`–`task-0006.jsonl`
+- Rows: 120 / 24,999
+- Next task: `task-0007.jsonl`
 - Validation: passed strict v2 schema, exact task order, opaque IDs, and one trajectory per reviewer task.
-- Labels: ADMIT 23; AMBIGUOUS 28; REJECT 9.
+- Labels: ADMIT 64; AMBIGUOUS 46; REJECT 10.
 - Output is model-assisted source semantic annotation, not human audit or final admission mask.
 
 The private opaque-ID mapping and reviewer input shards remain Git-ignored.
