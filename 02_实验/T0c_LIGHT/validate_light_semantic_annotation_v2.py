@@ -13,7 +13,7 @@ OUTPUT_FIELDS = {"review_id", "label", "a_star_alignment", "candidate_usability"
 LABELS = {"ADMIT", "REJECT", "AMBIGUOUS"}
 ALIGNMENTS = {"YES", "NO", "UNCLEAR"}
 USABILITY = {"USABLE", "NOT_USABLE", "UNCLEAR"}
-REASONS = {"ACTION_CANDIDATE_MISMATCH", "ACTOR_ACTION_CONTRADICTION", "MALFORMED_ACTION", "CANDIDATE_SEMANTIC_CONTRADICTION", "CANDIDATE_SET_MALFORMED", "ENTITY_RELATION_UNCLEAR", "ACTOR_VISIBILITY_OR_OWNERSHIP_UNCLEAR", "OBSERVATION_INSUFFICIENT"}
+REASONS = {"ACTION_CANDIDATE_MISMATCH", "ACTOR_ACTION_CONTRADICTION", "MALFORMED_ACTION", "CANDIDATE_SEMANTIC_CONTRADICTION", "CANDIDATE_SET_MALFORMED", "ENTITY_RELATION_UNCLEAR", "ACTOR_VISIBILITY_OR_OWNERSHIP_UNCLEAR", "OBSERVATION_INSUFFICIENT", "ACTION_ENTITY_OR_RELATION_UNOBSERVED"}
 
 
 def read_jsonl(path: Path):
@@ -65,7 +65,7 @@ def main() -> None:
             errors.append(f"line {line_number}: note must be string")
         if row["label"] == "REJECT" and not row["reasons"]:
             errors.append(f"line {line_number}: reject requires reason code")
-        if row["label"] == "AMBIGUOUS" and not any(x in {"ENTITY_RELATION_UNCLEAR", "ACTOR_VISIBILITY_OR_OWNERSHIP_UNCLEAR", "OBSERVATION_INSUFFICIENT"} for x in row["reasons"]):
+        if row["label"] == "AMBIGUOUS" and not any(x in {"ENTITY_RELATION_UNCLEAR", "ACTOR_VISIBILITY_OR_OWNERSHIP_UNCLEAR", "OBSERVATION_INSUFFICIENT", "ACTION_ENTITY_OR_RELATION_UNOBSERVED"} for x in row["reasons"]):
             errors.append(f"line {line_number}: ambiguous requires uncertainty reason")
         counts[row["label"]] += 1
     if ids != expected:

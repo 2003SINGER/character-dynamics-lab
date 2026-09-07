@@ -67,12 +67,53 @@ def opaque_id(source_id: str, secret: str):
     return "r2-" + hashlib.sha256((secret + "\0" + source_id).encode()).hexdigest()[:24]
 
 
+def direct_object(action: str):
+    """Conservative lexical selector for calibration rows, never shown to reviewer."""
+    action = action.strip().casefold()
+    for verb, delimiter in (("steal ", " from "), ("give ", " to "), ("put ", " in ")):
+        if action.startswith(verb) and delimiter in action:
+            return action[len(verb):].split(delimiter, 1)[0].strip()
+    for verb in ("get ", "drop ", "wear ", "remove ", "drink ", "eat "):
+        if action.startswith(verb):
+            return action[len(verb):].strip()
+    return ""
+
+
+def calibration_rows(grouped, total: int, unobserved_count: int, seed: int):
+    rng = random.Random(seed)
+    flat = [row for rows in grouped.values() for row in rows]
+    likely = [row for row in flat if (obj := direct_object(str(row["source_action_A_star"]))) and obj not in str(row["source_O"]).casefold()]
+    rng.shuffle(likely)
+    selected, selected_trajectories = [], set()
+    for row in likely:
+        if row["trajectory_id"] not in selected_trajectories:
+            selected.append(row)
+            selected_trajectories.add(row["trajectory_id"])
+            if len(selected) == unobserved_count:
+                break
+    if len(selected) != unobserved_count:
+        raise ValueError("not enough trajectory-distinct lexical calibration rows")
+    remainder = [row for row in flat if row["trajectory_id"] not in selected_trajectories]
+    rng.shuffle(remainder)
+    for row in remainder:
+        if row["trajectory_id"] not in selected_trajectories:
+            selected.append(row)
+            selected_trajectories.add(row["trajectory_id"])
+            if len(selected) == total:
+                break
+    if len(selected) != total:
+        raise ValueError("not enough trajectory-distinct calibration rows")
+    rng.shuffle(selected)
+    return [selected[start:start + 20] for start in range(0, total, 20)]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("replay", type=Path)
     ap.add_argument("output_dir", type=Path)
     ap.add_argument("--rows-per-shard", type=int, default=20)
     ap.add_argument("--limit-shards", type=int, default=None)
+    ap.add_argument("--calibration-unobserved-rows", type=int, default=0, help="build a 3x20 lexical support calibration set")
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--opaque-secret", required=True, help="kept out of reviewer-visible files")
     args = ap.parse_args()
@@ -82,7 +123,12 @@ def main() -> None:
     shards_dir = args.output_dir / "reviewer_input_shards"
     shards_dir.mkdir(exist_ok=True)
     grouped = load_rows(args.replay)
-    shards = isolate_into_shards(grouped, args.rows_per_shard, args.seed)
+    if args.calibration_unobserved_rows:
+        if args.rows_per_shard != 20 or args.limit_shards not in (None, 3) or not 0 < args.calibration_unobserved_rows < 60:
+            raise SystemExit("calibration mode requires --rows-per-shard 20, exactly 3 tasks, and 1..59 unobserved rows")
+        shards = calibration_rows(grouped, 60, args.calibration_unobserved_rows, args.seed)
+    else:
+        shards = isolate_into_shards(grouped, args.rows_per_shard, args.seed)
     if args.limit_shards is not None:
         shards = shards[:args.limit_shards]
     mapping, review_ids = [], set()
@@ -126,6 +172,7 @@ def main() -> None:
         "row_count": len(mapping),
         "tasks": task_names,
         "trajectory_unique_per_task": True,
+        "calibration_unobserved_rows": args.calibration_unobserved_rows,
         "excluded_from_reviewer_input": ["trajectory_id", "episode_id", "step_index", "t", "previous_step", "future_step", "source_episode_context", "model_results", "other_reviewer_outputs"],
     }
     (args.output_dir / "manifest_v2.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf8")
@@ -148,23 +195,26 @@ be unobserved.
 First label the three required axes. Then choose the row label by the rule
 below; do not use personal or narrative plausibility to create extra evidence.
 
-- `a_star_alignment = YES`: A* has the same action semantics as one candidate,
-  with no explicit contradiction in the visible row. `NO`: no candidate has
-  that action semantics or the row explicitly contradicts it. `UNCLEAR`: the
-  wording/argument relation prevents a reliable semantic comparison.
-- `candidate_usability = USABLE`: the visible finite candidate list can define
-  an observed-source candidate task. `NOT_USABLE`: the list is explicitly
-  malformed, self-contradictory, or cannot define distinct alternatives.
-  `UNCLEAR`: visible wording prevents deciding whether it defines a stable task.
-- `ADMIT`: neither axis is `NO`/`NOT_USABLE`, and there is no explicit actor,
-  action, or source contradiction.
+- `a_star_alignment = YES`: A* has the same action semantics as one candidate
+  **and** its required visible actor, entity, possession, and relation are
+  directly supported by `source_O`. `NO`: no candidate has that action
+  semantics or the row explicitly contradicts it. `UNCLEAR`: A* is a candidate
+  but `source_O` does not establish a needed entity, possession, target, or
+  relation. Do not infer another character's inventory.
+- `candidate_usability = USABLE`: visible evidence supports comparing the
+  candidates as an observed-source candidate task. `NOT_USABLE`: the list is
+  explicitly malformed, self-contradictory, or cannot define alternatives.
+  `UNCLEAR`: material candidates depend on entities, ownership, visibility, or
+  relations not established by `source_O`.
+- `ADMIT`: `a_star_alignment = YES`, `candidate_usability = USABLE`, and no
+  explicit actor, action, or source contradiction.
 - `REJECT`: only for explicit contradiction, malformed action, explicit
   actor-action impossibility, action/candidate semantic mismatch, or clearly
   unusable candidates. Absence from `source_O` alone is never a rejection.
-- `AMBIGUOUS`: evidence is insufficient for an axis or row decision, including
-  entity absence, underspecified relation, unclear actor ownership/visibility,
-  or uncertain semantic equivalence. If in doubt between `REJECT` and
-  `AMBIGUOUS`, choose `AMBIGUOUS`.
+- `AMBIGUOUS`: either axis is `UNCLEAR`, including entity absence,
+  underspecified relation, unclear actor ownership/visibility, or uncertain
+  semantic equivalence. If in doubt between `REJECT` and `AMBIGUOUS`, choose
+  `AMBIGUOUS`.
 
 ## Controlled reason codes
 
@@ -173,7 +223,8 @@ Use zero or more of only:
 `ACTION_CANDIDATE_MISMATCH`, `ACTOR_ACTION_CONTRADICTION`,
 `MALFORMED_ACTION`, `CANDIDATE_SEMANTIC_CONTRADICTION`,
 `CANDIDATE_SET_MALFORMED`, `ENTITY_RELATION_UNCLEAR`,
-`ACTOR_VISIBILITY_OR_OWNERSHIP_UNCLEAR`, `OBSERVATION_INSUFFICIENT`.
+`ACTOR_VISIBILITY_OR_OWNERSHIP_UNCLEAR`, `OBSERVATION_INSUFFICIENT`,
+`ACTION_ENTITY_OR_RELATION_UNOBSERVED`.
 
 ## Output JSONL
 
