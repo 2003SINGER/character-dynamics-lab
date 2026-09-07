@@ -63,6 +63,63 @@ std::string fact_value(const Observation& observation, const std::string& key) {
     }
     return "unknown";
 }
+
+std::string object_id_from_fact_key(const std::string& key) {
+    constexpr std::string_view prefix = "object.";
+    if (key.rfind(prefix, 0) != 0) return {};
+    const std::string remainder = key.substr(prefix.size());
+    constexpr std::string_view usability_suffix = ".usable";
+    if (remainder.size() > usability_suffix.size()
+        && remainder.compare(remainder.size() - usability_suffix.size(), usability_suffix.size(), usability_suffix) == 0) {
+        return remainder.substr(0, remainder.size() - usability_suffix.size());
+    }
+    return remainder.find('.') == std::string::npos ? remainder : std::string{};
+}
+
+bool known_fact_allows(const Observation& observation,
+                       const std::string& key,
+                       const std::string& allowed_value,
+                       const std::string& forbidden_value = {}) {
+    const ObservationFact* fact = find_fact(observation, key);
+    if (fact == nullptr || fact->status != KnowledgeStatus::Known) return true;
+    if (!forbidden_value.empty() && fact->value == forbidden_value) return false;
+    return fact->value == allowed_value;
+}
+
+bool subjective_preconditions_allow(ActionType action,
+                                    const Observation& observation,
+                                    const Object& object) {
+    const std::string object_usable_key = "object." + object.id + ".usable";
+    if (!known_fact_allows(observation, object_usable_key, "true", "false")) return false;
+    switch (action) {
+    case ActionType::TurnLightOn:
+        return known_fact_allows(observation, "room.light", "off", "on");
+    case ActionType::TurnLightOff:
+        return known_fact_allows(observation, "room.light", "on", "off");
+    case ActionType::OpenCurtain:
+        return known_fact_allows(observation, "room.curtain", "closed", "open");
+    case ActionType::CloseCurtain:
+        return known_fact_allows(observation, "room.curtain", "open", "closed");
+    case ActionType::TurnOffAlarm:
+        return known_fact_allows(observation, "room.alarm", "ringing", "silent");
+    case ActionType::StudyAtComputer:
+    case ActionType::StudyFocused:
+    case ActionType::StudyHalfhearted:
+        return known_fact_allows(observation, "room.light", "on", "off")
+            && known_fact_allows(observation, "task.coursework.status", "active", "completed");
+    case ActionType::ShopOnPhone: {
+        const ObservationFact* wallet = find_fact(observation, "wallet.balance");
+        if (wallet == nullptr || wallet->status != KnowledgeStatus::Known) return true;
+        try {
+            return std::stoi(wallet->value) >= 30;
+        } catch (...) {
+            return true;
+        }
+    }
+    default:
+        return true;
+    }
+}
 } // namespace
 
 const ObservationFact* find_fact(const Observation& observation, const std::string& key) {
@@ -78,7 +135,8 @@ bool has_known_fact(const Observation& observation, const std::string& key, cons
 
 Observation refresh_observation(Observation observation,
                                 const World& world,
-                                const WorldOutcome& previous_outcome) {
+                                const WorldOutcome& previous_outcome,
+                                const InformationAccess& access) {
     observation.updates_this_refresh.clear();
     observation.visible_object_labels.clear();
     observation.known_object_ids.clear();
@@ -95,21 +153,30 @@ Observation refresh_observation(Observation observation,
         observation.known_object_ids.push_back(object.id);
         observation.visible_object_labels.push_back(object.label);
         write_fact(observation, "object." + object.id, "present", "direct_room_visual", now);
+        if (access.object_usability_observable) {
+            write_fact(observation, "object." + object.id + ".usable",
+                       object.usable ? "true" : "false", "direct_object_inspection", now);
+        }
     }
     // Objects absent from this refresh remain remembered, but no longer count
     // as current visual knowledge. This is the minimal stale/unknown hook for
     // later movement, occlusion, and dynamically removed objects.
     for (const ObservationFact& fact : observation.facts) {
-        constexpr std::string_view kObjectPrefix = "object.";
-        if (fact.key.rfind(kObjectPrefix, 0) == 0) {
-            const std::string object_id = fact.key.substr(kObjectPrefix.size());
+        const std::string object_id = object_id_from_fact_key(fact.key);
+        if (!object_id.empty()) {
             if (!contains_id(observation.known_object_ids, object_id)) {
                 mark_stale(observation, fact.key);
             }
         }
     }
-    apply_self_action_feedback(observation, previous_outcome, now);
+    apply_self_action_feedback(observation, previous_outcome, now,
+                               access.self_task_completion_observable);
     write_fact(observation, "room.light", room.light_on ? "on" : "off", "direct_room_visual", now);
+    write_fact(observation, "room.curtain", room.curtain_open ? "open" : "closed", "direct_room_visual", now);
+    if (access.wallet_balance_observable) {
+        write_fact(observation, "wallet.balance", std::to_string(world.wallet),
+                   "direct_wallet_observation", now);
+    }
     const bool alarm_rang = std::any_of(previous_outcome.events.begin(), previous_outcome.events.end(),
         [](const WorldEvent& event) { return event.id == "alarm-rings"; });
     write_fact(observation, "room.alarm", room.alarm_ringing ? "ringing" : "silent",
@@ -151,7 +218,8 @@ Observation refresh_observation(Observation observation,
     for (const Object& object : room.objects) {
         if (!contains_id(observation.known_object_ids, object.id)) continue;
         for (ActionType action : object.affordances) {
-            if (!observation_knows_action(observation, action)) {
+            if (subjective_preconditions_allow(action, observation, object)
+                && !observation_knows_action(observation, action)) {
                 observation.known_actions.push_back(action);
             }
         }
@@ -173,11 +241,18 @@ void apply_self_action_feedback(Observation& observation,
     if (!outcome.accepted || outcome.task_id.empty()) return;
 
     const std::string status_key = "task." + outcome.task_id + ".status";
+    const std::size_t pending_start = observation.updates_this_refresh.size();
     if (outcome.task_completed && completion_is_observable) {
         write_fact(observation, status_key, "completed", "self_action_completion_feedback", observed_at);
     } else {
         write_fact(observation, status_key, "active", "self_action_progress_feedback", observed_at);
     }
+    // Preserve only semantic feedback created by this call for the next X
+    // evaluation. refresh_observation clears the per-refresh list, so without
+    // this handoff a completion delta can be lost before appraisal consumes it.
+    observation.pending_appraisal_updates.insert(observation.pending_appraisal_updates.end(),
+        observation.updates_this_refresh.begin() + static_cast<std::ptrdiff_t>(pending_start),
+        observation.updates_this_refresh.end());
 }
 
 bool observation_knows_action(const Observation& observation, ActionType action) {

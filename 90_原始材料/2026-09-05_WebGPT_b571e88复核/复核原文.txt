@@ -1,0 +1,738 @@
+看完了。最新 `webgpt-sync`：
+
+```text
+b571e88  sync Paper-0 framing and OPeRA audit route
+```
+
+这轮一共 4 个新提交，其中最重要的是：
+
+```text
+0efce67  fix: preserve completion deltas for appraisal
+0e9f85d  test: preserve raw E0 fixture stdout
+```
+
+## 先说结论
+
+**这轮总体是明显通过的。**
+
+前两轮最重要的那个 `completion ΔO → X → S` 时序 bug，确实修掉了，而且现在不是“代码看着修了”，而是有真实 stdout：
+
+```text
+completion_visible_X=X{tags=[task_completed]}
+completion_hidden_X=X{tags=[]}
+```
+
+并且状态真的分叉：
+
+```text
+visible:
+task_pressure = 0.00
+satisfaction = 0.76
+anxiety = 0.00
+commitment = none
+
+hidden:
+task_pressure = 0.55
+satisfaction = 0.44
+anxiety = 0.20
+commitment = coursework(active)
+```
+
+对应 `ΔS` 也是：
+
+```text
+visible:
+task_pressure -0.55
+satisfaction +0.31
+anxiety -0.20
+
+hidden:
+task_pressure  0.00
+satisfaction -0.01
+anxiety        0.00
+```
+
+所以我们之前设计的：
+
+$$
+W_{completed}
+\rightarrow O_{completed}
+\rightarrow X_{task\_completed}
+\rightarrow S
+$$
+
+**现在真的接通了。**
+
+而且 E0-3 的最大概率差从旧版 `0.121125` 变成：
+
+$$
+\boxed{0.131328}
+$$
+
+这是因为现在除了 commitment / support 分叉以外，**numeric S 也参与了 policy 分叉**。
+
+这个结果是好的。
+
+---
+
+# E0-1 / E0-2 现在也更完整了
+
+E0-1：
+
+```text
+wallet = 20 vs 120
+wallet hidden
+```
+
+实际保存：
+
+```text
+hidden_wallet_same_O=1
+hidden_wallet_same_pi=1
+max_abs_delta_p=0.000000
+```
+
+support 也是逐项完全一样。
+
+E0-2：
+
+```text
+wallet visible
+```
+
+现在明确检查：
+
+```text
+visible_wallet_facts_correct=1
+visible_wallet_support_correct=1
+visible_wallet_pi_changed=1
+```
+
+并且：
+
+```text
+wallet=20:
+ShopOnPhone 不在 support
+
+wallet=120:
+ShopOnPhone 在 support
+```
+
+最大概率差：
+
+$$
+0.085815
+$$
+
+所以目前三组 E0 已经形成了一条很漂亮的链：
+
+```text
+E0-1:
+hidden W differs
+→ O same
+→ A^O same
+→ π same
+
+E0-2:
+observable W differs
+→ O differs
+→ A^O differs
+→ π differs
+
+E0-3:
+same W completion
++ different information access
+→ O differs
+→ X differs
+→ S differs
+→ commitment differs
+→ A^O differs
+→ π differs
+```
+
+**这才真正开始像一套 intervention instrument。**
+
+---
+
+# 但 E0 还有两个测试层漏洞，我不会现在就把 T09 关掉
+
+## 第一刀：E0-3 现在“输出了 X/S 分叉”，但没有硬性要求它必须分叉
+
+现在 `run_e0()` 最终 return 主要还是：
+
+```cpp
+completion_visible_state.commitment.status
+    != completion_hidden_state.commitment.status
+```
+
+因此假设以后某次重构把：
+
+```text
+ΔO → X → numeric S
+```
+
+又搞断了，只要 commitment 还不同：
+
+```text
+visible = none
+hidden = active
+```
+
+整个 `--e0` **照样 exit 0**。
+
+那我们刚刚修的 bug 又可能悄悄回来。
+
+所以必须增加真正的硬断言，例如：
+
+```text
+visible X contains task_completed
+hidden X does not
+
+visible ΔS != hidden ΔS
+
+visible task_pressure < hidden task_pressure
+visible satisfaction > hidden satisfaction
+```
+
+不要求以后永远固定成 `-0.55/+0.31` 这些具体数值。
+
+只要求：
+
+> **这条被设计成敏感的 fixture 中，completion visibility 必须真的穿过 X→S。**
+
+这样才叫 regression test。
+
+---
+
+# 第二刀：`hidden_wallet_same_O` 现在还不是真正的“所有行为相关 O 输入相等”
+
+现在 `same_observation()` 比了：
+
+```text
+visible_object_labels
+known_object_ids
+known_actions
+facts
+部分 last_self_action
+```
+
+但没比：
+
+```text
+updates_this_refresh
+pending_appraisal_updates
+last_self_action 的 accepted/task_id/task_completed/source/time...
+```
+
+而这两个：
+
+```text
+updates_this_refresh
+pending_appraisal_updates
+```
+
+恰恰是 **X 的输入**。
+
+更关键的是当前 E0-1：
+
+```text
+refresh O
+↓
+直接 decide()
+```
+
+没有走：
+
+```text
+appraise
+↓
+update_state
+↓
+decide
+```
+
+所以目前 E0-1 证明得很严格的是：
+
+$$
+hidden\,W
+\nrightarrow
+O_{\text{persistent}}/A^O
+\nrightarrow
+\pi
+$$
+
+但还没有最强地证明：
+
+$$
+hidden\,W
+\nrightarrow
+\Delta O
+\nrightarrow X
+\nrightarrow S
+\nrightarrow \pi
+$$
+
+钱包现在当然没有这条 leak，我不是说结果错。
+
+我是说测试结构还有一个**未来回归逃生口**。
+
+最稳的 E0-1 应该是：
+
+```text
+same initial S/P
+hidden W differs
+↓
+refresh
+↓
+assert all behavior-relevant O/X inputs same
+↓
+appraise
+↓
+assert X same
+↓
+update_state
+↓
+assert S same
+↓
+decide
+↓
+assert A^O same
+assert π same
+```
+
+做到这个，information non-interference 就非常硬了。
+
+---
+
+# 宏观方向这轮 Luna 确实听进去了
+
+这个我也给通过。
+
+`对外表述.md §3` 已经从之前那个错误的：
+
+> world mediation 才是真正 Paper-0
+
+改回：
+
+> **persistent state 是否对未来行为近似充分且必要**
+
+也明确写了：
+
+```text
+W→O = information-boundary prerequisite / secondary intervention
+```
+
+而不是另立第二个 Paper-0。
+
+这个修正非常重要。
+
+现在：
+
+```text
+前台问题与候选创新.md
+对外表述.md §3
+TODO T13
+```
+
+三处主问题终于基本一致了：
+
+$$
+\boxed{
+H^{obs}\rightarrow S\rightarrow future\ behavior
+}
+$$
+
+---
+
+# OPeRA 路线也登记正确了
+
+现在新增：
+
+```text
+T0d
+最高优先：OPeRA 30–50 session feasibility audit
+```
+
+并把：
+
+```text
+T0c LIGHT
+```
+
+降到它后面。
+
+这也是我上一轮要求的。
+
+**但是注意：现在只是“登记了”。**
+
+仓库里还没有：
+
+```text
+02_实验/T0d_OPeRA/
+```
+
+也没有 OPeRA 数据审计结果。
+
+所以当前状态应该准确理解成：
+
+> **数据路线被纠正了，但还没有证明 OPeRA 可用。**
+
+---
+
+# 真正没执行的是 T13
+
+这反而是下一步最关键的。
+
+现在 TODO 还是：
+
+```text
+[ ] T13 冻结 Paper-0 问题卡
+```
+
+仓库里也没有看到独立的 Paper-0 problem card。
+
+所以我上一轮给的顺序：
+
+```text
+修 E0
+→ T13
+→ T0d
+```
+
+目前只完成了第一项。
+
+**现在应该真的做 T13。**
+
+而且只要一页。
+
+不要再写几十页研究设计。
+
+它应该冻结：
+
+```text
+RQ
+H/O/S/P/A 的定义
+独立 A* 要求
+三个 falsifiable claims
+baseline
+main metric
+split unit
+failure condition
+no-go
+```
+
+特别是明确：
+
+### Claim 1 — information boundary
+
+$$
+W_{hidden}\not\to policy
+$$
+
+E0 支持这一点的 instrumentation validity。
+
+### Claim 2 — approximate sufficiency
+
+$$
+p(A|S,O,P)
+\approx
+p(A|H^{obs},O,P)
+$$
+
+### Claim 3 — necessity
+
+$$
+NLL(S)
+<
+NLL(\operatorname{permute}(S))
+$$
+
+或者至少显著退化。
+
+以及：
+
+$$
+S+H
+$$
+
+到底还剩多少 residual gain。
+
+---
+
+# 但 TODO 的“权力结构”仍然没有真正收缩
+
+这是本轮宏观上最大的遗留问题。
+
+我上一轮明确说：
+
+> T35 不应该再是最高优先。
+
+但现在还是：
+
+```text
+T35
+优先级：最高
+```
+
+还要重审一整套“已被做过”清单。
+
+我仍然不同意。
+
+**现在绝对不应该在 T13/T0d 前重审一整库。**
+
+最多：
+
+```text
+OPeRA
+BehaviorChain
+PersonaX
+DPC
+PersonaForge
+ThinkPersona
+LIGHT
+PsychSim
+```
+
+这几个核心近邻按 13 维补矩阵。
+
+够了。
+
+---
+
+## T39 更应该降级
+
+现在 TODO 还写：
+
+```text
+T39
+定稿对外表述并冻结
+优先级：高
+```
+
+这仍然不对。
+
+因为 `对外表述.md §2` 现在还留着两句明显不能冻结的话。
+
+第一句：
+
+> “Memory in today's LLM-based character agents is mostly retrieval…”
+
+这已经过宽。
+
+现在明明知道：
+
+```text
+DPC
+PersonaForge
+...
+```
+
+已经有 dynamic state。
+
+不能写成“今天的 LLM character agents 基本都只是 retrieval”。
+
+第二句更直接：
+
+> “We test ... predictive sufficiency in a closed single-room simulation.”
+
+**这现在就是错的。**
+
+我们已经花这么多时间明确：
+
+```text
+小房间：
+E0 / causal wiring / information boundary
+
+独立 dataset：
+predictive sufficiency
+```
+
+小房间自生成 action 不能提供独立 `A*`。
+
+所以这句话必须改。
+
+因此：
+
+> **T39 不能 freeze。**
+
+应该变成：
+
+```text
+scientific anchor 冻结
+abstract wording 暂缓
+```
+
+等 T0d 后再定。
+
+---
+
+# 文档旧事实污染仍然存在，而且现在确实该清一次了
+
+我又核到了几个：
+
+### `完整机制说明_v0.md`
+
+仍然写：
+
+> “当前承诺仍直接消费 WorldOutcome”
+
+这个已经被：
+
+```text
+0e6c8c8
+```
+
+修掉很久了。
+
+现在实际是：
+
+```text
+WorldOutcome
+→ apply_self_action_feedback
+→ O
+→ update_commitment
+```
+
+这句话必须删。
+
+---
+
+### `未决问题与机制候选.md` Q04
+
+后面还写：
+
+> “当前 visibility 仍是 helper 级 bool，不是正式 scenario 信息权限”
+
+也已经错了。
+
+`ScenarioConfig.information_access` 已经贯穿 trajectory。
+
+---
+
+### Q01 更严重
+
+还保留旧代码：
+
+```cpp
+StudyAtDesk
+```
+
+以及：
+
+```text
+|A|: 16 → 17
+```
+
+现在已经早就确认实际是：
+
+```text
+旧：15 actual + Count
+新：16 actual + Count
+```
+
+而 `StudyFocused/StudyHalfhearted` 已经实现。
+
+这个再不改，以后新的 WebGPT/Luna 又会被旧文档带回去。
+
+---
+
+### T42 也还有小 stale
+
+TODO 还说：
+
+> `--e0` 第一组 paired fixture 已可运行
+
+现在明明已经三组，并且有 raw stdout。
+
+---
+
+# 统计解释还有一条没修
+
+D.2 最后一行仍然写：
+
+> “换成弱模型后优势消失 → 优势来自模型先验，不是状态表示”
+
+这个因果判断还是太硬。
+
+应该改成：
+
+> **观察到 representation × model-capacity interaction；模型先验是候选解释之一。**
+
+因为弱模型失败，也可能只是：
+
+```text
+弱模型读不懂这个 representation
+```
+
+不能直接推出：
+
+```text
+强模型的优势全来自先验
+```
+
+---
+
+# 所以这轮我的最终判定
+
+### 代码 / E0
+
+**通过，接近关闭，但补两个 hard assertion。**
+
+尤其：
+
+```text
+completion ΔO → X → S
+```
+
+现在已经真的修好了。
+
+### Paper-0 framing
+
+**通过。**
+
+这次终于没有再长两个 Paper-0。
+
+### 数据路线
+
+**方向通过，执行未开始。**
+
+`T0d OPeRA` 只是 TODO。
+
+### TODO 宏观治理
+
+**还没完全通过。**
+
+`T35 highest`、`T39 high/freeze` 依然会把项目拉回“继续准备”。
+
+### 文档一致性
+
+**需要一次纯清理。**
+
+不是重新设计，只删旧事实。
+
+---
+
+## 我现在给 Luna 的下一轮顺序只剩 4 件事
+
+```text
+1. E0-1 做完整 O/X/S/π non-interference hard assert
+2. E0-3 把 X/S 分叉写进 PASS 条件
+3. 做一次 stale-doc-only cleanup
+4. 真正完成 T13 Paper-0 一页问题卡
+```
+
+然后：
+
+```text
+5. 开始 T0d OPeRA 30–50 session audit
+```
+
+**不要先做 T35，不要 T39 freeze，不要 commitment，不要 Q01，不要 Scene recipe，不要 ToM。**
+
+到 `T13 + T0d` 出来以后，我们才真正到了这个项目的下一个岔路口：
+
+> OPeRA 能不能支撑第一张 held-out state-vs-history 表？
+
+那一轮才值得再做一次大的方向判断。
+
+现在仍然**不合并 main**；但这次已经不是因为架构不稳了，而是因为我希望把 **E0 完整验收 + Paper-0 问题卡**作为这一整段分支晋升 `main` 的自然封口。

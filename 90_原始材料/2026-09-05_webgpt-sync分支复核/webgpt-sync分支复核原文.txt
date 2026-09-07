@@ -1,0 +1,633 @@
+我看完了。`webgpt-sync` 现在比 `main` **明显更对，而且已经不是“同步一下我刚才的建议”那么简单——它实际上完成了一次很关键的研究边界纠偏。**
+
+当前分支 HEAD 是 `ed46dc3`，相对 `main@4e7fe46` **ahead 2 commits、behind 0**：
+
+* `0e6c8c8` — `fix: enforce observation boundary before commitment`
+* `ed46dc3` — `docs: freeze paper zero evidence boundary`
+
+我的判断先说：**这两次提交方向都应该保留，我倾向最终 merge 回 main；但我不会现在就宣布 E0 ready。还剩 3 个必须处理/明确的问题，其中一个是 `A^O` 修得有点过头。**
+
+---
+
+# 1. 最好的变化：你真的把 `W → S` commitment 旁路切掉了
+
+这个修改我认可，而且是实质性的。
+
+之前：
+
+```text
+W settle
+   ↓
+WorldOutcome
+   ↓
+update_commitment(S)
+```
+
+现在：
+
+```text
+W settle
+   ↓
+apply_self_action_feedback(...)
+   ↓
+O.last_self_action
+   ↓
+update_commitment(S, O)
+```
+
+也就是说现在是：
+
+$$
+W\rightarrow O\rightarrow S_{\text{commitment}}
+$$
+
+而不是：
+
+$$
+W\rightarrow S_{\text{commitment}}
+$$
+
+这不是代码洁癖，而是**你的信息干预实验终于有资格成立了。**
+
+特别是这个测试：
+
+> W 已经完成 coursework，但 completion feedback 被隐藏 → `commitment` 仍然 Active。
+
+这个测试我非常喜欢。
+
+因为它直接测试的是一个**研究不变量**：
+
+> **unknown W must not alter character-side persistent state.**
+
+这比原先一堆：
+
+```text
+starts_task_commitment=true
+resumes=true
+completes=true
+```
+
+科研价值高多了。
+
+---
+
+# 2. `A^O` 的隐藏钱包测试也修对了
+
+以前：
+
+```cpp
+world.available_actions()
+```
+
+先替角色检查真实钱包、灯、任务状态……
+
+现在：
+
+```text
+visible object
++
+stable affordance
+→ A^O
+
+A^O
+→ attempt
+
+W
+→ true precondition validation
+```
+
+于是：
+
+```text
+wallet = 20
+```
+
+不会神秘导致：
+
+```text
+ShopOnPhone disappears
+```
+
+而是：
+
+```text
+角色：我有手机，我可以试着购物
+世界：余额不足，拒绝
+角色：收到失败反馈
+```
+
+这个就是正确的：
+
+$$
+A^O\neq A^W
+$$
+
+而不是过去事实上：
+
+$$
+A^O\subseteq A^W
+$$
+
+而且 broken computer 不再从视觉里凭空消失，这也是正确的：
+
+```text
+present ≠ usable
+```
+
+这两个 fix 都该留下。
+
+---
+
+# 3. 但是：`A^O` 现在从“偷看 W”修到了另一个极端
+
+这是我目前对这个 branch 最重要的代码批评。
+
+现在大致是：
+
+```cpp
+for (const Object& object : room.objects) {
+    if (known(object)) {
+        for (ActionType action : object.affordances)
+            A_O.push(action);
+    }
+}
+```
+
+也就是说：
+
+> **只要看见一个物体，就把它所有稳定 affordance 全塞进去。**
+
+这解决了隐藏 precondition 泄漏。
+
+但是它没有消费**角色已经知道的 precondition**。
+
+比如灯现在已经开着。
+
+O 明明知道：
+
+```text
+room.light = on
+```
+
+但角色仍然会得到：
+
+```text
+TurnLightOn
+TurnLightOff
+```
+
+两个候选。
+
+又比如窗帘已经打开：
+
+```text
+O: curtain = open
+```
+
+理论上角色完全知道：
+
+```text
+OpenCurtain
+```
+
+当前状态下没有意义/无法产生对应状态转换。
+
+现在却仍然在 `A^O`。
+
+所以正确的结构不应该是：
+
+```text
+W preconditions 全部不参与 A^O
+```
+
+而应该拆成：
+
+```text
+stable affordance
+        +
+O-known / believed preconditions
+        ↓
+       A^O
+```
+
+然后：
+
+```text
+true W preconditions
+        ↓
+ settlement
+```
+
+也就是：
+
+### 主观前置条件
+
+角色知道的：
+
+```text
+灯已经开了
+窗帘已经开了
+我知道电脑在这里
+我认为这部手机能网购
+```
+
+可以影响 `A^O`。
+
+### 隐藏前置条件
+
+角色不知道的：
+
+```text
+余额其实不足
+电脑内部坏了
+远端服务挂了
+门锁实际卡住了
+任务其实被别人完成了
+```
+
+**不能提前影响 `A^O`。**
+
+这是下一刀。
+
+我会把它写成：
+
+$$
+A^O_t
+=
+\operatorname{ResolveAffordance}
+(O_t,\;B^{precondition}_t)
+$$
+
+而：
+
+$$
+A^W_t
+=
+\operatorname{ValidateWorld}(W_t)
+$$
+
+这才真正完成 Q04。
+
+---
+
+# 4. 第二个未完成点：现在“隐藏完成反馈”只是测试接口，还不是正常模拟能力
+
+你现在有：
+
+```cpp
+apply_self_action_feedback(..., completion_is_observable=false)
+```
+
+所以 verify 能做：
+
+```text
+W completed
+feedback suppressed
+commitment stays
+```
+
+很好。
+
+但是正常：
+
+```cpp
+advance_one_decision(...)
+```
+
+里面还是：
+
+```cpp
+apply_self_action_feedback(...); // default true
+```
+
+也就是说**正式 simulation path 目前没有 perception configuration 可以决定它是不是 observable。**
+
+换句话说：
+
+你已经证明：
+
+> “这个函数可以支持隐藏反馈。”
+
+但还没做到：
+
+> “同一个 scenario 可以通过冻结的感知条件运行 visible / hidden 两组。”
+
+所以 T09 现在仍然只能说：
+
+**fixture-ready。**
+
+不能说：
+
+**E0-ready。**
+
+这两者差一点，但科研意义差很多。
+
+我希望下一步不是再塞一个 bool 到 `advance_one_decision()`。
+
+而是建立一个极小的：
+
+```text
+PerceptionPolicy / InformationAccess
+```
+
+例如：
+
+```text
+self_task_completion:
+    immediate
+
+remote_task_completion:
+    hidden
+
+object_failure:
+    hidden_until_attempt
+
+wallet_balance:
+    hidden
+```
+
+然后 E0 的两个条件只换这个配置。
+
+这样你才能真正说：
+
+> 除 information access 外，其余机制完全相同。
+
+---
+
+# 5. 第三个问题：当前 branch 已经改变了 `A^O` 定义，所以旧 batch 的指标分布不再属于当前模型
+
+这个文档里虽然有说明历史 commit，但还是容易产生误解。
+
+你之前 T25/T25c 的：
+
+```text
+|A^O| = 9 / 10 / 11 / 13 / 14
+```
+
+以及：
+
+```text
+NLL 1.490 / 1.600 / ...
+```
+
+来自旧版：
+
+```text
+W.available_actions()
+→ A^O
+```
+
+现在 branch 已经变成：
+
+```text
+visible object's affordances
+→ A^O
+```
+
+**支持集定义已经变了。**
+
+那么旧：
+
+```text
+known_action_count
+known_<action>
+NLL / ln|A^O|
+```
+
+的 empirical distribution 就不能再描述当前实现。
+
+当然它们仍然是：
+
+> `807359b/6be808a` 的历史 smoke evidence。
+
+但不是：
+
+> `webgpt-sync` 当前模型的 action-space diagnostics。
+
+我不要求现在重跑 65,536。
+
+因为那仍然不是科研数据。
+
+但要在文档上特别明确：
+
+```text
+historical T25 metrics; invalidated for current A^O semantics
+```
+
+将来 E0 之前跑一个几十/几百步 smoke 就够。
+
+---
+
+# 6. Paper-0 的冻结，我整体是赞成的
+
+这部分是这个 branch 第二个非常大的进步。
+
+现在你正式写成：
+
+> 局部可观测、可回放；
+> 检验 information boundary / predictive approximate sufficiency / state necessity。
+
+并明确：
+
+```text
+Inverse                NO
+multi-agent             NO
+2nd-order ToM           NO
+P drift                 NO
+Scene Manager           NO
+large psychology schema NO
+advanced Q01 curves     NO
+```
+
+**这个我批准。**
+
+甚至我认为现在 `前台问题与候选创新.md` 的开头，是整个仓库目前最清楚的一版研究定位。
+
+特别是这句：
+
+$$
+p(A_{t+1}|H^{obs}_{\le t},O_t,P)
+\approx
+p(A_{t+1}|S_t,O_t,P)
+$$
+
+已经比：
+
+> “我们研究有持续心理状态的 NPC”
+
+高级太多了。
+
+因为现在你提出的是一个**可以失败的 representation hypothesis**。
+
+---
+
+# 7. T14 的 baseline 也比 main 好很多
+
+现在变成：
+
+```text
+persona only
+raw history
+structured history
+strong summary
+no-S
+naive-S
+state
+permuted-S
+S + history
+```
+
+这一套我基本批准。
+
+尤其是：
+
+### `structured history`
+
+这是 ThinkPersona 后必须补的。
+
+### `permuted-S`
+
+这是测 S 有没有真正被 policy 消费。
+
+### `S + history`
+
+这是测 predictive sufficiency 最关键的一组：
+
+如果：
+
+$$
+S+H \gg S
+$$
+
+说明 S 丢了大量行为相关历史。
+
+如果：
+
+$$
+S+H\approx S
+$$
+
+才有资格说：
+
+> S 接近 sufficiency。
+
+这已经开始像一张真正论文实验表了。
+
+---
+
+# 8. 但仓库里还有一处旧认知必须以后清理
+
+`项目现状速览_通俗版.md` 还写：
+
+> “如果能用一个精简的状态，就比读完整段历史预测得更准，那这个状态就是有用的。”
+
+这句话现在已经落后于你的正式 RQ 了。
+
+因为如我们前面说的：
+
+如果：
+
+$$
+S=f(H)
+$$
+
+是 history 的确定性压缩，
+
+那它并没有凭空创造信息。
+
+真正漂亮的目标未必是：
+
+```text
+S > H
+```
+
+而完全可能是：
+
+```text
+H             0.900
+S             0.894
+S+H           0.901
+
+tokens(S)     8% of H
+latency(S)    20% of H
+```
+
+这反而可能是一个非常好的结果：
+
+> S 保留了绝大多数 behavior-relevant history。
+
+所以通俗版以后应该改成：
+
+> **“用远小于完整历史的状态，能不能保留几乎相同的下一行为预测能力；以及给了这个状态之后，再加完整历史还能带来多少额外收益。”**
+
+这个才和现在 Paper-0 对齐。
+
+---
+
+# 9. 我对 `webgpt-sync` 的 merge 判断
+
+如果现在问我：
+
+> 这分支是走偏了还是走对了？
+
+答案很明确：
+
+**走对了，而且比 main 前进了一截。**
+
+如果问：
+
+> 能不能 merge？
+
+我的态度是：
+
+### 研究方向层：可以。
+
+`ed46dc3` 的 Paper-0 冻结应该成为 main 的新方向基线。
+
+### 当前代码层：核心 fix 可以。
+
+`0e6c8c8` 的两个关键修改：
+
+```text
+W-only precondition 不提前删 A^O
+WorldOutcome 不直接改 commitment
+```
+
+都应该保留。
+
+### 但 merge 后下一任务不是“开始 E0”
+
+而是只做下面三刀：
+
+1. **把 precondition 分成 `O-believed` 与 `W-authoritative`。** 已知的灯/窗帘状态可以筛 `A^O`；隐藏钱包/故障不能。
+
+2. **把 completion visibility 从测试 bool 提升为 scenario-level information-access rule。** E0 必须通过配置切换 visible/hidden，而不是测试代码手工调用 helper。
+
+3. **增加 4 个真正的 research invariant tests，而不是继续扩大 smoke：**
+
+   * hidden W changes → same `π` before observation；
+   * observable O changes → allowed `π` change；
+   * hidden completion → no commitment relief；
+   * shuffled S → policy receives altered S but W/O remain identical。
+
+做完这三件，我才会说：
+
+> **E0 的实验仪器基本 ready。**
+
+---
+
+而且我现在比上一轮还更确定一件事：
+
+**别碰 ToM。别碰 P 漂移。别碰多角色。别接 AdaMARP。甚至 LIGHT 数据都可以和这三刀并行审计，但不能阻塞这三刀。**
+
+`webgpt-sync` 最大的价值不是“修了几个 bug”。
+
+它第一次开始让仓库从：
+
+> **我想设计一个合理的人物系统**
+
+转向：
+
+> **我要建立一个别人能攻击、能复现、能把我打输的实验对象。**
+
+这个方向继续。

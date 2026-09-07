@@ -16,7 +16,7 @@
 |---|---|---|---|
 | T01 | 待决策 | 明确暂停承诺恢复是软偏好还是硬守卫；明确 started_at 与可知反馈语义；**补上 canceling conditions**（Côté 2013 §11.4.3 明列的 starting/canceling/completing 三类条件之一，当前缺） | 写下接受/拒绝、暂停/恢复、不可见完成的预期；并评估把承诺实现从 weight 调制改为 **rank 调制**是否更贴合语义，见 Q07 |
 | T02 | 待设计 | 选一个 X 意义维度与一个 U_k，分开解释和实际 delta | 同一 action 两个情境有独立 X→S 记录；保留旧映射对照，见 Q02/Q03 |
-| T03 | 部分完成 | v0 已固定 A^O 为角色相信可尝试的候选：由 O 中可见对象及其稳定 affordance 生成；W 只在结算时接受/拒绝，结果经 typed self-feedback 写回 O | 内建 verify 已覆盖“余额不足时 ShopOnPhone 不得从 A^O 消失”和“故障电脑仍可见、尝试后被 W 拒绝”。遮挡、错误 belief、对象实例绑定和一般化反馈策略仍见 Q04/Q05 |
+| T03 | **部分完成** | 保留“稳定 affordance + O 已知前置条件”两层：角色已知的灯/窗帘/闹钟/任务/钱包/对象可用性可筛 `A^O`，未知条件只能由 W 结算；采用最小 predicate 表，不引入 DSL | T42 已接通这些已知条件与未知条件的区分；对象错误 belief、遮挡、实例绑定和一般化反馈策略仍见 Q04/Q05 |
 | T04 | 待设计 | 给一个自然场景组合写最小 recipe 和对象实例绑定 | Object 基础能力→Scene 组合→W 结算；两同类物品可区别。**affordance 关系**建议按 `(effect, (entity, behavior))` 三元形式化，三分量以角色感知为准、关系存放于角色侧的 `O`，同时兼作规划算子；它不是多角色人际关系，见 Q05。选择条件与保持条件分开声明且放同一处 |
 
 T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插件架构。涉及接口变动时先保留已知基线，再做最小代码切片。[问题详情](未决问题与机制候选.md)是各 Q 编号的唯一说明。
@@ -32,7 +32,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ID | 状态 | 下一动作 | 判定条件 |
 |---|---|---|---|
 | T08 | 待继续 | 围绕 X/U/P/承诺缺口精读，不再泛列相似 Agent | 每篇给输入、状态、更新、P、动作、验证及可迁移边界；接文献库，不另抄全文 |
-| T09 | 待实验设计（E0） | 成对历史：固定 W/O，分别做观察 mask、同 O 下隐藏 W 改变、`S` 置换；另做完成反馈可见/抑制 | 记录 ΔO/X/S/commitment/π；验证未知 W 不进 policy、隐藏完成不直接解除压力。**仅作受控机制验收，不作为行为预测证据**；依赖 Q04/Q07 |
+| T09 | **已完成：E0 paired fixtures 回归验收** | E0-1/2/3 已实际运行并归档；E0-1 现在硬断言完整 O/X/S/support 相等，E0-3 硬断言 `task_completed` 经过 X→S 且方向正确 | 当前三组均固定 world seed/personality/state，未采样动作；结果只验证信息边界控制链，不作为行为预测证据；completion 的 `O→X→S` 已在 fixture 中直接输出；下一步转 T13 |
 | T10 | 待决策 | 判断单 session 质量是否为首个实验所需 | 如需才设计显式 ActionQuality；不能让 W 暗读 S，见 Q06 |
 | T11 | 待实验设计 | 检验 task_pressure 与残留紧张是否需要拆开 | 完成后是否有数据要求不同恢复；不要仅因可拆就加字段 |
 | T12 | 待实验设计 | 单因素改变 deadline、疲劳、中断或一个 P 维度 | 相同其余条件/seed，保留负结果；不以更多随机人格替代控制 |
@@ -43,16 +43,17 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 |---|---|---|---|
 | **T0** | **已完成审计；路线 B 待 pilot** | 审计独立 `A*` 来源；不要用本项目规则采样的动作自评 | [审计记录](../01_文献/专题审计_行为真值A星可行性_2026-09-05.md)：BehaviorChain 完整数据因版权暂不可得；CharacterBox 不构成独立 `A*`；SOTOPIA 可进入 30 episode 外部合成轨迹 pilot。**未通过 pilot 前不得启动正式 baseline 比较。** |
 | **T0b** | **已完成：结构通过，研究准入未过** | 从 SOTOPIA-π 公开 dump 导出 30 个 episode 的开发切片，核验 action、turn order、private/public information、provenance 与 episode-level split | 30/30 保留自身 goal 与对方 `Unknown`，但 provenance 在 dump 内未知，且动作表面高度坍缩为 `said/did nothing/left`，无法冻结不丢语义的有限动作 ontology。见 [T0b 结果](../01_文献/专题审计_行为真值A星可行性_2026-09-05.md#t0b-实测结果2026-09-05)。**不得据此启动 T14–T17。** |
-| **T0c** | **待可行性审计** | 对 LIGHT 做 30–50 条轻量数据审计：恢复 actor/turn/persona/当前世界/既往历史/真实动作/候选集；检查能否按角色重建 `O` 而不泄漏未来，并先核验物理动作长度 | 只做准入审计，**不训练、不重写动作 ontology**。通过才可考虑人类 replay；失败则记录原因，不用 LIGHT 宣称可用。详见[近邻与路线审计](../01_文献/专题审计_Paper0近邻与LIGHT路线_2026-09-05.md)。 |
+| **T0d** | **最高优先：待可行性审计** | 对 OPeRA 抽 30–50 个 session，核验 session 长度、动作 ontology/click subtype、user grouping、observation 完整性、rationale 位置、split 与未来泄漏；确认 finite candidate/ranking/NLL 可计算 | OPeRA 是人类 persona/history/observation→next action 候选，**官方统计与细节须独立复核**；只做准入审计，不训练。通过后优先于 LIGHT 进入 pilot。 |
+| **T0c** | **待可行性审计（低于 T0d）** | 对 LIGHT 做 30–50 条轻量数据审计：恢复 actor/turn/persona/当前世界/既往历史/真实动作/候选集；检查能否按角色重建 `O` 而不泄漏未来，并先核验物理动作长度 | 只做准入审计，**不训练、不重写动作 ontology**。通过才可考虑人类 replay；失败则记录原因，不用 LIGHT 宣称可用。详见[近邻与路线审计](../01_文献/专题审计_Paper0近邻与LIGHT路线_2026-09-05.md)。 |
 
-- [ ] T13：**冻结 Paper-0 问题卡**：局部可观测、可回放的单角色 Forward；`P` 固定、`D` 导出；分别可失败的信息边界、预测近似充分性、状态必要性。明确 no-go（Inverse、多角色/ToM、P 漂移、Scene Manager、Q01 高级曲线均不进入）；主证据只能是独立 held-out replay，E0 只验证控制链。问题卡还必须显式记录全局 `|A|`、每步 `|A^O|` 的定义和 NLL 报告口径。当前为 **16 项实际动作 + `Count` 哨兵**；`ln|A^O|` 是该步均匀随机猜测的 NLL 基线，**不是 NLL 上限**。换动作集或候选集定义即换实验；不同支撑集大小下的原始 NLL 不可直接混比，必须同时给分层原始 NLL 和按预注册分母归一化的 NLL。若未来出现 `|A^O|=1`，该步随机基线为 0、归一化无定义，需单列为确定性步而非除以 0。
+- [x] T13：**已冻结 Paper-0 问题卡**：[一页问题卡](Paper-0问题卡.md)。局部可观测、可回放的单角色 Forward；`P` 固定、`D` 导出；分别定义信息边界、预测近似充分性、状态必要性三条主张、外部 `A*`、baseline、split、NLL 口径与 no-go。E0 只验证控制链。
 - [ ] T14：建立 persona only、raw history、**结构化 history**、强 summary、`no-S`、`naive-S`、state 与置换-S基线；相同信息权限和模型条件；区分开发/测试，并报告 `S + history` 的残余收益。
 - [ ] T15：真实下一行为揭晓前输出概率/排名，做 Replay；控制身份泄漏、叙事 framing 和动作支持集。**2026-09-05 新增依据（迄今对"用 held-out NLL 而非人类评分"最强的一条支持）**：Game AI Pro V3 C04 是全套 146 章里**唯一的真人受试实验**——22 个 AI 对手、同日完成、顺序随机化、五点量表 + 开放式短答。结果：**「83% of players were unable to recognize an AI that was literally nothing more than a random number generator」**；享受度与实际/感知难度、智力、真实感**均不相关**，一个纯随机 AI 在"最好玩"上并列第二；且**「players invent stories for the nonplayer-controlled characters… They see cheating, bias, motivations, and desires where none exist」**。**人类评分测的是叙事可读性，不是机制保真度**，故只能作次要指标。同一来源还给出反向警告：**「In game AI, words sometimes speak louder than actions」**——这与 AI Town 的爆火互相印证（见资产页 §3.4）。
 - [ ] T16：做小消融再收缩机制；若 state 不优且无效率/可控性收益，接受更简单表示。
 - [ ] T17：接入有成本推断后，预先冻结质量容差，测总维护+决策 token/调用/延迟/成本，不只比较 prompt 长度。
 - [ ] T18：围绕最终窄问题做可复现职责级查新，记录数据库、检索式、时间、全文访问限制、引文追溯与等价先例。**起手先过一遍[研究问题页 §6.1](前台问题与候选创新.md) 的重合表**。⚠️ **2026-09-05 晚间修正**：原写「状态→分数→采样、承诺惯性、目标分桶、SmartObject、前置条件校验这五项…**不得再作为新颖性主张**」，**该约束力现已暂停**。理由：这些判定是在概念标签层做的比对，属用户批评过的错误方法（见[方法复核 §0](审核_文献比较方法与阶段缺口_2026-09-05.md)）。**T35 完成重审前，该五项只作提示，不作新颖性约束。**查新范围须显式纳入 GDC / Game AI Pro 等非学术来源（不在任何学术索引内，本次仅取到 2 篇，覆盖严重不足）。
 - [ ] T19：多 horizon 曲线。在约 20 / 100 / 500 决策点分别比较 raw history、强 summary 与 S 的 held-out NLL 或排名，找交叉点；不存在交叉点也原样记为结论。
-- [ ] T20：等维度对照消融。增设 naive-S（维度数与 theory-S 相同、维度非理论选定），与 theory-S 同成本比较。判据见 D.2。
+- [ ] T20：等维度对照消融。增设 naive-S（维度数与 theory-S 相同、维度非理论选定），与 theory-S 同成本比较；结论限定为当前数据、容量与 baseline 条件下的证据，不表述为心理机制已成立。判据见 D.2。
 - [ ] T21：噪声填充消融。在 trace 中注入与行为无关的填充事件，观察 S 相对 raw history 的优势是否增大，检验正则化假设。
 - [ ] T22：把"引入心理学"落成可证伪链：选定 N 个 appraisal 维度 → 固定函数形式 → 等维度非理论对照 → 预先写定 ΔNLL 判定阈值。四步完成前，不把心理学贡献写进任何结论，见[Q09](未决问题与机制候选.md#q09-字段和理论怎么选收益怎么判)。
 - [x] T23a：**T18 的前置**——Game AI Pro 覆盖。已从 10 篇扩到 **A 级 43 章全部下载完毕**（4 卷共 146 章，官网免费 PDF，**不在任何学术索引内**）。已按相关度分级：A 级 43（定向核读）/ B 级 30（按需回查）/ C 级 73（不读，寻路·转向·人群·赛车·摄像机·动画·MCTS 等，与机制链无对应）。完整清单见[Game AI Pro 全景与工程 Gap](../01_文献/专题核读_GameAIPro全景与工程Gap_2026-09-05.md) §5 附录。
@@ -82,11 +83,11 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 
 | ID | 下一动作 | 依据 | 优先级 |
 |---|---|---|---|
-| ~~**T25**~~ | ✅ **已实现于 `807359b`**：轨迹 CSV 落盘每个实际 `ActionType` 的 `p_<action>`，共 16 列 | 65,536 行 smoke 已验证每行概率和为 1、chosen action 概率大于 0；这是记录仪，不是 Replay 或模型比较 | 已办 |
-| ~~**T25b**~~ | ✅ **已实现于 `807359b`**：同时落盘 `known_action_count = |A^O|`，并规定将来**同时报告**按 `|A^O|` 分层的原始 NLL 和 `NLL / ln|A^O|` | `ln|A^O|` 是均匀随机 NLL 基线，不是数学上限；总体平均只能描述数据，不可单独支撑主张。若 `|A^O|=1`，归一化无定义，单列确定性步 | 已办 |
-| ~~**T25c**~~ | ✅ **已实现并验证于 `6be808a`**：每步为 16 个动作落 `known_<action>` support mask | `p_action=0` 可区分 `not_known` 与 `known_but_suppressed`；65,536 行验收中 mask 和均等于 `known_action_count`，chosen action 的 mask 均为 1 | 已办 |
+| ~~**T25**~~ | ✅ **已实现于 `807359b`，历史口径**：轨迹 CSV 落盘每个实际 `ActionType` 的 `p_<action>` | 65,536 行 smoke 仍是记录仪，但其 `A^O` 来自旧的 `W.available_actions()` 语义；当前分支已改为 visible-object affordance，**旧统计对当前模型候选集无效**，不得当作当前分布或实验结果 | 已办（需重标） |
+| ~~**T25b**~~ | ✅ **已实现于 `807359b`，历史口径**：落盘 `known_action_count = |A^O|` 及 NLL 报告规则 | `ln|A^O|` 规则仍保留；旧 9/10/11/13/14 分布只属于历史候选定义。E0 前重跑几十/几百步 smoke 后再记录当前分布 | 已办（需重标） |
+| ~~**T25c**~~ | ✅ **已实现并验证于 `6be808a`，历史口径**：每步落 `known_<action>` support mask | mask 机制可复用，但旧 65,536 行验收不能证明当前 `A^O`；待 T03 的 O-known predicate 落地后重新验收 | 已办（需重标） |
 | **T26** | 接 `ngram_lib`（V1 C48，1762 行 header-only）跑 N=1..5 留一 NLL 作**基线地板** | 其 `Probability_Next_Is(event)` 正好给出完整下一跳分布 | 高 |
-| **T27** | **ΔNLL 阈值必须与候选集规模挂钩**，在真实比较前预先写定，用 Δbits + N-gram 对照（非随机对照） | `ln|A^O|` 是随机基线；不能把它误当 NLL 上限，也不能用大词表直觉设未标定阈值 | 高 |
+| **T27** | **预注册分层 ΔNLL 判据**：报告按 session/user 聚类的 paired ΔNLL（并转 Δbits），另设 `S≈H` 的非劣效/等价界 ε 与置换-S 的优越性检验；不把 OPeRA action 当独立样本 | `ln|A^O|` 仅是逐步随机基线；候选集变化时同时报告分层原始 NLL 与按预注册分母归一化值 | 高 |
 | **T28** | 增设**置换 S 对照**：保持 X 与 π 不变，随机置换 S（或换成他人 S），看 NLL 是否显著变差 | 整合后 LLM 先验会从 X 一路传导到 π 并被包装成"角色决策"。此对照**成本极低、杀伤力最大** | 高 |
 | **T29** | 增设**等记忆对照**：给基线足够大的 N（或 LSTM/SSM）使其记忆容量不落下风 | 否则 S 取胜可能只证明"状态压缩有效"，不证明"理论结构有效" | 中 |
 | **T30** | 增设**分层诊断指标**（X 抽取一致性 / S 轨迹平滑性 / π 重现性） | 串联系统失败时**不可定位**是哪一环错 | 中 |
@@ -95,6 +96,8 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 | ~~**T33**~~ | ✅ **已实现于 `807359b`**：`StudyAtDesk` 拆为 `StudyFocused` / `StudyHalfhearted`，实际动作数 **15→16** | 后者消费 boredom 与 suspended 决策点，前者消费 satisfaction；π(A) 形式与 softmax 未改。系数只是规则占位，拆分不自动证明 Q01，见 [Q01 拍板块](未决问题与机制候选.md#q01-分段逆映射与量变质变) | 已办 |
 | ~~**T33b**~~ | ✅ **已实现并复核于 `807359b`**：`decision.cpp:86–90` 已将 `StudyFocused`、`StudyHalfhearted`、`StudyAtComputer` 全部计为 `advances_committed_task` | commitment bonus 不会因动作拆分而静默失效；本次复核同时更正此前过期的待办状态 | 已办 |
 | **T34** | 抓下剩余 8 个 demo 包存档 | companion 站点在腐烂，C09（Utility Theory 导论）链接**已实测 404** | 低（有时效） |
+
+| ~~**T42**~~ | ✅ **已完成于 `da70afa` 后续修订** | 已实现最小 `InformationAccess` trajectory 配置、完整 O-known/W-authoritative 前置条件、stale 解析修复与研究不变量；`--e0` 三组 paired fixture 已运行并有 raw stdout | T42 只负责 information-boundary 仪器；E0 fixture、元数据与研究协议归 T09，不再倒灌；**不表示 E0 或研究假设已验证** |
 
 状态同步约束：凡 TODO 宣称“已实现”或“待修复”的代码项，必须同列提交号、代码位置和可复核验收；实现改动与该行状态变更须在同一提交中完成。若是事后审计发现偏差，明确记录为“复核更正”，不把旧状态继续当作事实。
 
@@ -109,7 +112,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 
 | ID | 下一动作 | 依据 | 优先级 |
 |---|---|---|---|
-| **T35** | **按 13 维机制模板重审"已被做过"清单**。重审完成前，这些条目**暂停作为新颖性的约束力**，只作提示 | 我承认的 4 条自犯：T18「不得再作为新颖性主张」五项、「`W ≠ O` 已被 Talk of the Town 覆盖」、「二阶知识 TimeToM 已做」、「Gap 1a/4 不成立」。错误结构＝**具体机制 → 压缩成概念标签 → 找同标签论文 → 宣布重叠** | **最高（与 T25 并列）** |
+| **T35** | **后置：只审 8 个高风险近邻**（OPeRA、BehaviorChain、PersonaX、Dynamic Persona Coherence、PersonaForge、ThinkPersona、LIGHT、PsychSim），按 13 维补矩阵；不重审全库 | 研究准入与 Paper-0 问题卡优先；任何近邻结论仍须逐项核验，不作裸判重 | 中（T13/T0d 之后） |
 | **T36** | **补文献检索记录**：数据库、检索式、时间范围、全文访问限制、引文追溯 | 当前 82 篇**不可复现**，T18 的查新无法成立 | 高 |
 | **T37** | 建**跨论文机制对比矩阵**（参照 `WenyuChiou/ai-research-skills` 的 `literature-triage-matrix`），按 13 维逐项填，替代现有标签级重合表 | 现有[重合表](前台问题与候选创新.md#61-重合表格)是标签级的，正是用户批评的形态 | 高 |
 | **T38** | ✅ **已完成**（2026-09-05）：自研两个 skill。① **用户级** `mechanism-level-lit-compare`（13 维模板 + 错误模式 + 自检清单 + 母问题冻结规则）；② **项目级** `cd-orient`（新会话免重扫，含机制链、读文档顺序、三个数字、五个已踩过的坑、用户协作偏好） | WorkBuddy 市场**零科研 skill**（3 次检索确认）；GitHub 上的也不是中文流程 | 中（已办） |
@@ -128,7 +131,7 @@ T01–T04 是不同边界，逐项处理和验收；不要一次实现整套插�
 
 | ID | 下一动作 | 依据 | 优先级 |
 |---|---|---|---|
-| **T39** | 定稿对外表述，写成**中英对照**并冻结；后续所有对外材料（论文、README、演示页）只引用这一份，不各自重写 | 见[对外表述](对外表述.md) | 高 |
+| **T39** | **暂缓 abstract wording；仅冻结 scientific anchor**：Paper-0 的持久状态充分性/必要性与 `W→O` 前提已固定；待 T0d 后再定外部数据与结果措辞 | `对外表述.md` 仍保留过宽的领域概括与未完成数据路线，不能整页冻结 | 低（T0d 后） |
 | **T40** | 把 `WenyuChiou/ai-research-skills` 的 **Stage 6–8** 技能登记为后期写作阶段的参考：`academic-writing-skills`、`paper-memory-builder`、`paper-review` | 我们 Stage 5–7 全空（见[方法复核 §5](审核_文献比较方法与阶段缺口_2026-09-05.md)），这几个正好补位。市场无现成中文科研 skill，需按我们的流程改造 | 低（后期） |
 | **T41** | 现在写文档时即按论文结构组织：每份设计文档对应 Methods 的一节，每份审核文档对应 Threats to Validity / Limitations | 避免"设计文档 ↔ 论文"二次翻译。英文论文是终点，倒推组织现在的内容 | 中（贯穿） |
 
@@ -150,10 +153,10 @@ X 若由 LLM 做 appraisal，S 胜过 raw history 可能来自 LLM 的世界知�
 
 | 结果 | 允许的结论 |
 |---|---|
-| theory-S 明显优于 naive-S | 心理学的增量贡献成立 |
+| theory-S 明显优于 naive-S | 在当前数据、容量与 baseline 条件下，理论选定维度带来增量预测收益；不单独等同于心理机制已成立 |
 | theory-S ≈ naive-S | 收益来自有损压缩本身，与理论选择无关 |
 | naive-S 不优于 summary | 压缩在该任务上无价值，S 只剩成本收益 |
-| 换成弱模型后优势消失 | 优势来自模型先验，不是状态表示 |
+| 换成弱模型后优势消失 | 观察到 representation × model-capacity interaction；模型先验是候选解释之一，也可能是弱模型未能读懂该 representation，不能单独归因 |
 
 ## E. 扩展触发条件，不作为当前待完成量
 

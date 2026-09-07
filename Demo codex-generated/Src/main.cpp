@@ -20,6 +20,9 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
+    if (argc > 1 && std::string(argv[1]) == "--e0") {
+        return simulation.run_e0(std::cout) ? 0 : 1;
+    }
 
     simulation.run_all(std::cout);
     return 0;

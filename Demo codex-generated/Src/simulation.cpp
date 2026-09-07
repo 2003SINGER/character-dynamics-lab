@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -16,6 +17,7 @@
 #include <random>
 #include <sstream>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 namespace {
@@ -180,9 +182,10 @@ StepTrace advance_one_decision(World& world,
                                Observation& observation,
                                WorldOutcome& previous_outcome,
                                std::mt19937& action_rng,
-                               const Personality& personality) {
+                               const Personality& personality,
+                               const InformationAccess& information_access = {}) {
     StepTrace trace;
-    observation = refresh_observation(std::move(observation), world, previous_outcome);
+    observation = refresh_observation(std::move(observation), world, previous_outcome, information_access);
     trace.observation_at_decision = observation;
     trace.decision_time = world.time_summary();
     trace.world_before = world.summary();
@@ -195,7 +198,8 @@ StepTrace advance_one_decision(World& world,
     trace.chosen_action = sample_action(trace.decision, action_rng);
     trace.action_plan = world.expand_action(trace.chosen_action);
     trace.outcome = world.settle(trace.chosen_action);
-    apply_self_action_feedback(observation, trace.outcome, world.time_summary());
+    apply_self_action_feedback(observation, trace.outcome, world.time_summary(),
+                               information_access.self_task_completion_observable);
     update_commitment(state, observation, total_minutes(world.time));
     trace.state_after_settlement = state;
     trace.task_after = coursework_snapshot(world);
@@ -297,6 +301,7 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
         const Personality& personality = personalities[personality_index];
         for (unsigned int scenario_seed = 1; scenario_seed <= kBatchScenarioSeedCount; ++scenario_seed) {
             const unsigned int action_seed = action_seed_for(personality_index, scenario_seed);
+            const ScenarioConfig scenario{};
             World world(scenario_seed);
             CharacterState state;
             Observation observation;
@@ -304,7 +309,8 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
             std::mt19937 action_rng(action_seed);
 
             for (int step = 1; step <= kBatchStepsPerRun; ++step) {
-                const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome, action_rng, personality);
+                const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome,
+                                                             action_rng, personality, scenario.information_access);
                 std::ostringstream event_ids;
                 for (std::size_t event_index = 0; event_index < trace.outcome.events.size(); ++event_index) {
                     if (event_index != 0) event_ids << '|';
@@ -534,6 +540,97 @@ bool Simulation::verify(std::ostream& output) const {
     const bool gates_suspended_return = deferred_return.intention_status.find("defers return") != std::string::npos
         && permitted_return.intention_status.find("permits return") != std::string::npos;
 
+    const auto same_policy = [](const DecisionContext& left, const DecisionContext& right) {
+        if (left.candidates.size() != right.candidates.size()) return false;
+        for (std::size_t index = 0; index < left.candidates.size(); ++index) {
+            if (left.candidates[index].action != right.candidates[index].action
+                || left.candidates[index].probability != right.candidates[index].probability) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    // Research invariants: hidden W changes cannot affect policy before O
+    // changes; observed O changes may affect the candidate support; S must be
+    // consumed by policy; completion relief requires observable feedback.
+    World hidden_wallet_a;
+    World hidden_wallet_b;
+    hidden_wallet_a.wallet = 20;
+    hidden_wallet_b.wallet = 120;
+    const Observation hidden_wallet_o_a = refresh_observation({}, hidden_wallet_a, {});
+    const Observation hidden_wallet_o_b = refresh_observation({}, hidden_wallet_b, {});
+    const DecisionContext hidden_wallet_pi_a = decide(hidden_wallet_o_a, CharacterState{}, first);
+    const DecisionContext hidden_wallet_pi_b = decide(hidden_wallet_o_b, CharacterState{}, first);
+    const bool hidden_w_same_pi = same_policy(hidden_wallet_pi_a, hidden_wallet_pi_b)
+        && hidden_wallet_o_a.known_actions == hidden_wallet_o_b.known_actions;
+
+    World visible_light_off;
+    World visible_light_on;
+    visible_light_off.current_room().light_on = false;
+    visible_light_on.current_room().light_on = true;
+    const Observation visible_o_off = refresh_observation({}, visible_light_off, {});
+    const Observation visible_o_on = refresh_observation({}, visible_light_on, {});
+    const DecisionContext visible_pi_off = decide(visible_o_off, CharacterState{}, first);
+    const DecisionContext visible_pi_on = decide(visible_o_on, CharacterState{}, first);
+    const bool visible_o_can_change_pi = visible_o_off.known_actions != visible_o_on.known_actions
+        && !same_policy(visible_pi_off, visible_pi_on);
+
+    CharacterState state_low_signal;
+    CharacterState state_high_signal;
+    state_low_signal.boredom = 0.0;
+    state_high_signal.boredom = 1.0;
+    const DecisionContext shuffled_s_low = decide(visible_o_off, state_low_signal, first);
+    const DecisionContext shuffled_s_high = decide(visible_o_off, state_high_signal, first);
+    const bool state_input_affects_policy = !same_policy(shuffled_s_low, shuffled_s_high);
+
+    World information_access_world;
+    information_access_world.wallet = 20;
+    const InformationAccess visible_wallet_access{true, true, false};
+    const Observation visible_wallet_observation = refresh_observation(
+        {}, information_access_world, {}, visible_wallet_access);
+    const bool scenario_information_access_is_configurable =
+        has_known_fact(visible_wallet_observation, "wallet.balance", "20");
+
+    const bool light_precondition_filters_known_state =
+        std::find(visible_o_on.known_actions.begin(), visible_o_on.known_actions.end(), ActionType::TurnLightOn)
+            == visible_o_on.known_actions.end();
+    World open_curtain_world;
+    open_curtain_world.current_room().curtain_open = true;
+    const Observation open_curtain_observation = refresh_observation({}, open_curtain_world, {});
+    const bool curtain_precondition_filters_known_state =
+        std::find(open_curtain_observation.known_actions.begin(), open_curtain_observation.known_actions.end(), ActionType::OpenCurtain)
+            == open_curtain_observation.known_actions.end();
+    World dark_room_world;
+    dark_room_world.current_room().light_on = false;
+    const Observation dark_room_observation = refresh_observation({}, dark_room_world, {});
+    const bool study_requires_known_light =
+        std::find(dark_room_observation.known_actions.begin(), dark_room_observation.known_actions.end(), ActionType::StudyFocused)
+            == dark_room_observation.known_actions.end();
+    const bool silent_alarm_filters_action =
+        std::find(visible_o_off.known_actions.begin(), visible_o_off.known_actions.end(), ActionType::TurnOffAlarm)
+            == visible_o_off.known_actions.end();
+    const bool visible_wallet_filters_purchase =
+        std::find(visible_wallet_observation.known_actions.begin(), visible_wallet_observation.known_actions.end(), ActionType::ShopOnPhone)
+            == visible_wallet_observation.known_actions.end();
+    World visibly_broken_world;
+    for (Object& object : visibly_broken_world.current_room().objects) {
+        if (object.id == "computer") object.usable = false;
+    }
+    const InformationAccess visible_object_access{true, false, true};
+    const Observation visibly_broken_observation = refresh_observation({}, visibly_broken_world, {}, visible_object_access);
+    const ObservationFact* visible_usability = find_fact(visibly_broken_observation, "object.computer.usable");
+    const bool visible_usability_filters_action =
+        visible_usability != nullptr && visible_usability->status == KnowledgeStatus::Known
+        && visible_usability->value == "false"
+        && std::find(visibly_broken_observation.known_actions.begin(), visibly_broken_observation.known_actions.end(), ActionType::UseComputer)
+            == visibly_broken_observation.known_actions.end();
+    ScenarioConfig configured_scenario;
+    configured_scenario.information_access.wallet_balance_observable = true;
+    const std::string default_scenario_run = run_profile(first, 20260904U, 0U, false, 2, true);
+    const std::string configured_scenario_run = run_profile(first, 20260904U, 0U, false, 2, true, configured_scenario);
+    const bool scenario_config_reaches_trajectory = default_scenario_run != configured_scenario_run;
+
     output << "verify: reproducible=" << reproducible
            << ", profile_sensitive=" << profile_sensitive
            << ", rejects_illegal_action=" << validates_world
@@ -553,14 +650,221 @@ bool Simulation::verify(std::ostream& output) const {
            << ", completes_task_with_variable_effort=" << completes_task_with_variable_effort
            << ", completion_requires_observable_feedback=" << completion_requires_observable_feedback
            << ", deadline_is_observable=" << deadline_is_observable
-           << ", gates_suspended_return=" << gates_suspended_return << '\n';
+           << ", gates_suspended_return=" << gates_suspended_return
+           << ", hidden_w_same_pi=" << hidden_w_same_pi
+           << ", visible_o_can_change_pi=" << visible_o_can_change_pi
+           << ", state_input_affects_policy=" << state_input_affects_policy
+           << ", scenario_information_access_is_configurable=" << scenario_information_access_is_configurable
+           << ", scenario_config_reaches_trajectory=" << scenario_config_reaches_trajectory
+           << ", light_precondition_filters_known_state=" << light_precondition_filters_known_state
+           << ", curtain_precondition_filters_known_state=" << curtain_precondition_filters_known_state
+           << ", study_requires_known_light=" << study_requires_known_light
+           << ", silent_alarm_filters_action=" << silent_alarm_filters_action
+           << ", visible_wallet_filters_purchase=" << visible_wallet_filters_purchase
+           << ", visible_usability_filters_action=" << visible_usability_filters_action << '\n';
     return reproducible && profile_sensitive && validates_world && has_primitives
         && primitives_settle && handles_interruption && completed_task_stays_quiet && deduplicates_actions
         && preserves_rejected_feedback && keeps_broken_object_visible && does_not_leak_hidden_wallet
         && marks_absent_object_stale && reports_applied_delta
         && starts_task_commitment && suspends_for_bodily_need && resumes_task_commitment
         && completes_task_with_variable_effort && completion_requires_observable_feedback
-        && deadline_is_observable && gates_suspended_return;
+        && deadline_is_observable && gates_suspended_return
+        && hidden_w_same_pi && visible_o_can_change_pi && state_input_affects_policy
+        && scenario_information_access_is_configurable
+        && scenario_config_reaches_trajectory
+        && light_precondition_filters_known_state && curtain_precondition_filters_known_state
+        && study_requires_known_light && silent_alarm_filters_action
+        && visible_wallet_filters_purchase && visible_usability_filters_action;
+}
+
+bool Simulation::run_e0(std::ostream& output) const {
+    const Personality personality = procrastinating_profile();
+    const auto probability_for = [](const DecisionContext& policy, ActionType action) {
+        for (const CandidateAction& candidate : policy.candidates) {
+            if (candidate.action == action) return candidate.probability;
+        }
+        return 0.0;
+    };
+    const auto support_summary = [](const Observation& observation) {
+        std::ostringstream result;
+        for (std::size_t index = 0; index < observation.known_actions.size(); ++index) {
+            if (index != 0) result << '|';
+            result << to_string(observation.known_actions[index]);
+        }
+        return result.str();
+    };
+    const auto same_observation = [](const Observation& left, const Observation& right) {
+        if (left.visible_object_labels != right.visible_object_labels
+            || left.known_object_ids != right.known_object_ids
+            || left.known_actions != right.known_actions
+            || left.facts.size() != right.facts.size()
+            || left.updates_this_refresh.size() != right.updates_this_refresh.size()
+            || left.pending_appraisal_updates.size() != right.pending_appraisal_updates.size()) return false;
+        const auto same_fact = [](const ObservationFact& a, const ObservationFact& b) {
+            return a.key == b.key && a.value == b.value && a.status == b.status
+                && a.source == b.source && a.observed_at == b.observed_at;
+        };
+        const auto same_facts = [&same_fact](const auto& a, const auto& b) {
+            for (std::size_t index = 0; index < a.size(); ++index) {
+                if (!same_fact(a[index], b[index])) return false;
+            }
+            return true;
+        };
+        if (!same_facts(left.facts, right.facts)
+            || !same_facts(left.updates_this_refresh, right.updates_this_refresh)
+            || !same_facts(left.pending_appraisal_updates, right.pending_appraisal_updates)) return false;
+        const ObservedAction& a = left.last_self_action;
+        const ObservedAction& b = right.last_self_action;
+        if (a.has_action != b.has_action || a.action != b.action || a.accepted != b.accepted
+            || a.task_id != b.task_id || a.task_completed != b.task_completed
+            || a.outcome_reason != b.outcome_reason || a.source != b.source
+            || a.observed_at != b.observed_at) return false;
+        return true;
+    };
+    const auto emit_pair = [&](const char* fixture,
+                               const Observation& low_observation,
+                               const DecisionContext& low_policy,
+                               const CharacterState& low_state,
+                               const Observation& high_observation,
+                               const DecisionContext& high_policy,
+                               const CharacterState& high_state) {
+        double max_abs_delta = 0.0;
+        for (std::size_t index = 0; index < kActionCount; ++index) {
+            const ActionType action = static_cast<ActionType>(index);
+            max_abs_delta = std::max(max_abs_delta,
+                std::abs(probability_for(low_policy, action) - probability_for(high_policy, action)));
+        }
+        output << "fixture=" << fixture
+               << ",support_low=" << support_summary(low_observation)
+               << ",support_high=" << support_summary(high_observation)
+               << ",max_abs_delta_p=" << std::fixed << std::setprecision(6) << max_abs_delta
+               << ",commitment_low=" << commitment_status_name(low_state.commitment.status)
+               << ",commitment_high=" << commitment_status_name(high_state.commitment.status) << '\n';
+        for (std::size_t index = 0; index < kActionCount; ++index) {
+            const ActionType action = static_cast<ActionType>(index);
+            const double low_probability = probability_for(low_policy, action);
+            const double high_probability = probability_for(high_policy, action);
+            output << "p_low_" << to_string(action) << '=' << low_probability
+                   << ",p_high_" << to_string(action) << '=' << high_probability
+                   << ",delta_" << to_string(action) << '=' << (low_probability - high_probability) << '\n';
+        }
+        return max_abs_delta;
+    };
+
+    const ScenarioConfig hidden_scenario{};
+    World hidden_low(42U);
+    World hidden_high(42U);
+    hidden_low.wallet = 20;
+    hidden_high.wallet = 120;
+    const Observation hidden_low_o = refresh_observation({}, hidden_low, {}, hidden_scenario.information_access);
+    const Observation hidden_high_o = refresh_observation({}, hidden_high, {}, hidden_scenario.information_access);
+    const CharacterState empty_state;
+    const auto evaluate_hidden_wallet = [&personality](Observation observation) {
+        CharacterState state;
+        const Appraisal x = appraise(observation, state, personality);
+        clear_pending_appraisal_updates(observation);
+        const StateUpdate update = update_state(state, x, personality, 0);
+        const DecisionContext policy = decide(observation, state, personality);
+        return std::tuple<Observation, Appraisal, StateUpdate, CharacterState, DecisionContext>{
+            std::move(observation), x, update, state, policy};
+    };
+    auto hidden_low_eval = evaluate_hidden_wallet(hidden_low_o);
+    auto hidden_high_eval = evaluate_hidden_wallet(hidden_high_o);
+    const DecisionContext& hidden_low_pi = std::get<4>(hidden_low_eval);
+    const DecisionContext& hidden_high_pi = std::get<4>(hidden_high_eval);
+    const double hidden_delta = emit_pair("E0-1_hidden_wallet", std::get<0>(hidden_low_eval), hidden_low_pi,
+                                          std::get<3>(hidden_low_eval), std::get<0>(hidden_high_eval), hidden_high_pi,
+                                          std::get<3>(hidden_high_eval));
+
+    const ScenarioConfig visible_scenario{{true, true, false}};
+    const Observation visible_low_o = refresh_observation({}, hidden_low, {}, visible_scenario.information_access);
+    const Observation visible_high_o = refresh_observation({}, hidden_high, {}, visible_scenario.information_access);
+    const DecisionContext visible_low_pi = decide(visible_low_o, empty_state, personality);
+    const DecisionContext visible_high_pi = decide(visible_high_o, empty_state, personality);
+    const double visible_delta = emit_pair("E0-2_visible_wallet", visible_low_o, visible_low_pi, empty_state,
+                                           visible_high_o, visible_high_pi, empty_state);
+
+    World completion_visible_world(42U);
+    World completion_hidden_world(42U);
+    completion_visible_world.task_by_id("coursework")->effort_target = 0.10;
+    completion_hidden_world.task_by_id("coursework")->effort_target = 0.10;
+    const WorldOutcome visible_completion = completion_visible_world.settle(ActionType::StudyFocused);
+    const WorldOutcome hidden_completion = completion_hidden_world.settle(ActionType::StudyFocused);
+    Observation completion_visible_o;
+    Observation completion_hidden_o;
+    CharacterState completion_visible_state;
+    CharacterState completion_hidden_state;
+    completion_visible_state.commitment = {CommitmentStatus::Active, "coursework", "visible fixture", 0, 0};
+    completion_hidden_state.commitment = completion_visible_state.commitment;
+    apply_self_action_feedback(completion_visible_o, visible_completion, completion_visible_world.time_summary(), true);
+    apply_self_action_feedback(completion_hidden_o, hidden_completion, completion_hidden_world.time_summary(), false);
+    update_commitment(completion_visible_state, completion_visible_o, total_minutes(completion_visible_world.time));
+    update_commitment(completion_hidden_state, completion_hidden_o, total_minutes(completion_hidden_world.time));
+    completion_visible_o = refresh_observation(std::move(completion_visible_o), completion_visible_world, {},
+                                               hidden_scenario.information_access);
+    completion_hidden_o = refresh_observation(std::move(completion_hidden_o), completion_hidden_world, {},
+                                              hidden_scenario.information_access);
+    const Appraisal completion_visible_x = appraise(completion_visible_o, completion_visible_state, personality);
+    const Appraisal completion_hidden_x = appraise(completion_hidden_o, completion_hidden_state, personality);
+    const StateUpdate completion_visible_update = update_state(completion_visible_state, completion_visible_x, personality,
+                                                               visible_completion.elapsed_minutes);
+    const StateUpdate completion_hidden_update = update_state(completion_hidden_state, completion_hidden_x, personality,
+                                                              hidden_completion.elapsed_minutes);
+    const DecisionContext completion_visible_pi = decide(completion_visible_o, completion_visible_state, personality);
+    const DecisionContext completion_hidden_pi = decide(completion_hidden_o, completion_hidden_state, personality);
+    const double completion_delta = emit_pair("E0-3_completion_visibility", completion_visible_o, completion_visible_pi,
+                                              completion_visible_state, completion_hidden_o, completion_hidden_pi,
+                                              completion_hidden_state);
+    output << "completion_visible_X=" << appraisal_summary(completion_visible_x)
+           << ",completion_hidden_X=" << appraisal_summary(completion_hidden_x) << '\n'
+           << "completion_visible_delta_S=" << state_delta_summary(completion_visible_update.applied)
+           << ",completion_hidden_delta_S=" << state_delta_summary(completion_hidden_update.applied) << '\n'
+           << "completion_visible_S=" << state_summary(completion_visible_state) << '\n'
+           << "completion_hidden_S=" << state_summary(completion_hidden_state) << '\n';
+
+    const bool hidden_observation_equal = same_observation(hidden_low_o, hidden_high_o);
+    const bool hidden_appraisal_equal = appraisal_summary(std::get<1>(hidden_low_eval))
+        == appraisal_summary(std::get<1>(hidden_high_eval));
+    const bool hidden_state_equal = state_summary(std::get<3>(hidden_low_eval))
+        == state_summary(std::get<3>(hidden_high_eval));
+    const bool hidden_support_equal = support_summary(hidden_low_o) == support_summary(hidden_high_o);
+    const bool visible_wallet_facts_correct = has_known_fact(visible_low_o, "wallet.balance", "20")
+        && has_known_fact(visible_high_o, "wallet.balance", "120");
+    const bool visible_wallet_support_correct =
+        std::find(visible_low_o.known_actions.begin(), visible_low_o.known_actions.end(), ActionType::ShopOnPhone)
+            == visible_low_o.known_actions.end()
+        && std::find(visible_high_o.known_actions.begin(), visible_high_o.known_actions.end(), ActionType::ShopOnPhone)
+            != visible_high_o.known_actions.end();
+    output << "metadata=git_revision=" << CHARACTER_DYNAMICS_GIT_REVISION
+           << ",world_seed=42,personality=procrastinating,action_sampling=none"
+           << ",hidden_wallet_same_O=" << hidden_observation_equal
+           << ",hidden_wallet_same_X=" << hidden_appraisal_equal
+           << ",hidden_wallet_same_S=" << hidden_state_equal
+           << ",hidden_wallet_same_support=" << hidden_support_equal
+           << ",hidden_wallet_same_pi=" << (hidden_delta == 0.0)
+           << ",visible_wallet_facts_correct=" << visible_wallet_facts_correct
+           << ",visible_wallet_support_correct=" << visible_wallet_support_correct
+           << ",visible_wallet_pi_changed=" << (visible_delta > 0.0)
+           << ",completion_visibility_changes_state_or_pi=" << (completion_delta > 0.0
+               || completion_visible_state.commitment.status != completion_hidden_state.commitment.status) << '\n';
+    const auto has_tag = [](const Appraisal& appraisal, const std::string& tag) {
+        return std::find(appraisal.tags.begin(), appraisal.tags.end(), tag) != appraisal.tags.end();
+    };
+    const bool completion_x_assertion = has_tag(completion_visible_x, "task_completed")
+        && !has_tag(completion_hidden_x, "task_completed");
+    const bool completion_state_assertion = completion_visible_update.applied.task_pressure
+        != completion_hidden_update.applied.task_pressure
+        && completion_visible_update.applied.satisfaction
+            > completion_hidden_update.applied.satisfaction
+        && completion_visible_state.task_pressure < completion_hidden_state.task_pressure
+        && completion_visible_state.satisfaction > completion_hidden_state.satisfaction;
+    output << "completion_X_assertion=" << completion_x_assertion
+           << ",completion_state_assertion=" << completion_state_assertion << '\n';
+    return hidden_observation_equal && hidden_delta == 0.0
+        && hidden_appraisal_equal && hidden_state_equal && hidden_support_equal
+        && visible_wallet_facts_correct && visible_wallet_support_correct && visible_delta > 0.0
+        && completion_visible_state.commitment.status != completion_hidden_state.commitment.status
+        && completion_x_assertion && completion_state_assertion;
 }
 
 std::string Simulation::run_profile(const Personality& personality,
@@ -568,7 +872,8 @@ std::string Simulation::run_profile(const Personality& personality,
                                     unsigned int world_seed,
                                     bool include_header,
                                     int steps_per_run,
-                                    bool verbose_trace) const {
+                                    bool verbose_trace,
+                                    const ScenarioConfig& scenario) const {
     World world(world_seed);
     CharacterState state;
     std::mt19937 rng(action_seed);
@@ -585,7 +890,8 @@ std::string Simulation::run_profile(const Personality& personality,
     for (int step = 1; step <= steps_per_run; ++step) {
         const std::vector<ActionType> world_actions = world.available_actions();
         const bool was_observation_frozen = previous_outcome.observation_frozen_during_action;
-        const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome, rng, personality);
+        const StepTrace trace = advance_one_decision(world, state, observation, previous_outcome,
+                                                     rng, personality, scenario.information_access);
 
         if (verbose_trace) {
             output << "\n[Decision point " << step << " | " << trace.decision_time << "]\n"
