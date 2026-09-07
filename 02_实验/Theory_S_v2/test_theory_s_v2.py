@@ -30,7 +30,11 @@ class TheorySV2Tests(unittest.TestCase):
 
     def test_soft_semantic_anchor_is_not_a_hard_mask(self):
         m = TheoryS()
+        self.assertEqual(float(m.semantic_anchor_loss().detach()), 0.0)
+        with torch.no_grad(): m.beta[0, 0] = -.1
         self.assertGreater(float(m.semantic_anchor_loss().detach()), 0.0)
+        self.assertGreater(float(m.semantic_anchor_loss(margin=.05).detach()),
+                           float(m.semantic_anchor_loss().detach()))
         self.assertEqual(int((m.semantic_sign_prior == 0).sum()), 11)
         self.assertTrue(torch.all(m.beta[m.semantic_sign_prior == 0] == 0))
 

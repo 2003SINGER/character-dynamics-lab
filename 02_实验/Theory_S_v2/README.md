@@ -37,7 +37,9 @@ recovery anchor fatigue, negative and recovery anchor tension, and goal,
 positive, and social cues anchor engagement. Uncertain edges remain free. This
 is regularization metadata, not a hard topology or a claim that the literature
 dictates a sparse matrix; its weight is chosen only by a future protocol via
-`semantic_anchor_loss`.
+`semantic_anchor_loss`. Its default `margin=0.0` is violation-only; any
+positive margin must be passed explicitly as a development fixture and cannot
+be inferred as a scientific effect-size requirement.
 
 Candidate sets and support are upstream. The module receives O/P-derived
 candidate feature vectors and never reads source candidates or A*. P remains
