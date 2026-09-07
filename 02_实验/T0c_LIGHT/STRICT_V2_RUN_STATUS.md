@@ -7,11 +7,11 @@ diagnostics and are not merged here.
 
 ## Checkpoint — 2026-09-07 (fresh-session strict run)
 
-- Completed: `task-0001.jsonl`–`task-0015.jsonl`
-- Rows: 300 / 24,999
-- Next task: `task-0016.jsonl`
+- Completed: `task-0001.jsonl`–`task-0018.jsonl`
+- Rows: 360 / 24,999
+- Next task: `task-0019.jsonl`
 - Validation: passed strict v2 schema, exact task order, opaque IDs, and one trajectory per reviewer task.
-- Labels: ADMIT 169; AMBIGUOUS 109; REJECT 22.
+- Labels: ADMIT 223; AMBIGUOUS 115; REJECT 22.
 - Output is model-assisted source semantic annotation, not human audit or final admission mask.
 
 The private opaque-ID mapping and reviewer input shards remain Git-ignored.
