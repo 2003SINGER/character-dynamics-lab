@@ -15,6 +15,7 @@
 - [~] **M2 minimal candidate compiler**：从 canonical SceneSnapshot 的 objects/agents/possessions/facts 独立生成带 provenance 的 affordance 与 `A^O`；生成后才做 source `available_actions` support hit/miss。当前 ontology、实例绑定和前置条件仍是最小 development slice。
 - [~] **M3 dataset→capability matrix**：当前 LIGHT projection、可验证字段与 ontology 尚不足以支撑 persistent-S identification，最终适用性未决；PowerWash/FarmQuest/AGAIN 仍待各自 semantic audit。不得把 source `available_actions` 当作 `A^O`。
 - [ ] **M4 formal experiment gate**：M0–M3 未完成前，Run1–4 仅保留为 development identifiability diagnostics，不启动正式 test 或把结果写成 Theory-S 结论。
+- [x] **M5 Mechanism Sanity v1.2 trajectory sanity（受控工程检查）**：4 条固定 `A^O` 的 effort/progress/obstruction/recovery trajectory 均通过状态惯性、累积/恢复与 `π` 传导检查；`ΔO→X→U→S` 的真实数据语义审核仍未开始，不能视为 Gate 1 或正式实验。
 
 ## 本轮 development diagnostic 封口
 
