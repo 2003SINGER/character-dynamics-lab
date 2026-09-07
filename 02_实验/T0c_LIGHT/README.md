@@ -21,6 +21,10 @@
 `light_semantic_admission_blind50_20260907_for_external_llm.md`。
 此前的 `*.reviewed.csv` / `*.readout.md` 只是 AI source-only diagnostic，不是人工 semantic admission，不能作为准入证据，也不应提供给独立 reviewer 作为输入。候选集仍只被定义为 observed-source candidate set，未据此宣称 `A^O` 已验证。
 
+### Full semantic annotation shards（2026-09-07）
+
+全量 mechanism-dev cohort 已按 source-only 当前步证据切成 **24,999 rows / 500 shards × 50**；协议见 `full_semantic_annotation_20260907_v1/protocol.md`，输入位于同目录 `shards/`。输入不包含 previous/future step、Run1–4 结果或其他 reviewer 输出；reviewer 只返回紧凑 JSONL 标签，逐 shard 校验后追加落盘，便于断点续跑。3×20 smoke 也已生成并通过结构检查。
+
 复现：
 
 ```powershell
