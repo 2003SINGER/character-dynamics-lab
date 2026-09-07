@@ -11,9 +11,9 @@
 来源原件：[Theory-S 与机制纠偏对话](../90_原始材料/2026-09-07_用户对话_Theory-S与机制纠偏/README.md)。
 
 - [x] **M0 mechanism sandbox（工程 sanity 完成）**：固定 Scene/O/P/generated `A^O`，在 5 个 LIGHT development fixtures 上做 `do(S=s_1)` / `do(S=s_2)`；结果显示 π 改变且 support 不变。结果不是现实数据机制证据，见[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md)。
-- [x] **M1 Theory-S v2 trainable contract（工程切片）**：冻结六维 X、三维 S、固定拓扑/符号、bounded `g`、可训练 `W_XS/W_SA/alpha` 与等容量 Permuted-S；合成梯度 smoke 通过。仍不是拟合结果或心理学验证，见 [Theory-S v2](../02_实验/Theory_S_v2/README.md)。
+- [~] **M1 Theory-S trainable dynamics candidate**：已把每字段 relaxation、T14/T20 readout 与多步 candidate-NLL gradient smoke 合并为可训练参数化；X/S semantic contract、真实参数拟合与外部预测有效性仍未冻结/验证。见 [Theory-S v2](../02_实验/Theory_S_v2/README.md)。
 - [~] **M2 minimal candidate compiler**：从 canonical SceneSnapshot 的 objects/agents/possessions/facts 独立生成带 provenance 的 affordance 与 `A^O`；生成后才做 source `available_actions` support hit/miss。当前 ontology、实例绑定和前置条件仍是最小 development slice。
-- [x] **M3 dataset→capability matrix（路由版）**：已登记 LIGHT、OPeRA、ClubFloyd、FarmQuest、PowerWash、AGAIN、SOTOPIA 的 action/transition/O/persistence 能力与边界；不是准入或识别结论，见 [capability matrix](../02_实验/Theory_S_v2/capability_matrix.md)。不得把 source `available_actions` 当作 `A^O`。
+- [~] **M3 dataset→capability matrix（路由版）**：已按 owner audit 登记 LIGHT、OPeRA、ClubFloyd、FarmQuest、PowerWash、AGAIN、SOTOPIA 的字段能力与阻塞项；不是准入或识别结论，仍需各自 semantic audit，见 [capability matrix](../02_实验/Theory_S_v2/capability_matrix.md)。不得把 source `available_actions` 当作 `A^O`。
 - [ ] **M4 formal experiment gate**：M0–M3 未完成前，Run1–4 仅保留为 development identifiability diagnostics，不启动正式 test 或把结果写成 Theory-S 结论。
 - [x] **M5 Mechanism Sanity v1.2 trajectory sanity（受控工程检查）**：4 条固定 `A^O` 的 effort/progress/obstruction/recovery trajectory 均通过状态惯性、累积/恢复与 `π` 传导检查；`ΔO→X→U→S` 的真实数据语义审核仍未开始，不能视为 Gate 1 或正式实验。
 

@@ -15,7 +15,7 @@
 
 ## 结果边界
 
-本轮若通过，只能说明状态更新接口有可见的一阶 relaxation、build-up→recovery/decay 和行为传导。每个阶段还记录到轨迹中点的 half-life、步长缩小和 overshoot absence。它不证明 X 的语义正确、不证明字段是心理真实状态，也不证明任何数据集适合 persistent-S identification。特别要继续审查 residual persistence 和可疑 cross-effect；下一步若进入真实轨迹，必须先独立审核 `ΔO → X`，再冻结输入、时间尺度和对照。
+本轮若通过，只能说明状态更新接口有可见的一阶 relaxation、build-up→recovery/decay 和行为传导。每个阶段还记录到轨迹中点的 **finite-horizon midpoint-crossing diagnostic**（不是 dynamical half-life estimate）、步长缩小和 overshoot absence。它不证明 X 的语义正确、不证明字段是心理真实状态，也不证明任何数据集适合 persistent-S identification。特别要继续审查 residual persistence 和可疑 cross-effect；下一步若进入真实轨迹，必须先独立审核 `ΔO → X`，再冻结输入、时间尺度和对照。
 
 运行：
 

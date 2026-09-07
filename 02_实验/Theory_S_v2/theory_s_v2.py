@@ -1,14 +1,12 @@
-"""Dataset-neutral, literature-constrained Theory-S v2 module.
+"""Theory-S v2: learnable parameterization of the existing state mechanism.
 
-This is a trainable research operator, not a fitted psychological model.  It
-keeps candidate generation outside the module: action features are supplied
-by the caller and no source candidate list or A* field is read here.
+This consolidates the earlier per-field dynamics, v1/v1.2 transition plumbing,
+and T14/T20 conditional-linear readout. It does not define a new psychological
+topology. X and S are compatibility schemas whose semantics remain hypotheses.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Sequence
-
 import torch
 from torch import Tensor, nn
 import torch.nn.functional as F
@@ -16,128 +14,135 @@ import torch.nn.functional as F
 X_FIELDS = ("effort_load", "goal_relevance", "positive_conduciveness",
             "negative_conduciveness", "social_opportunity", "recovery_cue")
 STATE_FIELDS = ("fatigue", "engagement", "tension")
-ACTION_FEATURES = ("stimulation", "social", "conflict", "recovery")
-
-# Rows are S and columns are X.  1/-1 are permitted signed edges; zero is a
-# structural absence.  The signs are an explicit hypothesis, not a result.
-TOPOLOGY_XS = torch.tensor([
-    [1, 0, 0, 1, 0, -1],  # fatigue
-    [0, 1, 1, 0, 1, 0],   # engagement
-    [0, 1, 0, 1, 0, -1],  # tension
-], dtype=torch.float32)
-# Rows are S and columns are action-feature basis dimensions.
-TOPOLOGY_SA = torch.tensor([
-    [-1, 0, 0, 1],  # fatigue suppresses stimulation, supports recovery
-    [1, 1, 0, 0],   # engagement supports stimulation/social
-    [0, 0, 1, 0],   # tension supports conflict
-], dtype=torch.float32)
-
-
-def _signed_weight(raw: Tensor, topology: Tensor) -> Tensor:
-    """Positive magnitude + fixed sign, with structural zeros."""
-    return topology.to(raw.device) * F.softplus(raw) * (topology != 0).to(raw.dtype)
+# Must remain identical to Replay/replay_features_v1.py FEATURE_NAMES.
+FEATURE_NAMES = ("goal_progress", "stimulation", "recovery", "hunger_relief",
+                 "bathroom_relief", "short_term_reward", "environment_control",
+                 "context_relevance", "has_target", "target_in_scene",
+                 "target_visible_in_O", "target_in_inventory", "repeated_acquire")
+FEATURE_VERSION = "replay-raw-features-v1"
 
 
 @dataclass(frozen=True)
 class TheorySConfig:
-    state_permutation: tuple[int, ...] = (0, 1, 2)
+    state_dim: int = 3
+    x_dim: int = 6
+    feature_dim: int = len(FEATURE_NAMES)
     alpha_init: float = 0.80
 
 
 class TheoryS(nn.Module):
-    """Bounded state transition and action-score coupling.
+    """Per-field bounded relaxation plus the existing conditional readout.
 
-    ``x`` is [batch, 6], ``state`` [batch, 3], ``action_features`` [batch, 4],
-    and ``z_base`` [batch].  The action feature vector is an explicit caller
-    input, so the module cannot accidentally inspect candidate IDs or A*.
+    ``theta`` is the base T14/T20 action-feature weight. ``b``, ``beta``,
+    ``alpha`` and ``W`` are the Phase-B dynamic-state parameters. The caller
+    supplies O/P-derived candidate features; this module never receives source
+    candidates or A*.
     """
 
     def __init__(self, config: TheorySConfig | None = None):
         super().__init__()
         self.config = config or TheorySConfig()
-        perm = self.config.state_permutation
-        if sorted(perm) != list(range(3)):
-            raise ValueError("state_permutation must be a permutation of 0..2")
-        self.register_buffer("topology_xs", TOPOLOGY_XS[list(perm)].clone())
-        self.register_buffer("topology_sa", TOPOLOGY_SA[list(perm)].clone())
-        self.w_xs_raw = nn.Parameter(torch.zeros(3, 6))
-        self.w_sa_raw = nn.Parameter(torch.zeros(3, 4))
+        if self.config.state_dim != 3 or self.config.x_dim != 6:
+            raise ValueError("v2 compatibility contract is 3 S fields and 6 X fields")
+        d = self.config.feature_dim
+        self.theta = nn.Parameter(torch.zeros(d))
+        self.b = nn.Parameter(torch.zeros(3))
+        self.beta = nn.Parameter(torch.zeros(3, 6))
         a = min(max(float(self.config.alpha_init), 1e-4), 1 - 1e-4)
         self.alpha_raw = nn.Parameter(torch.full((3,), torch.logit(torch.tensor(a))))
-
-    @property
-    def w_xs(self) -> Tensor:
-        return _signed_weight(self.w_xs_raw, self.topology_xs)
-
-    @property
-    def w_sa(self) -> Tensor:
-        return _signed_weight(self.w_sa_raw, self.topology_sa)
+        self.w_sa = nn.Parameter(torch.zeros(3, d))
 
     @property
     def alpha(self) -> Tensor:
         return torch.sigmoid(self.alpha_raw)
 
+    @property
+    def eta(self) -> Tensor:
+        return 1.0 - self.alpha
+
     def transition(self, state: Tensor, x: Tensor) -> Tensor:
+        """S_t = alpha*S_(t-1) + (1-alpha)*sigmoid(b + beta*X_t)."""
         if state.shape[-1] != 3 or x.shape[-1] != 6:
             raise ValueError("state must end in 3 and x in 6 dimensions")
-        pre = self.alpha * state + x @ self.w_xs.transpose(-1, -2)
-        return torch.sigmoid(pre)
+        target = torch.sigmoid(self.b + x @ self.beta.transpose(-1, -2))
+        return self.alpha * state + self.eta * target
 
-    def score(self, state: Tensor, action_features: Tensor, z_base: Tensor | float = 0.0) -> Tensor:
-        if state.shape[-1] != 3 or action_features.shape[-1] != 4:
-            raise ValueError("state must end in 3 and action_features in 4 dimensions")
-        coupling = (state @ self.w_sa) * action_features
-        return torch.as_tensor(z_base, dtype=state.dtype, device=state.device) + coupling.sum(-1)
+    def logits(self, state: Tensor, candidate_features: Tensor,
+               z_base: Tensor | None = None) -> Tensor:
+        """Return candidate logits [batch, candidates] using canonical features."""
+        if state.shape[-1] != 3 or candidate_features.shape[-1] != len(FEATURE_NAMES):
+            raise ValueError("state/features do not match the v1 replay contract")
+        base = candidate_features @ self.theta
+        coupling = torch.einsum("bs,sd,bkd->bk", state, self.w_sa, candidate_features)
+        return base + coupling if z_base is None else z_base + coupling
 
-    def forward(self, state: Tensor, x: Tensor, action_features: Tensor,
-                z_base: Tensor | float = 0.0) -> tuple[Tensor, Tensor]:
+    def conditional_nll(self, state: Tensor, candidate_features: Tensor,
+                        gold_index: Tensor, z_base: Tensor | None = None) -> Tensor:
+        return F.cross_entropy(self.logits(state, candidate_features, z_base), gold_index)
+
+    def forward(self, state: Tensor, x: Tensor, candidate_features: Tensor,
+                gold_index: Tensor | None = None, z_base: Tensor | None = None):
         next_state = self.transition(state, x)
-        return next_state, self.score(next_state, action_features, z_base)
+        logits = self.logits(next_state, candidate_features, z_base)
+        if gold_index is None:
+            return next_state, logits
+        return next_state, logits, F.cross_entropy(logits, gold_index)
 
-    def parameter_count(self) -> int:
-        return sum(p.numel() for p in self.parameters())
+    def set_phase(self, phase: str) -> None:
+        """Phase A learns theta only; Phase B freezes theta and learns dynamics/readout."""
+        if phase not in {"A", "B"}:
+            raise ValueError("phase must be A or B")
+        self.theta.requires_grad_(phase == "A")
+        for p in (self.b, self.beta, self.alpha_raw, self.w_sa):
+            p.requires_grad_(phase == "B")
 
-
-def permuted_s(config: TheorySConfig | None = None) -> TheoryS:
-    """Equal-capacity Permuted-S control with identical X/action basis."""
-    base = config or TheorySConfig()
-    return TheoryS(TheorySConfig(state_permutation=(1, 2, 0), alpha_init=base.alpha_init))
-
-
-def topology_report(model: TheoryS) -> dict[str, object]:
-    return {
-        "state_fields": list(STATE_FIELDS), "x_fields": list(X_FIELDS),
-        "action_features": list(ACTION_FEATURES),
-        "xs_nonzero": int((model.topology_xs != 0).sum().item()),
-        "sa_nonzero": int((model.topology_sa != 0).sum().item()),
-        "parameter_count": model.parameter_count(),
-    }
+    def effective_parameter_report(self) -> dict[str, int]:
+        return {"raw_parameter_count": sum(p.numel() for p in self.parameters()),
+                "effective_trainable_degree_count": sum(p.numel() for p in self.parameters() if p.requires_grad),
+                "active_edges": 3 * 6 + 3 * len(FEATURE_NAMES), "frozen_edges": 0}
 
 
-def synthetic_gradient_smoke(seed: int = 7) -> dict[str, object]:
-    """Run a tiny differentiable check; no dataset or formal training involved."""
+def unroll(model: TheoryS, initial_state: Tensor, x_sequence: Tensor,
+           candidate_features: Tensor, gold_index: Tensor,
+           detach_state: bool = False) -> tuple[Tensor, Tensor]:
+    """Unroll [time,batch,*] and sum candidate-set NLL over time."""
+    state = initial_state
+    losses = []
+    states = []
+    for t in range(x_sequence.shape[0]):
+        state = model.transition(state, x_sequence[t])
+        if detach_state:
+            state = state.detach()
+        states.append(state)
+        losses.append(model.conditional_nll(state, candidate_features[t], gold_index[t]))
+    return torch.stack(states), torch.stack(losses).sum()
+
+
+def synthetic_gradient_smoke(seed: int = 7, steps: int = 10) -> dict[str, object]:
+    """Multi-step candidate-NLL trainability regression; never a research run."""
     torch.manual_seed(seed)
     model = TheoryS()
-    control = permuted_s()
-    x = torch.rand(8, 6)
-    state = torch.rand(8, 3)
-    action_features = torch.rand(8, 4)
-    z_base = torch.zeros(8)
-    next_state, logits = model(state, x, action_features, z_base)
-    loss = F.binary_cross_entropy_with_logits(logits, torch.rand(8))
-    loss.backward()
-    assert model.w_xs_raw.grad is not None and model.w_sa_raw.grad is not None
-    assert model.alpha_raw.grad is not None
-    assert torch.all((next_state >= 0) & (next_state <= 1))
-    assert model.parameter_count() == control.parameter_count()
-    assert int((model.topology_xs != 0).sum()) == int((control.topology_xs != 0).sum())
-    assert int((model.topology_sa != 0).sum()) == int((control.topology_sa != 0).sum())
-    assert not torch.equal(model.topology_xs, control.topology_xs)
-    return {"loss": float(loss.detach()), "parameter_count": model.parameter_count(),
-            "gradient_path": {"w_xs": float(model.w_xs_raw.grad.norm()),
-                              "w_sa": float(model.w_sa_raw.grad.norm()),
-                              "alpha": float(model.alpha_raw.grad.norm())},
-            "bounded_state": True, "no_candidate_leakage": True}
+    model.set_phase("B")
+    t, batch, candidates, d = steps, 2, 4, len(FEATURE_NAMES)
+    x = torch.rand(t, batch, 6)
+    features = torch.rand(t, batch, candidates, d)
+    gold = torch.randint(0, candidates, (t, batch))
+    initial = torch.full((batch, 3), .2)
+    before_states, before_loss = unroll(model, initial, x, features, gold)
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad], lr=0.08)
+    for _ in range(8):
+        optim.zero_grad(); _, loss = unroll(model, initial, x, features, gold); loss.backward(); optim.step()
+    after_states, after_loss = unroll(model, initial, x, features, gold)
+    optim.zero_grad(); _, final_loss = unroll(model, initial, x, features, gold); final_loss.backward()
+    grad_norms = {name: float(param.grad.norm()) for name, param in
+                  (("beta", model.beta), ("alpha", model.alpha_raw), ("w_sa", model.w_sa))}
+    assert float(after_loss.detach()) < float(before_loss.detach())
+    assert bool(torch.all((after_states >= 0) & (after_states <= 1)))
+    assert all(value > 0 for value in grad_norms.values())
+    assert model.theta.grad is None
+    return {"initial_nll": float(before_loss.detach()), "final_nll": float(after_loss.detach()),
+            "gradient_path": grad_norms, "bounded_state": True, "candidate_nll": True,
+            "multi_step": True, "theta_frozen_in_phase_b": True}
 
 
 if __name__ == "__main__":
