@@ -11,16 +11,16 @@
 来源原件：[Theory-S 与机制纠偏对话](../90_原始材料/2026-09-07_用户对话_Theory-S与机制纠偏/README.md)。
 
 - [x] **M0 mechanism sandbox（工程 sanity 完成）**：固定 Scene/O/P/generated `A^O`，在 5 个 LIGHT development fixtures 上做 `do(S=s_1)` / `do(S=s_2)`；结果显示 π 改变且 support 不变。结果不是现实数据机制证据，见[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md)。
-- [~] **M1 Theory-S candidate implementation**：核验 EMA/Broekens/MAMID/FAtiMA/TCN 与 Game-AI 可搬形式，暂用 `fatigue/engagement/tension` 三字段及 hand-set coupling；它们仍是 candidate mechanism / engineering hypotheses，不是冻结或心理学验证的 Theory-S。
+- [x] **M1 Theory-S v2 trainable contract（工程切片）**：冻结六维 X、三维 S、固定拓扑/符号、bounded `g`、可训练 `W_XS/W_SA/alpha` 与等容量 Permuted-S；合成梯度 smoke 通过。仍不是拟合结果或心理学验证，见 [Theory-S v2](../02_实验/Theory_S_v2/README.md)。
 - [~] **M2 minimal candidate compiler**：从 canonical SceneSnapshot 的 objects/agents/possessions/facts 独立生成带 provenance 的 affordance 与 `A^O`；生成后才做 source `available_actions` support hit/miss。当前 ontology、实例绑定和前置条件仍是最小 development slice。
-- [~] **M3 dataset→capability matrix**：当前 LIGHT projection、可验证字段与 ontology 尚不足以支撑 persistent-S identification，最终适用性未决；PowerWash/FarmQuest/AGAIN 仍待各自 semantic audit。不得把 source `available_actions` 当作 `A^O`。
+- [x] **M3 dataset→capability matrix（路由版）**：已登记 LIGHT、OPeRA、ClubFloyd、FarmQuest、PowerWash、AGAIN、SOTOPIA 的 action/transition/O/persistence 能力与边界；不是准入或识别结论，见 [capability matrix](../02_实验/Theory_S_v2/capability_matrix.md)。不得把 source `available_actions` 当作 `A^O`。
 - [ ] **M4 formal experiment gate**：M0–M3 未完成前，Run1–4 仅保留为 development identifiability diagnostics，不启动正式 test 或把结果写成 Theory-S 结论。
 - [x] **M5 Mechanism Sanity v1.2 trajectory sanity（受控工程检查）**：4 条固定 `A^O` 的 effort/progress/obstruction/recovery trajectory 均通过状态惯性、累积/恢复与 `π` 传导检查；`ΔO→X→U→S` 的真实数据语义审核仍未开始，不能视为 Gate 1 或正式实验。
 
 ## 本轮 development diagnostic 封口
 
 - [x] T14/T20 development chain：Run 1 full-refit、Run 1b frozen-model intervention、Run 2 frozen-`theta_0` incremental、Run 3 trajectory bootstrap、Run 3b permutation-assignment robustness、Run 4 Theory failure decomposition 均已完成并推送。该链只支持当前 LIGHT development cohort 下的结构诊断，不等于独立行为真值上的 formal result。
-- [ ] Run 4 后停止继续围绕 Theory-S 加诊断、调 `eta`、扩 coverage 或修改 representation；除非重新明确母问题与验收标准。
+- [x] Run 4 后停止继续围绕 v1/v1.2 Theory-S 加诊断、调 `eta`、扩 coverage 或修改 representation；本轮只冻结 v2 trainable contract，不启动正式训练。
 - [ ] 下一阶段回到 Paper-0 的 Experiment B：独立 `A*` 准入后，比较 `S` 与 raw legal history / structured history / strong summary，并报告 `S + history` residual gain。
 
 ## 本轮完成
