@@ -29,6 +29,6 @@
 
 候选集无法冻结、观察无法按角色重建、split 存在未来泄漏、或外部 `A*` 不独立，则停止正式 baseline。首轮不做 inverse、多角色/ToM、P 漂移、Scene Manager、Q01 高级曲线、心理机制成立或广泛新颖性宣称。
 
-## 路线顺序
+## 执行顺序
 
-E0 回归验收 → T0d OPeRA 30–50 session 准入审计 → 选择 OPeRA/LIGHT pilot → 最小 X→S slice → state/history/summary/naive-S/theory-S/permuted-S 表。
+本问题卡只冻结研究问题、边界、主张和 no-go，不维护易变的实验路线。当前执行入口见[项目现状速览](项目现状速览_通俗版.md)与[TODO](TODO.md)：先完成独立行为真值/候选集准入，再冻结 semantic/dynamics protocol，最后比较 history、summary、no-S、Theory-S、naive-S 与 trajectory-permuted-S。

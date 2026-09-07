@@ -1,0 +1,477 @@
+然后你额外看看有无屎山？有没偏？  
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+
+有，而且我现在能比较明确地区分：
+
+项目没有根本性跑偏，但仓库已经出现明显的“研究型屎山苗头”。
+
+最大风险不是代码写烂，而是 同一概念被四五套实验实现各自定义一次 + 前台文档彼此开始失同步 + 机制开发开始挤压母问题。
+
+一、研究方向：没根本偏，但已经贴到“机制过度开发”的边缘
+
+Paper-0 的冻结问题卡现在仍然很干净：
+
+$$ p(A\mid H^{obs},O,P)\approx p(A\mid S,O,P) $$
+
+核心还是三件事：
+
+S 是否保留历史后果；
+S 是否近似充分；
+正确历史归属的 S 是否必要。
+
+所以母问题没变。
+
+而我们最近做的：
+
+candidate generation
+S → π sanity
+X → S trajectory sanity
+gradient formalization
+
+其实都有合理原因：之前 Run1–4 已经暴露出“当前 S 几乎没有净增益”，如果连 S 都没真正接入行为、candidate 又不可信，直接跑正式实验反而是假科研。
+
+所以这段机制补课是必要的。
+
+但是——
+
+a72f691 已经出现一次真正的局部漂移
+
+它开始把：
+
+fixed signed topology + Permuted topology
+
+写成 Theory-S v2 的中心。
+
+这就有点从：
+
+“持久动态状态能不能压缩历史、帮助行为预测？”
+
+滑向：
+
+“哪张心理矩阵 topology 更好？”
+
+后者可以以后作为 T20 attribution，不能变成母问题。
+
+所以我们刚才给 Codex 的修正非常重要。修完之后应该立即停止继续造 v2.1/v2.2 机制。
+
+二、代码层面：现在最大的屎山是“平行语义实现”
+
+目前 active tree 里大约：
+
+199 个活动文件
+125 个在 02_实验
+54 个 Python 文件
+
+规模本身并不夸张。
+
+问题是我们现在至少有：
+
+C++ reference runtime
+    appraisal.cpp
+    state.cpp
+    decision.cpp
+
+Replay
+    transition_appraisal_v0.py
+    replay_features_v1.py
+    replay_probe_v1.py
+
+Mechanism_Sanity_v1
+    theory_s_v1.py
+    candidate_generation_v1.py
+
+Mechanism_Sanity_v1_2
+    trajectory runner
+
+Theory_S_v2
+    theory_s_v2.py
+
+也就是说：
+
+X → S → π 的含义已经在多个位置各自实现。
+
+这其实已经碰到仓库自己 ARCHITECTURE_RULES.md 第一条：
+
+Keep one canonical semantic path for O refresh → X/appraisal → S update → π/action decision → settlement.
+
+现在之所以暂时还能接受，是因为：
+
+C++ 是 reference/demo；
+T14 是旧 development probe；
+v1/v1.2 是 mechanism fixture；
+v2 是下一候选。
+
+但如果 Codex下一步又复制一个：
+
+Theory_S_v2/trainable_dynamics_v2.py
+experiment_b/theory_s_model.py
+LIGHT/theory_s_adapter.py
+
+那就真成屎山了。
+
+所以现在必须定一个原则
+
+从这次修正以后：
+
+Theory_S_v2/
+= canonical Python research dynamics operator
+
+Replay/
+= canonical source-neutral data / feature / baseline layer
+
+Mechanism_Sanity_v1/v1_2
+= frozen historical engineering fixtures
+
+C++ Demo
+= reference runtime，暂时独立
+
+后面的 Experiment B 调用 Theory_S_v2，不再复制 Theory-S。
+
+各数据集 adapter 只负责：
+
+raw
+→ ReplayRecord / SceneSnapshot / X-compatible inputs
+
+绝对不要各自拥有：
+
+LIGHTTheoryS
+OperaTheoryS
+AgainTheoryS
+
+这个我认为要直接告诉 Codex。
+
+三、第二个屎山已经出现：action semantics 分叉
+
+这个刚才已经抓出来了。
+
+仓库之前有 T14 canonical：
+
+goal_progress
+stimulation
+recovery
+hunger_relief
+bathroom_relief
+short_term_reward
+environment_control
+context_relevance
+has_target
+target_in_scene
+target_visible_in_O
+target_in_inventory
+repeated_acquire
+
+Mechanism v1 又有 semantic family。
+
+然后 a72f691 又造：
+
+stimulation
+social
+conflict
+recovery
+
+如果继续这样，半年之后就会出现：
+
+action_tags
+action_semantics
+action_features
+action_family
+behavior_features
+drive_features
+
+每一个名字都差一点。
+
+这是最典型的 AI coding 屎山。
+
+所以我们刚才要求：
+
+v2 必须复用 Replay/replay_features_v1.py
+
+是非常重要的。
+
+以后真的觉得 feature basis 不够，应该：
+
+replay_features_v1
+       ↓
+明确升级
+replay_features_v2
+
+然后全链一起迁移。
+
+而不是局部模块再造一套。
+
+四、目前最严重的“文档屎山”反而是 TODO
+
+这个很有意思：仓库自己的 repo_health_check.py 已经规定：
+
+TODO.md > 27000 bytes
+→ WARN
+
+现在 TODO 已经：
+
+33,790 bytes
+
+所以它已经被自己定义成超限了。
+
+而 ARCHITECTURE_RULES 又明确规定：
+
+TODO contains IDs, status, next action, completion condition, and links — not full literature arguments.
+
+但现在 TODO 里面已经塞了：
+
+长篇 Game AI Pro 论证；
+AI Town 分析；
+数据集历史；
+旧 T25/T26/T27；
+一堆已完成历史；
+多轮研究决策解释。
+
+这确实有点屎山了。
+
+应该怎么修？
+
+不是删历史。
+
+把 TODO 收缩成：
+
+ACTIVE
+BLOCKED
+NEXT
+DEFERRED
+
+每项最多：
+
+ID
+状态
+下一动作
+验收
+链接
+
+已完成的大段历史：
+
+移到 archive / milestone log。
+
+这样 Codex 每次读 TODO 不会吸收 30KB 历史上下文然后自己“发现新任务”。
+
+这个非常值得做，但我建议 不要和当前 Theory-S 修正混成同一个大 refactor。
+
+当前 Theory-S patch 完以后，做一个纯文档 cleanup commit 就行。
+
+五、前台文档已经开始互相打架
+
+这是目前另一个实质问题。
+
+比如 项目现状速览_通俗版.md 还写：
+
+下一步先补 mechanism sandbox。
+
+但 sandbox：
+
+M0 ✅
+v1.1 ✅
+v1.2 ✅
+
+早就做完了。
+
+02_实验/README.md 又说：
+
+当前主线是 T14/T20 rank-matched 1D development harness。
+
+而现在已经进入 3D trainable dynamics candidate。
+
+Paper-0问题卡 路线还是：
+
+OPeRA audit
+→ OPeRA/LIGHT pilot
+→ 最小 X→S
+
+这条研究问题本身不用动，但“路线顺序”显然已经是历史路线了。
+
+与此同时 TODO 又写：
+
+M1 v2 [x]
+M3 capability matrix [x]
+
+于是四个“真相来源”现在给出了四个阶段。
+
+这个很危险，因为 AI agent 最容易：
+
+读到哪个文件就把哪个当真。
+
+需要修成
+Paper-0问题卡：只保留 frozen RQ / claims / no-go，不维护易变路线；
+项目现状速览：唯一维护“现在到底在哪”；
+当前实现进度：事实；
+TODO：下一步；
+02_实验/README：实验路线索引，不宣布整个项目当前阶段。
+
+这其实就是仓库最初想做的“唯一职责”，但最近高速开发又开始松了。
+
+六、C++ 的 simulation.cpp 是屎山吗？
+
+它现在约：
+
+58 KB
+
+仓库 health check 也会 WARN。
+
+但我反而建议现在别碰。
+
+因为 ARCHITECTURE_RULES.md 已经明确写：
+
+known debt; this rule does not authorize a large refactor now.
+
+这个判断是对的。
+
+目前它：
+
+能跑；
+verify/E0 稳定；
+已经不是当前科研瓶颈。
+
+现在为了代码洁癖拆它，会是真正的注意力漂移。
+
+所以：
+
+有债，但不是现在该还的债。
+
+七、大量 JSON / fixture 不是主要问题
+
+例如：
+
+ClubFloyd review ≈ 1.55 MB
+LIGHT review ≈ 1.43 MB
+PowerWash review ≈ 0.97 MB
+FarmQuest review ≈ 0.64 MB
+AGAIN review ≈ 2.05 MB
+
+这些会让仓库越来越胖。
+
+但它们有 provenance / audit 价值，我现在不会为了漂亮删掉。
+
+未来可以统一：
+
+small audit fixtures → Git
+large reproducible generated artifacts → outputs / release / external storage
+manifest → Git
+
+现在还没严重到必须迁。
+
+八、我反而最担心的是“实验编号考古学”
+
+我们现在已经有：
+
+E0
+T0b
+T0c
+T0d
+T0f
+T0g
+T0h
+T14
+T20
+Mechanism Sanity v1
+v1.1
+v1.2
+Theory-S v2
+Run1
+Run1b
+Run2
+Run3
+Run3b
+Run4
+
+如果继续下去：
+
+v2.1
+Run5
+T20b
+M6
+Gate1a
+
+人已经开始需要考古才能知道先后关系。
+
+所以当前 Theory-S 修完后，不要继续产生阶段名字。
+
+下一阶段就简单叫：
+
+Development Training
+
+里面：
+
+baseline
+theory-S
+no-S
+history
+summary
+permuted-S
+
+够了。
+
+最终判断
+代码健康度
+
+我大概给：
+
+6.5～7/10
+
+不是屎山，但增长速度已经明显快于抽象收敛速度。
+
+主要问题：
+
+并行 semantic implementations    🟠
+action feature duplication       🔴 已经实际发生
+文档状态不同步                   🔴
+TODO 膨胀                        🟠
+大量历史实验留 active tree       🟡
+C++ simulation.cpp 58KB          🟡 已知债，暂不碰
+研究方向健康度
+
+反而更好一点：
+
+7.5～8/10
+
+母问题一直没漂。
+
+真正风险只有最近这一小段：
+
+persistent-state sufficiency
+          ↓
+mechanism sanity
+          ↓
+trainable dynamics
+          ↓
+差点变成
+“psychology topology benchmark”
+
+我们已经及时发现了。
+
+所以当前应该有一个很硬的停止线
+
+Codex 把我上一条 Theory-S 修正做完以后，机制开发停止。
+
+之后不允许再：
+
+加状态字段
+设计新 topology
+加 nonlinear gate
+改 P
+加新的 appraisal schema
+继续人工调 coupling
+
+除非后面的 development data 明确暴露某个失败，而且有预先定义的修改理由。
+
+下一步必须重新回到：
+
+$$ \boxed{\text{external trajectory} \rightarrow X \rightarrow S \rightarrow \text{next-action prediction}} $$
+
+也就是：
+
+找现有数据中真正能训练这条链的那部分 → 开发集训练 → 和 history/summary/no-S 比。
+
+否则我们就真的会从“研究人物动力学”变成“设计一个越来越漂亮的 NPC 心理模拟器”。
+
+我会把这个作为现在最重要的防偏边界。

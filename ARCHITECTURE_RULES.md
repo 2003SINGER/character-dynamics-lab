@@ -53,24 +53,29 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 38. Do not expand `simulation.cpp` with new datasets or measurements.
 39. Do not split files solely to make them look clean; split when ownership or reuse is real.
 
+### Research semantic ownership (2026-09-07)
+
+40. `02_实验/Theory_S_v2/` is the canonical Python research dynamics candidate; `Replay/` owns source-neutral records, canonical action features, and baseline probes. Dataset adapters may emit ReplayRecord/SceneSnapshot/X-compatible inputs, but must not copy or specialize Theory-S as `LIGHTTheoryS`, `OperaTheoryS`, or similar.
+41. `Mechanism_Sanity_v1` and `v1_2` are frozen historical engineering fixtures. New development training composes the canonical operator and feature layer; it does not create another X→S→π implementation.
+
 ## Tests and guards
 
-40. CTest and `--verify` remain regression gates for the existing reference runtime.
-41. Schema/provenance validators may fail on invalid records; size, duplication, and complexity checks warn only.
-42. A warning is not evidence that a mechanism is wrong; it is a prompt for review.
-43. Every new adapter needs a small schema-validating dev slice before larger downloads or model comparisons.
-44. Preserve negative results, raw outputs, configuration, and errors.
-45. Adapter acceptance is two-stage: schema validation is necessary but not sufficient; a semantic audit must check W/O/X/S ownership, causal availability, action meaning, and provenance.
-46. First adapter slices (roughly 20–50 trajectories) receive near-complete semantic review before scaling. Later batches use stratified sampling plus mandatory review of anomalies, new ontology values, low-confidence/unknown-heavy records, and validator edge cases.
-47. The extraction script may be deterministic while semantic annotations are human/AI-assisted; after review, annotations are saved as versioned frozen data and runtime experiments do not call the reviewing model.
-48. Semantic QA must record what the source says, what the transformation adds or loses, which fields are inferred, and whether any future information was used.
+42. CTest and `--verify` remain regression gates for the existing reference runtime.
+43. Schema/provenance validators may fail on invalid records; size, duplication, and complexity checks warn only.
+44. A warning is not evidence that a mechanism is wrong; it is a prompt for review.
+45. Every new adapter needs a small schema-validating dev slice before larger downloads or model comparisons.
+46. Preserve negative results, raw outputs, configuration, and errors.
+47. Adapter acceptance is two-stage: schema validation is necessary but not sufficient; a semantic audit must check W/O/X/S ownership, causal availability, action meaning, and provenance.
+48. First adapter slices (roughly 20–50 trajectories) receive near-complete semantic review before scaling. Later batches use stratified sampling plus mandatory review of anomalies, new ontology values, low-confidence/unknown-heavy records, and validator edge cases.
+49. The extraction script may be deterministic while semantic annotations are human/AI-assisted; after review, annotations are saved as versioned frozen data and runtime experiments do not call the reviewing model.
+50. Semantic QA must record what the source says, what the transformation adds or loses, which fields are inferred, and whether any future information was used.
 
 ## Documentation and review
 
-49. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
-50. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
-51. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
-52. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
+51. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
+52. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
+53. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
+54. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
 
 ## Current known baseline
 
