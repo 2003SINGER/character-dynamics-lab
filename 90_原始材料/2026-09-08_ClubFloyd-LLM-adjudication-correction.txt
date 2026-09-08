@@ -1,0 +1,501 @@
+不，我刚才把“human adjudication”要求得太死了。现在这种任务完全可以让强 LLM 承担绝大多数标注。
+
+关键不是“必须人标”，而是别把模型标注伪装成人工 gold。
+
+我们现在这 60 条其实特别适合做 LLM adjudication committee，因为判断问题已经冻结得非常清楚：
+
+这条 [ACTION] 是否代表玩家在游戏内选择/尝试了一个行为？
+
+这不是那种高度主观的文学判断，而是边界分类。
+
+我建议改成：
+
+用 3 个独立 fresh-session 强模型 reviewer，都只看：
+frozen command_admission_definition_v1
+raw_action
+pre_action_state
+不能看另外两个 reviewer 的答案
+不能看 future/post state
+每个输出四选一：
+IN_WORLD_CHOICE
+META_COMMAND
+CHAT_OR_COMMENTARY
+UNRESOLVED
+然后：
+3/3 一致 → 直接接受为 model_consensus
+2/3 一致且高置信 → 暂接受为 model_majority
+分歧/低置信 → 才扔给你人工看
+
+这样很可能最后你真正需要看的不是 60 条，而是：
+
+5～15 条最难的边界案例。
+
+甚至如果 60 条里 55 条三个强模型完全一致，我觉得完全没必要让你逐条重新劳动。
+
+但有一个措辞边界
+
+如果完全没人看过，就不能叫：
+
+human gold
+
+应该叫：
+
+frozen multi-LLM adjudicated admission labels
+
+或者：
+
+model-consensus silver labels
+
+这对于development-stage dataset admission完全够用了。
+
+我们现在又不是在做正式 benchmark leaderboard 的人工 gold 标注集。
+
+等以后真写 Paper-0，如果 ClubFloyd 变成主结果数据，再补一个真正人工抽样验证，比如随机抽：
+
+50–100 条；
+报 model-human agreement；
+
+那时候才值得你亲自/找别人标。
+
+而且你说得对：
+
+LLM 都这么强了，如果我们还把每个简单 semantic admission 都强制变成人工劳动，本身就有点机械遵守旧范式了。
+
+科研上真正重要的是：
+
+$$ \boxed{\text{标注协议固定 + reviewer 独立 + provenance 清楚 + 不看结果调标准}} $$
+
+而不是：
+
+$$ \boxed{\text{必须由碳基动物点击按钮才算可靠}} $$
+
+所以我会把下一步改成：
+
+让 Luna 用 3-way independent LLM adjudication 跑这 60 条；只把真正 unresolved/disagreement 的少量样本交给你。
+
+这比你硬标 60 条合理得多。
+
+让codex来，你给指令
+
+可以，直接把这段给 Codex。核心是：不再让我/你人工标 60 条，而是用冻结定义做 3-way independent LLM adjudication，只把真正难例留下。
+
+现在继续 ClubFloyd，但不要要求用户人工标完 60 条。
+
+目标：
+
+使用冻结的 command_admission_definition_v1.md，对现有 60 条分歧样本做 3-way independent LLM adjudication，并只把真正 unresolved 的少量样本留给人工。
+
+这轮仍然不训练 Theory-S，不改 evaluator，不新增数据集。
+
+1. Source of truth
+
+唯一 admission 定义：
+
+02_实验/Replay/ClubFloyd/command_admission_definition_v1.md
+
+必须严格区分：
+
+[
+A^W = \text{world-objective executable actions}
+]
+
+[
+A^O = \text{character-observed / generated candidate actions}
+]
+
+[
+A^* = \text{actually selected / attempted player action}
+]
+
+ClubFloyd 当前只直接提供 observed source A*。
+
+LLM reviewer 只回答：
+
+Does this [ACTION] represent the player choosing or attempting an in-world behavior?
+
+不得回答：
+
+Is this action objectively legal in W?
+
+不得根据 world execution success/failure 判 admission。
+
+2. Labels
+
+每个 reviewer 只能输出四类：
+
+IN_WORLD_CHOICE
+META_COMMAND
+CHAT_OR_COMMENTARY
+UNRESOLVED
+
+定义完全继承 command_admission_definition_v1.md。
+
+特别注意：
+
+IN_WORLD_CHOICE 包括
+successful action
+failed action
+rejected action
+parser rejected but clear behavioral intent
+impossible/unreachable target attempt
+mistaken-belief action
+shorthand movement
+speech/social in-world action
+custom verb / spell / game-specific action
+
+例如：
+
+west
+take worm
+jump on table
+say sorry
+ask X about Y
+
+即使 world 后续拒绝，也仍然是 A*。
+
+META_COMMAND
+
+仅系统/游戏控制层：
+
+save
+restore
+restart
+quit
+debug
+transcript
+credits
+walkthrough
+hint
+其他明确 bookkeeping/system control
+CHAT_OR_COMMENTARY
+
+玩家对其他真人、日志、观众、parser 或游戏设计的评论，而不是角色/游戏世界行为。
+
+UNRESOLVED
+
+仅当 raw action + pre-action context 仍无法稳定区分以上三类。
+
+不能因为 world legality 不确定而判 UNRESOLVED。
+
+3. Review artifact
+
+使用现有：
+
+command_admission_human_adjudication_v1.jsonl
+
+作为 60-row challenge set。
+
+注意：
+
+不读取其中旧 reviewer1/reviewer2 label 作为判断依据；
+最好生成一个 stripped artifact，只保留：
+audit_id
+raw_action
+pre_action_state
+
+例如：
+
+command_admission_llm_challenge_v1.jsonl
+
+不要让新 reviewer 看到 reviewer1 / reviewer2 的结果，避免 anchoring。
+
+4. 三个独立 reviewer
+
+使用 3 个独立 fresh-session reviewer。
+
+优先真正独立调用，不共享 conversational context。
+
+可以使用 Codex subagents；如果 Terra 可调用，也可以让不同 reviewer 使用 fresh isolated calls。
+
+要求：
+
+Reviewer A
+
+fresh session
+
+Reviewer B
+
+fresh session
+
+Reviewer C
+
+fresh session
+
+三者都：
+
+使用同一 frozen admission definition；
+只看 raw_action + pre_action_state；
+不看另外 reviewer 的输出；
+不看旧 reviewer1/reviewer2；
+不看 post-state；
+不看 future action；
+不看 execution outcome；
+不读取 model condition 或未来实验结果。
+
+如果只能使用同一个 model，也没关系，但必须 fresh isolated calls。
+
+保存：
+
+model/version
+prompt/version
+temperature
+timestamp
+input artifact hash
+output artifact hash
+5. Reviewer output schema
+
+每条严格输出：
+
+{
+  "audit_id": "...",
+  "label": "IN_WORLD_CHOICE | META_COMMAND | CHAT_OR_COMMENTARY | UNRESOLVED",
+  "confidence": "high | medium | low",
+  "reason": "one short sentence"
+}
+
+不要输出额外长解释。
+
+分别保存：
+
+command_admission_llm_review_A_v1.jsonl
+
+command_admission_llm_review_B_v1.jsonl
+
+command_admission_llm_review_C_v1.jsonl
+
+6. Aggregation rule 必须提前冻结
+
+在 reveal 三个 reviewer 结果前，先写 aggregation rule。
+
+推荐：
+
+Tier 1 — CONSENSUS
+
+如果：
+
+3/3 label 一致
+且至少 2 个 reviewer confidence 为 high/medium
+
+则：
+
+adjudication_status = MODEL_CONSENSUS
+
+接受该 label。
+
+Tier 2 — MAJORITY
+
+如果：
+
+2/3 label 一致
+majority 两个 reviewer 都不是 low confidence
+
+则：
+
+adjudication_status = MODEL_MAJORITY
+
+接受 majority label，但单独标记 provenance。
+
+Tier 3 — UNRESOLVED_FOR_HUMAN
+
+如果：
+
+三者三分；
+或 majority 依赖 low-confidence；
+或任意明显 schema/protocol violation；
+或 2/3 虽一致但 reason 暴露 world-legality contamination；
+
+则：
+
+adjudication_status = HUMAN_REVIEW_REQUIRED
+
+只把这些样本交给用户。
+
+不要为了减少 human review 数量修改 aggregation rule。
+
+7. 生成最终 adjudication table
+
+新增：
+
+command_admission_llm_adjudication_v1.jsonl
+
+每条至少包含：
+
+audit_id
+reviewer_A_label/confidence
+reviewer_B_label/confidence
+reviewer_C_label/confidence
+final_label
+adjudication_status
+disagreement_pattern
+
+以及 summary：
+
+3/3 consensus 数量
+2/3 majority 数量
+human-required 数量
+各 label 数量
+disagreement matrix
+confidence distribution
+8. 只把真正困难样本留给用户
+
+如果最终只有少量：
+
+HUMAN_REVIEW_REQUIRED
+
+生成：
+
+command_admission_human_review_required_v1.md
+
+每条只展示：
+
+raw action
+pre-action state
+三 reviewer labels
+三个 very short reasons
+final label 留空
+
+不要自动代用户填写。
+
+目标不是强行让 human-required = 0。
+
+如果剩 5–15 条，是完全正常的。
+
+9. 不叫 human gold
+
+这轮产物严禁命名：
+
+human gold
+gold labels
+human adjudication
+
+除非用户真的人工标了。
+
+正确命名：
+
+model_consensus
+model_majority
+multi_llm_adjudicated
+silver admission labels
+
+文档明确：
+
+These are frozen multi-LLM adjudicated development labels, not human gold.
+
+如果未来 Paper-0 正式使用 ClubFloyd，可再做独立 human spot-check。
+
+当前 development admission 不要求全量人工 gold。
+
+10. 重新检查旧 reviewer 的问题
+
+可以在新 adjudication 完成后，post-hoc 比较：
+
+old reviewer1 vs multi-LLM adjudication
+old reviewer2 vs multi-LLM adjudication
+mechanical quality class vs multi-LLM adjudication
+
+目的只是理解旧 heuristic。
+
+不得根据这些结果修改新 aggregation rule。
+
+11. 估计 usable Stage-A subset
+
+在不把 silver labels 冒充 source truth 的前提下，给一个 development estimate：
+
+ClubFloyd source actions 中大约有多少比例/规模可形成 IN_WORLD_CHOICE Stage-A target。
+
+区分：
+
+observed source [ACTION]
+admitted A*
+unresolved
+excluded meta/chat
+
+不要把 A* 和 A^W 或 A^O 混。
+
+12. Final gate
+
+这轮之后不要再返回 FIX_ONE_BLOCKER_v2/v3。
+
+只允许：
+
+GO_TO_REPRESENTATION_BASELINE
+
+若：
+
+corrected A* definition 已冻结；
+3-way LLM adjudication 大部分样本稳定；
+human-required subset 足够小；
+usable IN_WORLD_CHOICE subset 足够大；
+history/future boundary 继续通过；
+evaluator v1 保持冻结。
+
+允许存在少量 human-required rows；这些可以暂时从 development subset 排除。
+
+不要求：
+
+source candidate set；
+A^W；
+full A^O；
+human gold for every row。
+NO_GO_CLUBFLOYD_STAGE_A
+
+仅当：
+
+多模型对“是不是 in-world choice”仍大面积不一致；
+大量 source [ACTION] 本质无法解释；
+player/system boundary 不可靠；
+usable subset 过小。
+13. AGAIN
+
+AGAIN dynamics audit 已完成。
+
+状态改成：
+
+COMPLETED_DEVELOPMENT_AUDIT
+
+结论固定：
+
+short-term arousal-proxy persistence stable
+event-driven relaxation unstable
+not Theory-S validation
+no further AGAIN expansion now
+14. TODO / docs cleanup
+
+同步：
+
+CLUBFLOYD → 3-way LLM adjudication / final Stage-A gate
+AGAIN-DYN → completed
+POOL → completed
+T0d 去掉“先完成 routing v1”
+修掉旧 gold_independent 命名残留
+active docs 中保持 A^W / A^O / A* 严格区分
+15. 禁止
+
+禁止：
+
+让同一个 reviewer 看其他 reviewer 结果
+第四轮全量模型 review
+根据结果改 admission definition
+根据结果改 evaluator alias
+candidate-set reconstruction
+Theory-S training
+新数据集
+OPeRA v2
+LIGHT annotation
+post-state 参与 admission
+把 execution failure 当作不是 A*
+把 model-consensus 写成 human gold
+
+完成后 commit + push webgpt-sync，然后停止。
+
+最终汇报只需要：
+
+reviewer A/B/C provenance；
+3/3 consensus 数；
+2/3 majority 数；
+human-review-required 数；
+estimated usable IN_WORLD_CHOICE subset；
+final gate；
+下一步一句话。
+
+这次的目标就是把“LLM 很强”真正用起来，但同时保留研究上最重要的东西：冻结定义、独立 reviewer、清楚 provenance、不冒充人工 gold。

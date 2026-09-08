@@ -106,6 +106,7 @@ ClubFloyd **can form a legal open-text next-action development task** after this
 source filter and split protocol. The largest current blocker is not history
 leakage; it is semantic action admission/canonicalization and an evaluation
 metric for open text. It is therefore **not yet ready for Theory-S representation
-comparison**. The next action is **FIX_ONE_BLOCKER**: review the small
+comparison**. The old next-action note is superseded by corrected `A*` admission v1 and the completed multi-LLM adjudication; the current gate is
+**GO_TO_REPRESENTATION_BASELINE**.
 `verified_command_like_v0` fixture and freeze semantic-match rules. Do not begin
 Theory-S parameter training from this document alone.

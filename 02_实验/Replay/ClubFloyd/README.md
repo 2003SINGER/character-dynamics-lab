@@ -32,7 +32,7 @@ Stage-A source-command 入口已冻结于 [source-command protocol v0](source_co
 
 Read [command admission definition v1](command_admission_definition_v1.md) before using any Stage-A action. ClubFloyd `[ACTION]` is observed chosen action `A*`, not an objectively legal world action `A^W`, and not the character's subjective candidate set `A^O`. Failed, rejected, mistaken-belief, unreachable-target, and parser-rejected in-world attempts remain `A*` when the player's in-world choice is clear. World settlement/outcome is a separate later layer.
 
-`command_admission_audit_semantic_v0.jsonl` and `command_admission_review_independent_v0.jsonl` are model-assisted review provenance, not human gold. The 60-row `command_admission_human_adjudication_v1.jsonl` is an intentionally blank review sheet: `final_label` and `note` must be filled by a human under the v1 definition; they must not be auto-completed from world legality or post-state feedback.
+`command_admission_audit_semantic_v0.jsonl` and `command_admission_review_independent_v0.jsonl` are historical model-assisted review provenance, not human gold. The corrected 60-row challenge set was independently reviewed by three fresh LLM sessions and aggregated under [the frozen rule](llm_adjudication_aggregation_rule_v1.md): 51 `MODEL_CONSENSUS`, 9 `MODEL_MAJORITY`, 0 human-required. These are frozen multi-LLM adjudicated development labels, not human gold.
 
 全量抽取与分层 review slice：
 

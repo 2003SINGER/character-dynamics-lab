@@ -7,7 +7,7 @@
 
 ### Primary shortlist
 
-1. **#1 ClubFloyd — `PRIMARY_ACTION_CANDIDATE`**：425 条单玩家 transcript、438,188 observed steps，最天然地提供 ordered state/action history → observed next command。它仍不是 canonical finite-`A^O` 或完整 Theory-S 训练准入；下一步只需冻结 command-like 子集和开放文本 action 评价口径。
+1. **#1 ClubFloyd — `PRIMARY_ACTION_CANDIDATE`**：425 条单玩家 transcript、438,188 observed steps，最天然地提供 ordered state/action history → observed chosen `A*`。corrected admission 与 multi-LLM development adjudication 已冻结；它仍不是 canonical finite-`A^O` 或完整 Theory-S 训练准入，可进入 representation baseline。
 2. **#2 LIGHT — `PRIMARY_ACTION_CANDIDATE`（backup / canonical-interface candidate）**：source `A*`、scene/replay/13D 工程基础最好，但 actor-local gap 与 X 缺失阻止完整六维训练。它是现有 Theory-S 工程接口的备选，不是已通过 D01 的主数据。
 
 **如果今天必须开始第一次 real 3D Theory-S development experiment：选 LIGHT 的受限 actor-local development slice，不填缺失 X，不把 observed `available_actions` 当 `A^O`。**

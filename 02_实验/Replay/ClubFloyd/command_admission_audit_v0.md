@@ -23,9 +23,11 @@
 
 机械 `command-like` 100 条在旧 reviewer 体系下被分成 34/57/9，但这不是 precision 估计；两轮 reviewer 的分歧来自 admission 问题被错误地混入 world-legality/target-evidence 判断。按 corrected v1，失败或世界拒绝不应剔除 observed `A*`。
 
-**当前 gate：FIX_ONE_BLOCKER（先修复动作质量/语义准入边界，并完成少量人工 adjudication 以校准两轮分歧）。**
+**当前 gate：GO_TO_REPRESENTATION_BASELINE。** corrected `A*` admission is frozen and the 60-row multi-LLM adjudication is complete; no human-required rows remain under the frozen rule.
 
-已冻结 corrected `A^W / A^O / A*` 定义，并从两轮分歧中生成 60 条人工 adjudication sheet。人工 adjudication 只回答“是否代表玩家在游戏内选择/尝试行为”，不判断 `A^W` 合法性、执行成功与否或 target 是否被 pre-state 证明存在。完成后若 `IN_WORLD_CHOICE` subset 足够且边界/泄漏检查继续通过，即可进入 `GO_TO_REPRESENTATION_BASELINE`；不再进行第三轮模型全量 review。
+已冻结 corrected `A^W / A^O / A*` 定义。60 条冲突样本经三次独立 LLM review 后得到 51 条 `MODEL_CONSENSUS`、9 条 `MODEL_MAJORITY`、0 条 `HUMAN_REVIEW_REQUIRED`；最终标签为 `IN_WORLD_CHOICE` 49、`META_COMMAND` 10、`CHAT_OR_COMMENTARY` 1。它们是 multi-LLM adjudicated development silver labels，不是 human gold。挑战集经过冲突富集抽样，49/60（81.7%）只能作为 challenge-set development estimate，不能外推全量比例。
+
+review 只回答“是否代表玩家在游戏内选择/尝试行为”，不判断 `A^W` 合法性、执行成功与否或 target 是否被 pre-state 证明存在。history boundary / trajectory split / future leakage 继续通过；因此当前 admission blocker 已闭合，允许进入 `GO_TO_REPRESENTATION_BASELINE`。不再进行第四轮全量模型 review。
 
 ## 不变边界
 
