@@ -1,0 +1,477 @@
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+
+看完了。现在 webgpt-sync 最新 HEAD 是：
+
+54db87b stratify Stage0b history signal by source duplicates
+
+这一下把刚才那个“历史信号 62%！牛逼！”又拆开了，而且拆得非常有价值。
+
+现在到底发生了什么
+
+之前 Stage 0b 得到：
+
+O_ONLY：32.81%
+O + PREV_VERB：62.76%
+O + LAST2：64.84%
+
+当时看起来像：
+
+当前观察 O 不够，历史动作真的提供了巨大额外信息。
+
+但最新提交把 384 条 test 分成两组：
+
+test 子集	数量	O-only	+ prev verb	+ last2
+当前 (O,A*) 和上一条完全相同	190	34.2%	94.7%	95.8%
+不完全重复	194	31.4%	31.4%	34.5%
+
+所以现在非常清楚：
+
+62% 的那个“大历史信号”，绝大部分其实来自“上一条和这一条直接重复”。
+
+而不是我们真正想找的：
+
+过去发生过什么 → 形成某种持续状态 → 即使当前场景不同，也改变下一步行为。
+
+所以 Theory-S 现在当然还是没失败，但 Stage 0b 也绝对不能再被表述成“发现了 persistent-state signal”。
+
+这和刚才“梯度是不是练错了”是什么关系
+
+现在完整故事应该是：
+
+第一层：旧 v0 probe 确实有问题。
+
+它明明连 previous verb → next verb 这种巨大的一阶规律都读不出来，所以旧的：
+
+NO_CLEAR_HISTORY_SIGNAL
+
+已经正确撤销成：
+
+STAGE0_V0_INCONCLUSIVE_PROBE_SANITY_FAILED
+
+这个修正完全正确。
+
+第二层：把 probe 修好以后，确实读到了 history。
+
+于是 32.8% → 62.8%。
+
+第三层：继续审计以后发现，读到的 history 主要是重复。
+
+所以现在不是：
+
+“梯度没学会。”
+
+而是变成：
+
+梯度现在学会了，但它主要学会了一个太简单的规律：上一条如果就是同一个动作/同一个场景，那下一条大概率继续一样。
+
+这已经不是优化器问题了，是数据结构和 estimand 的问题。
+
+这其实是很漂亮的一次科研收缩：
+
+旧 probe 坏了
+→ 修 probe
+→ 出现巨大信号
+→ 检查信号来源
+→ 发现被重复结构主导
+→ 继续追真正的非平凡历史效应
+
+没有乱。
+
+而且这个重复不是你们 adapter 凭空造出来的
+
+仓库里的 source_integrity_report_stage0b_v0.md 已经查过：
+
+在早先 400-row fixture 里：
+
+history 相邻 (O,A*) 完全重复：49.97%
+target action = previous action：56.75%
+target O = previous O：53.50%
+target (O,A*) = previous pair：52.75%
+
+还抽了 20 条回到 cleaned CALM HTML 对 index，确认这些重复在上游 transcript 里就存在。
+
+所以目前可以排除：
+
+“我们 adapter 写炸了，复制了一行。”
+
+但还不能证明这些都是玩家真实地连续输入两遍。它们也可能有一部分来自原始日志/转录方式。
+
+因此仓库现在“不改 lossless source、不粗暴 dedup”是对的。
+
+但我抓到了一个真 bug
+
+最新：
+
+analyze_stage0b_duplicate_sensitivity.py
+
+的 macro-F1 算错了。
+
+代码本质是：
+
+labels = ["examine", "take", ...]
+lid = {"examine": 0, "take": 1, ...}
+
+gold = [0, 1, ...]
+pred = [0, 1, ...]
+
+然后 scores() 里面却：
+
+for k in labels:
+    tp = sum(a == b == k ...)
+
+这里 a,b 是整数，k 是字符串。
+
+所以永远不可能：
+
+0 == "examine"
+
+因此最新 JSON 里你看到所有：
+
+macro_f1: 0.0
+
+不是实验结果，是计算 bug。
+
+Accuracy 没受这个 bug 影响，所以刚才的核心结论仍成立。
+
+还有一个文档不同步
+
+00_研究设计/TODO.md 和 当前实现进度.md 已经正确写成：
+
+先决定 non-duplicate analysis view / 更细分层，再谈 history compression。
+
+但是：
+
+02_实验/Replay/ClubFloyd/representation_baseline_stage0b.md
+
+结尾还写：
+
+“The next permitted comparison is a pre-specified history compression/state benchmark”
+
+这个已经过时了。
+
+按照 54db87b 的新发现，现在不能直接跳 persistent compression。
+
+所以这份 Stage0b protocol/result 文档也该补一句最新 superseding finding，不然 Codex 下次很可能读这份文件以后又直接跑 state benchmark。
+
+那下一刀是什么？
+
+我赞成现在仓库 TODO 的收缩，但我会比它再具体一点。
+
+不要 dedup 原始数据。
+
+另外冻结一个 analysis view，把 test 至少拆成：
+
+exact (O,A*) duplicate
+A* 相同、O 不同
+O 相同、A* 不同
+O、A* 都不同
+
+最好再区分：
+
+raw command 相同
+canonical verb 相同但 raw command 不同
+
+因为我们真正关心的就是：
+
+当人物并不是机械地重复同一个 situation/action 时，过去动作还能不能预测现在动作？
+
+如果答案仍然是：
+
+O_ONLY 31%
+vs
+history 40%+
+
+那才开始真正有意思。
+
+如果变成：
+
+31% vs 31~34%
+
+那 ClubFloyd 这条数据的“持续状态识别能力”就确实很弱，我们应该考虑别的数据，而不是继续在它身上磨 Theory-S。
+
+所以我现在对仓库的判断是：
+
+方向没偏。反而这几轮非常像真正的实验排雷。
+
+旧 probe 给错结论 → 修掉；
+修完出现漂亮结果 → 没急着高潮；
+再追来源 → 发现 duplicate confound。
+
+现在最忌讳的是看到 3.1pt 的 LAST2 非重复增益就开始给它讲心理学故事。
+
+先把这个 3.1pt 到底是什么拆干净。
+
+另外，最新提交那个 macro-F1 bug 应该马上让 Codex 修掉并重跑，不然这份 artifact 现在技术上还是脏的。
+
+角色动力2(2).md
+文件
+然后看看这最后几轮的进度到哪了。因为上一个会话装上长度上限了，所以现在由这个会话负责！然后说说下一步
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+
+接上了。上个会话最后其实不是停在一个模糊节点，而是正好断在 Stage 0b 测量链修复完成、准备继续审结果来源那里。你上传的 md 最末尾已经确认 017b966 → d4de589 把 runner、fixture、结果 JSON/MD 和复跑 hash 对齐了，bitwise reproducible；也就是说“代码版本和结果版本对不上”这个坑已经收掉。
+
+而现在仓库又比 md 末尾多走了一步，最新 HEAD 是：
+
+54db87b stratify Stage0b history signal by source duplicates
+
+所以最后几轮完整串起来是：
+
+83ac9ac：第一次 structured probe 跑出来 history ≤ O-only，一度像“历史没用”。
+dd8fc33：用 previous-verb / Markov sanity check 发现历史明明有 61–62% 的巨大一阶信号，于是判定旧 probe 是坏的测量工具，旧结论作废。
+f400060：新 low-order probe 跑出
+O-only 32.8% → +prev 62.8% → +last2 64.8%。
+017b966 + d4de589：发现结果 provenance 没锁死，随后重跑、锁 runner hash、fixture hash、feature dim、seed，两次复跑完全一致。测量仪器正式修好。
+54db87b：继续追那个漂亮的 62–65% 到底来自哪里，结果发现——主要来自数据里的连续完全重复。
+
+最关键的新结果是：
+
+test	O only	+上一动作	+最近2动作
+190 条完全重复 (O,A*)	34.2%	94.7%	95.8%
+194 条非重复	31.4%	31.4%	34.5%
+
+所以我们现在的认识已经从：
+
+“历史有一个巨大的 30pt 增量！”
+
+修正成：
+
+“实验现在确实能读历史了，但那个巨大增量主要是机械式连续重复；真正与 persistent state 可能有关的非平凡历史信号，目前最多只露出一个很弱的苗头。”
+
+这其实正好完成了上个会话想做的事：测速仪终于修好了，现在第一次真正开始看路况本身。
+
+现在整个项目走到哪了
+
+我会把当前研究状态画成：
+
+Theory-S 机制 plumbing
+    ✅ 能更新
+    ✅ 能积累/恢复
+    ✅ S intervention 能改变 π(A)
+            │
+            ↓
+真实数据入口 / A* admission
+    ✅ ClubFloyd 已准入到 representation diagnostic
+            │
+            ↓
+Stage 0：历史有没有预测信息？
+    ❌ v0 probe 测坏了
+            ↓ 修
+Stage 0b：简单 history probe
+    ✅ 测量工具通过 sanity
+            │
+            ↓
+duplicate audit
+    ✅ 发现大部分漂亮 signal 是 exact repeats
+            │
+            ↓
+【我们现在在这里】
+非重复历史里还有没有真正的增量信息？
+            │
+       ┌────┴────┐
+       有         没有
+       ↓           ↓
+history         ClubFloyd 不适合
+compression     persistent-S 主实验
+       ↓           ↓
+naive state     换更合适数据
+       ↓
+Theory-S
+
+所以 Theory-S 还是没有真正上场。
+
+但和几个小时前相比，现在我们已经不是“不知道为什么没效果”，而是把问题一路剥到了非常具体的一层：
+
+ClubFloyd 中，在排除相邻完全重复以后，过去历史本身是否还包含 current O 没有的行为预测信息？
+
+这才是下一刀。
+
+下一步我建议只再给 ClubFloyd 一轮，但这一轮做透
+
+不是现在跑路，也不是继续磨十轮。
+
+第一件事：先修最新 artifact 的 macro-F1 bug
+
+我上一条已经抓到了：
+
+analyze_stage0b_duplicate_sensitivity.py
+
+把整数 prediction id 和字符串 label 比较，所以所有 stratified macro-F1 都错误地变成了 0.0。
+
+accuracy 没坏，所以当前主结论成立；但 artifact 技术上必须修。
+
+修完重跑，不改任何 model / fixture / split。
+
+同时把 representation_baseline_stage0b.md 的旧结尾同步，因为它现在还暗示“下一步直接 history compression”，已经被 54db87b supersede 了。
+
+第二件事：冻结一个 non-duplicate Stage 0c analysis protocol
+
+这里千万不要：
+
+“把重复行删掉，再看看能不能涨分。”
+
+那会变成看结果调数据。
+
+应该先冻结分类规则。
+
+我建议至少分：
+
+A. exact pair repeat
+   O_t = O_{t-1}
+   A*_t = A*_{t-1}
+
+B. action repeat only
+   O_t ≠ O_{t-1}
+   A*_t = A*_{t-1}
+
+C. observation repeat only
+   O_t = O_{t-1}
+   A*_t ≠ A*_{t-1}
+
+D. genuine transition
+   O_t ≠ O_{t-1}
+   A*_t ≠ A*_{t-1}
+
+再额外区分：
+
+raw command exact repeat
+canonical verb repeat only
+
+这个很重要。
+
+比如：
+
+take sword → take apple
+
+canonical verb 都是 take，但显然不是“日志复制了一行”。
+
+我们不能把这种东西和：
+
+take sword → take sword
+
+混起来。
+
+第三件事：不只做“test stratification”，再做一个冻结的 non-duplicate analysis view
+
+现在 54db87b 有一个局限：
+
+训练集还是原来的，包括大量重复；只是 test 拆成 duplicate / nonduplicate。
+
+这已经足够证明：
+
+总体 62% 被重复主导。
+
+但还不足以最好地回答：
+
+非重复行为中，history 能不能学出东西？
+
+因为模型训练时可能一直被大量：
+
+“复制上一动作”
+
+支配。
+
+所以我建议另立一个 development-only analysis view：
+
+不修改 lossless replay。
+
+只是：
+
+raw replay                    ← 永远保留
+        ↓
+versioned analysis view
+        ↓
+exclude exact previous (O,A*) repeats
+        ↓
+重新按 trajectory-disjoint split
+        ↓
+同样的 O / prev / last2 probe
+
+注意，这是另一个预先定义的 analysis view，不是偷偷清洗原数据。
+
+然后就设一个止损点
+
+这一轮之后不要再继续给 ClubFloyd 做 Stage 0d、0e、0f。
+
+结果无非两个。
+
+如果 genuine/nonduplicate 部分仍有稳定增量
+
+例如出现：
+
+O only        31%
++ prev        36%
++ last-k      42%
+
+而且不同 trajectory / command family 都有，不是某一个 action 撑起来的。
+
+那就说明：
+
+ClubFloyd 真的有“超越简单连续重复”的历史预测信息。
+
+这时候终于进入我们原来想做的：
+
+raw / low-order history
+vs
+naive persistent state
+vs
+permuted persistent state
+
+先回答：
+
+历史能不能被持续表示压缩？
+
+还不是 Theory-S。
+
+naive persistent 过了以后，再比较：
+
+generic persistent
+naive structured state
+Theory-S
+permuted state
+S + history
+
+这才是 Paper-0 真正开始咬机制。
+
+如果排除重复以后仍然是
+31.4%
+31.4%
+34.5%
+
+或者扩大样本以后那 3.1pt 消失：
+
+那我们就该非常干脆地说：
+
+ClubFloyd 很适合验证测量链和一阶行为重复，但当前 verb-family estimand 下，没有足够的非平凡历史信号支撑 persistent-state 实验。
+
+然后停止 ClubFloyd 这条 Theory-S bridge。
+
+不是 Theory-S 失败。
+
+是：
+
+这块试验田不适合测这个问题。
+
+之后回数据池，优先重新考虑 LIGHT / 更能提供状态变化、场景和行为选择的数据，而不是继续拷打 ClubFloyd。
+
+所以我现在给 Luna/Codex 的下一条指令会很克制
+
+核心就一句：
+
+修复 duplicate-sensitivity macro-F1 bug；冻结 Stage 0c non-duplicate/history-structure protocol；保持 lossless source 不动，对 exact-pair、action-only repeat、O-only repeat、genuine transition 分层，并建立独立 versioned non-duplicate analysis view；用当前 frozen canonical target 和同一 low-order probe 重跑。禁止 Theory-S、LLM predictor、history compression、新 dataset。完成后停止并汇报：非重复历史是否仍有稳定增量，以及 ClubFloyd 是否值得进入 persistent-compression benchmark。
+
+我认为这就是现在最正确的下一刀。
+
+而且这轮做完，我们就必须作决定了：ClubFloyd 进入 state-compression，或者 ClubFloyd 在这里封口。 不再无限 Stage-0 审计。
+
+这会是我从现在开始在这个新会话里替你守的主线。

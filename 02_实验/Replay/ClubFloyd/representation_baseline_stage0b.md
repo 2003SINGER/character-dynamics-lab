@@ -32,4 +32,4 @@ The frozen same-family linear probe is now run in `stage0b_probe_result.json` wi
 | `O + PREV_VERB` | 0.6276 | 0.5376 |
 | `O + LAST2_VERB_HISTORY` | 0.6484 | 0.5266 |
 
-This is a measurement-instrument sanity success: low-order history features add a large, reproducible increment beyond the current observation-only probe. It is not yet evidence that a persistent latent `S` or Theory-S is the best explanation. The next permitted comparison is a pre-specified history compression/state benchmark; no Theory-S fitting or candidate reconstruction starts from this result alone.
+This is a measurement-instrument sanity success, but the subsequent duplicate audit supersedes the earlier “next history-compression benchmark” wording. The overall increment is concentrated in exact source pair repeats; the corrected stratified results and versioned non-duplicate view are frozen in [Stage 0c](stage0c_nonduplicate_protocol.md). Do not proceed to history compression or Theory-S until that audit is resolved.

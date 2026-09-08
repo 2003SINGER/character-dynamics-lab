@@ -1,0 +1,16 @@
+{
+  "schema_version": "clubfloyd_stage0c_analysis_view_v0",
+  "source_fixture_sha256": "1151ad7867e0d724098be188b625f6ea221cd312f5e30013ded8d4c5009b5a7a",
+  "view_rule": "exclude only rows whose target (source_O, source_action_A_star) exactly equals immediately previous history pair; preserve all other rows and raw source",
+  "input_rows": 4000,
+  "output_rows": 1964,
+  "excluded_exact_duplicate_rows": 2036,
+  "category_counts_input": {
+    "EXACT_DUPLICATE_PAIR": 2036,
+    "ACTION_REPEAT_ONLY": 93,
+    "OBSERVATION_REPEAT_ONLY": 51,
+    "GENUINE_TRANSITION": 1820
+  },
+  "view_sha256": "0d26fb0a2e716b10483f483faa19bdd1747c6a901d42d670fdf165ce8c3ea6ff",
+  "lossless_source_unchanged": true
+}

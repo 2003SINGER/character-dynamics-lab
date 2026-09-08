@@ -10,6 +10,6 @@ The stratification is applied to the 384-row trajectory-disjoint test set, not t
 | `O + PREV_VERB` | 0.9474 | 0.3144 |
 | `O + LAST2_VERB_HISTORY` | 0.9579 | 0.3454 |
 
-The previous-verb gain is therefore overwhelmingly concentrated in exact duplicate pairs. On the current non-duplicate test subset, `O + PREV_VERB` does not exceed `O_ONLY`; `LAST2` is only 3.1 percentage points higher. This does not prove that all non-duplicate history is useless, but it does block interpreting the overall 62–65% result as evidence for a persistent character state.
+The previous-verb gain is therefore overwhelmingly concentrated in exact duplicate pairs. On the current four-way stratification, the corrected macro-F1 is reported in the JSON (the earlier all-zero macro-F1 artifact was a label-type bug and is superseded). On genuine transitions, `O + PREV_VERB` is below `O_ONLY`; `LAST2` is only modestly higher. This does not prove that all non-duplicate history is useless, but it blocks interpreting the overall 62–65% result as evidence for a persistent character state. See [Stage 0c](stage0c_nonduplicate_protocol.md) for the frozen analysis view.
 
 The machine-readable output is `stage0b_duplicate_sensitivity.json`; the analysis procedure is `analyze_stage0b_duplicate_sensitivity.py`. No deduplication has been applied to the source or fixture.
