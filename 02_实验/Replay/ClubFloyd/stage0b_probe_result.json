@@ -1,23 +1,28 @@
 {
   "schema_version": "clubfloyd_stage0b_low_order_probe_v0",
+  "runner_commit": "017b9669af76b271328ed8b968ad06c9b80b7178",
+  "runner_sha256": "78b2bae43543dd704ec5d50da7210a2f9e47cd8e37f5606967a2f87cda733de7",
   "fixture_sha256": "1151ad7867e0d724098be188b625f6ea221cd312f5e30013ded8d4c5009b5a7a",
   "train_rows": 2871,
   "test_rows": 384,
+  "seed": 20260908,
+  "O_DIM": 64,
+  "epochs": 4,
   "conditions": {
     "O_ONLY": {
-      "accuracy": 0.2838541666666667,
-      "macro_f1": 0.04242083009346436,
-      "feature_dim": 256
+      "accuracy": 0.328125,
+      "macro_f1": 0.03582578432877834,
+      "feature_dim": 64
     },
     "O_PLUS_PREV_VERB": {
-      "accuracy": 0.6171875,
-      "macro_f1": 0.5270211004118132,
-      "feature_dim": 283
+      "accuracy": 0.6276041666666666,
+      "macro_f1": 0.5375584155075386,
+      "feature_dim": 91
     },
     "O_PLUS_LAST2_VERB_HISTORY": {
-      "accuracy": 0.640625,
-      "macro_f1": 0.5765745928481866,
-      "feature_dim": 310
+      "accuracy": 0.6484375,
+      "macro_f1": 0.5265836799325271,
+      "feature_dim": 118
     }
   }
 }
