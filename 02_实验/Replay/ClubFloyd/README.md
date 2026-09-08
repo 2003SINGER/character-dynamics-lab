@@ -34,7 +34,7 @@ Read [command admission definition v1](command_admission_definition_v1.md) befor
 
 `command_admission_audit_semantic_v0.jsonl` and `command_admission_review_independent_v0.jsonl` are historical model-assisted review provenance, not human gold. The corrected 60-row challenge set was independently reviewed by three fresh LLM sessions and aggregated under [the frozen rule](llm_adjudication_aggregation_rule_v1.md): 51 `MODEL_CONSENSUS`, 9 `MODEL_MAJORITY`, 0 human-required. These are frozen multi-LLM adjudicated development labels, not human gold.
 
-The first v0 canary is retained but marked `STAGE0_V0_INCONCLUSIVE_PROBE_SANITY_FAILED`; its former `NO_CLEAR_HISTORY_SIGNAL` interpretation is invalidated. Stage 0b now passes the low-order probe sanity check (`O_ONLY` 0.3281 vs `O+PREV_VERB` 0.6276 vs `O+LAST2` 0.6484). This establishes an action-history measurement interface, not a Theory-S result. Continue only through the non-LLM [Stage 0b protocol](representation_baseline_stage0b.md); no Theory-S bridge is authorized yet.
+The first v0 canary is retained but marked `STAGE0_V0_INCONCLUSIVE_PROBE_SANITY_FAILED`; its former `NO_CLEAR_HISTORY_SIGNAL` interpretation is invalidated. Stage 0b passes the low-order probe sanity check, but [duplicate sensitivity](stage0b_duplicate_sensitivity.md) shows the gain is concentrated in exact source pair repeats and disappears for `O+PREV_VERB` on the non-duplicate test subset. This establishes a measurement interface, not a Theory-S result; no Theory-S bridge is authorized yet.
 
 全量抽取与分层 review slice：
 
