@@ -34,6 +34,8 @@ Read [command admission definition v1](command_admission_definition_v1.md) befor
 
 `command_admission_audit_semantic_v0.jsonl` and `command_admission_review_independent_v0.jsonl` are historical model-assisted review provenance, not human gold. The corrected 60-row challenge set was independently reviewed by three fresh LLM sessions and aggregated under [the frozen rule](llm_adjudication_aggregation_rule_v1.md): 51 `MODEL_CONSENSUS`, 9 `MODEL_MAJORITY`, 0 human-required. These are frozen multi-LLM adjudicated development labels, not human gold.
 
+The next representation step is deliberately non-LLM: [Representation Baseline Stage 0](representation_baseline_v0.md) predicts structured command verbs with one fixed-capacity linear probe across O-only, raw history, naive persistent, and permuted-state conditions. The first bounded canary result is [NO_CLEAR_HISTORY_SIGNAL](representation_baseline_v0_result.md); this does not authorize a Theory-S bridge.
+
 全量抽取与分层 review slice：
 
 ```powershell
