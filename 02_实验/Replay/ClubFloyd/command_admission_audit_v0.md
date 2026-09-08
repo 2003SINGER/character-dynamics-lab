@@ -17,7 +17,7 @@
 
 盲审文件 `command_admission_audit_semantic_v0.jsonl` 已形成 289 条标签：`valid_command` 76、`ambiguous_command` 173、`chat_or_commentary` 8、`meta_command` 32。该轮为保守的确定性 raw-action + pre-state 审查，不是人工逐条裁决；因此这些标签可作为 blocker 诊断，不应冒充高置信 gold。
 
-另做了一次独立盲审 `command_admission_audit_gold_independent_v0.jsonl`（不读取前一轮标签）：`valid_command` 195、`ambiguous_command` 32、`chat/commentary` 17、`meta_command` 45；高置信 257/289。两轮标签一致率仅 112/289（38.75%），说明在没有人工 adjudication protocol 前，任何单轮标签都不能作为最终 precision 估计。
+另做了一次独立盲审 `command_admission_audit_gold_independent_v0.jsonl`（不读取前一轮标签）：`valid_command` 209、`ambiguous_command` 18、`chat/commentary` 23、`meta_command` 39；高置信 253/289。两轮标签一致率仅 100/289（34.60%），说明在没有人工 adjudication protocol 前，任何单轮标签都不能作为最终 precision 估计。
 
 机械 `command-like` 100 条中仅 34 条被判为 `valid_command`，57 条仍 ambiguous，9 条被判 meta；这说明现有 quality heuristic 明显过宽，不能直接产出 `verified_command_like_v0`。
 
