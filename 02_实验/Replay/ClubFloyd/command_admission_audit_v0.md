@@ -11,7 +11,7 @@
 
 ## 冻结评估器
 
-`evaluate_command_v0.py` 固定输出：raw exact、normalized exact、verb exact、target exact、modifier exact、semantic match。规范化仅做 trim、casefold、连续空白折叠；不改变原始命令字段。
+`evaluate_command_v0.py`（schema `command_evaluation_v1`）固定输出：raw exact、normalized exact、verb exact、target exact、modifier exact、semantic match。semantic match 使用固定 token signature、有限别名（如 `i→inventory`、`x→examine`、`get→take`）与冠词移除；不读取 post-state，不接受 prediction 自报的 semantic_match，也不把 review classification label 当作命令等价性。
 
 ## 结果与准入门
 
