@@ -15,15 +15,17 @@
 
 ## 结果与准入门
 
+文件名更正：独立 review 已从旧称 `command_admission_audit_gold_independent_v0.jsonl` 重命名为 `command_admission_review_independent_v0.jsonl`；旧称不得解释为 human gold。
+
 盲审文件 `command_admission_audit_semantic_v0.jsonl` 已形成 289 条标签：`valid_command` 76、`ambiguous_command` 173、`chat_or_commentary` 8、`meta_command` 32。该轮为保守的确定性 raw-action + pre-state 审查，不是人工逐条裁决；因此这些标签可作为 blocker 诊断，不应冒充高置信 gold。
 
 另做了一次独立盲审 `command_admission_audit_gold_independent_v0.jsonl`（不读取前一轮标签）：`valid_command` 209、`ambiguous_command` 18、`chat/commentary` 23、`meta_command` 39；高置信 253/289。两轮标签一致率仅 100/289（34.60%），说明在没有人工 adjudication protocol 前，任何单轮标签都不能作为最终 precision 估计。
 
-机械 `command-like` 100 条中仅 34 条被判为 `valid_command`，57 条仍 ambiguous，9 条被判 meta；这说明现有 quality heuristic 明显过宽，不能直接产出 `verified_command_like_v0`。
+机械 `command-like` 100 条在旧 reviewer 体系下被分成 34/57/9，但这不是 precision 估计；两轮 reviewer 的分歧来自 admission 问题被错误地混入 world-legality/target-evidence 判断。按 corrected v1，失败或世界拒绝不应剔除 observed `A*`。
 
 **当前 gate：FIX_ONE_BLOCKER（先修复动作质量/语义准入边界，并完成少量人工 adjudication 以校准两轮分歧）。**
 
-允许的下一步是：收紧 quality/admission 规则并补做独立人工 gold，再运行冻结评估器报告 raw/normalized/verb-target-modifier/semantic 指标；在此之前不得进入 GO_TO_REPRESENTATION_BASELINE 或机制训练。
+已冻结 corrected `A^W / A^O / A*` 定义，并从两轮分歧中生成 60 条人工 adjudication sheet。人工 adjudication 只回答“是否代表玩家在游戏内选择/尝试行为”，不判断 `A^W` 合法性、执行成功与否或 target 是否被 pre-state 证明存在。完成后若 `IN_WORLD_CHOICE` subset 足够且边界/泄漏检查继续通过，即可进入 `GO_TO_REPRESENTATION_BASELINE`；不再进行第三轮模型全量 review。
 
 ## 不变边界
 

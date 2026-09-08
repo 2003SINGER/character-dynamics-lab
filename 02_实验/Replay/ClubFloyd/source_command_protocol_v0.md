@@ -1,5 +1,7 @@
 # ClubFloyd Source-Command Development Protocol v0
 
+> Boundary correction: this protocol is superseded on admission semantics by `command_admission_definition_v1.md`. ClubFloyd `[ACTION]` is observed `A*`; Stage A does not require objective `A^W` legality and does not claim source `A^O`.
+
 冻结日期：2026-09-08  
 状态：**development protocol only；未训练、未进入 Theory-S mechanism loop**
 
