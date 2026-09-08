@@ -43,8 +43,8 @@ def evaluate(y,p,K):
         tp=sum(a==b==k for a,b in zip(p,y)); fp=sum(a==k and b!=k for a,b in zip(p,y)); fn=sum(a!=k and b==k for a,b in zip(p,y)); fs.append(2*tp/(2*tp+fp+fn) if 2*tp+fp+fn else 0)
     return {'accuracy':acc,'macro_f1':sum(fs)/K}
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('fixture',type=Path); ap.add_argument('out',type=Path); a=ap.parse_args(); rows=[json.loads(x) for x in a.fixture.open(encoding='utf-8') if x.strip()]; tr,te=split(rows); labels=sorted({canonical_verb_family(r['source_action_A_star']) for r in rows}); lid={x:i for i,x in enumerate(labels)}; vocab={x:i for i,x in enumerate(labels)}; vocab['<UNK>']=len(vocab)
-    result={'schema_version':'clubfloyd_stage0b_low_order_probe_v0','fixture_sha256':hashlib.sha256(a.fixture.read_bytes()).hexdigest(),'train_rows':len(tr),'test_rows':len(te),'conditions':{}}
+    ap=argparse.ArgumentParser(); ap.add_argument('fixture',type=Path); ap.add_argument('out',type=Path); ap.add_argument('--runner-commit',required=True); a=ap.parse_args(); rows=[json.loads(x) for x in a.fixture.open(encoding='utf-8') if x.strip()]; tr,te=split(rows); labels=sorted({canonical_verb_family(r['source_action_A_star']) for r in rows}); lid={x:i for i,x in enumerate(labels)}; vocab={x:i for i,x in enumerate(labels)}; vocab['<UNK>']=len(vocab)
+    result={'schema_version':'clubfloyd_stage0b_low_order_probe_v0','runner_commit':a.runner_commit,'runner_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'fixture_sha256':hashlib.sha256(a.fixture.read_bytes()).hexdigest(),'train_rows':len(tr),'test_rows':len(te),'seed':SEED,'O_DIM':O_DIM,'epochs':EPOCHS,'conditions':{}}
     for kind in ('O_ONLY','O_PLUS_PREV_VERB','O_PLUS_LAST2_VERB_HISTORY'):
         Xtr=[feats(r,kind,vocab) for r in tr]; Xte=[feats(r,kind,vocab) for r in te]; model=train(Xtr,[lid[canonical_verb_family(r['source_action_A_star'])] for r in tr],len(labels)); pred=[]
         for x in Xte:
