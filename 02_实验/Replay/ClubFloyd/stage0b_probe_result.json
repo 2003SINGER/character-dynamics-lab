@@ -1,0 +1,23 @@
+{
+  "schema_version": "clubfloyd_stage0b_low_order_probe_v0",
+  "fixture_sha256": "1151ad7867e0d724098be188b625f6ea221cd312f5e30013ded8d4c5009b5a7a",
+  "train_rows": 2871,
+  "test_rows": 384,
+  "conditions": {
+    "O_ONLY": {
+      "accuracy": 0.2838541666666667,
+      "macro_f1": 0.04242083009346436,
+      "feature_dim": 256
+    },
+    "O_PLUS_PREV_VERB": {
+      "accuracy": 0.6171875,
+      "macro_f1": 0.5270211004118132,
+      "feature_dim": 283
+    },
+    "O_PLUS_LAST2_VERB_HISTORY": {
+      "accuracy": 0.640625,
+      "macro_f1": 0.5765745928481866,
+      "feature_dim": 310
+    }
+  }
+}

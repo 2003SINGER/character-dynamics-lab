@@ -1,0 +1,435 @@
+现在不是“机制炸了”，而是我们还没真正测到机制，前面那个小实验的“测量仪器”有问题。
+
+通俗讲，我们想研究的是：
+
+一个人过去经历了什么，会不会形成一个持续状态 \(S\)，然后这个 \(S\) 影响他下一步做什么。
+
+比如一个人连续受挫，可能 tension 上升；连续高强度活动，fatigue 上升；这些状态再改变下一步行为倾向。
+
+我们真正想验证的是：
+
+$$ 历史 \rightarrow S \rightarrow 下一步行为 $$
+
+但刚才 ClubFloyd 那个 Stage 0 根本还没把我们的 fatigue / engagement / tension 放进去。它只是先做一个前置检查：
+
+历史本身，对预测下一步行为有没有用？
+
+结果这个前置检查设计得太粗糙了。
+
+具体来说出了三个问题。
+
+第一，我们把“下一步行为”压缩得太狠了。
+
+本来真实动作可能是：
+
+take sword
+take food
+open door
+ask Alice about key
+
+但实验只预测第一个词，也就是：
+
+take
+open
+ask
+
+等于本来想研究“这个人下一步具体会干什么”，结果先退化成了：
+
+“猜下一个动词。”
+
+这当然可能丢掉大量真正和状态有关的信息。
+
+比如疲劳可能不是让你“不再 take”，而是让你从：
+
+take heavy box
+
+变成：
+
+sit on chair
+
+或者从追主线目标变成检查周围东西。
+
+只看 verb，很可能看不出来。
+
+第二，所谓 raw history 其实根本不 raw。
+
+我们本来想比较：
+
+当前观察 vs 加上过去历史。
+
+结果代码把过去 16 步的一大堆文本，全塞进一个 256 维哈希向量。
+
+你可以想象成：
+
+本来给学生一本完整笔记，结果先把笔记搅碎成 256 个计数，然后问“这本笔记有没有帮助”。
+
+如果没帮助，不能证明“历史没用”，可能只是压缩方式太烂。
+
+第三，也是最明显的：数据里有非常强的一阶重复规律，但我们的 probe 居然都没抓住。
+
+我刚刚检查到：
+
+400 个样本里，约 57% 下一步 action 和前一步 action 完全一样；
+很多 (状态, action) 连续成对重复；
+16 步 history 内约一半相邻 pair 都完全重复。
+
+所以一个傻到不能再傻的规则：
+
+“下一步就猜和上一步一样”
+
+理论上都应该挺强。
+
+结果我们的所谓 RAW_HISTORY 模型反而比只看当前 O 还差。
+
+这说明什么？
+
+不是：
+
+“历史没用。”
+
+而是：
+
+我们这个 probe 连数据里肉眼可见的历史规律都没读出来。
+
+所以现在真正的问题不是 Theory-S。
+
+Theory-S 现在还没有被判死刑
+
+我们的机制还是那个：
+
+$$ X_t \rightarrow S_t $$
+
+例如：
+
+effort / recovery → fatigue
+goal relevance / positive progress / social opportunity → engagement
+obstruction / negative event / recovery → tension
+
+再由：
+
+$$ S_t + O_t + P \rightarrow 行为倾向 $$
+
+这个机制目前只经历过：
+
+合成 sanity check：能更新、能积累、能恢复；
+LIGHT 旧 1D Theory-S：有一点 history-alignment sensitivity，但几乎没有净预测收益；
+AGAIN：证明确实有“持续性”这种现象，但 event→state 的具体 relaxation 不稳定；
+ClubFloyd：还没真正把 Theory-S 接进去。
+
+所以现在不能说：
+
+“Theory-S 不行。”
+
+最多只能说：
+
+我们还没找到一个足够干净的现实数据实验接口，能公平地测试 Theory-S。
+
+你可以把我们现在想象成造发动机
+
+我们的 Theory-S 是“发动机设计”。
+
+之前我们已经在台架上验证过：
+
+活塞能动、曲轴能转、油门输入会影响转速。
+
+然后现在终于准备装车测：
+
+这个发动机到底能不能让车跑得更好？
+
+结果第一次路测发现：
+
+测速仪坏了。
+
+它甚至连“前一分钟车速和下一分钟车速高度相关”这种明显东西都测不出来。
+
+所以正确动作不是：
+
+“发动机失败，拆了。”
+
+也不是：
+
+“换个更牛的发动机把结果救回来。”
+
+而是：
+
+$$ \boxed{\text{先把测速仪修好}} $$
+
+也就是先证明我们的实验至少能抓住一个最简单的历史规律：
+
+previous action → next action
+
+如果这个都能正常测出来，我们才有资格继续问：
+
+那么把历史压成 persistent state 呢？
+
+再下一步才是：
+
+naive state 和 Theory-S 谁更好？
+
+所以项目目前没有崩，也没有证明机制失败。现在暴露出来的是一个很典型、其实挺健康的科研问题：
+
+$$ \boxed{\text{我们第一次真正碰数据时，发现“怎么测”比“机制有没有效”先出了问题。}} $$
+
+而且这个问题现在已经很具体，不玄学：**先修 action target、重复数据解释和 history probe。**修完以后，才是真正轮到 Theory-S 上场。
+
+牛逼，梯度练错了？
+
+哈哈，不是“梯度公式写错了”那种离谱 bug。更准确地说是：
+
+$$ \boxed{\text{梯度大概率在正常下降，但喂给梯度的特征太烂了。}} $$
+
+代码里的 softmax + cross-entropy SGD 本身看不出明显数学错误。真正离谱的是 history 被处理成什么东西以后才送进去训练。
+
+比如前一步明明是：
+
+examine door
+
+而下一步有 57% 概率甚至直接重复前一步 action。
+
+最简单的模型只要看到：
+
+previous_verb = examine
+
+就能吃到一个巨大的历史信号。
+
+但现在代码不是这样。它做的是：
+
+一大坨上一时刻的 O 文本
++
+<ACT>
++
+examine door
+↓
+全部 tokenize
+↓
+和几百个状态词一起 hash 到 256 维
+↓
+归一化
+↓
+再和另外 15 步继续搅
+
+于是 examine 这个最重要的信号，可能只是几百个 token 里的一个。
+
+相当于：
+
+答案就在纸上写着“上一题选 C”，
+我们先把整本教材切碎倒进搅拌机，
+再让 logistic regression 从糊糊里找那个 C。
+
+然后发现找不到，差点宣布：
+
+“上一题答案对下一题没有信息。”
+
+所以我刚才才说这个实验的测量仪器没过 sanity check。
+
+更明显的是：
+
+C0 O-only = 0.3729
+C2 persistent = 0.3729
+C3 permuted = 0.3729
+三个连 macro-F1 都一模一样 0.0474
+
+这很像它们最后都主要学成了：
+
+“猜最常见的 verb。”
+
+而不是 gradient 完全没更新。
+
+所以可以区分三件事：
+
+**梯度算法：**目前没发现明显写错。
+
+**probe 训练：**可能因为类别极不平衡、18 epochs/固定 LR、特征太弱等原因退化，需要做 sanity。
+
+**最核心的问题：特征表示。**它把“上一动作是什么”这种极强信号淹没在了大量 hashed 状态文本里。
+
+因此下一步加：
+
+$$ \text{PreviousVerb baseline} $$
+
+特别狠。
+
+如果它直接从 37% 跳到比如 50%+，而现有 gradient probe 仍然 34%：
+
+$$ \boxed{\text{不是历史没信号，是我们的 probe 根本没学会读历史。}} $$
+
+这反而很好查。现在已经从“机制是不是寄了”缩小成了一个非常具体的工程/实验问题。
+
+看仓库
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+
+看完了。最新 webgpt-sync HEAD 是：
+
+dd8fc33 invalidate ClubFloyd v0 probe and add Stage0b sanity audit
+
+这次结果非常关键——我们刚才的判断基本坐实了：不是“历史没信号”，而是 v0 probe 没把历史信号读出来。
+
+1. 历史信号其实强得离谱
+
+新的 Stage 0b 用 4000 个 target、417 条 trajectory，test 有 384 条。
+
+最简单的三个 baseline：
+
+方法	Accuracy	Macro-F1
+永远猜训练集最多的 verb	31.8%	0.019
+直接猜上一动作的 verb	61.2%	0.573
+一阶 Markov \(v_{t-1}\to v_t\)	62.0%	0.528
+
+这就非常明确了：
+
+$$ \boxed{\text{history signal exists}} $$
+
+而且不是一点点。
+
+之前那个 learned C1 才 33.9%，所以它连：
+
+“上一动作对下一动作有巨大预测力”
+
+这种最简单的规律都没学出来。
+
+因此仓库现在已经正确把旧结论：
+
+NO_CLEAR_HISTORY_SIGNAL
+
+撤销成：
+
+STAGE0_V0_INCONCLUSIVE_PROBE_SANITY_FAILED
+
+这个修正是对的。
+
+2. 那些重复不是 adapter 搞出来的
+
+source-integrity 也查了。
+
+之前我看到：
+
+history 相邻完整 (O,A*) 重复：49.97%
+target action = previous action：56.75%
+target (O,A*) = previous (O,A*)：52.75%
+
+Codex 又确定性抽了 20 个例子，回到原始 cleaned CALM HTML 按 index 对照。
+
+20/20 在原始 transcript 里就已经是这样。
+
+所以目前可以排除：
+
+“我们的 ClubFloyd adapter 不小心复制了一遍。”
+
+更准确地说：
+
+$$ \boxed{\text{duplication 来自 source / upstream transcript}} $$
+
+但还不能说这些一定都是垃圾重复。
+
+有些可能真的是：
+
+玩家连续输两次同一个命令。
+
+所以现在没有粗暴 dedup，lossless replay 保持原样。这个处理也对。
+
+3. “梯度练错了？”现在可以更准确地回答
+
+梯度代码未必数学写错。
+
+但是：
+
+$$ \boxed{\text{旧 probe 作为测量工具失败了}} $$
+
+因为真正历史里明明存在一个 61% 级别的一阶信号，旧 probe 却只能做出 34%。
+
+所以不管是：
+
+特征 hash 太糟；
+256 维把 action 淹没了；
+类别不平衡；
+优化设置；
+representation 设计；
+
+哪个具体因素占主要责任，旧结果都不能拿来否定 history。
+
+这是现在已经有数据支持的，不只是我们的猜测。
+
+4. Stage 0b 现在还没真正跑 learned probe
+
+目前完成的是：
+
+source integrity；
+majority baseline；
+previous-verb baseline；
+first-order Markov baseline；
+新 Stage 0b protocol 冻结。
+
+接下来仓库明确准备跑：
+
+$$ O_t $$
+
+vs
+
+$$ O_t + v_{t-1} $$
+
+vs
+
+$$ O_t + v_{t-1},v_{t-2},\dots $$
+
+也就是：
+
+O_ONLY
+O + PREV_VERB
+O + LAST_K_VERB_HISTORY
+
+然后用同一个简单 linear probe。
+
+这一刀非常值得跑。
+
+因为现在我们已经知道：
+
+previous verb 本身有信息。
+
+下一问就是：
+
+当 current O 已经给了以后，previous/history 还能不能提供额外信息？
+
+这才真正贴近：
+
+$$ p(A_t|O_t,H_{<t}) \quad vs \quad p(A_t|O_t) $$
+
+这一步通过以后，才应该重新碰：
+
+persistent state 能不能压缩这些 history signal。
+
+然后才轮到 Theory-S。
+
+有一个小方法学措辞需要 Luna 顺手修
+
+canonical_verb_family() 里的：
+
+get→take
+directions→navigation
+x→examine
+i→inventory
+
+其实是 在 dd8fc33 这次 Stage 0b 才新增进 command_schema_v0.py 的。
+
+所以文档现在说：
+
+“reuse frozen command schema”
+
+稍微容易让人以为这些 family mappings 在 v0 之前就已经存在。
+
+更严谨应写：
+
+Stage-0b canonical verb-family mapping was frozen before the Stage-0b learned probe.
+
+这不影响实验，因为我们现在是明确发现 v0 estimand 有问题后，另起一个 Stage 0b；只要接下来不看 Stage0b learned 结果再改 mapping 就行。
+
+所以项目现在的状态其实比刚才好很多：
+
+$$ \boxed{ \text{历史有明显预测信号} \rightarrow \text{旧 probe 坏了} \rightarrow \text{现在重新测 history 在控制 O 后的增量} } $$
+
+Theory-S 还完全没输。甚至现在我们第一次确认：这个数据里确实存在值得“压缩进状态”的历史信息。
+
+下一步就是让 Luna 跑冻结的 Stage 0b low-order linear probe，别再加别的东西。
