@@ -26,6 +26,8 @@ py -3 tools/validate_replay_record.py outputs/external_assets_2026-09-06/ClubFlo
 
 这只是结构切片，不是语义准入或机制实验。下一步是逐条审计 W/O/X/S 归属、动作语义损失和 future leakage；审核前不得扩大批量或进入 mechanism loop。
 
+Stage-A source-command 入口已冻结于 [source-command protocol v0](source_command_protocol_v0.md)。当前 30-trajectory smoke 仅验证 `verified_command_like_v0`、canonical `verb/target/modifier`、trajectory-disjoint split 与 future-boundary；尚未开始模型训练或 Theory-S representation comparison。
+
 全量抽取与分层 review slice：
 
 ```powershell

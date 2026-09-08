@@ -1,0 +1,468 @@
+看完了。现在仓库终于回到一个比较正常的状态了。
+
+最新 webgpt-sync：
+
+b7eebfcf route existing dataset pool and correct OPeRA v1 scope
+
+这笔做了两件关键事。
+
+1. OPeRA v1 的错误解释已经纠正
+
+现在仓库不再写：
+
+10/30 → candidate reconstruction 失败 → route closed
+
+而是明确写：
+
+v1 每步恰好只产生 1 个 candidate，所以 10/30 是 single-target selection accuracy，不是 candidate-set support recall。
+
+因此当前 OPeRA 状态是：
+
+LIMITED-GO（v1 single-target failed; set route unresolved）
+
+也就是说我们刚才指出的问题已经进仓库了。以后真想重开，只能另冻一个 5–10 个 identity-bound candidates/step 的集合实验，不能拿 v1 当证据。
+
+这个修正是对的。
+
+2. 全数据集池真的横向排过了
+
+新文件：
+
+00_研究设计/Existing_Dataset_Pool_Routing_v1_2026-09-08.md
+
+现在不是 LIGHT / OPeRA 二选一了。
+
+它给出的排名是：
+
+Next-action
+
+ClubFloyd
+LIGHT
+
+Dynamics
+
+AGAIN
+
+另外也实际检查了：
+
+OPeRA
+FarmQuest
+PowerWash
+SOTOPIA
+Mem2Act
+Memora
+EverMemBench
+R-Helm
+DECADE
+PERMA
+MobileMem
+
+所以之前“忘了其他数据集”的问题现在基本补上了。
+
+我重点核了 ClubFloyd
+
+这个排名不是拍脑袋。
+
+仓库现有 ClubFloyd 全量：
+
+425 trajectories
+438,188 steps
+median 704 steps/trajectory
+max 8,934
+5 个 empty transcript
+0 parse failures
+
+而且结构天然就是：
+
+$$ [STATE]_t \rightarrow [ACTION]_t $$
+
+adapter 保留：
+
+$$ source\_O_t $$
+
+和：
+
+$$ source\_action\_A^*_t $$
+
+没有用 LLM 去制造这两个字段。
+
+从长历史→下一行为这个母问题看，它确实比 LIGHT 那种 median 3 steps 的轨迹漂亮得多。
+
+但 ClubFloyd 现在有一个非常实在的问题：
+
+command-like：218,575
+ambiguous：219,524
+chat/commentary-like：47
+meta-command：42
+
+也就是说差不多一半 action 现在还只是机械规则下的 ambiguous。
+
+所以它是：
+
+最值得继续准入的 next-action 数据
+
+不是：
+
+已经可以直接拿 438k steps 开训。
+
+这一点 routing 文档写得还算克制。
+
+routing 文件里有一句看起来矛盾，其实需要我们自己解释清楚
+
+它一边说：
+
+#1 ClubFloyd
+
+又说：
+
+“如果今天必须开始第一次 real 3D Theory-S development experiment：选 LIGHT restricted slice。”
+
+这不是完全自相矛盾，而是它混了两个排名标准：
+
+按“数据天然适合母问题”
+$$ \boxed{ClubFloyd > LIGHT} $$
+
+ClubFloyd 长轨迹、单玩家、state→command，太适合研究 persistent history 了。
+
+按“现在现成代码离训练有多近”
+$$ \boxed{LIGHT > ClubFloyd} $$
+
+因为 LIGHT 已经有：
+
+Replay
+SceneSnapshot
+transition compiler
+13D action features
+Run1–4
+gradient harness
+
+ClubFloyd 还没有开放文本 action 的正式评价接口。
+
+所以我建议以后别再叫一个统一的“#1”。
+
+应该理解成：
+
+Scientific fit #1 = ClubFloyd
+Engineering readiness #1 = LIGHT
+
+这就清楚了。
+
+AGAIN 的选择也合理
+
+routing 把 AGAIN 定成唯一 DYNAMICS_AUXILIARY。
+
+这个我认同。
+
+因为它有：
+
+124 participants
+~521k telemetry rows
+session-local time
+continuous arousal proxy
+past-only 对齐
+
+它非常适合单独测：
+
+$$ event/history \rightarrow persistence / lag / decay / recovery $$
+
+甚至比较：
+
+$$ \text{our first-order relaxation} $$
+
+和：
+
+$$ AR(1),\quad no-state $$
+
+但不能拿 AGAIN 去证明 fatigue / engagement / tension 三维心理语义。这条边界仓库也写清楚了。
+
+新归档那批也真的看过了
+
+不是只列名字。
+
+当前判断大致是：
+
+Mem2Act：新资产里面最值得后续 targeted audit；有 tool-call/action surface，但 mixed/model-constructed，所以没压过 ClubFloyd。
+Memora：更适合 persistence / forgetting structure。
+EverMemBench：memory retrieval。
+R-Helm：state/evidence boundary。
+DECADE：本地缺 raw haystack，目前不适合。
+PERMA：本地 payload 不完整。
+MobileMem：本地没有完整 trajectories。
+
+所以这轮 routing 至少解决了我之前最大的问题：
+
+没有把“名字像 memory”自动当成我们的行为轨迹数据。
+
+我对现在仓库状态的判断
+
+这轮是有价值的，而且我们现在不该再去 OPeRA 打 prompt 地鼠了。
+
+下一步已经比较清楚：
+
+先把 ClubFloyd 的“真实玩家 command baseline”协议冻出来。
+
+重点不是候选生成。
+
+第一刀甚至可以先不碰 finite \(A^O\)，而是回答：
+
+ClubFloyd 里面哪些 [ACTION] 真的是可用的玩家 command？
+我们怎么在开放文本 action 上公平比较 history / state？
+
+与此同时，AGAIN 可以由 subagent 独立冻结 dynamics audit protocol。
+
+所以现在主线实际上已经从：
+
+“找数据集”
+
+转成了：
+
+$$ \boxed{\text{ClubFloyd：把真实长轨迹变成可评的 next-action task}} $$
+
+这个方向我觉得比继续 LIGHT/OPeRA 局部修补健康得多。
+
+下一步
+
+下一步就一件主任务：
+
+冻结 ClubFloyd 的 next-action development protocol。
+
+不是继续找数据，也不是直接训练。我们现在已经选定 scientific fit #1 = ClubFloyd，所以先把“438k 长轨迹怎么变成一个合法、可评分的 next-action task”定死。
+
+同时可以让一个 subagent 并行冻结 AGAIN dynamics protocol，但它不阻塞主线。
+
+直接给 Codex：
+
+现在进入 ClubFloyd 主线。
+
+主任务：ClubFloyd Source-Command Development Protocol v0
+
+目标不是马上训练 Theory-S，而是冻结一个最小、可执行、不会因开放文本 action 而偷换任务的 next-action development protocol。
+
+母问题保持：
+
+H_obs_<t → persistent S_t → next player action A*_t
+
+不要修改 Theory-S。
+
+1. 先冻结 usable action subset
+
+基于现有：
+
+425 trajectories
+438,188 steps
+command-like 218,575
+ambiguous 219,524
+chat/commentary-like 47
+meta-command 42
+
+不要立刻大规模人工标注 438k。
+
+从现有 review fixture 开始，审计：
+
+command-like 规则 precision；
+ambiguous 中主要有哪些类型；
+chat/meta 是否可稳定机械排除；
+[STATE] → [ACTION] 是否确实保持 player-command boundary。
+
+输出一个冻结规则：
+
+verified_command_like_v0
+
+允许：
+
+deterministic rule；
+少量 Terra semantic classifier；
+但必须版本化、gold/source provenance 清楚。
+
+Terra 只能分类 action 本身是否是可评玩家 command，不能看未来 state。
+
+2. 不要求第一版先有 finite candidate set
+
+这一点非常重要。
+
+ClubFloyd 是开放文本 command。
+
+第一版协议不要为了兼容旧 NLL harness，强行把它改造成伪 finite A^O。
+
+先明确区分两个阶段：
+
+Stage A：source-command prediction/evaluation
+
+研究：
+
+history/state representation → observed next command
+
+Stage B：finite candidate-set reconstruction
+
+只有 Stage A 证明值得继续后再做。
+
+不要因为 source 没 candidate set 就阻塞 Stage A。
+
+3. 冻结开放文本 action 的 canonicalization
+
+需要定义一个最小 command representation，例如：
+
+verb + target + optional modifier
+
+例：
+
+take lamp
+open wooden door
+go north
+ask bartender about key
+
+但不要提前假定所有游戏命令都能完美解析。
+
+输出：
+
+exact raw command；
+normalized command；
+parse confidence；
+verb；
+target；
+modifier；
+parse status。
+
+原始 command 永远保留，不可被 canonical form 覆盖。
+
+4. 冻结第一版评价指标
+
+因为现在不是 finite candidate set，所以不能硬套 candidate-set NLL。
+
+第一版只需要设计一个公平的 development evaluation。
+
+至少比较：
+
+exact normalized-command accuracy；
+verb accuracy；
+target accuracy；
+semantic command match；
+optional top-k retrieval/ranking if a frozen candidate pool can be constructed without gold leakage。
+
+其中 semantic match 必须使用冻结 evaluator，不能边看结果边改规则。
+
+如果不能定义可靠概率空间，就明确说：
+
+ClubFloyd Stage A 暂不提供 canonical candidate-set NLL。
+
+这是允许的。
+
+5. 冻结 history boundary
+
+输入只能包括：
+
+current pre-action [STATE]_t
+previous source states/actions
+same transcript history
+
+禁止：
+
+current A*_t
+next [STATE]
+future command
+从 post-action text 反推 current action
+
+检查 parser 是否存在 off-by-one。
+
+6. 冻结 trajectory split
+
+按完整 transcript / game trajectory 切分。
+
+不能 step-level random split。
+
+要求：
+
+train
+validation
+development holdout
+
+trajectory-disjoint。
+
+如果能识别 game/domain，还应记录是否存在同游戏跨 split；这轮先报告，不要为了追求 cross-game generalization 过度设计。
+
+7. 只做一个小 protocol fixture
+
+先选一个 deterministic 小切片，例如：
+
+20–30 trajectories
+或
+1,000–3,000 verified command-like steps
+
+目的只是验证：
+
+parser
+history boundary
+command canonicalization
+evaluation
+split
+
+不要开始 Theory-S 参数训练。
+
+8. 输出文件
+
+新建：
+
+02_实验/Replay/ClubFloyd/source_command_protocol_v0.md
+
+必要时新增：
+
+command_schema_v0.py
+build_command_dev_slice_v0.py
+evaluate_command_v0.py
+
+但只做最小实现。
+
+最后必须回答：
+
+ClubFloyd 是否可以形成合法的 open-text next-action development task；
+usable command subset 大概有多少；
+最大 blocker 是 action canonicalization、evaluation，还是 history leakage；
+是否已经具备下一步接入 Theory-S representation comparison 的条件；
+下一步应是：
+GO_TO_REPRESENTATION_BASELINE
+FIX_ONE_BLOCKER
+NO_GO
+并行 Subagent：AGAIN dynamics protocol
+
+独立完成：
+
+02_实验/T0h_AGAIN/dynamics_protocol_v0.md
+
+只冻结：
+
+event/telemetry history → arousal proxy
+
+比较：
+
+no-state
+AR(1)
+frozen first-order relaxation family
+
+关注：
+
+persistence
+lag
+decay
+recovery
+
+不要训练 Theory-S 的 alpha/beta/b/W；
+不要把 arousal 当 fatigue/engagement/tension ground truth；
+不要让 AGAIN 阻塞 ClubFloyd 主线。
+
+禁止：
+
+新数据集
+OPeRA v2
+LIGHT 新 annotation
+Theory-S v2.x
+新 S/X 字段
+formal test
+真实参数训练
+
+完成后 commit + push webgpt-sync，然后停止。
+
+这一步结束后，如果 ClubFloyd 给 GO_TO_REPRESENTATION_BASELINE，下一刀才是第一次真正比较：
+
+$$ \text{raw history} \quad vs \quad \text{summary} \quad vs \quad \text{persistent S} $$
+
+那时我们就真正开始碰 Paper-0 的核心问题了。
