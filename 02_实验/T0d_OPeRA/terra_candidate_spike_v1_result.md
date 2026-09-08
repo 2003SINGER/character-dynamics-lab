@@ -27,20 +27,30 @@ resolved to the frozen raw input, and the candidate artifact hash was stable on
 repeat reads. No Terra regeneration was performed, so this is artifact stability,
 not a rerun-equivalence claim.
 
-## Frozen stopping decision
+## Validity correction
+
+The v1 artifact emitted exactly one candidate per record (30 records / 30
+candidates). The measured 10/30 figure is therefore **single-target identity
+selection accuracy**, not candidate-set support recall. It cannot close the
+broader `O_t → Ahat^O_t` question with a bounded 5–10 element set.
+
+## Frozen stopping decision for the v1 task
 
 The pre-registered conditional pass required strict support ≥70% **and**
 ambiguous gold matches ≤25%. Ambiguity passed (0%), but strict support failed
-(33.3%). Therefore the route is **FAIL/CLOSE**. OPeRA remains a coarse
-click-type/history auxiliary only. No v2/v3 prompt repair, candidate-set
-admission, action-readout compatibility discussion, or Theory-S training is
-authorized under this route.
+(33.3%). Therefore the **v1 single-target task** is **FAIL/CLOSE**. OPeRA
+remains a coarse click-type/history auxiliary for now. The multi-candidate
+route is **UNRESOLVED**, not closed: a separately frozen 5–10 candidate
+identity-preserving fixture would be a different experiment. No action-readout
+compatibility discussion or Theory-S training is authorized before that routing
+decision.
 
 The result is informative: v1 removed the v0 ambiguity failure, but target
 identity selection remains too inaccurate (11 family-only mismatches and 9
 misses). This is not evidence that Terra cannot summarize pages; it is evidence
-that this OPeRA release does not currently provide a sufficiently reliable
-identity-preserving candidate set for the canonical route.
+that this single-target spike does not provide reliable identity-preserving
+next-action selection. It does not test whether a bounded multi-candidate set
+can preserve support.
 
 Machine artifacts are Git-ignored under
 `outputs/opera_t0d_2026-09-08/terra_candidate_spike_v1/`.

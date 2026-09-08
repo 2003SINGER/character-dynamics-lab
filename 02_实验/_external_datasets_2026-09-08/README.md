@@ -9,5 +9,7 @@ Nested repository metadata is retained locally. No dataset is thereby admitted
 to the canonical Paper-0 protocol: each still requires its own adapter,
 licence/provenance check, semantic audit, and candidate/action-surface gate.
 
-Current payload: `external_data_intake/2026-09-07/` (decade, EverMemBench,
-Mem2Act, Memora, MobileMem, Perma, R-Helm and related benchmark assets).
+Current payload is directly under this directory (decade, EverMemBench,
+Mem2Act, Memora, MobileMem, Perma, R-Helm and related benchmark assets). The
+physical relocation from `D:\desk\科研\intents\02_数据与标注\外部数据原始\2026-09-07`
+was verified on 2026-09-08; the old source leaf is empty and removed.

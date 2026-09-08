@@ -1,0 +1,565 @@
+已调用工具
+已调用工具
+已调用工具
+
+对，我刚才确实忘了我们已经有一整个数据集池，被最近几轮 LIGHT / OPeRA 的审计把注意力吸过去了。不是只有这两个。
+
+现在仓库里已经明确有两层资产：
+
+已经做过 adapter / 审计的：LIGHT、OPeRA、ClubFloyd、FarmQuest、PowerWash、AGAIN、SOTOPIA。
+已经本地归档、但还没正式 routing 的：decade、EverMemBench、Mem2Act、Memora、MobileMem、Perma、R-Helm 等。
+
+而且这里面有几个其实很值得重新看，不该直接跳过。
+
+我们已有数据集应该这样看
+数据集	现成优势	当前主要问题	对母问题的潜力
+LIGHT	7,256 trajectories / 24,999 action steps；有真实 next action；已有 Replay/候选/13D feature 管线	多 actor；完整 6D X 不原生	高，最成熟
+OPeRA	真人 session；pre-action HTML/URL；独立真实 action	candidate identity / 13D readout 不兼容	中高，可改造
+ClubFloyd	425 trajectories / 438,188 steps；天然 STATE → ACTION 长回放	action 是自由文本命令；无 candidate/P/timestamp	我觉得应该重新重点看
+FarmQuest	42 participants / 122 sessions / 10,844 strong action-proxy；结构 telemetry	source_O=null，action 只是 proxy	中
+PowerWash	大量连续 telemetry/state/event；100人 pilot 已 344,248 steps	没独立 A*	更适合 S dynamics / persistence，不适合作 next-action 主任务
+AGAIN	124人；约 52万 telemetry；连续 arousal proxy	没 A*	很适合检验 动态状态持续性/恢复/滞后
+SOTOPIA	O/private-info 边界漂亮	synthetic；action surface 基本坍缩成 talk/nothing	辅助结构验证
+Mem2Act / EverMemBench / MobileMem / Memora / Perma / R-Helm / decade	已经本地有资产，而且名字上就和 long-horizon memory/action 很贴近	我们还没审，不能乱下结论	值得快速 routing
+
+我刚才最大的问题就是：把
+
+“哪个数据集今天马上能喂给冻结 Theory-S？”
+
+误成了
+
+“我们目前只有 LIGHT 和 OPeRA。”
+
+完全不是。
+
+尤其 ClubFloyd，我刚才不该漏
+
+这个其实很有意思。
+
+仓库已经抽出了：
+
+$$ 425\ trajectories,\quad 438188\ steps $$
+
+原始结构就是：
+
+$$ [STATE]\rightarrow[ACTION] $$
+
+adapter 也已经保持：
+
+source_O
+source_action_A_star
+
+而且没有做 LLM 推断污染它们。
+
+这和我们的问题：
+
+$$ H^{obs}\rightarrow S\rightarrow A $$
+
+天然非常接近。
+
+它的问题是 action 是文本命令、candidate set 没给。
+
+但我们刚刚已经讨论明白：
+
+candidate set 不原生存在不是致命问题。
+
+对 ClubFloyd，甚至可能比 OPeRA 更自然：
+
+$$ STATE_t + H_{<t} \overset{Terra}{\longrightarrow} \hat A^O_t $$
+
+然后真实玩家 command 是 \(A_t^*\)。
+
+当然它还有一个问题：不同游戏的动作本体和状态文本差异可能很大。但这至少值得先看，不能无视。
+
+AGAIN 和 PowerWash 也不是“没 A* 所以没用”
+
+我们 Paper-0 有多个证据责任。
+
+比如我们现在一直苦于：
+
+6D X 和动态 S 到底有没有真实时间序列意义？
+
+那 AGAIN 反而非常强：
+
+$$ telemetry/event history \rightarrow \text{continuous arousal proxy} $$
+
+它不能证明我们的 fatigue/engagement/tension 三维就是“真心理状态”，但它可以检验：
+
+persistence；
+decay；
+event→state lag；
+recovery；
+一阶 relaxation 这种动力学形式到底像不像真实连续 affect trajectory。
+
+PowerWash同理，更适合：
+
+$$ \text{events/progress}\rightarrow\text{persistent dynamics} $$
+
+所以它们可以承担 Theory-S dynamics evidence，不需要硬逼它们承担 next-action prediction。
+
+这正是我上一轮说“拆证据责任”时应该立刻想到的，而不是又只剩 LIGHT。
+
+现在真正合理的下一步
+
+不是继续深挖 OPeRA v1。
+
+也不是马上拿 LIGHT 硬训。
+
+而是做一次非常短的全池 routing，只回答一个问题：
+
+我们已经拥有的这些数据，分别最适合承担 Paper-0 哪一项证据责任？
+
+不是重新做七套详细准入审计。
+
+只做一张决策表：
+
+A. Next-action / sufficiency 主实验候选
+
+重点看：
+
+LIGHT
+ClubFloyd
+OPeRA
+以及新归档的 Mem2Act / EverMemBench / ... 中有没有天然 action prediction 数据
+B. Dynamics / persistence 辅助证据
+
+重点看：
+
+AGAIN
+PowerWash
+FarmQuest
+C. 信息边界 / synthetic format
+SOTOPIA
+
+然后挑：
+
+一个主 next-action 数据 + 一个 dynamics 数据
+
+就够了。
+
+例如最终很可能是：
+
+$$ \boxed{\text{ClubFloyd or LIGHT}} $$
+
+负责：
+
+$$ S\rightarrow A $$
+
+再用：
+
+$$ \boxed{\text{AGAIN}} $$
+
+负责：
+
+$$ X/event\rightarrow persistent\ dynamics $$
+
+这样甚至比硬要求 LIGHT 一个人同时提供完美的 O、X、S、A 更科学。
+
+所以你提醒得对：
+
+不是“不要再看数据集”，而是不要围着两个数据集打转。
+
+我们已经花力气弄了一个数据池，下一步应该横向把已有资产重新排一次优先级，尤其必须把 ClubFloyd + 新归档的 memory/action benchmarks 加回来。
+
+我现在会把下一刀定成：
+
+Existing Dataset Pool Routing v1：只做快速横向筛选，不新增下载、不深挖 adapter，挑出一个 action 主数据 + 一个 dynamics 辅助数据。
+
+这做完再决定是直接改造 LIGHT / ClubFloyd / OPeRA，还是某个 Mem2Act 类资产其实更天然。
+
+所以干啥？下一步！
+
+下一步就干这个，别再散：
+
+把我们“已有的数据集池”一次性横向筛完，选出：1 个 next-action 主数据 + 1 个 dynamics 辅助数据。
+
+这次不做深度审计、不改机制、不训练、不下载新数据。目标就是结束“到底用谁”的摇摆。
+
+直接给 Codex：
+
+现在停止继续深挖 LIGHT / OPeRA 单点问题。
+
+执行：
+
+Existing Dataset Pool Routing v1
+
+目标：
+
+从我们已经拥有的数据资产中，选出：
+
+一个最适合 Paper-0 history/state → next action 主实验的数据集；
+一个最适合 event/X → persistent dynamics 辅助实验的数据集。
+
+这轮只做横向 routing，不做完整 admission，不训练，不改 Theory-S。
+
+必须纳入的已有数据
+
+已经做过 adapter / audit：
+
+LIGHT
+OPeRA
+ClubFloyd
+FarmQuest
+PowerWash
+AGAIN
+SOTOPIA
+
+本地已经归档的新资产：
+
+decade
+EverMemBench
+Mem2Act
+Memora
+MobileMem
+Perma
+R-Helm
+_external_datasets_2026-09-08 中其他相关资产
+
+不要下载新数据。
+
+使用 subagent 并行
+Subagent A：next-action 组
+
+重点检查：
+
+LIGHT
+OPeRA
+ClubFloyd
+
+逐个只回答：
+
+trajectory 是否足够长；
+是否有独立真实/至少可解释的 A*；
+prediction-time O/history 是否可构造；
+action surface 是离散、文本还是开放目标；
+candidate set 是否原生存在；若不存在，是否能从合法 O 生成；
+是否能接现有 canonical action semantics / 13D features；
+是否需要 Terra semantic layer；
+最大 blocker 是什么；
+修复 blocker 的工程成本：低 / 中 / 高。
+
+特别重新认真看 ClubFloyd。
+
+不能因为它没有 source candidate set 就降级；
+它有 425 trajectories / 438,188 observed steps，原始结构是 [STATE] → [ACTION]，要判断这是否比 LIGHT / OPeRA 更天然适合 H_obs → S → A*。
+
+Subagent B：dynamics 组
+
+重点检查：
+
+AGAIN
+PowerWash
+FarmQuest
+
+不要因为没有 exact A* 就直接判无用。
+
+逐个回答：
+
+是否有连续时间/顺序事件；
+是否有可作为外部动态 proxy 的状态；
+是否能观察 persistence / decay / recovery / lag；
+是否适合验证一阶 relaxation 形式；
+是否可以承担 X/event → persistent state 的辅助证据；
+哪些结论绝对不能声称。
+
+尤其：
+
+AGAIN：
+
+telemetry
+continuous arousal proxy
+participant/session/game timeline
+
+PowerWash：
+
+event/progress/state telemetry
+
+FarmQuest：
+
+structured telemetry + action-proxy
+Subagent C：新归档 memory/action benchmark 组
+
+本地直接阅读已有仓库/README/docs，不下载新东西。
+
+检查：
+
+decade
+EverMemBench
+Mem2Act
+Memora
+MobileMem
+Perma
+R-Helm
+其他明显和 memory / action / long-horizon behavior 有关的资产
+
+这轮不要做 adapter。
+
+每个只回答：
+
+数据是什么；
+trajectory/history/action 是否真实存在；
+是 benchmark query-answer，还是实际 sequential behavior；
+有没有 next-action / action selection；
+有没有长期 memory / state persistence；
+和 Paper-0 母问题的贴合度；
+是否值得进入下一轮正式审计。
+
+若只是“长记忆问答 benchmark”，不要因为名字有 memory 就误判成我们的数据。
+
+统一评分
+
+所有数据集最后放进一张表。
+
+列：
+
+dataset
+human / synthetic / telemetry
+ordered trajectory
+usable H_obs
+independent A*
+candidate/action surface
+generated candidate feasibility
+X/event constructibility
+dynamic-state proxy
+trajectory length / scale
+leakage risk
+engineering cost
+Paper-0 role
+verdict
+
+Paper-0 role 只允许：
+
+PRIMARY_ACTION_CANDIDATE
+DYNAMICS_AUXILIARY
+STRUCTURAL_AUXILIARY
+NOT_USEFUL_NOW
+最终必须做选择
+
+不能最后写“各有优缺点”。
+
+必须给：
+
+Primary shortlist
+
+最多 2 个。
+
+然后明确排名：
+
+#1
+#2
+
+回答：
+
+如果今天必须开始搭第一次 real 3D Theory-S development experiment，优先用谁？
+
+Dynamics auxiliary
+
+只选 1 个。
+
+回答：
+
+如果要独立验证 persistence / decay / event→state dynamics，优先用谁？
+
+决策原则
+
+不要寻找“完美数据集”。
+
+允许：
+
+candidate set 由冻结 generator / Terra 从合法 O 构造；
+X 由版本化 semantic compiler / Terra 构造；
+只要明确它是 model-derived，而不是 source ground truth；
+不同数据集承担不同证据责任。
+
+不要要求一个数据集同时原生拥有：
+
+O + 6D X + S + exact A^O + A* + P + long trajectory
+
+这不是 routing 标准。
+
+禁止
+
+本轮禁止：
+
+新数据集下载；
+新 Theory-S；
+新 S/X 字段；
+改 alpha/beta/b/W；
+参数训练；
+OPeRA candidate v1；
+LIGHT 大规模 annotation；
+新 adapter 大工程；
+为了让某数据集获胜而改 Paper-0 问题。
+输出
+
+新建：
+
+00_研究设计/Existing_Dataset_Pool_Routing_v1_2026-09-08.md
+
+并更新：
+
+TODO
+capability matrix
+当前实现进度
+
+只做必要同步。
+
+最终汇报必须只有这些核心结果：
+
+next-action 主数据 #1；
+#2 备选；
+dynamics 辅助数据；
+为什么；
+每个最大 blocker；
+下一步是“开始训练前 protocol freeze”还是“先修一个明确 blocker”。
+
+commit + push webgpt-sync 后停止。
+
+这一步做完，我们就不再凭记忆挑 LIGHT / OPeRA，而是把已有资产真正排一次队。然后下一步要么直接进入训练 protocol freeze，要么只修排名第一数据集的一个明确 blocker。
+
+先看看仓库吧
+已调用工具
+已调用工具
+
+看了，最新 webgpt-sync 是：
+
+d27fae9 close OPeRA Terra candidate route after v1
+
+这笔之后没有做我们刚才说的“全数据集池 routing”。它实际上先把 OPeRA Terra v1 跑掉并封口了。
+
+但我发现一个很关键的问题：这个“封口”我不认可。
+
+v1 的结果是：
+
+fresh blind 30 steps
+ambiguity：0/30
+strict identity match：10/30 = 33.3%
+family-only mismatch：11/30
+miss：9/30
+然后因为低于预注册 70%，仓库宣布 candidate route CLOSED
+
+问题在这里：
+
+v1 每个 step 最终恰好只生成了 1 个 candidate。
+
+结果页明确写的是：
+
+records / candidates = 30 / 30
+candidate count per record = exactly 1
+
+这已经不是我们原来讨论的：
+
+$$ O_t \rightarrow \hat A_t^O $$
+
+候选动作集合生成了。
+
+它实际上变成：
+
+$$ O_t \rightarrow \hat a_t $$
+
+即 让 Terra 猜唯一一个下一动作 target。
+
+于是所谓：
+
+$$ \text{support recall}=10/30 $$
+
+实际上非常接近：
+
+Terra top-1 target prediction accuracy = 33.3%
+
+这当然不能拿来证明：
+
+“从 O 生成一个合理 candidate set 做不到。”
+
+v0 和 v1 放一起看反而很明显
+
+v0：
+
+平均 5.23 candidates/step
+strict 7/30
+ambiguous 17/30
+含 ambiguous 的 semantic coverage = 24/30 = 80%
+问题：不同具体 target 被抽象/合并了
+
+所以正确修复本来应该是：
+
+仍然每步生成约 5–10 个候选，但每个候选必须保留具体 target identity。
+
+也就是：
+
+candidate 1 -> element #14
+candidate 2 -> element #37
+candidate 3 -> element #52
+candidate 4 -> element #81
+...
+
+而不是 v1 实际发生的：
+
+candidate 1 -> element #37
+
+然后要求唯一这个就必须是 gold。
+
+这把 support-generation task 偷偷变成了 next-action selection task。
+
+所以仓库目前有一个研究判断需要纠正
+
+当前 TODO 写：
+
+OPeRA candidate route closed
+
+我觉得证据不够。
+
+更准确应该是：
+
+OPeRA v1 single-target identity selection failed；identity-preserving multi-candidate reconstruction 尚未真正测试。
+
+33.3% 甚至不算很差——如果页面原来平均 100–300 个 interactable element，让 Terra 单猜一个能有 10/30 命中，说明它其实在利用上下文。
+
+但这不是我们需要测试的指标。
+
+我们要的是：
+
+假如每步允许：
+
+$$ |\hat A_t^O|=5\sim10 $$
+
+能不能做到：
+
+$$ P(A_t^*\in\hat A_t^O) $$
+
+足够高，同时 candidate set 不爆炸。
+
+其他仓库状态
+
+LIGHT 仍然是：
+
+完整六维 Theory-S training NO-GO
+
+但 actor-local history 已正确改成：
+
+结构上可构造，只是 semantic admission / gap encoding 未完成。
+
+这一点现在文档是对的。
+
+而且：
+
+ClubFloyd
+FarmQuest
+PowerWash
+AGAIN
+SOTOPIA
+decade
+EverMemBench
+Mem2Act
+Memora
+MobileMem
+Perma
+R-Helm
+
+目前都还没有进入我们刚才说的横向 routing。
+
+所以仓库现在真实状态是：
+
+LIGHT 审完一轮；OPeRA v0/v1 跑了，但 v1 把 candidate-set task 做成了 single-target prediction；其他已有数据还没横向重新比较。
+
+因此，现在千万别顺着 TODO 的“OPeRA 已封口”直接往下走。 这个 v1 实验定义本身有问题，应该先把这个判断纠正，然后再做我们刚才说的全数据池 routing。
