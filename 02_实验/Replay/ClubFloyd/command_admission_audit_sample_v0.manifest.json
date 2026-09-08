@@ -1,0 +1,36 @@
+{
+  "schema_version": "command_admission_audit_sample_v0",
+  "source": "clubfloyd_full.replay.jsonl",
+  "selection": "sha256 rank within fixed quality strata",
+  "targets": {
+    "command-like": 100,
+    "ambiguous": 100,
+    "chat/commentary-like": 100,
+    "meta-command": 100
+  },
+  "selected_counts": {
+    "command-like": 100,
+    "ambiguous": 100,
+    "chat/commentary-like": 47,
+    "meta-command": 42
+  },
+  "total_counts": {
+    "ambiguous": 219524,
+    "command-like": 218575,
+    "chat/commentary-like": 47,
+    "meta-command": 42
+  },
+  "trajectory_count": 420,
+  "sample_count": 289,
+  "blind_fields": [
+    "raw_action",
+    "pre_action_state"
+  ],
+  "forbidden_fields": [
+    "post_action_state",
+    "reward",
+    "future_action",
+    "parsed"
+  ],
+  "sample_sha256": "cc25b6b74e7e3f4413c7d54d4551f9d07011e1493c04eaa2c80338532e43cde5"
+}
