@@ -17,6 +17,6 @@ $env:PYTHONPATH = Resolve-Path ..\..\outputs\opera_t0d_2026-09-06\python_package
 & "C:\Users\2003SINGER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" .\long_trajectory_stats.py --raw-dir ..\..\outputs\opera_t0d_2026-09-06\raw --out ..\..\outputs\opera_t0d_2026-09-06\slice\long_trajectory_stats.json
 ```
 
-结果：[2026-09-06_准入审计结果.md](2026-09-06_准入审计结果.md)；机器可读 JSON 位于 Git 忽略的 `outputs/opera_t0d_2026-09-06/slice/long_trajectory_stats.json`。全量结果显示 69 条 session ≥20 actions，但 user-disjoint test 仅 10 条；因此当前不授权直接进入 Paper-0 pilot。
+结果：[2026-09-06_准入审计结果.md](2026-09-06_准入审计结果.md)；机器可读 JSON 位于 Git 忽略的 `outputs/opera_t0d_2026-09-06/slice/long_trajectory_stats.json`。全量结果显示 69 条 session ≥20 actions，但 user-disjoint test 仅 10 条；因此当前不授权直接进入 Paper-0 pilot。冻结协议见 [OPeRA pilot protocol v0](OPeRA_pilot_protocol_v0.md)，当前判定为 LIMITED-GO 的 coarse click-type auxiliary，而非 canonical candidate-set 主实验。
 
 准入标准：可重放的 O（HTML/URL）、时间排序和 action ID 必须完整；session/user split 必须可冻结且不泄漏；必须能在不伪造候选集的情况下定义第一轮预测标签与 NLL。若 exact UI target 没有可枚举候选集，只能考虑 action-type/click-type 的受限协议，不能宣称和当前 `A^O` 等价。

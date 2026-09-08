@@ -9,8 +9,8 @@
 | M1 | **已完成（pre-training gate）** | 已冻结 anchor 语义边界、sign-violation 协议、decision-step 时间尺度、neutral 初始化与 trajectory reset；不再扩展机制 | [M1 冻结决策](Theory-S_M1冻结决策_2026-09-07.md)、[Theory-S v2](../02_实验/Theory_S_v2/README.md)；不得把候选实现写成心理学验证 |
 | M2 | 进行中 | 完善 SceneSnapshot → affordance → generated `A^O` 的最小 ontology 与实例绑定 | 生成不读 source `A*`；source support 仅 post-hoc 诊断；[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md) |
 | M3 | 进行中 | 按 owner audit 完成数据集语义准入，而非继续扩张 routing 表 | [capability matrix](../02_实验/Theory_S_v2/capability_matrix.md)；proxy/telemetry 不升级为 A* |
-| T0d | 进行中 | 完成 OPeRA semantic admission；冻结 user/session-disjoint split 与第一轮标签口径 | 通过 O/action/candidate/provenance 审计后才可 pilot；[OPeRA README](../02_实验/T0d_OPeRA/README.md) |
-| D01 | 进行中 | 完成 LIGHT actor/turn/persona/world/history/action 对齐和 O 边界人工审查 | restricted dev 资产不作为 formal benchmark；[LIGHT README](../02_实验/T0c_LIGHT/README.md) |
+| T0d | **LIMITED-GO（protocol frozen）** | 保留 OPeRA 仅作 coarse click-type auxiliary；不救成 canonical Paper-0 主数据 | 无 exact per-step candidate set、canonical 13D readout 不兼容；[OPeRA protocol](../02_实验/T0d_OPeRA/OPeRA_pilot_protocol_v0.md) |
+| D01 | **下一 owner** | 完成 LIGHT actor/turn/persona/world/history/action 对齐和 O 边界人工审查 | restricted dev 资产不作为 formal benchmark；[LIGHT README](../02_实验/T0c_LIGHT/README.md) |
 | T0c-TR | 进行中 | 审核 expected-effect 与 transition trace 后再决定是否进入外部 pilot | `ΔO → X → S` 语义与时间边界可追溯；不调参冒充结果 |
 | M4 | 未开始 | 独立 `A*` 准入后，冻结 data/split/feature/state protocol，再做 formal gate | 未满足前不启动 Experiment B、正式 test 或论文结果 |
 
