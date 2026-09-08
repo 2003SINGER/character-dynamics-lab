@@ -1,0 +1,266 @@
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+已调用工具
+
+这个结果先别往“ClubFloyd 没历史信号”上走。我看了 83ac9ac，这次 canary 暴露的是实验设计问题，而且有两个是硬问题。
+
+最关键的是数据本身：我直接统计了 400-row fixture，16-step history 中相邻 (O,A*) 49.97% 完全重复；更夸张的是，227/400 = 56.75% 的 target action 和前一步 action 完全相同，其中 211 条连 O 都和前一步一样。这说明 ClubFloyd 源/adapter 链里存在非常强的系统性 duplication，必须先搞清楚。现在一个最简单的 predict previous verb 都应该能抓到明显信号，而 C1_RAW_HISTORY 反而只有 0.339，说明 probe 根本没把最简单的一阶历史读出来。
+
+另外还有两个实现问题：
+
+文档写的是“用 frozen command_schema_v0 提取 verb”，但代码实际只是 verb(raw)=第一个 token。所以 get/take、north/south/east/west 等被拆成不同类，protocol 和实现不一致。
+C1_RAW_HISTORY 名字也不准确。它把 16 个长文本 (O,A) 全部 hash 进同一个 256 维 bag，所谓顺序只靠一个位置权重。它其实已经是一个很激进的 history compression，不是 raw-history benchmark。
+
+所以现在正确结论是：
+
+$$ \boxed{\text{v0 probe failed its own sanity check}} $$
+
+而不是：
+
+$$ \boxed{\text{observable history has no predictive signal}} $$
+
+尤其 C0=C2=C3 连 accuracy 和 macro-F1 都完全一样，而 macro-F1 只有 0.0474，非常像分类器主要在吃类别先验/多数类。
+
+下一步先做一个非常小的“probe sanity / source integrity”修复
+
+这不是为了救正结果，而是因为我们发现了明确的 protocol violation + source duplication。先不要 Theory-S，也不要 LLM。
+
+给 Luna 这段：
+
+暂停解释 83ac9ac 的 NO_CLEAR_HISTORY_SIGNAL。
+
+不要训练 Theory-S，不引入 LLM predictor/summarizer/updater，也不要修改 evaluator 来追分。
+
+当前任务不是“换一个更强模型救结果”，而是检查 Stage-0 canary 是否真的测到了 history signal。已经发现三个明确问题，需要先做 source/probe sanity audit。
+
+1. 先审计 ClubFloyd systematic duplication
+
+在当前 representation_baseline_v0.fixture.jsonl 上复现并正式报告：
+
+adjacent history (source_O, source_action_A_star) exact duplicate rate
+target action == immediately previous action rate
+target O == immediately previous O rate
+target (O,A*) == previous (O,A*) rate
+
+当前外部复核看到大约：
+
+adjacent history exact duplicate ≈ 50%
+target action == previous action ≈ 227/400
+target full pair == previous pair ≈ 211/400
+
+不要直接删除这些行。
+
+先回到对应 raw cleaned ClubFloyd HTML，随机/确定性检查至少 20 个 duplicate cases，回答：
+
+duplication 是原始 ClubFloyd/CALM transcript 本身存在，还是 adapter/parser 引入？
+
+新增一个很短的 source-integrity report。
+
+如果是 adapter bug：
+
+修 adapter；
+重新抽取；
+旧 v0 result 标记 invalidated-by-adapter-bug。
+
+如果 raw source 本身就重复：
+
+保留 lossless raw replay；
+另外冻结一个 analysis-view dedup rule，不得覆盖 source。
+只有在证明这些是系统性 duplicated records、而不是玩家真实重复 command 后，才允许在 development analysis view 中 collapse。
+
+不要凭“看起来重复”直接去重。
+
+2. 加三个无需训练的 sanity baselines
+
+在任何新 representation probe 前，先跑：
+
+B0 — GLOBAL_MAJORITY
+
+训练集最常见 canonical verb。
+
+B1 — PREVIOUS_VERB
+
+直接预测：
+
+verb(A*_{t-1})
+
+B2 — FIRST_ORDER_MARKOV
+
+只用 train trajectories 估计：
+
+p(v_t | v_{t-1})
+
+test 时取 argmax；未见 predecessor 回退 global majority。
+
+这些 baseline 不需要 256D，不需要 gradient。
+
+目的不是成为 Paper-0 baseline，而是检查：
+
+数据里最显然的一阶 temporal signal 到底存在不存在，以及当前 learned probe 是否连它都读不出来。
+
+若 PREVIOUS_VERB / Markov 明显高于当前 C0，而 C1 仍读不出，则 v0 probe representation 明确不合格，不能把 C1 解释为 raw-history test。
+
+3. 修正 target implementation 与 frozen protocol 的不一致
+
+当前 representation_probe_v0.py 的：
+
+verb(raw) = first token
+
+与文档声称的 frozen command_schema_v0 不一致。
+
+不要偷偷 patch v0 并覆盖结果。
+
+保留 v0 immutable，并新建 Stage 0b protocol。
+
+Stage 0b 的 target 必须真正调用/复用 frozen command canonicalizer，或者明确冻结一个 deterministic canonical verb-family mapper。
+
+至少处理：
+
+aliases，如 get → take
+shorthand direction 归为同一 navigation family，而不是 north/south/east/west 四个类别
+x → examine
+i/inv → inventory
+
+不得根据 v0 结果选择映射规则；映射只能来自此前 frozen schema/admission semantics。
+
+同时报告 class counts、train/test unseen classes、majority baseline。
+
+4. 不再把 hashed 256D C1 叫 RAW_HISTORY
+
+当前：
+
+16 个 (O,A) 长文本
+→ 同一个 256D signed hashing bag
+
+已经是强压缩。
+
+因此 rename/clarify：
+
+C1_HASHED_HISTORY_16
+
+不能将其结果用于：
+
+raw observable history has no signal
+
+如果仍想做 history-signal sanity，Stage 0b 先采用结构上明确的低阶历史特征：
+
+current O lexical features
+previous canonical verb one-hot
+optionally last-2 canonical verbs / transition counts
+
+例如：
+
+O_ONLY
+vs
+O + PREV_VERB
+vs
+O + LAST_K_VERB_HISTORY
+
+共享同一简单 linear probe。
+
+这一步只问：
+
+finite observable action history 是否提供增量 signal？
+
+不要先压成 EMA/state。
+
+5. Stage 0b 暂时不要测 persistent state
+
+顺序改成：
+
+Step A — Source integrity
+
+解决 duplication provenance。
+
+Step B — Probe sanity
+
+majority / previous-verb / Markov。
+
+Step C — History signal
+
+在 canonical verb-family target 上比较：
+
+O_ONLY
+vs
+O + PREV_VERB
+vs
+O + LAST_K_HISTORY
+
+只有这里出现可重复 history increment 后，才重新设计：
+
+naive persistent vs permuted persistent
+
+否则继续做 state comparison没有意义。
+
+6. 样本规模
+
+当前 test 只有 59 rows。
+
+Stage 0b 仍是 development，不需要直接全量 438k，但不要再用 59-row test 做“CI 下界必须 > 0”的强 gate。
+
+在 source integrity 修好后，构造更大的 deterministic trajectory-disjoint development slice，例如至少：
+
+2,000–5,000 targets
+hundreds of trajectories
+test 至少数百 rows
+
+具体规模按本地运行成本取一个一次可跑完的值并冻结。
+
+不要看结果后扩大样本。
+
+7. 解释边界
+
+即使 canonical verb-family 上 history 没有增益，也只能说：
+
+no clear history signal for this structured verb-family estimand.
+
+不能直接说：
+
+ClubFloyd has no history signal for next action.
+
+因为 full A* 还包含 target / modifier / sequence-specific choice。
+
+verb-only 是 diagnostic，不是完整 Paper-0 estimand。
+
+8. v0 当前状态修正
+
+把 83ac9ac 保留为真实负结果，但状态改成类似：
+
+STAGE0_V0_INCONCLUSIVE_PROBE_SANITY_FAILED
+
+理由明确写：
+
+target implementation did not actually use documented frozen canonicalizer;
+hashed-history representation was not a true raw-history baseline;
+systematic adjacent duplicate structure requires source-integrity audit;
+trivial temporal baselines were absent;
+59-row test was too small for the preregistered positive-CI gate to serve as a strong scientific stop.
+
+这不是“结果不好所以改实验”，而是结果揭露了 protocol/measurement defects。
+
+9. 禁止
+
+本轮禁止：
+
+LLM predictor
+Luna/Terra 直接预测 next action
+Theory-S
+alpha/beta/b/W training
+candidate-set reconstruction
+调 alias 追分
+无 provenance 去重
+第四轮 dataset semantic audit
+新数据集
+
+Luna/Terra只可以作为科研协作 agent 帮写代码/审文件；不要进入被评测 prediction chain。
+
+完成 source-integrity + trivial baselines + Stage-0b frozen protocol 后，先提交并汇报，不要自动继续 Theory-S。
+
+这一步其实很有价值：**v0 负结果没有白跑，它逼出了“我们的 probe 连显而易见的一阶重复都读不出来”这个事实。**先让 measurement instrument 合格，再讨论 Theory-S。

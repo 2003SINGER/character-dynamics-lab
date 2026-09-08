@@ -1,4 +1,8 @@
-# ClubFloyd Representation Baseline Stage 0 — first structured canary
+# ClubFloyd Representation Baseline Stage 0 — invalidated checkpoint
+
+> **Status: `STAGE0_V0_INCONCLUSIVE_PROBE_SANITY_FAILED`**
+
+This historical run is retained, but its former `NO_CLEAR_HISTORY_SIGNAL` interpretation is invalidated. The implementation did not use the documented frozen canonicalizer; `C1_RAW_HISTORY` was a heavily compressed hashed representation rather than raw history; source duplication and trivial temporal baselines were not audited; and the 59-row test was too small for a strong positive-CI stop gate. See `representation_baseline_stage0b.md`, `source_integrity_report_stage0b_v0.md`, and `stage0b_baselines.json`.
 
 Run artifact: `outputs/clubfloyd_representation_baseline_structured_v0/result.json`.
 

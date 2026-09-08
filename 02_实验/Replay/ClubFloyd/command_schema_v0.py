@@ -17,6 +17,24 @@ VERBS = {
     "throw", "tie", "turn", "unlock", "use", "wait", "wear", "begin", "inventory",
 }
 
+# Stage-0b diagnostic family mapping.  This is deliberately separate from the
+# reversible raw parse above: v0 remains immutable, while the family target
+# collapses aliases and direction shorthands using the frozen command schema.
+VERB_FAMILY_ALIASES = {
+    "get": "take", "x": "examine", "i": "inventory", "inv": "inventory",
+    "n": "navigation", "s": "navigation", "e": "navigation", "w": "navigation",
+    "north": "navigation", "south": "navigation", "east": "navigation", "west": "navigation",
+    "ne": "navigation", "nw": "navigation", "se": "navigation", "sw": "navigation",
+    "up": "navigation", "down": "navigation",
+}
+
+def canonical_verb_family(raw: str) -> str:
+    tokens = normalize_raw(raw).split()
+    if not tokens:
+        return "<EMPTY>"
+    token = tokens[0]
+    return VERB_FAMILY_ALIASES.get(token, token if token in VERBS else "<UNPARSED>")
+
 
 def normalize_raw(raw: str) -> str:
     return re.sub(r"\s+", " ", raw.strip().casefold())
@@ -51,4 +69,3 @@ def canonicalize(raw: str, quality: str | None = None) -> dict[str, Any]:
         "parse_status": status,
         "quality_class": quality,
     }
-
