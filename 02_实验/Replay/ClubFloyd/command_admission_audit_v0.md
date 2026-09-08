@@ -15,11 +15,13 @@
 
 ## 结果与准入门
 
-当前已完成可复现的全量分层与盲样本边界检查；语义标注文件尚未形成可审计的独立 gold，因此本轮不得把机械 command-like 计数当作 `verified_command_like_v0`。
+盲审文件 `command_admission_audit_semantic_v0.jsonl` 已形成 289 条标签：`valid_command` 76、`ambiguous_command` 173、`chat_or_commentary` 8、`meta_command` 32。该轮为保守的确定性 raw-action + pre-state 审查，不是人工逐条裁决；因此这些标签可作为 blocker 诊断，不应冒充高置信 gold。
 
-**当前 gate：NO_GO（语义准入未闭合）。**
+机械 `command-like` 100 条中仅 34 条被判为 `valid_command`，57 条仍 ambiguous，9 条被判 meta；这说明现有 quality heuristic 明显过宽，不能直接产出 `verified_command_like_v0`。
 
-允许的下一步是：由盲审者仅基于上述两个字段补齐语义标签，运行冻结评估器，报告 raw/normalized/verb-target-modifier/semantic 指标；在此之前不得进入 GO_TO_REPRESENTATION_BASELINE、FIX_ONE_BLOCKER 或机制训练。
+**当前 gate：FIX_ONE_BLOCKER（先修复动作质量/语义准入边界）。**
+
+允许的下一步是：收紧 quality/admission 规则并补做独立人工 gold，再运行冻结评估器报告 raw/normalized/verb-target-modifier/semantic 指标；在此之前不得进入 GO_TO_REPRESENTATION_BASELINE 或机制训练。
 
 ## 不变边界
 
