@@ -91,7 +91,7 @@ miss，不能将其 NLL 与 canonical finite-candidate `A^O` 结果混写。
 | click-type entropy | 2.929 bits |
 | action-type entropy | 0.442 bits |
 | eligible train/test under SHA-256 user-rank 80/20 | 59 / 10 sessions |
-| eligible train/test users | 42 / 10 users overall split |
+| split train/test users | 42 / 10 users overall; 24 users have at least one eligible long session overall |
 
 当前聚合 click rows 的 2,355 个 click-type 计数合计为 2,355；pilot 仍须按
 split 重新报告 unknown/missing click-type 行、每类计数和 train-only/test-only
