@@ -31,6 +31,7 @@ set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
     Src/observation.cpp
     Src/appraisal.cpp
     Src/state.cpp
+    Src/parameter_config.cpp
     Src/candidate_scoring.cpp
     Src/decision.cpp
     Src/simulation.cpp

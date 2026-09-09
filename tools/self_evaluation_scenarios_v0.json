@@ -1,6 +1,6 @@
 {
   "schema_version": "character_dynamics_self_evaluation_scenarios_v0",
-  "status": "manifest_only_until_paired_intervention_hooks_exist",
+  "status": "active_regression_manifest",
   "world_seed_count": 8,
   "scenarios": [
     {"scenario_seed": 1, "name": "mixed_weather_baseline_1", "intervention": "none", "expected_observation_contract": "baseline trace only"},
@@ -12,9 +12,10 @@
     {"scenario_seed": 7, "name": "rain_dominant_baseline_7", "intervention": "none", "expected_observation_contract": "baseline trace only"},
     {"scenario_seed": 8, "name": "mixed_weather_baseline_8", "intervention": "none", "expected_observation_contract": "baseline trace only"}
   ],
-  "future_paired_interventions": [
+  "paired_interventions": [
     {"id": "hidden_phone_removed", "same_initial_state": true, "world_change": "phone removed without direct observation", "expected": "W changes, O remains unchanged until discovery"},
     {"id": "visible_phone_removed", "same_initial_state": true, "world_change": "phone removed in direct view", "expected": "O changes immediately and policy can respond"},
-    {"id": "task_deadline_shift", "same_initial_state": true, "world_change": "deadline changes while unobserved", "expected": "state changes only after permitted observation", "status": "implemented_v0", "runner": "--paired-deadline"}
+    {"id": "task_deadline_shift", "same_initial_state": true, "world_change": "deadline changes while unobserved", "expected": "state changes only after permitted observation", "status": "implemented_v0", "runner": "--paired-deadline"},
+    {"id": "commitment_recovery", "same_initial_state": true, "world_change": "meal/rest interrupts and recovers an active task commitment", "expected": "Active → Suspended → Active with typed completion boundary", "status": "implemented_v0", "runner": "--paired-commitment"}
   ]
 }
