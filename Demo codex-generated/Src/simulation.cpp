@@ -674,9 +674,43 @@ void Simulation::run_paired_commitment_recovery(std::ostream& output, const std:
     apply_self_action_feedback(observation, resumed, world.time_summary());
     update_commitment(state, observation, total_minutes(world.time));
     file << "resumed_active," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << "," << state.fatigue << "," << state.hunger << ",permits return," << study_probability(preserved_return) << "," << tv << ",study_focused," << (resumed.accepted ? 1 : 0) << '\n';
+    // Completion is a separate probe: W can complete while the commitment
+    // closes only when the typed self-action feedback reaches O.
+    World completion_world(20260916U);
+    completion_world.task_by_id("coursework")->effort_target = 0.10;
+    CharacterState completion_state;
+    completion_state.commitment = {CommitmentStatus::Active, "coursework", "completion probe", 0, 0};
+    Observation completion_observation;
+    const WorldOutcome completion = completion_world.settle(ActionType::StudyFocused, "desk");
+    apply_self_action_feedback(completion_observation, completion, completion_world.time_summary(), true);
+    update_commitment(completion_state, completion_observation, total_minutes(completion_world.time));
+    const bool completion_closed = completion.task_completed
+        && completion_state.commitment.status == CommitmentStatus::None;
+    file << "completed_observable," << commitment_status_name(completion_state.commitment.status)
+         << "," << completion_state.commitment.suspended_decision_points << ","
+         << completion_state.fatigue << "," << completion_state.hunger
+         << ",completion feedback observed," << study_probability(preserved_return)
+         << "," << tv << ",study_focused," << (completion.accepted ? 1 : 0) << '\n';
+    CharacterState hidden_completion_state;
+    hidden_completion_state.commitment = {CommitmentStatus::Active, "coursework", "hidden completion probe", 0, 0};
+    Observation hidden_completion_observation;
+    apply_self_action_feedback(hidden_completion_observation, completion,
+                               completion_world.time_summary(), false);
+    update_commitment(hidden_completion_state, hidden_completion_observation,
+                      total_minutes(completion_world.time));
+    const bool hidden_completion_preserved = completion.task_completed
+        && hidden_completion_state.commitment.status == CommitmentStatus::Active;
+    file << "completed_hidden," << commitment_status_name(hidden_completion_state.commitment.status)
+         << "," << hidden_completion_state.commitment.suspended_decision_points << ","
+         << hidden_completion_state.fatigue << "," << hidden_completion_state.hunger
+         << ",completion feedback hidden," << study_probability(preserved_return)
+         << "," << tv << ",study_focused," << (completion.accepted ? 1 : 0) << '\n';
     output << "paired commitment recovery complete: active=" << active_created
            << ", suspended=" << suspended << ", policy_difference=" << tv
-           << ", resumed=" << (state.commitment.status == CommitmentStatus::Active) << " saved to " << path.string() << '\n';
+           << ", resumed=" << (state.commitment.status == CommitmentStatus::Active)
+           << ", completed_observable=" << completion_closed
+           << ", completed_hidden=" << hidden_completion_preserved
+           << " saved to " << path.string() << '\n';
 }
 
 bool Simulation::verify(std::ostream& output) const {

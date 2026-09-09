@@ -6,7 +6,7 @@ from pathlib import Path
 def rows(path):
     return list(csv.DictReader(Path(path).open(encoding='utf-8', newline='')))
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--deadline', type=Path, required=True); ap.add_argument('--commitment', type=Path, required=True); ap.add_argument('--out', type=Path, required=True); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument('--deadline', type=Path, required=True); ap.add_argument('--commitment', type=Path, required=True); ap.add_argument('--out', type=Path, required=True); ap.add_argument('--source-revision', default='unknown'); a = ap.parse_args()
     d, c = rows(a.deadline), rows(a.commitment)
     seeds = sorted({int(r['scenario_seed']) for r in d})
     hidden_step = {s: min(int(r['step']) for r in d if int(r['scenario_seed']) == s and r['branch'] == 'hidden' and r['discovery_event'] == '1') for s in seeds}
@@ -21,7 +21,9 @@ def main():
             'deadline_hidden_discovery_nonzero_policy': all(float(r['policy_tv_vs_control']) > 0 for r in hidden_disc),
             'commitment_active_setup': c[0]['commitment_status'] == 'active',
             'commitment_suspended': c[1]['commitment_status'] == 'suspended',
-            'commitment_resumed_active': c[-1]['commitment_status'] == 'active',
+            'commitment_resumed_active': any(r['phase'] == 'resumed_active' and r['commitment_status'] == 'active' for r in c),
+            'commitment_completion_observable_closes': any(r['phase'] == 'completed_observable' and r['commitment_status'] == 'none' and r['accepted'] == '1' for r in c),
+            'commitment_completion_hidden_preserved': any(r['phase'] == 'completed_hidden' and r['commitment_status'] == 'active' and r['accepted'] == '1' for r in c),
         },
         'mechanism_metrics': {
             'deadline': {'seeds': len(seeds), 'hidden_pre_discovery_max_tv': hidden_pre, 'visible_discovery_count': len(visible_disc), 'hidden_discovery_count': len(hidden_disc), 'visible_policy_tv': [float(r['policy_tv_vs_control']) for r in visible_disc], 'hidden_policy_tv': [float(r['policy_tv_vs_control']) for r in hidden_disc]},
@@ -29,6 +31,7 @@ def main():
         },
         'behavior_telemetry': {'not_scored': ['believability', 'naturalness', 'character differentiation as quality']},
         'efficiency_telemetry': {'model_calls': 0, 'decision_count': len(d), 'calls_per_decision': 0.0},
+        'provenance': {'source_revision': a.source_revision, 'deadline_csv': str(a.deadline), 'commitment_csv': str(a.commitment)},
     }
     a.out.parent.mkdir(parents=True, exist_ok=True); a.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'); print(json.dumps(result, ensure_ascii=False, indent=2))
 if __name__ == '__main__': main()
