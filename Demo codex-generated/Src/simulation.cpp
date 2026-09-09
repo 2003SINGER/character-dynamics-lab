@@ -561,10 +561,10 @@ void Simulation::run_paired_deadline_intervention(std::ostream& output, const st
         std::mt19937 control_rng(action_seed_base + scenario_seed), hidden_rng(action_seed_base + scenario_seed), visible_rng(action_seed_base + scenario_seed);
         ScenarioConfig control_config{}, hidden_config{}, visible_config{};
         hidden_config.information_access.task_deadline_observable = false;
-        const int hidden_discovery_at = total_minutes(hidden_world.time) + 60;
+        int hidden_discovery_at = -1;
         for (int step = 1; step <= 12; ++step) {
             hidden_config.information_access.task_deadline_observable =
-                step == 1 || total_minutes(hidden_world.time) >= hidden_discovery_at;
+                step == 1 || (hidden_discovery_at >= 0 && total_minutes(hidden_world.time) >= hidden_discovery_at);
             const StepRecord control = advance_one_decision(control_world, control_state, control_observation,
                 control_previous, control_rng, personality, control_config.information_access);
             const StepRecord hidden = advance_one_decision(hidden_world, hidden_state, hidden_observation,
@@ -574,9 +574,10 @@ void Simulation::run_paired_deadline_intervention(std::ostream& output, const st
             if (step == 1) {
                 for (World* world : {&hidden_world, &visible_world}) {
                     if (WorldTask* task = world->task_by_id("coursework")) {
-                        task->due_at_total_minutes = total_minutes(world->time) + 60;
+                        task->due_at_total_minutes = total_minutes(world->time) + 180;
                     }
                 }
+                hidden_discovery_at = total_minutes(hidden_world.time) + 60;
             }
             const auto emit = [&](const char* branch, const StepRecord& trace, const CharacterState& state,
                                   const World& world, const DecisionContext& baseline) {

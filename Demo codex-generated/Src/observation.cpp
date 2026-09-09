@@ -148,6 +148,16 @@ bool known_int(const Observation& observation, const std::string& key, int& valu
     return true;
 }
 
+bool known_double(const Observation& observation, const std::string& key, double& value) {
+    const ObservationFact* fact = find_fact(observation, key);
+    if (fact == nullptr || fact->status != KnowledgeStatus::Known || fact->value.empty()) return false;
+    char* end = nullptr;
+    const double parsed = std::strtod(fact->value.c_str(), &end);
+    if (end == fact->value.c_str() || *end != '\0') return false;
+    value = parsed;
+    return true;
+}
+
 Observation refresh_observation(Observation observation,
                                 const World& world,
                                 const WorldOutcome& previous_outcome,
@@ -246,7 +256,7 @@ Observation refresh_observation(Observation observation,
     write_fact(observation, "message.unread_count", std::to_string(world.unread_messages), "phone_notification_state", now);
     write_fact(observation, "clock.time", now, "internal_clock", now);
     write_fact(observation, "clock.total_minutes", std::to_string(total_minutes(world.time)), "internal_clock", now);
-    write_fact(observation, "room.temperature", format_temperature(room.temperature_celsius), "direct_room_thermal", now);
+    write_fact(observation, "room.temperature_celsius", std::to_string(room.temperature_celsius), "direct_room_thermal", now);
     if (room.curtain_open) {
         write_fact(observation, "outside.weather", world.weather, "direct_window_visual", now);
     } else {
@@ -346,7 +356,7 @@ Observation apply_sleep_sensory_update(Observation observation,
     observation.updates_this_refresh.clear();
     for (const WorldEvent& event : outcome.sleeping_sensory_events) {
         if (event.id == "room-cold") {
-            write_fact(observation, "room.temperature", format_temperature(world.current_room().temperature_celsius),
+            write_fact(observation, "room.temperature_celsius", std::to_string(world.current_room().temperature_celsius),
                        "direct_room_thermal_while_asleep", world.time_summary());
         }
     }
@@ -385,7 +395,7 @@ std::string observation_summary(const Observation& observation) {
         if (index + 1 < observation.known_actions.size()) output << ", ";
     }
     output << "], " << observation_updates_summary(observation)
-           << ", temperature=" << fact_value(observation, "room.temperature")
+           << ", temperature_celsius=" << fact_value(observation, "room.temperature_celsius")
            << ", time=" << fact_value(observation, "clock.time")
            << ", light=" << fact_value(observation, "room.light")
            << ", coursework_effort=" << fact_value(observation, "task.coursework.effort")

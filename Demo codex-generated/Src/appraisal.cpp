@@ -168,11 +168,13 @@ Appraisal appraise(const Observation& observation,
             appraisal.boredom_delta += 0.03;
             appraisal.anxiety_delta += 0.02 + 0.04 * personality.task_anxiety_sensitivity;
             appraisal.tags.push_back("alarm_interrupts_room");
-        } else if (update.key == "room.temperature" && update.value == "17.0C"
-                   && update.status == KnowledgeStatus::Known) {
-            appraisal.fatigue_delta += 0.04;
-            appraisal.satisfaction_delta -= 0.06;
-            appraisal.tags.push_back("cold_interrupts_sleep");
+        } else if (update.key == "room.temperature_celsius" && update.status == KnowledgeStatus::Known) {
+            double temperature = 0.0;
+            if (known_double(observation, update.key, temperature) && temperature <= 17.0) {
+                appraisal.fatigue_delta += 0.04;
+                appraisal.satisfaction_delta -= 0.06;
+                appraisal.tags.push_back("cold_interrupts_sleep");
+            }
         } else if (update.key == "message.unread_count" && update.value != "0"
                    && update.status == KnowledgeStatus::Known && coursework_pending) {
             appraisal.task_pressure_delta += 0.08;
