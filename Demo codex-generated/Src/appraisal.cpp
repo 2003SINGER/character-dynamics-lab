@@ -159,7 +159,8 @@ Appraisal appraise(const Observation& observation,
                 const int remaining = deadline - now;
                 const double urgency = remaining <= 0 ? 1.0
                     : remaining >= 720 ? 0.0 : 1.0 - static_cast<double>(remaining) / 720.0;
-                appraisal.task_pressure_delta += 0.20 * urgency;
+                appraisal.deadline_pressure_contribution = 0.20 * urgency;
+                appraisal.task_pressure_delta += appraisal.deadline_pressure_contribution;
                 appraisal.anxiety_delta += 0.08 * urgency * personality.task_anxiety_sensitivity;
                 appraisal.tags.push_back("deadline_urgency");
             }

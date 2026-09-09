@@ -32,6 +32,7 @@ struct Appraisal {
     double boredom_delta = 0.0;
     double fatigue_delta = 0.0;
     double task_pressure_delta = 0.0;
+    double deadline_pressure_contribution = 0.0;
     double satisfaction_delta = 0.0;
     double hunger_delta = 0.0;
     double bathroom_urge_delta = 0.0;

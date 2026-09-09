@@ -549,7 +549,7 @@ void Simulation::run_paired_deadline_intervention(std::ostream& output, const st
     if (path.has_parent_path()) fs::create_directories(path.parent_path());
     std::ofstream file(path);
     if (!file) throw std::runtime_error("Cannot open paired deadline output: " + output_path);
-    file << "scenario_seed,branch,step,deadline_fact,deadline_source,remaining_minutes,urgency,appraisal_pressure_delta,pre_task_pressure,post_task_pressure,chosen_action,policy_tv_vs_control,study_probability,observation_summary,discovery_event\n";
+    file << "scenario_seed,branch,step,simulation_total_minutes,deadline_fact,deadline_source,remaining_minutes,urgency,deadline_pressure_contribution,appraisal_pressure_delta,pre_task_pressure,post_task_pressure,shared_executed_action,policy_tv_vs_control,study_probability,observation_summary,discovery_event\n";
     file << std::fixed << std::setprecision(6);
     const Personality personality = procrastinating_profile();
     constexpr unsigned int action_seed_base = 20260914U;
@@ -592,10 +592,10 @@ void Simulation::run_paired_deadline_intervention(std::ostream& output, const st
                 for (const CandidateAction& candidate : trace.decision.candidates) {
                     if (candidate.action == ActionType::StudyAtComputer || candidate.action == ActionType::StudyFocused || candidate.action == ActionType::StudyHalfhearted) study_probability += candidate.probability;
                 }
-                file << scenario_seed << ',' << branch << ',' << step << ',';
+                file << scenario_seed << ',' << branch << ',' << step << ',' << total_minutes(world.time) << ',';
                 write_csv_field(file, deadline != nullptr ? deadline->value : "unknown");
                 file << ','; write_csv_field(file, deadline != nullptr ? deadline->source : "none");
-                file << ',' << remaining << ',' << urgency << ',' << trace.appraisal.task_pressure_delta
+                file << ',' << remaining << ',' << urgency << ',' << trace.appraisal.deadline_pressure_contribution << ',' << trace.appraisal.task_pressure_delta
                      << ',' << trace.state_at_decision.task_pressure
                      << ',' << trace.state_after_settlement.task_pressure << ',';
                 write_csv_field(file, to_string(trace.chosen_action));
@@ -614,6 +614,58 @@ void Simulation::run_paired_deadline_intervention(std::ostream& output, const st
         }
     }
     output << "paired deadline intervention complete: 8 seeds x 12 steps x 3 branches saved to " << path.string() << '\n';
+}
+
+void Simulation::run_paired_commitment_recovery(std::ostream& output, const std::string& output_path) const {
+    namespace fs = std::filesystem;
+    const fs::path path(output_path);
+    if (path.has_parent_path()) fs::create_directories(path.parent_path());
+    std::ofstream file(path);
+    if (!file) throw std::runtime_error("Cannot open commitment fixture output: " + output_path);
+    file << "phase,commitment_status,suspended_decision_points,fatigue,hunger,reconsideration,study_probability,preserved_vs_ablated_policy_tv,action,accepted\n";
+    const Personality personality = procrastinating_profile();
+    World world(20260915U);
+    CharacterState state;
+    Observation observation;
+    WorldOutcome previous;
+    const WorldOutcome study = world.settle(ActionType::StudyFocused, "desk");
+    apply_self_action_feedback(observation, study, world.time_summary());
+    update_commitment(state, observation, total_minutes(world.time));
+    const bool active_created = study.accepted && state.commitment.status == CommitmentStatus::Active;
+    state.fatigue = 0.80;
+    state.hunger = 0.85;
+    const WorldOutcome meal = world.settle(ActionType::GetMeal, "door");
+    apply_self_action_feedback(observation, meal, world.time_summary());
+    update_commitment(state, observation, total_minutes(world.time));
+    const bool suspended = meal.accepted && state.commitment.status == CommitmentStatus::Suspended;
+    state.hunger = 0.20;
+    CharacterState ablated_state = state;
+    ablated_state.commitment = {};
+    const Observation preserved_observation = refresh_observation(observation, world, meal);
+    const DecisionContext preserved_deferred = decide(preserved_observation, state, personality);
+    const DecisionContext ablated_deferred = decide(preserved_observation, ablated_state, personality);
+    state.fatigue = 0.20;
+    ablated_state.fatigue = 0.20;
+    const DecisionContext preserved_return = decide(preserved_observation, state, personality);
+    const DecisionContext ablated_return = decide(preserved_observation, ablated_state, personality);
+    const auto study_probability = [](const DecisionContext& decision) {
+        double total = 0.0;
+        for (const CandidateAction& candidate : decision.candidates) {
+            if (candidate.action == ActionType::StudyAtComputer || candidate.action == ActionType::StudyFocused || candidate.action == ActionType::StudyHalfhearted) total += candidate.probability;
+        }
+        return total;
+    };
+    const double tv = policy_distance(preserved_return, ablated_return);
+    file << "setup_active," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << "," << state.fatigue << "," << state.hunger << ",n/a," << study_probability(preserved_deferred) << ",0,," << (active_created ? 1 : 0) << '\n';
+    file << "interrupted_suspended," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << ",0.800000,0.850000," << preserved_deferred.intention_status << "," << study_probability(preserved_deferred) << ",0,," << (suspended ? 1 : 0) << '\n';
+    file << "recovery_ablation," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << ",0.200000,0.200000," << preserved_return.intention_status << "," << study_probability(preserved_return) << "," << tv << ",," << (tv > 0.0 ? 1 : 0) << '\n';
+    const WorldOutcome resumed = world.settle(ActionType::StudyFocused, "desk");
+    apply_self_action_feedback(observation, resumed, world.time_summary());
+    update_commitment(state, observation, total_minutes(world.time));
+    file << "resumed_active," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << "," << state.fatigue << "," << state.hunger << ",permits return," << study_probability(preserved_return) << "," << tv << ",study_focused," << (resumed.accepted ? 1 : 0) << '\n';
+    output << "paired commitment recovery complete: active=" << active_created
+           << ", suspended=" << suspended << ", policy_difference=" << tv
+           << ", resumed=" << (state.commitment.status == CommitmentStatus::Active) << " saved to " << path.string() << '\n';
 }
 
 bool Simulation::verify(std::ostream& output) const {
