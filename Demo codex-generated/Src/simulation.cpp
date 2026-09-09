@@ -723,6 +723,31 @@ bool Simulation::verify(std::ostream& output) const {
         && visible_usability->value == "false"
         && std::find(visibly_broken_observation.known_actions.begin(), visibly_broken_observation.known_actions.end(), ActionType::UseComputer)
             == visibly_broken_observation.known_actions.end();
+    World hidden_phone_world;
+    Observation hidden_phone_observation = refresh_observation({}, hidden_phone_world, {});
+    hidden_phone_world.current_room().objects.erase(
+        std::remove_if(hidden_phone_world.current_room().objects.begin(), hidden_phone_world.current_room().objects.end(),
+            [](const Object& object) { return object.id == "phone"; }),
+        hidden_phone_world.current_room().objects.end());
+    InformationAccess hidden_phone_access;
+    hidden_phone_access.phone_presence_observable = false;
+    const Observation hidden_phone_after_removal = refresh_observation(
+        hidden_phone_observation, hidden_phone_world, {}, hidden_phone_access);
+    InformationAccess visible_phone_access;
+    visible_phone_access.phone_presence_observable = true;
+    const Observation visible_phone_after_removal = refresh_observation(
+        hidden_phone_observation, hidden_phone_world, {}, visible_phone_access);
+    const bool hidden_belief_retains_phone_actions =
+        has_known_fact(hidden_phone_after_removal, "object.phone", "present")
+        && std::find(hidden_phone_after_removal.known_actions.begin(), hidden_phone_after_removal.known_actions.end(), ActionType::UsePhone)
+            != hidden_phone_after_removal.known_actions.end()
+        && std::find(hidden_phone_after_removal.known_actions.begin(), hidden_phone_after_removal.known_actions.end(), ActionType::ShopOnPhone)
+            != hidden_phone_after_removal.known_actions.end();
+    const bool visible_phone_removes_actions =
+        std::find(visible_phone_after_removal.known_actions.begin(), visible_phone_after_removal.known_actions.end(), ActionType::UsePhone)
+            == visible_phone_after_removal.known_actions.end()
+        && std::find(visible_phone_after_removal.known_actions.begin(), visible_phone_after_removal.known_actions.end(), ActionType::ShopOnPhone)
+            == visible_phone_after_removal.known_actions.end();
     ScenarioConfig configured_scenario;
     configured_scenario.information_access.wallet_balance_observable = true;
     const std::string default_scenario_run = run_profile(first, 20260904U, 0U, false, 2, true);
@@ -759,7 +784,9 @@ bool Simulation::verify(std::ostream& output) const {
            << ", study_requires_known_light=" << study_requires_known_light
            << ", silent_alarm_filters_action=" << silent_alarm_filters_action
            << ", visible_wallet_filters_purchase=" << visible_wallet_filters_purchase
-           << ", visible_usability_filters_action=" << visible_usability_filters_action << '\n';
+           << ", visible_usability_filters_action=" << visible_usability_filters_action
+           << ", hidden_belief_retains_phone_actions=" << hidden_belief_retains_phone_actions
+           << ", visible_phone_removes_actions=" << visible_phone_removes_actions << '\n';
     return reproducible && profile_sensitive && validates_world && has_primitives
         && primitives_settle && handles_interruption && completed_task_stays_quiet && deduplicates_actions
         && preserves_rejected_feedback && keeps_broken_object_visible && does_not_leak_hidden_wallet
@@ -772,7 +799,8 @@ bool Simulation::verify(std::ostream& output) const {
         && scenario_config_reaches_trajectory
         && light_precondition_filters_known_state && curtain_precondition_filters_known_state
         && study_requires_known_light && silent_alarm_filters_action
-        && visible_wallet_filters_purchase && visible_usability_filters_action;
+        && visible_wallet_filters_purchase && visible_usability_filters_action
+        && hidden_belief_retains_phone_actions && visible_phone_removes_actions;
 }
 
 bool Simulation::run_e0(std::ostream& output) const {

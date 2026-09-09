@@ -54,11 +54,19 @@ struct InformationAccess {
     bool phone_presence_observable = true;
 };
 
+// Stable affordance knowledge belongs to O. It is deliberately separate from
+// current W object presence/usability, which may change before discovery.
+struct KnownObjectAffordance {
+    std::string id;
+    std::vector<ActionType> affordances;
+};
+
 // O: a separately stored character-side view, even though this one-room
 // reference refreshes all visible fields deterministically.
 struct Observation {
     std::vector<std::string> visible_object_labels;
     std::vector<std::string> known_object_ids;
+    std::vector<KnownObjectAffordance> known_object_affordances;
     std::vector<ActionType> known_actions; // A^O, not W's full action set.
     std::vector<ObservationFact> facts;
     std::vector<ObservationFact> updates_this_refresh;

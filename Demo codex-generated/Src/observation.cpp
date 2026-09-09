@@ -173,6 +173,14 @@ Observation refresh_observation(Observation observation,
         }
         observation.known_object_ids.push_back(object.id);
         observation.visible_object_labels.push_back(object.label);
+        const auto known_affordance = std::find_if(observation.known_object_affordances.begin(),
+            observation.known_object_affordances.end(),
+            [&object](const KnownObjectAffordance& item) { return item.id == object.id; });
+        if (known_affordance == observation.known_object_affordances.end()) {
+            observation.known_object_affordances.push_back({object.id, object.affordances});
+        } else {
+            known_affordance->affordances = object.affordances;
+        }
         write_fact(observation, "object." + object.id, "present", "direct_room_visual", now);
         if (access.object_usability_observable) {
             write_fact(observation, "object." + object.id + ".usable",
@@ -182,13 +190,29 @@ Observation refresh_observation(Observation observation,
     // Objects absent from this refresh remain remembered, but no longer count
     // as current visual knowledge. This is the minimal stale/unknown hook for
     // later movement, occlusion, and dynamically removed objects.
+    std::vector<std::string> absent_object_ids;
     for (const ObservationFact& fact : observation.facts) {
         const std::string object_id = object_id_from_fact_key(fact.key);
         if (!object_id.empty()) {
             if (object_id == "phone" && !access.phone_presence_observable) continue;
             if (!contains_id(observation.known_object_ids, object_id)) {
                 mark_stale(observation, fact.key);
+                absent_object_ids.push_back(object_id);
             }
+        }
+    }
+    if (access.phone_presence_observable) {
+        std::sort(absent_object_ids.begin(), absent_object_ids.end());
+        absent_object_ids.erase(std::unique(absent_object_ids.begin(), absent_object_ids.end()), absent_object_ids.end());
+        observation.known_object_affordances.erase(
+            std::remove_if(observation.known_object_affordances.begin(), observation.known_object_affordances.end(),
+                [&absent_object_ids](const KnownObjectAffordance& item) {
+                    return contains_id(absent_object_ids, item.id);
+                }), observation.known_object_affordances.end());
+    }
+    for (const KnownObjectAffordance& item : observation.known_object_affordances) {
+        if (!contains_id(observation.known_object_ids, item.id)) {
+            observation.known_object_ids.push_back(item.id);
         }
     }
     apply_self_action_feedback(observation, previous_outcome, now,
@@ -237,10 +261,12 @@ Observation refresh_observation(Observation observation,
     // (wallet, hidden task completion, object failure, room flags) are tested
     // only at settlement and can then become O through feedback.
     observation.known_actions.push_back(ActionType::Idle);
-    for (const Object& object : room.objects) {
-        if (!contains_id(observation.known_object_ids, object.id)) continue;
-        for (ActionType action : object.affordances) {
-            if (subjective_preconditions_allow(action, observation, object)
+    for (const KnownObjectAffordance& known_object : observation.known_object_affordances) {
+        Object believed_object;
+        believed_object.id = known_object.id;
+        believed_object.affordances = known_object.affordances;
+        for (ActionType action : known_object.affordances) {
+            if (subjective_preconditions_allow(action, observation, believed_object)
                 && !observation_knows_action(observation, action)) {
                 observation.known_actions.push_back(action);
             }
