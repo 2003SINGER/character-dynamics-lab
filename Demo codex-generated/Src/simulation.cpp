@@ -197,7 +197,8 @@ StepRecord advance_one_decision(World& world,
                                WorldOutcome& previous_outcome,
                                std::mt19937& action_rng,
                                const Personality& personality,
-                               const InformationAccess& information_access = {}) {
+                               const InformationAccess& information_access = {},
+                               ActionType forced_action = ActionType::Count) {
     StepRecord trace;
     const DecisionSnapshot snapshot = prepare_decision(world, state, observation, previous_outcome,
                                                        personality, information_access);
@@ -209,7 +210,8 @@ StepRecord advance_one_decision(World& world,
     trace.state_at_decision = snapshot.state_at_decision;
     trace.task_before = coursework_snapshot(world);
     trace.decision = snapshot.decision;
-    trace.chosen_action = sample_action(trace.decision, action_rng);
+    trace.chosen_action = forced_action == ActionType::Count
+        ? sample_action(trace.decision, action_rng) : forced_action;
     std::string target_object_id;
     for (const CandidateAction& candidate : trace.decision.candidates) {
         if (candidate.action == trace.chosen_action) {
@@ -547,7 +549,7 @@ void Simulation::run_paired_deadline_intervention(std::ostream& output, const st
     if (path.has_parent_path()) fs::create_directories(path.parent_path());
     std::ofstream file(path);
     if (!file) throw std::runtime_error("Cannot open paired deadline output: " + output_path);
-    file << "scenario_seed,branch,step,deadline_fact,deadline_source,appraisal_pressure_delta,pre_task_pressure,post_task_pressure,chosen_action,policy_tv_vs_control,observation_summary,discovery_event\n";
+    file << "scenario_seed,branch,step,deadline_fact,deadline_source,remaining_minutes,urgency,appraisal_pressure_delta,pre_task_pressure,post_task_pressure,chosen_action,policy_tv_vs_control,study_probability,observation_summary,discovery_event\n";
     file << std::fixed << std::setprecision(6);
     const Personality personality = procrastinating_profile();
     constexpr unsigned int action_seed_base = 20260914U;
@@ -559,14 +561,16 @@ void Simulation::run_paired_deadline_intervention(std::ostream& output, const st
         std::mt19937 control_rng(action_seed_base + scenario_seed), hidden_rng(action_seed_base + scenario_seed), visible_rng(action_seed_base + scenario_seed);
         ScenarioConfig control_config{}, hidden_config{}, visible_config{};
         hidden_config.information_access.task_deadline_observable = false;
+        const int hidden_discovery_at = total_minutes(hidden_world.time) + 60;
         for (int step = 1; step <= 12; ++step) {
-            hidden_config.information_access.task_deadline_observable = (step == 1 || step >= 4);
+            hidden_config.information_access.task_deadline_observable =
+                step == 1 || total_minutes(hidden_world.time) >= hidden_discovery_at;
             const StepRecord control = advance_one_decision(control_world, control_state, control_observation,
                 control_previous, control_rng, personality, control_config.information_access);
             const StepRecord hidden = advance_one_decision(hidden_world, hidden_state, hidden_observation,
-                hidden_previous, hidden_rng, personality, hidden_config.information_access);
+                hidden_previous, hidden_rng, personality, hidden_config.information_access, control.chosen_action);
             const StepRecord visible = advance_one_decision(visible_world, visible_state, visible_observation,
-                visible_previous, visible_rng, personality, visible_config.information_access);
+                visible_previous, visible_rng, personality, visible_config.information_access, control.chosen_action);
             if (step == 1) {
                 for (World* world : {&hidden_world, &visible_world}) {
                     if (WorldTask* task = world->task_by_id("coursework")) {
@@ -576,18 +580,32 @@ void Simulation::run_paired_deadline_intervention(std::ostream& output, const st
             }
             const auto emit = [&](const char* branch, const StepRecord& trace, const CharacterState& state,
                                   const World& world, const DecisionContext& baseline) {
-                const ObservationFact* deadline = find_fact(trace.observation_at_decision, "task.coursework.deadline");
+                const ObservationFact* deadline = find_fact(trace.observation_at_decision, "task.coursework.deadline_at_total_minutes");
                 const double policy_tv = policy_distance(trace.decision, baseline);
+                int deadline_at = 0, clock_now = 0;
+                const bool numeric_deadline = known_int(trace.observation_at_decision, "task.coursework.deadline_at_total_minutes", deadline_at)
+                    && known_int(trace.observation_at_decision, "clock.total_minutes", clock_now);
+                const int remaining = numeric_deadline ? deadline_at - clock_now : 0;
+                const double urgency = !numeric_deadline ? 0.0 : (remaining <= 0 ? 1.0 : remaining >= 720 ? 0.0 : 1.0 - static_cast<double>(remaining) / 720.0);
+                double study_probability = 0.0;
+                for (const CandidateAction& candidate : trace.decision.candidates) {
+                    if (candidate.action == ActionType::StudyAtComputer || candidate.action == ActionType::StudyFocused || candidate.action == ActionType::StudyHalfhearted) study_probability += candidate.probability;
+                }
                 file << scenario_seed << ',' << branch << ',' << step << ',';
                 write_csv_field(file, deadline != nullptr ? deadline->value : "unknown");
                 file << ','; write_csv_field(file, deadline != nullptr ? deadline->source : "none");
-                file << ',' << trace.appraisal.task_pressure_delta
+                file << ',' << remaining << ',' << urgency << ',' << trace.appraisal.task_pressure_delta
                      << ',' << trace.state_at_decision.task_pressure
                      << ',' << trace.state_after_settlement.task_pressure << ',';
                 write_csv_field(file, to_string(trace.chosen_action));
-                file << ',' << policy_tv << ',';
+                file << ',' << policy_tv << ',' << study_probability << ',';
                 write_csv_field(file, observation_summary(trace.observation_at_decision));
-                file << ',' << (deadline != nullptr && deadline->value == "passed" ? 1 : 0) << '\n';
+                const bool discovered = std::any_of(trace.observation_at_decision.updates_this_refresh.begin(),
+                    trace.observation_at_decision.updates_this_refresh.end(), [](const ObservationFact& update) {
+                        return update.key == "task.coursework.deadline_at_total_minutes"
+                            && update.source != "initial_calendar";
+                    });
+                file << ',' << (discovered ? 1 : 0) << '\n';
             };
             emit("control", control, control_state, control_world, control.decision);
             emit("hidden", hidden, hidden_state, hidden_world, control.decision);
@@ -723,10 +741,11 @@ bool Simulation::verify(std::ostream& output) const {
     const WorldOutcome deadline_outcome = deadline_world.settle(ActionType::Idle);
     const Observation after_deadline_observation = refresh_observation(before_deadline_observation, deadline_world, deadline_outcome);
     const Appraisal deadline_appraisal = appraise(after_deadline_observation, CharacterState{}, first);
-    const bool deadline_is_observable = std::any_of(deadline_outcome.events.begin(), deadline_outcome.events.end(),
-        [](const WorldEvent& event) { return event.id == "task-deadline"; })
-        && std::find(deadline_appraisal.tags.begin(), deadline_appraisal.tags.end(), "deadline_passed")
-            != deadline_appraisal.tags.end();
+    const ObservationFact* observed_deadline = find_fact(after_deadline_observation,
+        "task.coursework.deadline_at_total_minutes");
+    const bool deadline_is_observable = observed_deadline != nullptr
+        && observed_deadline->status == KnowledgeStatus::Known
+        && observed_deadline->value == std::to_string(deadline_task->due_at_total_minutes);
     World reconsideration_world;
     const Observation reconsideration_observation = refresh_observation({}, reconsideration_world, {});
     CharacterState suspended_commitment;

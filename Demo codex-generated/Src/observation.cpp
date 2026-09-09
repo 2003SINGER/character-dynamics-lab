@@ -238,12 +238,14 @@ Observation refresh_observation(Observation observation,
         const bool deadline_passed = task.due_at_total_minutes >= 0
             && total_minutes(world.time) >= task.due_at_total_minutes;
         if (access.task_deadline_observable) {
-            write_fact(observation, "task." + task.id + ".deadline", deadline_passed ? "passed" : "upcoming",
-                       "internal_calendar", now);
+            const std::string key = "task." + task.id + ".deadline_at_total_minutes";
+            const std::string source = find_fact(observation, key) == nullptr ? "initial_calendar" : "internal_calendar";
+            write_fact(observation, key, std::to_string(task.due_at_total_minutes), source, now);
         }
     }
     write_fact(observation, "message.unread_count", std::to_string(world.unread_messages), "phone_notification_state", now);
     write_fact(observation, "clock.time", now, "internal_clock", now);
+    write_fact(observation, "clock.total_minutes", std::to_string(total_minutes(world.time)), "internal_clock", now);
     write_fact(observation, "room.temperature", format_temperature(room.temperature_celsius), "direct_room_thermal", now);
     if (room.curtain_open) {
         write_fact(observation, "outside.weather", world.weather, "direct_window_visual", now);

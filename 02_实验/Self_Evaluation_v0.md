@@ -33,3 +33,8 @@
 v0 只回答“当前规则引擎能否稳定产生可审计轨迹，以及哪些维度明显坏掉”。它不能宣布 NPC 自然、不能证明 Theory-S、不能替代外部评测。
 
 paired harness 运行入口为 `character_dynamics_reference --paired-phone <csv>`；它固定人格、初态与 action RNG，step 1 后移除 phone，hidden 分支保留旧 O 事实，visible 分支立即标 stale。评分器用 `--paired` 读取该 CSV。该 fixture 仍是机制诊断，优化 run 与 frozen evaluation run 必须分开。
+
+Deadline state-dynamics fixture 运行入口为 `--paired-deadline <csv>`。它使用
+绝对 `deadline_at_total_minutes` 与 `clock.total_minutes`，并以 shared-action
+replay 对齐三分支的时间和外部事件；CSV 同时记录 deadline discovery、derived
+remaining/urgency、appraisal pressure、state pressure 与 policy distance。
