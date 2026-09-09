@@ -14,6 +14,10 @@
 
 **受限 dev 资产，不能作为已通过研究准入的真人行为 benchmark。** 数据结构能支持字段映射，但 actor、角色可见信息和环境 world state 的时间对齐仍需人工 semantic audit；当前 `W`、state label、timestamp 保持 unknown。候选列表仅按 source 的 `available_actions` 记录为 observed，不等同于角色实际可知集合 `A^O`。
 
+### Actor-local history eligibility gate v0（2026-09-09）
+
+严格同 trajectory、同 actor、non-quarantine 的 gate 已完成：13,463 targets / 6,869 actor-trajectory units；但在排除 exact previous `(O,A*)` repeats 的 nontrivial view 上，`O+PREV_SAME_ACTOR_ACTION` 和 `O+LAST2_SAME_ACTOR_HISTORY` 的 NLL 都劣于 `O_ONLY`。Verdict 为 `NO_CLEAR_ACTOR_LOCAL_HISTORY_SIGNAL`；LIGHT 不进入 persistent-compression 或 Theory-S bridge，下一候选转 OPeRA。详见 [gate report](LIGHT_actor_local_history_gate_v0.md)。
+
 ### Blind semantic admission 50（2026-09-07）
 
 已生成固定、model-blind 的 50 条跨 trajectory source package：

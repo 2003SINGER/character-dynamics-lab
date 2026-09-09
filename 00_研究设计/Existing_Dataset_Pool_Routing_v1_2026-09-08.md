@@ -3,6 +3,10 @@
 核查日期：2026-09-08  
 范围：只读横向 routing；不下载、不新增 adapter、不训练、不修改 Theory-S、X/S schema 或冻结协议。
 
+## Superseding update（2026-09-09）
+
+The shortlist below is historical routing v1. It is superseded for the current next-action route: ClubFloyd Stage 0c found no positive low-order history increment after exact pair repeats were excluded, so its persistent-compression / Theory-S bridge is paused. LIGHT is now the next **eligibility-gate** candidate, not permission to start six-dimensional Theory-S training. OPeRA remains the backup if LIGHT fails the actor-local gate.
+
 ## Decision summary
 
 ### Primary shortlist
@@ -52,9 +56,9 @@
 
 ## Next action
 
-Do **not** start training yet. Freeze a narrow ClubFloyd source-command baseline
-protocol and, separately, an AGAIN arousal-proxy dynamics audit protocol. Only
-after the first protocol is accepted should the project decide whether to fix
-one explicit blocker or begin a real development experiment. No new downloads,
-adapters, Theory-S changes, or OPeRA prompt iterations are authorized by this
-routing pass.
+Do **not** start Theory-S training from this historical routing page. ClubFloyd
+Stage 0c is now paused for this estimand. The current next action is the
+strict LIGHT actor-local history eligibility gate, with lossless source,
+source candidate lists treated only as observed support (not `A^O`), and no
+new X fields. If LIGHT fails that gate, route to OPeRA; do not reopen ClubFloyd
+Stage 0d or iterate candidate reconstruction here.
