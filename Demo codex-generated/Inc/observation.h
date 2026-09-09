@@ -52,6 +52,7 @@ struct InformationAccess {
     bool wallet_balance_observable = false;
     bool object_usability_observable = false;
     bool phone_presence_observable = true;
+    bool task_deadline_observable = true;
 };
 
 // Stable affordance knowledge belongs to O. It is deliberately separate from

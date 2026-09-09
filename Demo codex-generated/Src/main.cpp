@@ -33,6 +33,16 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
+    if (argc > 1 && std::string(argv[1]) == "--paired-deadline") {
+        const std::string output_path = argc > 2 ? argv[2] : "paired_deadline_intervention.csv";
+        try {
+            simulation.run_paired_deadline_intervention(std::cout, output_path);
+            return 0;
+        } catch (const std::exception& error) {
+            std::cerr << "paired deadline intervention failed: " << error.what() << '\n';
+            return 1;
+        }
+    }
 
     simulation.run_all(std::cout);
     return 0;

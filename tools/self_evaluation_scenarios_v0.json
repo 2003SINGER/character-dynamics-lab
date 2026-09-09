@@ -15,6 +15,6 @@
   "future_paired_interventions": [
     {"id": "hidden_phone_removed", "same_initial_state": true, "world_change": "phone removed without direct observation", "expected": "W changes, O remains unchanged until discovery"},
     {"id": "visible_phone_removed", "same_initial_state": true, "world_change": "phone removed in direct view", "expected": "O changes immediately and policy can respond"},
-    {"id": "task_deadline_shift", "same_initial_state": true, "world_change": "deadline changes while unobserved", "expected": "state changes only after permitted observation"}
+    {"id": "task_deadline_shift", "same_initial_state": true, "world_change": "deadline changes while unobserved", "expected": "state changes only after permitted observation", "status": "implemented_v0", "runner": "--paired-deadline"}
   ]
 }

@@ -237,8 +237,10 @@ Observation refresh_observation(Observation observation,
         }
         const bool deadline_passed = task.due_at_total_minutes >= 0
             && total_minutes(world.time) >= task.due_at_total_minutes;
-        write_fact(observation, "task." + task.id + ".deadline", deadline_passed ? "passed" : "upcoming",
-                   "internal_calendar", now);
+        if (access.task_deadline_observable) {
+            write_fact(observation, "task." + task.id + ".deadline", deadline_passed ? "passed" : "upcoming",
+                       "internal_calendar", now);
+        }
     }
     write_fact(observation, "message.unread_count", std::to_string(world.unread_messages), "phone_notification_state", now);
     write_fact(observation, "clock.time", now, "internal_clock", now);
@@ -252,7 +254,7 @@ Observation refresh_observation(Observation observation,
     // The alarm is a room-local event. Its auditory source wins over the
     // ordinary visual refresh when it rang during the preceding action.
     for (const WorldEvent& event : previous_outcome.events) {
-        if (event.id == "task-reminder") {
+        if (event.id == "task-reminder" && access.task_deadline_observable) {
             write_fact(observation, "calendar.task_due", "today", "calendar_notification", now);
         }
     }

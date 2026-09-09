@@ -541,6 +541,62 @@ void Simulation::run_paired_phone_intervention(std::ostream& output, const std::
     output << "paired phone intervention complete: 8 seeds x 12 steps x 3 branches saved to " << path.string() << '\n';
 }
 
+void Simulation::run_paired_deadline_intervention(std::ostream& output, const std::string& output_path) const {
+    namespace fs = std::filesystem;
+    const fs::path path(output_path);
+    if (path.has_parent_path()) fs::create_directories(path.parent_path());
+    std::ofstream file(path);
+    if (!file) throw std::runtime_error("Cannot open paired deadline output: " + output_path);
+    file << "scenario_seed,branch,step,deadline_fact,deadline_source,appraisal_pressure_delta,pre_task_pressure,post_task_pressure,chosen_action,policy_tv_vs_control,observation_summary,discovery_event\n";
+    file << std::fixed << std::setprecision(6);
+    const Personality personality = procrastinating_profile();
+    constexpr unsigned int action_seed_base = 20260914U;
+    for (unsigned int scenario_seed = 1; scenario_seed <= 8; ++scenario_seed) {
+        World control_world(scenario_seed), hidden_world(scenario_seed), visible_world(scenario_seed);
+        CharacterState control_state, hidden_state, visible_state;
+        Observation control_observation, hidden_observation, visible_observation;
+        WorldOutcome control_previous, hidden_previous, visible_previous;
+        std::mt19937 control_rng(action_seed_base + scenario_seed), hidden_rng(action_seed_base + scenario_seed), visible_rng(action_seed_base + scenario_seed);
+        ScenarioConfig control_config{}, hidden_config{}, visible_config{};
+        hidden_config.information_access.task_deadline_observable = false;
+        for (int step = 1; step <= 12; ++step) {
+            hidden_config.information_access.task_deadline_observable = (step == 1 || step >= 4);
+            const StepRecord control = advance_one_decision(control_world, control_state, control_observation,
+                control_previous, control_rng, personality, control_config.information_access);
+            const StepRecord hidden = advance_one_decision(hidden_world, hidden_state, hidden_observation,
+                hidden_previous, hidden_rng, personality, hidden_config.information_access);
+            const StepRecord visible = advance_one_decision(visible_world, visible_state, visible_observation,
+                visible_previous, visible_rng, personality, visible_config.information_access);
+            if (step == 1) {
+                for (World* world : {&hidden_world, &visible_world}) {
+                    if (WorldTask* task = world->task_by_id("coursework")) {
+                        task->due_at_total_minutes = total_minutes(world->time) + 60;
+                    }
+                }
+            }
+            const auto emit = [&](const char* branch, const StepRecord& trace, const CharacterState& state,
+                                  const World& world, const DecisionContext& baseline) {
+                const ObservationFact* deadline = find_fact(trace.observation_at_decision, "task.coursework.deadline");
+                const double policy_tv = policy_distance(trace.decision, baseline);
+                file << scenario_seed << ',' << branch << ',' << step << ',';
+                write_csv_field(file, deadline != nullptr ? deadline->value : "unknown");
+                file << ','; write_csv_field(file, deadline != nullptr ? deadline->source : "none");
+                file << ',' << trace.appraisal.task_pressure_delta
+                     << ',' << trace.state_at_decision.task_pressure
+                     << ',' << trace.state_after_settlement.task_pressure << ',';
+                write_csv_field(file, to_string(trace.chosen_action));
+                file << ',' << policy_tv << ',';
+                write_csv_field(file, observation_summary(trace.observation_at_decision));
+                file << ',' << (deadline != nullptr && deadline->value == "passed" ? 1 : 0) << '\n';
+            };
+            emit("control", control, control_state, control_world, control.decision);
+            emit("hidden", hidden, hidden_state, hidden_world, control.decision);
+            emit("visible", visible, visible_state, visible_world, control.decision);
+        }
+    }
+    output << "paired deadline intervention complete: 8 seeds x 12 steps x 3 branches saved to " << path.string() << '\n';
+}
+
 bool Simulation::verify(std::ostream& output) const {
     const Personality first = procrastinating_profile();
     const Personality second = self_controlled_profile();
