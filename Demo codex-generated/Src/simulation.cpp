@@ -221,6 +221,37 @@ StepRecord advance_one_decision(World& world,
     previous_outcome = trace.outcome;
     return trace;
 }
+
+double policy_distance(const DecisionContext& left, const DecisionContext& right) {
+    double distance = 0.0;
+    for (std::size_t index = 0; index < kActionCount; ++index) {
+        const ActionType action = static_cast<ActionType>(index);
+        const auto probability = [action](const DecisionContext& context) {
+            for (const CandidateAction& candidate : context.candidates) {
+                if (candidate.action == action) return candidate.probability;
+            }
+            return 0.0;
+        };
+        distance += std::abs(probability(left) - probability(right));
+    }
+    return distance / 2.0;
+}
+
+double state_distance(const CharacterState& left, const CharacterState& right) {
+    const std::array<double, 9> a{left.boredom, left.fatigue, left.task_pressure,
+        left.satisfaction, left.hunger, left.bathroom_urge, left.anxiety,
+        left.screen_strain, left.purchase_urge};
+    const std::array<double, 9> b{right.boredom, right.fatigue, right.task_pressure,
+        right.satisfaction, right.hunger, right.bathroom_urge, right.anxiety,
+        right.screen_strain, right.purchase_urge};
+    double sum = 0.0;
+    for (std::size_t i = 0; i < a.size(); ++i) sum += std::abs(a[i] - b[i]);
+    return sum / static_cast<double>(a.size());
+}
+
+bool observation_equal(const Observation& left, const Observation& right) {
+    return observation_summary(left) == observation_summary(right);
+}
 } // namespace
 
 void Simulation::run_all(std::ostream& output) const {
@@ -407,6 +438,63 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
            << kBatchScenarioSeedCount << " scenario seeds x " << kBatchStepsPerRun
            << " decision points = " << (kBatchPersonalityCount * kBatchScenarioSeedCount * kBatchStepsPerRun)
            << " rows saved under " << root.string() << '\n';
+}
+
+void Simulation::run_paired_phone_intervention(std::ostream& output, const std::string& output_path) const {
+    namespace fs = std::filesystem;
+    const fs::path path(output_path);
+    if (path.has_parent_path()) fs::create_directories(path.parent_path());
+    std::ofstream file(path);
+    if (!file) throw std::runtime_error("Cannot open paired intervention output: " + output_path);
+    file << "scenario_seed,branch,step,decision_time,chosen_action,accepted,phone_world_present,phone_known,phone_fact_status,known_action_count,observation_summary,policy_distance,state_distance,observation_equal,phone_uses\n";
+    file << std::fixed << std::setprecision(6);
+    const Personality personality = procrastinating_profile();
+    constexpr unsigned int action_seed_base = 20260904U;
+    for (unsigned int scenario_seed = 1; scenario_seed <= 8; ++scenario_seed) {
+        World hidden_world(scenario_seed), visible_world(scenario_seed);
+        CharacterState hidden_state, visible_state;
+        Observation hidden_observation, visible_observation;
+        WorldOutcome hidden_previous, visible_previous;
+        std::mt19937 hidden_rng(action_seed_base + scenario_seed), visible_rng(action_seed_base + scenario_seed);
+        ScenarioConfig hidden_config{}; hidden_config.information_access.phone_presence_observable = false;
+        ScenarioConfig visible_config{}; visible_config.information_access.phone_presence_observable = true;
+        for (int step = 1; step <= 12; ++step) {
+            // Both branches observe the common initial phone. After the
+            // intervention the hidden branch keeps the last phone fact.
+            hidden_config.information_access.phone_presence_observable = (step == 1);
+            const StepRecord hidden = advance_one_decision(hidden_world, hidden_state, hidden_observation,
+                hidden_previous, hidden_rng, personality, hidden_config.information_access);
+            const StepRecord visible = advance_one_decision(visible_world, visible_state, visible_observation,
+                visible_previous, visible_rng, personality, visible_config.information_access);
+            const double pd = policy_distance(hidden.decision, visible.decision);
+            const double sd = state_distance(hidden.state_at_decision, visible.state_at_decision);
+            const bool oe = observation_equal(hidden.observation_at_decision, visible.observation_at_decision);
+            const auto emit = [&](const char* branch, const StepRecord& trace, const World& world) {
+                const ObservationFact* phone = find_fact(trace.observation_at_decision, "object.phone");
+                file << scenario_seed << ',' << branch << ',' << step << ',';
+                write_csv_field(file, trace.decision_time);
+                file << ','; write_csv_field(file, to_string(trace.chosen_action));
+                file << ',' << (trace.outcome.accepted ? 1 : 0) << ','
+                     << (world.object_for(ActionType::UsePhone) != nullptr ? 1 : 0) << ','
+                     << (phone != nullptr && phone->status == KnowledgeStatus::Known ? 1 : 0) << ',';
+                if (phone != nullptr) write_csv_field(file, phone->status == KnowledgeStatus::Known ? "known" : "stale");
+                else write_csv_field(file, "absent");
+                file << ',' << trace.decision.known_actions.size() << ',';
+                write_csv_field(file, observation_summary(trace.observation_at_decision));
+                file << ',' << pd << ',' << sd << ',' << (oe ? 1 : 0) << ',' << world.phone_uses << '\n';
+            };
+            emit("hidden", hidden, hidden_world);
+            emit("visible", visible, visible_world);
+            if (step == 1) {
+                for (World* world : {&hidden_world, &visible_world}) {
+                    Room& room = world->current_room();
+                    room.objects.erase(std::remove_if(room.objects.begin(), room.objects.end(),
+                        [](const Object& object) { return object.id == "phone"; }), room.objects.end());
+                }
+            }
+        }
+    }
+    output << "paired phone intervention complete: 8 seeds x 12 steps x 2 branches saved to " << path.string() << '\n';
 }
 
 bool Simulation::verify(std::ostream& output) const {

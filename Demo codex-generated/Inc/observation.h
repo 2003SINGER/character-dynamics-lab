@@ -51,6 +51,7 @@ struct InformationAccess {
     bool self_task_completion_observable = true;
     bool wallet_balance_observable = false;
     bool object_usability_observable = false;
+    bool phone_presence_observable = true;
 };
 
 // O: a separately stored character-side view, even though this one-room

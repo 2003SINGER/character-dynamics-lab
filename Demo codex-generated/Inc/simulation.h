@@ -46,6 +46,7 @@ class Simulation {
 public:
     void run_all(std::ostream& output) const;
     void run_batch(std::ostream& output, const std::string& output_directory) const;
+    void run_paired_phone_intervention(std::ostream& output, const std::string& output_path) const;
     bool run_e0(std::ostream& output) const;
     bool verify(std::ostream& output) const;
 

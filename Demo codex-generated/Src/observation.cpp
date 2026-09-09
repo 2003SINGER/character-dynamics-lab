@@ -165,6 +165,12 @@ Observation refresh_observation(Observation observation,
     // message, memory, sound, or stale prior observation.
     const Room& room = world.current_room();
     for (const Object& object : room.objects) {
+        if (object.id == "phone" && !access.phone_presence_observable) {
+            // The phone can remain in W while its presence is withheld from O.
+            // Existing phone facts are intentionally retained until a permitted
+            // discovery channel refreshes them.
+            continue;
+        }
         observation.known_object_ids.push_back(object.id);
         observation.visible_object_labels.push_back(object.label);
         write_fact(observation, "object." + object.id, "present", "direct_room_visual", now);
@@ -179,6 +185,7 @@ Observation refresh_observation(Observation observation,
     for (const ObservationFact& fact : observation.facts) {
         const std::string object_id = object_id_from_fact_key(fact.key);
         if (!object_id.empty()) {
+            if (object_id == "phone" && !access.phone_presence_observable) continue;
             if (!contains_id(observation.known_object_ids, object_id)) {
                 mark_stale(observation, fact.key);
             }
