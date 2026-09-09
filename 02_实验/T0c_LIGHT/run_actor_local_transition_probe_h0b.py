@@ -26,7 +26,7 @@ def prepare(rows,rules,kind,permuted=False):
         cand=r.get('candidate_set_factual') or []; action=str(r.get('source_action_A_star') or ''); gold=next((i for i,c in enumerate(cand) if str(c).casefold()==action.casefold()),None)
         if gold is None or not cand: continue
         pa,p2=(remap[id(r)] if permuted else (r.get('previous_source_action_A_star'),r.get('previous2_source_action_A_star')))
-        prevv=action_vec(pa,r.get('previous_source_O'),rules); prev2v=action_vec(p2,r.get('previous_source_O'),rules)
+        prevv=action_vec(pa,r.get('previous_source_O'),rules); prev2v=action_vec(p2,r.get('previous2_source_O'),rules)
         fs=[]
         for c in cand:
             cv=np.asarray(action_vec(c,r.get('source_O'),rules),float); pieces=[cv.tolist()]
