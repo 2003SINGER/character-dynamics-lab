@@ -6,7 +6,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| SYSTEM | **Evaluator v1 / split / optimizer smoke 已完成 plumbing** | 继续前先获得 fresh split-specific engine batches；不得把当前 smoke 当训练或泛化结果 | [Self-Evaluation v1](../02_实验/Self_Evaluation_v1.md)、[Development Split](Development_Split_v1.md)、[Optimizer](Optimizer_v0.md)；内部 score 不等于外部自然性 |
+| SYSTEM | **系统工程阶段暂停：Evaluator / split / optimizer checkpoint 已完成** | 在没有预注册且有依据的 quality objective 前不继续参数搜索；重启时优先建立 engineering pathology objective 证据层 | [Self-Evaluation v1](../02_实验/Self_Evaluation_v1.md)、[Development Split](Development_Split_v1.md)、[Optimizer](Optimizer_v0.md)、[Objective Readiness](Objective_Readiness_v0.md)、[System Phase Checkpoint](System_Phase_Checkpoint_2026-09-10.md) |
 | M1 | **已完成（pre-training gate）** | 已冻结 anchor 语义边界、sign-violation 协议、decision-step 时间尺度、neutral 初始化与 trajectory reset；不再扩展机制 | [M1 冻结决策](Theory-S_M1冻结决策_2026-09-07.md)、[Theory-S v2](../02_实验/Theory_S_v2/README.md)；不得把候选实现写成心理学验证 |
 | M2 | 进行中 | 完善 SceneSnapshot → affordance → generated `A^O` 的最小 ontology 与实例绑定 | 生成不读 source `A*`；source support 仅 post-hoc 诊断；[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md) |
 | M3 | **已完成（owner audit v0）** | 保留审计边界；若要重开 D01，先完成 actor-local observation audit、跨 actor gap 编码和 X 字段准入 | [capability matrix](../02_实验/Theory_S_v2/capability_matrix.md)、[D01 LIGHT](../02_实验/T0c_LIGHT/D01_semantic_temporal_admission_v0.md)、[OPeRA candidate reconstruction](../02_实验/T0d_OPeRA/candidate_reconstruction_feasibility_v0.md)；proxy/telemetry 不升级为 A* |

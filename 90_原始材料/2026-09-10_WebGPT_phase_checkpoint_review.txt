@@ -1,0 +1,330 @@
+可以，**现在非常适合告一段落**。
+
+我看了最新 `webgpt-sync`，HEAD 已到 **`5af2c41 sync split execution provenance`**。上一轮那个 candidate fixture 没吃 `config_` 的问题也已经修了，参数敏感性审计和 provenance 都落地了。
+
+当前阶段可以概括成：
+
+- Phone / Deadline / Commitment 三类机制 fixture：**CLOSED，而且已是 candidate-specific regression**
+- Self-Evaluation v1：**FROZEN**
+- Development split：**FROZEN / READY**，train 1101–1128、holdout 2101–2112，零重叠
+- ParameterConfig v0：**WIRED_PASS**
+- 9 个参数都确实能影响 runtime；Sensitivity：**PARTIAL**，不是死参数，但部分 aggregate effect 不呈简单单调
+- Optimizer：**END_TO_END_REGRESSION_PASS**
+- Selection：**BASELINE_RETAINED / NO_SELECTION**
+- Holdout：baseline-only one-shot 已完成
+- 最关键：**`OBJECTIVE_READINESS = NOT_READY`**
+
+这个 `NOT_READY` 正是停下来的理由，不是遗憾。现在继续硬跑 optimizer，本质上就得开始人为规定“多样性越高越好”“JS 越大越好”之类没有依据的目标了。
+
+还有一个小收尾：`TODO.md` 的 SYSTEM 行还是旧的“先获得 fresh split-specific engine batches”，这些 batch 早已有了。**让 Codex 先修这一个状态漂移，再做 main milestone。**
+
+---
+
+## main 我建议不要直接 merge `webgpt-sync`
+
+我查了 Git 历史：
+
+- `main` HEAD：`42a8847`
+- `webgpt-sync`：比共同祖先前进 **206 commits**
+- `main` 自己还有 4 个独立 milestone commits
+
+而且我确认了你们之前 main 的做法：
+
+`42a8847 milestone: Theory-S M1 freeze (source a66159c)`
+
+它的 **tree SHA 和 `a66159c` 完全相同**。
+
+也就是说 main 本来就是：
+
+> **阶段性完整快照链**
+
+不是开发提交汇总分支。
+
+所以继续沿用这个方式最好。不要把 206 个开发 commit 全 merge 到 main。
+
+我建议这次加 **3 个 milestone snapshot**：
+
+1. **External replay/history diagnostics closure**  
+   source：`d0f4696`  
+   代表 ClubFloyd / LIGHT history-compression / AGAIN 这轮开发诊断基本封口，不再沿旧 estimand 调参。
+
+2. **System mechanism fixtures closure**  
+   source：`ecbe5e5`  
+   代表 Phone + Deadline + Commitment/Recovery 三根机制支柱闭合，Engine 的 W→O→X→S→π 因果仪器成形。
+
+3. **Evaluator / Split / Optimizer infrastructure checkpoint**  
+   source：不要直接用 `5af2c41`，先让 Codex 修 TODO 并做一个最终 **phase checkpoint commit**，然后以那个新 SHA 为 source。  
+   代表：
+   `Evaluator frozen + split ready + ParameterConfig wired + end-to-end regression pass + OBJECTIVE_NOT_READY`。
+
+第三个就是我们真正的“这阶段到此为止”。
+
+给 Codex 下面整段即可：
+
+当前开发分支：`webgpt-sync`
+当前已观察 HEAD：`5af2c41466e73c1b1f894915dd5c6ffa0203dd46`
+
+目标：
+
+1. 先在 `webgpt-sync` 做一个极小的阶段收尾；
+2. 不把 200+ development commits 直接 merge 到 `main`；
+3. 延续仓库现有 `main` 的 milestone snapshot 风格，创建若干完整-tree阶段快照；
+4. 保留 `webgpt-sync` 原历史，不 rebase、不 squash、不 reset。
+
+## 0. 先理解现有 main 约定
+
+当前 `main` 的 milestone commit 是完整 source-tree snapshot。
+
+例如：
+
+`42a8847 milestone: Theory-S M1 freeze (source a66159c)`
+
+其 tree 应与 source `a66159c` 完全一致。
+
+先自行验证这个事实，再按相同模式执行。
+
+禁止直接：
+
+`git merge webgpt-sync`
+
+因为当前 `main` 与 `webgpt-sync` 已 diverged，且 main 的用途显然是阶段性 snapshot history，不是 development commit aggregation。
+
+---
+
+# Phase A — webgpt-sync 最终 pause checkpoint
+
+先 checkout `webgpt-sync`，确认 clean 并 fetch 最新远端。
+
+只做阶段状态收尾，不再改机制或实验。
+
+## A1. 修 TODO 的过期 SYSTEM 行
+
+当前 `00_研究设计/TODO.md` 仍写类似：
+
+“继续前先获得 fresh split-specific engine batches”
+
+但 fresh train / holdout 已经存在。
+
+将 SYSTEM 更新为当前真实状态，例如：
+
+- three mechanism fixtures CLOSED
+- Self-Evaluation v1 FROZEN
+- Development Split v1 FROZEN / READY
+- ParameterConfig v0 WIRED_PASS
+- Parameter Sensitivity v0 PARTIAL
+- Optimizer v0 END_TO_END_REGRESSION_PASS
+- selection = BASELINE_RETAINED / NO_SELECTION
+- Objective Readiness = NOT_READY
+- Holdout = TRUE_ONE_SHOT_COMPLETE (baseline-only)
+
+下一动作应改为：
+
+> 当前系统工程阶段暂停；在没有预注册且有依据的质量 objective 前不继续参数搜索。下一主线若重启，优先从 Objective_Readiness_v0 指定的 engineering pathology objective 证据层开始，而不是扩大 optimizer 搜索。
+
+不要顺手启动 pathology objective。
+
+## A2. 可选但推荐：增加一个阶段 checkpoint 文档
+
+例如：
+
+`00_研究设计/System_Phase_Checkpoint_2026-09-10.md`
+
+只做一页摘要：
+
+- 本阶段解决了什么；
+- 三 fixture 状态；
+- evaluator/split/config/optimizer 状态；
+- `BASELINE_RETAINED / NO_SELECTION`
+- `OBJECTIVE_READINESS = NOT_READY`
+- 当前没有 external/naturalness/psychological validity
+- 为什么在这里暂停；
+- 重启条件是什么。
+
+不要重新解释整个项目。
+
+## A3. 验证
+
+重新确认：
+
+- build PASS
+- existing CTest PASS
+- three candidate-aware fixture regression PASS
+- checked-in split audit PASS
+- evaluator hard gates PASS
+
+不要重跑大规模 search。
+
+commit：
+
+`checkpoint: pause system optimization before objective design`
+
+push `webgpt-sync`。
+
+记录该 commit 为：
+
+`FINAL_CHECKPOINT_SHA`
+
+---
+
+# Phase B — 创建 main milestone snapshots
+
+当前 `main` 已有自己的 milestone-only history。
+
+必须保留这些提交。
+
+不要把 `main` reset 到 webgpt-sync。
+不要 merge 206 commits。
+不要 rewrite 已存在 main history。
+
+采用与当前 milestone commits 相同的“source tree snapshot”方式。
+
+创建以下三个按顺序的 milestone commit。
+
+---
+
+## Milestone 1 — External replay/history diagnostics closure
+
+Source:
+
+`d0f469620321746b0ff5fd0d48b904a40da1faaf`
+
+建议 commit message：
+
+`milestone: external replay diagnostics sealed (source d0f4696)`
+
+body：
+
+`Snapshot source: d0f469620321746b0ff5fd0d48b904a40da1faaf`
+
+含义：
+
+- ClubFloyd 当前 verb-family nonduplicate route不支持继续 persistent-compression调参；
+- LIGHT generic actor-local history/compression diagnostic封口；
+- comparative sufficiency仍 inconclusive；
+- AGAIN只保留 development dynamics proxy；
+- 不代表 Theory-S 或外部预测有效。
+
+完整 tree 必须与 source commit tree完全一致。
+
+---
+
+## Milestone 2 — Character Dynamics mechanism fixtures closure
+
+Source:
+
+`ecbe5e5f7d2687675e00fc255118936eec9c0b3b`
+
+建议 commit message：
+
+`milestone: Character Dynamics mechanism fixtures closed (source ecbe5e5)`
+
+body：
+
+`Snapshot source: ecbe5e5f7d2687675e00fc255118936eec9c0b3b`
+
+含义：
+
+- phone information boundary / wrong belief / typed correction；
+- numeric deadline `O → X → S → π`；
+- commitment interruption / recovery / resumption / completion boundary；
+- W completion hidden from O does not directly clear commitment；
+- 三者都是 internal mechanism fixtures，不是 naturalness 或心理学验证。
+
+完整 tree 必须与 source commit tree完全一致。
+
+---
+
+## Milestone 3 — Evaluator / split / optimizer engineering checkpoint
+
+Source:
+
+`FINAL_CHECKPOINT_SHA`
+
+建议 commit message：
+
+`milestone: evaluator and optimizer infrastructure checkpoint (source <short_sha>)`
+
+body：
+
+`Snapshot source: <FINAL_CHECKPOINT_SHA>`
+
+含义：
+
+- Self-Evaluation v1 frozen；
+- development train/holdout split ready；
+- ParameterConfig fully wired；
+- candidate-specific mechanism regressions；
+- parameter sensitivity audit；
+- end-to-end optimizer regression；
+- `BASELINE_RETAINED / NO_SELECTION`；
+- `OBJECTIVE_READINESS = NOT_READY`；
+- 当前系统优化阶段正式暂停。
+
+完整 tree 必须与 `FINAL_CHECKPOINT_SHA` tree完全一致。
+
+---
+
+# Phase C — 每个 milestone 的硬验证
+
+创建每个 main milestone 后，必须检查：
+
+`git rev-parse <milestone_commit>^{tree}`
+==
+`git rev-parse <source_sha>^{tree}`
+
+三次全部必须相等。
+
+同时确认 main history仍是线性的 milestone chain：
+
+existing main milestone history
+→ replay diagnostics milestone
+→ mechanism fixtures milestone
+→ evaluator/optimizer checkpoint
+
+不得把 webgpt-sync development history作为 parents带进 main。
+
+---
+
+# Phase D — push 前最终检查
+
+确认：
+
+- `webgpt-sync` 未被重写；
+- main旧 milestones仍存在；
+- main新 milestone tree分别和三个 source完全一致；
+- working tree clean；
+- 无意外 merge commit；
+- 无 200+ development commits进入 main history；
+- 最新 main tree 等于 `FINAL_CHECKPOINT_SHA` tree。
+
+然后 push `main`。
+
+不要删除 `webgpt-sync`。
+
+最终报告：
+
+- FINAL_CHECKPOINT_SHA
+- 新增三个 main milestone SHA
+- 每个 milestone对应 source SHA
+- tree equality check结果
+- main最终 HEAD
+- webgpt-sync最终 HEAD
+- 是否有任何冲突/异常
+
+我觉得这样最舒服。
+
+`main` 最后会变成非常清晰的研究时间线：
+
+```text
+Paper-0 / E0 boundary
+→ Replay harness
+→ Run 1–4 diagnostics
+→ Theory-S M1 freeze
+→ External replay diagnostics sealed
+→ Character Dynamics mechanism fixtures closed
+→ Evaluator / split / optimizer infrastructure checkpoint
+```
+
+而 `webgpt-sync` 继续保留那两百多个真实开发过程、踩坑、修协议的历史。
+
+**现在就停一段时间完全合理。** 真正重新开这个系统主线时，不该从“再调几个参数”开始，而应该先回答 Objective Readiness 里那个问题：我们究竟凭什么说一个 NPC trajectory 比另一个更好。
