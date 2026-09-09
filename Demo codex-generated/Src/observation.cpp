@@ -156,6 +156,7 @@ Observation refresh_observation(Observation observation,
     observation.visible_object_labels.clear();
     observation.known_object_ids.clear();
     observation.known_actions.clear();
+    observation.action_target_bindings.clear();
     const std::string now = world.time_summary();
 
     // Current room rule: every present room object is directly observable.
@@ -269,6 +270,7 @@ Observation refresh_observation(Observation observation,
             if (subjective_preconditions_allow(action, observation, believed_object)
                 && !observation_knows_action(observation, action)) {
                 observation.known_actions.push_back(action);
+                observation.action_target_bindings.push_back({action, known_object.id});
             }
         }
     }

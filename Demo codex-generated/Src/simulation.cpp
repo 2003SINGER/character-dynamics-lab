@@ -231,6 +231,17 @@ StepRecord advance_one_decision(World& world,
     return trace;
 }
 
+const char* rejection_reason_name(RejectionReason reason) {
+    switch (reason) {
+    case RejectionReason::None: return "none";
+    case RejectionReason::TargetAbsent: return "target_absent";
+    case RejectionReason::TargetUnusable: return "target_unusable";
+    case RejectionReason::PreconditionFailed: return "precondition_failed";
+    case RejectionReason::ResourceInsufficient: return "resource_insufficient";
+    }
+    return "unknown";
+}
+
 double policy_distance(const DecisionContext& left, const DecisionContext& right) {
     double distance = 0.0;
     for (std::size_t index = 0; index < kActionCount; ++index) {
@@ -455,7 +466,7 @@ void Simulation::run_paired_phone_intervention(std::ostream& output, const std::
     if (path.has_parent_path()) fs::create_directories(path.parent_path());
     std::ofstream file(path);
     if (!file) throw std::runtime_error("Cannot open paired intervention output: " + output_path);
-    file << "scenario_seed,branch,step,decision_time,chosen_action,accepted,phone_world_present,phone_known,phone_fact_status,known_action_count,observation_summary,policy_distance,state_distance,observation_equal,phone_uses\n";
+    file << "scenario_seed,branch,step,decision_time,chosen_action,accepted,phone_world_present,phone_known,phone_fact_status,known_action_count,observation_summary,policy_distance,state_distance,observation_equal,phone_uses,target_object_id,failure_reason,discovery_event\n";
     file << std::fixed << std::setprecision(6);
     const Personality personality = procrastinating_profile();
     constexpr unsigned int action_seed_base = 20260904U;
@@ -492,7 +503,10 @@ void Simulation::run_paired_phone_intervention(std::ostream& output, const std::
                 else write_csv_field(file, "absent");
                 file << ',' << trace.decision.known_actions.size() << ',';
                 write_csv_field(file, observation_summary(trace.observation_at_decision));
-                file << ',' << pd << ',' << sd << ',' << (oe ? 1 : 0) << ',' << world.phone_uses << '\n';
+                file << ',' << pd << ',' << sd << ',' << (oe ? 1 : 0) << ',' << world.phone_uses << ',';
+                write_csv_field(file, trace.outcome.target_object_id);
+                file << ','; write_csv_field(file, rejection_reason_name(trace.outcome.failure_reason));
+                file << ',' << ((!trace.outcome.accepted && trace.outcome.failure_reason == RejectionReason::TargetAbsent) ? 1 : 0) << '\n';
             };
             emit("hidden", hidden, hidden_world);
             emit("visible", visible, visible_world);
@@ -505,6 +519,24 @@ void Simulation::run_paired_phone_intervention(std::ostream& output, const std::
                 }
             }
         }
+        // Deterministic mechanism probe: force the hidden-belief action so
+        // discovery semantics are recorded even when sampled policy does not
+        // choose UsePhone within the short trajectory.
+        World probe_world(scenario_seed);
+        Observation probe_observation = refresh_observation({}, probe_world, {});
+        probe_world.current_room().objects.erase(std::remove_if(
+            probe_world.current_room().objects.begin(), probe_world.current_room().objects.end(),
+            [](const Object& object) { return object.id == "phone"; }), probe_world.current_room().objects.end());
+        const WorldOutcome probe_failure = probe_world.settle(ActionType::UsePhone, "phone");
+        apply_self_action_feedback(probe_observation, probe_failure, probe_world.time_summary());
+        file << scenario_seed << ",mechanism_probe,2,\"" << probe_world.time_summary()
+             << "\",use_phone," << (probe_failure.accepted ? 1 : 0)
+             << ",0,0,absent,0,";
+        write_csv_field(file, observation_summary(probe_observation));
+        file << ",0,0,0,0,phone,";
+        write_csv_field(file, probe_failure.target_object_id);
+        file << ','; write_csv_field(file, rejection_reason_name(probe_failure.failure_reason));
+        file << "," << ((!probe_failure.accepted && probe_failure.failure_reason == RejectionReason::TargetAbsent) ? 1 : 0) << '\n';
     }
     output << "paired phone intervention complete: 8 seeds x 12 steps x 3 branches saved to " << path.string() << '\n';
 }

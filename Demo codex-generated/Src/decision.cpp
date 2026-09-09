@@ -177,10 +177,9 @@ DecisionContext decide(const Observation& observation,
         item.probability = item.eligible ? item.probability / normalizer : 0.0;
     }
     for (CandidateAction& item : decision.candidates) {
-        for (const KnownObjectAffordance& object : observation.known_object_affordances) {
-            if (std::find(object.affordances.begin(), object.affordances.end(), item.action)
-                != object.affordances.end()) {
-                item.target_object_id = object.id;
+        for (const ActionTargetBinding& binding : observation.action_target_bindings) {
+            if (binding.action == item.action) {
+                item.target_object_id = binding.target_object_id;
                 break;
             }
         }

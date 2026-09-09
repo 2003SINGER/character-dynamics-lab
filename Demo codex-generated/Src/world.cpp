@@ -387,6 +387,11 @@ WorldOutcome World::settle(ActionType action, const std::string& target_object_i
             outcome.effects.push_back("rejected: target object absent");
             return outcome;
         }
+        if (!provides_action(*target, plan.action)) {
+            outcome.failure_reason = RejectionReason::PreconditionFailed;
+            outcome.effects.push_back("rejected: target does not afford action");
+            return outcome;
+        }
         if (!target->usable) {
             outcome.failure_reason = RejectionReason::TargetUnusable;
             outcome.effects.push_back("rejected: target object unusable");

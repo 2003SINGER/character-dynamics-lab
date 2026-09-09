@@ -69,6 +69,7 @@ def evaluate(batch_dir: Path, paired_path: Path | None = None):
         action_divergence = []
         for pair in post:
             action_divergence.append(int(pair['hidden']['chosen_action'] != pair['visible']['chosen_action']))
+        probes = [row for row in rows if row.get('branch') == 'mechanism_probe' and row.get('discovery_event') == '1']
         paired = {
             'rows': len(rows), 'pairs': len(post),
             'InformationIntegrity': mean([(a + int(b)) / 2 for a, b in zip(hidden_retention, visible_detection)]),
@@ -77,6 +78,9 @@ def evaluate(batch_dir: Path, paired_path: Path | None = None):
             'BehavioralPersistence': mean(action_divergence),
             'mean_state_distance': mean(state_distances),
             'mean_policy_distance': mean(policy_distances),
+            'discovery_probe_count': len(probes),
+            'discovery_steps': [int(row['step']) for row in probes],
+            'correction_latency': [0 for _ in probes],
         }
     scores = {
         'WorldValidity': {'score': mean([float(x) for x in legal]), 'basis': 'accepted is binary and all trajectory rows parse'},
