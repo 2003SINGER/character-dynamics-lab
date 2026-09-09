@@ -36,7 +36,8 @@ bool commitment_can_bias_study(const Observation& observation, const CharacterSt
 
 DecisionContext decide(const Observation& observation,
                        const CharacterState& state,
-                       const Personality& personality) {
+                       const Personality& personality,
+                       const ParameterConfig& config) {
     DecisionContext decision;
     decision.known_actions = observation.known_actions;
     switch (state.commitment.status) {
@@ -53,12 +54,12 @@ DecisionContext decide(const Observation& observation,
                                   + (commitment_can_bias_study(observation, state) ? "permits return" : "defers return");
         break;
     }
-    const double distraction = state.boredom * 0.65 + personality.procrastination * 0.25
-                             + personality.stimulation_seeking * 0.20;
-    const double task_drive = state.task_pressure * (0.70 + personality.self_control * 0.80)
-                            + state.anxiety * 0.20;
-    const double recovery_drive = state.fatigue * 0.75 + state.screen_strain * 0.50
-                                + personality.rest_preference * 0.18;
+    const double distraction = config.distraction_weight * (state.boredom * 0.65 + personality.procrastination * 0.25
+                             + personality.stimulation_seeking * 0.20);
+    const double task_drive = config.task_drive_coefficient * (state.task_pressure * (0.70 + personality.self_control * 0.80)
+                            + state.anxiety * 0.20);
+    const double recovery_drive = config.recovery_drive_coefficient * (state.fatigue * 0.75 + state.screen_strain * 0.50
+                                + personality.rest_preference * 0.18);
     const double hunger_drive = state.hunger * (0.85 + personality.need_response * 0.25);
     const double bathroom_drive = state.bathroom_urge * (0.90 + personality.need_response * 0.20);
 
@@ -87,7 +88,7 @@ DecisionContext decide(const Observation& observation,
             || action == ActionType::StudyHalfhearted
             || action == ActionType::StudyAtComputer)
             && commitment_can_bias_study(observation, state);
-        const double commitment_bonus = advances_committed_task ? 0.16 : 0.0;
+        const double commitment_bonus = advances_committed_task ? 0.16 * config.commitment_bonus : 0.0;
         switch (action) {
         case ActionType::UsePhone:
             decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * 0.30 - state.fatigue * 0.12 + commitment_bonus, 0.12, "phone offers immediate stimulation but raises strain"));
@@ -99,12 +100,12 @@ DecisionContext decide(const Observation& observation,
             decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * 0.28 + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
             break;
         case ActionType::StudyAtComputer:
-            decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 - personality.procrastination * 0.16 + commitment_bonus, 0.18, "computer can be used for task progress"));
+            decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 * config.study_fatigue_penalty - personality.procrastination * 0.16 + commitment_bonus, 0.18, "computer can be used for task progress"));
             break;
         case ActionType::StudyFocused:
             decision.candidates.push_back(candidate(action,
                 0.05 + task_drive + state.satisfaction * 0.10
-                - state.fatigue * 0.25 - personality.procrastination * 0.18
+                - state.fatigue * 0.25 * config.study_fatigue_penalty - personality.procrastination * 0.18
                 + commitment_bonus,
                 0.18,
                 "lit desk supports sustained focused study"));
@@ -113,7 +114,7 @@ DecisionContext decide(const Observation& observation,
             decision.candidates.push_back(candidate(action,
                 0.06 + task_drive * 0.55 + state.boredom * 0.36
                 + 0.03 * static_cast<double>(state.commitment.suspended_decision_points)
-                - state.fatigue * 0.12 - personality.self_control * 0.18
+                - state.fatigue * 0.12 * config.study_fatigue_penalty - personality.self_control * 0.18
                 + commitment_bonus,
                 0.16,
                 "lit desk permits partial study when task pressure coexists with distraction"));

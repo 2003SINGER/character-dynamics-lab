@@ -12,6 +12,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <ostream>
 #include <random>
@@ -166,15 +167,16 @@ DecisionSnapshot prepare_decision(World& world,
                                   Observation& observation,
                                   const WorldOutcome& previous_outcome,
                                   const Personality& personality,
-                                  const InformationAccess& information_access = {}) {
+                                  const InformationAccess& information_access = {},
+                                  const ParameterConfig& config = ParameterConfig::defaults()) {
     observation = refresh_observation(std::move(observation), world, previous_outcome, information_access);
     DecisionSnapshot snapshot;
     snapshot.observation = observation;
     snapshot.appraisal = appraise(observation, state, personality);
     clear_pending_appraisal_updates(observation);
-    snapshot.state_update = update_state(state, snapshot.appraisal, personality, previous_outcome.elapsed_minutes);
+    snapshot.state_update = update_state(state, snapshot.appraisal, personality, previous_outcome.elapsed_minutes, config);
     snapshot.state_at_decision = state;
-    snapshot.decision = decide(observation, state, personality);
+    snapshot.decision = decide(observation, state, personality, config);
     return snapshot;
 }
 
@@ -198,10 +200,11 @@ StepRecord advance_one_decision(World& world,
                                std::mt19937& action_rng,
                                const Personality& personality,
                                const InformationAccess& information_access = {},
-                               ActionType forced_action = ActionType::Count) {
+                               ActionType forced_action = ActionType::Count,
+                               const ParameterConfig& config = ParameterConfig::defaults()) {
     StepRecord trace;
     const DecisionSnapshot snapshot = prepare_decision(world, state, observation, previous_outcome,
-                                                       personality, information_access);
+                                                       personality, information_access, config);
     trace.observation_at_decision = snapshot.observation;
     trace.decision_time = world.time_summary();
     trace.world_before = world.summary();
@@ -231,6 +234,16 @@ StepRecord advance_one_decision(World& world,
     trace.world_after = world.summary();
     previous_outcome = trace.outcome;
     return trace;
+}
+
+std::string stable_fingerprint(const std::string& value) {
+    std::ostringstream out; out << std::hex << std::hash<std::string>{}(value); return out.str();
+}
+
+std::string action_support_fingerprint(const DecisionContext& decision) {
+    std::ostringstream out;
+    for (ActionType action : decision.known_actions) out << to_string(action) << '|';
+    return stable_fingerprint(out.str());
 }
 
 const char* rejection_reason_name(RejectionReason reason) {
@@ -304,7 +317,8 @@ std::vector<Personality> Simulation::generate_personalities(std::size_t count, u
     return personalities;
 }
 
-void Simulation::run_batch(std::ostream& output, const std::string& output_directory) const {
+void Simulation::run_batch(std::ostream& output, const std::string& output_directory,
+                           const std::vector<unsigned int>& requested_world_seeds) const {
     namespace fs = std::filesystem;
     const fs::path root = create_batch_run_directory(output_directory);
     std::ofstream profiles_file(root / "personalities.csv");
@@ -319,13 +333,19 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
     metadata_file << "Character Dynamics Reference batch experiment\n"
                   << "run_directory=" << root.string() << '\n'
                   << "config_version=" << kBatchConfigVersion << '\n'
+                  << "parameter_config=" << config_.canonical_json() << '\n'
+                  << "parameter_config_hash=" << config_.hash() << '\n'
                   << "git_revision=" << CHARACTER_DYNAMICS_GIT_REVISION << '\n'
                   << "personality_generation=deterministic_uniform_[0,1]\n"
                   << "personality_generation_seed=" << kBatchPersonalitySeed << '\n'
                   << "personality_count=" << kBatchPersonalityCount << '\n'
-                  << "world_scenario_seed_count=" << kBatchScenarioSeedCount << '\n'
+                  << "world_scenario_seed_count=" << (requested_world_seeds.empty() ? kBatchScenarioSeedCount : requested_world_seeds.size()) << '\n'
+                  << "world_scenario_seeds=";
+    if (requested_world_seeds.empty()) { for (unsigned int seed = 1; seed <= kBatchScenarioSeedCount; ++seed) metadata_file << seed << (seed == kBatchScenarioSeedCount ? "" : ","); }
+    else { for (std::size_t i = 0; i < requested_world_seeds.size(); ++i) metadata_file << requested_world_seeds[i] << (i + 1 == requested_world_seeds.size() ? "" : ","); }
+    metadata_file << '\n'
                   << "steps_per_run=" << kBatchStepsPerRun << '\n'
-                  << "total_decision_points=" << (kBatchPersonalityCount * kBatchScenarioSeedCount * kBatchStepsPerRun) << '\n'
+                  << "total_decision_points=" << (kBatchPersonalityCount * (requested_world_seeds.empty() ? kBatchScenarioSeedCount : requested_world_seeds.size()) * kBatchStepsPerRun) << '\n'
                   << "task_model=single_world_task_with_continuous_effort\n"
                   << "task_effort_target=seeded_[7.2,9.2]_or_8.0_for_legacy_seed\n"
                   << "task_effort_settlement=base_effort_x_duration_x_interruption_x_seeded_variation_[0.90,1.10]\n"
@@ -355,14 +375,17 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
     for (std::size_t index = 0; index < kActionCount; ++index) {
         trajectories_file << ",p_" << to_string(static_cast<ActionType>(index));
     }
-    trajectories_file << ",chosen_action,accepted,elapsed_minutes,event_ids,outcome_task_id,outcome_task_effort_gained,outcome_task_settlement_variation,outcome_task_session_interrupted,post_commitment_status,post_commitment_task_id,post_task_effort,post_task_effort_target,post_task_status,post_wallet,post_unread_messages,post_weather,post_temperature_celsius\n";
+    trajectories_file << ",chosen_action,accepted,elapsed_minutes,simulation_total_minutes,target_object_id,failure_reason,event_ids,outcome_task_id,outcome_task_effort_gained,outcome_task_settlement_variation,outcome_task_session_interrupted,post_commitment_status,post_commitment_task_id,post_task_effort,post_task_effort_target,post_task_status,post_wallet,post_unread_messages,post_weather,post_temperature_celsius\n";
     trajectories_file << std::fixed << std::setprecision(6);
     runs_file << "personality_index,scenario_seed,action_seed,steps,final_time,coursework_effort_done,coursework_effort_target,coursework_status,coursework_completed_at,coursework_execution_count,final_commitment_status,final_commitment_task_id,wallet,unread_messages,weather,temperature_celsius,phone_uses,computer_uses,study_sessions,rest_sessions,bathroom_visits,meals_collected,online_orders,final_boredom,final_fatigue,final_task_pressure,final_satisfaction,final_hunger,final_bathroom_urge,final_anxiety,final_screen_strain,final_purchase_urge\n";
     runs_file << std::fixed << std::setprecision(6);
 
     for (std::size_t personality_index = 0; personality_index < personalities.size(); ++personality_index) {
         const Personality& personality = personalities[personality_index];
-        for (unsigned int scenario_seed = 1; scenario_seed <= kBatchScenarioSeedCount; ++scenario_seed) {
+        const std::vector<unsigned int> world_seeds = requested_world_seeds.empty()
+            ? [&] { std::vector<unsigned int> seeds; for (unsigned int seed = 1; seed <= kBatchScenarioSeedCount; ++seed) seeds.push_back(seed); return seeds; }()
+            : requested_world_seeds;
+        for (unsigned int scenario_seed : world_seeds) {
             const unsigned int action_seed = action_seed_for(personality_index, scenario_seed);
             const ScenarioConfig scenario{};
             World world(scenario_seed);
@@ -373,7 +396,12 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
 
             for (int step = 1; step <= kBatchStepsPerRun; ++step) {
                 const StepRecord trace = advance_one_decision(world, state, observation, previous_outcome,
-                                                             action_rng, personality, scenario.information_access);
+                                                             action_rng, personality, scenario.information_access,
+                                                             ActionType::Count, config_);
+                std::string target_object_id;
+                for (const CandidateAction& candidate : trace.decision.candidates) {
+                    if (candidate.action == trace.chosen_action) { target_object_id = candidate.target_object_id; break; }
+                }
                 std::ostringstream event_ids;
                 for (std::size_t event_index = 0; event_index < trace.outcome.events.size(); ++event_index) {
                     if (event_index != 0) event_ids << '|';
@@ -403,7 +431,12 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
                 trajectories_file << ',';
                 write_csv_field(trajectories_file, to_string(trace.chosen_action));
                 trajectories_file << ',' << (trace.outcome.accepted ? 1 : 0)
-                                  << ',' << trace.outcome.elapsed_minutes << ',';
+                                  << ',' << trace.outcome.elapsed_minutes
+                                  << ',' << total_minutes(world.time) << ',';
+                write_csv_field(trajectories_file, target_object_id);
+                trajectories_file << ',';
+                write_csv_field(trajectories_file, rejection_reason_name(trace.outcome.failure_reason));
+                trajectories_file << ',';
                 write_csv_field(trajectories_file, event_ids.str());
                 trajectories_file << ',';
                 write_csv_field(trajectories_file, trace.outcome.task_id);
@@ -456,9 +489,10 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
         }
     }
 
+    const std::size_t scenario_count = requested_world_seeds.empty() ? kBatchScenarioSeedCount : requested_world_seeds.size();
     output << "batch complete: " << kBatchPersonalityCount << " personalities x "
-           << kBatchScenarioSeedCount << " scenario seeds x " << kBatchStepsPerRun
-           << " decision points = " << (kBatchPersonalityCount * kBatchScenarioSeedCount * kBatchStepsPerRun)
+           << scenario_count << " scenario seeds x " << kBatchStepsPerRun
+           << " decision points = " << (kBatchPersonalityCount * scenario_count * kBatchStepsPerRun)
            << " rows saved under " << root.string() << '\n';
 }
 
@@ -622,7 +656,7 @@ void Simulation::run_paired_commitment_recovery(std::ostream& output, const std:
     if (path.has_parent_path()) fs::create_directories(path.parent_path());
     std::ofstream file(path);
     if (!file) throw std::runtime_error("Cannot open commitment fixture output: " + output_path);
-    file << "phase,commitment_status,suspended_decision_points,fatigue,hunger,reconsideration,study_probability,preserved_vs_ablated_policy_tv,action,accepted\n";
+    file << "phase,commitment_status,suspended_decision_points,fatigue,hunger,reconsideration,study_probability,preserved_vs_ablated_policy_tv,action,accepted,simulation_total_minutes,world_hash,observation_hash,continuous_state_hash,personality_hash,ao_hash,ablated_world_hash,ablated_observation_hash,ablated_continuous_state_hash,ablated_personality_hash,ablated_ao_hash\n";
     const Personality personality = procrastinating_profile();
     World world(20260915U);
     CharacterState state;
@@ -667,13 +701,24 @@ void Simulation::run_paired_commitment_recovery(std::ostream& output, const std:
         return total;
     };
     const double tv = policy_distance(preserved_return, ablated_return);
-    file << "setup_active," << setup_status << ",0,0.800000,0.850000,n/a," << study_probability(preserved_deferred) << ",0,," << (active_created ? 1 : 0) << '\n';
-    file << "interrupted_suspended," << interrupted_status << "," << interrupted_suspended_points << ",0.800000,0.850000," << preserved_deferred.intention_status << "," << study_probability(preserved_deferred) << ",0,," << (suspended ? 1 : 0) << '\n';
-    file << "recovery_ablation," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << "," << state.fatigue << "," << state.hunger << "," << preserved_return.intention_status << "," << study_probability(preserved_return) << "," << tv << ",," << (tv > 0.0 ? 1 : 0) << '\n';
+    const std::string world_hash = stable_fingerprint(world.summary());
+    const std::string observation_hash = stable_fingerprint(observation_summary(preserved_observation));
+    CharacterState continuous_state = state; continuous_state.commitment = {};
+    const std::string state_hash = stable_fingerprint(state_summary(continuous_state));
+    const std::string personality_hash = stable_fingerprint(personality_summary(personality));
+    const std::string ao_hash = action_support_fingerprint(preserved_return);
+    const std::string ablated_state_hash = stable_fingerprint(state_summary(ablated_state));
+    const std::string ablated_ao_hash = action_support_fingerprint(ablated_return);
+    const std::string hashes = "," + world_hash + "," + observation_hash + "," + state_hash + "," + personality_hash + "," + ao_hash + "," + world_hash + "," + observation_hash + "," + ablated_state_hash + "," + personality_hash + "," + ablated_ao_hash;
+    file << "setup_active," << setup_status << ",0,0.800000,0.850000,n/a," << study_probability(preserved_deferred) << ",0,," << (active_created ? 1 : 0) << ",0" << std::string(11 * 0, ',') << '\n';
+    file << "interrupted_after_meal," << interrupted_status << "," << interrupted_suspended_points << ",0.800000,0.850000," << preserved_deferred.intention_status << "," << study_probability(preserved_deferred) << ",0,," << (suspended ? 1 : 0) << "," << total_minutes(world.time) << std::string(11 * 0, ',') << '\n';
+    file << "deferred_before_rest," << commitment_status_name(deferred_state.commitment.status) << "," << deferred_state.commitment.suspended_decision_points << "," << deferred_state.fatigue << "," << deferred_state.hunger << "," << preserved_deferred.intention_status << "," << study_probability(preserved_deferred) << "," << tv << ",," << 1 << "," << total_minutes(world.time) << std::string(11 * 0, ',') << '\n';
+    file << "recovered_after_rest," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << "," << state.fatigue << "," << state.hunger << "," << preserved_return.intention_status << "," << study_probability(preserved_return) << "," << tv << ",," << 1 << "," << total_minutes(world.time) << hashes << '\n';
+    file << "recovery_ablation," << commitment_status_name(ablated_state.commitment.status) << "," << ablated_state.commitment.suspended_decision_points << "," << ablated_state.fatigue << "," << ablated_state.hunger << "," << ablated_return.intention_status << "," << study_probability(ablated_return) << "," << tv << ",," << (tv > 0.0 ? 1 : 0) << "," << total_minutes(world.time) << hashes << '\n';
     const WorldOutcome resumed = world.settle(ActionType::StudyFocused, "desk");
     apply_self_action_feedback(observation, resumed, world.time_summary());
     update_commitment(state, observation, total_minutes(world.time));
-    file << "resumed_active," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << "," << state.fatigue << "," << state.hunger << ",permits return," << study_probability(preserved_return) << "," << tv << ",study_focused," << (resumed.accepted ? 1 : 0) << '\n';
+    file << "resumed_active," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << "," << state.fatigue << "," << state.hunger << ",permits return," << study_probability(preserved_return) << "," << tv << ",study_focused," << (resumed.accepted ? 1 : 0) << "," << total_minutes(world.time) << std::string(11 * 0, ',') << '\n';
     // Completion is a separate probe: W can complete while the commitment
     // closes only when the typed self-action feedback reaches O.
     World completion_world(20260916U);
@@ -690,7 +735,7 @@ void Simulation::run_paired_commitment_recovery(std::ostream& output, const std:
          << "," << completion_state.commitment.suspended_decision_points << ","
          << completion_state.fatigue << "," << completion_state.hunger
          << ",completion feedback observed," << study_probability(preserved_return)
-         << "," << tv << ",study_focused," << (completion.accepted ? 1 : 0) << '\n';
+         << "," << tv << ",study_focused," << (completion.accepted ? 1 : 0) << "," << total_minutes(completion_world.time) << std::string(11 * 0, ',') << '\n';
     CharacterState hidden_completion_state;
     hidden_completion_state.commitment = {CommitmentStatus::Active, "coursework", "hidden completion probe", 0, 0};
     Observation hidden_completion_observation;
@@ -704,7 +749,7 @@ void Simulation::run_paired_commitment_recovery(std::ostream& output, const std:
          << "," << hidden_completion_state.commitment.suspended_decision_points << ","
          << hidden_completion_state.fatigue << "," << hidden_completion_state.hunger
          << ",completion feedback hidden," << study_probability(preserved_return)
-         << "," << tv << ",study_focused," << (completion.accepted ? 1 : 0) << '\n';
+         << "," << tv << ",study_focused," << (completion.accepted ? 1 : 0) << "," << total_minutes(completion_world.time) << std::string(11 * 0, ',') << '\n';
     output << "paired commitment recovery complete: active=" << active_created
            << ", suspended=" << suspended << ", policy_difference=" << tv
            << ", resumed=" << (state.commitment.status == CommitmentStatus::Active)
@@ -1253,7 +1298,8 @@ std::string Simulation::run_profile(const Personality& personality,
         const std::vector<ActionType> world_actions = world.available_actions();
         const bool was_observation_frozen = previous_outcome.observation_frozen_during_action;
         const StepRecord trace = advance_one_decision(world, state, observation, previous_outcome,
-                                                     rng, personality, scenario.information_access);
+                                                     rng, personality, scenario.information_access,
+                                                     ActionType::Count, config_);
 
         if (verbose_trace) {
             output << "\n[Decision point " << step << " | " << trace.decision_time << "]\n"

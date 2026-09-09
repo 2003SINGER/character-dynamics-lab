@@ -10,4 +10,5 @@ maximizes diversity, personality JS, or fixture policy TV.
 The smoke runner may return `BASELINE_RETAINED / NO_SELECTION` when candidates
 are not distinguishable. It never reads `internal_holdout` during search.
 
-Current status: `OPTIMIZER_V0_SMOKE = NOT_RUN`.
+Current status: `OPTIMIZER_V0 = END_TO_END_SMOKE_PASS`; four candidates reached
+distinct Engine batches, and the honest result was `BASELINE_RETAINED / NO_SELECTION`.

@@ -22,5 +22,6 @@ it never emits a total naturalness or believability score.
 | efficiency | decisions, calls, calls/decision, runtime, decisions/sec | runner metadata | descriptive | TELEMETRY_ONLY | zero calls is quality |
 
 Believability, external naturalness, psychological validity, and Theory-S
-validity are **NOT_SCORED**. `SELF_EVALUATION_V1 = FROZEN / NOT_READY` until a
-phone fixture and a fresh batch are supplied to the complete command.
+validity are **NOT_SCORED**. `SELF_EVALUATION_V1 = FROZEN`; the fresh train and
+holdout regressions pass all hard gates. This still does not establish
+psychological or external validity.

@@ -4,6 +4,7 @@
 #include "observation.h"
 #include "personality.h"
 #include "state.h"
+#include "parameter_config.h"
 
 #include <random>
 #include <string>
@@ -31,7 +32,8 @@ struct DecisionContext {
 
 DecisionContext decide(const Observation& observation,
                        const CharacterState& state,
-                       const Personality& personality);
+                       const Personality& personality,
+                       const ParameterConfig& config = ParameterConfig::defaults());
 ActionType sample_action(const DecisionContext& decision, std::mt19937& rng);
 void update_commitment(CharacterState& state,
                        const Observation& observation,

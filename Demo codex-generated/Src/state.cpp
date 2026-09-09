@@ -58,9 +58,10 @@ StateDelta semantic_delta(const Appraisal& appraisal,
 } // namespace
 
 StateUpdate update_state(CharacterState& state,
-                         const Appraisal& appraisal,
-                         const Personality& personality,
-                         int elapsed_minutes) {
+                          const Appraisal& appraisal,
+                          const Personality& personality,
+                         int elapsed_minutes,
+                         const ParameterConfig& config) {
     const CharacterState before = state;
     StateUpdate update;
     update.semantic_contribution = semantic_delta(appraisal, personality);
@@ -74,8 +75,9 @@ StateUpdate update_state(CharacterState& state,
     delta.fatigue = appraisal.fatigue_delta
                   + update.semantic_contribution.fatigue
                   + 0.012 * time_scale;
-    delta.task_pressure = appraisal.task_pressure_delta
-                        + update.semantic_contribution.task_pressure;
+    delta.task_pressure = (appraisal.task_pressure_delta
+                        + update.semantic_contribution.task_pressure)
+                        * config.task_pressure_coupling;
     delta.satisfaction = appraisal.satisfaction_delta
                        + update.semantic_contribution.satisfaction
                        - 0.01 * time_scale;
@@ -98,16 +100,16 @@ StateUpdate update_state(CharacterState& state,
 
     const double raw_task_pressure_delta = delta.task_pressure;
     if (raw_task_pressure_delta > 0.0) {
-        delta.task_pressure += 0.06 * personality.procrastination;
+        delta.task_pressure += 0.06 * personality.procrastination * config.state_accumulation;
         delta.anxiety += 0.05 * personality.task_anxiety_sensitivity;
     }
     if (raw_task_pressure_delta < 0.0) {
-        delta.task_pressure *= 0.70 + 0.30 * personality.self_control;
+        delta.task_pressure *= (0.70 + 0.30 * personality.self_control) * config.state_decay;
     }
     delta.fatigue += std::max(0.0, delta.screen_strain)
                    * 0.10 * personality.screen_strain_sensitivity;
     if (delta.fatigue < 0.0) {
-        delta.fatigue *= 0.70 + 0.30 * personality.rest_preference;
+        delta.fatigue *= (0.70 + 0.30 * personality.rest_preference) * config.state_recovery_strength;
     }
     if (delta.hunger < 0.0 || delta.bathroom_urge < 0.0) {
         delta.satisfaction += 0.04 * personality.need_response;

@@ -9,6 +9,6 @@ ClubFloyd, AGAIN, and every external replay asset.
 - phone, deadline, and commitment fixtures are regression hard gates, never rewards
 - split seeds and gate definitions are protocol inputs, not optimizer parameters
 
-The current smoke runner uses the checked-in batch as a plumbing fixture; it
-does not claim a trained or generalizing model. `DEVELOPMENT_SPLIT_V1 = FROZEN / NOT_READY`
-until a fresh seed-controlled engine batch is recorded for both partitions.
+Fresh default-configuration train and holdout batches are now recorded under
+`outputs/development_split_v1/`; the machine-readable audit reports zero seed
+overlap and both evaluator regressions pass. `DEVELOPMENT_SPLIT_V1 = FROZEN / READY`.

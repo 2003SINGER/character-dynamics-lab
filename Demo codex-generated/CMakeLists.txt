@@ -82,6 +82,7 @@ add_test(NAME character_dynamics_core_experiment_smoke
 add_executable(character_dynamics_replay_core
     Src/replay_core_cli.cpp
     Src/state.cpp
+    Src/parameter_config.cpp
     Src/candidate_scoring.cpp
 )
 target_include_directories(character_dynamics_replay_core PRIVATE Inc)

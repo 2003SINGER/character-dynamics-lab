@@ -1,6 +1,7 @@
 #include "parameter_config.h"
 
 #include <fstream>
+#include <cstdint>
 #include <iomanip>
 #include <regex>
 #include <sstream>
@@ -43,9 +44,9 @@ std::string ParameterConfig::canonical_json() const {
 }
 
 std::string ParameterConfig::hash() const {
-    // Stable, dependency-free provenance token. This is deliberately not a
-    // cryptographic claim; the canonical JSON is the auditable source.
-    std::hash<std::string> h;
-    std::ostringstream out; out << std::hex << h(canonical_json());
+    // Stable, dependency-free provenance token (FNV-1a; not cryptographic).
+    std::uint64_t value = 1469598103934665603ULL;
+    for (unsigned char byte : canonical_json()) { value ^= byte; value *= 1099511628211ULL; }
+    std::ostringstream out; out << std::hex << value;
     return out.str();
 }

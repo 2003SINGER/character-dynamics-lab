@@ -6,10 +6,12 @@
 #include "decision.h"
 #include "state.h"
 #include "world.h"
+#include "parameter_config.h"
 
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <utility>
 
 struct ScenarioConfig {
     InformationAccess information_access;
@@ -44,8 +46,10 @@ struct StepRecord {
 
 class Simulation {
 public:
+    explicit Simulation(ParameterConfig config = ParameterConfig::defaults()) : config_(std::move(config)) {}
     void run_all(std::ostream& output) const;
-    void run_batch(std::ostream& output, const std::string& output_directory) const;
+    void run_batch(std::ostream& output, const std::string& output_directory,
+                   const std::vector<unsigned int>& world_seeds = {}) const;
     void run_paired_phone_intervention(std::ostream& output, const std::string& output_path) const;
     void run_paired_deadline_intervention(std::ostream& output, const std::string& output_path) const;
     void run_paired_commitment_recovery(std::ostream& output, const std::string& output_path) const;
@@ -53,6 +57,7 @@ public:
     bool verify(std::ostream& output) const;
 
 private:
+    ParameterConfig config_;
     std::string run_profile(const Personality& personality,
                             unsigned int action_seed,
                             unsigned int world_seed,
