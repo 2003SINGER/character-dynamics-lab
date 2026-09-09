@@ -14,6 +14,10 @@
 
 **受限 dev 资产，不能作为已通过研究准入的真人行为 benchmark。** 数据结构能支持字段映射，但 actor、角色可见信息和环境 world state 的时间对齐仍需人工 semantic audit；当前 `W`、state label、timestamp 保持 unknown。候选列表仅按 source 的 `available_actions` 记录为 observed，不等同于角色实际可知集合 `A^O`。
 
+### Actor-local history eligibility gate v0（2026-09-09）
+
+严格同 trajectory、同 actor、non-quarantine 的 gate 已完成：13,463 targets / 6,869 actor-trajectory units。原 H0 equality-bit probe 被标记为 `LIGHT_H0_INCONCLUSIVE_HISTORY_FEATURE_TOO_NARROW`；它没有表示上一动作的通用语义。H0b 已用 generic Replay action interactions 加 capacity-matched permutation control 重跑，且 L2 保存并使用 `previous2_source_O`；nontrivial view 上 aligned history 优于 O-only 与 permuted history。首版 compression runner 曾漏掉每个 actor-unit 的第一条 prior，并错误构造 permutation，现已修复并完成 depth-stratified closure：depth≥2 的 26D cumulative-mean persistent 略优于 raw-prev 但 CI 跨 0，且显著优于相同 depth-bin 的 within-split permutation；depth≥3/4 样本较少、置换区间跨 0。当前为 `COMPRESSION_DEPTH2_ALIGNED_SIGNAL_PRESENT; COMPARATIVE_SUFFICIENCY_INCONCLUSIVE`，不作 formal non-inferiority claim。详见 [H0b report](LIGHT_H0b_transition_probe_v0.md) 与 [compression benchmark](LIGHT_compression_benchmark_v0.md)。
+
 ### Blind semantic admission 50（2026-09-07）
 
 已生成固定、model-blind 的 50 条跨 trajectory source package：

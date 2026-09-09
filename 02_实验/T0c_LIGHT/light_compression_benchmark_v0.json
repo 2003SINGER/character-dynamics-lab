@@ -1,0 +1,526 @@
+{
+  "schema_version": "light_actor_local_compression_benchmark_v0",
+  "runner_commit": "72a63659734af64a999798ae6272c4126a5a9cf3",
+  "runner_sha256": "16fa797c62f3e738af865e2651a540eb1c00bbeb61d95042d1f20569611bc7cb",
+  "feature_compiler_sha256": "2f48eb7c066c76d71f66cdc7a59e25b62818f36cef4ba37680444fb10150923f",
+  "probe_sha256": "1d8e7e41f171ca02511274fb66107855b122855d6808b91bfa6ab050b8b09a16",
+  "rules_sha256": "ebdaf2b24f20684b52266e0f4670849c8997d5c3b9e0bb57804685107d47b899",
+  "full_view_sha256": "e6f214b91ed644b60543cf442fdae4255ff177d26a25fccd750ab5c7381ba195",
+  "feature_version": "replay-raw-features-v1",
+  "protocol": {
+    "raw_prev": "current 13D + current⊙previous 13D = 26D",
+    "persistent_mean": "current 13D + current⊙cumulative-mean prior same-actor action 13D = 26D; first eligible target seeds history with previous_source_action_A_star",
+    "persistent_permuted": "same 26D persistent feature with deterministic cyclic no-self state permutation separately inside train/test and within depth bins depth=1, depth=2, depth=3, depth=4+",
+    "depth_views": [
+      "depth_1",
+      "depth_ge_2",
+      "depth_ge_3",
+      "depth_ge_4"
+    ],
+    "raw_last2": "current 13D + previous interaction 13D + previous2 interaction 13D = 39D",
+    "state_update": "fixed cumulative mean; no fitted state, LLM, ontology, X, or candidate reconstruction"
+  },
+  "train_unit_count": 4823,
+  "test_unit_count": 684,
+  "rows": 13463,
+  "conditions": {
+    "raw_prev": {
+      "full": {
+        "rows": 1349,
+        "mean_nll": 2.2908509949186695,
+        "mean_nll_bits": 3.3049993697847126,
+        "mrr": 0.34878347230640394,
+        "top1": 0.16234247590808007,
+        "unit_count": 684
+      },
+      "nontrivial": {
+        "rows": 1283,
+        "mean_nll": 2.3176986742197463,
+        "mean_nll_bits": 3.3437323835717536,
+        "mrr": 0.34748129929359617,
+        "top1": 0.16445830085736554,
+        "unit_count": 657
+      },
+      "contiguous": {
+        "rows": 657,
+        "mean_nll": 2.3418446064748153,
+        "mean_nll_bits": 3.3785676002937826,
+        "mrr": 0.34783331755625535,
+        "top1": 0.1613394216133942,
+        "unit_count": 446
+      },
+      "gapped": {
+        "rows": 692,
+        "mean_nll": 2.242436540016373,
+        "mean_nll_bits": 3.235152075789827,
+        "mrr": 0.34968557009664825,
+        "top1": 0.16329479768786126,
+        "unit_count": 453
+      },
+      "depth_1": {
+        "rows": 684,
+        "mean_nll": 2.239443993196976,
+        "mean_nll_bits": 3.2308347433338547,
+        "mrr": 0.3611367542703456,
+        "top1": 0.1695906432748538,
+        "unit_count": 684
+      },
+      "depth_ge_2": {
+        "rows": 665,
+        "mean_nll": 2.343726768118123,
+        "mean_nll_bits": 3.3812829855627338,
+        "mrr": 0.33607723942920914,
+        "top1": 0.1548872180451128,
+        "unit_count": 380
+      },
+      "depth_ge_3": {
+        "rows": 285,
+        "mean_nll": 2.4081993886044115,
+        "mean_nll_bits": 3.4742973154114183,
+        "mrr": 0.31039822410382334,
+        "top1": 0.12982456140350876,
+        "unit_count": 188
+      },
+      "depth_ge_4": {
+        "rows": 97,
+        "mean_nll": 2.5052615010207844,
+        "mean_nll_bits": 3.6143283436527263,
+        "mrr": 0.28193109695529,
+        "top1": 0.09278350515463918,
+        "unit_count": 77
+      }
+    },
+    "persistent_mean": {
+      "full": {
+        "rows": 1349,
+        "mean_nll": 2.289341001430398,
+        "mean_nll_bits": 3.3028209096674086,
+        "mrr": 0.3525528455277461,
+        "top1": 0.1682727946627131,
+        "unit_count": 684
+      },
+      "nontrivial": {
+        "rows": 1283,
+        "mean_nll": 2.316219361418608,
+        "mean_nll_bits": 3.341598186329628,
+        "mrr": 0.35163943216623084,
+        "top1": 0.17069368667186283,
+        "unit_count": 657
+      },
+      "contiguous": {
+        "rows": 657,
+        "mean_nll": 2.3417440660498614,
+        "mean_nll_bits": 3.3784225511212926,
+        "mrr": 0.34865152145884837,
+        "top1": 0.1628614916286149,
+        "unit_count": 446
+      },
+      "gapped": {
+        "rows": 692,
+        "mean_nll": 2.239588380830711,
+        "mean_nll_bits": 3.2310430506570094,
+        "mrr": 0.35625684829258275,
+        "top1": 0.17341040462427745,
+        "unit_count": 453
+      },
+      "depth_1": {
+        "rows": 684,
+        "mean_nll": 2.238702619468668,
+        "mean_nll_bits": 3.229765167132579,
+        "mrr": 0.362188442308997,
+        "top1": 0.1739766081871345,
+        "unit_count": 684
+      },
+      "depth_ge_2": {
+        "rows": 665,
+        "mean_nll": 2.3414261943053267,
+        "mean_nll_bits": 3.377963959131814,
+        "mrr": 0.34264194598131825,
+        "top1": 0.162406015037594,
+        "unit_count": 380
+      },
+      "depth_ge_3": {
+        "rows": 285,
+        "mean_nll": 2.406532294676302,
+        "mean_nll_bits": 3.4718922072686382,
+        "mrr": 0.3165520402814295,
+        "top1": 0.1368421052631579,
+        "unit_count": 188
+      },
+      "depth_ge_4": {
+        "rows": 97,
+        "mean_nll": 2.5022440728976303,
+        "mean_nll_bits": 3.609975115063213,
+        "mrr": 0.3103260401684643,
+        "top1": 0.12371134020618557,
+        "unit_count": 77
+      }
+    },
+    "persistent_permuted": {
+      "full": {
+        "rows": 1349,
+        "mean_nll": 2.2940383991601534,
+        "mean_nll_bits": 3.3095978220772095,
+        "mrr": 0.34548846869637123,
+        "top1": 0.15715344699777614,
+        "unit_count": 684
+      },
+      "nontrivial": {
+        "rows": 1283,
+        "mean_nll": 2.323183284004162,
+        "mean_nll_bits": 3.351645002908941,
+        "mrr": 0.3445759714467451,
+        "top1": 0.1597817614964926,
+        "unit_count": 657
+      },
+      "contiguous": {
+        "rows": 657,
+        "mean_nll": 2.3401654297337546,
+        "mean_nll_bits": 3.376145060336678,
+        "mrr": 0.3341712641102107,
+        "top1": 0.1506849315068493,
+        "unit_count": 446
+      },
+      "gapped": {
+        "rows": 692,
+        "mean_nll": 2.2502443831386905,
+        "mean_nll_bits": 3.2464164123424335,
+        "mrr": 0.3562332713164702,
+        "top1": 0.16329479768786126,
+        "unit_count": 453
+      },
+      "depth_1": {
+        "rows": 684,
+        "mean_nll": 2.242427938033843,
+        "mean_nll_bits": 3.2351396657522895,
+        "mrr": 0.36199442776780055,
+        "top1": 0.1695906432748538,
+        "unit_count": 684
+      },
+      "depth_ge_2": {
+        "rows": 665,
+        "mean_nll": 2.347123444890078,
+        "mean_nll_bits": 3.386183354297136,
+        "mrr": 0.32851091079433103,
+        "top1": 0.1443609022556391,
+        "unit_count": 380
+      },
+      "depth_ge_3": {
+        "rows": 285,
+        "mean_nll": 2.4077724330393275,
+        "mean_nll_bits": 3.4736813487349916,
+        "mrr": 0.3126169427858622,
+        "top1": 0.1368421052631579,
+        "unit_count": 188
+      },
+      "depth_ge_4": {
+        "rows": 97,
+        "mean_nll": 2.4997322744170756,
+        "mean_nll_bits": 3.6063513558516047,
+        "mrr": 0.29989417429231013,
+        "top1": 0.12371134020618557,
+        "unit_count": 77
+      }
+    },
+    "raw_last2": {
+      "full": {
+        "rows": 1349,
+        "mean_nll": 2.2890038932677266,
+        "mean_nll_bits": 3.3023345653928793,
+        "mrr": 0.36101585604250774,
+        "top1": 0.17197924388435878,
+        "unit_count": 684
+      },
+      "nontrivial": {
+        "rows": 1283,
+        "mean_nll": 2.3162386008501725,
+        "mean_nll_bits": 3.341625942962135,
+        "mrr": 0.36000902849787897,
+        "top1": 0.17381137957911147,
+        "unit_count": 657
+      },
+      "contiguous": {
+        "rows": 657,
+        "mean_nll": 2.336751444080853,
+        "mean_nll_bits": 3.3712197201655703,
+        "mrr": 0.36169472588884455,
+        "top1": 0.1765601217656012,
+        "unit_count": 446
+      },
+      "gapped": {
+        "rows": 692,
+        "mean_nll": 2.243671319735614,
+        "mean_nll_bits": 3.2369334863673664,
+        "mrr": 0.3603713220988058,
+        "top1": 0.1676300578034682,
+        "unit_count": 453
+      },
+      "depth_1": {
+        "rows": 684,
+        "mean_nll": 2.2368602441109235,
+        "mean_nll_bits": 3.227107181340506,
+        "mrr": 0.3631043145157136,
+        "top1": 0.1695906432748538,
+        "unit_count": 684
+      },
+      "depth_ge_2": {
+        "rows": 665,
+        "mean_nll": 2.3426373609718696,
+        "mean_nll_bits": 3.379711303275325,
+        "mrr": 0.3588677273272125,
+        "top1": 0.17443609022556392,
+        "unit_count": 380
+      },
+      "depth_ge_3": {
+        "rows": 285,
+        "mean_nll": 2.408804961615881,
+        "mean_nll_bits": 3.4751709725919615,
+        "mrr": 0.32157766781213554,
+        "top1": 0.1368421052631579,
+        "unit_count": 188
+      },
+      "depth_ge_4": {
+        "rows": 97,
+        "mean_nll": 2.505832746533015,
+        "mean_nll_bits": 3.6151524767203513,
+        "mrr": 0.2896463133496934,
+        "top1": 0.1134020618556701,
+        "unit_count": 77
+      }
+    }
+  },
+  "paired_unit_bootstrap_delta_nll": {
+    "full": {
+      "persistent_vs_raw_prev": {
+        "units": 684,
+        "mean_delta_nll": -0.0009606867791709324,
+        "ci95": [
+          -0.0027514779811968824,
+          0.0007365038096855697
+        ],
+        "delta_bits": -0.0013859780521574949
+      },
+      "persistent_permuted_vs_persistent": {
+        "units": 684,
+        "mean_delta_nll": 0.004296628148238157,
+        "ci95": [
+          0.0001698402636279595,
+          0.008549329130558428
+        ],
+        "delta_bits": 0.00619872412200712
+      },
+      "raw_last2_vs_raw_prev": {
+        "units": 684,
+        "mean_delta_nll": -0.0007897435582084871,
+        "ci95": [
+          -0.004529389020101947,
+          0.0029320363734998836
+        ],
+        "delta_bits": -0.0011393591150013888
+      }
+    },
+    "nontrivial": {
+      "persistent_vs_raw_prev": {
+        "units": 657,
+        "mean_delta_nll": -0.001311819663351608,
+        "ci95": [
+          -0.0029763079481318114,
+          0.00046742843163753364
+        ],
+        "delta_bits": -0.0018925557228579941
+      },
+      "persistent_permuted_vs_persistent": {
+        "units": 657,
+        "mean_delta_nll": 0.007250950544963248,
+        "ci95": [
+          0.003082470358161536,
+          0.011504062643135617
+        ],
+        "delta_bits": 0.010460910392949605
+      },
+      "raw_last2_vs_raw_prev": {
+        "units": 657,
+        "mean_delta_nll": -0.002118956965638166,
+        "ci95": [
+          -0.0058868190755720536,
+          0.0018086015860355271
+        ],
+        "delta_bits": -0.003057008706183308
+      }
+    },
+    "contiguous": {
+      "persistent_vs_raw_prev": {
+        "units": 446,
+        "mean_delta_nll": -0.0005096903217356713,
+        "ci95": [
+          -0.003967054792637439,
+          0.0026364341219950317
+        ],
+        "delta_bits": -0.0007353276995571533
+      },
+      "persistent_permuted_vs_persistent": {
+        "units": 446,
+        "mean_delta_nll": -0.0007435752803198106,
+        "ci95": [
+          -0.006436286520698183,
+          0.00482496387408027
+        ],
+        "delta_bits": -0.0010727523694450116
+      },
+      "raw_last2_vs_raw_prev": {
+        "units": 446,
+        "mean_delta_nll": -0.006419867384146911,
+        "ci95": [
+          -0.012168673073527413,
+          -0.0007659437759804253
+        ],
+        "delta_bits": -0.00926191083827355
+      }
+    },
+    "gapped": {
+      "persistent_vs_raw_prev": {
+        "units": 453,
+        "mean_delta_nll": -0.001999349639011748,
+        "ci95": [
+          -0.0047908636618222466,
+          0.0006056074175032379
+        ],
+        "delta_bits": -0.002884451809205388
+      },
+      "persistent_permuted_vs_persistent": {
+        "units": 453,
+        "mean_delta_nll": 0.009243274440349171,
+        "ci95": [
+          0.0035482254294094432,
+          0.01495312270788155
+        ],
+        "delta_bits": 0.013335226196667459
+      },
+      "raw_last2_vs_raw_prev": {
+        "units": 453,
+        "mean_delta_nll": 0.004507319843140357,
+        "ci95": [
+          -0.0011064266534343958,
+          0.010246951214985962
+        ],
+        "delta_bits": 0.006502687985399014
+      }
+    },
+    "depth_1": {
+      "persistent_vs_raw_prev": {
+        "units": 684,
+        "mean_delta_nll": -0.0007413737283109171,
+        "ci95": [
+          -0.0025765137421531444,
+          0.0010664016200426633
+        ],
+        "delta_bits": -0.001069576201279522
+      },
+      "persistent_permuted_vs_persistent": {
+        "units": 684,
+        "mean_delta_nll": 0.003725318565174205,
+        "ci95": [
+          -0.001884808899932947,
+          0.009135692479593609
+        ],
+        "delta_bits": 0.005374498619708415
+      },
+      "raw_last2_vs_raw_prev": {
+        "units": 684,
+        "mean_delta_nll": -0.002583749086053959,
+        "ci95": [
+          -0.0066275489103944174,
+          0.0014916223391791027
+        ],
+        "delta_bits": -0.0037275619933514383
+      }
+    },
+    "depth_ge_2": {
+      "persistent_vs_raw_prev": {
+        "units": 380,
+        "mean_delta_nll": -0.0027268391559937665,
+        "ci95": [
+          -0.006474350252491737,
+          0.0007833748667313088
+        ],
+        "delta_bits": -0.003933997327654054
+      },
+      "persistent_permuted_vs_persistent": {
+        "units": 380,
+        "mean_delta_nll": 0.006196463518385109,
+        "ci95": [
+          0.0018023017118964921,
+          0.010773178912687894
+        ],
+        "delta_bits": 0.008939607189023575
+      },
+      "raw_last2_vs_raw_prev": {
+        "units": 380,
+        "mean_delta_nll": -0.000678069901900344,
+        "ci95": [
+          -0.007900897621492403,
+          0.006357507037779822
+        ],
+        "delta_bits": -0.0009782480848476922
+      }
+    },
+    "depth_ge_3": {
+      "persistent_vs_raw_prev": {
+        "units": 188,
+        "mean_delta_nll": -0.003308800368826571,
+        "ci95": [
+          -0.012098091222536262,
+          0.0040648688051804025
+        ],
+        "delta_bits": -0.0047735898833976675
+      },
+      "persistent_permuted_vs_persistent": {
+        "units": 188,
+        "mean_delta_nll": 0.002196506454543249,
+        "ci95": [
+          -0.00416008053288377,
+          0.00861523566582072
+        ],
+        "delta_bits": 0.0031688889692501445
+      },
+      "raw_last2_vs_raw_prev": {
+        "units": 188,
+        "mean_delta_nll": 0.0018439611324753578,
+        "ci95": [
+          -0.009349435287699569,
+          0.013176444629465512
+        ],
+        "delta_bits": 0.0026602735814141958
+      }
+    },
+    "depth_ge_4": {
+      "persistent_vs_raw_prev": {
+        "units": 77,
+        "mean_delta_nll": -0.0055640761985852,
+        "ci95": [
+          -0.025537738320417603,
+          0.008848752778774489
+        ],
+        "delta_bits": -0.008027265138827183
+      },
+      "persistent_permuted_vs_persistent": {
+        "units": 77,
+        "mean_delta_nll": -0.000481054692953234,
+        "ci95": [
+          -0.010391848058708507,
+          0.009476927376974625
+        ],
+        "delta_bits": -0.0006940152199199936
+      },
+      "raw_last2_vs_raw_prev": {
+        "units": 77,
+        "mean_delta_nll": 0.005320060205271126,
+        "ci95": [
+          -0.010746796718066463,
+          0.021335413721584793
+        ],
+        "delta_bits": 0.007675224475375375
+      }
+    }
+  }
+}

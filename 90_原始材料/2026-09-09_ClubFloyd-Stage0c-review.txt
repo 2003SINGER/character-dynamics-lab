@@ -1,0 +1,668 @@
+看完了。最新 webgpt-sync HEAD 已经到：
+36c708d freeze Stage0c nonduplicate analysis and fix stratified metrics
+这次基本就是把我们上一轮要求的那一刀完整做完了，而且结果很明确。
+1. macro-F1 真 bug 已修
+analyze_stage0b_duplicate_sensitivity.py 现在已经从错误的：
+for k in labels:
+改成了按整数 class id 算：
+for k in range(len(labels)):
+所以之前全是 0.0 的 stratified macro-F1 已经恢复正常。
+并且 duplicate 分层现在也比之前细：
+- EXACT_DUPLICATE_PAIR：190
+- ACTION_REPEAT_ONLY：10
+- OBSERVATION_REPEAT_ONLY：6
+- GENUINE_TRANSITION：178
+还额外拆了：
+- raw action 完全重复
+- canonical verb 相同但 raw action 不同
+- canonical verb 真正变化
+这一刀是对的。
+2. 更重要：Stage 0c 已经真的跑完了
+不是只写 protocol。
+它从原 4000 targets 中，按预先定义规则只排除：
+当前 (O,A*) 与紧邻上一条 (O,A*) 完全相同
+
+于是：
+4000
+- 2036 exact repeats
+= 1964 non-duplicate analysis rows
+原始 replay 没改，这是一个单独 versioned analysis view。
+然后用完全同一个已经冻结的 Stage0b runner重新训练：
+- O_DIM=64
+- seed 20260908
+- epochs=4
+- 同一 trajectory-disjoint split
+- 没改 canonicalization
+- 没改 optimizer
+- 没上 Theory-S
+结果：
+条件	Accuracy	Macro-F1
+O_ONLY	29.90%	0.0249
+O + PREV_VERB	28.35%	0.0339
+O + LAST2	28.87%	0.0405
+
+
+也就是说：
+去掉那堆最明显的完全重复以后，history 不仅没赢，accuracy 甚至略低。
+
+所以仓库已经正式把 ClubFloyd 状态改成：
+Stage 0c non-duplicate view completed；当前 estimand 无正向增量
+
+并明确：
+暂停 ClubFloyd persistent-compression / Theory-S bridge。
+
+这个判定我赞成。
+3. 有个特别值得看的细节
+在原来 384 test 的 GENUINE_TRANSITION 178 条里：
+O_ONLY       33.15%
++ PREV       30.34%
++ LAST2      35.39%
+所以当时 LAST2 还有大概 +2.25pt。
+但问题是：
+当我们真的把 exact duplicates 从训练集和测试集整个 analysis view里都拿掉、重新训练以后，
+
+这个小提升没了：
+29.90
+28.35
+28.87
+这说明那 2pt 很可能不是一个稳定的、值得继续追的 history effect。
+所以这次止损不是因为看到一次负结果就跑路，而是：
+总体巨大提升
+↓
+发现被重复主导
+↓
+只看 genuine transition 还有一点点
+↓
+重新构造 nonduplicate train/test
+↓
+那一点点也不稳定
+到这里已经足够了。
+别再给 ClubFloyd 调第六刀。
+ClubFloyd 到底证明了什么？
+非常重要，不是：
+ClubFloyd 没有历史信息。
+
+更不是：
+persistent state 没用。
+
+更不是：
+Theory-S 失败。
+
+我们现在只能说：
+在 ClubFloyd 的当前 canonical verb-family next-action estimand 下，排除相邻 (O,A*) 完全重复以后，没有发现稳定的低阶历史增量。
+
+因为我们只预测：
+take
+open
+examine
+navigation
+...
+而不是完整：
+take sword
+take apple
+ask Bob about key
+...
+所以 ClubFloyd 作为当前这个 structured verb diagnostic不值得继续搭 persistent state。
+这是一个数据×任务接口的 NO-GO，不是母问题的 NO-GO。
+我现在反而发现仓库有一个需要马上同步的东西
+Existing_Dataset_Pool_Routing_v1 现在已经过时了。
+它还写：
+#1 ClubFloyd — PRIMARY_ACTION_CANDIDATE
+#2 LIGHT
+甚至：
+ClubFloyd = #1 pure next-action candidate
+
+这个排序是 Stage 0c 之前做的。
+现在既然 ClubFloyd 已经：
+persistent-compression / Theory-S bridge paused
+
+那 routing 至少应该加一个 superseding update，否则下一个 Codex/新会话一读 routing 又会说：
+“ClubFloyd 排第一，我们继续 ClubFloyd！”
+
+这会绕回去。
+还有个小旧债：
+TODO/T0d 仍写：
+“先完成 Existing Dataset Pool Routing v1”
+
+routing 明明早完成了。
+这个也该顺手清掉。
+那现在下一步去哪？
+我不会直接说：
+“好，ClubFloyd 不行，立刻 LIGHT 全六维 Theory-S！”
+
+那又会犯一样的错误。
+现在应该回母问题：
+\[
+H \rightarrow S \rightarrow A^*
+\]我们需要找的是：
+有足够行为相关历史、又有可评分 A* 的数据接口。
+
+现在现有池子里最自然的继任者确实是 LIGHT，但要非常明确它的角色发生变化：
+LIGHT 的优势
+它有：
+scene/world context
+human A*
+source action list
+scene → affordance 基础
+SceneSnapshot bridge
+candidate scoring 工程接口
+所以比 ClubFloyd 更适合：
+真正比较不同 persistent representation 对候选行为排序有没有帮助。
+
+但 LIGHT 的坑仍然存在
+它：
+- median trajectory 才约 3 step；
+- 62.2% adjacent pair 跨 actor；
+- 完整 6D X 缺字段；
+- source available_actions 不能冒充 A^O。
+所以不能直接跑完整 Theory-S training。
+我建议下一刀：先做一个 routing v2 + LIGHT 最小 eligibility gate
+不是再做几十页数据审计。
+就回答一个问题：
+在严格 actor-local、prediction-time-safe 的 LIGHT 子集里，有没有足够的连续历史来测试 persistent representation？
+
+具体先统计：
+连续同 actor decision length >= 2 / >= 3 / >= 4 的数量
+以及这些 step 上：
+A* 是否在 source candidate list
+当前 O 是否可构造
+past actor history 是否无未来泄漏
+candidate count 分布
+如果有几百/上千个合法 decision：
+下一步立刻做 LIGHT 的：
+current O
+vs
+O + raw/structured history
+先确认 LIGHT 自己真的有 history increment。
+只要这关过：
+history
+→ naive persistent
+→ permuted persistent
+→ Theory-S
+就正式接上。
+所以仓库现在的状态我会概括成：
+ClubFloyd Stage 0 已经完整封口，而且是一次有价值的负路线结果。
+我们修好了坏 probe，发现漂亮结果是 duplicate confound，再用独立 analysis view确认非重复 history 没稳定增量，因此按照预先约定止损。
+
+这轮没有白做，反而把我们的实验纪律立住了。
+下一步不要再碰 ClubFloyd。更新 routing，然后对 LIGHT 做一次非常窄的 actor-local history eligibility gate。过了就直接开始新的 representation baseline。
+
+
+
+
+  
+
+
+
+
+
+今天 16:34
+重新看看仓库把握，然后设计下一步！！！
+
+
+
+
+
+
+
+
+
+
+
+
+
+思考了 5m 44s
+
+我重新把 webgpt-sync@36c708d 从 Paper-0 → Theory-S → routing → ClubFloyd → LIGHT → OPeRA → 实验路由 捋了一遍。现在我对下一步的判断比上一条更明确了：
+下一步不是“更新 routing 然后随便选个数据集”，也不是直接上 LIGHT 的 Theory-S。
+下一步应该是：LIGHT Actor-Local History Eligibility Gate v0。
+先回答一个决定生死的问题：
+\[
+\boxed{\text{在严格同角色、合法历史下，LIGHT 的历史本身到底有没有额外行为预测价值？}}
+\]
+这一步过了，才进入 persistent state；不过，就停止 LIGHT，转 OPeRA。
+为什么我现在坚定选这一刀
+仓库真正的母问题一直没变。Paper-0问题卡.md 冻结的是：
+\[
+H^{obs}\rightarrow S\rightarrow A^*
+\]核心不是 Theory-S 那三个字段本身，而是：
+persistent S 能不能作为历史的紧凑、行为相关表示。
+
+而现在各部分状态其实已经很整齐：
+部分	现在真实状态
+W/O information boundary	✅ 工程 sanity 已完成
+Scene → affordance → generated \(A^O\)	🟡 M2 仍在发展，但不是当前第一 blocker
+Theory-S v2	✅ 可训练候选已冻结，不应该继续改
+ClubFloyd	⛔ 当前 verb estimand 已止损
+AGAIN	✅ dynamics auxiliary，不能提供行为 A*
+LIGHT	🟡 有真人 A*、scene、source candidates，但完整 6D Theory-S NO-GO
+OPeRA	🟡 真人长轨迹很好，但 exact candidate/readout 还没解决
+正式 Experiment B	❌ 还没开始
+
+
+因此现在缺的根本不是另一个状态更新公式。
+缺的是：
+找到一份真实轨迹，先证明合法历史对下一行为本身有值得压缩的信号。
+
+ClubFloyd 已经非常漂亮地告诉我们：
+千万不要默认“有长历史 = history 有预测价值”。
+
+为什么不是直接 OPeRA
+我认真重新看了 OPeRA。
+它其实在“历史条件”上比 LIGHT 好看很多：
+- 527 sessions；
+- median 7 actions；
+- 183 个 session ≥10 actions；
+- 69 个 ≥20；
+- HTML/URL 是清晰的 pre-action O；
+- 真人 A*；
+- 单 session 主体边界比 LIGHT 干净。
+但它的问题也很硬：
+- action_type 熵只有 0.442 bits，太粗；
+- conditional click_type 虽有约 2.929 bits，但已经偏“网页交互类别”；
+- exact UI target 没有 source candidate set；
+- multi-candidate reconstruction 尚未完成；
+- frozen canonical 13D action representation 目前不兼容。
+所以如果现在转 OPeRA，我们很容易进入：
+candidate reconstruction
+→ HTML grounding
+→ click ontology
+→ action representation
+→ Terra
+又钻进一个新坑。
+它应该是 LIGHT 失败后的 backup，不是今天第一刀。
+为什么 LIGHT 值得再给一次机会
+LIGHT 的 D01 虽然是 NO-GO，但要看清它否定的是什么：
+❌ “LIGHT 已经足够支持完整六维 X → 3D Theory-S training”
+
+而不是：
+❌ “LIGHT 不能测 history”。
+
+事实上 D01 明确写了：
+actor-local history 结构上可以构造。
+
+而 LIGHT 又已经有：
+- 24,999 个 quarantine 后真人 physical A*；
+- 7,256 trajectories；
+- current context[t]；
+- scene/object/agent 信息；
+- source candidate list；
+- A* 几乎都在 source list 中；
+- Replay → SceneSnapshot 已经接通。
+这使它成为当前离 Paper-0 接口最近的数据。
+但之前 LIGHT 那 140-step 结果不能继续用
+这个非常重要。
+仓库里历史上已经跑过：
+LIGHT_scene_snapshot_v1
+
+stateful NLL     1.419149
+no-history NLL   1.419183
+以及：
+Theory-S  1.418002
+zero-S    1.419183
+看起来几乎没用。
+但 D01 后来已经发现：
+physical-action 相邻 pair 有 62.2% 是不同 actor。
+
+我又重新看了 run_transition_theory_s_v0.py。
+它确实直接：
+prior = ss[i-1]
+action = steps[i-1]["source_action_A_star"]
+也就是：
+上一行是谁，它就拿谁当上一动作。
+
+没有 actor-local predecessor。
+所以这些旧 LIGHT 结果只能作为历史 engineering diagnostic。
+绝对不能拿它说“LIGHT history 没用”。
+这反而意味着我们现在有一个非常清晰、尚未真正做过的实验。
+下一步：LIGHT Actor-Local History Eligibility Gate v0
+我建议把它叫类似：
+LIGHT_H0_actor_local_history_gate_v0
+它还不是 Theory-S 实验。
+目标只有两个阶段。
+Phase A：先把合法历史结构数清楚
+从现有 24,999 non-quarantine physical actions 出发。
+不能再用：
+step[i-1]
+而必须：
+trajectory
++
+actor
++
+t < current_t
+寻找：
+previous_same_actor_step
+previous2_same_actor_step
+...
+每个 target 保存：
+trajectory_id
+actor
+target_t
+
+previous_same_actor_t
+actor_history_depth
+
+intervening_physical_rows
+intervening_other_actor_rows
+
+source_O_t
+A*_t
+previous_A*
+特别把 history 分成：
+A. 连续同角色
+actor_t == actor_(t-1)
+这是最干净的。
+B. 跨 actor gap 的同角色历史
+例如：
+Alice action
+Bob action
+Bob action
+Alice action
+当前 Alice 的过去行为当然还是：
+Alice_previous
+但中间发生了两件事。
+所以只能叫：
+actor-local accumulated history
+
+不能把：
+Alice_previous → Alice_current
+冒充一次简单 world transition。
+Phase A 必须先报告这些数字
+至少：
+history depth >=1
+history depth >=2
+history depth >=3
+history depth >=4
+各有多少 target。
+以及：
+gap=0
+gap=1
+gap>=2
+分别多少。
+再报告：
+- actor-trajectory unit 数；
+- current source_O 非空率；
+- candidate count 分布；
+- A* ∈ source_candidate_list；
+- previous A* 是否还在 current source list；
+- previous A* = current A* 的 raw repeat rate；
+- previous (O,A*) = current (O,A*) 的 exact-repeat rate。
+最后两个是 ClubFloyd 留给我们的教训，必须一开始就查。
+Phase B：如果数据量够，再立即跑 history probe
+不用等下一轮讨论。
+但这里也不要上 Theory-S。
+比较：
+\[
+O_t
+\]vs
+\[
+O_t + A^*_{\text{prev same actor}}
+\]vs
+\[
+O_t + A^*_{\text{last2 same actor}}
+\]也就是：
+L0  O_ONLY
+
+L1  O + PREV_SAME_ACTOR_ACTION
+
+L2  O + LAST2_SAME_ACTOR_HISTORY
+target 不要再搞一个新的动作 ontology
+这是很重要的一点。
+不要像 ClubFloyd 一样又另造：
+verb family
+也不要把 LIGHT 压成我们 RoomDemo 的 16 个 ActionType。
+先直接利用 LIGHT 自己的：
+source candidate list
++
+source A*
+进行一个：
+source-list conditional development diagnostic
+
+即：
+当前 candidate_set_factual
+→ 给每个 candidate 打分
+→ 看真实 A* 的 NLL / rank
+但文档必须写死：
+candidate_set_factual 是 source-provided action support，不是 A^O。
+
+所以这一轮可以用于判断：
+history 有没有预测价值
+
+但不能叫 Paper-0 candidate-set experiment。
+一定先跑傻瓜 baseline
+别再犯 ClubFloyd 第一次那个错。
+至少：
+B0：uniform
+当前 source list 均匀猜。
+B1：repeat-last
+如果上一同 actor action 仍在 current source list：
+就猜它。
+
+否则退化成 uniform / frozen fallback。
+这个 baseline 能直接告诉我们：
+是不是又被机械重复支配。
+
+B2：简单 first-order transition baseline
+如果 existing frozen action representation 足以支持，就做；
+如果需要新 ontology，就不做，不要为了 baseline 发明 action schema。
+学习 probe 怎么做
+必须保持同一 readout family。
+优先复用现有：
+Replay/replay_features_v1.py
+Replay/replay_probe_v1.py
+能复用就复用。
+不能复用的话：
+停下来登记 incompatibility。
+
+不要新造 LIGHTFeatureV2。
+这一点 ARCHITECTURE_RULES 已经写得很清楚。
+primary result 不能再被重复数据骗
+我建议一开始就冻结两个报告面：
+Full view
+所有 actor-local target。
+Nontrivial view
+排除：
+O_t == O_prev
+AND
+A*_t == A*_prev
+的 exact pair repeat。
+和 ClubFloyd 一样：
+原始数据完全不删。
+只是分析分层。
+主判断优先看 nontrivial view。
+判断标准
+不要只盯 accuracy。
+主指标还是仓库原来的：
+\[
+NLL
+\]并报告：
+- paired ΔNLL；
+- Δbits；
+- MRR；
+- top-1；
+- candidate count stratification；
+- gap stratification；
+- repeat/nonrepeat stratification。
+按 trajectory/actor unit bootstrap，而不是把每个 action 当独立样本。
+结果出来之后只有三条路
+A. history 明显有用
+比如：
+\[
+NLL(O+H)<NLL(O)
+\]而且：
+- nontrivial subset 仍然成立；
+- 不是 repeat-last 一个规律吃出来；
+- actor/trajectory bootstrap 稳定。
+那下一步终于进入：
+raw/structured history
+vs
+naive persistent state
+vs
+trajectory-permuted persistent state
+仍然先不 Theory-S。
+先证明：
+“压缩成 persistent representation”本身值得做。
+
+之后才：
+naive-S
+vs
+Theory-S
+vs
+strong summary
+vs
+S + history
+这才真正碰 Paper-0。
+B. history 还是没用
+那么：
+立即停止 LIGHT persistent-S 主路线。
+
+不要：
+- 修 X；
+- 补 effort；
+- 补 recovery；
+- 调 Theory-S；
+- 调 action feature。
+因为：
+history 本身都没预测增量，没必要研究怎么把它压进 S。
+
+这时转 OPeRA coarse click/history auxiliary，重新冻结协议。
+C. actor-local 样本本身太少
+那甚至不用跑 probe。
+LIGHT 直接：
+HISTORY_ELIGIBILITY_NO_GO
+
+转 OPeRA。
+这一步还有两个顺手债
+等结果出来同一个 commit里同步，不要单独开 docs 工程：
+1. Existing_Dataset_Pool_Routing_v1 已过时：
+   - ClubFloyd 不能再写 #1 active candidate；
+   - 应写 Stage0c paused。
+2. TODO/T0d 还写：
+   先完成 Existing Dataset Pool Routing v1
+   
+   routing 明明已经完成。
+一起修掉。
+我给 Luna/Codex 的完整指令
+现在不要训练 Theory-S，不要修改 Theory-S v2、X/S schema、candidate ontology、RoomDemo，也不要新增数据集。
+当前目标是完成 LIGHT Actor-Local History Eligibility Gate v0，只回答：
+在严格 prediction-time-safe、同 actor 的 LIGHT 历史下，past behavior 是否在 current source_O 之外提供稳定的 next-action prediction increment？
+
+ClubFloyd Stage0c 已暂停，不得回去继续调参。
+1. 冻结 actor-local history protocol
+只使用现有 LIGHT non-quarantine physical-action replay。
+当前 target step t 的合法行为历史只能包含：
+- 同 trajectory；
+- 同 actor；
+- i < t；
+- non-quarantine；
+不得把其他 actor 的 action 当当前 actor 的 past action。
+为每个 target 显式记录：
+- trajectory_id
+- actor
+- target_t
+- previous_same_actor_t
+- previous2_same_actor_t（若存在）
+- actor_history_depth
+- intervening_physical_rows
+- intervening_other_actor_rows
+- current source_O
+- current A*
+- previous same-actor A*
+区分：
+- CONTIGUOUS_SAME_ACTOR: 上一个 physical-action row 就是同 actor；
+- GAPPED_SAME_ACTOR: 存在 previous same-actor step，但中间有其他 actor physical actions。
+GAPPED 只能称 actor-local accumulated history，不得解释为单 action transition。
+2. 先做结构 eligibility audit
+报告至少：
+- target rows with history depth >=1 / >=2 / >=3 / >=4
+- actor-trajectory unit count
+- contiguous vs gapped counts
+- gap size distribution
+- source_O nonempty rate
+- source candidate-count distribution
+- A* in source candidate list
+- previous same-actor A* still in current source candidate list
+- raw previous-action == current-action rate
+- exact previous (source_O,A*) == current (source_O,A*) rate
+保留 lossless source，不做 dedup。
+冻结两个 analysis surfaces：
+- FULL actor-local view
+- NONTRIVIAL view：只在分析时排除 exact previous (O,A*) repeat
+如果合法 actor-local history 样本不足以形成至少数百个 trajectory/actor-disjoint evaluation targets，则给 HISTORY_ELIGIBILITY_NO_GO，停止，不训练任何 probe。
+3. 若结构 gate 足够，立即跑低阶 history probe
+条件：
+- L0 O_ONLY
+- L1 O + PREV_SAME_ACTOR_ACTION
+- L2 O + LAST2_SAME_ACTOR_HISTORY
+不得新造 LIGHT-specific action ontology，不得压成 RoomDemo ActionType。
+优先复用现有 canonical Replay feature/probe layer。若现有 frozen feature layer不兼容，登记 incompatibility 并停止；不要另造 LIGHTFeatureV2。
+当前 candidate_set_factual 仅允许作为：
+observed source candidate list / development scoring support
+不得称 A^O，不得由当前 A* 修补 candidate list。
+当前 A* 只能在 logits/candidate scores 形成之后 reveal 用于 loss。
+4. 必须有 trivial baselines
+至少：
+- uniform over current source candidate list
+- repeat-last-same-actor：若 previous A* 仍在 current source list，则预测 previous A*；否则使用预先冻结 fallback
+如果不需要新 action ontology即可实现，再加简单 first-order baseline；否则不新增。
+5. 指标
+主指标：
+- held-out NLL
+- paired ΔNLL / Δbits
+辅助：
+- MRR
+- top-1
+- candidate-count stratification
+- contiguous/gapped stratification
+- exact-repeat/nontrivial stratification
+统计单位按 trajectory/actor 聚类或 bootstrap，不能把 action row 当独立样本。
+6. 解释边界
+这一轮不是：
+- Paper-0 formal Experiment B
+- A^O validation
+- Theory-S validation
+- six-dimensional X training
+- psychological claim
+它只是决定 LIGHT 是否值得进入 persistent-representation comparison。
+只允许三类 verdict：
+1. HISTORY_SIGNAL_PRESENT
+   - nontrivial actor-local view 上 history 稳定改善 NLL；
+   - 下一步进入 generic/naive persistent compression benchmark，仍不直接 Theory-S。
+2. NO_CLEAR_ACTOR_LOCAL_HISTORY_SIGNAL
+   - history 在合法 nontrivial actor-local view 上没有稳定增量；
+   - 暂停 LIGHT persistent-S bridge，转 OPeRA routing。
+3. HISTORY_ELIGIBILITY_NO_GO
+   - actor-local有效样本/边界不足；
+   - 不训练 probe，转 OPeRA routing。
+7. 禁止
+本轮禁止：
+- Theory-S training
+- alpha/beta/b/W tuning
+- 新 X 字段
+- 修补 effort/recovery 缺失
+- LLM predictor
+- live semantic LLM
+- generated A^O 扩展
+- OPeRA candidate reconstruction
+- ClubFloyd Stage0d
+- 新数据集
+- 看结果后修改 history depth / repeat rule / split / target
+8. 文档同步
+实验完成后再同一 commit 更新：
+- TODO
+- 当前实现进度
+- Existing Dataset Pool Routing：明确 ClubFloyd Stage0c 已暂停
+- 修掉 T0d 仍写“先完成 routing v1”的旧待办
+不要单独做 docs-only commit。
+完成后 commit/push webgpt-sync 并停止，汇报：
+1. LIGHT 合法 actor-local history 实际规模；
+2. contiguous/gapped 分布；
+3. exact-repeat 是否严重；
+4. O-only vs prev vs last2 的 NLL/Δbits；
+5. nontrivial view 是否仍有 history increment；
+6. verdict；
+7. 是否进入 generic persistent compression，还是转 OPeRA。
+
+
+
+这次我认为主线非常稳：先验证“有东西值得压缩”，再研究“怎么压缩成 S”。 ClubFloyd 已经替我们交过一次学费，现在不要再反过来先修 Theory-S 再找适合它的数据。

@@ -17,6 +17,10 @@ $env:PYTHONPATH = Resolve-Path ..\..\outputs\opera_t0d_2026-09-06\python_package
 & "C:\Users\2003SINGER\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" .\long_trajectory_stats.py --raw-dir ..\..\outputs\opera_t0d_2026-09-06\raw --out ..\..\outputs\opera_t0d_2026-09-06\slice\long_trajectory_stats.json
 ```
 
-结果：[2026-09-06_准入审计结果.md](2026-09-06_准入审计结果.md)；机器可读 JSON 位于 Git 忽略的 `outputs/opera_t0d_2026-09-06/slice/long_trajectory_stats.json`。全量结果显示 69 条 session ≥20 actions，但 user-disjoint test 仅 10 条；因此当前不授权直接进入 Paper-0 pilot。
+结果：[2026-09-06_准入审计结果.md](2026-09-06_准入审计结果.md)；机器可读 JSON 位于 Git 忽略的 `outputs/opera_t0d_2026-09-06/slice/long_trajectory_stats.json`。全量结果显示 69 条 session ≥20 actions，但 user-disjoint test 仅 10 条；因此当前不授权直接进入 Paper-0 pilot。冻结协议见 [OPeRA pilot protocol v0](OPeRA_pilot_protocol_v0.md)，当前判定为 LIMITED-GO 的 coarse click-type auxiliary，而非 canonical candidate-set 主实验。
+
+Terra candidate spike 结果见 [terra_candidate_spike_v0.md](terra_candidate_spike_v0.md)。30 个 gold-blind steps 实际调用 `gpt-5.6-terra` 生成 157 个语义候选；严格 support recall 为 7/30（23.3%），17/30 仅有歧义支持，6/30 miss，因此 candidate reconstruction 当前 NO-GO，OPeRA 总体仍 LIMITED-GO。
+
+按预注册规则，v1 强制每个 step 只输出一个绑定具体 `target_source_index` 的候选；结果见 [terra_candidate_spike_v1_result.md](terra_candidate_spike_v1_result.md)。10/30（33.3%）是 single-target identity selection accuracy，不是 multi-candidate support recall。故 v1 single-target task 封口，但 `O_t → Ahat^O_t` 的 5–10 candidate route 仍 unresolved，不能把 v1 误写成 route-wide NO-GO。
 
 准入标准：可重放的 O（HTML/URL）、时间排序和 action ID 必须完整；session/user split 必须可冻结且不泄漏；必须能在不伪造候选集的情况下定义第一轮预测标签与 NLL。若 exact UI target 没有可枚举候选集，只能考虑 action-type/click-type 的受限协议，不能宣称和当前 `A^O` 等价。

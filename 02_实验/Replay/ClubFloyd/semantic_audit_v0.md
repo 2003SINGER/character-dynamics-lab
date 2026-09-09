@@ -1,5 +1,7 @@
 # ClubFloyd dev slice｜初步语义审计 v0
 
+> Superseded for admission semantics by [command admission definition v1](command_admission_definition_v1.md). This v0 report mixed observed-choice admission with world-legality/target evidence; do not use its `verified_action` wording as the current boundary.
+
 审计对象：全量 `clubfloyd_full.replay.jsonl`（425 条 trajectory / 438,188 steps）及 300 条 review fixture。这里是 adapter 的逐字段审计记录，不是机制实验结果。
 
 ## 结论

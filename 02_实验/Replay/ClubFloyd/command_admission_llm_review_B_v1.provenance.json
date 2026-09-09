@@ -1,0 +1,16 @@
+{
+  "review_file": "command_admission_llm_review_B_v1.jsonl",
+  "reviewer": "B",
+  "model": "gpt-5",
+  "session": "/root/llm_review_b",
+  "context_window_id": "01a080ea-ad3a-7142-b3c5-29550cf2d553",
+  "prompt": "Independently classify each frozen challenge record by asking only whether raw_action represents the player choosing or attempting an in-world behavior; emit audit_id, label, confidence, and one-sentence reason, without using future/post state.",
+  "input_file": "command_admission_llm_challenge_v1.jsonl",
+  "input_sha256": "82C048D15B3E9AA6F3F83CFAC3A23F0B68AD0E77F4BE7DD07E68AEB47629CCE2",
+  "definition_file": "command_admission_definition_v1.md",
+  "definition_sha256": "C20D6671BDFD722B38A2A63998AC7FDE1E9235F5FC5902915D619D521C41C765",
+  "output_sha256": "0F46A3AF66F30484B6585F46664D302AACE9E66347BE3564916DB53E09D31C01",
+  "record_count": 60,
+  "schema_normalization": "Deterministically mapped all pre-existing numeric confidence values (0.93-0.99) to the frozen categorical value high; labels and reasons were unchanged.",
+  "raw_artifact_output_sha256": "EF52F3A4FCCAC98F14AC2C506A6AE683AD34BF050DDFD26AE446A647D80297CA"
+}

@@ -1,0 +1,547 @@
+等等，但是我们的action不是世界给的吗，然后人物去选，所以A*是人物自发的，然后和世界的A取合法action吗
+
+对，你这个理解更接近我们原来真正想要的结构。我上一条把 ClubFloyd 的 \(A^*\) 说成“哪怕世界非法也算 action”，容易把行为尝试和世界执行动作混成一个东西。
+
+我们原本应该分三层：
+
+$$ A_t^W=\text{世界在真实状态 }W_t\text{ 下允许/可执行的动作集合} $$ $$ A_t^O=\text{人物根据自己的 }O_t\text{ 认为当前可以做的候选动作集合} $$
+
+然后人物自己选择：
+
+$$ A_t^* \sim \pi(S_t,O_t,P,A_t^O) $$
+
+最后把这个选择交给世界：
+
+$$ W_t \xrightarrow{A_t^*} W_{t+1} $$
+关键不是直接取交集
+
+不是简单：
+
+$$ A_t^*=A_t^O\cap A_t^W $$
+
+因为这样人物在选择前就等于知道了真实世界是否合法，会破坏我们很重要的 W/O 信息边界。
+
+更合理的是：
+
+W
+↓ 产生真实 affordance / legality
+A^W
+
+W
+↓ observation
+O
+↓ 人物理解/生成
+A^O
+↓ S,P 驱动选择
+A*
+↓
+交给 W 检查和结算
+
+于是可能出现两种情况。
+
+正常情况：
+
+$$ A^*\in A^O,\qquad A^*\in A^W $$
+
+人物想开门，门确实能开 → 世界执行成功。
+
+错误认知/失败尝试：
+
+$$ A^*\in A^O,\qquad A^*\notin A^W $$
+
+人物以为门没锁，所以选择开门；真实世界里门锁了 → 世界拒绝/失败。
+
+所以人物真正“自发”的东西是：
+
+$$ \boxed{A^*=\text{人物根据自己的候选空间实际选择的行为}} $$
+
+而 \(A^W\) 是：
+
+$$ \boxed{\text{世界负责判断它到底能不能执行}} $$
+
+这也解释了为什么我们以前 Demo 里专门保留了：
+
+未知余额时仍然允许人物尝试购买；
+隐藏故障时仍然允许人物尝试操作；
+W 在 settlement 阶段再拒绝。
+
+这个设计其实正是：
+
+$$ A^O \neq A^W $$
+那 ClubFloyd 现在该怎么理解？
+
+这里要重新小心一点。
+
+ClubFloyd 日志里的 [ACTION] 是玩家实际输入的 command。
+
+它首先对应的应该是：
+
+$$ \boxed{A_t^*} $$
+
+即“人物/玩家实际选择了什么”。
+
+但它不自动告诉我们：
+
+$$ A_t^O $$
+
+更不告诉我们完整：
+
+$$ A_t^W $$
+
+例如玩家输入：
+
+open door
+
+日志告诉我们：
+
+$$ A^*=\text{open door} $$
+
+接下来的游戏反馈可能告诉我们：
+
+门打开了 → 很可能 \(A^*\in A^W\)
+门锁着 → \(A^*\notin A^W\) 或需要额外前提
+parser 不懂 → 甚至可能只是 command surface 没映射成功
+
+所以 ClubFloyd 的 [ACTION] 应该保留为 observed chosen action \(A^*\)。
+
+我们不应该在 admission 阶段要求：
+
+“pre-state 必须证明它是世界合法动作。”
+
+这一点我上一条的结论仍然对。
+
+但原因不是“非法动作本身也是世界 action”，而是：
+
+它是人物真实作出的选择 \(A^*\)，世界是否合法属于下一层 \(A^W\) / settlement。
+
+这个区分非常重要。
+
+因此我们给 Luna 的指令最好稍微改一句：
+
+ClubFloyd admission 判定的是“这是不是玩家真实发出的 in-world behavioral choice \(A^*\)”；不是判它是否属于 \(A^W\)。成功/失败/非法性由随后世界反馈另行描述，不能用于反向决定这个选择是否算 \(A^*\)。
+
+这样就和我们整个架构完全对上了。
+
+shit！改
+
+对，上一版里把 “人物选择的 \(A^*\)” 和 “世界合法动作 \(A^W\)” 写混了。下面这版把定义彻底纠正回来，直接替换刚才给 Luna 的整段指令。
+
+现在不要继续做第三轮模型 reviewer，也不要扩大 ClubFloyd 审计层。
+
+先纠正并冻结一个关键概念：此前部分审计把“玩家是否作出了一个行为选择”与“这个行为在真实世界中是否合法/可执行”混在了一起。
+
+Character Dynamics / Paper-0 中必须严格区分：
+
+[
+A_t^W = \text{真实世界 }W_t\text{ 下客观合法/可执行的动作集合}
+]
+
+[
+\hat A_t^O = \text{人物依据自身 }O_t\text{ 形成/估计的主观候选动作集合}
+]
+
+[
+A_t^* = \text{人物实际从自身决策过程产生的 observed chosen action}
+]
+
+典型链条是：
+
+W → O → X → S → generated/estimated A^O → π → A* → W settlement → W'
+
+其中：
+
+A* 不要求事前属于 A^W；
+人物可能基于错误、滞后或不完整的 O 选择一个真实世界中不可执行的行为；
+世界只在 A* 已产生之后负责 legality / execution / rejection / consequence；
+因此不能利用 post-action world feedback 反过来决定这个 choice 是否算 A*。
+
+例如：
+
+人物认为门可开：
+
+open door ∈ A^O
+
+于是人物选择：
+
+A* = open door
+
+但真实 W 中门被锁：
+
+open door ∉ A^W
+
+世界随后拒绝。
+
+这里 open door 仍然是合法的 observed chosen action A*，只是 world execution failed。
+
+1. 冻结 ClubFloyd 的 source A* 定义
+
+新建：
+
+02_实验/Replay/ClubFloyd/command_admission_definition_v1.md
+
+明确：
+
+ClubFloyd [ACTION] 在 Stage A 中只有在能够解释为玩家真实发出的游戏内行为选择时，才准入：
+
+source_action_A_star
+
+这里判定的是：
+
+Is this an observed in-world player choice/command?
+
+而不是：
+
+Is this command objectively legal in W?
+
+也不是：
+
+Does the current pre-action state prove that its target exists / is reachable / is executable?
+
+2. Final admission labels
+
+冻结四类：
+
+IN_WORLD_CHOICE
+META_COMMAND
+CHAT_OR_COMMENTARY
+UNRESOLVED
+IN_WORLD_CHOICE
+
+只要 raw [ACTION] 明确表达玩家在游戏内试图采取的行为，就属于 A*。
+
+包括：
+
+successful commands；
+failed commands；
+world-rejected commands；
+target 实际不存在/不可达的尝试；
+mistaken-belief actions；
+parser rejected 但行为意图明确的输入；
+shorthand navigation：
+north
+south
+down
+out
+object interaction：
+open door
+take lamp
+shoot dizzy
+speech / social action：
+say sorry
+ask bartender about key
+游戏自定义 verb / spell / invented command，只要 raw action + legal pre-action context 足以判断它确实是玩家在游戏里采取的行为选择。
+
+注意：
+
+“游戏随后说 I don't understand / You can't do that / You can't go that way” 不得导致该 action 被剔除。
+
+那属于：
+
+A* → W settlement/result
+
+而不是 A* admission。
+
+META_COMMAND
+
+只包括明确操作游戏系统而非游戏世界的输入，例如：
+
+save
+restore
+restart
+quit
+transcript
+debug
+credits
+walkthrough
+hint
+
+具体边界需在文档中冻结。
+
+CHAT_OR_COMMENTARY
+
+玩家对其他真人、日志、观众或游戏本身进行评论，而不是控制游戏角色/世界的文本。
+
+例如明显的：
+
+“thanks, never managed to finish this game”
+对 walkthrough / parser / 游戏设计的吐槽
+非角色行为的自由讨论
+
+注意：
+
+角色在世界内说话仍然可以是 IN_WORLD_CHOICE。
+
+因此不能因为 action 是自然语言就自动判 commentary。
+
+UNRESOLVED
+
+只有在 raw action + prediction-time legal context 下，无法稳定判断它究竟是：
+
+游戏内 choice
+meta command
+commentary
+
+时才使用。
+
+不要把“世界合法性不确定”写成 UNRESOLVED。
+
+3. 纠正已有两轮 review 的解释
+
+现有：
+
+command_admission_audit_semantic_v0.jsonl
+
+和所谓：
+
+command_admission_audit_gold_independent_v0.jsonl
+
+都不是正式人工 gold。
+
+第二个文件尤其不能继续叫 gold。
+
+保留 provenance，但改名或显式 deprecated 为：
+
+command_admission_review_independent_v0.jsonl
+
+并在 README 中写：
+
+model-assisted independent review; not human gold
+
+此前两轮 34.60% agreement 的主要意义是：
+
+reviewer 对 admission question 的理解并不一致。
+
+不要把它解释成“ClubFloyd source action 本身只有低一致性”。
+
+4. 不做第三轮模型 reviewer
+
+不要让 Terra/Codex 再完整标一次 289 条。
+
+下一步是小规模人工 adjudication，用来确认新的 A* 定义是否可稳定执行。
+
+从两轮分歧中 deterministic 抽 50–80 条，重点覆盖：
+
+reviewer1 ambiguous → reviewer2 valid
+reviewer1 meta → reviewer2 valid
+reviewer1 chat → reviewer2 valid
+mechanical command-like 中两轮冲突
+failed attempt
+parser rejection
+shorthand direction
+custom verb / spell
+speech/social action
+target 当前 state 未明确出现的 command
+
+生成：
+
+command_admission_human_adjudication_v1.jsonl
+
+如果需要用户本人实际标注，则生成 review sheet：
+
+audit_id
+raw_action
+pre_action_state
+reviewer1
+reviewer2
+final_label 留空
+note 留空
+
+不要自动填写人工 final_label。
+
+5. 人工 adjudication 问题必须固定
+
+人工标注者每条只回答：
+
+“这条 [ACTION] 是否代表玩家在游戏内实际选择/尝试了一个行为？”
+
+不要问：
+
+“这个行为在真实世界状态下是否合法？”
+
+不要问：
+
+“游戏是否成功执行了它？”
+
+不要要求：
+
+“pre-state 是否明确证明 target 存在。”
+
+如果选择本身清楚，即使世界后来拒绝：
+
+→ IN_WORLD_CHOICE
+
+6. World legality 保持为独立层
+
+如果 ClubFloyd 后续能够从 post-action feedback 推断 execution result，可以另行构造：
+
+success
+rejected
+parser failure
+unknown outcome
+
+但这必须属于：
+
+A* → W outcome
+
+不能参与当前 A* admission。
+
+更不能利用 next state / post state 帮助 prediction-time model。
+
+当前 Stage A 不要求恢复完整 A^W。
+
+7. A^O 也不要和 A* 混
+
+ClubFloyd source 只直接给：
+
+observed A*
+
+它不直接给：
+
+A^O
+
+也不直接给：
+
+A^W
+
+后续如果需要 candidate-set experiment：
+
+[
+\hat A_t^O = G(O_t,H_{<t})
+]
+
+必须作为一个独立、冻结、gold-blind 的 generation layer。
+
+当前 Stage A 不需要先解决 finite A^O。
+
+8. evaluator v1 保持冻结
+
+现有 command_evaluation_v1：
+
+raw exact
+normalized exact
+verb exact
+target exact
+modifier exact
+conservative semantic signature
+
+保持不动。
+
+不要继续为了提高模型分数增加 alias / semantic rules。
+
+当前 blocker 是 admission definition，不是 evaluator。
+
+9. Gate
+
+这次小规模人工 adjudication 后，不再继续产生 FIX_ONE_BLOCKER_v2/v3/...。
+
+只允许：
+
+GO_TO_REPRESENTATION_BASELINE
+
+如果：
+
+A* 定义已冻结；
+人工标注者按该定义可以稳定判定；
+source [ACTION] 中存在规模足够的 IN_WORLD_CHOICE subset；
+history boundary / trajectory split / future leakage 继续通过；
+evaluator 已冻结。
+
+注意：
+
+不要求 A 属于 A^W。*
+
+不要求 source 提供 A^O。
+
+不要求 candidate set。
+
+NO_GO_CLUBFLOYD_STAGE_A
+
+只有当：
+
+大量 [ACTION] 连“是不是玩家游戏内 choice”都无法判断；
+transcript 的 player/system boundary 本质上不可靠；
+usable A* subset 极小；
+或存在无法解决的 future/source provenance 问题
+
+时才 NO-GO。
+
+10. AGAIN
+
+AGAIN dynamics audit 已完成并封口：
+
+short-term proxy persistence stable；
+event-driven relaxation unstable；
+不升级为 Theory-S evidence；
+不继续设计新 event/tau；
+不训练 alpha/beta/b/W。
+
+更新状态为 completed development audit。
+
+11. 文档同步
+
+更新：
+
+CLUBFLOYD：当前唯一动作 = freeze corrected A* definition + small human adjudication
+AGAIN-DYN：completed
+POOL：routing/protocol 已完成
+T0d：不要再写“先完成 routing v1”
+
+并检查所有 active docs：
+
+不得继续把：
+
+source_action_A_star
+
+写成：
+
+objectively legal world action
+
+也不得把：
+
+A^O
+
+写成：
+
+source available_actions
+
+保持三者：
+
+A^W / A^O / A*
+
+严格分离。
+
+12. 禁止
+
+本轮禁止：
+
+第三轮模型全量 review
+新数据集
+OPeRA v2
+LIGHT annotation
+candidate-set reconstruction
+Theory-S v2.x
+alpha/beta/b/W training
+根据 post-state 判断 A* 是否存在
+因 failed/illegal execution 排除 observed A*
+为了得到 GO 而放宽/收紧定义
+
+完成后 commit + push webgpt-sync，然后停止。
+
+最终汇报只给：
+
+frozen A^W / A^O / A* definition；
+human adjudication sample size；
+human adjudication 结果；
+estimated usable IN_WORLD_CHOICE subset；
+最终 gate；
+下一步一句话。
+
+这版的核心修正就是：
+
+$$ \boxed{A^*=\text{人物实际选择}} $$
+
+而
+
+$$ \boxed{A^W=\text{世界真实合法动作}} $$
+
+两者绝不能在 admission 阶段取交集。

@@ -1,0 +1,28 @@
+{
+  "schema_version": "clubfloyd_stage0b_low_order_probe_v0",
+  "runner_commit": "017b9669af76b271328ed8b968ad06c9b80b7178",
+  "runner_sha256": "78b2bae43543dd704ec5d50da7210a2f9e47cd8e37f5606967a2f87cda733de7",
+  "fixture_sha256": "0d26fb0a2e716b10483f483faa19bdd1747c6a901d42d670fdf165ce8c3ea6ff",
+  "train_rows": 1394,
+  "test_rows": 194,
+  "seed": 20260908,
+  "O_DIM": 64,
+  "epochs": 4,
+  "conditions": {
+    "O_ONLY": {
+      "accuracy": 0.29896907216494845,
+      "macro_f1": 0.02491350177019633,
+      "feature_dim": 64
+    },
+    "O_PLUS_PREV_VERB": {
+      "accuracy": 0.28350515463917525,
+      "macro_f1": 0.033925578430630744,
+      "feature_dim": 91
+    },
+    "O_PLUS_LAST2_VERB_HISTORY": {
+      "accuracy": 0.28865979381443296,
+      "macro_f1": 0.04045070782875661,
+      "feature_dim": 118
+    }
+  }
+}

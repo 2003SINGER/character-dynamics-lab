@@ -26,6 +26,16 @@ py -3 tools/validate_replay_record.py outputs/external_assets_2026-09-06/ClubFlo
 
 这只是结构切片，不是语义准入或机制实验。下一步是逐条审计 W/O/X/S 归属、动作语义损失和 future leakage；审核前不得扩大批量或进入 mechanism loop。
 
+Stage-A source-command 入口已冻结于 [source-command protocol v0](source_command_protocol_v0.md)。当前 30-trajectory smoke 仅验证 `verified_command_like_v0`、canonical `verb/target/modifier`、trajectory-disjoint split 与 future-boundary；尚未开始模型训练或 Theory-S representation comparison。
+
+## Corrected action boundary (v1)
+
+Read [command admission definition v1](command_admission_definition_v1.md) before using any Stage-A action. ClubFloyd `[ACTION]` is observed chosen action `A*`, not an objectively legal world action `A^W`, and not the character's subjective candidate set `A^O`. Failed, rejected, mistaken-belief, unreachable-target, and parser-rejected in-world attempts remain `A*` when the player's in-world choice is clear. World settlement/outcome is a separate later layer.
+
+`command_admission_audit_semantic_v0.jsonl` and `command_admission_review_independent_v0.jsonl` are historical model-assisted review provenance, not human gold. The corrected 60-row challenge set was independently reviewed by three fresh LLM sessions and aggregated under [the frozen rule](llm_adjudication_aggregation_rule_v1.md): 51 `MODEL_CONSENSUS`, 9 `MODEL_MAJORITY`, 0 human-required. These are frozen multi-LLM adjudicated development labels, not human gold.
+
+The first v0 canary is retained but marked `STAGE0_V0_INCONCLUSIVE_PROBE_SANITY_FAILED`; its former `NO_CLEAR_HISTORY_SIGNAL` interpretation is invalidated. Stage 0b passes the low-order probe sanity check, but [duplicate sensitivity](stage0b_duplicate_sensitivity.md) and the frozen [Stage 0c non-duplicate view](stage0c_nonduplicate_protocol.md) show no positive history increment for the current verb-family estimand after exact pair repeats are excluded. This establishes a repaired measurement interface, not a Theory-S result; the ClubFloyd persistent-compression bridge is paused.
+
 全量抽取与分层 review slice：
 
 ```powershell
