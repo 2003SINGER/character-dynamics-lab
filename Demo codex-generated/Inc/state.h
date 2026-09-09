@@ -3,6 +3,7 @@
 #include "appraisal.h"
 #include "personality.h"
 #include "state_types.h"
+#include "parameter_config.h"
 
 #include <string>
 
@@ -33,7 +34,8 @@ struct StateUpdate {
 StateUpdate update_state(CharacterState& state,
                          const Appraisal& appraisal,
                          const Personality& personality,
-                         int elapsed_minutes);
+                         int elapsed_minutes,
+                         const ParameterConfig& config = ParameterConfig::defaults());
 std::string state_summary(const CharacterState& state);
 std::string state_delta_summary(const StateDelta& delta);
 std::string state_update_summary(const StateUpdate& update);
