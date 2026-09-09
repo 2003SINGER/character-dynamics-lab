@@ -132,11 +132,12 @@ def main():
         groups = {'full': vg, 'nontrivial': {k: v for k, v in vg.items() if not v[0]['exact_previous_pair']}, 'contiguous': {k: v for k, v in vg.items() if v[0]['history_surface'] == 'CONTIGUOUS_SAME_ACTOR'}, 'gapped': {k: v for k, v in vg.items() if v[0]['history_surface'] == 'GAPPED_SAME_ACTOR'}}
         for view_name, predicate in {'depth_1': lambda d: d == 1, 'depth_ge_2': lambda d: d >= 2, 'depth_ge_3': lambda d: d >= 3, 'depth_ge_4': lambda d: d >= 4}.items():
             groups[view_name] = {k: v for k, v in vg.items() if predicate(v[0]['actor_history_depth'])}
+            groups[f'nontrivial_{view_name}'] = {k: v for k, v in groups[view_name].items() if not v[0]['exact_previous_pair']}
         result['conditions'][name] = {}; saved[name] = {}
         for view, subset in groups.items():
             eval_rows = [dict(v[0], features=[x[feature_key].tolist() for x in v[0]['features']]) for v in subset.values()]
             ev = evaluate(model, {r['target_id']: [r] for r in eval_rows}); saved[name][view] = ev.pop('_units'); result['conditions'][name][view] = ev
-    for view in ('full', 'nontrivial', 'contiguous', 'gapped', 'depth_1', 'depth_ge_2', 'depth_ge_3', 'depth_ge_4'):
+    for view in ('full', 'nontrivial', 'contiguous', 'gapped', 'depth_1', 'depth_ge_2', 'depth_ge_3', 'depth_ge_4', 'nontrivial_depth_1', 'nontrivial_depth_ge_2', 'nontrivial_depth_ge_3', 'nontrivial_depth_ge_4'):
         result['paired_unit_bootstrap_delta_nll'][view] = {'persistent_vs_raw_prev': delta_boot(saved['raw_prev'][view], saved['persistent_mean'][view]), 'persistent_permuted_vs_persistent': delta_boot(saved['persistent_mean'][view], saved['persistent_permuted'][view]), 'raw_last2_vs_raw_prev': delta_boot(saved['raw_prev'][view], saved['raw_last2'][view])}
     a.out.parent.mkdir(parents=True, exist_ok=True); a.out.write_text(json.dumps(result, ensure_ascii=False, indent=2, default=lambda x: x.tolist() if hasattr(x, 'tolist') else x) + '\n', encoding='utf-8'); print(json.dumps(result, ensure_ascii=False, indent=2))
 
