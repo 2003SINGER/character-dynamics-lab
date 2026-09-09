@@ -6,7 +6,9 @@
     "deadline_hidden_discovery_nonzero_policy": true,
     "commitment_active_setup": true,
     "commitment_suspended": true,
-    "commitment_resumed_active": true
+    "commitment_resumed_active": true,
+    "commitment_completion_observable_closes": true,
+    "commitment_completion_hidden_preserved": true
   },
   "mechanism_metrics": {
     "deadline": {
@@ -60,5 +62,10 @@
     "model_calls": 0,
     "decision_count": 288,
     "calls_per_decision": 0.0
+  },
+  "provenance": {
+    "source_revision": "a3a4488",
+    "deadline_csv": "outputs\\paired_deadline_v0\\paired_deadline.csv",
+    "commitment_csv": "outputs\\paired_commitment_recovery_v0\\trace.csv"
   }
 }
