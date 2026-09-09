@@ -2,7 +2,7 @@
 
 运行对象：RoomDemo C++ reference batch；32 personalities × 8 world seeds × 256 decision points = 65,536 trajectory rows / 256 runs。
 
-结果 JSON：`outputs/self_evaluation_v0/self_evaluation_scorecard_v0.json`（本地生成物；原始 batch 保存在同目录）。
+结果 JSON：`outputs/self_evaluation_v0_r4/self_evaluation_scorecard_v0.json`（本地生成物；原始 batch 保存在同目录）。该 batch provenance 锁定为 C++ revision `fa21052`。
 
 ## Score vector
 
