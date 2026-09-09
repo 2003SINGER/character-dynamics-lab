@@ -1,4 +1,5 @@
 #include "candidate_scoring.h"
+#include "state.h"
 
 #include <cmath>
 #include <iostream>

@@ -1,0 +1,633 @@
+很难搞啊，你每次都这么说。。但是最后都不行。。。你先看看整体我们的项目有无问题啊
+
+
+
+
+
+
+
+
+
+
+
+
+
+思考了 2m 26s
+
+对，这次我不再说“再补最后一刀就行”。我把整个仓库从母问题、Theory-S、数据路由、实验链和架构重新串了一遍。项目现在确实存在结构性问题。
+而且你这种“怎么每次都说快行了，然后又发现不行”的感觉是对的。之前我犯的一个问题，就是每次发现局部测量缺陷后，把它当成“局部 bug”，修完就觉得重新接近终点；但连续几轮下来已经说明：不是某一个 runner 写错了，而是当前科学问题、数据和实验工具没有完全对齐。
+先说最重要的结论
+我不认为 Character Dynamics 这个想法走偏了。
+我认为真正值得做的核心问题依然成立：
+一个角色经历过的东西，能不能被压成一个持续状态；这个状态是否真的保留了对未来行为有用的信息？
+
+这个问题非常干净，也确实能做科研。
+但我们现在的 Paper-0 设计过重了。它同时要求：
+1. W/O information boundary 成立；
+2. S 相对完整 Hobs 近似充分；
+3. S permutation 后预测显著下降；
+4. 还有独立 A*；
+5. 还有合法 actor-local O；
+6. 还有 finite A^O；
+7. 最后还希望接 Theory-S 的 X→S dynamics。
+这实际上不是一个简单实验，而是把数据集、世界模型、信息权限、历史压缩、状态动力学、动作空间六个难题绑在了一起。
+一旦任何一个环节的数据不完美，整个链就开始补洞。
+这正是最近发生的事。
+仓库自己其实已经把矛盾写出来了
+Paper-0问题卡.md 要的是：
+\[
+p(A|S,O,P)\approx p(A|H^{obs},O,P)
+\]这是一个很强的 approximate sufficiency 主张。
+但我们目前真正做的 LIGHT 比较是：
+current 13D
+current × previous-action 13D
+current × cumulative-mean-history 13D
+这当然是一个合理的 representation diagnostic。
+但它不是：
+完整 Hobs
+vs
+S
+所以我们现在其实距离 Paper-0 问题卡里写的“近似充分性”还挺远。
+仓库现在写：
+COMPARATIVE_SUFFICIENCY_INCONCLUSIVE
+
+这个判断是对的。
+更直接一点：
+我们花了很多力气证明了一个比 Paper-0 母问题弱很多的中间命题。
+
+这不是无用功，但确实说明实验路线设计得太长了。
+第二个大问题：LIGHT 天生不是验证 persistent dynamics 的理想数据
+LIGHT 不是坏数据。
+实际上它帮我们解决了很多东西：
+- 真人行为 A*
+- 有 observation
+- 有 candidate list
+- 可以 actor-local
+- 可以 trajectory split
+但它有一个致命的结构特点：
+actor-local history depth ≥1 : 13,463
+depth ≥2                     : 6,594
+depth ≥3                     : 2,871
+depth ≥4                     : 1,067
+到我们的 test：
+depth ≥2 : 665 rows
+depth ≥3 : 285
+depth ≥4 : 97
+也就是说我们想研究的是：
+persistent state
+
+结果数据大量只有：
+“这个角色刚刚做过一两次动作”。
+
+这就很别扭。
+而且之前审计已经发现：
+62.2% 相邻 physical actions 是跨 actor 的。
+
+所以 LIGHT 很适合：
+“短 actor-local history 有没有行为信息？”
+
+却不太适合：
+“一个长期持续状态有没有逐渐积累、衰减、恢复和保留行为后果？”
+
+这是数据和科学问题之间的结构错配，不是 runner 再写严谨一点能解决的。
+第三个问题更严重：LIGHT 根本不足以识别 Theory-S
+Theory_S_v2/README.md 自己写得其实很诚实：
+fatigue / engagement / tension 是 candidate project definitions，predictive validity unverified。
+
+六维 X：
+compatibility input schema，不是 canonical psychological model。
+
+而 D01 已经查出来：
+- effort_load：source 不提供；
+- recovery_cue：source 不提供；
+- 其他 X 很多需要 semantic annotation。
+所以如果现在坚持：
+LIGHT
+→ X
+→ fatigue / engagement / tension
+→ Theory-S
+→ next action
+必然有两种结果：
+要么我们大量用 LLM/人工构造 X；
+要么把缺失 source information 当 proxy。
+然后最后很难回答：
+是 Theory-S 在工作，还是 annotation 在工作？
+
+这不是一个小问题。
+因此仓库 TODO 现在禁止直接进入 Theory-S，其实非常合理。
+第四个问题：我们的“系统”比“实验”成熟得太多
+这点仓库 9 月 5 日那份自审其实已经说中过。
+我们已经有：
+- W
+- O
+- X
+- S
+- P
+- D
+- Scene
+- Object
+- affordance
+- commitment
+- InformationAccess
+- Replay
+- provenance
+- C++ runtime
+- Python Theory-S
+- candidate generation
+- adapters
+- permutation controls
+- 一堆 validators
+整个系统架构已经相当复杂。
+但真正独立行为数据上的强结论，到现在仍然主要是：
+LIGHT 上存在一个非常小的 actor-local history signal。
+
+这是明显的：
+模型/工程成熟度 > 科学证据成熟度。
+
+所以我们很容易产生一种错觉：
+“系统都这么完整了，只差证明一下。”
+实际上不是。
+科学上目前才刚刚走到：
+“历史里似乎真的有一点值得保存的信息。”
+
+第五个问题：我们一直在“边看结果边完善测量仪器”
+这个才是你最近最烦的根源。
+过程大概是：
+ClubFloyd history 没信号
+↓
+发现 hash instrument 不对
+
+换低阶 history
+↓
+发现 duplicate shortcut
+
+去 duplicate
+↓
+没信号
+
+换 LIGHT
+↓
+发现 cross-actor history 不合法
+
+actor-local
+↓
+发现 equality-bit 不是真 history
+
+H0b
+↓
+发现 previous2 O 错
+
+compression
+↓
+发现 state seed 错
+
+修 seed
+↓
+发现 permutation 错
+
+修 permutation
+↓
+发现 depth=1 根本没有 compression
+
+depth stratify
+↓
+现在又发现 depth 表被写成 nontrivial，其实没 intersect
+单独看，每次修正都合理。
+但整体看，这就是警告信号：
+我们并没有在执行一个冻结的实验协议，而是在逐渐发现“我们究竟该测什么”。
+
+这在 development 阶段不是科研违规，但意味着：
+这些结果不能再被当成一个不断接近正式结论的连续统计证据链。
+
+它们更应该被视为：
+protocol development history。
+
+这一点必须心理上彻底接受。
+否则每修一刀我们都会期待“这回成了”，然后下一刀再失望。
+所以整体项目到底该不该继续？
+我的判断是：
+部分	判断
+“经历留下持续后果 → 影响未来行为”这个母问题	继续，值得做
+W/O/X/S/P 作为长期系统架构	保留，但降级为研究基础设施
+LIGHT actor-local history 线	有价值，但只能当 representation development benchmark
+cumulative-mean naive-S	有价值的 control，不值得继续调
+Theory-S v2	保留候选机制，现在不要训练
+LIGHT 上完整 Theory-S 验证	当前条件下不应该做
+Paper-0 现在三个 claim 一口气全部证明	我认为需要重构
+继续 H0/H0b/H0c/H0d 无限补测量	停止
+
+
+最重要的是最后一条。
+我现在不建议再让 Luna 修刚才那个 nontrivial × depth≥2。
+它当然可以修，代码也就几行。
+但你刚刚问“为什么每次都有下一刀”，那正确反应就不是再给你安排下一刀。
+这个 intersection 问题我们已经知道了。把当前数字降级成 development diagnostic 即可，不需要继续追一份更漂亮的数字。
+我认为我们应该做一次真正的项目重置
+不是推倒重来。
+而是把科研主线和完整 Character Dynamics 系统愿景分开。
+我现在更愿意把 Paper-0 收缩成：
+在局部可观测的行为序列中，是否存在当前观察之外的行为相关历史信息；一个固定容量的持续表示能否保留这种信息，并且这种信息依赖正确的时间/人物对齐？
+
+注意这里暂时没有：
+- fatigue；
+- engagement；
+- tension；
+- 六维 X；
+- 心理学正确性；
+- 完整 A^O；
+- W/O/X/S/P 整套贡献。
+这就是一个非常朴素的 persistent representation 问题。
+而 Character Dynamics 的完整东西：
+W → O → X → S → action
+继续作为之后要回答的：
+这个 persistent representation 应该怎样具有语义、怎样更新、怎样用于 NPC。
+
+这样两个层次就不会互相卡死。
+更关键的是：我们得接受一个可能
+现有数据池可能根本没有一个数据集适合完整 Paper-0。
+这其实没有什么可耻的。
+ClubFloyd：
+长 history 很好，但 open-text action / candidate surface 太差。
+
+LIGHT：
+candidate/action 很好，但 actor-local history 太短，而且 X 不够。
+
+OPeRA：
+真人长序列更好一点，但 candidate reconstruction 很麻烦。
+
+AGAIN：
+dynamics 很好，但没有独立 next-action A*。
+
+这不是我们能力差。
+这是因为我们想同时要：
+长轨迹 + 真人行为 + 局部观察 + finite candidate set + actor-local + independent A* + semantic state cues
+
+这种数据本来就罕见。
+真正危险的是因为舍不得已经下载的数据，就不断改问题去适配它。
+这个我认为现在必须停。
+所以现在我对项目的评价
+如果继续按最近这种路径：
+“跑一个 gate → 发现定义问题 → 补一个 gate → 再发现控制问题”
+
+我认为项目会继续陷进去。
+不是因为研究问题不行，而是因为实验对象不够适配母问题，导致我们不停修观测仪器。
+但如果现在把路线重排：
+先确定一个真正最小、能被现有/可获得数据明确回答的科学命题，再让 W/O/X/S/P 服务它，而不是要求所有模块同时被验证，
+
+这个项目我认为仍然非常有生命力。
+而且我们其实已经得到一个很重要的教训：
+真正困难的不是设计一个漂亮 S，而是建立一个能证明 S 有必要存在的识别问题。
+
+这反而就是研究。
+只是我们现在需要从“继续施工”切换到“重新决定这篇论文到底证明什么”。
+我建议现在停止 Luna 改代码。下一步不是实验，而是我们俩把整个项目重新画成一张：母问题 → 最小 claim → 所需观测 → 现有数据能不能提供 → 提供不了就换数据/换 claim 的决策图。然后只留一条真正能走通的主线。
+
+
+
+
+  来源
+
+
+
+
+
+对的啊！我们要做的是一个很大的系统构想啊。难道不应该是全新的npc驱动框架的创作吗我们把npc行为弄出来，打分、优化，让它更自然，需要的算力更小？你再看看新仓库？要不直接开始自己跑自己定评分。把科研主线和完整 Character Dynamics 系统愿景分  是对的啊
+
+
+
+
+
+
+
+
+
+
+
+
+
+思考了 4m 20s
+
+对。现在我觉得我们终于把“项目”和“论文”这两个层级摆正了。
+Character Dynamics 本体应该是一个 NPC 驱动框架/运行时，而不是为了 Paper-0 存在的一组实验代码。 Paper-0、Paper-1……应该是从这个系统里抽出来验证某个机制的科研支线。
+最新仓库我也重新看了，HEAD 已经到 60400ac close compression with nontrivial depth intersection。LIGHT 这条线现在完全可以封口：排除 exact-repeat 后，depth≥2 的 aligned persistent state 确实优于 permuted state，但与 raw-prev 的比较仍不确定。这个结果已经完成它作为 research diagnostic 的使命，不该再吞项目注意力。
+现在仓库真正需要纠偏的是“总叙事”
+当前仓库其实还没完成我们刚才说的分离。
+README.md 第一行还是：
+在受限信息下，持续更新的角色状态能否保留历史中对未来行为有用的后果……
+
+项目现状速览 也还是把 held-out NLL / Paper-0 当整个项目的中心。
+这其实应该降一级。
+我现在会把项目重新定义成：
+Character Dynamics：一个面向可持续运行 NPC 的角色动力学框架。NPC 不在每一步重新读取完整历史并由大模型“猜下一步”，而是在一个可结算世界中维护自己的局部认知、结构化解释、持续状态和行动倾向；开放语义只在必要时调用模型，常规状态维护与行动可以由廉价、可控的模块持续运行。
+
+这才是你一开始真正想做的东西。
+而且这里有个很漂亮的系统目标：
+\[
+\boxed{\text{更自然的长期行为}}
+\]同时：
+\[
+\boxed{\text{更少的模型调用 / token / latency / VRAM}}
+\]这两件事是可以一起优化的。
+但“全新 NPC 框架”的新不能靠几个组件
+这点还是得卡住。
+现在公开系统已经很强了。
+Generative Agents 已经是：
+完整经历记录 → memory retrieval → reflection → planning → behavior。Google Research
+
+Inworld 已经有 NPC 的 memory、goals、actions、long-term memory，甚至支持运行时 character mutation。LinkedIn
+NVIDIA ACE 更不能忽略：现在已经有 C/C++ Game Agent SDK，做实时 game-state 接入、agent loop、RAG，并且直接强调 小模型、on-device、低延迟、与图形同时推理。NVIDIA 开发者
+所以：
+“NPC 有记忆 + 有情绪 + 会行动 + 用小模型”
+
+肯定不能作为我们的区别。
+我们真正可能不同的地方是整个计算职责
+我们的系统是：
+                  ┌──────────────┐
+                  │      W       │
+                  │ 权威游戏世界 │
+                  └──────┬───────┘
+                         │
+                   perception
+                         ↓
+                 ┌────────────┐
+                 │     O      │
+                 │ NPC知道什么│
+                 └─────┬──────┘
+                       │ ΔO
+                       ↓
+             ┌──────────────────┐
+             │ X / Appraisal    │ ← LLM可在这里稀疏调用
+             │ 这件事意味着什么 │
+             └────────┬─────────┘
+                      ↓
+             ┌─────────────────┐
+             │ persistent S    │
+             │ 经历留下的后果  │
+             └────────┬────────┘
+                      ↓
+           cheap decision / policy
+                      ↓
+                    π(A)
+                      ↓
+                 world settle
+                      ↓
+                      W'
+关键不是每个 box 新。
+关键是：
+LLM 不再拥有整个 NPC。
+
+LLM 可以只是：
+开放世界变化 → 有限、结构化角色语义
+
+的编译器。
+然后持续状态、恢复、承诺、候选动作、policy、world settlement 都可以是本地廉价模块。
+这才有可能真正省算力。
+而且你说的“自己跑、自己评分、自己优化”——我现在非常赞成
+作为系统开发主线，我们根本不用等真人 dataset。
+因为现在 C++ Demo 已经能：
+- 自动跑；
+- 一次 batch 65,536 decision points；
+- 输出 W/O/X/S/D/π(A)/action/outcome；
+- 有固定 seed；
+- 有 personality；
+- 有世界事件；
+- 有信息权限；
+- 有 typed world settlement。
+换句话说：
+我们现在已经有一个 NPC 动力学 simulator。
+
+欠的不是 simulator。
+欠的是：
+Evaluator
+然后才是：
+Optimizer
+所以整个项目实际上可以变成三个大块：
+Character Dynamics Engine
+         ↓
+    NPC trajectories
+         ↓
+Character Dynamics Evaluator
+         ↓
+ multi-dimensional scores
+         ↓
+Character Dynamics Optimizer
+         ↓
+ update mechanism/config
+         ↺
+这个结构我觉得比我们最近折腾 LIGHT 健康太多了。
+评分不要一上来压成一个“自然度 87 分”
+这会很危险。
+先保留一个多维 score vector。
+例如第一版完全可以这么测：
+维度	测什么
+World Validity	有没有非法动作/世界状态矛盾
+Information Integrity	NPC 有没有知道自己不该知道的东西
+Causal Responsiveness	世界变化后行为是否真的有变化
+Persistence	事件影响是否能持续若干决策
+Recovery	原因消失后是否合理恢复
+Commitment	是否不会每一步毫无理由换目标
+Adaptivity	新证据来后又能改变，而不是死犟
+Character Differentiation	不同 P 是否产生稳定但非模板化差异
+Behavioral Diversity	是否不是一条动作循环
+Believability	blind LLM judge / 人类觉得自然不自然
+Efficiency	model calls / tokens / latency / GPU time
+
+
+其中前三项甚至大量可以程序自动算。
+“自然”这种东西再交给 judge。
+这很重要，因为现有 role-playing evaluation 也已经说明不能只看一个“像不像角色”：CharacterEval 就是四个维度、13 个细指标；EmoCharacter 又专门把 emotional fidelity 单独拉出来。ACL 会议文集
+我们可以借这种思想，但把评价对象从：
+对话文本
+
+变成：
+世界中的行为轨迹。
+
+这就和我们的系统很搭。
+更牛逼的是：我们可以直接做反事实 scenario
+这甚至比找 dataset 更适合系统开发。
+比如同一个 NPC，完全相同初态：
+Scenario A
+玩家没动手机。
+Scenario B
+玩家偷偷拿走手机，NPC 没看见。
+Scenario C
+玩家当 NPC 面拿走手机。
+然后系统应该表现出：
+B：
+W 已改变
+O 还不知道
+→ 行为暂时不变
+
+后来 NPC 看手机位置
+→ O 改变
+→ X 更新
+→ S 改变
+→ 行为逐渐改变
+而：
+C：
+立即观察
+→ 立即产生相应反应
+这个评分甚至完全不需要“唯一正确动作”。
+我们可以测：
+\[
+D_{KL}(\pi_B,\pi_A)
+\]在未发现前应该很小；
+发现以后应该变大。
+这就是行为反事实评分。
+这种东西非常适合 Character Dynamics。
+“自己评分然后优化”也可以真的做优化
+比如我们先只调：
+state update parameters
+decision weights
+thresholds
+decay / recovery constants
+都不用神经网络。
+跑：
+100 scenarios
+× 20 random seeds
+× candidate parameter configurations
+然后寻找：
+自然性更高 + 约束不破坏 + cost 更低
+
+的 Pareto frontier。
+甚至不用 gradient。
+直接：
+- random search；
+- Bayesian optimization；
+- CMA-ES；
+都可以。
+以后有可微模块再 gradient。
+但这里有一条必须守
+“自己评分”可以拿来开发。
+不能变成：
+我们自己定义一个分数 → 优化它 → 最后宣布我们这个系统分最高，所以自然。
+
+那肯定 Goodhart。
+所以我建议评分分两层。
+内部 Development Score
+我们自己定义。
+用途：
+让系统越来越好。
+
+可以疯狂跑，可以优化。
+External Evaluation
+完全独立。
+例如：
+- frozen unseen scenarios；
+- 不告诉 judge 是哪个 system；
+- judge 不看到内部 S/X；
+- 换一个没参与优化的 judge model；
+- 小规模 human pairwise；
+- 外部 replay / novel behavior trajectories。
+用途：
+科研证据。
+
+这就彻底把我们之前那个纠结解开了。
+甚至“算力更小”可以成为系统非常漂亮的一条主线
+因为现在很多 LLM NPC 路线自然会走：
+full history
++ memory retrieval
++ world state
++ persona
+→ LLM
+→ action
+而 Character Dynamics 可以走：
+事件发生
+↓
+只有必要时调用 LLM 做 X
+↓
+更新 persistent S
+
+接下来几十个普通 decision：
+不调用大模型
+↓
+O + S + P + affordance
+→ cheap policy
+那么成本就从大致：
+\[
+O(T\times C_{\text{LLM}})
+\]变成：
+\[
+O(E\times C_{\text{LLM}} + T\times C_{\text{cheap}})
+\]其中：
+\[
+E\ll T
+\]如果开放语义事件远少于游戏 decision tick，这个差距会非常明显。
+NVIDIA ACE 已经证明业界非常在意 on-device、小模型和低延迟，所以“效率”这个问题绝不是虚构需求。NVIDIA 开发者
+但我们的路线可以不是：
+把 LLM 蒸馏小一点。
+
+而是：
+减少根本不需要 LLM 的决策。
+
+我觉得这个反而更符合你的系统。
+所以现在两条线应该这样彻底分
+Character Dynamics 系统主线
+目标：
+做出一个真的能驱动 NPC 的框架。
+
+关注：
+W/O
+X
+S/P
+affordance
+commitment
+policy
+world settlement
+LLM semantic frontend
+evaluation
+optimization
+runtime cost
+允许：
+- synthetic world；
+- 自生成轨迹；
+- designer score；
+- LLM judge；
+- 参数调优；
+- demo；
+- Godot/UE 等未来接入；
+- 系统工程迭代。
+Research Track
+从系统里切一个问题：
+Paper-0 可以继续问：
+persistent state 是否真的保存行为相关历史？
+
+以后还可以有：
+Paper-1
+event-driven structured semantics 是否比 full-history LLM 更省计算而质量不降？
+
+Paper-2
+W→O information mediation 是否改善隐藏事件/错误归因下 NPC 行为？
+
+Paper-3
+structured persistent dynamics 是否改善长期角色行为一致性？
+
+这些论文是：
+给系统提供证据。
+
+不是：
+系统只为了给论文服务。
+
+现在仓库下一步我反而不想再跑 LIGHT 了
+60400ac 已经可以把 LIGHT 封起来。
+而仓库目前最大的错误是：
+README / 项目现状 / TODO 仍然把 Research Track 写成了整个 Character Dynamics。
+
+所以我认为真正下一步应该是：
+Character Dynamics
+├── System Vision
+│   ├── Engine
+│   ├── Evaluator
+│   └── Optimizer
+│
+└── Research Tracks
+    ├── Paper-0 persistent representation
+    ├── external replay
+    └── future experiments
+代码先不用大搬家。
+先把概念 ownership 改掉，然后马上开始：
+Self-Play / Self-Evaluation v0
+
+而不是再找第六个外部数据集。
+第一版甚至就拿现成 RoomDemo 跑。把 8 个世界 seed 改造成真正有明确干预语义的 scenario suite，再写一个 evaluator 对现有完整 trajectory 打多维分。
+我觉得这一次是真正回到你最初那个“让人物活起来”的项目了，而不是继续把 Character Dynamics 磨成一个 0.002 bit 的小 paper。
