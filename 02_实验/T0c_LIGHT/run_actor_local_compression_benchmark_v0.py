@@ -77,7 +77,7 @@ def permute_states(rows):
     for r in rows:
         fs = []
         state = remap[r['target_id']]
-        for item in r['_base_items']:
+        for item in r['features']:
             cv = item['current']
             fs.append({'current': cv, 'raw_prev': item['raw_prev'], 'raw_last2': item['raw_last2'], 'persistent_mean': np.concatenate([cv, cv * state])})
         q = dict(r); q['features'] = fs; q['permuted_persistent_state'] = state.tolist(); out.append(q)
