@@ -4,6 +4,19 @@
 #include "state.h"
 
 #include <sstream>
+#include <cstdlib>
+
+namespace {
+bool parse_int_fact(const Observation& observation, const std::string& key, int& value) {
+    const ObservationFact* fact = find_fact(observation, key);
+    if (fact == nullptr || fact->status != KnowledgeStatus::Known) return false;
+    char* end = nullptr;
+    const long parsed = std::strtol(fact->value.c_str(), &end, 10);
+    if (end == fact->value.c_str() || *end != '\0') return false;
+    value = static_cast<int>(parsed);
+    return true;
+}
+}
 
 Appraisal appraise(const Observation& observation,
                    const CharacterState& old_state,
@@ -137,21 +150,32 @@ Appraisal appraise(const Observation& observation,
                 "task.coursework.status=completed"
             });
             appraisal.tags.push_back("task_completed");
-        } else if (update.key == "task.coursework.deadline" && update.value == "passed"
-                   && update.status == KnowledgeStatus::Known && coursework_pending) {
-            appraisal.task_pressure_delta += 0.18;
-            appraisal.anxiety_delta += 0.10 + 0.10 * personality.task_anxiety_sensitivity;
-            appraisal.tags.push_back("deadline_passed");
+        } else if (update.key == "task.coursework.deadline_at_total_minutes"
+                   && update.source != "initial_calendar" && update.status == KnowledgeStatus::Known
+                   && coursework_pending) {
+            int deadline = 0, now = 0;
+            if (parse_int_fact(observation, update.key, deadline)
+                && parse_int_fact(observation, "clock.total_minutes", now)) {
+                const int remaining = deadline - now;
+                const double urgency = remaining <= 0 ? 1.0
+                    : remaining >= 720 ? 0.0 : 1.0 - static_cast<double>(remaining) / 720.0;
+                appraisal.deadline_pressure_contribution = 0.20 * urgency;
+                appraisal.task_pressure_delta += appraisal.deadline_pressure_contribution;
+                appraisal.anxiety_delta += 0.08 * urgency * personality.task_anxiety_sensitivity;
+                appraisal.tags.push_back("deadline_urgency");
+            }
         } else if (update.key == "room.alarm" && update.value == "ringing"
                    && update.status == KnowledgeStatus::Known) {
             appraisal.boredom_delta += 0.03;
             appraisal.anxiety_delta += 0.02 + 0.04 * personality.task_anxiety_sensitivity;
             appraisal.tags.push_back("alarm_interrupts_room");
-        } else if (update.key == "room.temperature" && update.value == "17.0C"
-                   && update.status == KnowledgeStatus::Known) {
-            appraisal.fatigue_delta += 0.04;
-            appraisal.satisfaction_delta -= 0.06;
-            appraisal.tags.push_back("cold_interrupts_sleep");
+        } else if (update.key == "room.temperature_celsius" && update.status == KnowledgeStatus::Known) {
+            double temperature = 0.0;
+            if (known_double(observation, update.key, temperature) && temperature <= 17.0) {
+                appraisal.fatigue_delta += 0.04;
+                appraisal.satisfaction_delta -= 0.06;
+                appraisal.tags.push_back("cold_interrupts_sleep");
+            }
         } else if (update.key == "message.unread_count" && update.value != "0"
                    && update.status == KnowledgeStatus::Known && coursework_pending) {
             appraisal.task_pressure_delta += 0.08;

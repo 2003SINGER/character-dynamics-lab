@@ -363,22 +363,52 @@ std::vector<ActionType> World::available_actions() const {
 }
 
 WorldOutcome World::settle(ActionType action) {
+    const Object* object = object_for(action);
+    return settle(action, object != nullptr ? object->id : std::string{});
+}
+
+WorldOutcome World::settle(ActionType action, const std::string& target_object_id) {
     // Re-expand inside W immediately before settlement. This deliberately
     // makes CharacterActionPlan a trace/provenance object rather than a
     // capability that another module can forge to mutate W.
     CharacterActionPlan plan = expand_action(action);
     WorldOutcome outcome;
     outcome.action = plan.action;
+    outcome.target_object_id = target_object_id;
     outcome.provenance = "World::settle(" + to_string(plan.action) + ")";
 
+    if (!target_object_id.empty()) {
+        const Object* target = nullptr;
+        for (const Object& candidate : current_room().objects) {
+            if (candidate.id == target_object_id) { target = &candidate; break; }
+        }
+        if (target == nullptr) {
+            outcome.failure_reason = RejectionReason::TargetAbsent;
+            outcome.effects.push_back("rejected: target object absent");
+            return outcome;
+        }
+        if (!provides_action(*target, plan.action)) {
+            outcome.failure_reason = RejectionReason::PreconditionFailed;
+            outcome.effects.push_back("rejected: target does not afford action");
+            return outcome;
+        }
+        if (!target->usable) {
+            outcome.failure_reason = RejectionReason::TargetUnusable;
+            outcome.effects.push_back("rejected: target object unusable");
+            return outcome;
+        }
+    }
     if (!can_execute(plan.action)) {
-        outcome.effects.push_back("rejected: object unavailable or action precondition failed");
+        outcome.failure_reason = (plan.action == ActionType::ShopOnPhone && wallet < 30)
+            ? RejectionReason::ResourceInsufficient : RejectionReason::PreconditionFailed;
+        outcome.effects.push_back("rejected: action precondition failed");
         return outcome;
     }
 
     outcome.accepted = true;
     if (!plan.object_id.empty()) {
         outcome.object_id = plan.object_id;
+        if (outcome.target_object_id.empty()) outcome.target_object_id = plan.object_id;
         outcome.provenance += " via object:" + plan.object_id;
     }
 

@@ -15,6 +15,8 @@ struct WorldEvent {
     int occurred_at_total_minutes = -1;
 };
 
+enum class RejectionReason { None, TargetAbsent, TargetUnusable, PreconditionFailed, ResourceInsufficient };
+
 enum class TaskStatus {
     Active,
     Completed
@@ -39,6 +41,8 @@ struct WorldOutcome {
     ActionType action = ActionType::Idle;
     std::string activity;
     std::string object_id;
+    std::string target_object_id;
+    RejectionReason failure_reason = RejectionReason::None;
     int elapsed_minutes = 0;
     bool observation_frozen_during_action = false;
     bool woke_early = false;
@@ -92,6 +96,7 @@ struct World {
     // W owns primitive generation. A plan is useful for trace/provenance,
     // but callers cannot submit arbitrary primitives for execution.
     WorldOutcome settle(ActionType action);
+    WorldOutcome settle(ActionType action, const std::string& target_object_id);
     WorldOutcome execute(ActionType action);
     std::string time_summary() const;
     std::string summary() const;

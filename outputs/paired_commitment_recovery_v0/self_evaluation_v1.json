@@ -1,0 +1,71 @@
+{
+  "schema_version": "character_dynamics_self_evaluation_v1",
+  "hard_gates": {
+    "deadline_hidden_pre_discovery_tv_zero": true,
+    "deadline_visible_discovery_nonzero_policy": true,
+    "deadline_hidden_discovery_nonzero_policy": true,
+    "commitment_active_setup": true,
+    "commitment_suspended": true,
+    "commitment_resumed_active": true,
+    "commitment_completion_observable_closes": true,
+    "commitment_completion_hidden_preserved": true
+  },
+  "mechanism_metrics": {
+    "deadline": {
+      "seeds": 8,
+      "hidden_pre_discovery_max_tv": {
+        "1": 0.0,
+        "2": 0.0,
+        "3": 0.0,
+        "4": 0.0,
+        "5": 0.0,
+        "6": 0.0,
+        "7": 0.0,
+        "8": 0.0
+      },
+      "visible_discovery_count": 8,
+      "hidden_discovery_count": 8,
+      "visible_policy_tv": [
+        0.021727,
+        0.023041,
+        0.023951,
+        0.02406,
+        0.021727,
+        0.026987,
+        0.028724,
+        0.032442
+      ],
+      "hidden_policy_tv": [
+        0.033135,
+        0.02061,
+        0.034649,
+        0.029353,
+        0.026789,
+        0.026028,
+        0.02773,
+        0.02884
+      ]
+    },
+    "commitment": {
+      "preserved_vs_ablated_policy_tv": 0.0283871,
+      "recovery_fatigue": 0.55796
+    }
+  },
+  "behavior_telemetry": {
+    "not_scored": [
+      "believability",
+      "naturalness",
+      "character differentiation as quality"
+    ]
+  },
+  "efficiency_telemetry": {
+    "model_calls": 0,
+    "decision_count": 288,
+    "calls_per_decision": 0.0
+  },
+  "provenance": {
+    "source_revision": "a3a4488",
+    "deadline_csv": "outputs\\paired_deadline_v0\\paired_deadline.csv",
+    "commitment_csv": "outputs\\paired_commitment_recovery_v0\\trace.csv"
+  }
+}

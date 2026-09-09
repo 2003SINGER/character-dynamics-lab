@@ -1,0 +1,125 @@
+{
+  "source_csv": "outputs\\paired_deadline_v0\\paired_deadline.csv",
+  "seeds": 8,
+  "rows": 288,
+  "visible_discovery_steps": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+  ],
+  "hidden_discovery_steps": [
+    4,
+    5,
+    5,
+    7,
+    5,
+    3,
+    3,
+    4
+  ],
+  "hidden_pre_discovery_max_policy_tv_vs_control": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 0.0,
+    "4": 0.0,
+    "5": 0.0,
+    "6": 0.0,
+    "7": 0.0,
+    "8": 0.0
+  },
+  "visible_discovery": {
+    "urgency": [
+      0.75,
+      0.75,
+      0.75,
+      0.75,
+      0.75,
+      0.75,
+      0.75,
+      0.75
+    ],
+    "deadline_pressure_contribution": [
+      0.15,
+      0.15,
+      0.15,
+      0.15,
+      0.15,
+      0.15,
+      0.15,
+      0.15
+    ],
+    "policy_tv_vs_control": [
+      0.021727,
+      0.023041,
+      0.023951,
+      0.02406,
+      0.021727,
+      0.026987,
+      0.028724,
+      0.032442
+    ],
+    "study_probability": [
+      0.318816,
+      0.353937,
+      0.380904,
+      0.380357,
+      0.318816,
+      0.375437,
+      0.357621,
+      0.376253
+    ]
+  },
+  "hidden_discovery": {
+    "urgency": [
+      0.847222,
+      0.861111,
+      0.868056,
+      0.851389,
+      0.875,
+      0.833333,
+      0.833333,
+      0.847222
+    ],
+    "deadline_pressure_contribution": [
+      0.169444,
+      0.172222,
+      0.173611,
+      0.170278,
+      0.175,
+      0.166667,
+      0.166667,
+      0.169444
+    ],
+    "policy_tv_vs_control": [
+      0.033135,
+      0.02061,
+      0.034649,
+      0.029353,
+      0.026789,
+      0.026028,
+      0.02773,
+      0.02884
+    ],
+    "study_probability": [
+      0.338105,
+      0.407351,
+      0.421519,
+      0.309958,
+      0.295813,
+      0.387657,
+      0.441725,
+      0.350875
+    ]
+  },
+  "gates": {
+    "hidden_pre_discovery_policy_tv_zero_all_seeds": true,
+    "visible_policy_nonzero_all_seeds": true,
+    "hidden_policy_nonzero_after_discovery_all_seeds": true,
+    "shared_time_rows_present": true
+  }
+}

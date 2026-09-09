@@ -182,8 +182,9 @@ WorldOutcome settle_action(World& world,
                            CharacterState& state,
                            Observation& observation,
                            ActionType action,
+                           const std::string& target_object_id,
                            const InformationAccess& information_access) {
-    const WorldOutcome outcome = world.settle(action);
+    const WorldOutcome outcome = world.settle(action, target_object_id);
     apply_self_action_feedback(observation, outcome, world.time_summary(),
                                information_access.self_task_completion_observable);
     update_commitment(state, observation, total_minutes(world.time));
@@ -196,7 +197,8 @@ StepRecord advance_one_decision(World& world,
                                WorldOutcome& previous_outcome,
                                std::mt19937& action_rng,
                                const Personality& personality,
-                               const InformationAccess& information_access = {}) {
+                               const InformationAccess& information_access = {},
+                               ActionType forced_action = ActionType::Count) {
     StepRecord trace;
     const DecisionSnapshot snapshot = prepare_decision(world, state, observation, previous_outcome,
                                                        personality, information_access);
@@ -208,9 +210,18 @@ StepRecord advance_one_decision(World& world,
     trace.state_at_decision = snapshot.state_at_decision;
     trace.task_before = coursework_snapshot(world);
     trace.decision = snapshot.decision;
-    trace.chosen_action = sample_action(trace.decision, action_rng);
+    trace.chosen_action = forced_action == ActionType::Count
+        ? sample_action(trace.decision, action_rng) : forced_action;
+    std::string target_object_id;
+    for (const CandidateAction& candidate : trace.decision.candidates) {
+        if (candidate.action == trace.chosen_action) {
+            target_object_id = candidate.target_object_id;
+            break;
+        }
+    }
     trace.action_plan = world.expand_action(trace.chosen_action);
-    trace.outcome = settle_action(world, state, observation, trace.chosen_action, information_access);
+    trace.outcome = settle_action(world, state, observation, trace.chosen_action,
+                                  target_object_id, information_access);
     trace.state_after_settlement = state;
     trace.task_after = coursework_snapshot(world);
     if (!trace.outcome.sleeping_sensory_events.empty()) {
@@ -220,6 +231,48 @@ StepRecord advance_one_decision(World& world,
     trace.world_after = world.summary();
     previous_outcome = trace.outcome;
     return trace;
+}
+
+const char* rejection_reason_name(RejectionReason reason) {
+    switch (reason) {
+    case RejectionReason::None: return "none";
+    case RejectionReason::TargetAbsent: return "target_absent";
+    case RejectionReason::TargetUnusable: return "target_unusable";
+    case RejectionReason::PreconditionFailed: return "precondition_failed";
+    case RejectionReason::ResourceInsufficient: return "resource_insufficient";
+    }
+    return "unknown";
+}
+
+double policy_distance(const DecisionContext& left, const DecisionContext& right) {
+    double distance = 0.0;
+    for (std::size_t index = 0; index < kActionCount; ++index) {
+        const ActionType action = static_cast<ActionType>(index);
+        const auto probability = [action](const DecisionContext& context) {
+            for (const CandidateAction& candidate : context.candidates) {
+                if (candidate.action == action) return candidate.probability;
+            }
+            return 0.0;
+        };
+        distance += std::abs(probability(left) - probability(right));
+    }
+    return distance / 2.0;
+}
+
+double state_distance(const CharacterState& left, const CharacterState& right) {
+    const std::array<double, 9> a{left.boredom, left.fatigue, left.task_pressure,
+        left.satisfaction, left.hunger, left.bathroom_urge, left.anxiety,
+        left.screen_strain, left.purchase_urge};
+    const std::array<double, 9> b{right.boredom, right.fatigue, right.task_pressure,
+        right.satisfaction, right.hunger, right.bathroom_urge, right.anxiety,
+        right.screen_strain, right.purchase_urge};
+    double sum = 0.0;
+    for (std::size_t i = 0; i < a.size(); ++i) sum += std::abs(a[i] - b[i]);
+    return sum / static_cast<double>(a.size());
+}
+
+bool observation_equal(const Observation& left, const Observation& right) {
+    return observation_summary(left) == observation_summary(right);
 }
 } // namespace
 
@@ -409,6 +462,257 @@ void Simulation::run_batch(std::ostream& output, const std::string& output_direc
            << " rows saved under " << root.string() << '\n';
 }
 
+void Simulation::run_paired_phone_intervention(std::ostream& output, const std::string& output_path) const {
+    namespace fs = std::filesystem;
+    const fs::path path(output_path);
+    if (path.has_parent_path()) fs::create_directories(path.parent_path());
+    std::ofstream file(path);
+    if (!file) throw std::runtime_error("Cannot open paired intervention output: " + output_path);
+    file << "scenario_seed,branch,step,decision_time,chosen_action,accepted,phone_world_present,phone_known,phone_fact_status,known_action_count,observation_summary,policy_distance,state_distance,observation_equal,phone_uses,target_object_id,failure_reason,discovery_event\n";
+    file << std::fixed << std::setprecision(6);
+    const Personality personality = procrastinating_profile();
+    constexpr unsigned int action_seed_base = 20260904U;
+    for (unsigned int scenario_seed = 1; scenario_seed <= 8; ++scenario_seed) {
+        World control_world(scenario_seed), hidden_world(scenario_seed), visible_world(scenario_seed);
+        CharacterState control_state, hidden_state, visible_state;
+        Observation control_observation, hidden_observation, visible_observation;
+        WorldOutcome control_previous, hidden_previous, visible_previous;
+        std::mt19937 control_rng(action_seed_base + scenario_seed), hidden_rng(action_seed_base + scenario_seed), visible_rng(action_seed_base + scenario_seed);
+        ScenarioConfig hidden_config{}; hidden_config.information_access.phone_presence_observable = false;
+        ScenarioConfig visible_config{}; visible_config.information_access.phone_presence_observable = true;
+        for (int step = 1; step <= 12; ++step) {
+            // Both branches observe the common initial phone. After the
+            // intervention the hidden branch keeps the last phone fact.
+            hidden_config.information_access.phone_presence_observable = (step == 1);
+            const StepRecord control = advance_one_decision(control_world, control_state, control_observation,
+                control_previous, control_rng, personality, {});
+            const StepRecord hidden = advance_one_decision(hidden_world, hidden_state, hidden_observation,
+                hidden_previous, hidden_rng, personality, hidden_config.information_access);
+            const StepRecord visible = advance_one_decision(visible_world, visible_state, visible_observation,
+                visible_previous, visible_rng, personality, visible_config.information_access);
+            const double pd = policy_distance(hidden.decision, visible.decision);
+            const double sd = state_distance(hidden.state_at_decision, visible.state_at_decision);
+            const bool oe = observation_equal(hidden.observation_at_decision, visible.observation_at_decision);
+            const auto emit = [&](const char* branch, const StepRecord& trace, const World& world) {
+                const ObservationFact* phone = find_fact(trace.observation_at_decision, "object.phone");
+                file << scenario_seed << ',' << branch << ',' << step << ',';
+                write_csv_field(file, trace.decision_time);
+                file << ','; write_csv_field(file, to_string(trace.chosen_action));
+                file << ',' << (trace.outcome.accepted ? 1 : 0) << ','
+                     << (world.object_for(ActionType::UsePhone) != nullptr ? 1 : 0) << ','
+                     << (phone != nullptr && phone->status == KnowledgeStatus::Known ? 1 : 0) << ',';
+                if (phone != nullptr) write_csv_field(file, phone->status == KnowledgeStatus::Known ? "known" : "stale");
+                else write_csv_field(file, "absent");
+                file << ',' << trace.decision.known_actions.size() << ',';
+                write_csv_field(file, observation_summary(trace.observation_at_decision));
+                file << ',' << pd << ',' << sd << ',' << (oe ? 1 : 0) << ',' << world.phone_uses << ',';
+                write_csv_field(file, trace.outcome.target_object_id);
+                file << ','; write_csv_field(file, rejection_reason_name(trace.outcome.failure_reason));
+                file << ',' << ((!trace.outcome.accepted && trace.outcome.failure_reason == RejectionReason::TargetAbsent) ? 1 : 0) << '\n';
+            };
+            emit("hidden", hidden, hidden_world);
+            emit("visible", visible, visible_world);
+            emit("control", control, control_world);
+            if (step == 1) {
+                for (World* world : {&hidden_world, &visible_world}) {
+                    Room& room = world->current_room();
+                    room.objects.erase(std::remove_if(room.objects.begin(), room.objects.end(),
+                        [](const Object& object) { return object.id == "phone"; }), room.objects.end());
+                }
+            }
+        }
+        // Deterministic mechanism probe: force the hidden-belief action so
+        // discovery semantics are recorded even when sampled policy does not
+        // choose UsePhone within the short trajectory.
+        World probe_world(scenario_seed);
+        Observation probe_observation = refresh_observation({}, probe_world, {});
+        probe_world.current_room().objects.erase(std::remove_if(
+            probe_world.current_room().objects.begin(), probe_world.current_room().objects.end(),
+            [](const Object& object) { return object.id == "phone"; }), probe_world.current_room().objects.end());
+        const WorldOutcome probe_failure = probe_world.settle(ActionType::UsePhone, "phone");
+        apply_self_action_feedback(probe_observation, probe_failure, probe_world.time_summary());
+        file << scenario_seed << ",mechanism_probe,2,\"" << probe_world.time_summary()
+             << "\",use_phone," << (probe_failure.accepted ? 1 : 0)
+             << ",0,0,absent,0,";
+        write_csv_field(file, observation_summary(probe_observation));
+        file << ",0,0,0,0,phone,";
+        write_csv_field(file, probe_failure.target_object_id);
+        file << ','; write_csv_field(file, rejection_reason_name(probe_failure.failure_reason));
+        file << "," << ((!probe_failure.accepted && probe_failure.failure_reason == RejectionReason::TargetAbsent) ? 1 : 0) << '\n';
+    }
+    output << "paired phone intervention complete: 8 seeds x 12 steps x 3 branches saved to " << path.string() << '\n';
+}
+
+void Simulation::run_paired_deadline_intervention(std::ostream& output, const std::string& output_path) const {
+    namespace fs = std::filesystem;
+    const fs::path path(output_path);
+    if (path.has_parent_path()) fs::create_directories(path.parent_path());
+    std::ofstream file(path);
+    if (!file) throw std::runtime_error("Cannot open paired deadline output: " + output_path);
+    file << "scenario_seed,branch,step,simulation_total_minutes,deadline_fact,deadline_source,remaining_minutes,urgency,deadline_pressure_contribution,appraisal_pressure_delta,pre_task_pressure,post_task_pressure,shared_executed_action,policy_tv_vs_control,study_probability,observation_summary,discovery_event\n";
+    file << std::fixed << std::setprecision(6);
+    const Personality personality = procrastinating_profile();
+    constexpr unsigned int action_seed_base = 20260914U;
+    for (unsigned int scenario_seed = 1; scenario_seed <= 8; ++scenario_seed) {
+        World control_world(scenario_seed), hidden_world(scenario_seed), visible_world(scenario_seed);
+        CharacterState control_state, hidden_state, visible_state;
+        Observation control_observation, hidden_observation, visible_observation;
+        WorldOutcome control_previous, hidden_previous, visible_previous;
+        std::mt19937 control_rng(action_seed_base + scenario_seed), hidden_rng(action_seed_base + scenario_seed), visible_rng(action_seed_base + scenario_seed);
+        ScenarioConfig control_config{}, hidden_config{}, visible_config{};
+        hidden_config.information_access.task_deadline_observable = false;
+        int hidden_discovery_at = -1;
+        for (int step = 1; step <= 12; ++step) {
+            hidden_config.information_access.task_deadline_observable =
+                step == 1 || (hidden_discovery_at >= 0 && total_minutes(hidden_world.time) >= hidden_discovery_at);
+            const StepRecord control = advance_one_decision(control_world, control_state, control_observation,
+                control_previous, control_rng, personality, control_config.information_access);
+            const StepRecord hidden = advance_one_decision(hidden_world, hidden_state, hidden_observation,
+                hidden_previous, hidden_rng, personality, hidden_config.information_access, control.chosen_action);
+            const StepRecord visible = advance_one_decision(visible_world, visible_state, visible_observation,
+                visible_previous, visible_rng, personality, visible_config.information_access, control.chosen_action);
+            if (step == 1) {
+                for (World* world : {&hidden_world, &visible_world}) {
+                    if (WorldTask* task = world->task_by_id("coursework")) {
+                        task->due_at_total_minutes = total_minutes(world->time) + 180;
+                    }
+                }
+                hidden_discovery_at = total_minutes(hidden_world.time) + 60;
+            }
+            const auto emit = [&](const char* branch, const StepRecord& trace, const CharacterState& state,
+                                  const World& world, const DecisionContext& baseline) {
+                const ObservationFact* deadline = find_fact(trace.observation_at_decision, "task.coursework.deadline_at_total_minutes");
+                const double policy_tv = policy_distance(trace.decision, baseline);
+                int deadline_at = 0, clock_now = 0;
+                const bool numeric_deadline = known_int(trace.observation_at_decision, "task.coursework.deadline_at_total_minutes", deadline_at)
+                    && known_int(trace.observation_at_decision, "clock.total_minutes", clock_now);
+                const int remaining = numeric_deadline ? deadline_at - clock_now : 0;
+                const double urgency = !numeric_deadline ? 0.0 : (remaining <= 0 ? 1.0 : remaining >= 720 ? 0.0 : 1.0 - static_cast<double>(remaining) / 720.0);
+                double study_probability = 0.0;
+                for (const CandidateAction& candidate : trace.decision.candidates) {
+                    if (candidate.action == ActionType::StudyAtComputer || candidate.action == ActionType::StudyFocused || candidate.action == ActionType::StudyHalfhearted) study_probability += candidate.probability;
+                }
+                file << scenario_seed << ',' << branch << ',' << step << ',' << total_minutes(world.time) << ',';
+                write_csv_field(file, deadline != nullptr ? deadline->value : "unknown");
+                file << ','; write_csv_field(file, deadline != nullptr ? deadline->source : "none");
+                file << ',' << remaining << ',' << urgency << ',' << trace.appraisal.deadline_pressure_contribution << ',' << trace.appraisal.task_pressure_delta
+                     << ',' << trace.state_at_decision.task_pressure
+                     << ',' << trace.state_after_settlement.task_pressure << ',';
+                write_csv_field(file, to_string(trace.chosen_action));
+                file << ',' << policy_tv << ',' << study_probability << ',';
+                write_csv_field(file, observation_summary(trace.observation_at_decision));
+                const bool discovered = std::any_of(trace.observation_at_decision.updates_this_refresh.begin(),
+                    trace.observation_at_decision.updates_this_refresh.end(), [](const ObservationFact& update) {
+                        return update.key == "task.coursework.deadline_at_total_minutes"
+                            && update.source != "initial_calendar";
+                    });
+                file << ',' << (discovered ? 1 : 0) << '\n';
+            };
+            emit("control", control, control_state, control_world, control.decision);
+            emit("hidden", hidden, hidden_state, hidden_world, control.decision);
+            emit("visible", visible, visible_state, visible_world, control.decision);
+        }
+    }
+    output << "paired deadline intervention complete: 8 seeds x 12 steps x 3 branches saved to " << path.string() << '\n';
+}
+
+void Simulation::run_paired_commitment_recovery(std::ostream& output, const std::string& output_path) const {
+    namespace fs = std::filesystem;
+    const fs::path path(output_path);
+    if (path.has_parent_path()) fs::create_directories(path.parent_path());
+    std::ofstream file(path);
+    if (!file) throw std::runtime_error("Cannot open commitment fixture output: " + output_path);
+    file << "phase,commitment_status,suspended_decision_points,fatigue,hunger,reconsideration,study_probability,preserved_vs_ablated_policy_tv,action,accepted\n";
+    const Personality personality = procrastinating_profile();
+    World world(20260915U);
+    CharacterState state;
+    Observation observation;
+    WorldOutcome previous;
+    const WorldOutcome study = world.settle(ActionType::StudyFocused, "desk");
+    apply_self_action_feedback(observation, study, world.time_summary());
+    update_commitment(state, observation, total_minutes(world.time));
+    const bool active_created = study.accepted && state.commitment.status == CommitmentStatus::Active;
+    const std::string setup_status = commitment_status_name(state.commitment.status);
+    state.fatigue = 0.80;
+    state.hunger = 0.85;
+    const WorldOutcome meal = world.settle(ActionType::GetMeal, "door");
+    apply_self_action_feedback(observation, meal, world.time_summary());
+    update_commitment(state, observation, total_minutes(world.time));
+    const bool suspended = meal.accepted && state.commitment.status == CommitmentStatus::Suspended;
+    const std::string interrupted_status = commitment_status_name(state.commitment.status);
+    const int interrupted_suspended_points = state.commitment.suspended_decision_points;
+    const Appraisal meal_appraisal = appraise(observation, state, personality);
+    update_state(state, meal_appraisal, personality, meal.elapsed_minutes);
+    CharacterState deferred_state = state;
+    const Observation deferred_observation = refresh_observation(observation, world, meal);
+    const DecisionContext preserved_deferred = decide(deferred_observation, deferred_state, personality);
+    CharacterState deferred_ablated = deferred_state; deferred_ablated.commitment = {};
+    const DecisionContext ablated_deferred = decide(deferred_observation, deferred_ablated, personality);
+    const WorldOutcome rest = world.settle(ActionType::RestAtBed, "bed");
+    apply_self_action_feedback(observation, rest, world.time_summary());
+    const Appraisal rest_appraisal = appraise(observation, state, personality);
+    update_state(state, rest_appraisal, personality, rest.elapsed_minutes);
+    update_commitment(state, observation, total_minutes(world.time));
+    const Observation preserved_observation = refresh_observation(observation, world, rest);
+    CharacterState ablated_state = state;
+    ablated_state = state;
+    ablated_state.commitment = {};
+    const DecisionContext preserved_return = decide(preserved_observation, state, personality);
+    const DecisionContext ablated_return = decide(preserved_observation, ablated_state, personality);
+    const auto study_probability = [](const DecisionContext& decision) {
+        double total = 0.0;
+        for (const CandidateAction& candidate : decision.candidates) {
+            if (candidate.action == ActionType::StudyAtComputer || candidate.action == ActionType::StudyFocused || candidate.action == ActionType::StudyHalfhearted) total += candidate.probability;
+        }
+        return total;
+    };
+    const double tv = policy_distance(preserved_return, ablated_return);
+    file << "setup_active," << setup_status << ",0,0.800000,0.850000,n/a," << study_probability(preserved_deferred) << ",0,," << (active_created ? 1 : 0) << '\n';
+    file << "interrupted_suspended," << interrupted_status << "," << interrupted_suspended_points << ",0.800000,0.850000," << preserved_deferred.intention_status << "," << study_probability(preserved_deferred) << ",0,," << (suspended ? 1 : 0) << '\n';
+    file << "recovery_ablation," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << "," << state.fatigue << "," << state.hunger << "," << preserved_return.intention_status << "," << study_probability(preserved_return) << "," << tv << ",," << (tv > 0.0 ? 1 : 0) << '\n';
+    const WorldOutcome resumed = world.settle(ActionType::StudyFocused, "desk");
+    apply_self_action_feedback(observation, resumed, world.time_summary());
+    update_commitment(state, observation, total_minutes(world.time));
+    file << "resumed_active," << commitment_status_name(state.commitment.status) << "," << state.commitment.suspended_decision_points << "," << state.fatigue << "," << state.hunger << ",permits return," << study_probability(preserved_return) << "," << tv << ",study_focused," << (resumed.accepted ? 1 : 0) << '\n';
+    // Completion is a separate probe: W can complete while the commitment
+    // closes only when the typed self-action feedback reaches O.
+    World completion_world(20260916U);
+    completion_world.task_by_id("coursework")->effort_target = 0.10;
+    CharacterState completion_state;
+    completion_state.commitment = {CommitmentStatus::Active, "coursework", "completion probe", 0, 0};
+    Observation completion_observation;
+    const WorldOutcome completion = completion_world.settle(ActionType::StudyFocused, "desk");
+    apply_self_action_feedback(completion_observation, completion, completion_world.time_summary(), true);
+    update_commitment(completion_state, completion_observation, total_minutes(completion_world.time));
+    const bool completion_closed = completion.task_completed
+        && completion_state.commitment.status == CommitmentStatus::None;
+    file << "completed_observable," << commitment_status_name(completion_state.commitment.status)
+         << "," << completion_state.commitment.suspended_decision_points << ","
+         << completion_state.fatigue << "," << completion_state.hunger
+         << ",completion feedback observed," << study_probability(preserved_return)
+         << "," << tv << ",study_focused," << (completion.accepted ? 1 : 0) << '\n';
+    CharacterState hidden_completion_state;
+    hidden_completion_state.commitment = {CommitmentStatus::Active, "coursework", "hidden completion probe", 0, 0};
+    Observation hidden_completion_observation;
+    apply_self_action_feedback(hidden_completion_observation, completion,
+                               completion_world.time_summary(), false);
+    update_commitment(hidden_completion_state, hidden_completion_observation,
+                      total_minutes(completion_world.time));
+    const bool hidden_completion_preserved = completion.task_completed
+        && hidden_completion_state.commitment.status == CommitmentStatus::Active;
+    file << "completed_hidden," << commitment_status_name(hidden_completion_state.commitment.status)
+         << "," << hidden_completion_state.commitment.suspended_decision_points << ","
+         << hidden_completion_state.fatigue << "," << hidden_completion_state.hunger
+         << ",completion feedback hidden," << study_probability(preserved_return)
+         << "," << tv << ",study_focused," << (completion.accepted ? 1 : 0) << '\n';
+    output << "paired commitment recovery complete: active=" << active_created
+           << ", suspended=" << suspended << ", policy_difference=" << tv
+           << ", resumed=" << (state.commitment.status == CommitmentStatus::Active)
+           << ", completed_observable=" << completion_closed
+           << ", completed_hidden=" << hidden_completion_preserved
+           << " saved to " << path.string() << '\n';
+}
+
 bool Simulation::verify(std::ostream& output) const {
     const Personality first = procrastinating_profile();
     const Personality second = self_controlled_profile();
@@ -535,10 +839,11 @@ bool Simulation::verify(std::ostream& output) const {
     const WorldOutcome deadline_outcome = deadline_world.settle(ActionType::Idle);
     const Observation after_deadline_observation = refresh_observation(before_deadline_observation, deadline_world, deadline_outcome);
     const Appraisal deadline_appraisal = appraise(after_deadline_observation, CharacterState{}, first);
-    const bool deadline_is_observable = std::any_of(deadline_outcome.events.begin(), deadline_outcome.events.end(),
-        [](const WorldEvent& event) { return event.id == "task-deadline"; })
-        && std::find(deadline_appraisal.tags.begin(), deadline_appraisal.tags.end(), "deadline_passed")
-            != deadline_appraisal.tags.end();
+    const ObservationFact* observed_deadline = find_fact(after_deadline_observation,
+        "task.coursework.deadline_at_total_minutes");
+    const bool deadline_is_observable = observed_deadline != nullptr
+        && observed_deadline->status == KnowledgeStatus::Known
+        && observed_deadline->value == std::to_string(deadline_task->due_at_total_minutes);
     World reconsideration_world;
     const Observation reconsideration_observation = refresh_observation({}, reconsideration_world, {});
     CharacterState suspended_commitment;
@@ -635,6 +940,48 @@ bool Simulation::verify(std::ostream& output) const {
         && visible_usability->value == "false"
         && std::find(visibly_broken_observation.known_actions.begin(), visibly_broken_observation.known_actions.end(), ActionType::UseComputer)
             == visibly_broken_observation.known_actions.end();
+    World hidden_phone_world;
+    Observation hidden_phone_observation = refresh_observation({}, hidden_phone_world, {});
+    hidden_phone_world.current_room().objects.erase(
+        std::remove_if(hidden_phone_world.current_room().objects.begin(), hidden_phone_world.current_room().objects.end(),
+            [](const Object& object) { return object.id == "phone"; }),
+        hidden_phone_world.current_room().objects.end());
+    InformationAccess hidden_phone_access;
+    hidden_phone_access.phone_presence_observable = false;
+    const Observation hidden_phone_after_removal = refresh_observation(
+        hidden_phone_observation, hidden_phone_world, {}, hidden_phone_access);
+    InformationAccess visible_phone_access;
+    visible_phone_access.phone_presence_observable = true;
+    const Observation visible_phone_after_removal = refresh_observation(
+        hidden_phone_observation, hidden_phone_world, {}, visible_phone_access);
+    const bool hidden_belief_retains_phone_actions =
+        has_known_fact(hidden_phone_after_removal, "object.phone", "present")
+        && std::find(hidden_phone_after_removal.known_actions.begin(), hidden_phone_after_removal.known_actions.end(), ActionType::UsePhone)
+            != hidden_phone_after_removal.known_actions.end()
+        && std::find(hidden_phone_after_removal.known_actions.begin(), hidden_phone_after_removal.known_actions.end(), ActionType::ShopOnPhone)
+            != hidden_phone_after_removal.known_actions.end();
+    const bool visible_phone_removes_actions =
+        std::find(visible_phone_after_removal.known_actions.begin(), visible_phone_after_removal.known_actions.end(), ActionType::UsePhone)
+            == visible_phone_after_removal.known_actions.end()
+        && std::find(visible_phone_after_removal.known_actions.begin(), visible_phone_after_removal.known_actions.end(), ActionType::ShopOnPhone)
+            == visible_phone_after_removal.known_actions.end();
+    World discovery_world;
+    Observation discovery_observation = refresh_observation({}, discovery_world, {});
+    discovery_world.current_room().objects.erase(
+        std::remove_if(discovery_world.current_room().objects.begin(), discovery_world.current_room().objects.end(),
+            [](const Object& object) { return object.id == "phone"; }),
+        discovery_world.current_room().objects.end());
+    const WorldOutcome discovery_failure = discovery_world.settle(ActionType::UsePhone, "phone");
+    apply_self_action_feedback(discovery_observation, discovery_failure,
+                               discovery_world.time_summary());
+    const Observation discovery_next = refresh_observation(discovery_observation, discovery_world, discovery_failure);
+    const ObservationFact* corrected_phone = find_fact(discovery_next, "object.phone");
+    const bool typed_discovery_correction = discovery_failure.failure_reason == RejectionReason::TargetAbsent
+        && discovery_failure.target_object_id == "phone"
+        && corrected_phone != nullptr && corrected_phone->value == "absent"
+        && corrected_phone->source == "failed_direct_interaction"
+        && std::find(discovery_next.known_actions.begin(), discovery_next.known_actions.end(), ActionType::UsePhone)
+            == discovery_next.known_actions.end();
     ScenarioConfig configured_scenario;
     configured_scenario.information_access.wallet_balance_observable = true;
     const std::string default_scenario_run = run_profile(first, 20260904U, 0U, false, 2, true);
@@ -671,7 +1018,10 @@ bool Simulation::verify(std::ostream& output) const {
            << ", study_requires_known_light=" << study_requires_known_light
            << ", silent_alarm_filters_action=" << silent_alarm_filters_action
            << ", visible_wallet_filters_purchase=" << visible_wallet_filters_purchase
-           << ", visible_usability_filters_action=" << visible_usability_filters_action << '\n';
+           << ", visible_usability_filters_action=" << visible_usability_filters_action
+           << ", hidden_belief_retains_phone_actions=" << hidden_belief_retains_phone_actions
+           << ", visible_phone_removes_actions=" << visible_phone_removes_actions
+           << ", typed_discovery_correction=" << typed_discovery_correction << '\n';
     return reproducible && profile_sensitive && validates_world && has_primitives
         && primitives_settle && handles_interruption && completed_task_stays_quiet && deduplicates_actions
         && preserves_rejected_feedback && keeps_broken_object_visible && does_not_leak_hidden_wallet
@@ -684,7 +1034,9 @@ bool Simulation::verify(std::ostream& output) const {
         && scenario_config_reaches_trajectory
         && light_precondition_filters_known_state && curtain_precondition_filters_known_state
         && study_requires_known_light && silent_alarm_filters_action
-        && visible_wallet_filters_purchase && visible_usability_filters_action;
+        && visible_wallet_filters_purchase && visible_usability_filters_action
+        && hidden_belief_retains_phone_actions && visible_phone_removes_actions
+        && typed_discovery_correction;
 }
 
 bool Simulation::run_e0(std::ostream& output) const {

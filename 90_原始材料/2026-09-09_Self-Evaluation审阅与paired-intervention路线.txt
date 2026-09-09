@@ -1,0 +1,255 @@
+看完了。这次仓库是真的转弯了，而且我认为方向比前几天健康很多。
+最新 HEAD 是 a53d3c4 lock self evaluation batch provenance。它前面连续做了三件关键事：
+- 0c43b6b：split system vision and launch self evaluation v0
+- fa21052：把实际 C++ runtime git revision 写进 batch metadata
+- a53d3c4：把首轮 self-evaluation batch provenance 锁到 fa21052
+也就是说，我们刚刚说的“系统主线 / 科研支线分离”已经真正进仓库了，不只是聊天里说说。
+现在项目定位，我觉得对了
+新文件 Character_Dynamics_System_Vision_v0.md 直接写：
+Character Dynamics 的主产品是一个可持续运行的 NPC 角色动力学框架，而不是某一篇 Paper-0 的实验脚本集合。
+
+而且已经正式拆成：
+Character Dynamics
+    Engine
+    Evaluator
+    Optimizer
+
+Research Tracks
+    Paper-0
+    LIGHT / Replay
+    Theory-S
+    future experiments
+README 也已经改成 NPC runtime 的叙事了。
+LIGHT 也终于彻底封口。 TODO 明确写了不再搞 H0/H0b/H0c/H0d，这个非常重要。
+这次我不会让我们又回 LIGHT。
+但 Self-Evaluation v0 我仔细看代码之后，发现它目前更准确地说是：
+Evaluator plumbing + trajectory health diagnostics v0
+
+还不是我们真正想要的“NPC 行为质量评分器”。
+这没问题，因为它本来就是第一版。
+问题是：现在别真的把这些 score 冻死。
+现在几个分数其实还不能按表面理解
+最搞笑的是：
+BehavioralDiversity = 0.0566
+看起来低得一批。
+但代码定义是：
+unique actions / 256
+我们一共就 16 个动作。
+所以理论最大值：
+\[
+16/256=0.0625
+\]而：
+\[
+0.0566\times256\approx14.5
+\]也就是说实际平均一个 run 已经用了大约：
+14.5 / 16 种动作
+
+所以这个所谓 0.0566 实际上接近它自己定义下的满分。
+指标尺度写歪了。
+另一个：
+WorldValidity = 1.0000
+代码其实是：
+float(row['accepted']) in (0.0, 1.0)
+这只证明：
+accepted 这一列里面写的是合法的 0/1。
+
+它根本没证明：
+世界运行有效。
+
+甚至某个 action 被 W 合理拒绝，accepted=0，这个检查照样记 1。
+所以现在这个应该叫：
+TrajectorySchemaValidity
+
+或者 AcceptedFieldValidity
+而真正的 WorldValidity 应该检查：
+动作是否合法结算
+primitive invariant
+状态值域
+世界状态一致性
+资源是否越界
+task progression 是否逆行
+unsupported action 是否执行
+...
+这个以后可以直接利用现有 verify() / W invariant。
+然后：
+CausalResponsiveness = 0.9301
+Adaptivity          = 0.9301
+完全是同一个指标。
+都是：
+出现 event 后，下一步 chosen action 跟上一步不一样了吗？
+
+这甚至目前连 responsiveness 都很难叫。
+因为一个本来就高度随机、每步经常换动作的 NPC，也能轻松 0.93。
+真正要测的是：
+\[
+\Delta\pi =
+D(\pi_{\text{intervention}},
+  \pi_{\text{control}})
+\]而不是：
+action_t != action_t-1
+所以你们 scenario manifest 里写的：
+hidden_phone_removed
+visible_phone_removed
+task_deadline_shift
+才是正路。
+还有：
+Persistence = Commitment = 0.9795
+也是同一个指标重复放两个名字。
+这版没关系，但以后必须拆：
+- Commitment continuity：一个 intention 是否保持；
+- State persistence：某次事件造成的 ΔS 是否跨多步残留；
+- Behavioral persistence：对应的 π(A) effect 是否跨多步仍然存在。
+这三个完全不是一回事。
+Efficiency=0.0 也有同样的表示问题。
+实际意思是：
+0 LLM calls
+
+这当然是现在 rule-only runtime 的优点。
+但写成 score=0 看起来像效率最差。
+我建议 Efficiency 根本先别归一化成 score，直接保持：
+model_calls / decision
+tokens / decision
+P50 latency
+P95 latency
+GPU ms / decision
+CPU ms / decision
+memory
+以后做 Pareto comparison。
+所以我最想改仓库里的一个说法
+目前几处都写：
+freeze Self-Evaluation v0 evaluator，然后加 paired intervention
+
+我觉得这个顺序太死了。
+应该是：
+冻结 Evaluator v0 的接口、维度、provenance 和禁止事项；暂不冻结每个 metric 的最终公式。
+
+因为现在已经明确看出部分 metric 是 placeholder。
+如果现在“冻结公式”，那我们反而又走进前几天那个坑：
+为了遵守一个过早冻结的 measurement instrument，不断在错误尺子上解释数字。
+
+真正该冻结的是：
+Evaluator consumes trajectory
+Evaluator outputs vector, not scalar
+each metric records definition / denominator / provenance
+dev != external eval
+judge != optimizer objective
+no hidden W leakage
+no post-hoc external-score redesign
+这些。
+不是 unique_actions/256 这个公式。
+但系统主线这次真的已经能往前跑了
+我现在认为下一刀不是写更多评分维度。
+而是直接实现第一个真正的 paired world intervention。
+甚至只做 phone 就够。
+同一个：
+P
+initial W
+action RNG
+world RNG
+做三条 trajectory：
+Control:
+手机还在。
+
+Hidden:
+手机被拿走，但 NPC 未观察到。
+
+Visible:
+手机在 NPC 面前被拿走。
+然后我们第一次真正得到系统级 evaluator：
+Hidden，发现之前
+应该：
+\[
+O_H=O_C
+\]因此：
+\[
+X_H=X_C,\quad
+S_H=S_C,\quad
+\pi_H\approx\pi_C
+\]这是 Information Integrity。
+Hidden，发现以后
+开始：
+\[
+O_H\neq O_C
+\]然后：
+\[
+X\rightarrow S\rightarrow\pi
+\]逐步分叉。
+这是 Causal Responsiveness + Persistence。
+Visible
+应该比 Hidden 更早分叉。
+这是 observation mediation。
+而且这些东西甚至不需要 LLM judge。
+完全可以程序自己算。
+这就是我觉得 Character Dynamics 很漂亮的地方：它不是“让 GPT 看轨迹然后说 8.7/10 很自然”。
+系统内部大量性质是可以做精确反事实评分的。
+所以这轮我的结论和之前很不一样
+以前我会说：
+再补一个 metric，然后再看看。
+
+这次不是。
+System architecture 已经切对了。Self-Evaluation v0 也完成了它该完成的事情：证明从 Engine → trajectory → Evaluator → scorecard 这条管子通了。
+别再优化这 0.9301、0.9795、0.0566。
+它们现在只是 diagnostic placeholders。
+真正下一步就是：
+\[
+\boxed{\text{paired intervention harness}}
+\]而不是 Optimizer。
+等 phone hidden/visible/control 真的跑通之后，我们才第一次拥有：
+Engine
+  ↓
+controlled trajectory generation
+  ↓
+Evaluator
+  ↓
+meaningful system objective
+那时候再做 Optimizer 就牛逼了——因为它优化的终于不是我们拍脑袋造出来的“自然度”，而是可控世界中的行为性质。
+而且我现在认为，这条系统线比我们之前追 0.002 bits 有意思太多了，也更接近你原本想造的 NPC 框架。
+
+
+
+
+  来源
+
+
+
+
+
+。。。真的假的
+
+
+
+
+
+
+
+
+
+
+
+
+
+真的，但要把“真的”拆开，不然容易又变成我给你灌鸡汤。
+第一层：仓库现在确实完成了方向切换。 这个不是我脑补。最新几次提交已经把系统主线改成 Engine / Evaluator / Optimizer，LIGHT 被明确封口，Self-Evaluation v0 已经实际跑了 65,536 条 decision rows，还加了 runtime provenance。这个变化是实打实的。
+第二层：我说“paired intervention 比继续追 LIGHT 更对”也是真的。 因为你们这个系统最有特色的地方，本来就不是单纯 next-action prediction，而是：
+W 真变化
+→ NPC 是否能知道
+→ O 何时变化
+→ X/S 是否受影响
+→ π(A) 何时、持续多久发生变化
+这个链条最适合用 同初态、只改一个世界事实/可见性 的反事实实验来测。比如 hidden phone / visible phone / control，正好能直接测你们系统的核心职责，而不是绕一圈去找一个勉强适配的外部数据集。
+第三层：但“这就是一个全新的、能发顶会的 NPC 框架”——这个我现在不敢说。 这个还没证明。我们现在只能说：
+这个系统构想是完整的、内部逻辑是通的，而且终于找到了一个跟它真正匹配的开发和评测闭环。
+
+至于：
+- 是否真的比 Generative Agents / Inworld / ACE 这些路线更自然；
+- 是否真的更省算力；
+- 是否真的有足够强的新颖性；
+- paired intervention 做出来后效果是否漂亮；
+这些都还要实验和对照。
+还有一个很关键的地方：我刚才指出 evaluator 的几个 metric 定义有问题，不是在说系统又“废了”。恰恰相反，这次是第一次出现“系统主线没问题，但评分器 v0 需要修”这种正常工程状态。 跟前面那种“整个科研链条一直在发现 estimand 都没定对”不是一个级别的问题。
+所以我现在的真实判断是：
+之前：我们拿一个大系统硬塞进一个不适配的 Paper-0 测量链里。
+现在：我们终于开始把大系统当大系统做，再从里面切科研问题。
+
+这一步我觉得是对的。
+而且我最支持你现在立刻做的，不是继续写文档，也不是再找数据集，而是真把 hidden / visible / control 三条 NPC trajectory 跑出来。如果连这种最核心的世界-观测-状态-行为分叉都跑不漂亮，那系统主线确实有问题；如果跑得漂亮，我们才算第一次真正看到 Character Dynamics “活起来”。

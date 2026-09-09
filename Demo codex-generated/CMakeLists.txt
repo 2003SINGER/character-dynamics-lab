@@ -38,6 +38,8 @@ set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
 
 add_library(character_dynamics_runtime STATIC ${CHARACTER_DYNAMICS_RUNTIME_SOURCES})
 target_include_directories(character_dynamics_runtime PUBLIC Inc)
+target_compile_definitions(character_dynamics_runtime PUBLIC
+    CHARACTER_DYNAMICS_GIT_REVISION="${CHARACTER_DYNAMICS_GIT_REVISION}")
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(character_dynamics_runtime PRIVATE -Wall -Wextra -Wpedantic)
 elseif(MSVC)

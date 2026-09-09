@@ -11,7 +11,7 @@ inline constexpr const char* WalletBalance = "wallet.balance";
 inline constexpr const char* RoomLight = "room.light";
 inline constexpr const char* RoomCurtain = "room.curtain";
 inline constexpr const char* RoomAlarm = "room.alarm";
-inline constexpr const char* RoomTemperature = "room.temperature";
+inline constexpr const char* RoomTemperature = "room.temperature_celsius";
 inline constexpr const char* ClockTime = "clock.time";
 inline constexpr const char* MessageUnreadCount = "message.unread_count";
 }
@@ -51,13 +51,25 @@ struct InformationAccess {
     bool self_task_completion_observable = true;
     bool wallet_balance_observable = false;
     bool object_usability_observable = false;
+    bool phone_presence_observable = true;
+    bool task_deadline_observable = true;
 };
+
+// Stable affordance knowledge belongs to O. It is deliberately separate from
+// current W object presence/usability, which may change before discovery.
+struct KnownObjectAffordance {
+    std::string id;
+    std::vector<ActionType> affordances;
+};
+struct ActionTargetBinding { ActionType action = ActionType::Idle; std::string target_object_id; };
 
 // O: a separately stored character-side view, even though this one-room
 // reference refreshes all visible fields deterministically.
 struct Observation {
     std::vector<std::string> visible_object_labels;
     std::vector<std::string> known_object_ids;
+    std::vector<KnownObjectAffordance> known_object_affordances;
+    std::vector<ActionTargetBinding> action_target_bindings;
     std::vector<ActionType> known_actions; // A^O, not W's full action set.
     std::vector<ObservationFact> facts;
     std::vector<ObservationFact> updates_this_refresh;
@@ -71,6 +83,7 @@ const ObservationFact* find_fact(const Observation& observation, const std::stri
 bool has_known_fact(const Observation& observation, const std::string& key, const std::string& value);
 bool known_bool(const Observation& observation, const std::string& key, bool& value);
 bool known_int(const Observation& observation, const std::string& key, int& value);
+bool known_double(const Observation& observation, const std::string& key, double& value);
 Observation refresh_observation(Observation previous,
                                 const World& world,
                                 const WorldOutcome& previous_outcome,

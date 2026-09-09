@@ -23,6 +23,36 @@ int main(int argc, char* argv[]) {
     if (argc > 1 && std::string(argv[1]) == "--e0") {
         return simulation.run_e0(std::cout) ? 0 : 1;
     }
+    if (argc > 1 && std::string(argv[1]) == "--paired-phone") {
+        const std::string output_path = argc > 2 ? argv[2] : "paired_phone_intervention.csv";
+        try {
+            simulation.run_paired_phone_intervention(std::cout, output_path);
+            return 0;
+        } catch (const std::exception& error) {
+            std::cerr << "paired phone intervention failed: " << error.what() << '\n';
+            return 1;
+        }
+    }
+    if (argc > 1 && std::string(argv[1]) == "--paired-deadline") {
+        const std::string output_path = argc > 2 ? argv[2] : "paired_deadline_intervention.csv";
+        try {
+            simulation.run_paired_deadline_intervention(std::cout, output_path);
+            return 0;
+        } catch (const std::exception& error) {
+            std::cerr << "paired deadline intervention failed: " << error.what() << '\n';
+            return 1;
+        }
+    }
+    if (argc > 1 && std::string(argv[1]) == "--paired-commitment") {
+        const std::string output_path = argc > 2 ? argv[2] : "paired_commitment_recovery.csv";
+        try {
+            simulation.run_paired_commitment_recovery(std::cout, output_path);
+            return 0;
+        } catch (const std::exception& error) {
+            std::cerr << "paired commitment fixture failed: " << error.what() << '\n';
+            return 1;
+        }
+    }
 
     simulation.run_all(std::cout);
     return 0;

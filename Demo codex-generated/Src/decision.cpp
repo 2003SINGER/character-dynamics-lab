@@ -176,6 +176,14 @@ DecisionContext decide(const Observation& observation,
     for (CandidateAction& item : decision.candidates) {
         item.probability = item.eligible ? item.probability / normalizer : 0.0;
     }
+    for (CandidateAction& item : decision.candidates) {
+        for (const ActionTargetBinding& binding : observation.action_target_bindings) {
+            if (binding.action == item.action) {
+                item.target_object_id = binding.target_object_id;
+                break;
+            }
+        }
+    }
     return decision;
 }
 
