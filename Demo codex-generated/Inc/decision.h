@@ -11,6 +11,7 @@
 
 struct CandidateAction {
     ActionType action = ActionType::Idle;
+    std::string target_object_id;
     double activation = 0.0;
     double threshold = 0.0;
     double probability = 0.0;

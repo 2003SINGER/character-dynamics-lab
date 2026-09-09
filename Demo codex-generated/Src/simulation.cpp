@@ -182,8 +182,9 @@ WorldOutcome settle_action(World& world,
                            CharacterState& state,
                            Observation& observation,
                            ActionType action,
+                           const std::string& target_object_id,
                            const InformationAccess& information_access) {
-    const WorldOutcome outcome = world.settle(action);
+    const WorldOutcome outcome = world.settle(action, target_object_id);
     apply_self_action_feedback(observation, outcome, world.time_summary(),
                                information_access.self_task_completion_observable);
     update_commitment(state, observation, total_minutes(world.time));
@@ -209,8 +210,16 @@ StepRecord advance_one_decision(World& world,
     trace.task_before = coursework_snapshot(world);
     trace.decision = snapshot.decision;
     trace.chosen_action = sample_action(trace.decision, action_rng);
+    std::string target_object_id;
+    for (const CandidateAction& candidate : trace.decision.candidates) {
+        if (candidate.action == trace.chosen_action) {
+            target_object_id = candidate.target_object_id;
+            break;
+        }
+    }
     trace.action_plan = world.expand_action(trace.chosen_action);
-    trace.outcome = settle_action(world, state, observation, trace.chosen_action, information_access);
+    trace.outcome = settle_action(world, state, observation, trace.chosen_action,
+                                  target_object_id, information_access);
     trace.state_after_settlement = state;
     trace.task_after = coursework_snapshot(world);
     if (!trace.outcome.sleeping_sensory_events.empty()) {
@@ -451,17 +460,19 @@ void Simulation::run_paired_phone_intervention(std::ostream& output, const std::
     const Personality personality = procrastinating_profile();
     constexpr unsigned int action_seed_base = 20260904U;
     for (unsigned int scenario_seed = 1; scenario_seed <= 8; ++scenario_seed) {
-        World hidden_world(scenario_seed), visible_world(scenario_seed);
-        CharacterState hidden_state, visible_state;
-        Observation hidden_observation, visible_observation;
-        WorldOutcome hidden_previous, visible_previous;
-        std::mt19937 hidden_rng(action_seed_base + scenario_seed), visible_rng(action_seed_base + scenario_seed);
+        World control_world(scenario_seed), hidden_world(scenario_seed), visible_world(scenario_seed);
+        CharacterState control_state, hidden_state, visible_state;
+        Observation control_observation, hidden_observation, visible_observation;
+        WorldOutcome control_previous, hidden_previous, visible_previous;
+        std::mt19937 control_rng(action_seed_base + scenario_seed), hidden_rng(action_seed_base + scenario_seed), visible_rng(action_seed_base + scenario_seed);
         ScenarioConfig hidden_config{}; hidden_config.information_access.phone_presence_observable = false;
         ScenarioConfig visible_config{}; visible_config.information_access.phone_presence_observable = true;
         for (int step = 1; step <= 12; ++step) {
             // Both branches observe the common initial phone. After the
             // intervention the hidden branch keeps the last phone fact.
             hidden_config.information_access.phone_presence_observable = (step == 1);
+            const StepRecord control = advance_one_decision(control_world, control_state, control_observation,
+                control_previous, control_rng, personality, {});
             const StepRecord hidden = advance_one_decision(hidden_world, hidden_state, hidden_observation,
                 hidden_previous, hidden_rng, personality, hidden_config.information_access);
             const StepRecord visible = advance_one_decision(visible_world, visible_state, visible_observation,
@@ -485,6 +496,7 @@ void Simulation::run_paired_phone_intervention(std::ostream& output, const std::
             };
             emit("hidden", hidden, hidden_world);
             emit("visible", visible, visible_world);
+            emit("control", control, control_world);
             if (step == 1) {
                 for (World* world : {&hidden_world, &visible_world}) {
                     Room& room = world->current_room();
@@ -494,7 +506,7 @@ void Simulation::run_paired_phone_intervention(std::ostream& output, const std::
             }
         }
     }
-    output << "paired phone intervention complete: 8 seeds x 12 steps x 2 branches saved to " << path.string() << '\n';
+    output << "paired phone intervention complete: 8 seeds x 12 steps x 3 branches saved to " << path.string() << '\n';
 }
 
 bool Simulation::verify(std::ostream& output) const {
@@ -748,6 +760,23 @@ bool Simulation::verify(std::ostream& output) const {
             == visible_phone_after_removal.known_actions.end()
         && std::find(visible_phone_after_removal.known_actions.begin(), visible_phone_after_removal.known_actions.end(), ActionType::ShopOnPhone)
             == visible_phone_after_removal.known_actions.end();
+    World discovery_world;
+    Observation discovery_observation = refresh_observation({}, discovery_world, {});
+    discovery_world.current_room().objects.erase(
+        std::remove_if(discovery_world.current_room().objects.begin(), discovery_world.current_room().objects.end(),
+            [](const Object& object) { return object.id == "phone"; }),
+        discovery_world.current_room().objects.end());
+    const WorldOutcome discovery_failure = discovery_world.settle(ActionType::UsePhone, "phone");
+    apply_self_action_feedback(discovery_observation, discovery_failure,
+                               discovery_world.time_summary());
+    const Observation discovery_next = refresh_observation(discovery_observation, discovery_world, discovery_failure);
+    const ObservationFact* corrected_phone = find_fact(discovery_next, "object.phone");
+    const bool typed_discovery_correction = discovery_failure.failure_reason == RejectionReason::TargetAbsent
+        && discovery_failure.target_object_id == "phone"
+        && corrected_phone != nullptr && corrected_phone->value == "absent"
+        && corrected_phone->source == "failed_direct_interaction"
+        && std::find(discovery_next.known_actions.begin(), discovery_next.known_actions.end(), ActionType::UsePhone)
+            == discovery_next.known_actions.end();
     ScenarioConfig configured_scenario;
     configured_scenario.information_access.wallet_balance_observable = true;
     const std::string default_scenario_run = run_profile(first, 20260904U, 0U, false, 2, true);
@@ -786,7 +815,8 @@ bool Simulation::verify(std::ostream& output) const {
            << ", visible_wallet_filters_purchase=" << visible_wallet_filters_purchase
            << ", visible_usability_filters_action=" << visible_usability_filters_action
            << ", hidden_belief_retains_phone_actions=" << hidden_belief_retains_phone_actions
-           << ", visible_phone_removes_actions=" << visible_phone_removes_actions << '\n';
+           << ", visible_phone_removes_actions=" << visible_phone_removes_actions
+           << ", typed_discovery_correction=" << typed_discovery_correction << '\n';
     return reproducible && profile_sensitive && validates_world && has_primitives
         && primitives_settle && handles_interruption && completed_task_stays_quiet && deduplicates_actions
         && preserves_rejected_feedback && keeps_broken_object_visible && does_not_leak_hidden_wallet
@@ -800,7 +830,8 @@ bool Simulation::verify(std::ostream& output) const {
         && light_precondition_filters_known_state && curtain_precondition_filters_known_state
         && study_requires_known_light && silent_alarm_filters_action
         && visible_wallet_filters_purchase && visible_usability_filters_action
-        && hidden_belief_retains_phone_actions && visible_phone_removes_actions;
+        && hidden_belief_retains_phone_actions && visible_phone_removes_actions
+        && typed_discovery_correction;
 }
 
 bool Simulation::run_e0(std::ostream& output) const {

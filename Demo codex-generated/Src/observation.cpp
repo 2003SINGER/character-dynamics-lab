@@ -195,7 +195,7 @@ Observation refresh_observation(Observation observation,
         const std::string object_id = object_id_from_fact_key(fact.key);
         if (!object_id.empty()) {
             if (object_id == "phone" && !access.phone_presence_observable) continue;
-            if (!contains_id(observation.known_object_ids, object_id)) {
+            if (!contains_id(observation.known_object_ids, object_id) && fact.value == "present") {
                 mark_stale(observation, fact.key);
                 absent_object_ids.push_back(object_id);
             }
@@ -286,6 +286,32 @@ void apply_self_action_feedback(Observation& observation,
     observation.last_self_action = {true, outcome.action, outcome.accepted, outcome.task_id,
         outcome.task_completed && completion_is_observable,
         outcome.accepted ? "accepted by W" : "rejected by W", "self_action_feedback", observed_at};
+    if (!outcome.accepted && outcome.failure_reason == RejectionReason::TargetAbsent
+        && !outcome.target_object_id.empty()) {
+        const std::string object_key = "object." + outcome.target_object_id;
+        const std::size_t pending_start = observation.updates_this_refresh.size();
+        std::vector<ActionType> revoked_actions;
+        for (const KnownObjectAffordance& item : observation.known_object_affordances) {
+            if (item.id == outcome.target_object_id) revoked_actions = item.affordances;
+        }
+        write_fact(observation, object_key, "absent", "failed_direct_interaction", observed_at);
+        observation.known_object_ids.erase(
+            std::remove(observation.known_object_ids.begin(), observation.known_object_ids.end(), outcome.target_object_id),
+            observation.known_object_ids.end());
+        observation.known_object_affordances.erase(
+            std::remove_if(observation.known_object_affordances.begin(), observation.known_object_affordances.end(),
+                [&outcome](const KnownObjectAffordance& item) { return item.id == outcome.target_object_id; }),
+            observation.known_object_affordances.end());
+        observation.known_actions.erase(
+            std::remove_if(observation.known_actions.begin(), observation.known_actions.end(),
+                [&revoked_actions](ActionType action) {
+                    return std::find(revoked_actions.begin(), revoked_actions.end(), action)
+                        != revoked_actions.end();
+                }), observation.known_actions.end());
+        observation.pending_appraisal_updates.insert(observation.pending_appraisal_updates.end(),
+            observation.updates_this_refresh.begin() + static_cast<std::ptrdiff_t>(pending_start),
+            observation.updates_this_refresh.end());
+    }
     if (!outcome.accepted || outcome.task_id.empty()) return;
 
     const std::string status_key = "task." + outcome.task_id + ".status";
