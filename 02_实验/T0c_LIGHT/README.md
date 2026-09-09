@@ -16,7 +16,7 @@
 
 ### Actor-local history eligibility gate v0（2026-09-09）
 
-严格同 trajectory、同 actor、non-quarantine 的 gate 已完成：13,463 targets / 6,869 actor-trajectory units；但在排除 exact previous `(O,A*)` repeats 的 nontrivial view 上，`O+PREV_SAME_ACTOR_ACTION` 和 `O+LAST2_SAME_ACTOR_HISTORY` 的 NLL 都劣于 `O_ONLY`。Verdict 为 `NO_CLEAR_ACTOR_LOCAL_HISTORY_SIGNAL`；LIGHT 不进入 persistent-compression 或 Theory-S bridge，下一候选转 OPeRA。详见 [gate report](LIGHT_actor_local_history_gate_v0.md)。
+严格同 trajectory、同 actor、non-quarantine 的 gate 已完成：13,463 targets / 6,869 actor-trajectory units。原 H0 equality-bit probe 被标记为 `LIGHT_H0_INCONCLUSIVE_HISTORY_FEATURE_TOO_NARROW`；它没有表示上一动作的通用语义。H0b 已用 generic Replay action interactions 加 capacity-matched permutation control 重跑，nontrivial view 上 aligned history 优于 O-only 与 permuted history。详见 [H0b report](LIGHT_H0b_transition_probe_v0.md)。
 
 ### Blind semantic admission 50（2026-09-07）
 

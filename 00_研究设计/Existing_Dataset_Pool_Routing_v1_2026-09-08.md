@@ -5,7 +5,7 @@
 
 ## Superseding update（2026-09-09）
 
-The shortlist below is historical routing v1. It is superseded for the current next-action route: ClubFloyd Stage 0c found no positive low-order history increment after exact pair repeats were excluded, so its persistent-compression / Theory-S bridge is paused. LIGHT is now the next **eligibility-gate** candidate, not permission to start six-dimensional Theory-S training. OPeRA remains the backup if LIGHT fails the actor-local gate.
+The shortlist below is historical routing v1. It is superseded for the current next-action route: ClubFloyd Stage 0c found no positive low-order history increment after exact pair repeats were excluded, so its persistent-compression / Theory-S bridge is paused. LIGHT H0b now finds aligned generic action-transition signal beyond O-only and a permuted control. LIGHT may proceed to a generic/raw-history versus naive persistent-compression benchmark; this is not permission to start Theory-S training. OPeRA remains the backup if that compression benchmark fails.
 
 ## Decision summary
 
@@ -57,8 +57,8 @@ The shortlist below is historical routing v1. It is superseded for the current n
 ## Next action
 
 Do **not** start Theory-S training from this historical routing page. ClubFloyd
-Stage 0c is now paused for this estimand. The current next action is the
-strict LIGHT actor-local history eligibility gate, with lossless source,
-source candidate lists treated only as observed support (not `A^O`), and no
-new X fields. If LIGHT fails that gate, route to OPeRA; do not reopen ClubFloyd
-Stage 0d or iterate candidate reconstruction here.
+Stage 0c is paused for this estimand. LIGHT H0b has passed the history-signal
+gate, so the next action is a generic/raw-history versus naive
+persistent-compression benchmark with lossless source, source candidate lists
+treated only as observed support (not `A^O`), and no new X fields. If that
+compression benchmark fails, route to OPeRA; do not reopen ClubFloyd Stage 0d.

@@ -27,4 +27,4 @@ On the full view, L1/L2 improve NLL only slightly. On the predeclared nontrivial
 
 ## Verdict
 
-`NO_CLEAR_ACTOR_LOCAL_HISTORY_SIGNAL` for this source-support next-action diagnostic. Do not enter generic persistent compression or Theory-S from LIGHT. Route next to OPeRA only after recording this gate; this is a data×interface no-go, not a Theory-S no-go.
+The earlier `NO_CLEAR_ACTOR_LOCAL_HISTORY_SIGNAL` verdict is superseded as **`LIGHT_H0_INCONCLUSIVE_HISTORY_FEATURE_TOO_NARROW`**. The equality-bit probe only tested whether a current candidate exactly repeated the previous action; it did not represent the previous action's generic semantics. Do not route to OPeRA from this artifact alone. See the H0b transition probe.
