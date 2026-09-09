@@ -39,8 +39,12 @@ def target_rows(rows, rules):
                 continue
             prev = action_vec(r.get('previous_source_action_A_star'), r.get('previous_source_O'), rules)
             prev2 = action_vec(r.get('previous2_source_action_A_star'), r.get('previous2_source_O'), rules)
-            # State is a fixed, non-fitted cumulative mean of prior same-actor actions.
-            state = np.mean(np.stack(prior), axis=0) if prior else np.zeros(13, dtype=float)
+            # The first eligible target already has one prior action outside this view.
+            # Seed the persistent history with it before computing S_t.
+            if not prior:
+                prior.append(prev)
+            # State is a fixed, non-fitted cumulative mean of all prior same-actor actions.
+            state = np.mean(np.stack(prior), axis=0)
             fs = []
             for c in cand:
                 cv = action_vec(c, r.get('source_O'), rules)
@@ -54,6 +58,7 @@ def target_rows(rows, rules):
                 'target_id': f"{r['trajectory_id']}::{r['target_step_index']}",
                 'group_key': unit,
                 'features': fs,
+                'persistent_state': state.tolist(),
                 'gold_index': int(gold),
                 'exact_previous_pair': bool(r.get('exact_previous_pair')),
                 'history_surface': r.get('history_surface'),
@@ -66,7 +71,7 @@ def permute_states(rows):
     ordered = sorted(rows, key=lambda r: hashlib.sha256(r['target_id'].encode()).hexdigest())
     if len(ordered) <= 1:
         return rows
-    shifted = [r['_persistent_state'] for r in ordered[1:] + ordered[:1]]
+    shifted = [np.asarray(r['persistent_state'], dtype=float) for r in ordered[1:] + ordered[:1]]
     remap = {r['target_id']: s for r, s in zip(ordered, shifted)}
     out = []
     for r in rows:
@@ -75,7 +80,7 @@ def permute_states(rows):
         for item in r['_base_items']:
             cv = item['current']
             fs.append({'current': cv, 'raw_prev': item['raw_prev'], 'raw_last2': item['raw_last2'], 'persistent_mean': np.concatenate([cv, cv * state])})
-        q = dict(r); q['features'] = fs; out.append(q)
+        q = dict(r); q['features'] = fs; q['permuted_persistent_state'] = state.tolist(); out.append(q)
     return out
 
 def evaluate(model, groups):
@@ -98,12 +103,10 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument('full_view', type=Path); ap.add_argument('rules', type=Path); ap.add_argument('out', type=Path); ap.add_argument('--runner-commit', required=True); a = ap.parse_args()
     raw = [json.loads(x) for x in a.full_view.open(encoding='utf-8') if x.strip()]
     rules = json.loads(a.rules.read_text(encoding='utf-8')); rows = target_rows(raw, rules)
-    for r in rows:
-        r['_base_items'] = r['features']; r['_persistent_state'] = np.asarray(r['features'][0]['persistent_mean'][13:], dtype=float) if r['features'] else np.zeros(13)
-    # Keep the candidate vectors and all condition dimensions identical across controls.
-    perm = permute_states(rows)
     units = sorted({r['group_key'] for r in rows}); train = {u for u in units if bucket(u) < 7}; test = {u for u in units if bucket(u) >= 9}
-    result = {'schema_version': 'light_actor_local_compression_benchmark_v0', 'runner_commit': a.runner_commit, 'runner_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'feature_compiler_sha256': hashlib.sha256((Path(__file__).parents[1] / 'Replay/replay_features_v1.py').read_bytes()).hexdigest(), 'probe_sha256': hashlib.sha256((Path(__file__).parents[1] / 'Replay/replay_probe_v1.py').read_bytes()).hexdigest(), 'rules_sha256': hashlib.sha256(a.rules.read_bytes()).hexdigest(), 'full_view_sha256': hashlib.sha256(a.full_view.read_bytes()).hexdigest(), 'feature_version': FEATURE_VERSION, 'protocol': {'raw_prev': 'current 13D + current⊙previous 13D = 26D', 'persistent_mean': 'current 13D + current⊙cumulative-mean prior same-actor action 13D = 26D', 'persistent_permuted': 'same 26D persistent feature with deterministic cyclic state permutation', 'raw_last2': 'current 13D + previous interaction 13D + previous2 interaction 13D = 39D', 'state_update': 'fixed cumulative mean; no fitted state, LLM, ontology, X, or candidate reconstruction'}, 'train_unit_count': len(train), 'test_unit_count': len(test), 'rows': len(rows), 'conditions': {}, 'paired_unit_bootstrap_delta_nll': {}}
+    result = {'schema_version': 'light_actor_local_compression_benchmark_v0', 'runner_commit': a.runner_commit, 'runner_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'feature_compiler_sha256': hashlib.sha256((Path(__file__).parents[1] / 'Replay/replay_features_v1.py').read_bytes()).hexdigest(), 'probe_sha256': hashlib.sha256((Path(__file__).parents[1] / 'Replay/replay_probe_v1.py').read_bytes()).hexdigest(), 'rules_sha256': hashlib.sha256(a.rules.read_bytes()).hexdigest(), 'full_view_sha256': hashlib.sha256(a.full_view.read_bytes()).hexdigest(), 'feature_version': FEATURE_VERSION, 'protocol': {'raw_prev': 'current 13D + current⊙previous 13D = 26D', 'persistent_mean': 'current 13D + current⊙cumulative-mean prior same-actor action 13D = 26D; first eligible target seeds history with previous_source_action_A_star', 'persistent_permuted': 'same 26D persistent feature with deterministic cyclic no-self state permutation separately inside train and test', 'raw_last2': 'current 13D + previous interaction 13D + previous2 interaction 13D = 39D', 'state_update': 'fixed cumulative mean; no fitted state, LLM, ontology, X, or candidate reconstruction'}, 'train_unit_count': len(train), 'test_unit_count': len(test), 'rows': len(rows), 'conditions': {}, 'paired_unit_bootstrap_delta_nll': {}}
+    # Permute only within each split, so no donor state crosses the train/test boundary.
+    perm = permute_states([r for r in rows if r['group_key'] in train]) + permute_states([r for r in rows if r['group_key'] in test])
     all_conditions = {'raw_prev': rows, 'persistent_mean': rows, 'persistent_permuted': perm, 'raw_last2': rows}
     saved = {}
     for name, source in all_conditions.items():
