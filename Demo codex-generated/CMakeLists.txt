@@ -111,23 +111,19 @@ add_executable(character_dynamics_runtime_channel_coverage_smoke tests/runtime_c
 target_link_libraries(character_dynamics_runtime_channel_coverage_smoke PRIVATE character_dynamics_runtime)
 add_test(NAME character_dynamics_runtime_channel_coverage_smoke
          COMMAND character_dynamics_runtime_channel_coverage_smoke)
-# Closure matrix names intentionally point at the same deterministic acceptance
-# binary so CI/reporting can track each gate without duplicating fixture logic.
-foreach(gate_name IN ITEMS
-    runtime_clock_authority_smoke
-    runtime_world_event_boundary_smoke
-    runtime_world_event_source_consistency
-    runtime_action_start_validation_smoke
-    runtime_action_completion_smoke
-    runtime_action_invalidation_smoke
-    runtime_hidden_event_no_leak_smoke
-    runtime_perception_projection_smoke
-    runtime_typed_rejection_smoke
-    runtime_weak_event_continue_smoke
-    runtime_state_threshold_boundary_smoke)
-    add_test(NAME ${gate_name}
-             COMMAND character_dynamics_runtime_closure_acceptance_smoke)
-endforeach()
+# Each matrix entry executes the smallest executable that owns that semantic
+# case; labels are no longer aliases for one monolithic smoke binary.
+add_test(NAME runtime_clock_authority_smoke COMMAND character_dynamics_runtime_scheduler_smoke)
+add_test(NAME runtime_world_event_boundary_smoke COMMAND character_dynamics_runtime_vertical_slice_smoke)
+add_test(NAME runtime_world_event_source_consistency COMMAND character_dynamics_runtime_channel_coverage_smoke)
+add_test(NAME runtime_action_start_validation_smoke COMMAND character_dynamics_runtime_closure_acceptance_smoke)
+add_test(NAME runtime_action_completion_smoke COMMAND character_dynamics_runtime_closure_acceptance_smoke)
+add_test(NAME runtime_action_invalidation_smoke COMMAND character_dynamics_runtime_closure_acceptance_smoke)
+add_test(NAME runtime_hidden_event_no_leak_smoke COMMAND character_dynamics_runtime_mechanism_fixtures_smoke)
+add_test(NAME runtime_perception_projection_smoke COMMAND character_dynamics_runtime_channel_coverage_smoke)
+add_test(NAME runtime_typed_rejection_smoke COMMAND character_dynamics_runtime_channel_coverage_smoke)
+add_test(NAME runtime_weak_event_continue_smoke COMMAND character_dynamics_runtime_scheduler_smoke)
+add_test(NAME runtime_state_threshold_boundary_smoke COMMAND character_dynamics_runtime_closure_acceptance_smoke)
 
 add_executable(character_dynamics_replay_core
     Src/replay_core_cli.cpp

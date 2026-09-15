@@ -1,6 +1,7 @@
 #pragma once
 
 #include "action.h"
+#include "runtime_config.h"
 
 #include <optional>
 #include <string>
@@ -74,7 +75,7 @@ struct RuntimeBoundary {
 // an otherwise completed interruptible action. Only then is completion settled.
 class RuntimeScheduler {
 public:
-    explicit RuntimeScheduler(int start_total_minutes = 0, int max_runtime_step_minutes = 60)
+    explicit RuntimeScheduler(int start_total_minutes = 0, int max_runtime_step_minutes = RuntimeConfig::DefaultMaxIntegrationStepMinutes)
         : now_total_minutes_(start_total_minutes), max_runtime_step_minutes_(max_runtime_step_minutes) {}
 
     int now_total_minutes() const { return now_total_minutes_; }
@@ -95,7 +96,7 @@ public:
 
 private:
     int now_total_minutes_ = 0;
-    int max_runtime_step_minutes_ = 60;
+    int max_runtime_step_minutes_ = RuntimeConfig::DefaultMaxIntegrationStepMinutes;
     std::optional<RunningAction> running_action_;
     std::vector<ScheduledRuntimeEvent> scheduled_events_;
 };

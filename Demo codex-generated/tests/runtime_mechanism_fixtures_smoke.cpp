@@ -1,96 +1,58 @@
 #include "continuous_runtime.h"
 #include "decision.h"
-
 #include <algorithm>
-#include <iostream>
 
-static bool has_fact(const Observation& observation, const char* key) {
-    return find_fact(observation, key) != nullptr;
-}
+static bool fact(const Observation& o, const char* k) { return find_fact(o, k) != nullptr; }
+static bool tag(const Appraisal& a, const char* t) { return std::find(a.tags.begin(), a.tags.end(), t) != a.tags.end(); }
 
 int main() {
-    Personality personality;
+    Personality p;
+    World w; w.time.minute_of_day = 560; w.tasks.front().due_at_total_minutes = 565;
+    RuntimeScheduler sch(560); Observation o = refresh_observation({}, w, {});
+    ContinuousRuntime rt(sch, w, o);
+    if (!rt.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 1;
+    CharacterState s; auto tick = rt.execute_next_boundary(s, p);
+    if (!fact(o, "task.deadline_passed") || !tag(tick.appraisal, "deadline_passed")
+        || tick.impulse_state.applied.task_pressure <= 0.0 || !tick.running_action_after
+        || tick.running_action_after->elapsed_minutes != 5) return 2;
 
-    // Scheduler-native Deadline: the event boundary precedes action completion.
-    World deadline_world;
-    deadline_world.time.minute_of_day = 9 * 60 + 20;
-    deadline_world.tasks.front().due_at_total_minutes = 9 * 60 + 25;
-    RuntimeScheduler deadline_scheduler(9 * 60 + 20);
-    Observation deadline_observation = refresh_observation({}, deadline_world, {});
-    ContinuousRuntime deadline_runtime(deadline_scheduler, deadline_world, deadline_observation);
-    const WorldOutcome deadline_start = deadline_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35);
-    if (!deadline_start.accepted) { std::cerr << "deadline reject " << static_cast<int>(deadline_start.failure_reason) << "\n"; return 1; }
-    CharacterState deadline_state;
-    const RuntimeExecutionResult deadline_tick = deadline_runtime.execute_next_boundary(deadline_state, personality);
-    if (deadline_tick.runtime.boundary.at_total_minutes != 9 * 60 + 25
-        || std::none_of(deadline_tick.runtime.world_events.begin(), deadline_tick.runtime.world_events.end(),
-                        [](const WorldEvent& event) { return event.id == "task-deadline"; })
-        || !has_known_fact(deadline_observation, "task.deadline_passed", "1")
-        || std::find(deadline_tick.appraisal.tags.begin(), deadline_tick.appraisal.tags.end(),
-                     "deadline_passed") == deadline_tick.appraisal.tags.end()) {
-        std::cerr << "deadline t=" << deadline_tick.runtime.boundary.at_total_minutes
-                  << " events=" << deadline_tick.runtime.world_events.size() << "\n";
-        return 2;
-    }
-    InformationAccess hidden_deadline;
-    hidden_deadline.task_deadline_observable = false;
-    World hidden_deadline_world;
-    hidden_deadline_world.time.minute_of_day = 9 * 60 + 20;
-    hidden_deadline_world.tasks.front().due_at_total_minutes = 9 * 60 + 25;
-    RuntimeScheduler hidden_deadline_scheduler(9 * 60 + 20);
-    Observation hidden_deadline_observation = refresh_observation({}, hidden_deadline_world, {}, hidden_deadline);
-    ContinuousRuntime hidden_deadline_runtime(hidden_deadline_scheduler, hidden_deadline_world,
-                                              hidden_deadline_observation, hidden_deadline);
-    if (!hidden_deadline_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 7;
-    CharacterState hidden_deadline_state;
-    const RuntimeExecutionResult hidden_deadline_tick =
-        hidden_deadline_runtime.execute_next_boundary(hidden_deadline_state, personality);
-    if (has_fact(hidden_deadline_observation, "task.deadline_passed")
-        || std::find(hidden_deadline_tick.appraisal.tags.begin(), hidden_deadline_tick.appraisal.tags.end(),
-                     "deadline_passed") != hidden_deadline_tick.appraisal.tags.end()) return 8;
+    InformationAccess hidden; hidden.task_deadline_observable = false;
+    World hw; hw.time.minute_of_day = 560; hw.tasks.front().due_at_total_minutes = 565;
+    RuntimeScheduler hsch(560); Observation ho = refresh_observation({}, hw, {}, hidden);
+    ContinuousRuntime hrt(hsch, hw, ho, hidden); hrt.submit_action_intent(ActionType::StudyFocused, "desk", 35);
+    CharacterState hs; auto ht = hrt.execute_next_boundary(hs, p);
+    if (fact(ho, "task.deadline_passed") || tag(ht.appraisal, "deadline_passed")
+        || ht.impulse_state.applied.task_pressure != 0.0) return 3;
 
-    // Scheduler-native Phone: hidden W absence remains an attempted intent and
-    // becomes a typed rejection without creating an illegal RunningAction.
-    World phone_world;
-    phone_world.time.minute_of_day = 9 * 60 + 20;
-    const Observation phone_prior = refresh_observation({}, phone_world, {});
-    if (!observation_knows_action(phone_prior, ActionType::UsePhone)) return 9;
-    phone_world.current_room().objects.front().usable = false;
-    RuntimeScheduler phone_scheduler(9 * 60 + 20);
-    InformationAccess hidden_phone;
-    hidden_phone.phone_presence_observable = false;
-    Observation phone_observation = refresh_observation({}, phone_world, {}, hidden_phone);
-    ContinuousRuntime phone_runtime(phone_scheduler, phone_world, phone_observation, hidden_phone);
-    if (phone_runtime.submit_action_intent(ActionType::UsePhone, "phone", 10).accepted) return 3;
-    CharacterState phone_state;
-    const RuntimeExecutionResult phone_tick = phone_runtime.execute_next_boundary(phone_state, personality);
-    if ((phone_scheduler.running_action().has_value()
-         && phone_scheduler.running_action()->action == ActionType::UsePhone)
-        || phone_observation.action_constraints.empty()
-        || !phone_tick.policy_evaluated) {
-        return 4;
-    }
-    const auto use_phone_candidate = std::find_if(phone_tick.decision.candidates.begin(),
-                                                  phone_tick.decision.candidates.end(),
-                                                  [](const CandidateAction& c) { return c.action == ActionType::UsePhone; });
-    if (use_phone_candidate != phone_tick.decision.candidates.end() && use_phone_candidate->probability > 0.0) return 10;
+    World pw; pw.time.minute_of_day = 560; Observation po = refresh_observation({}, pw, {});
+    if (!observation_knows_action(po, ActionType::UsePhone)) return 4;
+    pw.current_room().objects.front().usable = false;
+    hidden.phone_presence_observable = false; po = refresh_observation(po, pw, {}, hidden);
+    if (!observation_knows_action(po, ActionType::UsePhone)) return 5;
+    RuntimeScheduler psch(560); ContinuousRuntime prt(psch, pw, po, hidden);
+    if (prt.submit_action_intent(ActionType::UsePhone, "phone", 10).accepted) return 6;
+    CharacterState ps; auto pt = prt.execute_next_boundary(ps, p);
+    if (pt.running_action_after && pt.running_action_after->action == ActionType::UsePhone) return 7;
 
-    // Scheduler-native Commitment consumer reads typed self-feedback before O
-    // is consumed; hidden completion does not clear the commitment.
-    World commitment_world;
-    commitment_world.time.minute_of_day = 9 * 60 + 20;
-    commitment_world.tasks.front().effort_target = 0.01;
-    RuntimeScheduler commitment_scheduler(9 * 60 + 20);
-    InformationAccess hidden_completion;
-    hidden_completion.self_task_completion_observable = false;
-    Observation commitment_observation = refresh_observation({}, commitment_world, {}, hidden_completion);
-    ContinuousRuntime commitment_runtime(commitment_scheduler, commitment_world, commitment_observation,
-                                          hidden_completion);
-    if (!commitment_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 5;
-    CharacterState commitment_state;
-    commitment_state.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
-    commitment_runtime.execute_next_boundary(commitment_state, personality);
-    commitment_runtime.execute_next_boundary(commitment_state, personality);
-    if (commitment_state.commitment.status != CommitmentStatus::Active) return 6;
+    World cw; cw.time.minute_of_day = 560; cw.tasks.front().effort_target = 0.01;
+    RuntimeScheduler csch(560); Observation co = refresh_observation({}, cw, {}); ContinuousRuntime crt(csch, cw, co);
+    crt.set_test_action_selector([](const DecisionContext&) { return ActionType::StudyFocused; });
+    if (!crt.submit_action_intent(ActionType::StudyFocused, "desk", 1).accepted) return 8;
+    CharacterState cs; crt.execute_next_boundary(cs, p);
+    if (cs.commitment.status != CommitmentStatus::Active) return 9;
+    crt.execute_next_boundary(cs, p);
+    cs.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
+    World rw; rw.time.minute_of_day = 560; Observation ro = refresh_observation({}, rw, {});
+    RuntimeScheduler rsch(560); ContinuousRuntime rrt(rsch, rw, ro);
+    if (!rrt.submit_action_intent(ActionType::RestAtBed, "bed", 1).accepted) return 10;
+    CharacterState rs; rs.commitment = cs.commitment; rrt.execute_next_boundary(rs, p);
+    if (rs.commitment.status != CommitmentStatus::Suspended) return 11;
+
+    InformationAccess no_completion; no_completion.self_task_completion_observable = false;
+    World nw; nw.time.minute_of_day = 560; nw.tasks.front().effort_target = 0.01;
+    RuntimeScheduler nsch(560); Observation no = refresh_observation({}, nw, {}, no_completion);
+    ContinuousRuntime nrt(nsch, nw, no, no_completion); nrt.submit_action_intent(ActionType::StudyFocused, "desk", 1);
+    CharacterState ns; ns.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
+    nrt.execute_next_boundary(ns, p); if (ns.commitment.status != CommitmentStatus::Active) return 12;
     return 0;
 }

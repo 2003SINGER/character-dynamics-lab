@@ -96,7 +96,7 @@ agnostic. Its smoke test demonstrates:
 The runtime bridge now provides `World::validate_runtime_start`, typed
 rejection payloads, and a perception-aware `apply_world_events` projector;
 fixtures must use these APIs rather than duplicating W's event meaning in
-key/value writes. Remaining closure work is tracked in the acceptance matrix:
+key/value writes. Historical closure notes are retained below; current status is tracked in the acceptance matrix:
 give the rejection event its typed `WorldOutcome` payload and then project it
 to O, where the existing `ActionConstraintBelief` can remain the persistent
 actor-local consequence. It must not make `W -> S` a shortcut or copy hidden
@@ -133,7 +133,7 @@ psychological model, or authorize a batch/evaluator migration.
 Future scheduler boundaries must include state-threshold crossings (or a
 bounded numerical step when they cannot be predicted), in addition to world
 events, physical preemption, action completion and external input.
-The v1 fallback is `RuntimeScheduler::max_runtime_step_minutes` (default 60):
+The v1 default is the shared `RuntimeConfig::DefaultMaxIntegrationStepMinutes` (60):
 long actions receive bounded integration opportunities even when no event source
 can predict a threshold crossing.
 
@@ -149,7 +149,7 @@ re-appraised at the same timestamp.
 Threshold replacement first calls the canonical W start-validation path. An
 accepted replacement ends the old action and starts the new one at the same
 authoritative clock; a rejected replacement leaves the old action running and
-uses the existing one-minute typed-rejection transition latency.
+uses the shared `RuntimeConfig::RejectionFeedbackLatencyMinutes` transition latency.
 
 At every stage, old and new outputs must have distinct provenance and run
 directories. `optimizer_train`, `internal_holdout`, Objective v0 and optimizer

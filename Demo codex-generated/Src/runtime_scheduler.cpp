@@ -62,7 +62,7 @@ void RuntimeScheduler::start_action(ActionType action, std::string target_object
 
 void RuntimeScheduler::invalidate_running_action() {
     if (!running_action_.has_value()) throw std::logic_error("Cannot invalidate without a running action");
-    schedule({"action_invalidated", now_total_minutes_ + 1, true, std::nullopt,
+    schedule({"action_invalidated", now_total_minutes_ + RuntimeConfig::PhysicalInvalidationLatencyMinutes, true, std::nullopt,
               DecisionGateReason::PlanInvalidated});
 }
 
@@ -79,7 +79,7 @@ void RuntimeScheduler::reject_action(ActionType action, std::string target_objec
     // A rejection is feedback for a proposed intent. It does not modify an
     // unrelated running action; the actor receives it at the next transition.
     schedule({"action_rejected:" + to_string(action) + ":" + target_object_id,
-              now_total_minutes_ + 1, false, std::move(rejection),
+              now_total_minutes_ + RuntimeConfig::RejectionFeedbackLatencyMinutes, false, std::move(rejection),
               running_action_.has_value() ? std::optional<DecisionGateReason>{}
                                            : std::optional<DecisionGateReason>{DecisionGateReason::ActionRejected}});
 }

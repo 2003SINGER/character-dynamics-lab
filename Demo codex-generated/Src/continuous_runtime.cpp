@@ -1,7 +1,6 @@
 #include "continuous_runtime.h"
 
 namespace {
-constexpr double kNeedReconsiderationThreshold = 0.40; // Runtime v1 engineering semantics.
 }
 
 ContinuousRuntime::ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation,
@@ -54,10 +53,10 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     }
     schedule_next_world_boundary();
     bool threshold_reconsideration = false;
-    if ((before_continuous.hunger < kNeedReconsiderationThreshold
-         && state.hunger >= kNeedReconsiderationThreshold)
-        || (before_continuous.bathroom_urge < kNeedReconsiderationThreshold
-            && state.bathroom_urge >= kNeedReconsiderationThreshold)) {
+    if ((before_continuous.hunger < RuntimeConfig::NeedReconsiderationThreshold
+         && state.hunger >= RuntimeConfig::NeedReconsiderationThreshold)
+        || (before_continuous.bathroom_urge < RuntimeConfig::NeedReconsiderationThreshold
+            && state.bathroom_urge >= RuntimeConfig::NeedReconsiderationThreshold)) {
         result.runtime.boundary.decision_gate.open = true;
         result.runtime.boundary.decision_gate.reasons.push_back(DecisionGateReason::NeedThresholdCrossed);
         threshold_reconsideration = true;
