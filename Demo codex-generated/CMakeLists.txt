@@ -35,6 +35,7 @@ set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
     Src/candidate_scoring.cpp
     Src/decision.cpp
     Src/simulation.cpp
+    Src/runtime_scheduler.cpp
 )
 
 add_library(character_dynamics_runtime STATIC ${CHARACTER_DYNAMICS_RUNTIME_SOURCES})
@@ -78,6 +79,11 @@ if(MINGW)
 endif()
 add_test(NAME character_dynamics_core_experiment_smoke
          COMMAND character_dynamics_core_smoke)
+
+add_executable(character_dynamics_runtime_scheduler_smoke tests/runtime_scheduler_smoke.cpp)
+target_link_libraries(character_dynamics_runtime_scheduler_smoke PRIVATE character_dynamics_runtime)
+add_test(NAME character_dynamics_runtime_scheduler_smoke
+         COMMAND character_dynamics_runtime_scheduler_smoke)
 
 add_executable(character_dynamics_replay_core
     Src/replay_core_cli.cpp

@@ -1,0 +1,1003 @@
+看完了。这个修法总体是对的，而且 不是给 shop_on_phone 打补丁，是真正做成了通用的 Typed Rejection Feedback v0。
+最新 webgpt-sync HEAD 是 b2d8672 fix: feed typed rejected actions into observation。它新增了 ActionConstraintBelief，按 action + target + constraint type 记录 actor-local blocker，类型覆盖 TargetAbsent / TargetUnusable / ResourceRequirement / Precondition。这正是我们刚才讨论的结构。
+现在闭环已经变成：
+W rejects
+→ typed RejectionReason
+→ O.record_constraint(...)
+→ A^O 生成时 is_blocked(...)
+→ 对应 action/target 暂时消失
+而且没有偷读 W。比如 ResourceInsufficient 只记录：
+ResourceRequirement = unsatisfied
+source = failed_resource_check
+并没有把隐藏的 wallet=xx 抄进 O。
+恢复机制也做了：
+- TargetAbsent：目标重新被直接观察到时 resolve；
+- TargetUnusable：直接观察到 usable 时 resolve；
+- ResourceRequirement：只有角色合法获得 wallet observation 后才 resolve，然后重新由 O-side wallet precondition 判断；
+- A^O 最后同时检查普通 subjective precondition 和 is_blocked()。
+这个设计我认可。
+更重要的是，loop 真的没了
+他们用同一个 frozen optimizer_train 重跑了 229,376 decisions / 896 trajectories：
+- 仍然出现 784 次 ResourceInsufficient；
+- 这些 rejected attempt 仍然是 0 分钟；
+- 但 max consecutive resource rejection = 1；
+- casebook 从 52 个降到 47 个；
+- zero_time_loop case = 0。
+这说明修掉的确实不是表面 symptom，而是：
+一次失败之后，下一轮决策获得了新的 actor-local 信息。
+
+所以即使失败仍然 0 分钟，也不会原地死循环。
+这其实是非常干净的验证。
+有一个小地方我也特意看了：有没有违反我们坚持的
+W → O → X → S
+没有。
+apply_self_action_feedback() 只是把 rejection 写进 O；appraise() 再通过 last_self_action.accepted == false 产生：
+satisfaction -0.03
+anxiety +0.03
+tags = action_rejected / goal_obstructed
+也就是说 rejection 不直接改 S，仍然经过 X。 
+所以这条边界也是对的。
+但我不会现在把所有 rejection 机制宣布“完美完成”
+当前 v0 有一个刻意的简化：
+ActionConstraintBelief 本身只是 blocker；X 目前只知道泛化的：
+action_rejected
+goal_obstructed
+它还不会区分：
+钱不够
+目标坏了
+目标不存在
+其他前置条件失败
+对情绪/意义是不是应该不同。
+但这不是当前 blocker。现在的目标只是：
+失败能不能正确改变下一轮可执行性认知，且不泄露 W。
+
+这个已经做到了。
+以后如果我们真的需要更细的角色反应，才让：
+constraint type
+→ structured X
+例如“钱不够”可能产生 frustration，“目标不存在”可能产生 surprise。但现在千万别顺手扩。
+所以这轮我会正式判断：
+Typed Rejection Feedback v0 = PASS。
+而且这个 Behavior Audit 已经非常值了：
+先看轨迹
+→ 发现真实 loop
+→ 定位为 epistemic feedback bug
+→ 修通用机制
+→ 同数据重跑
+→ loop 消失
+这比我们先拍脑袋设计一个 pathology penalty 强很多。
+现在该干什么？
+继续看剩下那 47 个 case。
+但不是全看完再说。还是同样的节奏：
+找最可疑的一类 → 看完整轨迹 → 判断是 Engine bug、合理行为、还是确实可能成为 pathology metric。
+
+我建议下一类优先看：
+active_task_stagnation 和 high_hunger/high_bathroom 的重叠 case。
+因为这里最容易区分出两种东西：
+- 合理 trade-off：任务急，所以暂时忍一会儿；
+- 真正的系统 bug：需求已经极端，却因为 policy/state coupling 某处锁死，永远不去处理。
+这个比单纯看“重复动作”更接近我们真正想知道的：角色的持续行为有没有失去基本自洽性。
+
+
+
+
+  2/2
+
+
+
+
+
+
+钱不够
+目标坏了
+目标不存在
+其他前置条件失败可以作为下一轮循环的世界输入啊。这样就能利用之前的框架了。我们没有统一运算周期吗？这个帧率一定是要比最短的行为还要短或者持平的
+
+
+
+
+
+
+
+
+
+
+
+
+
+对，你这个想法更统一，而且我觉得比现在临时挂一个 ActionConstraintBelief 更接近我们原本的框架。
+我们原来的主链其实就应该是：
+W_t
+↓
+O_t
+↓
+X_t
+↓
+S_t
+↓
+π_t(A)
+↓
+执行动作
+↓
+W_{t+1} + 本周期事件 E_t
+↓
+下一周期
+那么：
+钱不够
+目标坏了
+目标不存在
+前置条件失败
+根本不需要变成一套特殊的“失败反馈旁路”。
+它们完全可以是 本周期 W settlement 产生的事件：
+E_t = {
+    type: ResourceInsufficient,
+    action: ShopOnPhone,
+    target: phone
+}
+然后下一周期正常走：
+W / event
+→ O
+→ X
+→ S
+→ decision
+这反而更漂亮。
+关键区别
+不是：
+W rejects
+→ 特殊函数偷偷改 O
+→ A^O 改变
+而是：
+第 t 周期：
+角色尝试购物
+
+W settlement：
+ResourceInsufficient
+
+第 t+1 周期输入：
+“刚才购物失败：资源不足”
+
+↓ O
+角色知道“当前购物条件不满足”
+
+↓ X
+这是一次 goal obstruction / resource failure
+
+↓ S
+可能产生 frustration / anxiety……
+具体取决于 P、S
+
+↓ A^O
+shop_on_phone 暂时不可行
+
+↓ π
+重新决策
+这就是我们原来的机制自己把 loop 解掉了。
+而且你后半句抓到了更根本的问题：我们现在其实没有真正统一的 tick
+当前 Engine 实际上更接近：
+decision
+→ action
+→ 一口气推进 20 / 35 / 60 / 480 分钟
+→ 下一次 decision
+也就是 action-driven / event-driven decision step。
+所以：
+use_phone = 25min
+sleep = 480min
+turn_light_on = 1min
+每做一个动作，时间直接跳过去。
+这并不是我们最初直觉上的：
+t
+t+1
+t+2
+t+3
+...
+统一周期。
+我现在反而更赞成你说的：底层应该存在统一运算周期
+但要区分两个东西：
+世界更新 tick 和 角色重新决策 decision point 不应该是同一个概念。
+
+例如设：
+Δt = 1 min
+这是 Character Dynamics 的 simulation tick。
+那么一个 25 分钟的 use_phone：
+t=0  决定 use_phone(duration=25)
+t=1  正在 use_phone
+t=2  正在 use_phone
+...
+t=24 正在 use_phone
+t=25 动作完成
+     → outcome
+     → 可重新决策
+而不是每分钟都重新问：
+“还玩不玩手机？”
+
+否则一个长动作会被拆烂。
+所以结构应该是：
+每个 simulation tick：
+
+W advance one tick
+↓
+外界事件发生
+↓
+当前 action progress
+↓
+产生新的可观察变化 ΔW / E
+↓
+O 更新
+↓
+X 更新
+↓
+S 更新
+↓
+检查：
+    当前 action 是否结束？
+    是否被强事件打断？
+    是否需要 reconsider？
+
+如果否：
+    继续当前 action
+
+如果是：
+    重新计算 A^O / π
+    选择下一动作
+这一下整个系统就顺了。
+也就是说，π 不需要每帧运行
+这是最重要的。
+你说：
+帧率一定要比最短行为短或者持平
+
+我同意对状态演化层来说是这样。
+假如最短有意义动作是 1 分钟，那么：
+simulation tick <= 1min
+合理。
+但：
+decision frequency ≠ simulation tick frequency
+否则我们的低计算量目标就没了。
+可以是：
+simulation:
+    每分钟更新一次
+
+cheap S dynamics:
+    每分钟一次
+
+LLM/X semantic reasoning:
+    只有重要 ΔO 才调用
+
+policy decision:
+    动作结束 / interruption / reconsideration 时调用
+这正好和我们一直想做的 sparse reasoning 结合起来。
+这样“失败动作”也特别自然
+例如：
+tick 100
+current action = ShopOnPhone
+W settlement：
+wallet insufficient
+action terminates immediately
+E_100 = ResourceInsufficient
+tick 101
+统一进入：
+Input:
+W_101
+E_100
+然后：
+O_101:
+    刚才购物因为资源不足失败
+X：
+resource obstruction
+S：
+可能 frustration ↑
+purchase urge / anxiety 根据规则改变
+A^O：
+ShopOnPhone 暂时 blocked
+π：
+重新选择
+所以连“失败为什么是 0 分钟”这种尴尬都容易处理：
+它没有完整动作持续时间，但至少占据一个 simulation transition。
+
+不是：
+t=100
+失败
+还是 t=100
+重新决策
+失败
+还是 t=100
+……
+而是：
+tick 100 attempt
+tick 101 receives failure
+自然就不可能出现无限 zero-time decision loop。
+我甚至觉得这里可以重新明确我们的完整动力学
+以前我们写：
+O_t,S_t,P_t
+→ a_t
+→ W'
+→ O_{t+1}
+现在可以精确一点：
+W_t
++
+running action R_t
++
+external/internal events E_t
+        ↓
+world transition
+        ↓
+W_{t+1}, outcome_t
+        ↓
+observation projection
+        ↓
+O_{t+1}
+        ↓
+appraisal
+        ↓
+X_{t+1}
+        ↓
+state dynamics
+        ↓
+S_{t+1}
+        ↓
+decision gate G_{t+1}
+       / \
+      no  yes
+      ↓    ↓
+ continue  π(A | O,S,P)
+ R_t       ↓
+         new R
+这里突然多出来一个非常重要的东西：
+decision gate G
+它决定：
+什么时候角色真的需要重新作决定。
+
+这可能才是我们以后低计算量 NPC 的关键。
+比如 gate 在：
+- 当前 action 完成；
+- action 执行失败；
+- 强外界事件；
+- bodily need 跨阈值；
+- commitment reconsider；
+- action 被中断；
+时打开。
+普通 tick：
+G = false
+根本不用重新跑 policy。
+所以你的这个问题不是小修。
+它实际上指出：
+我们现在 Demo 把“世界演化周期”和“决策周期”混成了一个 action-step。
+
+对于早期 mechanism fixture 没关系，因为那时候就是为了验证因果链。
+但如果 Character Dynamics 真要成为一个持续运行的 NPC runtime，最终应该拆成：
+固定 simulation tick
++
+持续 action state
++
+event/outcome stream
++
+sparse decision gate
+而“钱不够 / 目标坏了 / 目标不存在”这些东西，正好都作为统一事件流进入下一 tick，不需要成为框架外的一套特殊机制。
+我觉得这是比刚才那个 ActionConstraintBelief 更上层、更正确的一刀。ActionConstraintBelief 可以保留成 O 对过去 failure event 的持久化结果，但它不该是反馈机制本身。
+
+
+
+
+  
+
+
+
+
+
+牛逼，原来我们都没统一系统tick。。。他妈的没有系统tick哪来的角色状态衰减？你他妈的，哪来的随机世界事件？
+
+
+
+
+
+
+
+
+
+
+
+
+
+思考了 18s
+
+对，你这一骂是有道理的。我刚刚去看了 state.cpp，现在可以把问题说死：
+我们不是“完全没有时间”，而是把“动作结束”偷偷当成了系统时钟。
+这在 Demo 阶段能跑，但对于真正的 Character Dynamics runtime，架构上确实不对。
+
+当前 S 的所谓“自然衰减/积累”，实际上是这样算的：
+time_scale = elapsed_minutes / 30.0;
+然后：
+boredom += 0.01 * time_scale;
+fatigue += 0.012 * time_scale;
+hunger += 0.025 * time_scale;
+bathroom_urge += 0.020 * time_scale;
+screen_strain -= 0.030 * time_scale;
+purchase_urge -= 0.018 * time_scale;
+...
+也就是说它不是：
+每 1 分钟：
+S(t) → S(t+1)
+而是：
+角色做完一个 35min 行为
+→ 一次性给 S 补 35min 的变化
+睡 480 分钟：
+→ 一次性跨 480min
+→ 一次性更新 S
+失败动作 0 分钟：
+→ time_scale = 0
+→ 时间动力学完全不走
+这就是刚才那个 loop 为什么特别容易卡死。
+而随机世界事件也一样。
+现在 World 其实做了一个“小聪明”：
+before = 10:00
+action duration = 60min
+after = 11:00
+然后它检查：
+10:00 到 11:00 之间有没有 schedule event？
+
+有的话，把它们一次性塞进 outcome。
+所以天气、消息、提醒这些不是没发生，但它们不是由统一 world tick 驱动的，而是：
+action 跨过一个时间区间
+→ 扫描这个区间内有哪些事件
+→ action settlement 时一起结算
+这对于日志回放能凑合。
+但对于角色动力学来说就有非常明显的问题。
+比如：
+10:00 开始学习 35min
+
+10:05 收到重要消息
+10:10 房间突然变冷
+10:20 hunger 跨过 0.8
+目前角色可能直到：
+10:35 action结束
+才统一知道/处理。
+于是我们实际上失去了：
+事件发生时间
+→ O什么时候改变
+→ X什么时候出现
+→ S什么时候开始响应
+→ 是否应该中断当前行为
+这整个动态过程。
+所以我们现在发现的是一个架构级缺口
+正确系统应该有独立于 action 的时间轴：
+Simulation Clock
+
+t=0
+t=Δt
+t=2Δt
+t=3Δt
+...
+然后所有模块都挂在这个统一时间上。
+我会非常明确地区分三个频率：
+1. Simulation Tick
+最底层。
+例如：
+Δt = 1 min
+每 tick 都进行：
+W dynamics
+external events
+running-action progress
+continuous S dynamics
+这是真正时间。
+2. Observation / Appraisal Update
+有新信息的时候更新：
+W/event
+→ O
+→ ΔO
+→ X
+→ S
+不一定每 tick 都有 semantic event。
+例如：
+11:01 没发生任何新事
+→ O基本不变
+→ 不需要复杂 X
+但 hunger 这种连续变量还是可以按时间 dynamics 更新。
+3. Decision Point
+最稀疏。
+只有：
+当前 action完成
+action失败
+强事件打断
+重要需求触发 reconsideration
+commitment gate触发
+才：
+A^O
+→ π
+→ choose new action
+所以不会变成每分钟重新决策一次。
+这一下我们之前很多东西都会突然更合理
+比如 S 衰减。
+现在是：
+做了什么动作
+↓
+动作结束
+↓
+顺便衰减 S
+正确应该是：
+时间本身在流逝
+↓
+S 按 field-specific dynamics 演化
+动作只是其中一个输入。
+例如：
+d hunger / dt = +α
+
+d fatigue / dt =
+    +α_study      if studying
+    -β_rest       if resting
+    -γ_sleep      if sleeping
+
+d boredom / dt =
+    ...
+也就是说更像：
+\[
+S_{t+\Delta t}
+=
+F(S_t,\Delta t,R_t,X_t,P)
+\]其中 R_t 是当前正在执行的行为。
+这才真的是 dynamics。
+随机事件也不应该依赖 action 结束
+而应该：
+World.tick()
+
+if random/event scheduler says event occurs:
+    emit WorldEvent
+例如：
+10:17
+message arrives
+
+10:23
+temperature drops
+
+10:44
+someone knocks
+这些事件在系统时间轴上自己发生。
+然后决定：
+角色能不能感知？
+是否打断当前动作？
+是否只写 O？
+是否触发 decision gate？
+而不是：
+“等你这局手机玩完我再一次性告诉你刚才发生了什么。”
+
+更要命的是：长 action 本来就应该是一个状态
+现在：
+StudyFocused
+像一个原子操作。
+其实 runtime 应该有：
+struct RunningAction {
+    ActionType type;
+    target;
+    start_time;
+    planned_duration;
+    elapsed;
+    interruptibility;
+    status;
+};
+于是：
+09:00 start StudyFocused
+09:01 running
+09:02 running
+...
+09:13 incoming message
+      ↓
+      是否打断？
+09:14 running / interrupted
+...
+09:35 completed
+这样世界和人物才是真的持续运行。
+甚至我们原来的“状态 field 自带 dynamics”现在才真正有落脚点
+我们一直说：
+每个 S field 自己有 dynamics。
+
+但说实话，在目前 action-step Engine 里，它更像：
+每次 decision 后给一坨 delta。
+
+严格讲还不算我们最初想象中的“动力学”。
+有统一 tick 后才能真正写：
+fatigue:
+  passive drift
+  study accumulation
+  rest recovery
+  sleep recovery
+
+hunger:
+  time accumulation
+  meal reset/recovery
+
+task_pressure:
+  deadline/time dynamics
+  progress dynamics
+  reminder impulses
+
+anxiety:
+  relaxation decay
+  event impulses
+  interaction with task pressure
+这才是：
+状态随时间演化，而不是随 decision count 演化。
+
+所以我现在会重新定义底层：
+                ┌──────────────┐
+                │ Simulation   │
+                │ Clock / Tick │
+                └──────┬───────┘
+                       ↓
+              ┌─────────────────┐
+              │ W dynamics      │
+              │ event scheduler │
+              │ action progress │
+              └────────┬────────┘
+                       ↓
+                 W_t + Events
+                       ↓
+                      O_t
+                       ↓
+                      X_t
+                       ↓
+               S dynamics tick
+                       ↓
+               Decision Gate?
+                  /          \
+                no            yes
+                ↓              ↓
+         continue action     A^O → π
+而且这不是“再加一个模块”。
+这其实应该成为 Engine 的时间骨架。
+我们前面的 Phone、Deadline、Commitment、Typed Rejection 都还能留着，只是从：
+decision-step机制
+迁到：
+tick/event-driven runtime
+里面。
+所以确实，我们现在发现了一个比刚才 rejection loop 还更底层的东西：
+当前 Demo 已经足够验证机制，但它还不是一个真正持续运行的 dynamics runtime。
+
+下一刀我认为已经非常明确了：先别继续 Behavior Audit，也别继续 Objective。先设计 Simulation Tick + RunningAction + DecisionGate 的最小 v0，并保证旧三个 fixture 可以在新时间骨架下复现。
+这刀值得做。
+
+
+
+
+  
+
+
+
+
+
+牛逼卧槽尼玛。整个系统一开始就没做好，现在需要重新弄。。。
+
+
+
+
+
+
+
+
+
+
+
+
+
+对，但我得纠正一句：不是“整个系统都没做好”，而是最底层的 runtime 时间语义一开始没立起来。 这很严重，但也没严重到把前面全推倒。
+我们前面真正做对的东西其实还在：
+W ≠ O
+W authoritative
+O actor-local
+ΔO → X → S
+S / P → π(A)
+A^O 与 A^W 分离
+typed settlement
+commitment
+typed rejection feedback
+information boundary
+这些是角色动力学的语义层，没因为 tick 问题失效。
+真正有问题的是下面这一层：
+“这些机制什么时候运行？”
+“时间怎样流？”
+“一个动作持续期间世界在干什么？”
+“状态在哪些时刻演化？”
+“什么时候重新决策？”
+我们之前默认成了：
+decision
+→ 选择一个 action
+→ action 整段瞬间结算
+→ 一次性推进 1/20/35/480 分钟
+→ 一次性更新 W/O/X/S
+→ 下一 decision
+这其实是一个 action-step simulator。
+而我们脑子里一直想做的是：
+持续运行的 world
++
+持续运行的 character state
++
+持续中的 action
++
+事件流
++
+必要时才 decision
+这俩不是一回事。
+所以最准确的说法是：
+我们拿一个“机制验证器”慢慢长成了“NPC runtime”，但中间没有补上 runtime 的时间骨架。
+
+这个现在必须补。
+而且这里我再纠正一个刚才我们俩都容易冲动的点：
+核心不一定非得是“固定 tick”
+真正必须有的是：
+统一 simulation clock + 明确的时间推进语义。
+
+固定 tick 是一种实现。
+比如：
+Δt = 1 min
+每分钟推进一次，很直观。
+但另一种甚至可能更适合我们：
+discrete-event simulation
+系统直接从一个“有意义的时间点”跳到下一个：
+10:00 action starts
+10:07 message event
+10:13 hunger threshold crossing
+10:35 action completes
+在 10:00→10:07 之间，S 用：
+\[
+S_{t+\Delta t}=F(S_t,R_t,\Delta t)
+\]积分 7 分钟。
+然后处理 message。
+再积分 6 分钟。
+这样我们既有统一时间轴，又没必要为了一个 8 小时睡眠跑 480 个空 tick。
+所以我现在更愿意把底层叫：
+Simulation Clock / Runtime Scheduler
+而不是先把自己锁死在“1 分钟 tick”。
+它可以支持：
+fixed tick mode
+也可以支持：
+next-event mode
+但所有模块必须服从同一个时间轴。
+现在需要真正重新设计的是 Runtime Core
+我会把下一版切成这些东西：
+Runtime
+├── SimulationClock
+├── EventScheduler
+├── World
+├── RunningAction
+├── Observation
+├── Appraisal
+├── CharacterState
+├── DecisionGate
+└── Policy
+核心循环应该是：
+当前时间 t
+│
+├─ 找到下一时间边界
+│   ├─ world event
+│   ├─ running action milestone/completion
+│   ├─ state threshold crossing
+│   └─ optional fixed tick
+│
+↓
+推进 Δt
+│
+├─ W continuous dynamics
+├─ RunningAction progress
+└─ S continuous dynamics
+│
+↓
+处理该时刻 Event
+│
+↓
+W_t / event
+↓
+O update
+↓
+X update
+↓
+S impulse/update
+↓
+DecisionGate
+│
+├─ closed → continue RunningAction
+│
+└─ open
+    ↓
+    A^O
+    ↓
+    π(A)
+    ↓
+    start/replace RunningAction
+这才是完整系统。
+RunningAction 是这次必须补的第一等公民
+以前：
+StudyFocused
+只是一个 enum。
+以后应该是：
+struct RunningAction {
+    ActionType type;
+    std::string target;
+
+    SimTime started_at;
+    Duration planned_duration;
+    Duration elapsed;
+
+    ActionStatus status;
+
+    bool interruptible;
+};
+动作不是：
+“选了，然后完成。”
+
+而是：
+“从 t0 开始占据角色，并持续一段时间。”
+
+于是我们才可以合理描述：
+09:00 开始学习
+09:12 手机消息
+09:12 O获得消息
+09:12 X认为重要/不重要
+09:12 S变化
+09:12 DecisionGate判断是否值得中断
+
+如果不值得：
+    继续学习
+
+如果值得：
+    suspend/interupt Study
+    重新决策
+这才是 NPC runtime。
+S 也得重新分清两种更新
+这是之前最大的概念混合。
+以后最好明确：
+Continuous dynamics
+时间本身造成：
+hunger ↑
+bathroom urge ↑
+fatigue drift
+boredom drift
+anxiety relaxation
+purchase urge decay
+写成：
+\[
+\dot S = f(S,P,R,W)
+\]或者离散：
+\[
+S_{t+\Delta t}=F(S_t,P,R_t,\Delta t)
+\]Event impulse
+事件造成瞬时变化：
+任务完成
+收到消息
+动作失败
+被打断
+发现 deadline
+即：
+\[
+S^+ = S^- + g(X,P)
+\]所以完整一点是：
+先随 Δt 演化
+↓
+到达 event time
+↓
+O → X
+↓
+event impulse
+↓
+得到新的 S
+这比现在所有东西挤在一个 update_state(appraisal, elapsed_minutes) 里干净太多。
+随机世界事件也终于能正常定义
+现在 World 的随机性是：
+action 从 t 跳到 t+35
+→ 查这个区间有没有事件
+新 Runtime 应该是：
+EventScheduler:
+    09:23 study-message
+    11:17 weather-change
+    13:42 task-reminder
+这些事件和角色行为同级存在于时间轴。
+甚至未来：
+另一个 NPC 的行为
+物体变化
+门被别人打开
+电话
+环境声音
+也全是：
+WorldEvent(time, source, payload)
+这样未来扩 multi-agent 时不用再重做时间系统。
+DecisionGate 可能反而是我们现在最值得研究/设计的东西
+因为我们的核心愿景本来就不是：
+每个 tick 调一次 LLM。
+
+而是：
+绝大多数时间让角色继续当前行为，只在真正需要时重新思考。
+
+所以：
+DecisionGate = false
+应该是常态。
+打开原因可能有：
+ActionCompleted
+ActionRejected
+StrongExternalEvent
+NeedThresholdCrossed
+CommitmentReconsideration
+ExplicitInterruption
+PlanInvalidated
+然后才：
+π(A)
+以后甚至：
+简单 gate
+→ cheap policy
+
+复杂/陌生 gate
+→ LLM semantic reasoning
+这恰好回到我们一开始想要的低成本持续 NPC。
+所以前面的东西不要删
+尤其千万别现在重构心态一上来：
+“操，全删重写。”
+
+不。
+我建议直接把现有东西定性成：
+Action-Step Reference Engine v0
+冻结。
+它已经替我们验证了：
+- W/O boundary；
+- deadline information propagation；
+- commitment；
+- action settlement；
+- rejection feedback；
+- evaluator/provenance 工具链。
+然后新开：
+Continuous Runtime v1
+或者：
+Runtime Scheduler v1
+逐层迁移。
+这样每迁移一层都有旧 reference 对照。
+我会按这个顺序重构
+第一刀只做时间内核：
+SimulationClock
+EventScheduler
+RunningAction
+DecisionGate
+先不改 S 内容，不加新心理变量，不碰 optimizer。
+然后做到一个最小 smoke：
+09:00 StudyFocused(duration=35)
+
+09:00–09:10
+S 连续变化
+
+09:10 message event
+O/X 更新
+
+DecisionGate=false
+继续学习
+
+09:20 temperature event
+O/X/S 更新
+
+09:35 StudyFocused completed
+DecisionGate=true
+重新决策
+这跑通以后，再迁：
+State dynamics
+↓
+typed rejection
+↓
+Phone fixture
+↓
+Deadline fixture
+↓
+Commitment fixture
+而且三个旧 fixture 都必须在新 runtime 上重新找到等价机制证据。
+所以，是的，这一刀挺大的。
+但其实这是件好事：我们是在 Demo 已经足够复杂、刚好开始暴露 runtime 本质问题的时候发现它，而不是把整个论文/系统都建立在 action-step 上以后才发现。
+最重要的一句是：
+不要“重写 Character Dynamics”，要“把 Character Dynamics 从 action-step reference model 搬到真正的 temporal runtime 上”。
+
+研究问题没漂，反而现在系统定义更清楚了。
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+ChatGPT 可能会出错。请核查重要信息。
