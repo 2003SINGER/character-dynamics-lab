@@ -38,6 +38,16 @@ It still exposes an exact elapsed minute duration, so a later W/S integrator
 can use the same timeline for continuous dynamics. A fixed-tick adapter can be
 added later without changing the ownership contract.
 
+### Shared-timestamp contract
+
+At a shared timestamp `t`, the scheduler deterministically: (1) integrates
+the open interval `[previous, t)`; (2) advances the running action to `t`;
+(3) handles exogenous events at `t`; (4) lets an event explicitly marked
+interrupting preempt completion of an interruptible action; then (5) settles
+completion only if the action is still running. Thus a 10:35 interrupting
+event and a 10:35 action completion yield `Interrupted`, not a result that
+depends on container iteration order. The scheduler smoke locks this rule.
+
 `RunningAction` is first-class state: action, target, start time, planned and
 elapsed duration, interruptibility, and terminal status. Policy is **not**
 called once per clock minute. `DecisionGate` only opens for an action
@@ -65,15 +75,33 @@ to O, where the existing `ActionConstraintBelief` can remain the persistent
 actor-local consequence. It must not make `W -> S` a shortcut or copy hidden
 W values into O.
 
+## First scheduler-native vertical slice
+
+`runtime_vertical_slice_smoke` is the first real W/O/X/S/pi path on the new
+clock, while keeping all existing batch machinery on Reference v0:
+
+1. At 09:00 it starts a 35-minute `StudyFocused` `RunningAction`.
+2. At 09:10 a weak message event occurs. The 10-minute interval updates S via
+   `advance_continuous_state(S, P, RunningAction, Delta-t)`; the permitted
+   message payload then enters O, existing X yields `social_task_reminder`,
+   and its S impulse is applied with `Delta-t=0`. The gate remains closed.
+3. At 09:35 another 25-minute action interval is integrated. The actual W
+   study settlement writes its existing self-feedback into O; X/S run, the
+   completion gate opens, and existing `decide` produces a next action which
+   starts a new `RunningAction`.
+
+The continuous-action coefficients in this adapter are explicitly engineering
+placeholders. They prove that elapsed time and `RunningAction` are separate
+inputs to S; they do not preserve old action-step magnitudes, claim a
+psychological model, or authorize a batch/evaluator migration.
+
 ## Migration order and acceptance
 
-1. Add a runtime adapter that advances W and continuous S over each reported
-   `Delta-t`, preserving the existing action-step engine unchanged.
-2. Route scheduled events and typed settlement outcomes through O -> X -> S;
-   implement no new appraisal semantics merely because a type exists.
-3. Recreate Phone, Deadline and Commitment as scheduler-native fixtures with
+1. Recreate the Deadline fixture natively, proving that a deadline can become
+   observable during a long action rather than only after it completes.
+2. Recreate Phone and Commitment as scheduler-native fixtures with
    equivalent information-boundary evidence.
-4. Only then consider replacing any action-step batch or evaluator path.
+3. Only then consider replacing any action-step batch or evaluator path.
 
 At every stage, old and new outputs must have distinct provenance and run
 directories. `optimizer_train`, `internal_holdout`, Objective v0 and optimizer

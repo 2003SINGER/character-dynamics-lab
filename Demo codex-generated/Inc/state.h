@@ -7,6 +7,8 @@
 
 #include <string>
 
+struct RunningAction;
+
 // A persistent task-level commitment. It preserves the direction of an
 // unfinished task across individual actions without turning actions into a
 // multi-step script.
@@ -36,6 +38,14 @@ StateUpdate update_state(CharacterState& state,
                          const Personality& personality,
                          int elapsed_minutes,
                          const ParameterConfig& config = ParameterConfig::defaults());
+// The continuous part of S dynamics for a scheduler boundary. It deliberately
+// takes the currently running action as an input and applies no appraisal/event
+// impulse; callers route those separately through O -> X -> update_state(..., 0).
+StateUpdate advance_continuous_state(CharacterState& state,
+                                     const Personality& personality,
+                                     const RunningAction* running_action,
+                                     int elapsed_minutes,
+                                     const ParameterConfig& config = ParameterConfig::defaults());
 std::string state_summary(const CharacterState& state);
 std::string state_delta_summary(const StateDelta& delta);
 std::string state_update_summary(const StateUpdate& update);

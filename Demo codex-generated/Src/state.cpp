@@ -1,5 +1,7 @@
 #include "state.h"
 
+#include "runtime_scheduler.h"
+
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
@@ -135,6 +137,56 @@ StateUpdate update_state(CharacterState& state,
     update.applied.anxiety = state.anxiety - before.anxiety;
     update.applied.screen_strain = state.screen_strain - before.screen_strain;
     update.applied.purchase_urge = state.purchase_urge - before.purchase_urge;
+    return update;
+}
+
+StateUpdate advance_continuous_state(CharacterState& state,
+                                     const Personality& personality,
+                                     const RunningAction* running_action,
+                                     int elapsed_minutes,
+                                     const ParameterConfig& config) {
+    // Keep baseline wall-clock drift in the established updater, but isolate
+    // it from all event/appraisal deltas. Running-action rates are explicitly
+    // a v1 engineering adapter, not a claim about psychological parameters.
+    StateUpdate update = update_state(state, Appraisal{}, personality, elapsed_minutes, config);
+    if (running_action == nullptr || elapsed_minutes == 0) return update;
+
+    const CharacterState before = state;
+    const double scale = static_cast<double>(elapsed_minutes) / 30.0;
+    StateDelta action_delta;
+    action_delta.elapsed_minutes = elapsed_minutes;
+    switch (running_action->action) {
+    case ActionType::StudyAtComputer:
+    case ActionType::StudyFocused:
+    case ActionType::StudyHalfhearted:
+        action_delta.fatigue = 0.018 * scale;
+        action_delta.screen_strain = running_action->action == ActionType::StudyAtComputer ? 0.020 * scale : 0.0;
+        break;
+    case ActionType::RestAtBed:
+        action_delta.fatigue = -0.050 * scale;
+        action_delta.screen_strain = -0.020 * scale;
+        break;
+    case ActionType::SleepAtBed:
+        action_delta.fatigue = -0.110 * scale;
+        action_delta.screen_strain = -0.060 * scale;
+        break;
+    case ActionType::UsePhone:
+    case ActionType::ShopOnPhone:
+    case ActionType::UseComputer:
+        action_delta.fatigue = 0.006 * scale;
+        action_delta.screen_strain = 0.030 * scale;
+        break;
+    default:
+        break;
+    }
+    state.fatigue = clamp_unit(state.fatigue + action_delta.fatigue);
+    state.screen_strain = clamp_unit(state.screen_strain + action_delta.screen_strain);
+    action_delta.fatigue = state.fatigue - before.fatigue;
+    action_delta.screen_strain = state.screen_strain - before.screen_strain;
+    update.requested.fatigue += action_delta.fatigue;
+    update.requested.screen_strain += action_delta.screen_strain;
+    update.applied.fatigue += action_delta.fatigue;
+    update.applied.screen_strain += action_delta.screen_strain;
     return update;
 }
 

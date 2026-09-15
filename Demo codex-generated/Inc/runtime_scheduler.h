@@ -58,7 +58,10 @@ struct RuntimeBoundary {
 // event or action completion and reports the exact elapsed duration. A caller
 // integrates W and continuous S dynamics over that duration, then routes the
 // returned events through O -> X -> S. Policy is only consulted when the gate
-// is open; ordinary weak events need not reopen a decision.
+// is open; ordinary weak events need not reopen a decision. At one shared
+// timestamp the contract is deterministic: first integrate [previous,t), then
+// process exogenous events at t; an interrupting event preempts completion of
+// an otherwise completed interruptible action. Only then is completion settled.
 class RuntimeScheduler {
 public:
     explicit RuntimeScheduler(int start_total_minutes = 0) : now_total_minutes_(start_total_minutes) {}

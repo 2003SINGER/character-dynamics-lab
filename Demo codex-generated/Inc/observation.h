@@ -117,6 +117,15 @@ void apply_self_action_feedback(Observation& observation,
                                 const WorldOutcome& outcome,
                                 const std::string& observed_at,
                                 bool completion_is_observable = true);
+// Project an already-authorized observable runtime event into O. The caller
+// supplies only the event payload the actor can perceive; this function never
+// reads W. The scheduler-native caller appraises the resulting Delta-O at the
+// same runtime boundary.
+void apply_observable_runtime_event(Observation& observation,
+                                    std::string key,
+                                    std::string value,
+                                    std::string source,
+                                    const std::string& observed_at);
 bool observation_knows_action(const Observation& observation, ActionType action);
 Observation apply_sleep_sensory_update(Observation previous,
                                        const WorldOutcome& outcome,

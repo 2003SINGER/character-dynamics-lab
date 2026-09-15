@@ -85,6 +85,11 @@ target_link_libraries(character_dynamics_runtime_scheduler_smoke PRIVATE charact
 add_test(NAME character_dynamics_runtime_scheduler_smoke
          COMMAND character_dynamics_runtime_scheduler_smoke)
 
+add_executable(character_dynamics_runtime_vertical_slice_smoke tests/runtime_vertical_slice_smoke.cpp)
+target_link_libraries(character_dynamics_runtime_vertical_slice_smoke PRIVATE character_dynamics_runtime)
+add_test(NAME character_dynamics_runtime_vertical_slice_smoke
+         COMMAND character_dynamics_runtime_vertical_slice_smoke)
+
 add_executable(character_dynamics_replay_core
     Src/replay_core_cli.cpp
     Src/state.cpp

@@ -41,6 +41,18 @@ int main() {
         return 1;
     }
 
+    RuntimeScheduler same_timestamp(0);
+    same_timestamp.start_action(ActionType::StudyFocused, "desk", 5, true);
+    same_timestamp.schedule({"urgent_message", 5, true, true});
+    const RuntimeBoundary preempted_completion = same_timestamp.advance_to_next_boundary();
+    if (!has_reason(preempted_completion.decision_gate, DecisionGateReason::ActionInterrupted)
+        || has_reason(preempted_completion.decision_gate, DecisionGateReason::ActionCompleted)
+        || !preempted_completion.action_after_boundary.has_value()
+        || preempted_completion.action_after_boundary->status != RunningActionStatus::Interrupted) {
+        std::cerr << "same-timestamp interrupt priority must be explicit\n";
+        return 1;
+    }
+
     RuntimeScheduler rejection(100);
     rejection.reject_action(ActionType::ShopOnPhone, "phone");
     const RuntimeBoundary rejected = rejection.advance_to_next_boundary();

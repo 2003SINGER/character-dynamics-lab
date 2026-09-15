@@ -413,6 +413,14 @@ void apply_self_action_feedback(Observation& observation,
         observation.updates_this_refresh.end());
 }
 
+void apply_observable_runtime_event(Observation& observation,
+                                    std::string key,
+                                    std::string value,
+                                    std::string source,
+                                    const std::string& observed_at) {
+    write_fact(observation, std::move(key), std::move(value), std::move(source), observed_at);
+}
+
 bool observation_knows_action(const Observation& observation, ActionType action) {
     return std::find(observation.known_actions.begin(), observation.known_actions.end(), action)
         != observation.known_actions.end();
