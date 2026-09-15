@@ -1,0 +1,570 @@
+看完了。最新 `webgpt-sync` 是 **`b5ff3ea feat: align runtime World with scheduler clock`**。这次确实推进了一大截，但**还不能说我们上一轮那套“Runtime/Dataflow 架构改版”已经做完**。现在大概完成了第一阶段：**单一时间轴开始成立；真正的数据流 runtime 还差关键两层。** 
+
+### 先说做对了什么
+
+最重要的是，之前那个：
+
+```text
+scheduler = 09:10
+World      = 09:00
+O timestamp 手写 "09:10"
+```
+
+已经被正面解决了。
+
+现在新增了 `WorldRuntimeAdapter`，明确规定它是 **scheduler-native 唯一允许推进 W 时间的桥**；构造时就要求 `world.time == scheduler.now`，每次 boundary 前后也都检查二者一致。 
+
+而 `World` 也新增：
+
+```cpp
+advance_runtime_by(int elapsed_minutes)
+```
+
+旧 `settle()` 保留给 Reference v0，所以没有为了新 runtime 去破坏旧实验。这个边界是对的。
+
+而且 vertical smoke 已经不再自己：
+
+```cpp
+world.unread_messages = 1;
+```
+
+伪造消息了。
+
+现在 scheduler 只提供 09:30 这个 boundary，真正的 `message-study-group` 是由 `World::advance_runtime_by()` 在世界时间推进时产生的。这已经开始接近：
+
+```text
+clock
+→ W
+→ WorldEvent
+```
+
+了。
+
+另外，**数据流已经第一次被写成正式架构规则**。
+
+`ARCHITECTURE_RULES` 第一条现在明确写了：
+
+- 单一 authoritative simulation clock；
+- `W/O/S/P/RunningAction` 是 persistent nodes；
+- deltas/events 才是 flow；
+- action 不能推进 runtime clock；
+- hidden W event 不能开 character gate；
+- fixture 不能自己手工同步 timestamp。
+
+`AGENTS.md` 也写进去了，所以以后 Codex 至少不会再完全忘掉这个基本原则。
+
+这一步非常重要。
+
+---
+
+# 但现在有一个新坑：动作“完成”了，却没有真正结算
+
+这个是目前最大的 blocker。
+
+上一版 `e10c984` 在 35min action completion 时还有：
+
+```text
+scheduler says completed
+↓
+world.settle(StudyFocused)
+↓
+WorldOutcome
+↓
+self feedback → O
+↓
+X → S
+↓
+π
+```
+
+虽然它重复推进时间，所以错。
+
+现在为了避免 `world.settle()` 再推进 35min，Luna **直接把整个 settlement 拿掉了**。
+
+最新 smoke 到 action completion 后实际是：
+
+```cpp
+completion_boundary = scheduler.advance_to_next_boundary();
+
+world_runtime.advance_to_boundary(...);
+
+advance_continuous_state(...);
+
+Appraisal completion_x = appraise(observation, ...);
+
+update_state(...);
+
+decide(...);
+```
+
+没有：
+
+```text
+W study settlement
+task effort +
+study_sessions +
+WorldOutcome
+self-action feedback
+```
+
+
+
+所以现在发生了：
+
+```text
+09:20 StudyFocused starts
+        ↓
+09:55 scheduler:
+      RunningAction = Completed
+        ↓
+但 W：
+      没结算 StudyFocused
+      没增加 task effort
+      没产生 ActionOutcome
+      没有 self-feedback
+        ↓
+却直接开始下一次 decision
+```
+
+这当然不行。
+
+但这是**非常明确、很好修的坑**：
+
+> 我们需要一个 scheduler-native 的 **completion settlement**，它只结算动作效果，绝不推进时间。
+
+也就是从旧：
+
+```text
+World::settle(action)
+=
+validate
++ effects
++ task progress
++ counters
++ AdvanceSimulationTime
++ scheduled events
+```
+
+正式拆出：
+
+```text
+runtime validate/start
+```
+
+以及：
+
+```text
+runtime settle_completion(action)
+=
+effects
++ task progress
++ counters
++ typed WorldOutcome
+
+NO TIME ADVANCE
+NO INTERVAL EVENT SCAN
+```
+
+这才完成我们一直想拆的：
+
+```text
+时间是谁管？
+→ scheduler
+
+动作结果是谁管？
+→ W
+```
+
+---
+
+# 第二个坑：WorldEvent 已经真的产生了，但 O projection 还是假的
+
+这次进了一半。
+
+好的一半：
+
+```text
+World.advance_runtime_by()
+→ WorldEvent(message-study-group)
+```
+
+已经是真的。
+
+但接下来仍然是 smoke 自己知道：
+
+> “噢这是 message，那我得把 unread_count 写成 1。”
+
+于是手工调用：
+
+```cpp
+apply_observable_runtime_event(
+    observation,
+    "message.unread_count",
+    "1",
+    "runtime_message_notification",
+    world.time_summary()
+);
+```
+
+
+
+所以当前其实是：
+
+```text
+WorldEvent
+   ↓
+测试代码 if message-study-group
+   ↓
+手写 O key/value
+   ↓
+O
+```
+
+还不是我们要的：
+
+```text
+WorldEvent
+↓
+ObservationProjector / PerceptionFilter
+↓
+根据角色 information access / Scene / source
+↓
+ObservationDelta
+↓
+persistent O
+```
+
+所以我们上一轮说的：
+
+> **typed WorldEvent → legal O projection → ΔO → X**
+
+还没有实现。
+
+现在只是：
+
+> typed WorldEvent 已经有了。
+
+这是重要区别。
+
+---
+
+# 第三个坑：canonical runtime owner 还不存在
+
+现在这个 flow：
+
+```text
+scheduler
+→ world adapter
+→ continuous S
+→ event lookup
+→ O
+→ X
+→ S
+→ policy
+→ start action
+```
+
+全部还是写在：
+
+```text
+runtime_vertical_slice_smoke.cpp
+```
+
+里面。
+
+所以现在这个 smoke 本身就是 orchestration。
+
+这违背我们最终想要的：
+
+```text
+ContinuousRuntime::advance()
+```
+
+统一执行：
+
+```text
+boundary
+→ Δt
+→ W
+→ RunningAction
+→ S continuous
+→ events/outcomes
+→ O
+→ X
+→ S impulse
+→ gate
+→ π
+```
+
+否则 Deadline 写一套，Phone 再写一套，Commitment 又写一套，过三天我们又会发现三套数据流语义不一样。
+
+所以 **现在绝对不能迁 Deadline。**
+
+TODO 这点已经改对了：
+
+> 先完成 canonical runtime owner 与 typed WorldEvent/ActionOutcome → O incremental flow；此前不迁 Deadline。
+
+---
+
+# 文档其实也还没统一完
+
+这个我挺不满意。
+
+我们上一轮明确说：
+
+> 数据流不是附加说明，要替换旧“轮式链”。
+
+但是现在 System Vision 是：
+
+先写：
+
+> Continuous Runtime v1 是 event-driven incremental stateful dataflow runtime...
+
+很好。
+
+紧接着又写：
+
+> **核心运行链保持为：**
+
+```text
+W
+→ O
+→ ΔO/X
+→ S
+→ D/π
+→ settlement
+→ W'
+```
+
+
+
+这就还是**新旧两个 mental model 并存**。
+
+这张链可以作为“因果语义子链”，但不能继续叫：
+
+> 核心运行链。
+
+应该改成：
+
+> **character causal path inside the runtime**
+
+然后真正核心 runtime 图必须是：
+
+```text
+authoritative timeline
+        ↓
+       Δt
+   ┌────┴─────┐
+   ↓          ↓
+W dynamics   S continuous dynamics
+   ↓          ↑
+WorldEvent    │
+   ↓          │
+ΔO → X ───────┘
+   ↓
+DecisionGate
+   ↓ only if open
+π → ActionIntent → RunningAction/W
+```
+
+否则以后 coder 还是会看着旧图理解成一轮一轮跑。
+
+---
+
+更明显的是：
+
+### `完整机制说明_v0.md` 根本没改
+
+这次 commit 的 changed-file list里没有它。
+
+也就是说仓库所谓“完整机制唯一维护位置”仍然保留旧：
+
+```text
+外部事件 / 时间 / 上次行动
+→ W
+→ O
+→ X
+→ S
+→ D
+→ π
+→ action
+→ W
+→ 下一轮
+```
+
+这个现在已经**正式过时**。
+
+### `当前实现进度.md` 也没跟上
+
+它现在还写：
+
+> Runtime Scheduler v1：首条 Study → message → O/X/S → completion → pi vertical smoke 已通过
+
+但没有记录：
+
+```text
+WorldRuntimeAdapter
+single authoritative clock
+advance_runtime_by
+```
+
+而且“completion”实际上现在还没有 world settlement。
+
+所以当前 source-of-truth 已经漂了：
+
+```text
+System Vision：半新半旧
+Runtime Scheduler：比较新
+完整机制说明：旧
+当前实现进度：落后一提交
+代码：又比其中一些更新
+```
+
+这个要马上收束。
+
+---
+
+# 还有我们说过的两个东西也没做
+
+一是：
+
+```text
+continuous S
+```
+
+和：
+
+```text
+event impulse
+```
+
+目前依然只是：
+
+```cpp
+advance_continuous_state(...)
+
+update_state(state, appraisal, personality, 0)
+```
+
+兼容桥。
+
+还没有真正出现：
+
+```cpp
+apply_appraisal_impulse(...)
+```
+
+这个目前不是 blocker，可以下一阶段做，但要继续标 compatibility。
+
+二是 **state threshold boundary**。
+
+文档这次已经补上：
+
+> future scheduler boundaries must include state-threshold crossings，或者无法预测时用 bounded numerical step。
+
+这个定义对了，但代码还没实现。
+
+目前也不用急着做，先把基本数据流闭环。
+
+---
+
+# 所以当前架构状态我会这样定
+
+```text
+DATAFLOW ARCHITECTURE DEFINITION
+    PARTIAL PASS
+
+authoritative simulation clock
+    PASS in controlled runtime slice
+
+World Δt advancement
+    PASS
+
+World scheduled event generation
+    PASS
+
+RunningAction progress
+    PASS
+
+continuous S over Δt
+    PASS as engineering adapter
+
+typed WorldEvent
+    PASS
+
+typed WorldEvent → legal ΔO
+    NOT YET
+
+runtime action start validation
+    NOT YET canonical
+
+runtime action completion settlement
+    FAIL / MISSING
+
+typed ActionOutcome → O
+    NOT YET canonical
+
+canonical runtime owner
+    NOT YET
+
+DecisionGate after O/X/S
+    PARTIAL
+
+threshold-crossing boundary
+    NOT YET
+
+Deadline native fixture
+    DO NOT START
+```
+
+所以这次不是“Luna 做错了”。
+
+它其实是在按照我们给的阶段顺序做：
+
+> **先把 World clock 焊上。**
+
+这个 commit 名字也很诚实：`align runtime World with scheduler clock`，它没宣称完成整个 dataflow runtime。
+
+但**下一提交千万不能跑去 Deadline。**
+
+下一刀应该集中完成一个真正闭环：
+
+```text
+ContinuousRuntime owner
+        ↓
+scheduler boundary
+        ↓
+WorldRuntimeAdapter Δt
+        ↓
+WorldEvent
+        ↓
+legal ObservationDelta
+        ↓
+X
+        ↓
+S impulse
+        ↓
+
+if RunningAction completed:
+        ↓
+W.settle_runtime_completion()
+        ↓
+typed ActionOutcome
+        ↓
+O
+        ↓
+X
+        ↓
+S
+        ↓
+
+DecisionGate
+        ↓
+π
+        ↓
+validate/start next RunningAction
+```
+
+等这条 canonical path 成了，**再写 Deadline fixture 就会非常舒服**。
+
+而且我会要求下一轮顺手把那三个文档 source-of-truth 修齐。否则我们刚刚才骂完“说了几百次数据流”，结果仓库的《完整机制说明》还在写“回到下一轮”，那就太离谱了。

@@ -368,6 +368,14 @@ WorldOutcome World::settle(ActionType action) {
 }
 
 WorldOutcome World::settle(ActionType action, const std::string& target_object_id) {
+    return settle_impl(action, target_object_id, true);
+}
+
+WorldOutcome World::settle_runtime_completion(ActionType action, const std::string& target_object_id) {
+    return settle_impl(action, target_object_id, false);
+}
+
+WorldOutcome World::settle_impl(ActionType action, const std::string& target_object_id, bool advance_clock) {
     // Re-expand inside W immediately before settlement. This deliberately
     // makes CharacterActionPlan a trace/provenance object rather than a
     // capability that another module can forge to mutate W.
@@ -422,15 +430,20 @@ WorldOutcome World::settle(ActionType action, const std::string& target_object_i
     if (time_primitive == outcome.settled_primitives.end()) {
         throw std::logic_error("CharacterActionPlan has no AdvanceSimulationTime primitive");
     }
-    auto& advance = std::get<AdvanceSimulationTime>(time_primitive->payload);
-    int after = before + advance.minutes;
-    if (plan.action == ActionType::SleepAtBed) {
+    int after = before;
+    if (advance_clock) {
+        auto& advance = std::get<AdvanceSimulationTime>(time_primitive->payload);
+        after = before + advance.minutes;
+        if (plan.action == ActionType::SleepAtBed) {
         const int cold_wake_minute = first_cold_event_between(scenario_seed, before, after);
         if (cold_wake_minute >= 0) {
             after = cold_wake_minute;
             advance.minutes = after - before;
             outcome.woke_early = true;
         }
+        }
+    } else {
+        outcome.settled_primitives.erase(time_primitive);
     }
 
     Room& room = current_room();
@@ -471,14 +484,14 @@ WorldOutcome World::settle(ActionType action, const std::string& target_object_i
         outcome.effects.push_back(primitive.description);
     }
 
-    if (plan.action == ActionType::SleepAtBed) {
+    if (advance_clock && plan.action == ActionType::SleepAtBed) {
         outcome.observation_frozen_during_action = true;
         outcome.effects.push_back(outcome.woke_early
             ? "character wakes early because a cold scenario event is sensed; the next decision point can refresh O from the room"
             : "character wakes; the next decision point can refresh O from the room");
     }
 
-    apply_scheduled_events(*this, before, after, plan.action == ActionType::SleepAtBed, outcome);
+    if (advance_clock) apply_scheduled_events(*this, before, after, plan.action == ActionType::SleepAtBed, outcome);
 
     if (plan.action == ActionType::StudyFocused
         || plan.action == ActionType::StudyHalfhearted
@@ -495,9 +508,10 @@ WorldOutcome World::settle(ActionType action, const std::string& target_object_i
             : (plan.action == ActionType::StudyFocused
                 ? task->desk_base_effort
                 : task->desk_base_effort * 0.60);
-        const double duration_factor = static_cast<double>(outcome.elapsed_minutes)
+        const int action_elapsed = advance_clock ? outcome.elapsed_minutes : action_definition(plan.action).default_duration_minutes;
+        const double duration_factor = static_cast<double>(action_elapsed)
             / static_cast<double>(action_definition(plan.action).default_duration_minutes);
-        outcome.task_session_interrupted = outcome.elapsed_minutes
+        outcome.task_session_interrupted = action_elapsed
             < action_definition(plan.action).default_duration_minutes;
         const double interruption_factor = outcome.task_session_interrupted ? 0.55 : 1.0;
         outcome.task_effort_gained = base_effort * duration_factor

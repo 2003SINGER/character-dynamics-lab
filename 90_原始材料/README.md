@@ -4,6 +4,7 @@
 
 | 包 | 内容 | 完整性/阅读入口 |
 |---|---|---|
+| [2026-09-15_Continuous_Runtime闭环复核](2026-09-15_Continuous_Runtime闭环复核.txt) | 对单时钟 adapter 后缺失的 runtime completion settlement、typed O projection、canonical owner 与文档收束的复核 | [原文](2026-09-15_Continuous_Runtime闭环复核.txt)；SHA-256 `efeb3601e1279496cb25c89a7e8a16376d269f9d4fcff6676f58a6551eef3873` |
 | [2026-09-15_Runtime_Dataflow_Architecture_Revision指令](2026-09-15_Runtime_Dataflow_Architecture_Revision指令.txt) | 统一时钟、增量数据流、WorldRuntimeAdapter 与 canonical runtime owner 的架构复核及实施约束 | [原文](2026-09-15_Runtime_Dataflow_Architecture_Revision指令.txt)；SHA-256 `930682a9089c8efd658ed73035c447b97dccc15469002eb69188e921fac18803` |
 | [2026-09-15_统一时钟与Runtime_Scheduler重构建议](2026-09-15_统一时钟与Runtime_Scheduler重构建议.txt) | 对 Typed Rejection Feedback 的复核及统一 Simulation Clock、RunningAction、EventScheduler、DecisionGate 的 Runtime v1 迁移建议；原始判断不替代实现验收 | [原文](2026-09-15_统一时钟与Runtime_Scheduler重构建议.txt)；SHA-256 `211a0096a861fba1360b9a2cf82b50dbc7aeaced00b09b815fc52bf5716c90d5` |
 | [2026-09-15_行为审计casebook复核与Engine修复建议](2026-09-15_行为审计casebook复核与Engine修复建议.txt) | 对 behavior-audit casebook 的复核：从零时间购物循环定位 Typed Rejection Feedback 的 Engine 修复边界；原始结论不替代本仓库验证 | [原文](2026-09-15_行为审计casebook复核与Engine修复建议.txt)；SHA-256 `6e0f511369b43d6903d613a38377b292e14c7dc400bdc0ea10a66af29597c654` |

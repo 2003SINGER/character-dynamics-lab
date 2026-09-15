@@ -58,6 +58,12 @@ called once per clock minute. `DecisionGate` only opens for an action
 completion, rejection, a strong external event, interruption, a need
 threshold, commitment reconsideration, or plan invalidation.
 
+`World::settle_runtime_completion` is the scheduler-native counterpart of the
+Reference v0 whole-action settle: it validates and applies action effects,
+counters, task effort and typed `WorldOutcome`, but never advances `World.time`
+or scans interval events. The scheduler owns elapsed time; W owns completion
+effects.
+
 ## v1 executable evidence
 
 `RuntimeScheduler` lives in

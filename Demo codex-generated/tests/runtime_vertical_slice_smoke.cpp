@@ -76,6 +76,8 @@ int main() {
     const std::vector<WorldEvent> completion_events = world_runtime.advance_to_boundary(completion_boundary, scheduler);
     const StateUpdate study_second_leg = advance_continuous_state(
         state, personality, &*completion_boundary.action_after_boundary, completion_boundary.elapsed_minutes);
+    const WorldOutcome completion = world.settle_runtime_completion(ActionType::StudyFocused, "desk");
+    apply_self_action_feedback(observation, completion, world.time_summary());
     const Appraisal completion_x = appraise(observation, state, personality);
     const StateUpdate completion_impulse = update_state(state, completion_x, personality, 0);
     const DecisionContext next_policy = decide(observation, state, personality);
@@ -91,6 +93,7 @@ int main() {
         || study_second_leg.applied.fatigue <= 0.0
         || !completion_events.empty()
         || total_minutes(world.time) != scheduler.now_total_minutes()
+        || !completion.accepted || completion.elapsed_minutes != 0 || completion.task_effort_gained <= 0.0
         || completion_impulse.applied.elapsed_minutes != 0
         || next == nullptr || !scheduler.running_action().has_value()) {
         std::cerr << "completion must settle W/O/X/S before the gated next policy action\n";
