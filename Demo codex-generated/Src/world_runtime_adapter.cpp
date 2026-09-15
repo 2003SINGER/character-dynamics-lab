@@ -27,3 +27,7 @@ std::vector<WorldEvent> WorldRuntimeAdapter::advance_to_boundary(const RuntimeBo
     }
     return events;
 }
+
+std::string WorldRuntimeAdapter::time_summary() const {
+    return world_.time_summary();
+}

@@ -1,0 +1,24 @@
+#pragma once
+
+#include "observation.h"
+#include "runtime_scheduler.h"
+#include "world_runtime_adapter.h"
+
+struct ContinuousRuntimeStep {
+    RuntimeBoundary boundary;
+    std::vector<WorldEvent> world_events;
+};
+
+// Canonical owner for the scheduler-native W -> O incremental handoff.
+// State integration and policy remain explicit callers at this stage.
+class ContinuousRuntime {
+public:
+    ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation);
+    bool schedule_next_world_boundary();
+    ContinuousRuntimeStep advance_next_boundary();
+
+private:
+    RuntimeScheduler& scheduler_;
+    WorldRuntimeAdapter world_runtime_;
+    Observation& observation_;
+};

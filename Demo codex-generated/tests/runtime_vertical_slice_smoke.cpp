@@ -1,4 +1,5 @@
 #include "appraisal.h"
+#include "continuous_runtime.h"
 #include "decision.h"
 #include "observation.h"
 #include "runtime_scheduler.h"
@@ -31,22 +32,23 @@ int main() {
     CharacterState state;
     World world;
     world.time.minute_of_day = 9 * 60 + 20;
-    Observation observation = refresh_observation({}, world, {});
     RuntimeScheduler scheduler(9 * 60 + 20);
-    WorldRuntimeAdapter world_runtime(world, scheduler);
+    Observation observation = refresh_observation({}, world, {});
+    ContinuousRuntime runtime(scheduler, world, observation);
     const WorldOutcome start = world.validate_runtime_start(ActionType::StudyFocused, "desk");
     if (!start.accepted) { std::cerr << "W rejected a legal study start\n"; return 1; }
     scheduler.start_action(ActionType::StudyFocused, "desk", 35, true);
     // W is the boundary source; the fixture does not duplicate its schedule.
-    if (!world_runtime.schedule_next_world_boundary(scheduler)) {
+    if (!runtime.schedule_next_world_boundary()) {
         std::cerr << "World did not expose a next runtime boundary\n";
         return 1;
     }
 
     // [09:00, 09:10): continuous S receives both elapsed duration and the
     // running study action, while policy remains closed at the weak event.
-    const RuntimeBoundary message_boundary = scheduler.advance_to_next_boundary();
-    const std::vector<WorldEvent> world_events = world_runtime.advance_to_boundary(message_boundary, scheduler);
+    const ContinuousRuntimeStep message_step = runtime.advance_next_boundary();
+    const RuntimeBoundary& message_boundary = message_step.boundary;
+    const std::vector<WorldEvent>& world_events = message_step.world_events;
     const StateUpdate study_first_leg = advance_continuous_state(
         state, personality, &*message_boundary.action_after_boundary, message_boundary.elapsed_minutes);
     const auto message = std::find_if(world_events.begin(), world_events.end(), [](const WorldEvent& event) {
@@ -56,7 +58,6 @@ int main() {
         std::cerr << "World did not emit the scheduled message at the runtime boundary\n";
         return 1;
     }
-    apply_world_events(observation, world_events, world.time_summary());
     const Appraisal message_x = appraise(observation, state, personality);
     const StateUpdate message_impulse = update_state(state, message_x, personality, 0);
     observation.updates_this_refresh.clear();
@@ -74,8 +75,9 @@ int main() {
 
     // [09:10, 09:35): the action continues. At completion, W settlement and
     // its typed self-feedback occur before the gate authorizes the next pi.
-    const RuntimeBoundary completion_boundary = scheduler.advance_to_next_boundary();
-    const std::vector<WorldEvent> completion_events = world_runtime.advance_to_boundary(completion_boundary, scheduler);
+    const ContinuousRuntimeStep completion_step = runtime.advance_next_boundary();
+    const RuntimeBoundary& completion_boundary = completion_step.boundary;
+    const std::vector<WorldEvent>& completion_events = completion_step.world_events;
     const StateUpdate study_second_leg = advance_continuous_state(
         state, personality, &*completion_boundary.action_after_boundary, completion_boundary.elapsed_minutes);
     const WorldOutcome completion = world.settle_runtime_completion(

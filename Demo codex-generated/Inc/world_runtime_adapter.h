@@ -14,6 +14,7 @@ public:
     bool schedule_next_world_boundary(RuntimeScheduler& scheduler) const;
     std::vector<WorldEvent> advance_to_boundary(const RuntimeBoundary& boundary,
                                                 const RuntimeScheduler& scheduler);
+    std::string time_summary() const;
 
 private:
     World& world_;
