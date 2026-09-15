@@ -333,7 +333,7 @@ Observation refresh_observation(Observation observation,
     // ordinary visual refresh when it rang during the preceding action.
     for (const WorldEvent& event : previous_outcome.events) {
         if (event.id == "task-reminder" && access.task_deadline_observable) {
-            write_fact(observation, "calendar.task_due", "today", "calendar_notification", now);
+            write_fact(observation, FactKey::TaskReminder, "today", "calendar_notification", now);
         }
     }
 
@@ -435,15 +435,15 @@ void apply_world_events(Observation& observation, const std::vector<WorldEvent>&
     for (const WorldEvent& event : events) {
         if (event.id == "message-study-group") {
             if (!access.phone_presence_observable) continue;
-            apply_observable_runtime_event(observation, "message.unread_count", std::to_string(world.unread_messages),
+            apply_observable_runtime_event(observation, FactKey::MessageUnreadCount, std::to_string(world.unread_messages),
                                            "world_event:message-study-group", observed_at);
         } else if (event.id == "task-reminder") {
             if (!access.task_deadline_observable) continue;
-            apply_observable_runtime_event(observation, "task.reminder", "1",
+            apply_observable_runtime_event(observation, FactKey::TaskReminder, "1",
                                            "world_event:task-reminder", observed_at);
         } else if (event.id == "task-deadline") {
             if (!access.task_deadline_observable) continue;
-            apply_observable_runtime_event(observation, "task.deadline_passed", "1",
+            apply_observable_runtime_event(observation, FactKey::TaskDeadlinePassed, "1",
                                            "world_event:task-deadline", observed_at);
         } else if (event.id == "alarm-rings") {
             apply_observable_runtime_event(observation, "room.alarm", "ringing",
@@ -453,11 +453,11 @@ void apply_world_events(Observation& observation, const std::vector<WorldEvent>&
                                            std::to_string(world.current_room().temperature_celsius),
                                            "world_event:room-temperature-shift", observed_at);
         } else if (event.id == "evening") {
-            apply_observable_runtime_event(observation, "world.time_phase", "evening",
+            apply_observable_runtime_event(observation, FactKey::EveningPhase, "evening",
                                            "world_event:evening", observed_at);
         } else if (event.id == "weather-rain" || event.id == "weather-clear") {
             if (!world.current_room().curtain_open) continue;
-            apply_observable_runtime_event(observation, "outside.weather",
+            apply_observable_runtime_event(observation, FactKey::OutsideWeather,
                                            event.id == "weather-rain" ? "rain" : "clear",
                                            "world_event:" + event.id, observed_at);
         }

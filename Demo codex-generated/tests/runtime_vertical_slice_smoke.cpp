@@ -65,7 +65,7 @@ int main() {
     const RuntimeExecutionResult completion_result = runtime.execute_next_boundary(state, personality);
     const RuntimeBoundary& completion_boundary = completion_result.runtime.boundary;
     const std::vector<WorldEvent>& completion_events = completion_result.runtime.world_events;
-    const WorldOutcome& completion = *completion_result.outcome;
+    const WorldOutcome& completion = *completion_result.pre_policy_outcome;
     std::mt19937 expected_rng(0x43445257U);
     const ActionType expected_sample = sample_action(completion_result.decision, expected_rng);
 

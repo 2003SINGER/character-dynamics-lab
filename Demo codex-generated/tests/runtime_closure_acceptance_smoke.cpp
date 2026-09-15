@@ -89,7 +89,7 @@ int main() {
     invalid_runtime.invalidate_running_action();
     CharacterState invalid_state;
     const RuntimeExecutionResult invalid_step = invalid_runtime.execute_next_boundary(invalid_state, personality);
-    if (!invalid_step.outcome || !invalid_step.outcome->plan_invalidated
+    if (!invalid_step.pre_policy_outcome || !invalid_step.pre_policy_outcome->plan_invalidated
         || invalid_step.runtime.boundary.decision_gate.reasons.empty()) return 12;
 
     // B4: bounded steps expose a deterministic need-threshold opportunity.
@@ -116,7 +116,7 @@ int main() {
                          DecisionGateReason::NeedThresholdCrossed)) {
             saw_reconsideration = true;
         }
-        if (saw_threshold && !tick.outcome.has_value() && threshold_scheduler.running_action().has_value()
+        if (saw_threshold && !tick.pre_policy_outcome.has_value() && threshold_scheduler.running_action().has_value()
             && threshold_scheduler.running_action()->elapsed_minutes > 0) preserved_progress = true;
     }
     if (!saw_threshold || !saw_reconsideration || !preserved_progress) return 14;
@@ -132,10 +132,10 @@ int main() {
     CharacterState replace_state;
     replace_state.hunger = 0.39;
     const RuntimeExecutionResult replace_tick = replace_runtime.execute_next_boundary(replace_state, personality);
-    if (!replace_tick.policy_evaluated || !replace_tick.outcome.has_value()
+    if (!replace_tick.policy_evaluated || !replace_tick.post_policy_outcome.has_value()
         || !replace_tick.replacement_validation_performed || !replace_tick.replacement_validation_accepted
-        || !replace_tick.outcome->task_session_interrupted
-        || replace_tick.outcome->provenance != "ContinuousRuntime::policy_reconsideration"
+        || !replace_tick.post_policy_outcome->task_session_interrupted
+        || replace_tick.post_policy_outcome->provenance != "ContinuousRuntime::policy_reconsideration"
         || replace_scheduler.now_total_minutes() != replace_tick.runtime.boundary.at_total_minutes
         || !replace_scheduler.running_action().has_value()
         || replace_scheduler.running_action()->action != ActionType::RestAtBed) return 18;
@@ -184,7 +184,8 @@ int main() {
         || rejected_replace_scheduler.running_action()->action != ActionType::StudyFocused
         || rejected_replace_scheduler.running_action()->started_at_total_minutes != old_started_at
         || rejected_replace_scheduler.running_action()->elapsed_minutes <= 0
-        || rejected_replace_tick.outcome.has_value()) return 20;
+        || rejected_replace_tick.pre_policy_outcome.has_value()
+        || rejected_replace_tick.post_policy_outcome.has_value()) return 20;
     const RuntimeExecutionResult rejected_feedback_tick =
         rejected_replace_runtime.execute_next_boundary(rejected_replace_state, personality);
     if (rejected_feedback_tick.policy_evaluated
@@ -212,8 +213,8 @@ int main() {
     for (int step = 0; step < 4; ++step) {
         const RuntimeExecutionResult completion_tick =
             completion_runtime.execute_next_boundary(completion_state, personality);
-        if (completion_tick.outcome.has_value()) {
-            if (completion_tick.outcome->task_completed) {
+        if (completion_tick.pre_policy_outcome.has_value()) {
+            if (completion_tick.pre_policy_outcome->task_completed) {
                 ++completion_outcomes;
                 completion_task_completed = true;
                 for (const AppraisalSignal& signal : completion_tick.appraisal.semantic_signals) {

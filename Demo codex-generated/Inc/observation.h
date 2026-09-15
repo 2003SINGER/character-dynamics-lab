@@ -14,6 +14,11 @@ inline constexpr const char* RoomAlarm = "room.alarm";
 inline constexpr const char* RoomTemperature = "room.temperature_celsius";
 inline constexpr const char* ClockTime = "clock.time";
 inline constexpr const char* MessageUnreadCount = "message.unread_count";
+inline constexpr const char* TaskReminder = "task.reminder";
+inline constexpr const char* TaskDeadlinePassed = "task.deadline_passed";
+inline constexpr const char* TaskDeadlineAt = "task.deadline_at_total_minutes";
+inline constexpr const char* EveningPhase = "world.time_phase";
+inline constexpr const char* OutsideWeather = "outside.weather";
 }
 
 enum class KnowledgeStatus {

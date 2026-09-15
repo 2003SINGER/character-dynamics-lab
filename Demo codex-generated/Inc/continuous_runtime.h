@@ -16,6 +16,8 @@ struct ContinuousRuntimeStep {
 
 struct RuntimeExecutionResult {
     ContinuousRuntimeStep runtime;
+    std::optional<RunningAction> running_action_before;
+    std::optional<RunningAction> running_action_after;
     StateUpdate continuous_state;
     StateUpdate impulse_state;
     Appraisal appraisal;
@@ -24,13 +26,12 @@ struct RuntimeExecutionResult {
     std::optional<WorldOutcome> pre_policy_outcome;
     // Policy-generated transition result; consumed on the next boundary.
     std::optional<WorldOutcome> post_policy_outcome;
-    // Deprecated compatibility alias for callers being migrated.
-    std::optional<WorldOutcome> outcome;
     std::optional<ActionType> selected_action;
     std::string selected_target_object_id;
     bool replacement_validation_performed = false;
     bool replacement_validation_accepted = false;
     unsigned int policy_seed = 0;
+    std::vector<ObservationFact> observation_deltas;
     bool policy_evaluated = false;
 };
 

@@ -1,10 +1,18 @@
 # Runtime Scheduler v1｜统一时间骨架
 
-状态：**Continuous Runtime v1 closure 已完成；尚未迁移既有 reference fixtures。**
+状态：**System v1 final hardening + scheduler-native fixtures：READY_FOR_INDEPENDENT_REVIEW。**
 
-当前 checkpoint：`TEMPORAL_KERNEL_PASS`；`FIRST_VERTICAL_SLICE_PASS`；
-`WORLD_RUNTIME_CLOCK_ADAPTER_PASS`（受控 slice）；完整 canonical owner、typed
-outcome flow 与 scheduler-native fixtures 仍未完成。
+## Current Runtime v1 contract
+
+当前 HEAD 已具备 canonical ContinuousRuntime owner、typed pre/post outcomes、
+W-validated ActionIntent、Deadline/Phone/Commitment fixture smoke、deterministic
+trace、semantic channel coverage 与 CI。Reference v0 仍是独立的 action-step
+历史/对照引擎，未被改写或替换。
+
+## Historical implementation checkpoints
+
+`TEMPORAL_KERNEL_PASS`、`FIRST_VERTICAL_SLICE_PASS`、
+`WORLD_RUNTIME_CLOCK_ADAPTER_PASS` 是演进历史，不代表当前未完成状态。
 
 ## 边界
 

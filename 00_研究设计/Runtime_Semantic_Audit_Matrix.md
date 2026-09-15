@@ -15,4 +15,4 @@
 | rejection | typed `RuntimeRejection` | constraint/target ΔO | rejection appraisal → S impulse | rejection gate | consumed exactly once |
 | interruption | typed runtime outcome | interruption feedback | plan/reconsideration appraisal | policy gate | consumed |
 
-Key naming is verified at the projector/consumer boundary; no generic ontology framework is introduced. Commitment update remains deferred to the scheduler-native Commitment fixture, while self-action feedback is retained until current-boundary appraisal consumption.
+Key naming is centralized in `FactKey`; no generic ontology framework is introduced. Commitment update runs in the canonical scheduler-native boundary before self-action feedback is consumed, and reads actor-local feedback only.

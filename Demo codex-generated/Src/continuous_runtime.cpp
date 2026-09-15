@@ -33,9 +33,11 @@ void ContinuousRuntime::invalidate_running_action() {
 RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& state, const Personality& personality) {
     RuntimeExecutionResult result;
     result.policy_seed = policy_seed_;
+    result.running_action_before = scheduler_.running_action();
     const CharacterState before_continuous = state;
     result.runtime.boundary = scheduler_.advance_to_next_boundary();
     const auto& action = result.runtime.boundary.action_after_boundary;
+    result.running_action_after = action;
     // Continuous dynamics is integrated before event projection at t.
     result.continuous_state = advance_continuous_state(state, personality,
         action.has_value() ? &*action : nullptr, result.runtime.boundary.elapsed_minutes);
@@ -61,10 +63,9 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         threshold_reconsideration = true;
     }
     if (action.has_value() && action->status == RunningActionStatus::Completed) {
-        result.outcome = world_runtime_.world().settle_runtime_completion(
+        result.pre_policy_outcome = world_runtime_.world().settle_runtime_completion(
             action->action, action->target_object_id, action->elapsed_minutes);
-        result.pre_policy_outcome = result.outcome;
-        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary(),
+        apply_self_action_feedback(observation_, *result.pre_policy_outcome, world_runtime_.time_summary(),
                                    access_.self_task_completion_observable, false);
     } else if (action.has_value() && action->status == RunningActionStatus::Interrupted) {
         WorldOutcome invalidation;
@@ -73,16 +74,16 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         invalidation.action_elapsed_minutes = action->elapsed_minutes;
         invalidation.provenance = "ContinuousRuntime::plan_invalidated";
         invalidation.plan_invalidated = true;
-        result.outcome = invalidation;
-        result.pre_policy_outcome = result.outcome;
-        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary(), true, false);
+        result.pre_policy_outcome = invalidation;
+        apply_self_action_feedback(observation_, *result.pre_policy_outcome, world_runtime_.time_summary(), true, false);
     }
     result.appraisal = appraise(observation_, state, personality);
     result.impulse_state = apply_appraisal_impulse(state, result.appraisal, personality);
+    result.observation_deltas = observation_.updates_this_refresh;
     update_commitment(state, observation_, scheduler_.now_total_minutes());
     consume_appraisal_inputs(observation_);
     if (result.runtime.boundary.decision_gate.open
-        && (result.outcome.has_value() || !action.has_value()
+        && (result.pre_policy_outcome.has_value() || !action.has_value()
             || action->status != RunningActionStatus::Running || threshold_reconsideration)) {
         result.policy_evaluated = true;
         result.decision = decide(observation_, state, personality);
@@ -117,7 +118,6 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
                     reconsideration.action_elapsed_minutes = action->elapsed_minutes;
                     reconsideration.task_session_interrupted = true;
                     reconsideration.provenance = "ContinuousRuntime::policy_reconsideration";
-                    result.outcome = reconsideration;
                     result.post_policy_outcome = reconsideration;
                     apply_self_action_feedback(observation_, reconsideration,
                                                world_runtime_.time_summary(), true, false);
@@ -132,5 +132,6 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
             }
         }
     }
+    result.running_action_after = scheduler_.running_action();
     return result;
 }
