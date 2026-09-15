@@ -21,7 +21,17 @@ ActionOutcome、Delta-O、X、StateDelta 与 DecisionGateReason，而不是每�
 `WorldEvent/Outcome → legal O projection → Delta-O → X → S impulse`；决策流
 `DecisionGate → A^O → pi → ActionIntent`。普通事件不自动运行 policy。
 
-核心运行链保持为：
+三条流共享以下持久节点：
+
+```text
+Persistent: W ── O ── S ── P ── RunningAction
+                 │     │       │
+TIME:       Δt → W dynamics / S continuous / action progress
+EVENT: WorldEvent/Outcome → legal ΔO → X → S impulse
+DECISION: DecisionGate → A^O → π → ActionIntent → W validate
+```
+
+其中下列链只表示角色因果语义子路径，不再是完整 runtime mental model：
 
 ```text
 W authoritative world
