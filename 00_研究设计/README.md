@@ -1,6 +1,6 @@
 # 研究设计：唯一维护入口
 
-整理日期：2026-09-05
+整理日期：2026-09-16
 
 当前只维护按职责归属的活动文档；数量不是稳定契约。按内容归属维护，不再按“某天新对话／某个模型的新总结”新增并列总纲。
 
@@ -16,6 +16,20 @@
 | [TODO](TODO.md) | 下一动作、依赖、验收、完成状态 | 长篇机制论证 |
 | [后置机制候选｜AU 考古](后置机制候选_AU考古.md) | 保存暂不进入主线的 AU 候选及升格条件 | 当前 runtime、Paper-0 主张与主线 TODO |
 | [当前实现进度](当前实现进度.md) | 代码版本、实际能力、未实现项、验证证据 | 从目标设计推断完成 |
+| **[System Vision v0](Character_Dynamics_System_Vision_v0.md)** | Engine / Evaluator / Optimizer 的系统边界与 runtime 三流模型 | 把 Engine 冻结误写为全系统完成 |
+| **[Runtime Scheduler v1](Runtime_Scheduler_v1.md)** | 已冻结的统一时间、RunningAction、DecisionGate 与 outcome contract | 新研究目标或 batch/evaluator 迁移授权 |
+| **[Runtime Closure Matrix](Runtime_Closure_Acceptance_Matrix.md)** | Runtime / Engine v1 closure 的 gate 与可执行证据 | 心理机制或科研有效性结论 |
+| [Runtime Semantic Audit Matrix](Runtime_Semantic_Audit_Matrix.md) | runtime channel 的 W/O/X/S 消费边界 | 增加新 runtime 功能 |
+| [Runtime Stabilization Audit](Runtime_v1_Stabilization_Audit_2026-09-15.md) | 历史 anti-patch-debt checkpoint 与已解决事项 | 当前待办列表 |
+| [System Phase Checkpoint](System_Phase_Checkpoint_2026-09-10.md) | Evaluator / Objective / Optimizer 暂停边界 | Runtime closure 状态 |
+| [Objective Readiness v0](Objective_Readiness_v0.md) | objective 为什么尚不可用于质量排序/优化 | 用 telemetry 声称自然度 |
+| [Optimizer v0](Optimizer_v0.md) | optimizer 的开发护栏与 no-selection 状态 | 开始参数搜索的授权 |
+| [Development Split v1](Development_Split_v1.md) | synthetic train/holdout 的冻结 split 协议 | 正式外部 test 声明 |
+| [ParameterConfig v0](ParameterConfig_v0.md) | 参数 owner、序列化与 sensitivity 边界 | 心理学参数解释 |
+| **[Paper-0 问题卡](Paper-0问题卡.md)** | 当前科研主问题、A* / O / candidate-set admission 前提 | 系统工程完成宣称 |
+| [Theory-S M1 冻结决策](Theory-S_M1冻结决策_2026-09-07.md) | pre-training 的语义与协议冻结边界 | Theory-S 已训练/有效的声明 |
+| [Existing Dataset Pool Routing](Existing_Dataset_Pool_Routing_v1_2026-09-08.md) | 历史数据集 routing、已 superseded 的 benchmark next-action | 新 dataset 搜索或训练授权 |
+| [Architecture Audit Policy](architecture_audit_policy.md) | AI-heavy 工程的审计范围、已知债与不授权重构边界 | 当前 Runtime 的待办 |
 | 本 README | 阅读路由与维护规则 | 复制其他七页的内容 |
 
 ## 从哪里读
@@ -26,7 +40,7 @@
 
 理解项目：研究问题 → 完整机制。
 
-继续改造：实现进度 → 未决问题 → TODO 中选定的切片。
+继续改造：先看系统愿景与 Runtime closure；Runtime 已冻结时，直接读 Paper-0 问题卡 → TODO 的 M2，不重开 Engine。
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 

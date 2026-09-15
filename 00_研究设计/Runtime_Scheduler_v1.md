@@ -1,6 +1,6 @@
 # Runtime Scheduler v1｜统一时间骨架
 
-状态：**System v1 final hardening + scheduler-native fixtures：READY_FOR_INDEPENDENT_REVIEW。**
+状态：**System Runtime / Engine v1：CLOSED / FROZEN。** 此状态不覆盖 Evaluator、Objective、Optimizer 或 Paper-0 科学验收。
 
 ## Current Runtime v1 contract
 
@@ -127,7 +127,7 @@ psychological model, or authorize a batch/evaluator migration.
    observable during a long action rather than only after it completes.
 2. Recreate Phone and Commitment as scheduler-native fixtures with
    equivalent information-boundary evidence.
-4. Only then consider replacing any action-step batch or evaluator path.
+3. Only then consider replacing any action-step batch or evaluator path.
 
 Future scheduler boundaries must include state-threshold crossings (or a
 bounded numerical step when they cannot be predicted), in addition to world

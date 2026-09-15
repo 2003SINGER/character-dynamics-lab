@@ -2,17 +2,18 @@
 
 > 一个面向可持续运行 NPC 的角色动力学框架：让常规决策由可审计的局部观察、持续状态与廉价策略完成，只在必要时调用开放语义模型，并同时优化长期行为质量与运行成本。
 
-当前已有规则化 C++ 参考模拟与批量日志；尚未完成真实行为预测、干预、强基线和心理机制验证。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
+当前已有规则化 C++ 参考模拟与批量日志；**Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**：统一时钟、RunningAction、事件/信息边界、DecisionGate、typed rejection、scheduler-native fixtures、trace、case-isolated CTest 与 CI 已闭环。Evaluator、Objective、Optimizer 与 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
 
 ## 从这里进入
 
 | 要找什么 | 唯一维护位置 |
 |---|---|
 | 系统主线、Engine / Evaluator / Optimizer 与研究支线 ownership | [系统愿景](00_研究设计/Character_Dynamics_System_Vision_v0.md) |
+| Runtime / Engine v1 的冻结边界与可执行验收 | [Runtime Scheduler](00_研究设计/Runtime_Scheduler_v1.md)；[Closure Matrix](00_研究设计/Runtime_Closure_Acceptance_Matrix.md) |
 | 整体机制、各层职责、任务/承诺、时间与低耦合 | [完整机制说明](00_研究设计/完整机制说明_v0.md) |
 | 研究问题、Forward/Inverse、候选创新及评价边界 | [研究问题](00_研究设计/前台问题与候选创新.md) |
 | 尚未定下的计算、具体机制/实现缺口 | [未决问题](00_研究设计/未决问题与机制候选.md) |
-| 下一动作、依赖与验收 | [TODO](00_研究设计/TODO.md) |
+| 下一动作、依赖与验收 | [TODO](00_研究设计/TODO.md)；当前仅推进 M2 candidate-set admission |
 | Self-Play / Self-Evaluation v0 | [评测协议](02_实验/Self_Evaluation_v0.md)；[scorecard runner](tools/self_evaluation_v0.py)；[scenario manifest](tools/self_evaluation_scenarios_v0.json) |
 | 实验导出器、切片与可复现记录 | [实验总路由](02_实验/README.md)；[跨数据集 Replay 接口草案](02_实验/跨数据集Replay接口_v0.md)；[机制识别循环与反事实诊断](02_实验/机制识别循环与反事实诊断_v0.md) |
 | 文献 PDF、职责级阅读与证据 | [文献库](01_文献/README.md) |

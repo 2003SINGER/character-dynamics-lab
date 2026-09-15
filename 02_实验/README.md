@@ -13,6 +13,6 @@ Mechanism 表达力与候选集边界的独立工程验收见 [Mechanism Sanity 
 
 该 runner 输出 `development_only` 且 `formal_test=false`；正式行为真值准入前不得把 dev holdout 当 Paper-0 test。
 
-本地外部实验/基准数据统一放在[`_external_datasets_2026-09-08`](_external_datasets_2026-09-08/)，与 `90_原始材料` 的原始复核/对话证据分开。该目录只解决物理归档与 provenance，不代表任何数据集已经通过本项目的 adapter、语义准入或 Paper-0 candidate/action-surface gate。
+本地外部实验/基准 payload 位于 [`outputs/external_assets_2026-09-06`](../outputs/external_assets_2026-09-06/)；[`_external_datasets_2026-09-08`](_external_datasets_2026-09-08/) 只保留 tracked provenance/readme 层，与 `90_原始材料` 的原始复核/对话证据分开。该归档不代表任何数据集已经通过本项目的 adapter、语义准入或 Paper-0 candidate/action-surface gate。
 
 `T14_T20_rank_matched_probe_v1.md`、`Replay/replay_features_v1.py`、`Replay/replay_probe_v1.py` 是既有 1D 候选协议与训练设施；`Theory_S_v2/` 是后续 trainable dynamics candidate，但尚未进入真实 development training。v0 协议、`drive-linear-v0` 与 C++ `replay_core_cli` 仅作历史 diagnostic/repro path。其他数据集按各自 README 的准入状态维护。

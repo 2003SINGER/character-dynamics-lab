@@ -1,6 +1,6 @@
 # Continuous Runtime v1 Closure 验收矩阵
 
-当前状态：**READY_FOR_INDEPENDENT_REVIEW**。本矩阵记录 end-to-end owner 审计后的可执行证据；研究心理机制有效性仍不由该工程门槛推出。
+当前状态：**CLOSED / FROZEN**（独立复核完成）。本矩阵记录 end-to-end owner 审计后的可执行证据；研究心理机制有效性仍不由该工程门槛推出。
 
 | Gate | 当前 | 证据/说明 |
 |---|---|---|
@@ -21,6 +21,6 @@
 
 ## Executable evidence
 
-当前 CTest：6 个基础注册 + closure acceptance + trace + mechanism fixture executable，并保留 gate-labelled closure registrations；总数随 fixture 增长，不将标签数表述为独立 fixture 数。
+当前 CTest 包含基础、closure、trace、mechanism fixture、channel coverage，以及以 `runtime_case_smoke --case <name>` 逐 case 执行的 gate-labelled registrations。
 
-`RUNTIME_V1_CLOSURE_AND_PROJECT_STABILIZATION = READY_FOR_INDEPENDENT_REVIEW`。π selection、completion/rejection exactly-once、threshold continue/replace、physical preemption distinction 均有 dedicated assertions；下一阶段 fixture migration 等待独立复核。
+`RUNTIME_V1_CLOSURE_AND_PROJECT_STABILIZATION = CLOSED / FROZEN`。π selection、completion/rejection exactly-once、threshold continue/replace、physical preemption distinction均有可执行证据。后续不再扩 Runtime；下一条 active research work 为 M2 candidate-set admission。

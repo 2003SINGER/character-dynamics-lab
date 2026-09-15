@@ -5,7 +5,7 @@
 
 ## Superseding update（2026-09-09）
 
-The shortlist below is historical routing v1. It is superseded for the current next-action route: ClubFloyd Stage 0c found no positive low-order history increment after exact pair repeats were excluded, so its persistent-compression / Theory-S bridge is paused. LIGHT H0b now finds aligned generic action-transition signal beyond O-only and a permuted control. LIGHT may proceed to a generic/raw-history versus naive persistent-compression benchmark; this is not permission to start Theory-S training. OPeRA remains the backup if that compression benchmark fails.
+The shortlist below is historical routing v1. It is superseded for the current next-action route: ClubFloyd Stage 0c found no positive low-order history increment after exact pair repeats were excluded, so its persistent-compression / Theory-S bridge is paused. LIGHT H0b found aligned generic action-transition signal beyond O-only and a permuted control; the subsequent generic/raw-history versus naive persistent-compression benchmark completed with `COMPRESSION_DEPTH2_ALIGNED_SIGNAL_PRESENT; COMPARATIVE_SUFFICIENCY_INCONCLUSIVE`. This remains no permission to start Theory-S training.
 
 ## Decision summary
 
@@ -54,11 +54,11 @@ The shortlist below is historical routing v1. It is superseded for the current n
   inspectable tool-call surface among the new archive group, and even that is
   mixed/model-constructed.
 
-## Next action
+## Superseded next action
 
 Do **not** start Theory-S training from this historical routing page. ClubFloyd
-Stage 0c is paused for this estimand. LIGHT H0b has passed the history-signal
-gate, so the next action is a generic/raw-history versus naive
-persistent-compression benchmark with lossless source, source candidate lists
-treated only as observed support (not `A^O`), and no new X fields. If that
-compression benchmark fails, route to OPeRA; do not reopen ClubFloyd Stage 0d.
+Stage 0c is paused for this estimand. The generic/raw-history versus naive
+persistent-compression benchmark completed with aligned depth-2 signal but
+inconclusive comparative sufficiency. This page authorizes neither a new
+dataset search nor an OPeRA escalation. The active research next action is M2
+candidate-set admission, owned by the project TODO.
