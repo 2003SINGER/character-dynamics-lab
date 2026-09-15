@@ -15,6 +15,10 @@ bool WorldRuntimeAdapter::schedule_next_world_boundary(RuntimeScheduler& schedul
     return true;
 }
 
+WorldOutcome WorldRuntimeAdapter::validate_runtime_start(ActionType action, const std::string& target_object_id) const {
+    return world_.validate_runtime_start(action, target_object_id);
+}
+
 std::vector<WorldEvent> WorldRuntimeAdapter::advance_to_boundary(const RuntimeBoundary& boundary,
                                                                   const RuntimeScheduler& scheduler) {
     if (boundary.at_total_minutes != scheduler.now_total_minutes()

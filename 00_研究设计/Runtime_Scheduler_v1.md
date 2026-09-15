@@ -1,6 +1,6 @@
 # Runtime Scheduler v1｜统一时间骨架
 
-状态：**最小时间内核已实现并通过 smoke；尚未迁移既有 reference fixtures。**
+状态：**Continuous Runtime v1 closure 进行中；尚未迁移既有 reference fixtures。**
 
 当前 checkpoint：`TEMPORAL_KERNEL_PASS`；`FIRST_VERTICAL_SLICE_PASS`；
 `WORLD_RUNTIME_CLOCK_ADAPTER_PASS`（受控 slice）；完整 canonical owner、typed
@@ -58,7 +58,8 @@ called once per clock minute. `DecisionGate` only opens for an action
 completion, rejection, a strong external event, interruption, a need
 threshold, commitment reconsideration, or plan invalidation.
 
-`WorldRuntimeAdapter::schedule_next_world_boundary` queries W's authoritative
+`ContinuousRuntime` now owns action-intent submission and automatically renews
+the next W boundary after every step. `WorldRuntimeAdapter::schedule_next_world_boundary` queries W's authoritative
 event source and registers the next event; fixtures no longer copy known W
 timestamps into the scheduler. `World::validate_runtime_start` is the scheduler-native start gate: policy's
 intent must be accepted by W before a `RunningAction` is created. A later

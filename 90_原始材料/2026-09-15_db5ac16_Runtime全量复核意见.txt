@@ -1,0 +1,852 @@
+看了。最新 webgpt-sync 已经到 db5ac16 feat: add canonical continuous runtime owner，中间还有：
+- 4204b49：start validation + WorldEvent projector
+- 1fd783d：World 自己提供下一事件 boundary
+- db5ac16：新增 ContinuousRuntime
+所以这三刀确实是在按我们上一轮的方向推进。
+现在我会说：框架终于开始长成 runtime 了，但还差最后一层“真正闭环”。而且我抓到了几个迁 Deadline 前必须修的坑。
+已经真正修好的
+ActionIntent → W start validation 已经有了。World::validate_runtime_start() 会检查目标不存在、目标不支持动作、目标坏、资源不足、其他 precondition，只有 accepted 才应该创建 RunningAction。
+completion 的时长 provenance 也修了。现在明确区分：
+action_elapsed_minutes
+time_advanced_by_settlement
+runtime completion 可以记录实际 35 分钟，同时 settlement 自己推进时间为 0。之前那个“35 分钟动作 outcome elapsed=0”的语义混乱已经解决。
+World event boundary 也不再由 fixture 手写 09:30。现在 World::next_runtime_event_after() 给出下一事件，WorldRuntimeAdapter::schedule_next_world_boundary() 注册到 scheduler。
+而且终于出现：
+ContinuousRuntime
+它至少统一拥有了：
+scheduler
+→ WorldRuntimeAdapter
+→ advance W
+→ typed WorldEvent
+→ O projection
+所以测试不再自己手写 message key。
+这几个都是实质进展。
+但是：这个 ContinuousRuntime 目前还不能叫“完整 canonical runtime owner”
+它自己的头文件其实已经老实写了：
+State integration and policy remain explicit callers at this stage. 
+
+也就是说现在实际上是：
+ContinuousRuntime:
+    scheduler → W → O
+
+测试代码:
+    O → X
+    X → S
+    DecisionGate
+    π
+    W completion
+    start next action
+所以真正的数据流仍然有一半在 smoke 里手工串。
+runtime_vertical_slice_smoke.cpp 现在仍然自己：
+advance_continuous_state(...)
+appraise(...)
+update_state(...)
+decide(...)
+world.settle_runtime_completion(...)
+apply_self_action_feedback(...)
+scheduler.start_action(...)
+所以当前更准确的名字其实是：
+canonical W→O runtime bridge owner
+
+还不是：
+canonical Character Dynamics runtime owner
+
+这不是咬文嚼字。因为 Deadline / Phone / Commitment 如果现在开始迁，它们仍然可以各自把 O→X→S→π 串成三套。
+而且这里还有一个直接的生命周期漏洞
+初始 StudyFocused：
+world.validate_runtime_start(...)
+scheduler.start_action(...)
+很好。
+但是 09:55 完成后，policy 选出下一动作：
+next = highest_probability(next_policy);
+
+scheduler.start_action(
+    next->action,
+    next->target_object_id,
+    ...
+);
+没有再调用 validate_runtime_start()。 
+所以我们刚加的 start validation 目前只是：
+smoke 初始动作遵守了。
+
+而不是：
+runtime 保证所有 ActionIntent 都必须先经 W validation。
+
+这是一个真正的 ownership 问题。
+正确做法应该让外部根本没有机会写：
+scheduler.start_action(...)
+来启动角色动作。
+应该由 ContinuousRuntime 暴露类似：
+submit_action_intent(...)
+内部固定：
+ActionIntent
+→ W.validate_runtime_start
+    ├ reject → typed ActionOutcome → O → X → S → gate
+    └ accept → scheduler.start_action
+这样才叫 invariant。
+我还抓到一个 Deadline 会马上炸的坑
+这个很重要。
+旧 apply_scheduled_events() 不只会产生天气、消息等，还会检查：
+task.due_at_total_minutes
+→ task-deadline event
+但是新 next_runtime_event_after() 目前只枚举：
+Alarm
+StudyMessage
+Weather
+Temperature
+TaskReminder
+Evening
+没有 task deadline。 
+这意味着：
+09:00 action starts
+09:40 deadline passes
+10:00 action completes
+如果 09:40 没有别的 scheduled event，scheduler 根本不会在 09:40 停。
+于是 advance_runtime_by() 最后虽然可能在 10:00 扫描出：
+task-deadline occurred at 09:40
+但已经晚了。
+这又退化成：
+事件发生了，但没有成为时间 boundary。
+
+所以现在绝对还不能迁 Deadline fixture。
+下一事件查询必须把所有 runtime-relevant W event source 统一进去，包括 task deadline。
+还有更根本的一点：现在所谓 “legal WorldEvent → O projector” 还不 legal
+现在：
+apply_world_events(
+    Observation&,
+    vector<WorldEvent>,
+    observed_at
+)
+它只有 Observation + events + time。
+它没有：
+InformationAccess
+Scene/perception context
+World state
+sensor/channel
+所以它根本没有足够信息判断：
+这个事件这个角色到底能不能知道。
+
+例如当前：
+weather-rain
+→ observation["world.weather"] = "rain"
+直接写。
+但我们原来的 O 语义明明是：
+窗帘开 → outside.weather 可见
+窗帘关 → outside.weather stale
+这里新 projector 如果看到天气事件就直接告诉角色天气，等于绕过了原来的 observation boundary。
+这正是我们一直防的：
+hidden W → O leak
+而且：
+message-study-group
+→ unread_count = "1"
+还是硬编码 1。
+如果已经有两条未读，再来一条：
+W unread_messages = 3
+O unread_count = 1
+也会错。
+另外 alarm-rings、temperature、evening 等 WorldEvent 目前 apply_world_events() 根本没处理。
+所以它现在应该叫：
+minimal event projection smoke
+
+不能叫已经完成的 legal observation projector。
+World boundary 注册还有一个调度细节
+现在流程是：
+runtime.schedule_next_world_boundary();
+runtime.advance_next_boundary();
+但 advance_next_boundary() 自己不会自动注册下一个 World event。
+所以第一次 09:30 消息过后，如果 action 一直持续到 12:00，而 11:00 还有天气：
+除非 caller 再手动：
+runtime.schedule_next_world_boundary();
+否则 scheduler 只知道 action completion。
+也就是说 owner 还没有真正持续维护：
+next action completion
+vs
+next W event
+vs
+next threshold
+的最早 boundary。
+而且如果 caller 在同一时刻反复调用 schedule_next_world_boundary()，目前看起来也没有明显的 dedupe contract。
+所以这部分应该被 ContinuousRuntime 内部接管，而不是让 fixture 决定何时重新查询 W。
+文档比上一轮好很多，但还没真正改成数据流图
+《完整机制说明》确实终于补了：
+- authoritative event-driven timeline；
+- RunningAction persistent；
+- Δt / WorldEvent / typed outcome；
+- start validation；
+- runtime completion；
+- “回到下一 runtime boundary”。
+所以不再是完全旧文档了。
+但主体图仍然是：
+W
+→ SceneFilter
+→ O
+→ X
+→ S
+→ D
+→ π
+→ W
+→ 下一 runtime boundary
+这仍然是一个顺序 pipeline mental model。
+而我们真正拍板的是：
+persistent nodes
++
+three flows
+
+TIME FLOW
+EVENT FLOW
+DECISION FLOW
+这个顶层图还没有真正替换进去。
+所以你之前骂“数据流说几百次”的问题，文档现在算修了 50%，还没修到底。
+TODO 也已经过期了
+TODO 现在还写：
+完成 canonical runtime owner 与 typed WorldEvent/ActionOutcome → O incremental flow；此前不迁 Deadline。
+
+但现在已经完成了其中一部分，剩下的问题应该更新成更加具体的：
+1. ContinuousRuntime 接管完整 boundary lifecycle
+2. 所有 ActionIntent 强制 start validation
+3. runtime owner 自动维护 next World boundary
+4. task deadline 纳入 World boundary source
+5. observation projection 真正 respect InformationAccess / Scene
+6. typed ActionOutcome/rejection 走同一 owner
+7. 然后 Deadline native fixture
+所以现在我给这个阶段的评价是
+authoritative clock                  PASS
+World Δt advancement                 PASS
+RunningAction                        PASS
+runtime completion settlement        PASS
+actual action elapsed provenance      PASS
+start validation API                 PASS
+World-derived boundary API           PASS
+minimal typed WorldEvent projector    PASS
+
+start validation invariant            NOT YET
+continuous automatic W boundaries     NOT YET
+deadline as W boundary                FAIL / MISSING
+legal perception-aware projection     NOT YET
+typed rejection through owner         NOT YET
+O→X→S→π owned by runtime              NOT YET
+state-threshold boundary              NOT YET
+full incremental-dataflow doc model   PARTIAL
+下一刀
+现在别再加一个小 helper，也还是别迁 Deadline。
+直接把 ContinuousRuntime 从：
+scheduler → W → O owner
+升级为：
+FULL BOUNDARY OWNER
+
+choose earliest boundary
+↓
+Δt
+↓
+W + RunningAction + continuous S
+↓
+WorldEvent / ActionOutcome
+↓
+legal ΔO
+↓
+X
+↓
+S impulse
+↓
+DecisionGate
+↓ if open
+π
+↓
+ActionIntent
+↓
+W.validate_start
+├ reject → outcome → O/X/S
+└ accept → RunningAction
+并且 World boundary 自动续订、deadline 加入 boundary source、projector 加 perception/access 权限。
+做到这一步，我才会说：
+Continuous Runtime v1 的基本计算闭环完成，可以开始迁 Deadline fixture。
+
+现在已经非常接近了，但还差这一刀，而且这刀不能糊。
+
+
+
+
+  
+
+
+
+
+
+一刀又一刀，没说好具体验收标准！没有好好地知道他
+
+
+
+
+
+
+
+
+
+
+
+
+
+对，这个锅在我这边。
+我们这几轮的问题不是“Luna 每次只做一点”，而是我一直用 code review 的方式在追 bug，却没有先给它一个完整 milestone 和明确 DoD。结果就变成：
+你提交
+→ 我发现下一层
+→ 再改
+→ 我又发现下一层
+→ 再改
+这其实说明我没有提前把 Continuous Runtime v1 到底什么叫“完成” 定死。尤其你之前已经说过 Luna/Codex 很快，可以一次部署一个完整阶段，我还在按“小提交—小复核”喂任务，这确实不对。
+现在不再说“下一刀”。
+我们应该直接把当前阶段定义成：
+CONTINUOUS_RUNTIME_V1_CLOSURE
+只有下面所有条件同时满足，才允许宣布 Runtime v1 基本闭环、才允许迁 Deadline / Phone / Commitment。
+不是做到某一条就回来问我。
+我把它完整写成一份可以直接扔给 Luna 的任务。
+当前 webgpt-sync 基线为：
+db5ac1655e4a61ea802cd09b8aca1f4646dd7db0
+当前已有：
+- authoritative scheduler clock；
+- WorldRuntimeAdapter；
+- RunningAction；
+- DecisionGate；
+- World::advance_runtime_by()；
+- World::validate_runtime_start()；
+- World::settle_runtime_completion(...)；
+- actual action elapsed provenance；
+- World-sourced event boundary API；
+- minimal WorldEvent → O projector；
+- ContinuousRuntime 初版 owner。
+本轮不要再按“发现一个问题修一个问题”的方式推进。
+目标是一次性完成：
+CONTINUOUS_RUNTIME_V1_CLOSURE
+完成定义如下。
+只有 A–H 全部 PASS，才能把该 milestone 标为 CLOSED，并进入 scheduler-native Deadline fixture。
+
+A. Runtime Ownership Gate
+A1. 单一 canonical owner
+ContinuousRuntime 必须成为 scheduler-native runtime 的唯一 orchestration owner。
+正常 scheduler-native fixture 不得自己手工串：
+- scheduler.advance_to_next_boundary()
+- WorldRuntimeAdapter::advance_to_boundary()
+- advance_continuous_state()
+- apply_world_events()
+- appraise()
+- update_state(..., 0)
+- world.validate_runtime_start()
+- scheduler.start_action()
+- world.settle_runtime_completion()
+- apply_self_action_feedback()
+- decide()
+这些步骤必须由 ContinuousRuntime 按统一顺序组织。
+允许 test 检查返回的 trace/result，但不允许 test 自己重新实现 runtime flow。
+验收
+仓库搜索 scheduler-native tests：
+除 scheduler 本身 unit/smoke test 外，不应存在第二套手工完整 orchestration。
+
+A2. Canonical boundary order 固定
+每个 boundary 必须严格遵守：
+1. 确定最早 next boundary；
+2. 推进 [t_prev, t) 的 continuous dynamics；
+3. scheduler clock 到 t；
+4. W 同步推进到 t；
+5. RunningAction progress 到 t；
+6. 产生该时刻 WorldEvent；
+7. 处理 hard physical preemption / invalidation；
+8. 若 action 在 t 正常完成，则 completion settlement；
+9. 将 WorldEvent / ActionOutcome 做合法 O projection；
+10. 得到 ΔO；
+11. ΔO/O/S/P → X；
+12. event impulse 更新 S；
+13. 评估 DecisionGate；
+14. gate closed：继续当前 RunningAction；
+15. gate open：计算 A^O → π → ActionIntent；
+16. ActionIntent 必须经过 W start validation；
+17. accepted 才能创建新的 RunningAction；
+18. rejected 必须变成 typed ActionOutcome，并重新进入 O→X→S；
+19. runtime 自动准备下一 boundary。
+不得由 fixture 改变顺序。
+
+B. Time / Boundary Gate
+B1. 单一权威时间
+scheduler-native runtime 任意 boundary 后必须满足：
+total_minutes(world.time) == scheduler.now_total_minutes()
+不得存在：
+- 手写时间字符串；
+- fixture 自己修改 World.time；
+- action settlement 推进 runtime 时间；
+- 第二个 clock owner。
+自动测试
+runtime_clock_authority_smoke
+至少跨：
+- world event boundary；
+- action completion boundary；
+- rejection transition。
+每一步都 assert clock equality。
+
+B2. World event 自动成为 boundary
+caller/fixture 不得知道并手工注册诸如：
+- 09:30 message；
+- 11:00 weather；
+- deadline time。
+ContinuousRuntime 必须自动询问 World/event source 并持续维护下一 W boundary。
+处理完一个 W event 后，runtime 自己注册/查询下一个 event。
+不得要求 fixture 每次调用：
+schedule_next_world_boundary()。
+自动测试
+构造：
+- action 从 09:00 持续到 12:00；
+- W 在 09:30、10:45、11:20 有三个事件。
+只启动一次 runtime。
+预期 boundary 顺序必须自动为：
+09:30
+10:45
+11:20
+12:00
+不得由 test 手工 schedule 这三个 timestamp。
+
+B3. 所有 runtime-relevant W events 必须进入 next-event source
+至少包括现有：
+- alarm；
+- study message；
+- weather；
+- temperature；
+- task reminder；
+- evening；
+- task deadline。
+尤其：
+next_runtime_event_after() 与 advance_runtime_by() 的事件集合不能不一致。
+如果 advance_runtime_by() 能产生某种时间驱动事件，但 next-event query 无法提前暴露它，则 FAIL。
+自动测试
+runtime_world_event_source_consistency
+对一段覆盖全天的时间窗：
+比较：
+- next-event enumeration；
+- actual advance_runtime_by() emitted events。
+任何 runtime-relevant scheduled event 漏掉都 fail。
+
+B4. State threshold boundary 明确处理
+v1 不要求现在实现复杂解析 threshold predictor，但必须二选一：
+方案 1
+实现可预测 threshold crossing；
+或：
+方案 2
+实现 bounded integration step / max-step fallback。
+必须保证：
+长 action 不能从：
+S_need=0.2
+直接跨 8 小时到：
+S_need=1.0
+而完全没有机会在关键 threshold 被重新检查。
+需要明确：
+max_runtime_step_minutes
+或等价机制。
+自动测试
+长 action：
+- duration >= 240 min；
+- 一个 continuous S field 在中途越过已定义 reconsideration threshold。
+必须在 action completion 前产生一个 boundary / gate evaluation opportunity。
+如果当前状态字段没有合适稳定阈值，可使用测试专用 deterministic threshold source，但不得修改正式心理参数。
+
+C. Action Lifecycle Gate
+Action 生命周期必须固定为：
+ActionIntent
+→ W validate start
+→ accepted / rejected
+→ RunningAction
+→ progress
+→ completion / physical interruption / invalidation
+→ typed ActionOutcome
+
+C1. 所有 ActionIntent 强制 start validation
+外部 scheduler-native code 不得直接：
+scheduler.start_action(...)
+作为角色动作入口。
+ContinuousRuntime 提供唯一动作启动接口，例如：
+submit_action_intent(...)
+内部：
+W.validate_runtime_start()
+accepted：
+→ start RunningAction
+rejected：
+→ typed WorldOutcome
+→ O
+→ X
+→ S
+→ DecisionGate
+自动测试
+选四类非法 start：
+- TargetAbsent；
+- TargetUnusable；
+- ResourceInsufficient；
+- PreconditionFailed。
+全部必须：
+- 不创建 RunningAction；
+- W 时间不跳；
+- typed failure reason 正确；
+- O 获得合法失败知识；
+- 不复制隐藏 W 值；
+- 后续 policy 不在同一 instant 无限 retry。
+
+C2. Completion 不重新猜时长
+completion settlement 必须直接使用完成的 RunningAction context。
+至少消费：
+- action；
+- target；
+- actual elapsed；
+- planned duration；
+- status。
+不得通过：
+action_definition(action).default_duration
+重新猜 actual duration。
+自动测试
+启动一个 custom-duration action：
+例如默认 35min，但 RunningAction duration=50min。
+completion outcome：
+action_elapsed_minutes == 50
+且涉及 duration 的 world effect 使用 50，而不是 35。
+
+C3. Completion settlement 不推进时间
+必须：
+time_advanced_by_settlement == 0
+同时：
+action_elapsed_minutes > 0
+World effect / counter / task progress 正常发生。
+
+C4. 中途 invalidation 是单独生命周期
+如果动作开始时合法，但运行中 W 变化使它无法继续：
+不得等 completion 时重新判“start 不合法”。
+必须变成：
+PlanInvalidated 或 PhysicalPreemption
+→ RunningAction 终止/中断
+→ typed outcome
+→ O/X/S
+→ gate。
+本轮至少实现一个 deterministic smoke，例如：
+角色使用某目标；
+中途目标被移除或变 unusable；
+action 在 completion 前终止。
+
+D. Observation / Information Boundary Gate
+这是本轮最重要的 semantic gate 之一。
+D1. WorldEvent projector 必须真正 actor-local
+当前 minimal：
+apply_world_events(observation, events, time)
+不足以称 legal projector。
+新 projector 必须拥有足够 context 判断：
+- InformationAccess；
+- 当前 Scene / location；
+- 感知渠道；
+- event source；
+- 必要的 actor-local observation state。
+原则：
+WorldEvent happened != actor observed it
+
+D2. Hidden event 不得改变 O/X/S/gate
+自动测试
+制造一个 W event：
+W 确实变化，
+但角色没有合法感知渠道。
+必须满足：
+- W changed；
+- O unchanged；
+- ΔO empty；
+- X 无该事件语义；
+- S 无该 event impulse；
+- character DecisionGate 不因为该事件打开。
+这条必须是 HARD GATE。
+
+D3. Weather 必须尊重已有 perception semantics
+例如当前 RoomDemo：
+curtain closed 时，outside weather 不应因为 WorldEvent 直接写进 O。
+测试：
+- curtain closed；
+- W weather changes clear→rain。
+预期：
+W = rain
+O 不获得新的 known outside.weather=rain。
+curtain open 时相同事件才允许进入 O。
+
+D4. Message projection 不得硬编码 unread_count=1
+WorldEvent projector 必须产生与实际 actor-observable message state 一致的更新。
+例如已有 unread=2，又收到一条：
+W = 3
+若该 notification channel 合法可见，则 O 应得到 3，而不是固定 1。
+
+D5. 覆盖当前所有 runtime WorldEvent 类型
+至少明确处理或明确“不 observable”：
+- alarm；
+- message；
+- weather；
+- temperature；
+- task reminder；
+- deadline；
+- evening；
+- task completion / action outcome。
+不允许 silent ignore 一个已有 event type 而不登记。
+
+E. Typed ActionOutcome Gate
+E1. rejection 与 completion 走同一个 event/outcome pipeline
+不得再存在：
+scheduler.reject_action() 只有字符串 id、没有 typed payload
+作为 canonical runtime 路径。
+canonical path 必须持有完整：
+WorldOutcome
+至少包括：
+- accepted；
+- action；
+- target；
+- RejectionReason；
+- actual elapsed；
+- provenance。
+然后统一：
+ActionOutcome → legal O projection → ΔO → X → S
+
+E2. ActionConstraintBelief 定位不变
+保留：
+ActionConstraintBelief
+但明确它只是：
+O 对失败事件的 persistent belief consequence
+不是反馈通道。
+ResourceInsufficient 测试必须：
+- O 只知道“资源要求当前不满足”；
+- 不复制 wallet 实际余额；
+- ShopOnPhone 被阻止；
+- 合法 wallet observation 后 constraint 可恢复。
+
+E3. typed rejection 不得 zero-time infinite retry
+一个 rejected ActionIntent：
+必须至少经过一个明确 runtime transition / gate cycle，或由 canonical rejection semantics 明确保证同 instant 不重复 policy。
+不允许：
+t → reject → π → reject → π ... at same t
+
+F. S Dynamics Gate
+F1. continuous 与 impulse 语义分离
+canonical runtime 必须把：
+continuous time dynamics
+和：
+event/appraisal impulse
+作为两个显式阶段。
+推荐接口：
+advance_continuous_state(...)
+apply_appraisal_impulse(...)
+若暂时复用旧：
+update_state(..., elapsed=0)
+必须封装在 compatibility adapter 内。
+fixture 不得直接通过 elapsed=0 表达 canonical event impulse。
+
+F2. continuous state 必须吃真实 Δt + RunningAction
+测试：
+同样总时长 30min：
+A：
+30min 一次推进
+B：
+10+10+10min 推进
+在当前线性/确定性 v1 dynamics 下，结果应在规定容差内一致。
+若某字段设计为非线性、boundary-dependent，则必须文档说明差异来源。
+
+G. Decision Gate Gate
+G1. World event 本身不自动等于 character gate
+必须区分：
+physical preemption
+W/runtime 可以直接中止 action。
+subjective reconsideration
+必须先：
+WorldEvent → O → X → S
+再由 gate 规则判断。
+hidden W event 不得打开 character gate。
+
+G2. weak observable event
+可更新：
+O/X/S
+但 RunningAction 默认继续。
+测试：
+Study running
+→ normal message
+→ O/X/S changed
+→ gate closed
+→ same RunningAction continues。
+
+G3. completion
+正常 completion：
+→ WorldOutcome
+→ O/X/S
+→ gate open
+→ policy
+→ new ActionIntent。
+
+H. Documentation / Regression Gate
+H1. 《完整机制说明》必须真正改成数据流视角
+当前顺序 pipeline 图不能继续作为唯一“完整运行链”。
+正式顶层图必须区分：
+Persistent nodes
+- W
+- O
+- S
+- P
+- RunningAction
+TIME FLOW
+Δt → W dynamics / S continuous / RunningAction progress
+EVENT FLOW
+WorldEvent / ActionOutcome
+→ legal projection
+→ ΔO
+→ X
+→ S impulse
+DECISION FLOW
+DecisionGate
+→ A^O
+→ π
+→ ActionIntent
+→ W validate
+→ RunningAction / rejection outcome
+旧：
+W→O→X→S→π→W
+只能标为：
+“character causal subpath”
+不得继续作为完整 runtime mental model。
+
+H2. 文档 source-of-truth 对齐
+同步更新：
+- 完整机制说明_v0.md
+- Character_Dynamics_System_Vision_v0.md
+- Runtime_Scheduler_v1.md
+- 当前实现进度.md
+- TODO.md
+- ARCHITECTURE_RULES.md
+- 必要时 AGENTS.md
+禁止出现：
+一个文件说 canonical runtime 已完成，
+另一个文件还说缺 owner。
+
+H3. Reference v0 全回归
+必须保证：
+- Reference v0 行为语义不变；
+- build PASS；
+- 全部 CTest PASS；
+- --verify 全 PASS；
+- Phone / Deadline / Commitment 历史 fixture 不被改写；
+- optimizer_train / holdout 不读取、不重跑、不改；
+- frozen artifacts 不因为浮点末位变化而更新。
+
+Required executable acceptance tests
+至少最终应存在并 PASS：
+1. runtime_clock_authority_smoke
+2. runtime_world_event_boundary_smoke
+3. runtime_world_event_source_consistency
+4. runtime_action_start_validation_smoke
+5. runtime_action_completion_smoke
+6. runtime_action_invalidation_smoke
+7. runtime_hidden_event_no_leak_smoke
+8. runtime_perception_projection_smoke
+9. runtime_typed_rejection_smoke
+10. runtime_weak_event_continue_smoke
+11. runtime_state_threshold_boundary_smoke
+12. runtime_vertical_slice_smoke
+如果不希望每项单独 binary，可以合并为少数 test binary，但报告必须逐项列 PASS/FAIL。
+
+Closure criteria
+只有以下全部成立才能写：
+CONTINUOUS_RUNTIME_V1 = CLOSED
+- one authoritative clock；
+- automatic boundary ownership；
+- W events are real boundary sources；
+- task deadline included；
+- state threshold cannot be silently crossed；
+- one canonical runtime owner；
+- every action intent start-validated；
+- actual RunningAction duration reaches settlement；
+- no settlement time advance；
+- typed WorldEvent legally projected into O；
+- hidden event cannot affect O/X/S/gate；
+- typed ActionOutcome/rejection uses same pipeline；
+- continuous S and event impulse semantically separated；
+- DecisionGate only after legal actor-local dataflow；
+- tests above PASS；
+- Reference v0 regression PASS；
+- docs agree.
+任意一项未满足：
+不得标 CLOSED；
+不得迁 Deadline / Phone / Commitment；
+必须在最终报告列出具体 blocker。
+
+After closure only
+只有 CONTINUOUS_RUNTIME_V1 = CLOSED 后才开始下一 milestone：
+SCHEDULER_NATIVE_MECHANISM_FIXTURES
+顺序：
+1. Deadline
+2. Phone
+3. Commitment
+这三项迁移属于下一阶段，不属于本任务。
+
+Final report format
+完成后一次性报告，不要做到一半就停下来等待下一条指令。
+必须包含：
+1. final git HEAD；
+2. commits；
+3. changed files；
+4. runtime owner API；
+5. exact boundary ordering；
+6. full persistent-node / transient-flow list；
+7. ActionIntent lifecycle；
+8. WorldEvent perception lifecycle；
+9. rejection lifecycle；
+10. threshold-boundary mechanism；
+11. executable acceptance matrix：A1–H3 每项 PASS/FAIL；
+12. CTest / verify results；
+13. Reference v0 regression result；
+14. remaining limitations；
+15. explicit line：
+CONTINUOUS_RUNTIME_V1 = CLOSED
+或
+CONTINUOUS_RUNTIME_V1 = NOT_CLOSED: <blockers>
+不要读取 internal holdout。
+不要运行 optimizer。
+不要设计 Objective。
+不要启动 Deadline fixture。
+不要修改 main。
+验证后的修改全部 commit 并 push webgpt-sync。
+
+
+
+这才是我们之前应该一开始给的东西。
+而且我这次还要纠正前几轮我的一个工作方式：以后不能把“我又发现一个问题”自动等同于“下一阶段”。
+如果是在一个已经定义好 DoD 的 milestone 里面发现问题，它只是：
+该 milestone 还没通过验收。
+
+比如刚才这些：
+- start validation 没覆盖下一动作；
+- deadline 没进 next-event source；
+- projector 不尊重 curtain；
+- World boundary 不自动续订；
+都不应该被我说成“四个下一刀”。
+它们本来就应该属于同一个：
+Continuous Runtime v1 closure test suite
+
+里面的失败项。
+以后我们应该按：
+先定义完整 milestone
+→ 定验收矩阵
+→ Luna 一次做完整
+→ 我按矩阵审计
+→ PASS / FAIL
+→ FAIL 就返修同一个 milestone
+→ 全 PASS 才进入下一层
+而不是：
+commit
+→ 我灵机一动发现新问题
+→ 再发明一个下一步
+你前面说“支线不要轻易放弃，但也别被小点吸住”，其实工程上也一样：需要足够深入，但深入应该被 milestone 边界约束。
+这一轮现在边界终于可以定死了：不再讨论“下一刀是什么”，只讨论 CONTINUOUS_RUNTIME_V1_CLOSURE 哪几项还没 PASS。
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+ChatGPT 可能会出错。请核查重要信息。

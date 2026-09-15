@@ -12,6 +12,7 @@ class WorldRuntimeAdapter {
 public:
     WorldRuntimeAdapter(World& world, const RuntimeScheduler& scheduler);
     bool schedule_next_world_boundary(RuntimeScheduler& scheduler) const;
+    WorldOutcome validate_runtime_start(ActionType action, const std::string& target_object_id) const;
     std::vector<WorldEvent> advance_to_boundary(const RuntimeBoundary& boundary,
                                                 const RuntimeScheduler& scheduler);
     std::string time_summary() const;

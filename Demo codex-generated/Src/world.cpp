@@ -600,6 +600,13 @@ std::optional<WorldEvent> World::next_runtime_event_after(int total_minutes) con
             case ScheduledEventKind::Evening: return WorldEvent{"evening", "evening begins", "world clock", absolute_minute};
             }
         }
+        for (const WorldTask& task : tasks) {
+            if (task.status == TaskStatus::Active && task.due_at_total_minutes > total_minutes
+                && task.due_at_total_minutes / kMinutesPerDay == day_index) {
+                return WorldEvent{"task-deadline", "deadline passes for task: " + task.id,
+                                  "world/task-calendar", task.due_at_total_minutes};
+            }
+        }
     }
     return std::nullopt;
 }

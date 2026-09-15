@@ -35,9 +35,8 @@ int main() {
     RuntimeScheduler scheduler(9 * 60 + 20);
     Observation observation = refresh_observation({}, world, {});
     ContinuousRuntime runtime(scheduler, world, observation);
-    const WorldOutcome start = world.validate_runtime_start(ActionType::StudyFocused, "desk");
+    const WorldOutcome start = runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35, true);
     if (!start.accepted) { std::cerr << "W rejected a legal study start\n"; return 1; }
-    scheduler.start_action(ActionType::StudyFocused, "desk", 35, true);
     // W is the boundary source; the fixture does not duplicate its schedule.
     if (!runtime.schedule_next_world_boundary()) {
         std::cerr << "World did not expose a next runtime boundary\n";
@@ -88,8 +87,8 @@ int main() {
     const DecisionContext next_policy = decide(observation, state, personality);
     const CandidateAction* next = highest_probability(next_policy);
     if (next != nullptr) {
-        scheduler.start_action(next->action, next->target_object_id,
-                               action_definition(next->action).default_duration_minutes);
+        runtime.submit_action_intent(next->action, next->target_object_id,
+                                     action_definition(next->action).default_duration_minutes);
     }
 
     if (completion_boundary.elapsed_minutes != 25

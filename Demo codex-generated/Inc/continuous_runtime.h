@@ -15,6 +15,8 @@ class ContinuousRuntime {
 public:
     ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation);
     bool schedule_next_world_boundary();
+    WorldOutcome submit_action_intent(ActionType action, const std::string& target_object_id,
+                                      int duration_minutes, bool interruptible = true);
     ContinuousRuntimeStep advance_next_boundary();
 
 private:
