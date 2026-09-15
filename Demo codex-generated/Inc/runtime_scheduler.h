@@ -64,9 +64,11 @@ struct RuntimeBoundary {
 // an otherwise completed interruptible action. Only then is completion settled.
 class RuntimeScheduler {
 public:
-    explicit RuntimeScheduler(int start_total_minutes = 0) : now_total_minutes_(start_total_minutes) {}
+    explicit RuntimeScheduler(int start_total_minutes = 0, int max_runtime_step_minutes = 60)
+        : now_total_minutes_(start_total_minutes), max_runtime_step_minutes_(max_runtime_step_minutes) {}
 
     int now_total_minutes() const { return now_total_minutes_; }
+    int max_runtime_step_minutes() const { return max_runtime_step_minutes_; }
     const std::optional<RunningAction>& running_action() const { return running_action_; }
 
     void schedule(ScheduledRuntimeEvent event);
@@ -79,6 +81,7 @@ public:
 
 private:
     int now_total_minutes_ = 0;
+    int max_runtime_step_minutes_ = 60;
     std::optional<RunningAction> running_action_;
     std::vector<ScheduledRuntimeEvent> scheduled_events_;
 };

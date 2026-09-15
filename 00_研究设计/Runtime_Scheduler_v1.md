@@ -127,6 +127,9 @@ psychological model, or authorize a batch/evaluator migration.
 Future scheduler boundaries must include state-threshold crossings (or a
 bounded numerical step when they cannot be predicted), in addition to world
 events, physical preemption, action completion and external input.
+The v1 fallback is `RuntimeScheduler::max_runtime_step_minutes` (default 60):
+long actions receive bounded integration opportunities even when no event source
+can predict a threshold crossing.
 
 At every stage, old and new outputs must have distinct provenance and run
 directories. `optimizer_train`, `internal_holdout`, Objective v0 and optimizer

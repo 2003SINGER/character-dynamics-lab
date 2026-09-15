@@ -75,6 +75,10 @@ RuntimeBoundary RuntimeScheduler::advance_to_next_boundary() {
     for (const ScheduledRuntimeEvent& event : scheduled_events_) {
         if (next < 0 || event.occurs_at_total_minutes < next) next = event.occurs_at_total_minutes;
     }
+    if (max_runtime_step_minutes_ > 0) {
+        const int bounded = now_total_minutes_ + max_runtime_step_minutes_;
+        if (next < 0 || bounded < next) next = bounded;
+    }
     if (next < 0) throw std::logic_error("RuntimeScheduler has no next boundary");
 
     RuntimeBoundary boundary;
