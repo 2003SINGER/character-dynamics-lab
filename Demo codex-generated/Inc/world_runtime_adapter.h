@@ -17,6 +17,7 @@ public:
                                                 const RuntimeScheduler& scheduler);
     std::string time_summary() const;
     const World& world() const { return world_; }
+    World& world() { return world_; }
 
 private:
     World& world_;

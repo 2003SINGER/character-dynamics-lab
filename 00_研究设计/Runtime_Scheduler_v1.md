@@ -134,3 +134,8 @@ can predict a threshold crossing.
 At every stage, old and new outputs must have distinct provenance and run
 directories. `optimizer_train`, `internal_holdout`, Objective v0 and optimizer
 selection remain out of scope.
+`ContinuousRuntime::execute_next_boundary` is the canonical orchestration API:
+it advances continuous S, settles a completed RunningAction, projects outcome
+and events into O, applies X→S impulse, evaluates the gate, and submits the
+next policy intent through W validation. The older lower-level calls remain
+available for unit tests and are not the fixture-level contract.

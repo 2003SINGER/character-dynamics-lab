@@ -26,3 +26,29 @@ ContinuousRuntimeStep ContinuousRuntime::advance_next_boundary() {
     schedule_next_world_boundary();
     return {boundary, events};
 }
+
+RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& state, const Personality& personality) {
+    RuntimeExecutionResult result;
+    result.runtime = advance_next_boundary();
+    const auto& action = result.runtime.boundary.action_after_boundary;
+    result.continuous_state = advance_continuous_state(state, personality,
+        action.has_value() ? &*action : nullptr, result.runtime.boundary.elapsed_minutes);
+    if (action.has_value() && action->status == RunningActionStatus::Completed) {
+        result.outcome = world_runtime_.world().settle_runtime_completion(
+            action->action, action->target_object_id, action->elapsed_minutes);
+        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary());
+    }
+    result.appraisal = appraise(observation_, state, personality);
+    result.impulse_state = update_state(state, result.appraisal, personality, 0);
+    if (result.runtime.boundary.decision_gate.open) {
+        result.decision = decide(observation_, state, personality);
+        for (const CandidateAction& candidate : result.decision.candidates) {
+            if (candidate.probability > 0.0) {
+                submit_action_intent(candidate.action, candidate.target_object_id,
+                                     action_definition(candidate.action).default_duration_minutes);
+                break;
+            }
+        }
+    }
+    return result;
+}

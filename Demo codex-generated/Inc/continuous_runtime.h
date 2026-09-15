@@ -3,10 +3,22 @@
 #include "observation.h"
 #include "runtime_scheduler.h"
 #include "world_runtime_adapter.h"
+#include "appraisal.h"
+#include "decision.h"
+#include "state.h"
 
 struct ContinuousRuntimeStep {
     RuntimeBoundary boundary;
     std::vector<WorldEvent> world_events;
+};
+
+struct RuntimeExecutionResult {
+    ContinuousRuntimeStep runtime;
+    StateUpdate continuous_state;
+    StateUpdate impulse_state;
+    Appraisal appraisal;
+    DecisionContext decision;
+    std::optional<WorldOutcome> outcome;
 };
 
 // Canonical owner for the scheduler-native W -> O incremental handoff.
@@ -18,6 +30,7 @@ public:
     WorldOutcome submit_action_intent(ActionType action, const std::string& target_object_id,
                                       int duration_minutes, bool interruptible = true);
     ContinuousRuntimeStep advance_next_boundary();
+    RuntimeExecutionResult execute_next_boundary(CharacterState& state, const Personality& personality);
 
 private:
     RuntimeScheduler& scheduler_;
