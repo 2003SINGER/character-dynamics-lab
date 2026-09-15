@@ -4,6 +4,10 @@
 #include <algorithm>
 #include <iostream>
 
+static bool has_fact(const Observation& observation, const char* key) {
+    return find_fact(observation, key) != nullptr;
+}
+
 int main() {
     Personality personality;
 
@@ -21,16 +25,36 @@ int main() {
     if (deadline_tick.runtime.boundary.at_total_minutes != 9 * 60 + 25
         || std::none_of(deadline_tick.runtime.world_events.begin(), deadline_tick.runtime.world_events.end(),
                         [](const WorldEvent& event) { return event.id == "task-deadline"; })
-        || !has_known_fact(deadline_observation, "task.deadline_passed", "1")) {
+        || !has_known_fact(deadline_observation, "task.deadline_passed", "1")
+        || std::find(deadline_tick.appraisal.tags.begin(), deadline_tick.appraisal.tags.end(),
+                     "deadline_passed") == deadline_tick.appraisal.tags.end()) {
         std::cerr << "deadline t=" << deadline_tick.runtime.boundary.at_total_minutes
                   << " events=" << deadline_tick.runtime.world_events.size() << "\n";
         return 2;
     }
+    InformationAccess hidden_deadline;
+    hidden_deadline.task_deadline_observable = false;
+    World hidden_deadline_world;
+    hidden_deadline_world.time.minute_of_day = 9 * 60 + 20;
+    hidden_deadline_world.tasks.front().due_at_total_minutes = 9 * 60 + 25;
+    RuntimeScheduler hidden_deadline_scheduler(9 * 60 + 20);
+    Observation hidden_deadline_observation = refresh_observation({}, hidden_deadline_world, {}, hidden_deadline);
+    ContinuousRuntime hidden_deadline_runtime(hidden_deadline_scheduler, hidden_deadline_world,
+                                              hidden_deadline_observation, hidden_deadline);
+    if (!hidden_deadline_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 7;
+    CharacterState hidden_deadline_state;
+    const RuntimeExecutionResult hidden_deadline_tick =
+        hidden_deadline_runtime.execute_next_boundary(hidden_deadline_state, personality);
+    if (has_fact(hidden_deadline_observation, "task.deadline_passed")
+        || std::find(hidden_deadline_tick.appraisal.tags.begin(), hidden_deadline_tick.appraisal.tags.end(),
+                     "deadline_passed") != hidden_deadline_tick.appraisal.tags.end()) return 8;
 
     // Scheduler-native Phone: hidden W absence remains an attempted intent and
     // becomes a typed rejection without creating an illegal RunningAction.
     World phone_world;
     phone_world.time.minute_of_day = 9 * 60 + 20;
+    const Observation phone_prior = refresh_observation({}, phone_world, {});
+    if (!observation_knows_action(phone_prior, ActionType::UsePhone)) return 9;
     phone_world.current_room().objects.front().usable = false;
     RuntimeScheduler phone_scheduler(9 * 60 + 20);
     InformationAccess hidden_phone;
@@ -46,6 +70,10 @@ int main() {
         || !phone_tick.policy_evaluated) {
         return 4;
     }
+    const auto use_phone_candidate = std::find_if(phone_tick.decision.candidates.begin(),
+                                                  phone_tick.decision.candidates.end(),
+                                                  [](const CandidateAction& c) { return c.action == ActionType::UsePhone; });
+    if (use_phone_candidate != phone_tick.decision.candidates.end() && use_phone_candidate->probability > 0.0) return 10;
 
     // Scheduler-native Commitment consumer reads typed self-feedback before O
     // is consumed; hidden completion does not clear the commitment.

@@ -14,9 +14,9 @@ int main() {
     const auto next = world.next_runtime_event_after(9 * 60 + 20);
     if (!next || next->id != "task-deadline" || next->occurred_at_total_minutes != 9 * 60 + 25) return 1;
     RuntimeScheduler scheduler(9 * 60 + 20);
-    scheduler.schedule({"world_event:message-study-group", 9 * 60 + 30, false, false});
-    scheduler.schedule({"world_event:message-study-group", 9 * 60 + 30, false, false});
-    scheduler.schedule({"world_event:task-deadline", 9 * 60 + 25, false, false});
+    scheduler.schedule({"world_event:message-study-group", 9 * 60 + 30, false, std::nullopt});
+    scheduler.schedule({"world_event:message-study-group", 9 * 60 + 30, false, std::nullopt});
+    scheduler.schedule({"world_event:task-deadline", 9 * 60 + 25, false, std::nullopt});
     const RuntimeBoundary boundary = scheduler.advance_to_next_boundary();
     if (boundary.at_total_minutes != 9 * 60 + 25 || boundary.events.size() != 1) return 2;
 
@@ -63,7 +63,7 @@ int main() {
     const StateUpdate replay_impulse = apply_appraisal_impulse(once_state, replay_appraisal, once_personality);
     if (once_impulse.applied.elapsed_minutes != 0 || replay_impulse.applied.task_pressure != 0.0) return 8;
     RuntimeScheduler weak_scheduler(0);
-    weak_scheduler.schedule({"hidden-weather", 5, false, false});
+    weak_scheduler.schedule({"hidden-weather", 5, false, std::nullopt});
     const RuntimeBoundary weak_boundary = weak_scheduler.advance_to_next_boundary();
     if (weak_boundary.decision_gate.open) return 9;
 

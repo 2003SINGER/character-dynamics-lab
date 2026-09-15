@@ -164,6 +164,11 @@ Appraisal appraise(const Observation& observation,
                 appraisal.anxiety_delta += 0.08 * urgency * personality.task_anxiety_sensitivity;
                 appraisal.tags.push_back("deadline_urgency");
             }
+        } else if (update.key == FactKey::TaskDeadlinePassed && update.value == "1"
+                   && update.status == KnowledgeStatus::Known && coursework_pending) {
+            appraisal.task_pressure_delta += 0.20;
+            appraisal.anxiety_delta += 0.08 * personality.task_anxiety_sensitivity;
+            appraisal.tags.push_back("deadline_passed");
         } else if (update.key == "room.alarm" && update.value == "ringing"
                    && update.status == KnowledgeStatus::Known) {
             appraisal.boredom_delta += 0.03;
@@ -181,7 +186,8 @@ Appraisal appraise(const Observation& observation,
             appraisal.task_pressure_delta += 0.08;
             appraisal.anxiety_delta += 0.05;
             appraisal.tags.push_back("social_task_reminder");
-        } else if (update.key == "calendar.task_due" && update.value == "today"
+        } else if (((update.key == "calendar.task_due" && update.value == "today")
+                    || (update.key == FactKey::TaskReminder && update.value == "1"))
                    && update.status == KnowledgeStatus::Known && coursework_pending) {
             appraisal.task_pressure_delta += 0.14;
             appraisal.anxiety_delta += 0.06 + 0.08 * personality.task_anxiety_sensitivity;

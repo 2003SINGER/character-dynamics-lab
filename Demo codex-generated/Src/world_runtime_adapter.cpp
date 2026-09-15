@@ -11,7 +11,7 @@ WorldRuntimeAdapter::WorldRuntimeAdapter(World& world, const RuntimeScheduler& s
 bool WorldRuntimeAdapter::schedule_next_world_boundary(RuntimeScheduler& scheduler) const {
     const auto next = world_.next_runtime_event_after(scheduler.now_total_minutes());
     if (!next.has_value()) return false;
-    scheduler.schedule({"world_event:" + next->id, next->occurred_at_total_minutes, false, false});
+    scheduler.schedule({"world_event:" + next->id, next->occurred_at_total_minutes, false, std::nullopt});
     return true;
 }
 

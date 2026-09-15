@@ -45,7 +45,6 @@ enum class DecisionGateReason {
 struct ScheduledRuntimeEvent {
     std::string id;
     int occurs_at_total_minutes = 0;
-    bool opens_decision_gate = false;
     bool interrupts_running_action = false;
     std::optional<RuntimeRejection> rejection;
     std::optional<DecisionGateReason> gate_reason;

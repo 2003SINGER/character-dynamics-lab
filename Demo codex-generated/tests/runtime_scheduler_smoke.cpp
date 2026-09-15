@@ -12,8 +12,8 @@ bool has_reason(const DecisionGate& gate, DecisionGateReason reason) {
 int main() {
     RuntimeScheduler scheduler(9 * 60);
     scheduler.start_action(ActionType::StudyFocused, "desk", 35, true);
-    scheduler.schedule({"message", 9 * 60 + 10, false, false});
-    scheduler.schedule({"temperature_drop", 9 * 60 + 20, false, false});
+    scheduler.schedule({"message", 9 * 60 + 10, false, std::nullopt});
+    scheduler.schedule({"temperature_drop", 9 * 60 + 20, false, std::nullopt});
 
     const RuntimeBoundary first = scheduler.advance_to_next_boundary();
     const RuntimeBoundary second = scheduler.advance_to_next_boundary();
@@ -30,7 +30,7 @@ int main() {
 
     RuntimeScheduler interruption(0);
     interruption.start_action(ActionType::StudyFocused, "desk", 35, true);
-    interruption.schedule({"urgent_message", 5, true, true});
+    interruption.schedule({"urgent_message", 5, true, std::nullopt, DecisionGateReason::StrongExternalEvent});
     const RuntimeBoundary interrupted = interruption.advance_to_next_boundary();
     if (interrupted.elapsed_minutes != 5
         || !has_reason(interrupted.decision_gate, DecisionGateReason::StrongExternalEvent)
@@ -43,7 +43,7 @@ int main() {
 
     RuntimeScheduler same_timestamp(0);
     same_timestamp.start_action(ActionType::StudyFocused, "desk", 5, true);
-    same_timestamp.schedule({"urgent_message", 5, true, true});
+    same_timestamp.schedule({"urgent_message", 5, true, std::nullopt, DecisionGateReason::StrongExternalEvent});
     const RuntimeBoundary preempted_completion = same_timestamp.advance_to_next_boundary();
     if (!has_reason(preempted_completion.decision_gate, DecisionGateReason::ActionInterrupted)
         || has_reason(preempted_completion.decision_gate, DecisionGateReason::ActionCompleted)
