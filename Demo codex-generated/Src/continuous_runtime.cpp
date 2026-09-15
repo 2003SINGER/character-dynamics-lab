@@ -16,6 +16,7 @@ WorldOutcome ContinuousRuntime::submit_action_intent(ActionType action, const st
         return validation;
     }
     scheduler_.start_action(action, target_object_id, duration_minutes, interruptible);
+    schedule_next_world_boundary();
     return validation;
 }
 
