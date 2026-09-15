@@ -368,7 +368,10 @@ void apply_self_action_feedback(Observation& observation,
     }
     observation.last_self_action = {true, outcome.action, outcome.accepted, outcome.task_id,
         outcome.task_completed && completion_is_observable,
-        outcome.accepted ? "accepted by W" : "rejected by W", "self_action_feedback", observed_at};
+        outcome.plan_invalidated ? "plan invalidated during runtime"
+                                 : (outcome.accepted ? "accepted by W" : "rejected by W"),
+        "self_action_feedback", observed_at};
+    if (outcome.plan_invalidated) return;
     record_constraint(observation, outcome, observed_at);
     if (!outcome.accepted && outcome.failure_reason == RejectionReason::TargetAbsent
         && !outcome.target_object_id.empty()) {

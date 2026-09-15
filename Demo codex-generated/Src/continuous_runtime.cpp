@@ -41,6 +41,15 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         result.outcome = world_runtime_.world().settle_runtime_completion(
             action->action, action->target_object_id, action->elapsed_minutes);
         apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary());
+    } else if (action.has_value() && action->status == RunningActionStatus::Interrupted) {
+        WorldOutcome invalidation;
+        invalidation.action = action->action;
+        invalidation.target_object_id = action->target_object_id;
+        invalidation.action_elapsed_minutes = action->elapsed_minutes;
+        invalidation.provenance = "ContinuousRuntime::plan_invalidated";
+        invalidation.plan_invalidated = true;
+        result.outcome = invalidation;
+        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary());
     }
     result.appraisal = appraise(observation_, state, personality);
     result.impulse_state = apply_appraisal_impulse(state, result.appraisal, personality);

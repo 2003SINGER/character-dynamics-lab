@@ -53,6 +53,19 @@ int main() {
     if (std::abs(one_chunk.fatigue - three_chunks.fatigue) > 1e-9
         || std::abs(one_chunk.screen_strain - three_chunks.screen_strain) > 1e-9) return 6;
 
+    // C4/G: invalidation is a distinct terminal outcome on the next boundary.
+    World invalid_world;
+    invalid_world.time.minute_of_day = 9 * 60;
+    RuntimeScheduler invalid_scheduler(9 * 60);
+    Observation invalid_observation = refresh_observation({}, invalid_world, {});
+    ContinuousRuntime invalid_runtime(invalid_scheduler, invalid_world, invalid_observation);
+    if (!invalid_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 7;
+    invalid_runtime.invalidate_running_action();
+    CharacterState invalid_state;
+    const RuntimeExecutionResult invalid_step = invalid_runtime.execute_next_boundary(invalid_state, personality);
+    if (!invalid_step.outcome || !invalid_step.outcome->plan_invalidated
+        || invalid_step.runtime.boundary.decision_gate.reasons.empty()) return 8;
+
     std::cout << "runtime closure acceptance smoke OK\n";
     return 0;
 }

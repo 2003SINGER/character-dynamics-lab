@@ -55,6 +55,7 @@ struct WorldOutcome {
     double task_effort_after = 0.0;
     double task_settlement_variation = 1.0;
     bool task_session_interrupted = false;
+    bool plan_invalidated = false;
     bool task_completed = false;
     std::vector<WorldPrimitive> settled_primitives;
     std::vector<WorldPrimitive> planned_primitives;
