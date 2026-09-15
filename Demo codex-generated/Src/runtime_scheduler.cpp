@@ -65,6 +65,14 @@ void RuntimeScheduler::invalidate_running_action() {
     schedule({"action_invalidated", now_total_minutes_ + 1, true, true});
 }
 
+void RuntimeScheduler::replace_running_action(ActionType action, std::string target_object_id,
+                                               int duration_minutes, bool interruptible) {
+    if (!running_action_.has_value()) throw std::logic_error("Cannot replace without a running action");
+    if (duration_minutes <= 0) throw std::invalid_argument("Running action duration must be positive");
+    running_action_ = {action, std::move(target_object_id), now_total_minutes_, duration_minutes,
+                       0, interruptible, RunningActionStatus::Running};
+}
+
 void RuntimeScheduler::reject_action(ActionType action, std::string target_object_id,
                                      std::optional<RuntimeRejection> rejection) {
     if (running_action_.has_value()) {

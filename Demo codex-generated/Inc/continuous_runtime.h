@@ -7,6 +7,7 @@
 #include "decision.h"
 #include "state.h"
 #include <random>
+#include <functional>
 
 struct ContinuousRuntimeStep {
     RuntimeBoundary boundary;
@@ -34,8 +35,11 @@ public:
     WorldOutcome submit_action_intent(ActionType action, const std::string& target_object_id,
                                       int duration_minutes, bool interruptible = true);
     void invalidate_running_action();
-    ContinuousRuntimeStep advance_next_boundary();
     RuntimeExecutionResult execute_next_boundary(CharacterState& state, const Personality& personality);
+    // Test-only deterministic policy override; production keeps seeded sampling.
+    void set_test_action_selector(std::function<ActionType(const DecisionContext&)> selector) {
+        test_action_selector_ = std::move(selector);
+    }
 
 private:
     RuntimeScheduler& scheduler_;
@@ -43,4 +47,5 @@ private:
     Observation& observation_;
     InformationAccess access_;
     std::mt19937 rng_{0x43445257U};
+    std::function<ActionType(const DecisionContext&)> test_action_selector_;
 };

@@ -33,3 +33,9 @@
 
 - Preserve Action-Step Reference v0. Runtime-native work must not add a second clock, let an action advance runtime time, shortcut `W → S`, or let a hidden W event open a character gate.
 - Treat W/O/S/P/RunningAction as persistent nodes and deltas/events as the flow. Scheduler-native fixtures use the canonical runtime bridge rather than manually synchronizing timestamps or projecting W facts.
+
+## Milestone status and review discipline
+
+- Use `IMPLEMENTING`, `READY_FOR_INDEPENDENT_REVIEW`, and `CLOSED` as distinct states.
+- Codex/Luna may move a milestone to `READY_FOR_INDEPENDENT_REVIEW`, but must not declare it `CLOSED`; closure requires explicit user confirmation after independent review.
+- Passing self-written tests is implementation evidence, not independent closure. If independent review finds an uncovered invariant within the same milestone, repair that milestone rather than creating a new artificial sub-milestone.

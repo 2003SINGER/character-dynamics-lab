@@ -25,23 +25,6 @@ void ContinuousRuntime::invalidate_running_action() {
     scheduler_.invalidate_running_action();
 }
 
-ContinuousRuntimeStep ContinuousRuntime::advance_next_boundary() {
-    const RuntimeBoundary boundary = scheduler_.advance_to_next_boundary();
-    const std::vector<WorldEvent> events = world_runtime_.advance_to_boundary(boundary, scheduler_);
-    apply_world_events(observation_, events, world_runtime_.world(), access_, world_runtime_.time_summary());
-    for (const ScheduledRuntimeEvent& event : boundary.events) {
-        if (!event.rejection.has_value()) continue;
-        WorldOutcome rejection;
-        rejection.action = event.rejection->action;
-        rejection.target_object_id = event.rejection->target_object_id;
-        rejection.failure_reason = static_cast<RejectionReason>(event.rejection->failure_reason);
-        rejection.provenance = event.rejection->provenance;
-        apply_self_action_feedback(observation_, rejection, world_runtime_.time_summary(), true, false);
-    }
-    schedule_next_world_boundary();
-    return {boundary, events};
-}
-
 RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& state, const Personality& personality) {
     RuntimeExecutionResult result;
     const CharacterState before_continuous = state;
@@ -91,15 +74,30 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
             || action->status != RunningActionStatus::Running || threshold_reconsideration)) {
         result.policy_evaluated = true;
         result.decision = decide(observation_, state, personality);
-        const ActionType selected = sample_action(result.decision, rng_);
+        const ActionType selected = test_action_selector_ ? test_action_selector_(result.decision)
+                                                           : sample_action(result.decision, rng_);
         for (const CandidateAction& candidate : result.decision.candidates) {
             if (candidate.action == selected && candidate.probability > 0.0) {
                 result.selected_action = selected;
                 // A threshold crossing is a subjective reconsideration point. Keep
                 // the running action and its elapsed progress unless an explicit
                 // physical interruption outcome was produced at this boundary.
-                if (!threshold_reconsideration || !action.has_value()
-                    || action->status != RunningActionStatus::Running) {
+                if (threshold_reconsideration && action.has_value()
+                    && action->status == RunningActionStatus::Running
+                    && selected != action->action) {
+                    WorldOutcome reconsideration;
+                    reconsideration.action = action->action;
+                    reconsideration.target_object_id = action->target_object_id;
+                    reconsideration.action_elapsed_minutes = action->elapsed_minutes;
+                    reconsideration.task_session_interrupted = true;
+                    reconsideration.provenance = "ContinuousRuntime::policy_reconsideration";
+                    result.outcome = reconsideration;
+                    apply_self_action_feedback(observation_, reconsideration,
+                                               world_runtime_.time_summary(), true, false);
+                    scheduler_.replace_running_action(candidate.action, candidate.target_object_id,
+                                                      action_definition(candidate.action).default_duration_minutes);
+                } else if (!threshold_reconsideration || !action.has_value()
+                           || action->status != RunningActionStatus::Running) {
                     submit_action_intent(candidate.action, candidate.target_object_id,
                                          action_definition(candidate.action).default_duration_minutes);
                 }

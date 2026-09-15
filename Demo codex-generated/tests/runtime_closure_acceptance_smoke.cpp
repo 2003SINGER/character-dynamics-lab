@@ -101,6 +101,7 @@ int main() {
     if (!threshold_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 13;
     CharacterState threshold_state;
     threshold_state.hunger = 0.35;
+    threshold_runtime.set_test_action_selector([](const DecisionContext&) { return ActionType::StudyFocused; });
     bool saw_threshold = false;
     bool saw_reconsideration = false;
     bool preserved_progress = false;
@@ -119,6 +120,24 @@ int main() {
             && threshold_scheduler.running_action()->elapsed_minutes > 0) preserved_progress = true;
     }
     if (!saw_threshold || !saw_reconsideration || !preserved_progress) return 14;
+
+    // A different policy choice replaces the running action at the same clock boundary.
+    World replace_world;
+    replace_world.time.minute_of_day = 1;
+    RuntimeScheduler replace_scheduler(1, 60);
+    Observation replace_observation = refresh_observation({}, replace_world, {});
+    ContinuousRuntime replace_runtime(replace_scheduler, replace_world, replace_observation);
+    if (!replace_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 17;
+    replace_runtime.set_test_action_selector([](const DecisionContext&) { return ActionType::RestAtBed; });
+    CharacterState replace_state;
+    replace_state.hunger = 0.39;
+    const RuntimeExecutionResult replace_tick = replace_runtime.execute_next_boundary(replace_state, personality);
+    if (!replace_tick.policy_evaluated || !replace_tick.outcome.has_value()
+        || !replace_tick.outcome->task_session_interrupted
+        || replace_tick.outcome->provenance != "ContinuousRuntime::policy_reconsideration"
+        || replace_scheduler.now_total_minutes() != replace_tick.runtime.boundary.at_total_minutes
+        || !replace_scheduler.running_action().has_value()
+        || replace_scheduler.running_action()->action != ActionType::RestAtBed) return 18;
 
     // Self-action completion feedback is immediate in runtime and must be consumed once.
     World completion_world;

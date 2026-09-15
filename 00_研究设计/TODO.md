@@ -6,7 +6,14 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| SYSTEM | **Continuous Runtime v1：CLOSED（end-to-end audit）** | π selection、ΔO exactly-once、threshold reconsideration、boundary order 与 17 项 acceptance 全通过；下一阶段才迁 Deadline/Phone/Commitment，不读取 holdout，不设计 Objective | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[Objective Readiness](Objective_Readiness_v0.md) |
+| SYSTEM | **Runtime v1 closure + project stabilization：READY_FOR_INDEPENDENT_REVIEW** | π selection、ΔO exactly-once、threshold continue/replace、boundary order、API/文档/审计护栏已实现；17 项 gate-labelled registrations 通过，但 CLOSED 保留给独立复核 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[Objective Readiness](Objective_Readiness_v0.md) |
+
+## 研究范围护栏
+
+- **ACTIVE**：Paper-0 的 persistent `S`、legal actor-local `O`、independent `A*` 与 candidate-set admission。
+- **PAUSED**：Objective readiness、evaluator ranking、optimizer、Theory-S training、外部数据集扩展。
+- **DEFERRED SYSTEM/RESEARCH BRANCH**：Deadline/Phone/Commitment scheduler-native fixtures、ToM、multi-agent、Inverse、P drift、Q01 advanced response curves、Scene Manager 与 live LLM semantics。
+- 当前科学瓶颈是 `independent A* + actor-local O + frozen/reconstructable candidate set`；不启动 dataset tourism。
 | M1 | **已完成（pre-training gate）** | 已冻结 anchor 语义边界、sign-violation 协议、decision-step 时间尺度、neutral 初始化与 trajectory reset；不再扩展机制 | [M1 冻结决策](Theory-S_M1冻结决策_2026-09-07.md)、[Theory-S v2](../02_实验/Theory_S_v2/README.md)；不得把候选实现写成心理学验证 |
 | M2 | 进行中 | 完善 SceneSnapshot → affordance → generated `A^O` 的最小 ontology 与实例绑定 | 生成不读 source `A*`；source support 仅 post-hoc 诊断；[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md) |
 | M3 | **已完成（owner audit v0）** | 保留审计边界；若要重开 D01，先完成 actor-local observation audit、跨 actor gap 编码和 X 字段准入 | [capability matrix](../02_实验/Theory_S_v2/capability_matrix.md)、[D01 LIGHT](../02_实验/T0c_LIGHT/D01_semantic_temporal_admission_v0.md)、[OPeRA candidate reconstruction](../02_实验/T0d_OPeRA/candidate_reconstruction_feasibility_v0.md)；proxy/telemetry 不升级为 A* |
