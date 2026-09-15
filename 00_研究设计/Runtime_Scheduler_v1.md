@@ -129,11 +129,25 @@ The v1 fallback is `RuntimeScheduler::max_runtime_step_minutes` (default 60):
 long actions receive bounded integration opportunities even when no event source
 can predict a threshold crossing.
 
+### Outcome timing contract
+
+WorldEvent, completion, physical interruption, and delivered typed rejection
+are **pre-policy outcomes**: they enter O→X→S before the boundary's policy
+decision. A policy-generated replacement interruption is a **post-policy
+transition outcome**: it is written to actor-local O after the decision and is
+consumed exactly once at the next runtime boundary. It is not recursively
+re-appraised at the same timestamp.
+
+Threshold replacement first calls the canonical W start-validation path. An
+accepted replacement ends the old action and starts the new one at the same
+authoritative clock; a rejected replacement leaves the old action running and
+uses the existing one-minute typed-rejection transition latency.
+
 At every stage, old and new outputs must have distinct provenance and run
 directories. `optimizer_train`, `internal_holdout`, Objective v0 and optimizer
 selection remain out of scope.
 `ContinuousRuntime::execute_next_boundary` is the canonical orchestration API:
 it advances continuous S, settles a completed RunningAction, projects outcome
 and events into O, applies X→S impulse, evaluates the gate, and submits the
-next policy intent through W validation. The older lower-level calls remain
-available for unit tests and are not the fixture-level contract.
+next policy intent through W validation. Lower-level scheduler calls remain
+temporal primitives only; fixtures must use this owner API.

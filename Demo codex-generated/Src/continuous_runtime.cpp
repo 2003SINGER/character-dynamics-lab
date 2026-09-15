@@ -82,9 +82,20 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
                 // A threshold crossing is a subjective reconsideration point. Keep
                 // the running action and its elapsed progress unless an explicit
                 // physical interruption outcome was produced at this boundary.
+                const bool same_intent = action.has_value()
+                    && selected == action->action
+                    && candidate.target_object_id == action->target_object_id;
                 if (threshold_reconsideration && action.has_value()
                     && action->status == RunningActionStatus::Running
-                    && selected != action->action) {
+                    && !same_intent) {
+                    const WorldOutcome validation = world_runtime_.validate_runtime_start(
+                        candidate.action, candidate.target_object_id);
+                    if (!validation.accepted) {
+                        scheduler_.reject_action(candidate.action, candidate.target_object_id, RuntimeRejection{
+                            false, candidate.action, candidate.target_object_id,
+                            static_cast<int>(validation.failure_reason), 0, validation.provenance});
+                        break;
+                    }
                     WorldOutcome reconsideration;
                     reconsideration.action = action->action;
                     reconsideration.target_object_id = action->target_object_id;

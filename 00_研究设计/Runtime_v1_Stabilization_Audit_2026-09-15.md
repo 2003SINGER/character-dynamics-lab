@@ -5,8 +5,8 @@
 | 检查项 | 结论 | 分类 | 处理 |
 |---|---|---|---|
 | canonical runtime pipeline | `execute_next_boundary()` 唯一完整推进入口；低层 `advance_next_boundary()` 已移除 | PASS | BLOCKER_NOW 已修 |
-| threshold semantics | reconsideration 可 continue/replace；physical invalidation 仍独立 | PASS | BLOCKER_NOW 已修 |
-| exactly-once appraisal | completion/rejection/invalidation immediate；Reference v0 保留 deferred | PASS | BLOCKER_NOW 已修 |
+| threshold semantics | reconsideration 可 continue/replace；replacement 先走 W validation，失败时旧 action 保持 running；physical invalidation 仍独立 | PASS | BLOCKER_NOW 已修 |
+| exactly-once appraisal | completion/rejection/invalidation immediate；policy-generated replacement feedback 延迟到下一 boundary；Reference v0 保留 deferred | PASS | BLOCKER_NOW 已修 |
 | event→O→X→S coverage | 见 [Runtime Semantic Audit Matrix](Runtime_Semantic_Audit_Matrix.md) | PASS | FIX_BEFORE_FIXTURE_MIGRATION：逐 fixture 继续回归 |
 | commitment consumer | 尚未迁移 scheduler-native commitment consumer | known gap | DEFERRED_TO_SCHEDULER_NATIVE_COMMITMENT_FIXTURE |
 | string key drift | 已登记现有 producer/consumer 边界；暂不引入 ontology framework | known risk | FIX_BEFORE_BATCH_MIGRATION |

@@ -57,6 +57,7 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 
 40. `02_实验/Theory_S_v2/` is the canonical Python research dynamics candidate; `Replay/` owns source-neutral records, canonical action features, and baseline probes. Dataset adapters may emit ReplayRecord/SceneSnapshot/X-compatible inputs, but must not copy or specialize Theory-S as `LIGHTTheoryS`, `OperaTheoryS`, or similar.
 41. `Mechanism_Sanity_v1` and `v1_2` are frozen historical engineering fixtures. New development training composes the canonical operator and feature layer; it does not create another X→S→π implementation.
+42. Every character ActionIntent, including threshold or commitment replacements, must pass `World::validate_runtime_start` before a new RunningAction is created. RuntimeScheduler is a temporal primitive and must not become world-aware.
 
 ## Tests and guards
 

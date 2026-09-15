@@ -33,6 +33,7 @@
 
 - Preserve Action-Step Reference v0. Runtime-native work must not add a second clock, let an action advance runtime time, shortcut `W → S`, or let a hidden W event open a character gate.
 - Treat W/O/S/P/RunningAction as persistent nodes and deltas/events as the flow. Scheduler-native fixtures use the canonical runtime bridge rather than manually synchronizing timestamps or projecting W facts.
+- No path may create or replace a character `RunningAction` from an `ActionIntent` without `W` start validation. This includes initial, completion, rejection, threshold/commitment reconsideration, and future plan changes. The scheduler remains world-agnostic.
 
 ## Milestone status and review discipline
 

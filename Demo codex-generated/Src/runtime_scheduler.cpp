@@ -75,12 +75,8 @@ void RuntimeScheduler::replace_running_action(ActionType action, std::string tar
 
 void RuntimeScheduler::reject_action(ActionType action, std::string target_object_id,
                                      std::optional<RuntimeRejection> rejection) {
-    if (running_action_.has_value()) {
-        throw std::logic_error("Cannot reject a new action while another action is running");
-    }
-    // A rejection is an immediate W settlement outcome, but the actor receives
-    // and reacts to it at the next runtime transition. The payload is typed by
-    // the integrating World/O layer; this core records the scheduling rule.
+    // A rejection is feedback for a proposed intent. It does not modify an
+    // unrelated running action; the actor receives it at the next transition.
     schedule({"action_rejected:" + to_string(action) + ":" + target_object_id,
               now_total_minutes_ + 1, true, false, std::move(rejection)});
 }
