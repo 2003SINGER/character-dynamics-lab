@@ -1,0 +1,1158 @@
+看了，最新 webgpt-sync HEAD 已经变成：
+e10c984 feat: wire first scheduler-native character slice。它正好接在上一轮 f822fa1 后面。
+这轮有两个实质进展，而且都对。
+第一，我们上一轮指出的“同 timestamp 到底谁先谁后”已经正式钉死了。现在协议明确规定：先积分 [previous,t)，再处理 t 时刻外部事件；如果这个事件明确要求 interrupt，那么它优先于恰好在 t 完成的 action，所以“10:35 正好完成 + 10:35 强中断”会得到 Interrupted，不是碰巧看代码顺序。 而且 smoke 真的加了这个 case，明确断言不能同时出现 ActionCompleted。
+第二，第一条 W/O/X/S/π vertical slice 确实接起来了。流程是：
+09:00 StudyFocused 开始
+↓
+scheduler → 09:10
+↓
+advance_continuous_state(S, RunningAction, 10min)
+↓
+message → O
+↓
+X = appraise(...)
+↓
+S impulse，Δt=0
+↓
+gate 仍关闭
+
+继续 action
+↓
+09:35 completion
+↓
+World settlement
+↓
+self-feedback → O
+↓
+X → S
+↓
+DecisionGate open
+↓
+decide(...)
+↓
+下一 RunningAction
+代码里不是 fake 的：advance_continuous_state() 真吃 RunningAction + elapsed_minutes，event impulse 又单独走 update_state(..., 0)；完成以后也真的调用 world.settle()、apply_self_action_feedback()、refresh_observation()、appraise()、update_state()、decide()。
+所以到这里可以正式说：
+Scheduler 不再只是空时间骨架，第一个 Character Dynamics runtime slice 已经存在。
+
+但我发现了一个比 Deadline 更应该先修的关键问题。
+现在其实还没有“统一时钟”
+看这个 vertical smoke：
+const RuntimeBoundary message_boundary =
+    scheduler.advance_to_next_boundary();
+scheduler 已经从 09:00 到 09:10。
+然后：
+world.unread_messages = 1;
+apply_observable_runtime_event(..., "09:10");
+但是这期间 world.time 根本没推进。World 依然认为现在是 09:00。这里 "09:10" 是手写进去的。
+直到 09:35：
+world.settle(StudyFocused, "desk");
+旧 World settlement 才按完整 StudyFocused 的 35 分钟一次性推进自己的时间；旧 World 目前也没有独立的 advance_by(dt) / advance_to(t) runtime API。
+而旧 World 的动作展开本身仍然带着：
+AdvanceSimulationTime{action_duration}
+也就是说旧世界模型的基本语义依旧是：
+action settlement
+    ↓
+顺手推进整段时间
+而不是：
+统一 clock 推时间
+    ↓
+W 随 Δt 演化
+    ↓
+action 只是运行在这段时间上
+这就是当前真正的断点。
+为什么现在看起来没炸？
+因为这个 smoke 被非常精心地选成了：
+09:00 World
+scheduler 先偷偷跑到 09:10
+手动发生 message
+World 仍然 09:00
+
+scheduler 再跑到 09:35
+World.settle(35min)
+World 一口气追到 09:35
+终点恰好重新对齐。
+所以 smoke PASS。
+但中途：
+scheduler.now = 09:10
+World.time     = 09:00
+O timestamp    = 09:10
+已经存在三个时间视图。
+这会直接把 Deadline fixture 炸出来
+比如：
+09:00 开始学习 60min
+09:20 得知 deadline
+scheduler 到 09:20 了。
+这时候如果 X 要算：
+remaining = deadline_at - now
+谁是 now？
+如果从 World.time 取：
+now = 09:00    ❌
+如果从 scheduler 取：
+now = 09:20    ✅
+但我们的原则本来就是：
+世界中不应该存在两个独立的权威时钟。
+
+而且更麻烦的是旧 World 自己有一整套 scheduled events，它是在某次完整 action settlement 时扫描：
+before < event_time <= after
+然后一次性补发天气、消息、task reminder、deadline 等事件。
+这和新 scheduler 自己的 ScheduledRuntimeEvent 是两套调度系统。
+所以我现在不会照 TODO 直接说“下一步迁 Deadline”。
+应该先补这一刀：
+            ONE authoritative runtime clock
+                      │
+                      ▼
+          World.advance_by(Δt)
+                      │
+        ┌─────────────┴─────────────┐
+        ▼                           ▼
+W continuous evolution       due WorldEvents
+        │                           │
+        ▼                           ▼
+RunningAction progress          O → X
+        │                           │
+        └────────────┬──────────────┘
+                     ▼
+                     S
+也就是把旧：
+World::settle(action)
+= 做动作效果 + 推整个动作时间 + 补发期间所有事件
+拆成 runtime 语义：
+World.advance_by(dt)
+    → 时间前进
+    → W 连续/定时事件发生
+    → 返回 typed WorldEvents
+
+RunningAction progress
+    → 独立推进
+
+action completion
+    → 只做 completion settlement
+    → 不再偷偷推进 35min
+旧 Reference v0 的 settle() 可以原封不动留着。
+新 runtime 应该走另一条 API，千万别把旧语义硬改掉。
+还有一个相关的小问题：现在 ScheduledRuntimeEvent 基本只有 id + flags，真正消息内容是 vertical smoke 自己手工：
+world.unread_messages = 1;
+apply_observable_runtime_event(... "message.unread_count", "1" ...)
+塞进去的。
+这作为第一条 smoke 完全可以，但下一层应该变成：
+World.advance
+→ typed WorldEvent
+→ observability/filter
+→ ΔO
+而不是 caller 知道“哦这是 message，所以我要手工改 W，再手写 O key”。
+所以我对这轮的判断是：
+这提交是明显进展，上一轮要求的两个东西确实都完成了。
+但也恰好把下一层真正的问题暴露出来了：
+Scheduler 有统一时间，Character State 开始按这个时间跑了；但是 World 还活在旧 action-step 时间里。
+
+因此当前准确状态应该是：
+Scheduler temporal kernel           PASS
+shared-timestamp contract           PASS
+first O/X/S/π runtime slice         PASS
+
+single authoritative W/runtime time NOT YET
+scheduler-native World events       NOT YET
+runtime action settlement           NOT YET
+
+Deadline fixture                    暂时别迁
+我会让 Luna 下一步先做 WorldRuntimeAdapter / advance_by(Δt)，把 scheduler clock 和 W clock 真正焊成一个时间轴。这个打通后再迁 Deadline，Deadline 才是非常漂亮的第一项验收。
+
+
+
+
+  
+
+
+
+
+
+另外我们是用数据流视角循环更新吗
+
+
+
+
+
+
+
+
+
+
+
+
+
+对，而且我觉得现在应该明确把整个 Character Dynamics 定义成“时间驱动的数据流循环”，而不是“每轮调用一堆函数”。
+更准确地说，是：
+统一时间轴上的增量数据流（incremental dataflow） + 持久状态节点。
+
+核心不是：
+每 tick：
+W → O → X → S → π
+然后全部重算一遍
+而是：
+时间推进 Δt
+   ↓
+产生变化 ΔW / WorldEvent / ActionProgress
+   ↓
+只把“变化”沿数据流往下传播
+可以画成：
+Simulation Clock
+      │
+      ├── Δt
+      ▼
+┌───────────────┐
+│ W / World     │◄──── RunningAction
+└──────┬────────┘
+       │
+       │ ΔW + WorldEvent + ActionOutcome
+       ▼
+┌───────────────┐
+│ Observation O │
+└──────┬────────┘
+       │ ΔO
+       ▼
+┌───────────────┐
+│ Appraisal X   │
+└──────┬────────┘
+       │ semantic/event signal
+       ▼
+┌───────────────┐
+│ Persistent S  │◄──── Δt continuous dynamics
+└──────┬────────┘
+       │
+       ▼
+ DecisionGate
+    │       │
+ closed   open
+    │       │
+ continue  ▼
+ action   A^O → π(A)
+              │
+              ▼
+        new RunningAction
+              │
+              └──────────────→ W
+然后循环。
+最关键的一点：传的是 Δ，不是每次重新传整个世界
+例如：
+09:00 → 09:10
+没有重要事件，那么数据流可能只有：
+Δt = 10 min
+RunningAction = StudyFocused
+
+→ S continuous dynamics
+根本不用：
+重新理解整个 W
+重新生成整个 O
+重新 appraise 整个世界
+重新 decision
+到了 09:10 一条消息：
+WorldEvent:
+message_received
+才产生：
+ΔW
+→ ΔO
+→ X
+→ S impulse
+但如果这个消息不值得打断学习：
+DecisionGate = closed
+数据流就在这里结束。
+角色继续学习。
+这就是我们想要的稀疏计算。
+所以我们现在实际上可以把不同东西分成三种流。
+时间流：
+Δt
+→ W continuous dynamics
+→ S continuous dynamics
+→ RunningAction progress
+事件流：
+WorldEvent / ActionOutcome
+→ O
+→ ΔO
+→ X
+→ S
+决策流：
+DecisionGate opens
+→ O + S + P
+→ A^O
+→ π
+→ RunningAction
+→ W
+三条流在统一 simulation clock 上汇合。
+这比以前简单的：
+O,S,P → action → W' → O'
+完整得多。
+而且这里还有一个非常重要的思想：
+O / S / W 不是“消息”，而是持久状态节点
+真正流动的是：
+ΔW
+ΔO
+X
+ΔS
+ActionOutcome
+WorldEvent
+DecisionTrigger
+所以不是传统 pipeline：
+输入进去
+→ 输出出来
+→ 数据消失
+而更像：
+        ┌── W state ──┐
+events ─┤             ├→ ΔW
+        └─────────────┘
+               ↓
+        ┌── O state ──┐
+ΔW ────►│             │→ ΔO
+        └─────────────┘
+               ↓
+              X
+               ↓
+        ┌── S state ──┐
+Δt,X ──►│             │→ ΔS
+        └─────────────┘
+每个节点：
+收到增量 → 根据自己的 update rule 修改内部持久状态 → 必要时发出新的增量。
+
+这才真的很符合你一开始说的：
+每个 state field 自己附带 dynamics。
+
+比如：
+fatigue
+自己监听：
+Δt
+RunningAction
+RecoveryEvent
+而：
+task_pressure
+监听：
+Δt
+DeadlineObservation
+TaskProgress
+TaskCompletion
+它们理论上甚至不需要由一个巨大的 update_state() 一锅端。
+这也会让未来的模块化特别舒服。
+比如：
+HungerState
+inputs:
+  Δt
+  MealCompleted
+
+FatigueState
+inputs:
+  Δt
+  RunningAction
+  SleepCompleted
+
+TaskPressureState
+inputs:
+  Δt
+  DeadlineObserved
+  TaskProgress
+
+CommitmentState
+inputs:
+  ActionOutcome
+  TaskCompletion
+  Interruption
+每个都是：
+state_t + incoming signals
+→ state_t'
+这就真的变成了状态动力学网络。
+所以我现在会把整个系统最核心的计算范式写成一句：
+Character Dynamics 是一个运行在统一 simulation clock 上的、事件驱动的增量状态数据流系统：持久的 W/O/S/P 节点通过 Δt、ΔW、ΔO、X、ActionOutcome 等稀疏信号更新；只有 DecisionGate 打开时才进入行为选择。
+
+这句话我觉得已经非常接近我们系统真正的定义了。
+而且你会发现，我们刚刚发现的“统一时钟缺失”其实正好补上了数据流视角最后缺的一块：
+以前我们有：
+数据怎么流
+但没有：
+这些流什么时候发生
+现在变成：
+Scheduler 决定什么时候
++
+Dataflow 决定什么数据往哪流
++
+State dynamics 决定节点怎么更新
+这三个合起来，才是整个 Character Dynamics runtime。
+
+
+
+
+  
+
+
+
+
+
+Workbuddy给的评价“
+我查一下当前提交状态，包括远端有没有新东西。
+webgpt-sync 上有 main 没有的新提交。我看一下具体内容。
+main 比 webgpt-sync 落后了 4 个提交。我看具体内容。
+4 个都是今天的提交。我读一下新增内容。
+我用独立的 worktree 把 webgpt-sync 拉出来实机编译验证一下（不碰你当前工作区）。
+已经有一个现成的 worktree，我直接用它编译。
+编译通过。跑测试。
+核心不变量全过。最后看两个新增的原始材料（
+WebGPT 复核记录）。
+新提交在 webgpt-sync 上，main 落后 4 个（main 是 squash 镜像，实际增量就是这 4 个）：
+提交	内容
+555f7f6	AGENTS.md：每次验证后必须 commit 并推 ****webgpt-sync，不许只留 worktree；main 除非点名否则不推
+d4e543c	Behavior Audit v0：从 frozen optimizer_train 筛可疑轨迹供人看
+b2d8672	Typed Rejection Feedback v0：修一个真实的引擎级死循环
+f822fa1	Runtime Scheduler v1：新增事件驱动时间骨架
+
+
+最有价值的一刀：b2d8672
+不是打补丁，是从轨迹里挖出来的真 bug。shop_on_phone 因隐藏余额不足被 W 拒绝 → elapsed=0 分钟 → O 只得到一个泛泛的 "rejected by W" → 下次还是选它 → 死循环。旧代码只对 TargetAbsent 做过认知纠正。
+修法是通用化的 ActionConstraintBelief（TargetAbsent / TargetUnusable / ResourceRequirement / Precondition），拒绝时写入 O，在 A^O 生成时 is_blocked() 拦掉。关键是没有破信息边界：只记"这次资源不够"，不把隐藏的 wallet 余额抄进 O；恢复也必须等角色合法观察到钱包。且 rejection 仍走 O → X → S，没有直接改 S。
+同数据重跑：229,376 decisions，仍有 784 次资源拒绝且仍是 0 分钟，但 max consecutive 从 6–7 降到 1，casebook 52→47，zero_time_loop = 0。
+我实机验证了，不是纸面声明
+用现成 worktree（/private/tmp/character-dynamics-webgpt-sync，HEAD=f822fa1）在 macOS + clang 下构建：
+- 编译 0 错误（只有 2 个 unused warning）
+- CTest 4/4 通过（新增 runtime_scheduler_smoke）
+- --verify**** 33 项不变量全 = 1，含新增三项：rejected_unusable_action_is_suppressed、rejected_resource_action_is_suppressed、resource_constraint_recovers_after_credible_update
+顺带核实了 casebook 的 holdout 防火墙是真的：behavior_audit_casebook_v0.py:247-250 用 development_split_v1.json 的 optimizer_train_world_seeds 做子集硬校验，不在集合内直接 raise。
+三个我认为需要你拍板的风险
+1. Runtime Scheduler 是平行宇宙（上图）。它编译进 runtime lib，但全仓库没有任何调用方，没接 W/O/X/S。文档说这是刻意的，TODO 也给了迁移顺序（Delta-t adapter → Phone/Deadline/Commitment fixture）。但 ARCHITECTURE_RULES 第 35 条是 Rule of Three，而这里连一次集成都还没有——没有 owner、没有截止点，有长期悬空风险。
+2. 现在有两套 rejection 机制：O 侧的 ActionConstraintBelief（生效、修好了循环）+ scheduler 侧的 reject_action（只记调度、payload 为空）。文档承认待整合，但两处代码并存了。
+3. 工作区那个未提交改动是浮点末位漂移：trajectory_results.json 里 0.10407645001569735 → ...733。相对误差 ~1e-17 无实质影响，但说明 Mechanism_Sanity_v1_2 这个"冻结 fixture"在 macOS 上重跑不是 bit-reproducible。考虑到项目对 provenance 的敏感度，值得知道。
+另外两份新原始材料（1002 行 + 360 行）记录了这次的判断转向：原本要设计 pathology penalty，看轨迹后发现真正该修的是 epistemic feedback；再往下挖又发现更底层的问题——当前引擎是 action-step simulator，不是持续运行的 runtime，状态随 decision count 演化而非随时间演化。所以 SYSTEM 主线从"暂停等 objective"改成了"先补时间骨架"。这个转向我认为是对的，比拍脑袋定 penalty 强。
+我没有做任何 merge 或 push（AGENTS.md 明确保护 main）。要我把这 4 个提交合并到 main 吗？还是先放着？另外那个浮点漂移的 json，要提交还是回滚？
+”
+
+
+
+
+
+显示更多
+
+
+
+
+
+
+
+思考了 33s
+
+这份评价我基本认可，但它已经落后一提交。它验的是 f822fa1，而现在 webgpt-sync 已经到 e10c984 feat: wire first scheduler-native character slice；main 仍停在 e9ad2eb。 
+所以它的三个风险，我现在会这样重判：
+1. “Runtime Scheduler 是平行宇宙”——已经部分解决。
+   e10c984 已经真的接了第一条 RunningAction → Δt continuous S → World event → O → X → S impulse → gate → π vertical slice，不再是零调用方。
+   但现在更大的问题变成了我们刚抓到的：Scheduler 时钟和 World.time 还不是同一个权威时钟。09:10 scheduler 已推进，但 World 仍可能在 09:00，直到旧 world.settle() 一次性补 35 分钟。
+   所以当前真正 blocker 不是“没有 owner”，而是：
+   single authoritative simulation time = NOT YET。
+2. “两套 rejection 机制”——我不把它视为两套机制本身。
+   合理的最终形态本来就应该是两层：
+   scheduler/action settlement 负责产生 typed rejection event；
+   O 里的 ActionConstraintBelief 负责保存这个事件造成的持久认知后果。
+   现在危险点只是二者还没真正通过统一 typed payload 接起来。也就是说应该收敛成：
+   WorldOutcome/RejectionEvent → O → ActionConstraintBelief，
+   而不是删掉其中一个。
+3. 浮点末位漂移——直接回滚，不提交。
+   1e-17 量级没有科学意义。把这种 macOS/clang 浮点末位变化提交进“冻结 fixture”，只会污染 provenance。正确处理是：
+   - canonical snapshot 保持不动；
+   - verifier 使用明确数值容差；
+   - 如果真的关心跨平台复现，记录 compiler/platform；
+   - 不要通过不断更新 JSON 来追 bitwise equality。
+main：现在别合
+Workbuddy 问“把这 4 个提交合并 main 吗”，我的答案现在更明确：
+先别。
+现在实际上已经是 5 个新阶段提交：
+Behavior audit
+→ Typed rejection feedback
+→ Runtime scheduler core
+→ scheduler-native vertical slice
+→ （下一步）统一 World/runtime 时间
+这是一段正在进行中的架构迁移，不是已经封口的 milestone。
+main 现在停在 e9ad2eb evaluator and optimizer infrastructure checkpoint 非常合适。
+我会等到至少完成：
+single authoritative simulation clock
+→ scheduler-native World.advance(Δt)
+→ typed WorldEvent → O
+→ Deadline native fixture
+→ Phone native fixture
+→ Commitment native fixture
+并且旧 Reference v0 仍全部 regression PASS。
+到那时候再给 main 加一个漂亮的：
+milestone: continuous runtime temporal core
+或者更晚：
+milestone: scheduler-native mechanism fixtures closed
+而不是现在把半迁移状态塞进去。
+所以 Workbuddy 这次最大的价值其实不是它提出了什么我们没想到的东西，而是它独立实机验证了我们的前几步不是纸面工程：编译过、CTest 过、33 条 invariant 过、holdout firewall 也真存在。这给前面的结果增加了一次很好的独立工程复核。
+但在科学/架构判断上，我们现在已经比它的 f822fa1 快了一步：
+真正下一刀不是继续扩 Scheduler，也不是 merge main，而是让 World 服从唯一 runtime clock。
+
+这个做完，Deadline 才值得迁。
+
+
+
+
+  
+
+
+
+
+
+统一一下这四轮我们的对话，给详细修改，包括数据流的视角真的更新！他妈的之前我说了几百次了。。。
+
+
+
+
+
+
+
+
+
+
+
+
+
+思考了 2m 55s
+
+对，这次要把它真正改成架构，不是再在 Runtime_Scheduler_v1.md 里补两段话。
+问题就在这：之前你一直说“数据流”，我们却把它当成了机制图的表达方式，而没有当成 runtime 的计算范式和接口约束。 所以仓库虽然早就写着 W → O → X → S → π，真正代码还是“做一个 action → 一次性结算 → 下一轮”的调用链。现在才被 zero-time loop、统一时钟、随机事件、状态衰减一路把这个底层错误炸出来。
+仓库当前确实还存在这个错位：System Vision 仍把核心写成轮式 W→O→X→S→π→settlement→W'；完整机制也仍以“回到下一轮”收尾；Architecture Rule 1 甚至从 O refresh 才开始定义 canonical path。  
+而 e10c984 虽然已经有第一条 scheduler-native W/O/X/S/π slice，但 World 还没有服从同一个 clock；当前 TODO 甚至已经准备直接迁 Deadline，这一步应该撤回，先统一时间和数据流。 
+这四轮对话最后应该统一成这一句话
+Character Dynamics 是运行在单一权威 simulation timeline 上的、事件驱动的增量状态数据流系统。W、O、S、P 和 RunningAction 是持久状态节点；真正沿系统流动的是 Δt / ΔW / WorldEvent / ActionOutcome / ΔO / X / ΔS / DecisionTrigger / ActionIntent。只有 DecisionGate 打开时才运行行为选择。
+
+这句话以后应该是顶层定义。
+不是：
+每轮：
+W → O → X → S → π → W'
+而是：
+                   SINGLE AUTHORITATIVE CLOCK
+                              │
+                    next meaningful boundary
+                              │
+                              ▼
+                  TimeAdvance Δt = [t0,t1)
+                    │         │         │
+                    ▼         ▼         ▼
+             W continuous   Running    S continuous
+               dynamics      Action      dynamics
+                    │        progress       │
+                    └──────┬───────┬────────┘
+                           ▼
+                      boundary @ t1
+                           │
+               WorldEvent / ActionOutcome
+                           │
+                           ▼
+                     Observation Filter
+                           │
+                          ΔO
+                           │
+                           ▼
+                           X
+                           │
+                           ▼
+                      S event impulse
+                           │
+                           ▼
+                     DecisionGate
+                       │          │
+                    closed       open
+                       │          │
+                       ▼          ▼
+              continue action   A^O
+                                  │
+                                  π
+                                  │
+                              ActionIntent
+                                  │
+                              W validation
+                              /           \
+                         rejected        accepted
+                            │                │
+                     ActionOutcome      RunningAction
+                            │                │
+                            └────────下一时间边界──┘
+这里 W/O/S 不是“流过去的数据包”。它们是有记忆的节点。
+真正的数据流是：
+Δt
+WorldDelta
+WorldEvent
+ActionOutcome
+ObservationDelta
+Appraisal X
+StateDelta
+DecisionTrigger
+ActionIntent
+这点必须写进代码接口，而不只是画图。
+四轮发现其实是一条连续的因果链
+发现	我们原来哪里错了	现在应该得到什么架构结论
+shop_on_phone zero-time loop	action rejection 没进入正常认知更新流	rejection 是 typed ActionOutcome，必须重新进入 O→X→S
+“钱不够/目标坏了可以作为下一轮输入”	把 rejection correction 做成特殊旁路	failure 是正常事件流，ActionConstraintBelief 只是 O 对事件的持久后果
+没统一 tick，哪来的 S 衰减/随机世界事件	action completion 偷偷充当时间	必须有独立 authoritative simulation timeline
+Scheduler v1	开始区分时间推进和 decision	RunningAction、event boundary、DecisionGate 成第一等概念
+vertical slice	scheduler 时间与 World.time 仍分裂	World 必须接入同一 clock，action 不得自行推进时间
+数据流重新提出	过去只是画 W→O→X→S	数据流必须决定接口、ownership、增量更新、gate 和 trace
+
+
+还有一个这次必须顺手修掉的东西：
+当前 scheduler 把 opens_decision_gate / interrupts_running_action 放在外部事件本身上，这从数据流角度也不够对。
+因为：
+W 中发生 urgent_message
+并不等于：
+角色知道了它
+更不等于：
+角色一定中断当前动作
+正确应该是：
+WorldEvent
+→ perception / O
+→ ΔO
+→ X
+→ S
+→ reconsideration gate
+→ 角色决定继续还是打断
+只有真正的物理强制中断，例如目标消失导致正在执行的动作无法继续，才能由 W/runtime 直接终止 RunningAction。
+所以最终要明确区分：
+physical preemption
+和：
+character reconsideration
+“收到一条重要消息”通常属于第二种，而不是 scheduler 直接把学习动作打断。
+“统一 tick”也要在这次定准
+我们真正需要的是：
+统一时钟，不一定是固定 1 分钟 tick。
+
+现在选 event-driven 是正确的。
+例如：
+09:00 study starts
+09:17 message
+09:31 hunger threshold
+09:35 study completes
+runtime 可以直接：
+09:00 → 09:17   Δt=17
+09:17 → 09:31   Δt=14
+09:31 → 09:35   Δt=4
+只要所有 dynamics 都使用这同一个精确 Δt。
+但这里有个必须写进协议的新要求：
+任何会触发行为重新决策的连续状态阈值，也必须能够成为 scheduler boundary。
+
+否则睡 8 小时的时候：
+hunger 0.2
+↓
+中途跨 0.8
+↓
+scheduler 却直接跳 480min
+我们还是会漏掉真正的动态过程。
+所以未来 boundary sources 应该是：
+world event time
+action completion
+hard physical interruption
+state threshold crossing
+external input
+optional numerical max-step
+对于目前线性 dynamics，可以预测 threshold crossing；以后复杂 dynamics 如果不能解析预测，再加 fixed/max integration step。
+代码层面也要真正分流
+现在 update_state(appraisal, elapsed_minutes) 同时干：
+时间衰减
++
+event/appraisal impulse
+这就是旧 action-step 思维留下来的。
+新 runtime 语义应该正式拆成：
+advance_continuous_state(
+    S,
+    P,
+    RunningAction,
+    Δt
+)
+和：
+apply_appraisal_impulse(
+    S,
+    P,
+    X
+)
+也就是说：
+\[
+S(t+\Delta t)^-=F(S(t),P,R(t),\Delta t)
+\]到 boundary 后：
+\[
+S(t+\Delta t)^+=G(S^-,X,P)
+\]这是两类完全不同的更新。
+旧 Reference v0 的 update_state() 不要删，因为旧 fixture 还依赖它。
+新 runtime 不应该永远拿：
+update_state(..., elapsed)
+update_state(..., 0)
+假装已经完成结构拆分。
+World 也必须拆开“时间”和“动作结算”
+目前最大的直接代码问题是：
+World::settle(action)
+=
+action effects
++
+AdvanceSimulationTime(action.duration)
++
+scan events between before/after
+这在新 runtime 必须禁止。
+scheduler-native path 应该变成：
+clock advances Δt
+↓
+WorldRuntime advances to same t
+↓
+World emits events occurring in this interval/boundary
+动作另外走生命周期：
+ActionIntent
+↓
+validate_start
+↓
+RunningAction
+↓
+progress
+↓
+complete / interrupt / reject
+↓
+typed ActionOutcome
+动作永远不能再拥有“推进世界时钟”的权力。
+数据流视角下 rejection 最终也变得非常干净
+当前两个东西不应该被理解成“两套 rejection mechanism”。
+应该是：
+W validation
+↓
+ActionOutcome{
+    accepted=false,
+    reason=ResourceInsufficient
+}
+↓
+runtime event stream
+↓
+O projection
+↓
+ActionConstraintBelief{
+    ShopOnPhone,
+    ResourceRequirement,
+    unsatisfied
+}
+↓
+ΔO
+↓
+X
+↓
+S
+↓
+DecisionGate
+所以：
+ActionConstraintBelief = 持久 O 状态
+而：
+ResourceInsufficient ActionOutcome = 数据流消息
+这俩角色完全不冲突。
+下面这版我建议你直接给 Luna/Codex。它不是“继续改 Runtime Scheduler”的小任务，而是这次真正的 Runtime/Dataflow Architecture Revision。
+当前 webgpt-sync 基线为 e10c9845dd908f4c3e20f45e11caff8edf01301b。
+本轮不是继续增加零散 scheduler feature，也不是立即迁 Deadline fixture。请根据最近四轮架构复核，对 Character Dynamics 做一次 Runtime / Dataflow Architecture Revision。
+核心目标：
+把“统一 simulation timeline + 增量数据流 + 持久状态节点 + RunningAction + DecisionGate”升级为 Character Dynamics 的顶层架构约束，并使第一条 scheduler-native runtime 真正遵守它。
+禁止把本轮理解成单个 bug fix。
+一、先冻结并保留旧 Reference v0
+现有 Action-Step Reference Engine v0 保持不变，用作历史机制对照。
+不得破坏：
+- 旧 World::settle() 行为；
+- 旧 batch；
+- optimizer_train / holdout artifacts；
+- Self-Evaluation / Optimizer；
+- Phone / Deadline / Commitment 历史 fixture；
+- 现有 CTest；
+- Simulation::verify() invariants。
+旧路径允许继续使用：
+action → whole-action settlement → advance duration
+但必须明确标记为：
+Reference v0 semantics only
+scheduler-native runtime 不得继续复用其中“action 自己推进世界时间”的语义。
+二、把顶层定义正式改成 stateful incremental dataflow
+Character Dynamics 的正式 runtime 定义修改为：
+Character Dynamics is an event-driven incremental stateful dataflow runtime over one authoritative simulation timeline.
+持久状态节点：
+- W authoritative world state
+- O_i actor-local persistent observation / belief
+- S_i persistent dynamic character state
+- P_i relatively stable parameters
+- RunningAction_i runtime action state
+- commitment 等属于相应持久 character state，不是独立“轮次变量”
+真正沿系统传播的 transient data：
+TimeAdvance / Δt
+WorldDelta
+WorldEvent
+ActionOutcome
+ObservationDelta / ΔO
+Appraisal X
+StateDelta / update trace
+DecisionTrigger / DecisionGateReason
+ActionIntent
+不得继续把“完整 W/O/S 被每轮重新计算”作为目标 runtime 语义。
+初始化或显式 resync 可以做 full projection；正常运行应优先增量传播。
+三、正式区分三条 flow
+TIME FLOW：
+Δt → W continuous dynamics
+Δt + RunningAction → action progress
+Δt + RunningAction + P → S continuous dynamics
+EVENT FLOW：
+WorldEvent / ActionOutcome
+→ legal observation projection
+→ ΔO
+→ X
+→ S event impulse
+DECISION FLOW：
+DecisionGate open
+→ derive D / A^O
+→ π(A | O,S,P,D,A^O)
+→ ActionIntent
+→ W validation
+→ accepted: RunningAction
+→ rejected: typed ActionOutcome
+普通 time/event flow 不得自动调用 policy。
+四、单一权威 simulation time
+scheduler-native runtime 中只允许一个 authoritative clock。
+推荐约束：
+RuntimeScheduler / SimulationClock 持有 authoritative time。
+W.time 在 scheduler-native path 中只能作为该时钟的 world-visible mirror/view，不得自行推进。
+必须满足：
+world.time == scheduler.now
+在每一个 runtime boundary 都成立。
+当前 runtime_vertical_slice_smoke 中：
+- scheduler 到 09:10；
+- World.time 仍在 09:00；
+- "09:10" 手写进入 O；
+这种状态必须消失。
+新增一个最小 concrete runtime bridge，例如：
+WorldRuntimeAdapter
+或等价命名。
+不要建立 interface/factory/plugin framework。
+它至少负责：
+1. 根据 authoritative clock 把 W 从 t0 推到 t1；
+2. 返回该 interval/boundary 中发生的 typed WorldEvents；
+3. 保证 W 不通过 action settlement 再次推进时间；
+4. 每个 boundary assert world/scheduler clock 一致。
+五、World event scheduler 必须从 action settlement 中解耦
+当前 Reference v0 中：
+World::settle(action)
+会跨整个 action duration，并扫描期间天气、消息、reminder、deadline 等事件。
+该行为只保留在 Reference v0。
+scheduler-native runtime 中：
+random/scheduled WorldEvent 必须拥有自己的 timestamp，并独立于 action completion 发生。
+现有 schedule_for_day(...) 等逻辑可以复用/抽出给新的 runtime event source，但不得改变旧 reference 结果。
+新 runtime 必须能够表达：
+09:00 Study begins
+09:10 Message arrives
+09:20 Weather changes
+09:35 Study completes
+而不是等到 09:35 才一次性补发 09:10 和 09:20 的事件。
+六、不要让 scheduler 决定角色觉得什么事件“重要”
+当前 ScheduledRuntimeEvent 中的：
+opens_decision_gate
+interrupts_running_action
+语义需要重新审计。
+必须区分：
+A. hard / physical runtime preemption
+例如：
+- action target physically disappears；
+- world rule makes running action impossible；
+- external force mechanically terminates action。
+这种情况可以由 runtime/W 直接终止 RunningAction。
+B. character reconsideration
+例如：
+- urgent message；
+- deadline information；
+- temperature change；
+- social event；
+- internal need threshold。
+这种事件必须先走：
+W event → O → ΔO → X → S
+然后才允许 DecisionGate 判断是否值得 reconsider。
+未被角色观察到的 W event：
+不得直接打开 character DecisionGate。
+因此在 integrated runtime 中，不允许：
+hidden W event → opens_decision_gate=true
+这种旁路。
+如果现有 scheduler smoke 需要保留机械 interrupt 测试，请把字段/语义命名改为明确的 physical/hard preemption，而不是 subjective importance。
+七、RunningAction 成为正式 runtime state
+RunningAction 至少继续保存：
+- action
+- target
+- started_at
+- planned_duration
+- elapsed/progress
+- interruptibility
+- status
+但动作生命周期必须明确区分：
+validate/start
+running/progress
+complete
+interrupt
+reject
+不得再把 action 当成一次函数调用。
+scheduler-native action 不能通过 AdvanceSimulationTime 改时钟。
+对于第一版迁移，可以暂时保留“大多数 world effect 在 completion settlement 才生效”，但必须把时间推进从 settlement 中完全拆掉。
+后续如果 study progress、sleep effects 等需要持续 settlement，再单独进入 continuous action effect，不要本轮顺手扩机制。
+八、Rejection 统一进入正常数据流
+保留当前 ActionConstraintBelief。
+但重新明确：
+ActionConstraintBelief 不是 rejection feedback channel。
+它是 O 对过去 rejection evidence 的持久认知结果。
+正确路径：
+ActionIntent
+→ W validation
+→ ActionOutcome{accepted=false, typed reason}
+→ runtime event transition
+→ O projection
+→ ActionConstraintBelief
+→ ΔO
+→ X
+→ S
+→ DecisionGate
+当前 scheduler 的 reject_action() 不应长期形成另一套无 payload rejection path。
+请让 integrated runtime 的 rejection 使用已有 typed WorldOutcome/RejectionReason，或一个无信息损失的 typed wrapper。
+失败 attempt 不允许在同一 simulation instant 无限 retry。
+不要把 duration 永久硬编码成“因为 scheduler 方便所以 1 min”；如果本轮暂时需要 1-minute minimum attempt latency，请明确写成 v1 engineering assumption，并集中定义。
+九、S 更新正式拆成 continuous 和 impulse 两类
+目标 runtime contract：
+advance_continuous_state(S,P,RunningAction,Δt)
+只处理：
+- wall-clock drift；
+- running-action-dependent dynamics；
+- 不读取 Appraisal event impulse。
+另一个明确 API：
+apply_appraisal_impulse(S,P,X)
+只处理：
+- event/appraisal 造成的瞬时更新；
+- elapsed time = 0；
+- 不重复 wall-clock drift。
+现有 update_state(Appraisal, elapsed_minutes) 继续保留给 Reference v0。
+新 runtime 当前可暂时通过 adapter 调旧实现，但文档和接口必须承认它只是 compatibility bridge，不能把混合 updater 当作最终 canonical runtime update。
+不要本轮新增心理字段或重新调状态系数。
+十、连续状态阈值也属于时间边界
+事件驱动 scheduler 不等于只考虑：
+world event + action completion。
+任何能够打开 DecisionGate 的连续状态 threshold，也必须最终成为 boundary source，例如：
+- hunger threshold；
+- bathroom threshold；
+- fatigue threshold；
+- commitment reconsideration timer。
+如果 dynamics 可解析预测 crossing time，则 future scheduler 应取最早 crossing。
+如果以后 dynamics 不能稳定解析预测，可以增加 bounded numerical step/fixed-tick adapter。
+不要因为“没有固定每分钟 tick”就允许 scheduler 跨过一个会影响行为的 threshold 而完全不产生 boundary。
+本轮若暂不实现 threshold predictor，请在 Runtime Scheduler 文档中明确登记为 required boundary source，不得把它遗忘。
+十一、建立一个真正的 scheduler-native runtime owner
+现在 runtime_vertical_slice_smoke.cpp 手工串：
+scheduler
+→ continuous S
+→ 手工修改 W
+→ 手写 O timestamp
+→ X
+→ S
+→ settlement
+→ policy。
+这只能是 smoke，不应成为 canonical orchestration。
+请建立一个最小 concrete runtime owner，例如：
+ContinuousRuntime
+或语义等价名称。
+不要做接口体系。
+它负责执行一次：
+advance_to_next_boundary()
+并按唯一顺序协调：
+Clock
+World
+RunningAction
+O
+X
+S
+DecisionGate
+Policy。
+目标是以后 Phone / Deadline / Commitment fixture 调这个 canonical path，而不是每个 fixture 手工复制一套 flow。
+十二、Shared timestamp contract 更新
+当前 explicit contract “interrupt event at t preempts completion at t”只适用于 hard physical preemption。
+新的 general ordering 写清：
+1. integrate open interval [previous,t)；
+2. advance W continuous state / S continuous state / RunningAction progress to t；
+3. apply exogenous W events at t；
+4. apply any hard physical action invalidation/preemption；
+5. if action reaches completion and has not been physically preempted, settle completion；
+6. project legally observable event/outcome data into O；
+7. produce ΔO；
+8. compute X；
+9. apply S event impulse；
+10. evaluate DecisionGate；
+11. only if gate opens, run A^O / π；
+12. if currently running action remains valid, decision may explicitly continue it or replace/interrupt it。
+A merely “important” message must not automatically win over action completion before O/X has even seen it.
+十三、Observation 必须逐步从 full refresh 转向 incremental projection
+Initial observation：
+允许：
+W → initial O projection
+正常 runtime：
+优先：
+WorldDelta / WorldEvent / ActionOutcome
+→ visibility/information filter
+→ ΔO
+→ mutate persistent O
+不要在每个 weak event 后重新扫描完整 W。
+apply_observable_runtime_event(key,value,...) 当前可以保留作为 vertical-slice compatibility helper，但 integrated runtime 不应该由 caller 手工知道：
+“这是 message，所以把 unread_messages 改成 1，再手写一个 O key。”
+应由 typed WorldEvent 经过合法 projection 得到 O update。
+不得读取 hidden W 方便生成 ΔO。
+十四、文档必须同步改，不许只改 Runtime_Scheduler_v1.md
+至少更新：
+ARCHITECTURE_RULES.md
+修改 Rule 1，使 canonical path 从 temporal/dataflow 开始，而不是从 O refresh 开始。
+新增明确 guardrails：
+- one authoritative simulation time；
+- W/O/S/P/RunningAction are persistent nodes；
+- deltas/events are the flow；
+- no W → S shortcut；
+- no hidden W event → DecisionGate；
+- scheduler orders time but does not decide subjective meaning；
+- action cannot advance runtime clock；
+- Reference v0 exempt/frozen；
+- scheduler-native fixtures must use canonical runtime owner。
+00_研究设计/Character_Dynamics_System_Vision_v0.md
+该文件已经语义过时。
+可以 rename/version bump 为 v1，但保持只有一个 active source of truth。
+核心链改成 temporal incremental dataflow，不再以简单 W→O→X→S→π→W' 作为完整 runtime 描述。
+00_研究设计/完整机制说明_v0.md
+更新“一眼看完整运行链”。
+必须加入：
+- authoritative clock；
+- time flow；
+- event flow；
+- decision flow；
+- persistent node vs transient delta；
+- RunningAction；
+- DecisionGate；
+- action lifecycle；
+- rejection event；
+- continuous S / event impulse 分离。
+该文档如果 version bump，请 rename，不要复制出两个都声称“当前唯一维护位置”的文件。
+00_研究设计/Runtime_Scheduler_v1.md
+当前状态更新为：
+TEMPORAL_KERNEL_PASS
+FIRST_VERTICAL_SLICE_PASS
+SINGLE_WORLD_RUNTIME_CLOCK_NOT_YET_PASS
+迁移顺序改为：
+1. single authoritative clock + WorldRuntimeAdapter；
+2. typed WorldEvent → O incremental flow；
+3. canonical runtime owner；
+4. scheduler-native Deadline；
+5. Phone；
+6. Commitment；
+7. only then consider batch migration。
+不要再写“下一步直接迁 Deadline”。
+00_研究设计/TODO.md
+SYSTEM 下一步改为：
+先完成 authoritative clock / WorldRuntimeAdapter / canonical incremental dataflow，不迁 Deadline，不碰 Objective/optimizer/holdout。
+当前实现进度.md
+明确 Reference v0 与 Continuous Runtime v1 两种语义。
+AGENTS.md
+增加给 AI coder 的硬约束：
+任何 runtime-native 修改不得创建第二时钟、不得让 action 推进 clock、不得 W→S、不得 hidden W→gate、不得为 fixture 手工复制 canonical dataflow。
+十五、必须新增的验收测试
+A. runtime_clock_authority_smoke
+在每个 runtime boundary：
+scheduler.now == world.time
+不得存在手写 "09:10" 来掩盖 clock drift。
+B. world_event_dataflow_smoke
+一个真实 World message event 在 action 中途发生：
+W changes
+→ typed event
+→ O
+→ ΔO
+→ X
+→ S impulse。
+C. hidden_event_no_subjective_effect_smoke
+W 中发生角色不可观察事件：
+W 可以变化；
+但 O/X/S/DecisionGate 不得因为该隐藏事件改变。
+D. weak_event_no_forced_interrupt_smoke
+可观察弱事件：
+可以更新 O/X/S；
+但不自动 interrupt RunningAction。
+E. hard_preemption_smoke
+真正物理 invalidation 可以在 shared timestamp preempt action completion。
+F. typed_rejection_dataflow_smoke
+ResourceInsufficient：
+typed ActionOutcome
+→ O constraint
+→ no hidden wallet copy
+→ no same-instant retry loop。
+G. Deadline scheduler-native fixture
+长 action 中途合法获得 deadline：
+事件发生时即进入 O/X/S；
+不得等 action 完成后补发。
+H. Reference regression
+现有 build / CTest / --verify 必须保持 PASS。
+旧 fixture provenance 不改。
+十六、不要做的事
+本轮禁止：
+- Objective/pathology metric；
+- optimizer search；
+- internal holdout；
+- 新 S 字段；
+- Theory-S 参数训练；
+- LLM semantics；
+- multi-agent；
+- ToM；
+- UI；
+- 重新设计心理参数；
+- 为了“整洁”大拆文件；
+- generic event bus / observer framework / DI / plugin architecture；
+- 把 Reference v0 删除或偷偷改成新 runtime。
+十七、提交策略
+允许拆成少量语义完整提交，例如：
+docs: define temporal incremental dataflow runtime
+feat: unify scheduler and world simulation time
+feat: route typed world events through runtime dataflow
+feat: add canonical continuous runtime owner
+test: migrate deadline fixture to scheduler-native runtime
+每个阶段验证后 commit 并 push webgpt-sync。
+暂时不要更新 main。
+只有在：
+- single authoritative clock PASS；
+- canonical dataflow owner PASS；
+- Deadline / Phone / Commitment scheduler-native fixtures PASS；
+- Reference v0 regression PASS；
+之后，才讨论新的 main milestone snapshot。
+最终报告必须给出：
+- 新 HEAD；
+- 实际改动文件；
+- authoritative clock owner；
+- runtime boundary ordering；
+- persistent state nodes；
+- transient flow types；
+- WorldEvent → O → X → S trace 示例；
+- rejection trace 示例；
+- Deadline native fixture 结果；
+- Reference regression；
+- 已知尚未迁移部分；
+- 是否出现任何 W→S / hidden-W→gate / second-clock side channel。
+
+
+
+这次我会特别把一个判断钉死：
+“数据流”以后不是我们写论文时画的箭头。它就是 runtime 的程序模型。
+Scheduler 回答：
+什么时候传播。
+
+Dataflow 回答：
+什么变化传播到哪里。
+
+State dynamics 回答：
+收到变化后，持久节点怎么更新。
+
+DecisionGate 回答：
+什么时候值得重新做行为选择。
+
+这四个东西合起来，才是我们一直想做的 Character Dynamics。之前我们只有后两三个概念的雏形，却一直让 action-step 循环偷偷承担“时间系统”的工作，这才是这几天连续炸坑的根源。
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+ChatGPT 可能会出错。请核查重要信息。

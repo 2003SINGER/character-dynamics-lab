@@ -524,6 +524,18 @@ WorldOutcome World::execute(ActionType action) {
     return settle(action);
 }
 
+std::vector<WorldEvent> World::advance_runtime_by(int elapsed_minutes) {
+    if (elapsed_minutes < 0) throw std::invalid_argument("Runtime World advance cannot be negative");
+    const int before = total_minutes(time);
+    const int after = before + elapsed_minutes;
+    WorldOutcome transition;
+    advance_minutes(time, elapsed_minutes);
+    // Reuse the exact deterministic event source used by Reference v0, but
+    // emit events at their own runtime boundary rather than action completion.
+    apply_scheduled_events(*this, before, after, false, transition);
+    return transition.events;
+}
+
 std::string World::time_summary() const {
     return ::time_summary(time);
 }

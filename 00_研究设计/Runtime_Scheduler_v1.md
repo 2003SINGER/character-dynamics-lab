@@ -2,6 +2,10 @@
 
 状态：**最小时间内核已实现并通过 smoke；尚未迁移既有 reference fixtures。**
 
+当前 checkpoint：`TEMPORAL_KERNEL_PASS`；`FIRST_VERTICAL_SLICE_PASS`；
+`WORLD_RUNTIME_CLOCK_ADAPTER_PASS`（受控 slice）；完整 canonical owner、typed
+outcome flow 与 scheduler-native fixtures 仍未完成。
+
 ## 边界
 
 现有 C++ `Simulation` 是 **Action-Step Reference Engine v0**：一次决策直接
@@ -97,11 +101,17 @@ psychological model, or authorize a batch/evaluator migration.
 
 ## Migration order and acceptance
 
-1. Recreate the Deadline fixture natively, proving that a deadline can become
+1. Complete the canonical runtime owner and typed WorldEvent/ActionOutcome → O
+   incremental projection; do not hand-write event payloads in fixtures.
+2. Recreate the Deadline fixture natively, proving that a deadline can become
    observable during a long action rather than only after it completes.
-2. Recreate Phone and Commitment as scheduler-native fixtures with
+3. Recreate Phone and Commitment as scheduler-native fixtures with
    equivalent information-boundary evidence.
-3. Only then consider replacing any action-step batch or evaluator path.
+4. Only then consider replacing any action-step batch or evaluator path.
+
+Future scheduler boundaries must include state-threshold crossings (or a
+bounded numerical step when they cannot be predicted), in addition to world
+events, physical preemption, action completion and external input.
 
 At every stage, old and new outputs must have distinct provenance and run
 directories. `optimizer_train`, `internal_holdout`, Objective v0 and optimizer

@@ -11,6 +11,16 @@ Character Dynamics 的主产品是一个可持续运行的 NPC 角色动力学�
 1. NPC 在可结算世界中表现出更连贯、可响应、可恢复、彼此有差异的长期行为；
 2. 常规决策不必每一步重新调用大模型，从而降低模型调用次数、token、延迟和运行成本。
 
+Continuous Runtime v1 的正式计算范式是：**an event-driven incremental
+stateful dataflow runtime over one authoritative simulation timeline**。W/O/S/P
+与 RunningAction 是持久节点；正常运行传播的是 Delta-t、WorldEvent、
+ActionOutcome、Delta-O、X、StateDelta 与 DecisionGateReason，而不是每轮重算
+完整世界。Reference v0 保留其 action-step 语义作对照。
+
+三条 runtime flow 为：时间流 `Delta-t → W/S/action progress`；事件流
+`WorldEvent/Outcome → legal O projection → Delta-O → X → S impulse`；决策流
+`DecisionGate → A^O → pi → ActionIntent`。普通事件不自动运行 policy。
+
 核心运行链保持为：
 
 ```text

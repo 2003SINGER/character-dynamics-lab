@@ -28,3 +28,8 @@
 - After every verified project edit, create a local Git commit and push it to `webgpt-sync`. Do not leave verified changes only in the local worktree.
 - The default review loop is: WebGPT reviews the repository → user pastes the review → Codex applies verified changes → Codex commits and pushes to `webgpt-sync` → WebGPT reviews that branch again.
 - `main` is protected: never merge or push to `main` unless the user explicitly instructs that specific `main` push or merge. An instruction to commit, publish, sync, or push changes without naming `main` authorizes only `webgpt-sync`.
+
+## Scheduler-native runtime
+
+- Preserve Action-Step Reference v0. Runtime-native work must not add a second clock, let an action advance runtime time, shortcut `W → S`, or let a hidden W event open a character gate.
+- Treat W/O/S/P/RunningAction as persistent nodes and deltas/events as the flow. Scheduler-native fixtures use the canonical runtime bridge rather than manually synchronizing timestamps or projecting W facts.

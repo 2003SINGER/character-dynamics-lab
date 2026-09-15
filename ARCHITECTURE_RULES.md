@@ -4,7 +4,7 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 
 ## Runtime and experiment boundaries
 
-1. Keep one canonical semantic path for `O refresh → X/appraisal → S update → π/action decision → settlement`.
+1. Scheduler-native runtime uses one authoritative simulation clock and incremental dataflow: persistent `W/O/S/P/RunningAction` nodes receive `Delta-t`, WorldEvent/Outcome, Delta-O, X, and DecisionGate deltas. Reference v0 is explicitly exempt. In scheduler-native code, actions never advance the clock; W mirrors it only through `WorldRuntimeAdapter`; no hidden W event may open a character gate; and fixtures must call the canonical bridge rather than hand-writing timestamps or duplicating dataflow.
 2. Replay and experiments should call the runtime path or explicitly document every intentional difference and its semantic risk.
 3. `Simulation::verify()` is for invariants and regression checks. `Simulation::run_e0()` is for the fixed E0 control fixtures. Do not put cross-dataset experiments, adapters, or baselines there.
 4. Do not change runtime behavior under the pretext of repository cleanup.

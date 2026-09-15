@@ -97,6 +97,9 @@ struct World {
     // but callers cannot submit arbitrary primitives for execution.
     WorldOutcome settle(ActionType action);
     WorldOutcome settle(ActionType action, const std::string& target_object_id);
+    // Scheduler-native API: time is advanced only by the runtime clock. This
+    // leaves Reference v0's whole-action `settle` semantics unchanged.
+    std::vector<WorldEvent> advance_runtime_by(int elapsed_minutes);
     WorldOutcome execute(ActionType action);
     std::string time_summary() const;
     std::string summary() const;

@@ -4,6 +4,7 @@
 #include "runtime_scheduler.h"
 #include "state.h"
 #include "world.h"
+#include "world_runtime_adapter.h"
 
 #include <algorithm>
 #include <iostream>
@@ -29,25 +30,38 @@ int main() {
     Personality personality;
     CharacterState state;
     World world;
-    world.time.minute_of_day = 9 * 60;
+    world.time.minute_of_day = 9 * 60 + 20;
     Observation observation = refresh_observation({}, world, {});
-    RuntimeScheduler scheduler(9 * 60);
+    RuntimeScheduler scheduler(9 * 60 + 20);
+    WorldRuntimeAdapter world_runtime(world, scheduler);
     scheduler.start_action(ActionType::StudyFocused, "desk", 35, true);
-    scheduler.schedule({"study_message", 9 * 60 + 10, false, false});
+    // This is only a temporal boundary request. The actual message payload is
+    // produced by World::advance_runtime_by at its legacy deterministic 09:30
+    // schedule, not hand-written by this caller.
+    scheduler.schedule({"world_event_boundary", 9 * 60 + 30, false, false});
 
     // [09:00, 09:10): continuous S receives both elapsed duration and the
     // running study action, while policy remains closed at the weak event.
     const RuntimeBoundary message_boundary = scheduler.advance_to_next_boundary();
+    const std::vector<WorldEvent> world_events = world_runtime.advance_to_boundary(message_boundary, scheduler);
     const StateUpdate study_first_leg = advance_continuous_state(
         state, personality, &*message_boundary.action_after_boundary, message_boundary.elapsed_minutes);
-    world.unread_messages = 1; // W changes before its permitted O projection.
+    const auto message = std::find_if(world_events.begin(), world_events.end(), [](const WorldEvent& event) {
+        return event.id == "message-study-group";
+    });
+    if (message == world_events.end()) {
+        std::cerr << "World did not emit the scheduled message at the runtime boundary\n";
+        return 1;
+    }
     apply_observable_runtime_event(observation, "message.unread_count", "1",
-                                   "runtime_message_notification", "09:10");
+                                   "runtime_message_notification", world.time_summary());
     const Appraisal message_x = appraise(observation, state, personality);
     const StateUpdate message_impulse = update_state(state, message_x, personality, 0);
+    observation.updates_this_refresh.clear();
     clear_pending_appraisal_updates(observation);
 
     if (message_boundary.elapsed_minutes != 10 || message_boundary.decision_gate.open
+        || total_minutes(world.time) != scheduler.now_total_minutes()
         || study_first_leg.applied.fatigue <= 0.0
         || !has_known_fact(observation, "message.unread_count", "1")
         || !has_tag(message_x, "social_task_reminder")
@@ -59,14 +73,11 @@ int main() {
     // [09:10, 09:35): the action continues. At completion, W settlement and
     // its typed self-feedback occur before the gate authorizes the next pi.
     const RuntimeBoundary completion_boundary = scheduler.advance_to_next_boundary();
+    const std::vector<WorldEvent> completion_events = world_runtime.advance_to_boundary(completion_boundary, scheduler);
     const StateUpdate study_second_leg = advance_continuous_state(
         state, personality, &*completion_boundary.action_after_boundary, completion_boundary.elapsed_minutes);
-    const WorldOutcome completion = world.settle(ActionType::StudyFocused, "desk");
-    apply_self_action_feedback(observation, completion, world.time_summary());
-    observation = refresh_observation(std::move(observation), world, completion);
     const Appraisal completion_x = appraise(observation, state, personality);
     const StateUpdate completion_impulse = update_state(state, completion_x, personality, 0);
-    clear_pending_appraisal_updates(observation);
     const DecisionContext next_policy = decide(observation, state, personality);
     const CandidateAction* next = highest_probability(next_policy);
     if (next != nullptr) {
@@ -78,8 +89,8 @@ int main() {
         || !completion_boundary.decision_gate.open
         || completion_boundary.action_after_boundary->status != RunningActionStatus::Completed
         || study_second_leg.applied.fatigue <= 0.0
-        || !completion.accepted || completion.elapsed_minutes != 35
-        || world.time.minute_of_day != 9 * 60 + 35
+        || !completion_events.empty()
+        || total_minutes(world.time) != scheduler.now_total_minutes()
         || completion_impulse.applied.elapsed_minutes != 0
         || next == nullptr || !scheduler.running_action().has_value()) {
         std::cerr << "completion must settle W/O/X/S before the gated next policy action\n";

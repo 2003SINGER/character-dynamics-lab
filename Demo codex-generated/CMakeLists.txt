@@ -28,6 +28,7 @@ set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
     Src/scene_snapshot.cpp
     Src/world_primitive.cpp
     Src/world.cpp
+    Src/world_runtime_adapter.cpp
     Src/observation.cpp
     Src/appraisal.cpp
     Src/state.cpp
