@@ -4,7 +4,7 @@
 
 | Gate | 当前 | 证据/说明 |
 |---|---|---|
-| A1 canonical boundary/action owner | PARTIAL | `ContinuousRuntime::execute_next_boundary` 已统一推进、结算、投影与 gate；旧 vertical fixture 仍保留低层检查调用 |
+| A1 canonical boundary/action owner | PASS | vertical fixture 已完全改走 `ContinuousRuntime::execute_next_boundary`；低层调用仅保留在 scheduler unit smoke |
 | A2 boundary order | PASS | owner API 固定 continuous → completion/invalidation → O → X → S impulse → gate |
 | B1 authoritative clock | PASS | adapter 强制 W time == scheduler clock；reference/vertical smoke |
 | B2 automatic W boundary | PASS | owner 每步续订；scheduler dedupe |
@@ -14,10 +14,10 @@
 | C2/C3 completion provenance | PASS | actual elapsed 与 settlement clock advance 分离 |
 | C4 invalidation | PASS | `invalidate_running_action` → typed plan-invalidated outcome smoke |
 | D actor-local perception | PARTIAL | weather curtain、phone visibility 已守住；alarm/temperature/channel 仍需逐类验收 |
-| E typed rejection | PARTIAL | rejection provenance/constraint 已接通；scheduler rejection marker 尚未携带完整 WorldOutcome payload |
+| E typed rejection | PASS (v1 payload) | scheduler rejection event 携带 `RuntimeRejection` typed payload，并在下一 transition 进入 O；仍未建模完整 WorldOutcome 对象跨边界序列化 |
 | F continuous/impulse | PASS (v1 adapter) | `advance_continuous_state` 与 `apply_appraisal_impulse` 分离；chunk equivalence smoke |
 | G decision gate | PARTIAL | weak event continue、threshold opportunity 已有；完整 hidden-event gate matrix 待补 |
-| H docs/regression | PARTIAL | 6/6 CTest 通过；顶层 Vision/TODO 与最终 closure report 仍待统一审计 |
+| H docs/regression | PARTIAL | 6/6 CTest 通过，矩阵与顶层 Vision/TODO 已同步；仍需逐项独立 acceptance binaries 与最终审计 |
 
 ## Executable evidence
 
