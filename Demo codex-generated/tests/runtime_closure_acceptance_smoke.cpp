@@ -66,6 +66,23 @@ int main() {
     if (!invalid_step.outcome || !invalid_step.outcome->plan_invalidated
         || invalid_step.runtime.boundary.decision_gate.reasons.empty()) return 8;
 
+    // B4: bounded steps expose a deterministic need-threshold opportunity.
+    World threshold_world;
+    threshold_world.time.minute_of_day = 1;
+    RuntimeScheduler threshold_scheduler(1, 60);
+    Observation threshold_observation = refresh_observation({}, threshold_world, {});
+    ContinuousRuntime threshold_runtime(threshold_scheduler, threshold_world, threshold_observation);
+    if (!threshold_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 9;
+    CharacterState threshold_state;
+    bool saw_threshold = false;
+    for (int step = 0; step < 8 && threshold_scheduler.running_action().has_value(); ++step) {
+        const RuntimeExecutionResult tick = threshold_runtime.execute_next_boundary(threshold_state, personality);
+        for (const DecisionGateReason reason : tick.runtime.boundary.decision_gate.reasons) {
+            if (reason == DecisionGateReason::NeedThresholdCrossed) saw_threshold = true;
+        }
+    }
+    if (!saw_threshold) return 10;
+
     std::cout << "runtime closure acceptance smoke OK\n";
     return 0;
 }

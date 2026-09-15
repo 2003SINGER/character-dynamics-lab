@@ -34,9 +34,15 @@ ContinuousRuntimeStep ContinuousRuntime::advance_next_boundary() {
 RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& state, const Personality& personality) {
     RuntimeExecutionResult result;
     result.runtime = advance_next_boundary();
+    const CharacterState before_continuous = state;
     const auto& action = result.runtime.boundary.action_after_boundary;
     result.continuous_state = advance_continuous_state(state, personality,
         action.has_value() ? &*action : nullptr, result.runtime.boundary.elapsed_minutes);
+    if ((before_continuous.hunger < 0.40 && state.hunger >= 0.40)
+        || (before_continuous.bathroom_urge < 0.40 && state.bathroom_urge >= 0.40)) {
+        result.runtime.boundary.decision_gate.open = true;
+        result.runtime.boundary.decision_gate.reasons.push_back(DecisionGateReason::NeedThresholdCrossed);
+    }
     if (action.has_value() && action->status == RunningActionStatus::Completed) {
         result.outcome = world_runtime_.world().settle_runtime_completion(
             action->action, action->target_object_id, action->elapsed_minutes);
@@ -53,7 +59,9 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     }
     result.appraisal = appraise(observation_, state, personality);
     result.impulse_state = apply_appraisal_impulse(state, result.appraisal, personality);
-    if (result.runtime.boundary.decision_gate.open) {
+    if (result.runtime.boundary.decision_gate.open
+        && (result.outcome.has_value() || !action.has_value()
+            || action->status != RunningActionStatus::Running)) {
         result.decision = decide(observation_, state, personality);
         for (const CandidateAction& candidate : result.decision.candidates) {
             if (candidate.probability > 0.0) {
