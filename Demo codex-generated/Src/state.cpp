@@ -190,6 +190,13 @@ StateUpdate advance_continuous_state(CharacterState& state,
     return update;
 }
 
+StateUpdate apply_appraisal_impulse(CharacterState& state,
+                                    const Appraisal& appraisal,
+                                    const Personality& personality,
+                                    const ParameterConfig& config) {
+    return update_state(state, appraisal, personality, 0, config);
+}
+
 std::string state_summary(const CharacterState& state) {
     std::ostringstream output;
     output << "S{";

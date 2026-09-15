@@ -74,6 +74,7 @@ public:
     void schedule(ScheduledRuntimeEvent event);
     void start_action(ActionType action, std::string target_object_id,
                       int duration_minutes, bool interruptible = true);
+    void invalidate_running_action();
     // Settlement failures are emitted into the next one-minute transition,
     // rather than allowing another decision at the same simulation instant.
     void reject_action(ActionType action, std::string target_object_id);

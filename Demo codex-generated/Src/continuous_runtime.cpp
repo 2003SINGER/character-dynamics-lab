@@ -19,6 +19,10 @@ WorldOutcome ContinuousRuntime::submit_action_intent(ActionType action, const st
     return validation;
 }
 
+void ContinuousRuntime::invalidate_running_action() {
+    scheduler_.invalidate_running_action();
+}
+
 ContinuousRuntimeStep ContinuousRuntime::advance_next_boundary() {
     const RuntimeBoundary boundary = scheduler_.advance_to_next_boundary();
     const std::vector<WorldEvent> events = world_runtime_.advance_to_boundary(boundary, scheduler_);
@@ -39,7 +43,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary());
     }
     result.appraisal = appraise(observation_, state, personality);
-    result.impulse_state = update_state(state, result.appraisal, personality, 0);
+    result.impulse_state = apply_appraisal_impulse(state, result.appraisal, personality);
     if (result.runtime.boundary.decision_gate.open) {
         result.decision = decide(observation_, state, personality);
         for (const CandidateAction& candidate : result.decision.candidates) {

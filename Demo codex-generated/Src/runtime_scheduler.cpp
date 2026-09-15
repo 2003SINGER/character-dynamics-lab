@@ -60,6 +60,11 @@ void RuntimeScheduler::start_action(ActionType action, std::string target_object
                        0, interruptible, RunningActionStatus::Running};
 }
 
+void RuntimeScheduler::invalidate_running_action() {
+    if (!running_action_.has_value()) throw std::logic_error("Cannot invalidate without a running action");
+    schedule({"action_invalidated", now_total_minutes_ + 1, true, true});
+}
+
 void RuntimeScheduler::reject_action(ActionType action, std::string target_object_id) {
     if (running_action_.has_value()) {
         throw std::logic_error("Cannot reject a new action while another action is running");

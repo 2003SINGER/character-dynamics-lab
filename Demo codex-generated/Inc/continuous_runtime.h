@@ -29,6 +29,7 @@ public:
     bool schedule_next_world_boundary();
     WorldOutcome submit_action_intent(ActionType action, const std::string& target_object_id,
                                       int duration_minutes, bool interruptible = true);
+    void invalidate_running_action();
     ContinuousRuntimeStep advance_next_boundary();
     RuntimeExecutionResult execute_next_boundary(CharacterState& state, const Personality& personality);
 

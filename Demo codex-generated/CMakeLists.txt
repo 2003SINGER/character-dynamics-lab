@@ -92,6 +92,11 @@ target_link_libraries(character_dynamics_runtime_vertical_slice_smoke PRIVATE ch
 add_test(NAME character_dynamics_runtime_vertical_slice_smoke
          COMMAND character_dynamics_runtime_vertical_slice_smoke)
 
+add_executable(character_dynamics_runtime_closure_acceptance_smoke tests/runtime_closure_acceptance_smoke.cpp)
+target_link_libraries(character_dynamics_runtime_closure_acceptance_smoke PRIVATE character_dynamics_runtime)
+add_test(NAME character_dynamics_runtime_closure_acceptance_smoke
+         COMMAND character_dynamics_runtime_closure_acceptance_smoke)
+
 add_executable(character_dynamics_replay_core
     Src/replay_core_cli.cpp
     Src/state.cpp

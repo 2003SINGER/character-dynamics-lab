@@ -46,6 +46,10 @@ StateUpdate advance_continuous_state(CharacterState& state,
                                      const RunningAction* running_action,
                                      int elapsed_minutes,
                                      const ParameterConfig& config = ParameterConfig::defaults());
+StateUpdate apply_appraisal_impulse(CharacterState& state,
+                                    const Appraisal& appraisal,
+                                    const Personality& personality,
+                                    const ParameterConfig& config = ParameterConfig::defaults());
 std::string state_summary(const CharacterState& state);
 std::string state_delta_summary(const StateDelta& delta);
 std::string state_update_summary(const StateUpdate& update);
