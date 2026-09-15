@@ -65,7 +65,8 @@ void RuntimeScheduler::invalidate_running_action() {
     schedule({"action_invalidated", now_total_minutes_ + 1, true, true});
 }
 
-void RuntimeScheduler::reject_action(ActionType action, std::string target_object_id) {
+void RuntimeScheduler::reject_action(ActionType action, std::string target_object_id,
+                                     std::optional<RuntimeRejection> rejection) {
     if (running_action_.has_value()) {
         throw std::logic_error("Cannot reject a new action while another action is running");
     }
@@ -73,7 +74,7 @@ void RuntimeScheduler::reject_action(ActionType action, std::string target_objec
     // and reacts to it at the next runtime transition. The payload is typed by
     // the integrating World/O layer; this core records the scheduling rule.
     schedule({"action_rejected:" + to_string(action) + ":" + target_object_id,
-              now_total_minutes_ + 1, true, false});
+              now_total_minutes_ + 1, true, false, std::move(rejection)});
 }
 
 RuntimeBoundary RuntimeScheduler::advance_to_next_boundary() {

@@ -21,11 +21,19 @@ struct RunningAction {
     RunningActionStatus status = RunningActionStatus::Running;
 };
 
+struct RuntimeRejection {
+    ActionType action = ActionType::Idle;
+    std::string target_object_id;
+    int failure_reason = 0;
+    std::string provenance;
+};
+
 struct ScheduledRuntimeEvent {
     std::string id;
     int occurs_at_total_minutes = 0;
     bool opens_decision_gate = false;
     bool interrupts_running_action = false;
+    std::optional<RuntimeRejection> rejection;
 };
 
 enum class DecisionGateReason {
@@ -77,7 +85,8 @@ public:
     void invalidate_running_action();
     // Settlement failures are emitted into the next one-minute transition,
     // rather than allowing another decision at the same simulation instant.
-    void reject_action(ActionType action, std::string target_object_id);
+    void reject_action(ActionType action, std::string target_object_id,
+                       std::optional<RuntimeRejection> rejection = std::nullopt);
     RuntimeBoundary advance_to_next_boundary();
 
 private:

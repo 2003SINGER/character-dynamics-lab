@@ -26,7 +26,11 @@ int main() {
     world.wallet = 0;
     const WorldOutcome rejected = runtime.submit_action_intent(ActionType::ShopOnPhone, "phone", 10);
     if (rejected.accepted || rejected.failure_reason != RejectionReason::ResourceInsufficient
-        || rejected.provenance.empty() || observation.action_constraints.empty()) return 3;
+        || rejected.provenance.empty()) return 3;
+    CharacterState rejection_state;
+    Personality rejection_personality;
+    const RuntimeExecutionResult rejection_step = runtime.execute_next_boundary(rejection_state, rejection_personality);
+    if (observation.action_constraints.empty() || !rejection_step.runtime.boundary.decision_gate.open) return 4;
 
     // D3/D4: projection respects curtain and uses actual unread state.
     world.current_room().curtain_open = false;
@@ -35,11 +39,11 @@ int main() {
     const std::string weather_value_before = weather_before ? weather_before->value : "";
     apply_world_events(observation, {WorldEvent{"weather-rain", "rain", "world/weather", 1}}, world, {}, "09:25");
     const ObservationFact* weather_after = find_fact(observation, "outside.weather");
-    if ((weather_after ? weather_after->value : "") != weather_value_before) return 4;
+    if ((weather_after ? weather_after->value : "") != weather_value_before) return 5;
     world.current_room().curtain_open = true;
     apply_world_events(observation, {WorldEvent{"message-study-group", "message", "phone", 1}}, world, {}, "09:25");
     const ObservationFact* unread = find_fact(observation, "message.unread_count");
-    if (!unread || unread->value != "3") return 5;
+    if (!unread || unread->value != "3") return 6;
 
     // F2: deterministic continuous dynamics is chunk-equivalent.
     Personality personality;
@@ -51,7 +55,7 @@ int main() {
     advance_continuous_state(three_chunks, personality, &action, 10);
     advance_continuous_state(three_chunks, personality, &action, 10);
     if (std::abs(one_chunk.fatigue - three_chunks.fatigue) > 1e-9
-        || std::abs(one_chunk.screen_strain - three_chunks.screen_strain) > 1e-9) return 6;
+        || std::abs(one_chunk.screen_strain - three_chunks.screen_strain) > 1e-9) return 7;
 
     // C4/G: invalidation is a distinct terminal outcome on the next boundary.
     World invalid_world;
@@ -59,12 +63,12 @@ int main() {
     RuntimeScheduler invalid_scheduler(9 * 60);
     Observation invalid_observation = refresh_observation({}, invalid_world, {});
     ContinuousRuntime invalid_runtime(invalid_scheduler, invalid_world, invalid_observation);
-    if (!invalid_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 7;
+    if (!invalid_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 8;
     invalid_runtime.invalidate_running_action();
     CharacterState invalid_state;
     const RuntimeExecutionResult invalid_step = invalid_runtime.execute_next_boundary(invalid_state, personality);
     if (!invalid_step.outcome || !invalid_step.outcome->plan_invalidated
-        || invalid_step.runtime.boundary.decision_gate.reasons.empty()) return 8;
+        || invalid_step.runtime.boundary.decision_gate.reasons.empty()) return 9;
 
     // B4: bounded steps expose a deterministic need-threshold opportunity.
     World threshold_world;
@@ -72,7 +76,7 @@ int main() {
     RuntimeScheduler threshold_scheduler(1, 60);
     Observation threshold_observation = refresh_observation({}, threshold_world, {});
     ContinuousRuntime threshold_runtime(threshold_scheduler, threshold_world, threshold_observation);
-    if (!threshold_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 9;
+    if (!threshold_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 10;
     CharacterState threshold_state;
     bool saw_threshold = false;
     for (int step = 0; step < 8 && threshold_scheduler.running_action().has_value(); ++step) {
@@ -81,7 +85,7 @@ int main() {
             if (reason == DecisionGateReason::NeedThresholdCrossed) saw_threshold = true;
         }
     }
-    if (!saw_threshold) return 10;
+    if (!saw_threshold) return 11;
 
     std::cout << "runtime closure acceptance smoke OK\n";
     return 0;

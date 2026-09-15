@@ -11,8 +11,8 @@ WorldOutcome ContinuousRuntime::submit_action_intent(ActionType action, const st
                                                      int duration_minutes, bool interruptible) {
     WorldOutcome validation = world_runtime_.validate_runtime_start(action, target_object_id);
     if (!validation.accepted) {
-        scheduler_.reject_action(action, target_object_id);
-        apply_self_action_feedback(observation_, validation, world_runtime_.time_summary());
+        scheduler_.reject_action(action, target_object_id, RuntimeRejection{
+            action, target_object_id, static_cast<int>(validation.failure_reason), validation.provenance});
         return validation;
     }
     scheduler_.start_action(action, target_object_id, duration_minutes, interruptible);
@@ -27,6 +27,15 @@ ContinuousRuntimeStep ContinuousRuntime::advance_next_boundary() {
     const RuntimeBoundary boundary = scheduler_.advance_to_next_boundary();
     const std::vector<WorldEvent> events = world_runtime_.advance_to_boundary(boundary, scheduler_);
     apply_world_events(observation_, events, world_runtime_.world(), {}, world_runtime_.time_summary());
+    for (const ScheduledRuntimeEvent& event : boundary.events) {
+        if (!event.rejection.has_value()) continue;
+        WorldOutcome rejection;
+        rejection.action = event.rejection->action;
+        rejection.target_object_id = event.rejection->target_object_id;
+        rejection.failure_reason = static_cast<RejectionReason>(event.rejection->failure_reason);
+        rejection.provenance = event.rejection->provenance;
+        apply_self_action_feedback(observation_, rejection, world_runtime_.time_summary());
+    }
     schedule_next_world_boundary();
     return {boundary, events};
 }
