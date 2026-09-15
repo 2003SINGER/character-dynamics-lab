@@ -1,0 +1,386 @@
+看了。最新 `webgpt-sync` HEAD 是 **`ebf698e feat: settle runtime action completion without time advance`**。这一刀是对的：上一轮我指出的“RunningAction 完成了但 W 根本没结算”已经补回来了。
+
+现在新增的 `World::settle_runtime_completion()` 复用同一个 `settle_impl()`，但 `advance_clock=false` 时会把 `AdvanceSimulationTime` primitive 从实际结算中移除；动作效果、counter、task effort、typed `WorldOutcome` 仍然由 W 结算。于是这条 ownership 终于真的成立：
+
+```text
+时间推进 → Scheduler
+动作效果 → W
+```
+
+而不是原来的 `action = 效果 + 顺便推时间`。 
+
+vertical slice 也重新闭上了：
+
+```text
+RunningAction完成
+→ settle_runtime_completion
+→ WorldOutcome
+→ self feedback → O
+→ X
+→ S impulse
+→ π
+→ next RunningAction
+```
+
+而且 task effort 确实重新产生了。
+
+所以之前的：
+
+> “统一了时间，但动作完成不结算”
+
+**已经修掉。**
+
+---
+
+但我继续往下看，现在真正该修的不是 Deadline，而是 **Action 生命周期 + canonical dataflow owner**。
+
+最严重的是这个：
+
+## 现在没有 start validation
+
+当前还是：
+
+```cpp
+scheduler.start_action(...)
+```
+
+直接生成 `RunningAction`。
+
+`RuntimeScheduler::start_action()` 完全不问 W：
+
+```text
+ActionIntent
+→ 直接 Running
+```
+
+
+
+然后过了比如 35 分钟，才调用：
+
+```cpp
+world.settle_runtime_completion(...)
+```
+
+而这个函数内部又重新：
+
+```cpp
+if (!can_execute(plan.action)) reject;
+```
+
+
+
+于是理论上现在可以：
+
+```text
+09:00
+角色选择一个实际上非法的动作
+
+↓ 没有 W validation
+
+09:00–09:35
+RunningAction 正常跑了 35 分钟
+S 也按“正在执行这个动作”演化了
+
+09:35
+W 才说：
+“不行，这动作其实不能做”
+```
+
+这肯定不对。
+
+正确生命周期必须变成：
+
+```text
+π
+↓
+ActionIntent
+↓
+W.validate_start()
+      │
+ ┌────┴─────┐
+ │          │
+reject    accept
+ │          │
+Outcome   RunningAction
+ │          │
+O/X/S      时间推进
+```
+
+然后 **completion settlement 不应该再承担“这个动作一开始是否合法”的职责**。
+
+如果中间 W 条件变化让动作不能继续，那是：
+
+```text
+RunningAction
+→ PlanInvalidated / PhysicalPreemption
+→ typed outcome
+```
+
+而不是完成时突然重新审判开始条件。
+
+这个是当前第一优先级。
+
+---
+
+第二个问题也很关键：
+
+## WorldEvent 仍然不知道怎么自动成为 scheduler boundary
+
+现在 smoke 是：
+
+```cpp
+scheduler.schedule({
+    "world_event_boundary",
+    09:30,
+    false,
+    false
+});
+```
+
+然后到了 09:30，`World::advance_runtime_by()` 才真的产生 `message-study-group`。
+
+这比以前“手工制造 message”已经好很多。
+
+但问题是：
+
+> **谁告诉 scheduler 09:30 有世界事件？**
+
+还是测试代码自己。
+
+也就是说现在是：
+
+```text
+测试作者：
+“我知道 W 09:30 有消息，所以请 scheduler 09:30 停一下。”
+
+scheduler → 09:30
+
+World：
+“对，我这里确实产生了消息。”
+```
+
+真正 runtime 应该反过来：
+
+```text
+World/EventSource:
+next event = 09:30
+
+RunningAction:
+completion = 09:55
+
+State:
+next threshold = 09:47
+
+Scheduler:
+min(09:30,09:47,09:55)
+= 09:30
+```
+
+所以最终 boundary sources 应该真正汇总：
+
+```text
+next world event
+next action completion
+next state threshold
+external input
+hard preemption
+```
+
+而不是 fixture 手工 schedule 世界本来自己已经知道的事件。
+
+否则随机世界事件依然没有真正接进时间骨架。
+
+---
+
+第三个问题：**typed WorldEvent → O 仍然是手工投影。**
+
+现在 W 已经真的发出了：
+
+```text
+WorldEvent{
+    id = message-study-group
+}
+```
+
+但 smoke 随后还是：
+
+```cpp
+apply_observable_runtime_event(
+    observation,
+    "message.unread_count",
+    "1",
+    ...
+);
+```
+
+
+
+换句话说：
+
+```text
+WorldEvent
+↓
+测试代码自己理解它是什么意思
+↓
+手写 key/value
+↓
+O
+```
+
+还没有：
+
+```text
+WorldEvent
+↓
+Perception / Observation Projector
+↓
+合法 ΔO
+↓
+persistent O
+```
+
+所以我们真正的数据流还差这一段。
+
+---
+
+还有两个次一级问题也已经冒头了。
+
+`settle_runtime_completion()` 当前明确让：
+
+```text
+completion.elapsed_minutes == 0
+```
+
+测试甚至把它写成 invariant。
+
+从“该函数不负责推进时间”角度这没错，但从 `WorldOutcome` provenance 看会很歧义：
+
+> 一个持续 35 分钟并成功完成的动作，outcome 却写 elapsed=0。
+
+以后最好区分：
+
+```text
+time_advanced_by_settlement = 0
+```
+
+和：
+
+```text
+action_elapsed_minutes = 35
+```
+
+否则 trace 会误导 evaluator。
+
+而且 runtime study settlement 现在：
+
+```cpp
+action_elapsed =
+    action_definition(action).default_duration_minutes;
+```
+
+
+
+所以假设未来：
+
+```text
+RunningAction StudyFocused
+planned_duration = 50min
+```
+
+完成后 W 还是按默认 35min 算 effort。
+
+这说明 `WorldOutcome` / completion settlement 最终应该吃真正的 RunningAction completion context，而不是重新从 `ActionType` 猜时长。
+
+---
+
+## 文档还没完全收束
+
+这个问题依然存在。
+
+`完整机制说明_v0.md` 到最新 HEAD 仍然把系统写成：
+
+```text
+事件/时间
+→ W
+→ O
+→ X
+→ S
+→ D
+→ π
+→ action
+→ W
+→ 回到下一轮
+```
+
+并且还声称自己是“完整机制的唯一维护位置”。
+
+所以我们刚才花大力气确立的：
+
+> authoritative timeline + incremental stateful dataflow
+
+**还没有真正进入这个最高层 source-of-truth。**
+
+这必须修。
+
+---
+
+因此现在我会把状态定成：
+
+```text
+single authoritative clock             PASS
+World Δt advancement                    PASS
+runtime completion settlement           PASS
+time/effect ownership separation        PASS
+
+ActionIntent → W start validation       MISSING
+World event → automatic boundary        MISSING
+typed WorldEvent → legal ΔO             MISSING
+typed ActionOutcome → unified ΔO        PARTIAL
+canonical ContinuousRuntime owner       MISSING
+actual action elapsed provenance        MISSING
+state-threshold boundary                MISSING
+top-level mechanism docs unified        NOT YET
+```
+
+**所以仍然别迁 Deadline。**
+
+下一刀应该一次把三件紧密相连的东西做掉：
+
+```text
+ContinuousRuntime owner
+        │
+        ├─ 查询 next World boundary
+        ├─ Scheduler advance
+        ├─ World Δt
+        ├─ S continuous
+        ├─ typed event → O projector
+        ├─ X → S impulse
+        │
+DecisionGate
+        ↓
+π
+        ↓
+ActionIntent
+        ↓
+W validate_start
+   /          \
+reject        accept
+ ↓             ↓
+Outcome    RunningAction
+```
+
+然后 completion：
+
+```text
+RunningAction completed
+↓
+W.settle_runtime_completion(actual RunningAction context)
+↓
+ActionOutcome
+↓
+O → X → S
+```
+
+**这条闭环一旦出来，我才会认为我们终于有了真正的 Character Dynamics Continuous Runtime v1，而不是一组已经逐渐正确的 runtime 零件。**
+
+这轮提交没走偏，反而是在稳步补我们刚刚挖出来的底层坑；但 canonical owner 这一刀现在已经不能再拖了。

@@ -44,6 +44,8 @@ struct WorldOutcome {
     std::string target_object_id;
     RejectionReason failure_reason = RejectionReason::None;
     int elapsed_minutes = 0;
+    int action_elapsed_minutes = 0;
+    int time_advanced_by_settlement = 0;
     bool observation_frozen_during_action = false;
     bool woke_early = false;
     std::string task_id;
@@ -97,7 +99,9 @@ struct World {
     // but callers cannot submit arbitrary primitives for execution.
     WorldOutcome settle(ActionType action);
     WorldOutcome settle(ActionType action, const std::string& target_object_id);
-    WorldOutcome settle_runtime_completion(ActionType action, const std::string& target_object_id);
+    WorldOutcome validate_runtime_start(ActionType action, const std::string& target_object_id) const;
+    WorldOutcome settle_runtime_completion(ActionType action, const std::string& target_object_id,
+                                           int action_elapsed_minutes);
     // Scheduler-native API: time is advanced only by the runtime clock. This
     // leaves Reference v0's whole-action `settle` semantics unchanged.
     std::vector<WorldEvent> advance_runtime_by(int elapsed_minutes);
@@ -106,5 +110,6 @@ struct World {
     std::string summary() const;
 
 private:
-    WorldOutcome settle_impl(ActionType action, const std::string& target_object_id, bool advance_clock);
+    WorldOutcome settle_impl(ActionType action, const std::string& target_object_id, bool advance_clock,
+                             int runtime_action_elapsed_minutes = -1);
 };

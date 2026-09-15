@@ -58,11 +58,14 @@ called once per clock minute. `DecisionGate` only opens for an action
 completion, rejection, a strong external event, interruption, a need
 threshold, commitment reconsideration, or plan invalidation.
 
-`World::settle_runtime_completion` is the scheduler-native counterpart of the
-Reference v0 whole-action settle: it validates and applies action effects,
+`World::validate_runtime_start` is the scheduler-native start gate: policy's
+intent must be accepted by W before a `RunningAction` is created. A later
+`World::settle_runtime_completion` applies action effects,
 counters, task effort and typed `WorldOutcome`, but never advances `World.time`
-or scans interval events. The scheduler owns elapsed time; W owns completion
-effects.
+or scans interval events. Its outcome records both `action_elapsed_minutes`
+and `time_advanced_by_settlement`, so provenance does not confuse runtime
+duration with settlement clock movement. The scheduler owns elapsed time; W
+owns completion effects.
 
 ## v1 executable evidence
 
@@ -79,7 +82,10 @@ agnostic. Its smoke test demonstrates:
    opens the next decision gate, so there cannot be a second decision at the
    same clock instant.
 
-This core deliberately records scheduling only. A future integration must
+This core deliberately records scheduling only. The runtime bridge now also
+provides `World::validate_runtime_start` and a typed `apply_world_events`
+projector; fixtures must use these APIs rather than duplicating W's event
+meaning in key/value writes. A future integration must
 give the rejection event its typed `WorldOutcome` payload and then project it
 to O, where the existing `ActionConstraintBelief` can remain the persistent
 actor-local consequence. It must not make `W -> S` a shortcut or copy hidden

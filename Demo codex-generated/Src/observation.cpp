@@ -421,6 +421,26 @@ void apply_observable_runtime_event(Observation& observation,
     write_fact(observation, std::move(key), std::move(value), std::move(source), observed_at);
 }
 
+void apply_world_events(Observation& observation, const std::vector<WorldEvent>& events,
+                        const std::string& observed_at) {
+    for (const WorldEvent& event : events) {
+        if (event.id == "message-study-group") {
+            apply_observable_runtime_event(observation, "message.unread_count", "1",
+                                           "world_event:message-study-group", observed_at);
+        } else if (event.id == "task-reminder") {
+            apply_observable_runtime_event(observation, "task.reminder", "1",
+                                           "world_event:task-reminder", observed_at);
+        } else if (event.id == "task-deadline") {
+            apply_observable_runtime_event(observation, "task.deadline_passed", "1",
+                                           "world_event:task-deadline", observed_at);
+        } else if (event.id == "weather-rain" || event.id == "weather-clear") {
+            apply_observable_runtime_event(observation, "world.weather",
+                                           event.id == "weather-rain" ? "rain" : "clear",
+                                           "world_event:" + event.id, observed_at);
+        }
+    }
+}
+
 bool observation_knows_action(const Observation& observation, ActionType action) {
     return std::find(observation.known_actions.begin(), observation.known_actions.end(), action)
         != observation.known_actions.end();

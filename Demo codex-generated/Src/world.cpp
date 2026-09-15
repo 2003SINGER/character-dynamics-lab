@@ -371,11 +371,38 @@ WorldOutcome World::settle(ActionType action, const std::string& target_object_i
     return settle_impl(action, target_object_id, true);
 }
 
-WorldOutcome World::settle_runtime_completion(ActionType action, const std::string& target_object_id) {
-    return settle_impl(action, target_object_id, false);
+WorldOutcome World::validate_runtime_start(ActionType action, const std::string& target_object_id) const {
+    WorldOutcome outcome;
+    outcome.action = action;
+    outcome.target_object_id = target_object_id;
+    const CharacterActionPlan plan = expand_action(action);
+    if (!target_object_id.empty()) {
+        const Object* target = nullptr;
+        for (const Object& candidate : current_room().objects) {
+            if (candidate.id == target_object_id) { target = &candidate; break; }
+        }
+        if (target == nullptr) { outcome.failure_reason = RejectionReason::TargetAbsent; return outcome; }
+        if (!provides_action(*target, plan.action)) { outcome.failure_reason = RejectionReason::PreconditionFailed; return outcome; }
+        if (!target->usable) { outcome.failure_reason = RejectionReason::TargetUnusable; return outcome; }
+    }
+    if (!can_execute(plan.action)) {
+        outcome.failure_reason = (plan.action == ActionType::ShopOnPhone && wallet < 30)
+            ? RejectionReason::ResourceInsufficient : RejectionReason::PreconditionFailed;
+        return outcome;
+    }
+    outcome.accepted = true;
+    return outcome;
 }
 
-WorldOutcome World::settle_impl(ActionType action, const std::string& target_object_id, bool advance_clock) {
+WorldOutcome World::settle_runtime_completion(ActionType action, const std::string& target_object_id,
+                                               int action_elapsed_minutes) {
+    WorldOutcome outcome = settle_impl(action, target_object_id, false, action_elapsed_minutes);
+    outcome.action_elapsed_minutes = action_elapsed_minutes;
+    return outcome;
+}
+
+WorldOutcome World::settle_impl(ActionType action, const std::string& target_object_id, bool advance_clock,
+                                int runtime_action_elapsed_minutes) {
     // Re-expand inside W immediately before settlement. This deliberately
     // makes CharacterActionPlan a trace/provenance object rather than a
     // capability that another module can forge to mutate W.
@@ -508,7 +535,10 @@ WorldOutcome World::settle_impl(ActionType action, const std::string& target_obj
             : (plan.action == ActionType::StudyFocused
                 ? task->desk_base_effort
                 : task->desk_base_effort * 0.60);
-        const int action_elapsed = advance_clock ? outcome.elapsed_minutes : action_definition(plan.action).default_duration_minutes;
+        const int action_elapsed = advance_clock
+            ? outcome.elapsed_minutes
+            : (runtime_action_elapsed_minutes >= 0 ? runtime_action_elapsed_minutes
+                                                   : action_definition(plan.action).default_duration_minutes);
         const double duration_factor = static_cast<double>(action_elapsed)
             / static_cast<double>(action_definition(plan.action).default_duration_minutes);
         outcome.task_session_interrupted = action_elapsed
@@ -531,6 +561,11 @@ WorldOutcome World::settle_impl(ActionType action, const std::string& target_obj
             append_event(outcome, {"task-completed", "coursework has been completed", "world/task", total_minutes(time)});
         }
     }
+    outcome.action_elapsed_minutes = advance_clock ? outcome.elapsed_minutes
+                                                   : (runtime_action_elapsed_minutes >= 0
+                                                          ? runtime_action_elapsed_minutes
+                                                          : action_definition(plan.action).default_duration_minutes);
+    outcome.time_advanced_by_settlement = advance_clock ? outcome.elapsed_minutes : 0;
     return outcome;
 }
 
