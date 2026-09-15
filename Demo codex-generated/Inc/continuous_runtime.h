@@ -25,7 +25,8 @@ struct RuntimeExecutionResult {
 // State integration and policy remain explicit callers at this stage.
 class ContinuousRuntime {
 public:
-    ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation);
+    ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation,
+                      InformationAccess access = {});
     bool schedule_next_world_boundary();
     WorldOutcome submit_action_intent(ActionType action, const std::string& target_object_id,
                                       int duration_minutes, bool interruptible = true);
@@ -37,4 +38,5 @@ private:
     RuntimeScheduler& scheduler_;
     WorldRuntimeAdapter world_runtime_;
     Observation& observation_;
+    InformationAccess access_;
 };

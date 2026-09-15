@@ -1,7 +1,8 @@
 #include "continuous_runtime.h"
 
-ContinuousRuntime::ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation)
-    : scheduler_(scheduler), world_runtime_(world, scheduler), observation_(observation) {}
+ContinuousRuntime::ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation,
+                                     InformationAccess access)
+    : scheduler_(scheduler), world_runtime_(world, scheduler), observation_(observation), access_(access) {}
 
 bool ContinuousRuntime::schedule_next_world_boundary() {
     return world_runtime_.schedule_next_world_boundary(scheduler_);
@@ -27,7 +28,7 @@ void ContinuousRuntime::invalidate_running_action() {
 ContinuousRuntimeStep ContinuousRuntime::advance_next_boundary() {
     const RuntimeBoundary boundary = scheduler_.advance_to_next_boundary();
     const std::vector<WorldEvent> events = world_runtime_.advance_to_boundary(boundary, scheduler_);
-    apply_world_events(observation_, events, world_runtime_.world(), {}, world_runtime_.time_summary());
+    apply_world_events(observation_, events, world_runtime_.world(), access_, world_runtime_.time_summary());
     for (const ScheduledRuntimeEvent& event : boundary.events) {
         if (!event.rejection.has_value()) continue;
         WorldOutcome rejection;
