@@ -433,11 +433,23 @@ void apply_world_events(Observation& observation, const std::vector<WorldEvent>&
             apply_observable_runtime_event(observation, "message.unread_count", std::to_string(world.unread_messages),
                                            "world_event:message-study-group", observed_at);
         } else if (event.id == "task-reminder") {
+            if (!access.task_deadline_observable) continue;
             apply_observable_runtime_event(observation, "task.reminder", "1",
                                            "world_event:task-reminder", observed_at);
         } else if (event.id == "task-deadline") {
+            if (!access.task_deadline_observable) continue;
             apply_observable_runtime_event(observation, "task.deadline_passed", "1",
                                            "world_event:task-deadline", observed_at);
+        } else if (event.id == "alarm-rings") {
+            apply_observable_runtime_event(observation, "room.alarm", "ringing",
+                                           "world_event:alarm-rings", observed_at);
+        } else if (event.id == "room-temperature-shift") {
+            apply_observable_runtime_event(observation, "room.temperature_celsius",
+                                           std::to_string(world.current_room().temperature_celsius),
+                                           "world_event:room-temperature-shift", observed_at);
+        } else if (event.id == "evening") {
+            apply_observable_runtime_event(observation, "world.time_phase", "evening",
+                                           "world_event:evening", observed_at);
         } else if (event.id == "weather-rain" || event.id == "weather-clear") {
             if (!world.current_room().curtain_open) continue;
             apply_observable_runtime_event(observation, "outside.weather",
