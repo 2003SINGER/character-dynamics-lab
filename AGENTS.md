@@ -25,6 +25,6 @@
 
 ## Version Control
 
-- After verified project edits, create a local Git commit when appropriate.
-- The default review loop is: WebGPT reviews the repository → user pastes the review → Codex applies verified changes → Codex commits and pushes to `webgpt-sync` → WebGPT reviews that branch again. Do not merge or push these changes to `main` unless the user explicitly says to merge into `main`.
-- A current user instruction to push the reviewed changes authorizes pushing to `webgpt-sync`; `main` remains protected until an explicit merge instruction.
+- After every verified project edit, create a local Git commit and push it to `webgpt-sync`. Do not leave verified changes only in the local worktree.
+- The default review loop is: WebGPT reviews the repository → user pastes the review → Codex applies verified changes → Codex commits and pushes to `webgpt-sync` → WebGPT reviews that branch again.
+- `main` is protected: never merge or push to `main` unless the user explicitly instructs that specific `main` push or merge. An instruction to commit, publish, sync, or push changes without naming `main` authorizes only `webgpt-sync`.
