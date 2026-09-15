@@ -6,6 +6,7 @@
 #include "appraisal.h"
 #include "decision.h"
 #include "state.h"
+#include <random>
 
 struct ContinuousRuntimeStep {
     RuntimeBoundary boundary;
@@ -19,6 +20,7 @@ struct RuntimeExecutionResult {
     Appraisal appraisal;
     DecisionContext decision;
     std::optional<WorldOutcome> outcome;
+    std::optional<ActionType> selected_action;
 };
 
 // Canonical owner for the scheduler-native W -> O incremental handoff.
@@ -39,4 +41,5 @@ private:
     WorldRuntimeAdapter world_runtime_;
     Observation& observation_;
     InformationAccess access_;
+    std::mt19937 rng_{0x43445257U};
 };

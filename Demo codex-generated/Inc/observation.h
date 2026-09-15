@@ -134,5 +134,6 @@ Observation apply_sleep_sensory_update(Observation previous,
                                        const WorldOutcome& outcome,
                                        const World& world);
 void clear_pending_appraisal_updates(Observation& observation);
+void consume_appraisal_inputs(Observation& observation);
 std::string observation_updates_summary(const Observation& observation);
 std::string observation_summary(const Observation& observation);

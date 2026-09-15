@@ -483,6 +483,12 @@ void clear_pending_appraisal_updates(Observation& observation) {
     observation.pending_appraisal_updates.clear();
 }
 
+void consume_appraisal_inputs(Observation& observation) {
+    observation.updates_this_refresh.clear();
+    observation.pending_appraisal_updates.clear();
+    observation.last_self_action = {};
+}
+
 std::string observation_updates_summary(const Observation& observation) {
     std::ostringstream output;
     output << "updates=[";

@@ -52,10 +52,18 @@ int main() {
                        hidden_phone, "09:25");
     unread = find_fact(observation, "message.unread_count");
     if (!unread || unread->value != unread_before_hidden) return 7;
+    CharacterState once_state;
+    Personality once_personality;
+    const Appraisal once_appraisal = appraise(observation, once_state, once_personality);
+    const StateUpdate once_impulse = apply_appraisal_impulse(once_state, once_appraisal, once_personality);
+    consume_appraisal_inputs(observation);
+    const Appraisal replay_appraisal = appraise(observation, once_state, once_personality);
+    const StateUpdate replay_impulse = apply_appraisal_impulse(once_state, replay_appraisal, once_personality);
+    if (once_impulse.applied.elapsed_minutes != 0 || replay_impulse.applied.task_pressure != 0.0) return 8;
     RuntimeScheduler weak_scheduler(0);
     weak_scheduler.schedule({"hidden-weather", 5, false, false});
     const RuntimeBoundary weak_boundary = weak_scheduler.advance_to_next_boundary();
-    if (weak_boundary.decision_gate.open) return 8;
+    if (weak_boundary.decision_gate.open) return 9;
 
     // F2: deterministic continuous dynamics is chunk-equivalent.
     Personality personality;
@@ -67,7 +75,7 @@ int main() {
     advance_continuous_state(three_chunks, personality, &action, 10);
     advance_continuous_state(three_chunks, personality, &action, 10);
     if (std::abs(one_chunk.fatigue - three_chunks.fatigue) > 1e-9
-        || std::abs(one_chunk.screen_strain - three_chunks.screen_strain) > 1e-9) return 9;
+        || std::abs(one_chunk.screen_strain - three_chunks.screen_strain) > 1e-9) return 10;
 
     // C4/G: invalidation is a distinct terminal outcome on the next boundary.
     World invalid_world;
@@ -75,12 +83,12 @@ int main() {
     RuntimeScheduler invalid_scheduler(9 * 60);
     Observation invalid_observation = refresh_observation({}, invalid_world, {});
     ContinuousRuntime invalid_runtime(invalid_scheduler, invalid_world, invalid_observation);
-    if (!invalid_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 10;
+    if (!invalid_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 11;
     invalid_runtime.invalidate_running_action();
     CharacterState invalid_state;
     const RuntimeExecutionResult invalid_step = invalid_runtime.execute_next_boundary(invalid_state, personality);
     if (!invalid_step.outcome || !invalid_step.outcome->plan_invalidated
-        || invalid_step.runtime.boundary.decision_gate.reasons.empty()) return 11;
+        || invalid_step.runtime.boundary.decision_gate.reasons.empty()) return 12;
 
     // B4: bounded steps expose a deterministic need-threshold opportunity.
     World threshold_world;
@@ -88,7 +96,7 @@ int main() {
     RuntimeScheduler threshold_scheduler(1, 60);
     Observation threshold_observation = refresh_observation({}, threshold_world, {});
     ContinuousRuntime threshold_runtime(threshold_scheduler, threshold_world, threshold_observation);
-    if (!threshold_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 12;
+    if (!threshold_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 13;
     CharacterState threshold_state;
     bool saw_threshold = false;
     for (int step = 0; step < 8 && threshold_scheduler.running_action().has_value(); ++step) {
@@ -97,7 +105,7 @@ int main() {
             if (reason == DecisionGateReason::NeedThresholdCrossed) saw_threshold = true;
         }
     }
-    if (!saw_threshold) return 13;
+    if (!saw_threshold) return 14;
 
     std::cout << "runtime closure acceptance smoke OK\n";
     return 0;

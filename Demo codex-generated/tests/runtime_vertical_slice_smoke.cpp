@@ -76,7 +76,8 @@ int main() {
         || completion.time_advanced_by_settlement != 0
         || completion.action_elapsed_minutes != 35 || completion.task_effort_gained <= 0.0
         || completion_result.impulse_state.applied.elapsed_minutes != 0
-        || completion_result.decision.candidates.empty() || !scheduler.running_action().has_value()) {
+        || completion_result.decision.candidates.empty() || !completion_result.selected_action.has_value()
+        || !scheduler.running_action().has_value()) {
         std::cerr << "completion must settle W/O/X/S before the gated next policy action\n";
         return 1;
     }
