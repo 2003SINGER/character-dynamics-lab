@@ -13,11 +13,11 @@
 | C1 start validation | PASS | `submit_action_intent` 唯一 owner API；typed provenance |
 | C2/C3 completion provenance | PASS | actual elapsed 与 settlement clock advance 分离 |
 | C4 invalidation | PASS | `invalidate_running_action` → typed plan-invalidated outcome smoke |
-| D actor-local perception | PARTIAL | weather curtain、phone visibility 已守住；alarm/temperature/channel 仍需逐类验收 |
+| D actor-local perception | PASS (current channels) | `World + InformationAccess` projector 覆盖 message/weather/alarm/temperature/reminder/deadline/evening；hidden phone/weather 不写入 O |
 | E typed rejection | PASS (v1 payload) | scheduler rejection event 携带 `RuntimeRejection` typed payload，并在下一 transition 进入 O；仍未建模完整 WorldOutcome 对象跨边界序列化 |
 | F continuous/impulse | PASS (v1 adapter) | `advance_continuous_state` 与 `apply_appraisal_impulse` 分离；chunk equivalence smoke |
 | G decision gate | PARTIAL | weak event continue、threshold opportunity 已有；完整 hidden-event gate matrix 待补 |
-| H docs/regression | PARTIAL | 6/6 CTest 通过，矩阵与顶层 Vision/TODO 已同步；仍需逐项独立 acceptance binaries 与最终审计 |
+| H docs/regression | PARTIAL | 17/17 CTest 通过，矩阵与顶层 Vision/TODO 已同步；仍需最终逐项审计及完整 WorldOutcome 跨边界证据 |
 
 ## Executable evidence
 

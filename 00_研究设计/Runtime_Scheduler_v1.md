@@ -85,10 +85,10 @@ agnostic. Its smoke test demonstrates:
    opens the next decision gate, so there cannot be a second decision at the
    same clock instant.
 
-This core deliberately records scheduling only. The runtime bridge now also
-provides `World::validate_runtime_start` and a typed `apply_world_events`
-projector; fixtures must use these APIs rather than duplicating W's event
-meaning in key/value writes. A future integration must
+The runtime bridge now provides `World::validate_runtime_start`, typed
+rejection payloads, and a perception-aware `apply_world_events` projector;
+fixtures must use these APIs rather than duplicating W's event meaning in
+key/value writes. Remaining closure work is tracked in the acceptance matrix:
 give the rejection event its typed `WorldOutcome` payload and then project it
 to O, where the existing `ActionConstraintBelief` can remain the persistent
 actor-local consequence. It must not make `W -> S` a shortcut or copy hidden
