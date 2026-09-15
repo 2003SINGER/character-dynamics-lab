@@ -21,6 +21,7 @@ struct RuntimeExecutionResult {
     DecisionContext decision;
     std::optional<WorldOutcome> outcome;
     std::optional<ActionType> selected_action;
+    bool policy_evaluated = false;
 };
 
 // Canonical owner for the scheduler-native W -> O incremental handoff.

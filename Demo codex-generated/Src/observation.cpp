@@ -361,7 +361,8 @@ Observation refresh_observation(Observation observation,
 void apply_self_action_feedback(Observation& observation,
                                 const WorldOutcome& outcome,
                                 const std::string& observed_at,
-                                bool completion_is_observable) {
+                                bool completion_is_observable,
+                                bool defer_appraisal) {
     if (outcome.provenance.empty()) {
         observation.last_self_action = {};
         return;
@@ -395,9 +396,11 @@ void apply_self_action_feedback(Observation& observation,
                     return std::find(revoked_actions.begin(), revoked_actions.end(), action)
                         != revoked_actions.end();
                 }), observation.known_actions.end());
-        observation.pending_appraisal_updates.insert(observation.pending_appraisal_updates.end(),
-            observation.updates_this_refresh.begin() + static_cast<std::ptrdiff_t>(pending_start),
-            observation.updates_this_refresh.end());
+        if (defer_appraisal) {
+            observation.pending_appraisal_updates.insert(observation.pending_appraisal_updates.end(),
+                observation.updates_this_refresh.begin() + static_cast<std::ptrdiff_t>(pending_start),
+                observation.updates_this_refresh.end());
+        }
     }
     if (!outcome.accepted || outcome.task_id.empty()) return;
 
@@ -411,9 +414,11 @@ void apply_self_action_feedback(Observation& observation,
     // Preserve only semantic feedback created by this call for the next X
     // evaluation. refresh_observation clears the per-refresh list, so without
     // this handoff a completion delta can be lost before appraisal consumes it.
-    observation.pending_appraisal_updates.insert(observation.pending_appraisal_updates.end(),
-        observation.updates_this_refresh.begin() + static_cast<std::ptrdiff_t>(pending_start),
-        observation.updates_this_refresh.end());
+    if (defer_appraisal) {
+        observation.pending_appraisal_updates.insert(observation.pending_appraisal_updates.end(),
+            observation.updates_this_refresh.begin() + static_cast<std::ptrdiff_t>(pending_start),
+            observation.updates_this_refresh.end());
+    }
 }
 
 void apply_observable_runtime_event(Observation& observation,

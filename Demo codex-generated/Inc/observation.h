@@ -116,7 +116,8 @@ Observation refresh_observation(Observation previous,
 void apply_self_action_feedback(Observation& observation,
                                 const WorldOutcome& outcome,
                                 const std::string& observed_at,
-                                bool completion_is_observable = true);
+                                bool completion_is_observable = true,
+                                bool defer_appraisal = true);
 // Project an already-authorized observable runtime event into O. The caller
 // supplies only the event payload the actor can perceive; this function never
 // reads W. The scheduler-native caller appraises the resulting Delta-O at the

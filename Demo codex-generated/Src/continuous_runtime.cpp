@@ -73,7 +73,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     if (action.has_value() && action->status == RunningActionStatus::Completed) {
         result.outcome = world_runtime_.world().settle_runtime_completion(
             action->action, action->target_object_id, action->elapsed_minutes);
-        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary());
+        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary(), true, false);
     } else if (action.has_value() && action->status == RunningActionStatus::Interrupted) {
         WorldOutcome invalidation;
         invalidation.action = action->action;
@@ -82,7 +82,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         invalidation.provenance = "ContinuousRuntime::plan_invalidated";
         invalidation.plan_invalidated = true;
         result.outcome = invalidation;
-        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary());
+        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary(), true, false);
     }
     result.appraisal = appraise(observation_, state, personality);
     result.impulse_state = apply_appraisal_impulse(state, result.appraisal, personality);
@@ -90,6 +90,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     if (result.runtime.boundary.decision_gate.open
         && (result.outcome.has_value() || !action.has_value()
             || action->status != RunningActionStatus::Running)) {
+        result.policy_evaluated = true;
         result.decision = decide(observation_, state, personality);
         const ActionType selected = sample_action(result.decision, rng_);
         for (const CandidateAction& candidate : result.decision.candidates) {

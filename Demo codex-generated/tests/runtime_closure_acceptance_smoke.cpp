@@ -98,14 +98,50 @@ int main() {
     ContinuousRuntime threshold_runtime(threshold_scheduler, threshold_world, threshold_observation);
     if (!threshold_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 13;
     CharacterState threshold_state;
+    threshold_state.hunger = 0.35;
     bool saw_threshold = false;
+    bool saw_reconsideration = false;
     for (int step = 0; step < 8 && threshold_scheduler.running_action().has_value(); ++step) {
         const RuntimeExecutionResult tick = threshold_runtime.execute_next_boundary(threshold_state, personality);
         for (const DecisionGateReason reason : tick.runtime.boundary.decision_gate.reasons) {
             if (reason == DecisionGateReason::NeedThresholdCrossed) saw_threshold = true;
         }
+        if (tick.outcome.has_value() && tick.outcome->plan_invalidated
+            && tick.policy_evaluated) {
+            saw_reconsideration = true;
+        }
     }
-    if (!saw_threshold) return 14;
+    if (!saw_threshold || !saw_reconsideration) return 14;
+
+    // Self-action completion feedback is immediate in runtime and must be consumed once.
+    World completion_world;
+    completion_world.time.minute_of_day = 9 * 60 + 20;
+    completion_world.tasks.front().effort_target = 0.01;
+    RuntimeScheduler completion_scheduler(9 * 60 + 20);
+    Observation completion_observation = refresh_observation({}, completion_world, {});
+    ContinuousRuntime completion_runtime(completion_scheduler, completion_world, completion_observation);
+    if (!completion_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 15;
+    CharacterState completion_state;
+    int completion_outcomes = 0;
+    int completion_signals = 0;
+    bool completion_task_completed = false;
+    for (int step = 0; step < 4; ++step) {
+        const RuntimeExecutionResult completion_tick =
+            completion_runtime.execute_next_boundary(completion_state, personality);
+        if (completion_tick.outcome.has_value()) {
+            if (completion_tick.outcome->task_completed) {
+                ++completion_outcomes;
+                completion_task_completed = true;
+                for (const AppraisalSignal& signal : completion_tick.appraisal.semantic_signals) {
+                    if (signal.kind == AppraisalSignalKind::GoalCompletion) ++completion_signals;
+                }
+            }
+        }
+    }
+    if (completion_outcomes != 1 || !completion_task_completed || completion_signals != 1
+        || !completion_observation.pending_appraisal_updates.empty()) {
+        return 16;
+    }
 
     std::cout << "runtime closure acceptance smoke OK\n";
     return 0;

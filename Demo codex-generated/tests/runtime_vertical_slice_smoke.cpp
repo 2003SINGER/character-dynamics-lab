@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <random>
 
 namespace {
 bool has_tag(const Appraisal& appraisal, const std::string& tag) {
@@ -65,6 +66,8 @@ int main() {
     const RuntimeBoundary& completion_boundary = completion_result.runtime.boundary;
     const std::vector<WorldEvent>& completion_events = completion_result.runtime.world_events;
     const WorldOutcome& completion = *completion_result.outcome;
+    std::mt19937 expected_rng(0x43445257U);
+    const ActionType expected_sample = sample_action(completion_result.decision, expected_rng);
 
     if (completion_boundary.elapsed_minutes != 25
         || !completion_boundary.decision_gate.open
@@ -77,6 +80,7 @@ int main() {
         || completion.action_elapsed_minutes != 35 || completion.task_effort_gained <= 0.0
         || completion_result.impulse_state.applied.elapsed_minutes != 0
         || completion_result.decision.candidates.empty() || !completion_result.selected_action.has_value()
+        || *completion_result.selected_action != expected_sample
         || !scheduler.running_action().has_value()) {
         std::cerr << "completion must settle W/O/X/S before the gated next policy action\n";
         return 1;
