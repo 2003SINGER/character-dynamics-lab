@@ -96,11 +96,10 @@ agnostic. Its smoke test demonstrates:
 The runtime bridge now provides `World::validate_runtime_start`, typed
 rejection payloads, and a perception-aware `apply_world_events` projector;
 fixtures must use these APIs rather than duplicating W's event meaning in
-key/value writes. Historical closure notes are retained below; current status is tracked in the acceptance matrix:
-give the rejection event its typed `WorldOutcome` payload and then project it
-to O, where the existing `ActionConstraintBelief` can remain the persistent
-actor-local consequence. It must not make `W -> S` a shortcut or copy hidden
-W values into O.
+key/value writes. Historical closure notes are retained below; current status
+is tracked in the acceptance matrix. At the earlier checkpoint, rejection
+payload projection had not yet been completed; it is now implemented and
+covered by the typed-rejection cases.
 
 ## First scheduler-native vertical slice
 

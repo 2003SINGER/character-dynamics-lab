@@ -10,7 +10,7 @@
 | temperature | temperature event | temperature fact | comfort appraisal | policy relevance | consumed |
 | task reminder | reminder event | task reminder fact | task-pressure appraisal | gate by relevance | consumed |
 | task deadline | deadline event | deadline fact | deadline appraisal | gate by relevance | consumed |
-| evening | evening event | time/evening fact | rest/sleep appraisal | policy relevance | consumed |
+| evening | evening event | time/evening fact | context/telemetry only (no direct X consumer in v1) | policy relevance | stored in O; no fabricated impulse |
 | completion | typed `WorldOutcome` | task status ΔO | GoalCompletion signal → S impulse | completion gate | consumed exactly once |
 | rejection | typed `RuntimeRejection` | constraint/target ΔO | rejection appraisal → S impulse | rejection gate | consumed exactly once |
 | interruption | typed runtime outcome | interruption feedback | plan/reconsideration appraisal | policy gate | consumed |
