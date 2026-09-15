@@ -22,7 +22,7 @@ WorldOutcome ContinuousRuntime::submit_action_intent(ActionType action, const st
 ContinuousRuntimeStep ContinuousRuntime::advance_next_boundary() {
     const RuntimeBoundary boundary = scheduler_.advance_to_next_boundary();
     const std::vector<WorldEvent> events = world_runtime_.advance_to_boundary(boundary, scheduler_);
-    apply_world_events(observation_, events, world_runtime_.time_summary());
+    apply_world_events(observation_, events, world_runtime_.world(), {}, world_runtime_.time_summary());
     schedule_next_world_boundary();
     return {boundary, events};
 }

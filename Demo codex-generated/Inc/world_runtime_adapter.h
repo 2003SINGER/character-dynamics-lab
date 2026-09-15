@@ -16,6 +16,7 @@ public:
     std::vector<WorldEvent> advance_to_boundary(const RuntimeBoundary& boundary,
                                                 const RuntimeScheduler& scheduler);
     std::string time_summary() const;
+    const World& world() const { return world_; }
 
 private:
     World& world_;

@@ -422,10 +422,12 @@ void apply_observable_runtime_event(Observation& observation,
 }
 
 void apply_world_events(Observation& observation, const std::vector<WorldEvent>& events,
+                        const World& world, const InformationAccess& access,
                         const std::string& observed_at) {
     for (const WorldEvent& event : events) {
         if (event.id == "message-study-group") {
-            apply_observable_runtime_event(observation, "message.unread_count", "1",
+            if (!access.phone_presence_observable) continue;
+            apply_observable_runtime_event(observation, "message.unread_count", std::to_string(world.unread_messages),
                                            "world_event:message-study-group", observed_at);
         } else if (event.id == "task-reminder") {
             apply_observable_runtime_event(observation, "task.reminder", "1",
@@ -434,7 +436,8 @@ void apply_world_events(Observation& observation, const std::vector<WorldEvent>&
             apply_observable_runtime_event(observation, "task.deadline_passed", "1",
                                            "world_event:task-deadline", observed_at);
         } else if (event.id == "weather-rain" || event.id == "weather-clear") {
-            apply_observable_runtime_event(observation, "world.weather",
+            if (!world.current_room().curtain_open) continue;
+            apply_observable_runtime_event(observation, "outside.weather",
                                            event.id == "weather-rain" ? "rain" : "clear",
                                            "world_event:" + event.id, observed_at);
         }

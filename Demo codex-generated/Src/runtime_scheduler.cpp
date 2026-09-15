@@ -41,7 +41,11 @@ void RuntimeScheduler::schedule(ScheduledRuntimeEvent event) {
     if (event.occurs_at_total_minutes <= now_total_minutes_) {
         throw std::invalid_argument("Scheduled runtime event must occur after the current clock time");
     }
-    scheduled_events_.push_back(std::move(event));
+    const auto duplicate = std::find_if(scheduled_events_.begin(), scheduled_events_.end(),
+        [&event](const ScheduledRuntimeEvent& existing) {
+            return existing.id == event.id && existing.occurs_at_total_minutes == event.occurs_at_total_minutes;
+        });
+    if (duplicate == scheduled_events_.end()) scheduled_events_.push_back(std::move(event));
 }
 
 void RuntimeScheduler::start_action(ActionType action, std::string target_object_id,

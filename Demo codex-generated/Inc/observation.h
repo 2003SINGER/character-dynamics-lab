@@ -127,6 +127,7 @@ void apply_observable_runtime_event(Observation& observation,
                                     std::string source,
                                     const std::string& observed_at);
 void apply_world_events(Observation& observation, const std::vector<WorldEvent>& events,
+                        const World& world, const InformationAccess& access,
                         const std::string& observed_at);
 bool observation_knows_action(const Observation& observation, ActionType action);
 Observation apply_sleep_sensory_update(Observation previous,

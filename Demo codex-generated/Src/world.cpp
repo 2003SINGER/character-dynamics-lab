@@ -375,6 +375,7 @@ WorldOutcome World::validate_runtime_start(ActionType action, const std::string&
     WorldOutcome outcome;
     outcome.action = action;
     outcome.target_object_id = target_object_id;
+    outcome.provenance = "World::validate_runtime_start(" + to_string(action) + ")";
     const CharacterActionPlan plan = expand_action(action);
     if (!target_object_id.empty()) {
         const Object* target = nullptr;
@@ -587,28 +588,32 @@ std::vector<WorldEvent> World::advance_runtime_by(int elapsed_minutes) {
 
 std::optional<WorldEvent> World::next_runtime_event_after(int total_minutes) const {
     const int first_day = total_minutes / kMinutesPerDay;
+    std::optional<WorldEvent> earliest;
     for (int day_index = first_day; day_index <= first_day + 2; ++day_index) {
         for (const ScheduledEvent& scheduled : schedule_for_day(scenario_seed, day_index)) {
             const int absolute_minute = day_index * kMinutesPerDay + scheduled.minute_of_day;
             if (absolute_minute <= total_minutes) continue;
+            WorldEvent candidate;
             switch (scheduled.kind) {
-            case ScheduledEventKind::Alarm: return WorldEvent{"alarm-rings", "the alarm clock rings in the room", "room/alarm-clock", absolute_minute};
-            case ScheduledEventKind::StudyMessage: return WorldEvent{"message-study-group", "a study-group message arrives", "phone notification", absolute_minute};
-            case ScheduledEventKind::Weather: return WorldEvent{scheduled.rainy ? "weather-rain" : "weather-clear", "weather changes", "world/weather", absolute_minute};
-            case ScheduledEventKind::Temperature: return WorldEvent{"room-temperature-shift", "room temperature changes", "world/temperature", absolute_minute};
-            case ScheduledEventKind::TaskReminder: return WorldEvent{"task-reminder", "calendar reminder: a task remains due today", "calendar", absolute_minute};
-            case ScheduledEventKind::Evening: return WorldEvent{"evening", "evening begins", "world clock", absolute_minute};
+            case ScheduledEventKind::Alarm: candidate = {"alarm-rings", "the alarm clock rings in the room", "room/alarm-clock", absolute_minute}; break;
+            case ScheduledEventKind::StudyMessage: candidate = {"message-study-group", "a study-group message arrives", "phone notification", absolute_minute}; break;
+            case ScheduledEventKind::Weather: candidate = {scheduled.rainy ? "weather-rain" : "weather-clear", "weather changes", "world/weather", absolute_minute}; break;
+            case ScheduledEventKind::Temperature: candidate = {"room-temperature-shift", "room temperature changes", "world/temperature", absolute_minute}; break;
+            case ScheduledEventKind::TaskReminder: candidate = {"task-reminder", "calendar reminder: a task remains due today", "calendar", absolute_minute}; break;
+            case ScheduledEventKind::Evening: candidate = {"evening", "evening begins", "world clock", absolute_minute}; break;
             }
+            if (!earliest || candidate.occurred_at_total_minutes < earliest->occurred_at_total_minutes) earliest = candidate;
         }
         for (const WorldTask& task : tasks) {
             if (task.status == TaskStatus::Active && task.due_at_total_minutes > total_minutes
                 && task.due_at_total_minutes / kMinutesPerDay == day_index) {
-                return WorldEvent{"task-deadline", "deadline passes for task: " + task.id,
-                                  "world/task-calendar", task.due_at_total_minutes};
+                WorldEvent candidate{"task-deadline", "deadline passes for task: " + task.id,
+                                     "world/task-calendar", task.due_at_total_minutes};
+                if (!earliest || candidate.occurred_at_total_minutes < earliest->occurred_at_total_minutes) earliest = candidate;
             }
         }
     }
-    return std::nullopt;
+    return earliest;
 }
 
 std::string World::time_summary() const {

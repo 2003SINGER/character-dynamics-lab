@@ -1,0 +1,467 @@
+看完了。最新 `webgpt-sync` 是 **`b9bb291` — `feat: bound long runtime integration steps`**，上一提交是 **`5b6e135` — `feat: make runtime owner submit intents and renew boundaries`**。
+
+先给结论：
+
+> **`CONTINUOUS_RUNTIME_V1 = NOT_CLOSED`**
+>
+> 而且这次不再说“下一刀”。按我们刚定的 Closure Gate 来验，它现在是**明确的 milestone 中途状态**，大约把 B/C 的一部分补了，但 A、D、E、F、H 仍有硬 FAIL。
+
+好的部分确实在推进：`ContinuousRuntime::submit_action_intent()` 已经强制先 `validate_runtime_start()` 再创建 RunningAction；`advance_next_boundary()` 也会自动续订下一 World boundary；另外加了默认 60min 的 `max_runtime_step_minutes`，长 action 不会一次跨 8 小时。 
+
+但按照我们自己的验收表，当前状态是：
+
+| Gate | 状态 | 判断 |
+|---|---|---|
+| A Runtime Ownership | ❌ FAIL | `ContinuousRuntime` 仍只拥有 `scheduler→W→O`，头文件自己就写着 **State integration and policy remain explicit callers**。 |
+| B Time/Boundary | ⚠️ PARTIAL | 单时钟 PASS、max-step 有了；但 World event 查询和自动续订还有实际 bug |
+| C Action Lifecycle | ⚠️ PARTIAL | start validation API/intent owner 有了；completion elapsed 也对；invalidation 还没有 |
+| D Observation Boundary | ❌ FAIL | projector 仍然不懂 `InformationAccess` / scene / perception |
+| E Typed Outcome | ❌ FAIL | runtime rejection 现在实际上还是坏的 |
+| F S Dynamics | ❌ FAIL | continuous/impulse 仍由 fixture 手串，`update_state(...,0)` 仍直接使用 |
+| G Decision Gate | ⚠️ PARTIAL | weak event smoke 对；完整 actor-local gate ownership 未形成 |
+| H Docs/Regression/Tests | ❌ FAIL | 没有我们要求的 acceptance matrix/test suite；TODO 还是旧状态 |
+
+## 最严重的一个真 bug：runtime rejection 其实没进入 O
+
+现在：
+
+```cpp
+ContinuousRuntime::submit_action_intent(...)
+{
+    WorldOutcome validation = world_runtime_.validate_runtime_start(...);
+
+    if (!validation.accepted) {
+        scheduler_.reject_action(...);
+        apply_self_action_feedback(observation_, validation, ...);
+        return validation;
+    }
+}
+```
+
+看起来对。
+
+但是 `validate_runtime_start()` 创建的 `WorldOutcome` **没有设置 `provenance`**。
+
+而：
+
+```cpp
+apply_self_action_feedback(...)
+{
+    if (outcome.provenance.empty()) {
+        observation.last_self_action = {};
+        return;
+    }
+```
+
+直接返回。
+
+所以：
+
+```text
+ResourceInsufficient
+TargetAbsent
+TargetUnusable
+PreconditionFailed
+```
+
+经过新的 canonical `submit_action_intent()` 拒绝时：
+
+```text
+W reject
+↓
+scheduler 安排 1min rejection marker
+↓
+apply_self_action_feedback()
+↓
+因为 provenance 为空
+↓
+直接 return
+↓
+ActionConstraintBelief 根本没写
+```
+
+也就是说我们前面已经修好的 **Typed Rejection Feedback v0，在新 Continuous Runtime 路径里还没真正接通。**
+
+这是 **E1/E2 HARD FAIL**。
+
+而且 scheduler 那边还是：
+
+```text
+"action_rejected:" + action + target
+```
+
+字符串 marker，不带 typed `WorldOutcome` payload。
+
+所以现在正好是我们验收标准禁止的：
+
+```text
+typed outcome 一套
++
+scheduler string rejection 一套
+```
+
+还没统一。
+
+---
+
+## 第二个真 bug：Deadline 虽然“加进 next event”了，但查询顺序是错的
+
+这次它确实把 task deadline 加进了 `next_runtime_event_after()`。
+
+但代码是：
+
+```cpp
+for day:
+    for scheduled_event:
+        if event > now:
+            return scheduled_event;
+
+    for task:
+        if deadline > now:
+            return deadline;
+```
+
+
+
+注意：它不是求所有候选的：
+
+```text
+min(timestamp)
+```
+
+而是**先找到任何一个未来 scheduled event 就 return 了**。
+
+例如：
+
+```text
+now       = 09:20
+deadline  = 09:25
+message   = 09:30
+```
+
+函数会：
+
+```text
+先遍历 scheduled events
+→ 找到 09:30 message
+→ return 09:30
+```
+
+根本看不到下面的：
+
+```text
+09:25 deadline
+```
+
+然后 W 从 09:20 一口推进到 09:30 时，`advance_runtime_by()` 虽然会发现：
+
+```text
+task-deadline occurred_at = 09:25
+```
+
+但角色已经 **09:30 才处理它**。
+
+这正是我们 Closure B3 要防的：
+
+> event 虽然存在，但没有成为正确 runtime boundary。
+
+所以目前：
+
+**Deadline 仍然不能迁。**
+
+---
+
+## 第三个 bug：World boundary 自动续订会重复注册同一个未来事件
+
+现在每次：
+
+```cpp
+advance_next_boundary()
+{
+    ...
+    schedule_next_world_boundary();
+}
+```
+
+
+
+但 scheduler 的：
+
+```cpp
+schedule(...)
+{
+    scheduled_events_.push_back(...)
+}
+```
+
+**没有 dedupe。** 
+
+比如：
+
+```text
+RunningAction completion = 09:30
+next WorldEvent          = 11:00
+```
+
+已有一个 11:00 W boundary。
+
+09:30 action completion 后：
+
+```text
+advance_next_boundary()
+→ 再 query next WorldEvent
+→ 还是 11:00
+→ 又 push 一个 11:00
+```
+
+现在两个。
+
+如果中间又因为 max-step 出现 10:30 boundary：
+
+```text
+→ 又 schedule 一次 11:00
+```
+
+变三个。
+
+到 11:00 scheduler 会一次拿到一堆重复的 boundary marker。
+
+World 本身只产生一个真实 event，所以暂时可能没炸行为，但：
+
+> **boundary ownership contract 还是错的。**
+
+而且刚加入的 60min max-step 会让这个重复注册更容易出现。
+
+---
+
+## D Gate 还是明显 FAIL
+
+现在的：
+
+```cpp
+apply_world_events(
+    Observation&,
+    vector<WorldEvent>,
+    observed_at
+)
+```
+
+接口里连：
+
+```text
+InformationAccess
+World / Scene
+location
+perception channel
+```
+
+都没有。
+
+所以它根本不可能完成我们要求的：
+
+```text
+WorldEvent happened
+≠
+actor observed it
+```
+
+之前那个具体漏洞也仍然在：
+
+```text
+weather-rain
+→ 直接写 O
+```
+
+不检查 curtain。
+
+message 仍是：
+
+```text
+message-study-group
+→ unread_count = "1"
+```
+
+不是 W 当前真实的 2→3。当前 projector 仍是 minimal smoke projector，不是 legal actor-local projector。
+
+所以 Closure D1–D5 现在不能打 PASS。
+
+---
+
+## A Gate 也还没完成
+
+这个最直观。
+
+现在 vertical slice 仍然自己：
+
+```cpp
+advance_continuous_state(...)
+appraise(...)
+update_state(..., 0)
+world.settle_runtime_completion(...)
+apply_self_action_feedback(...)
+decide(...)
+runtime.submit_action_intent(...)
+```
+
+
+
+所以 `ContinuousRuntime` 还没有拥有：
+
+```text
+Δt
+→ S continuous
+→ event/outcome
+→ O
+→ X
+→ S impulse
+→ gate
+→ π
+→ ActionIntent
+```
+
+它只是：
+
+```text
+boundary
+→ W
+→ O
+```
+
+加了 ActionIntent validation。
+
+因此 **A1 仍然 FAIL**。
+
+我们定的标准明明就是：
+
+> scheduler-native fixture 不允许自己重新实现 runtime flow。
+
+目前 test 正在重新实现。
+
+---
+
+## max-step 也只是解决了一半
+
+这次新增：
+
+```text
+max_runtime_step_minutes = 60
+```
+
+好。
+
+但是 scheduler 到 60min heartbeat 后，只会产生一个普通 boundary：
+
+```text
+elapsed = 60
+gate = closed
+```
+
+它不会自己：
+
+```text
+integrate S
+→ 检查 hunger 是否越阈值
+→ NeedThresholdCrossed
+```
+
+因为 S 根本还不属于 ContinuousRuntime owner。
+
+所以 B4 当前只能算：
+
+```text
+bounded integration opportunity = PASS
+threshold reconsideration = NOT YET
+```
+
+不是整个 B4 PASS。
+
+---
+
+## 测试体系也还完全没达到我们刚规定的 Closure Gate
+
+当前 CMake 仍然只有原来的这些 runtime tests：
+
+```text
+runtime_scheduler_smoke
+runtime_vertical_slice_smoke
+```
+
+以及 reference/core/replay smoke。
+
+我们明确要求的：
+
+```text
+clock authority
+world event source consistency
+start validation ×4
+invalidation
+hidden event no leak
+perception projection
+typed rejection
+weak event continue
+threshold boundary
+...
+```
+
+都还没有形成 executable acceptance matrix。
+
+而且 Runtime Scheduler 文档自己仍明确写：
+
+> `Continuous Runtime v1 closure 进行中`
+
+以及：
+
+> future integration must give the rejection event its typed `WorldOutcome` payload... 
+
+所以 Luna 自己其实也没有声称做完。
+
+---
+
+## H 文档也还是没闭
+
+TODO 到现在仍然写：
+
+> “完成 canonical runtime owner 与 typed WorldEvent/ActionOutcome → O incremental flow” 
+
+和当前代码进度已经不对应。
+
+System Vision 虽然正确写了“三条 dataflow”，下面却还继续说：
+
+> “核心运行链保持为 W→O→X→S→π→W'”。
+
+所以我们要求的：
+
+> **旧链只能叫 character causal subpath，不能再叫完整 runtime mental model**
+
+还没落地。
+
+---
+
+# 因此这次不要再给它“下一步”
+
+直接按我们已经冻结的验收说：
+
+```text
+CONTINUOUS_RUNTIME_V1 = NOT_CLOSED
+```
+
+当前最关键 FAIL 是：
+
+1. **A1**：ContinuousRuntime 没拥有完整 O→X→S→Gate→π→settlement flow。
+2. **B2**：World boundary 自动续订会重复注册。
+3. **B3**：`next_runtime_event_after()` 没求全局最早事件，deadline 可能被晚处理。
+4. **B4**：有 max-step，但没有 threshold gate evaluation。
+5. **C4**：运行中 invalidation / physical preemption 未实现。
+6. **D1–D5**：合法 actor-local event projection 基本没做。
+7. **E1/E2**：runtime rejected start 因 provenance 为空，实际不会形成 `ActionConstraintBelief`；typed rejection pipeline 未闭。
+8. **F1/F2**：S continuous/impulse 仍由 fixture 手动组织，无 compatibility owner 和 chunk-equivalence test。
+9. **G1**：scheduler 仍把 `StrongExternalEvent` 当直接开 gate 的概念，subjective reconsideration 与 physical preemption 还没真正拆干净。
+10. **H1–H3**：数据流顶层文档、TODO、acceptance tests、最终 regression report 都没闭。
+
+**这 10 项不是十个“下一刀”。它们是同一个 `CONTINUOUS_RUNTIME_V1_CLOSURE` 当前的 FAIL 列表。**
+
+现在正确反馈给 Luna 就一句逻辑：
+
+> 不进入 Deadline，不创建新 milestone。继续完成已经给出的 Closure Gate；以上 FAIL 全部返修，并输出 A1–H3 的最终 acceptance matrix。任何一项 FAIL 就继续保持 `NOT_CLOSED`。
+
+这次终于可以按验收办了，不再跟着 commit 一个一个跑。
