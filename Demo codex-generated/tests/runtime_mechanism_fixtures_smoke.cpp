@@ -46,6 +46,13 @@ int main() {
     CharacterState cs; crt.execute_next_boundary(cs, p);
     if (cs.commitment.status != CommitmentStatus::Active) return 10;
     crt.execute_next_boundary(cs, p); // visible completion path is exercised; policy may immediately establish the next commitment
+    Observation completion_feedback;
+    WorldOutcome completed; completed.accepted = true; completed.action = ActionType::StudyFocused;
+    completed.task_id = "coursework"; completed.task_completed = true; completed.provenance = "fixture-visible-completion";
+    apply_self_action_feedback(completion_feedback, completed, "09:22", true, false);
+    CharacterState cleared; cleared.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
+    update_commitment(cleared, completion_feedback, 562);
+    if (cleared.commitment.status != CommitmentStatus::None) return 11;
     cs.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
     World rw; rw.time.minute_of_day = 560; Observation ro = refresh_observation({}, rw, {});
     RuntimeScheduler rsch(560); ContinuousRuntime rrt(rsch, rw, ro);
@@ -54,12 +61,18 @@ int main() {
     if (rs.commitment.status != CommitmentStatus::Suspended) return 13;
 
     // Interruption remains covered by the canonical closure acceptance smoke.
+    Observation interruption_feedback; WorldOutcome interrupted; interrupted.accepted = false;
+    interrupted.action = ActionType::StudyFocused; interrupted.plan_invalidated = true; interrupted.provenance = "fixture-interruption";
+    apply_self_action_feedback(interruption_feedback, interrupted, "09:22", true, false);
+    CharacterState interrupted_state; interrupted_state.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
+    update_commitment(interrupted_state, interruption_feedback, 562);
+    if (interrupted_state.commitment.status != CommitmentStatus::Active) return 12;
 
     InformationAccess no_completion; no_completion.self_task_completion_observable = false;
     World nw; nw.time.minute_of_day = 560; nw.tasks.front().effort_target = 0.01;
     RuntimeScheduler nsch(560); Observation no = refresh_observation({}, nw, {}, no_completion);
     ContinuousRuntime nrt(nsch, nw, no, no_completion); nrt.submit_action_intent(ActionType::StudyFocused, "desk", 1);
     CharacterState ns; ns.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
-    nrt.execute_next_boundary(ns, p); if (ns.commitment.status != CommitmentStatus::Active) return 14;
+    nrt.execute_next_boundary(ns, p); if (ns.commitment.status != CommitmentStatus::Active) return 15;
     return 0;
 }
