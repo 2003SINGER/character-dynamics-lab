@@ -1,0 +1,361 @@
+看完了。这次我反而更确定：你刚才说“先直接看实验结果”是对的。因为这一轮真的从轨迹里挖出了一个 Engine 级问题，而不是一个该拿 Objective 去惩罚的“坏偏好”。
+最新 webgpt-sync 有提交 d4e543c feat: add development behavior audit casebook。它没有先定义 pathology 分数，而是从 frozen optimizer_train 里筛可疑轨迹：896 条 trajectory 中选出 52 个 case，并且明确没有读取 holdout。筛选项包括重复动作、零时间动作、未处理需求、高 task pressure/低 study probability、任务停滞、commitment suspension。
+casebook 的实现也合格：不是只给一个排行榜，而是每个 case 保存完整 256-step trajectory CSV，同时在 JSON 中附高亮段前后各 3 步的 S_pre、O_known_actions、完整 π 和 outcome；输入 seed 还会硬检查只能来自 optimizer_train。也就是说，现在这个东西真能拿来“看角色到底在干什么”。
+而且第一轮已经得到一个很有价值的反例：连续 8 次 idle 不一定有问题——它每次推进 10 分钟、任务已经完成、身体需求很低。所以“重复次数高 = pathology”这个简单指标直接被否了。仓库现在也明确把这些 screener 定位成“挑材料给人看”，不是 penalty。
+真正有意思的是另一个：
+多条轨迹出现连续 6–7 次 shop_on_phone，但每次 elapsed_minutes = 0，世界时间和状态都不推进。
+
+这不是因为 shop_on_phone 本身定义成 0 分钟。源码里它明明是 20 分钟。
+我顺着代码查下去，基本把机制找出来了。
+这其实是一个“失败动作死循环”
+World::settle() 里，如果购物时真实 W.wallet < 30，会：
+failure_reason = ResourceInsufficient
+return outcome
+直接返回，所以不会执行后面的 AdvanceSimulationTime，于是这次 decision：
+elapsed_minutes = 0
+是合理的。
+问题出在 O 怎么学习这次失败。
+现在 apply_self_action_feedback() 对失败动作的特殊纠正只处理：
+TargetAbsent
+也就是之前 Phone fixture 验过的：
+我以为手机还在
+→ 用手机失败
+→ TargetAbsent
+→ O 更新“手机不存在”
+→ 撤销 affordance
+但 ResourceInsufficient 没有对应的认知更新。它只留下一个很泛的：
+rejected by W
+然后就 return 了。
+同时 ShopOnPhone 的 A^O 判断是：
+如果 O 知道 wallet：
+    wallet >= 30 才允许
+如果 O 根本不知道 wallet：
+    默认允许
+所以很容易形成：
+O：我觉得可以买
+        ↓
+π：shop_on_phone
+        ↓
+W：钱不够，ResourceInsufficient
+        ↓
+elapsed = 0
+        ↓
+O：没有学到“现在买不了”
+        ↓
+S：因为 0 分钟也基本不演化
+        ↓
+π：还是 shop_on_phone
+        ↓
+W：钱不够
+        ↓
+……
+这就是 casebook 里看到的 zero-time loop。
+这非常关键
+因为如果我们按照我最开始那个错误思路，直接定义：
+连续重复购物 → penalty
+optimizer 最后可能只是把 shop_on_phone 权重调低一点。
+表面上 loop 消失了，真正的认知反馈 bug 却还在。
+现在从真实轨迹往回查，我们发现真正应该修的是：
+失败行为本身应该产生足以改变下一次决策的 actor-local feedback。
+
+这跟 Phone 的 TargetAbsent 其实是同一个更一般的原则：
+Action attempt
+→ W rejection
+→ typed rejection evidence
+→ legal O correction
+→ A^O / π changes
+只不过当前系统只实现了 TargetAbsent，没把这个机制推广到 ResourceInsufficient / PreconditionFailed / TargetUnusable。
+所以我建议现在先别写 Pathology Objective
+下一步先做一刀很明确的 Engine 修复：
+Rejected-action epistemic feedback v0
+但别粗暴地：
+ResourceInsufficient → wallet=0
+因为失败只告诉角色：
+“这次购买需要的资源不够。”
+
+并不一定告诉他精确余额。
+更合理的是加一个 actor-local、动作相关的可执行性事实，例如：
+action.shop_on_phone.resource_sufficient = false
+source = failed_resource_check
+或者一个等价的 bounded belief / rejection memory。
+这样：
+ResourceInsufficient
+→ O learns shop currently infeasible
+→ A^O removes/suppresses ShopOnPhone
+→ no immediate retry loop
+等未来角色通过合法渠道重新知道钱包变多，再恢复它。
+至于 rejected attempt 是否应该消耗 1–2 分钟，可以之后单独决定；只让失败耗时并没有解决认知不更新的问题。
+然后重新跑完全相同的 train casebook。
+这会形成一个特别干净的开发闭环：
+Behavior audit
+→ 发现 zero-time shop loop
+→ 定位到 rejection feedback 缺口
+→ 修机制
+→ regression
+→ 重跑同一个 casebook
+→ 看 loop 是否消失
+→ 再继续审剩下 51 个 case
+我现在甚至不建议急着看全部 52 条。
+先把这个已经非常明确的真 bug 修掉。
+修完后 casebook 里下一批暴露出来的问题才更值得看。这样我们是在一层层剥真正的 failure mode，而不是一开始就拍脑袋造一个“NPC 质量函数”。
+这次 Behavior Audit 已经证明它值了：第一轮就找出了一个之前三套 mechanism fixture 和 evaluator 都没抓到的系统缺口。
+
+
+
+
+  
+
+
+
+
+
+这个loop怎么设计？
+
+
+
+
+
+
+
+
+
+
+
+
+
+不是给 shop_on_phone 单独打一块补丁。这个地方应该设计成一个通用的“失败动作反馈闭环”，正好补全我们原来的：
+O → A^O → π → action → W settlement → feedback → O
+现在缺的就是最后这半圈。
+我会把它设计成：
+O / S
+  ↓
+生成 A^O
+  ↓
+π(A)
+  ↓
+选择 action + target
+  ↓
+W 检查真实 precondition
+  ↓
+┌──────── accepted ────────┐
+│                          │
+│ 正常 settlement          │
+│ 时间推进 / W 改变         │
+│                          ↓
+│                     action outcome
+│                          │
+└──────────────────────────┤
+                           ↓
+                    actor-local feedback
+                           ↓
+                    更新 O / ΔO
+                           ↓
+                    下一轮重新生成 A^O
+重点是 rejected 分支：
+W rejects action
+      ↓
+typed rejection reason
+      ↓
+转化成“角色合法获得的新知识”
+      ↓
+写入 O
+      ↓
+A^O 下一轮改变
+1. W 只负责说“为什么失败”
+这个其实现在已经有雏形：
+enum class RejectionReason {
+    TargetAbsent,
+    TargetUnusable,
+    ResourceInsufficient,
+    PreconditionFailed
+};
+这层很好。
+W 不应该直接改 O，也不应该说：
+wallet = 13
+
+如果角色实际上没有办法知道精确余额。
+它只提供交互真实结果：
+action = shop_on_phone
+target = phone
+accepted = false
+reason = ResourceInsufficient
+2. O 根据失败原因形成“最小必要知识”
+这里才是我们现在缺的。
+最简单但我不太推荐的是：
+shop_on_phone_available = false
+因为太 action-specific。
+更好的结构可以叫：
+struct ActionConstraintBelief {
+    ActionType action;
+    std::string target_id;
+
+    ConstraintType constraint;
+    bool satisfied;
+
+    std::string source;
+    int observed_at;
+};
+例如这次：
+action = shop_on_phone
+target = phone
+constraint = ResourceRequirement
+satisfied = false
+source = failed_direct_interaction
+O 就知道：
+“我现在不能完成这个购物动作，因为资源条件不满足。”
+
+但不需要知道真实 W.wallet。
+这很符合我们的 W != O。
+3. 下一轮 A^O 用这个知识过滤
+现在逻辑大概是：
+if O knows wallet:
+    wallet >= 30
+else:
+    allow ShopOnPhone
+以后变成：
+known explicit blocker?
+    yes → 不进入当前可执行 A^O
+    no  → 再检查 O 中已知普通 precondition
+于是：
+第 t 轮
+
+O:
+    没有 wallet 知识
+
+A^O:
+    shop_on_phone ✓
+
+→ 尝试购物
+
+W:
+    ResourceInsufficient
+
+
+第 t+1 轮
+
+O:
+    action.shop_on_phone:
+        ResourceRequirement = unsatisfied
+
+A^O:
+    shop_on_phone ✗
+loop 当场断掉。
+但是最关键的是：怎么恢复？
+不能：
+失败一次
+→ shop_on_phone 永久封印
+那一样是错的。
+所以每一个这种 blocker 都必须有一个失效条件。
+比如：
+ResourceInsufficient blocker
+    ↓
+如果角色后来观察到 wallet 发生变化
+    ↓
+blocker 失效
+    ↓
+重新根据新的 O 判断 shop_on_phone
+例如：
+10:00
+购物失败
+→ ResourceRequirement unsatisfied
+
+12:00
+角色收到 100 元
+→ O.wallet changed
+→ invalidate resource blocker
+
+12:01
+A^O 重新包含 shop_on_phone
+因此完整闭环其实是：
+尝试
+ ↓
+失败
+ ↓
+获得失败知识
+ ↓
+暂时阻止重复尝试
+ ↓
+相关条件发生变化
+ ↓
+旧失败知识失效
+ ↓
+动作重新开放
+这才叫 recoverable。
+四种 rejection 可以分别怎么处理
+我觉得直接形成一张映射就很好：
+W rejection	O 学到什么	什么时候恢复
+TargetAbsent	目标当前不存在	再次发现目标
+TargetUnusable	目标当前不可用	观察到 usable 状态变化
+ResourceInsufficient	某资源条件当前不满足	相关资源发生可信更新
+PreconditionFailed	某前置条件当前不满足	对应 precondition 的 O 更新
+
+
+你会发现，Phone fixture 已经实现了第一行。
+所以我们现在不是新造一个机制。
+是在把：
+TargetAbsent
+→ O correction
+推广成：
+typed W rejection
+→ typed epistemic correction
+这其实很漂亮。
+还有一个容易踩的坑
+不要让：
+rejected action → S 直接变化
+比如：
+购物失败 → anxiety +0.2
+这个不应该写死在反馈层。
+正确的是：
+W rejection
+↓
+O 得到：
+resource requirement unsatisfied
+↓
+ΔO
+↓
+X 解释：
+“想买东西但钱不够”
+↓
+S 是否焦虑、失望、烦躁
+由 X + P + 当前 S 决定
+所以严格保持：
+W
+↓
+typed outcome
+↓
+O
+↓
+X
+↓
+S
+↓
+π
+千万别 W outcome → S 抄近路。
+至于 elapsed_minutes = 0，我反而暂时不会急着改。
+失败动作到底耗不耗时间，是另一件事。
+比如：
+- 点付款发现余额不足：可能耗 1 分钟；
+- 拉门发现门不在：几秒；
+- 尝试启动坏掉的电脑：可能 2 分钟。
+未来可以让 rejection outcome 自己有：
+attempt_duration_minutes
+但这只是模拟精度。
+这次 loop 真正的问题不是 0 分钟，而是失败没有产生新的决策信息。
+我会先把这个机制叫：
+Typed Rejection Feedback
+它刚好可以成为 W → O 的一个正式接口。这样这个 bug 修完，不只是“购物不循环了”，而是整个 Character Dynamics 多出一块非常合理的通用机制。
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+ChatGPT 可能会出错。请核查重要信息。

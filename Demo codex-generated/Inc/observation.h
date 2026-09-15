@@ -63,6 +63,27 @@ struct KnownObjectAffordance {
 };
 struct ActionTargetBinding { ActionType action = ActionType::Idle; std::string target_object_id; };
 
+// A failed direct attempt is evidence available to the actor, but it must not
+// reveal the hidden W value that caused the rejection.  This is intentionally
+// separate from ordinary facts: it records a bounded "do not retry this yet"
+// belief, keyed by the attempted action and target, until an appropriate O
+// update can invalidate it.
+enum class ActionConstraintType {
+    TargetAbsent,
+    TargetUnusable,
+    ResourceRequirement,
+    Precondition
+};
+
+struct ActionConstraintBelief {
+    ActionType action = ActionType::Idle;
+    std::string target_object_id;
+    ActionConstraintType constraint = ActionConstraintType::Precondition;
+    bool satisfied = false;
+    std::string source;
+    std::string observed_at;
+};
+
 // O: a separately stored character-side view, even though this one-room
 // reference refreshes all visible fields deterministically.
 struct Observation {
@@ -71,6 +92,7 @@ struct Observation {
     std::vector<KnownObjectAffordance> known_object_affordances;
     std::vector<ActionTargetBinding> action_target_bindings;
     std::vector<ActionType> known_actions; // A^O, not W's full action set.
+    std::vector<ActionConstraintBelief> action_constraints;
     std::vector<ObservationFact> facts;
     std::vector<ObservationFact> updates_this_refresh;
     // A sensory update can occur during a long action after the current

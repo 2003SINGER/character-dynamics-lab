@@ -57,6 +57,35 @@ initial full-trace reads established useful counterexamples:
    subsequent recovery, so it requires contextual labels rather than a scalar
    cutoff.
 
+## Engine correction readout
+
+The casebook review identified an engine-level feedback gap, rather than a
+candidate objective term: `shop_on_phone` could be rejected for a hidden
+insufficient wallet, but only `TargetAbsent` previously altered O. A rejected
+attempt therefore supplied no decision-relevant information; a stochastic
+policy could choose the same action repeatedly without advancing time.
+
+`Typed Rejection Feedback v0` now records a bounded actor-side action
+constraint from each typed W rejection. It suppresses the matching
+action/target in A^O without copying the hidden wallet balance into O. A later
+direct wallet observation resolves the resource constraint and lets the
+ordinary O-side wallet rule decide whether shopping returns. This preserves
+`W → typed outcome → O → X → S → pi`: rejection feedback does not directly
+alter S.
+
+The same frozen `optimizer_train` split was rerun after the correction:
+
+- 229,376 decisions / 896 trajectories; holdout was not read;
+- 784 resource-insufficient rejections still took zero simulated minutes;
+- every such rejection was isolated (`max consecutive resource rejection = 1`),
+  so the former repeated zero-time loop no longer appears;
+- the descriptive casebook fell from 52 to 47 cases and contains no
+  `zero_time_loop` case.
+
+Zero-minute failed attempts remain a simulation-resolution choice, not a
+pathology objective. The demonstrated defect was the absence of new O
+information after a typed failure.
+
 ## Next action
 
 Review the selected traces, recording for each proposed failure mode at least

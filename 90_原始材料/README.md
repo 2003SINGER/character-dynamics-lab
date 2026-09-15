@@ -4,6 +4,7 @@
 
 | 包 | 内容 | 完整性/阅读入口 |
 |---|---|---|
+| [2026-09-15_行为审计casebook复核与Engine修复建议](2026-09-15_行为审计casebook复核与Engine修复建议.txt) | 对 behavior-audit casebook 的复核：从零时间购物循环定位 Typed Rejection Feedback 的 Engine 修复边界；原始结论不替代本仓库验证 | [原文](2026-09-15_行为审计casebook复核与Engine修复建议.txt)；SHA-256 `6e0f511369b43d6903d613a38377b292e14c7dc400bdc0ea10a66af29597c654` |
 | [2026-09-05_WebGPT_论文级仓库审计](2026-09-05_WebGPT_论文级仓库审计/) | 两份针对当前 HEAD 的 WebGPT 审计：研究问题收缩、代码级信息旁路、LIGHT 与四项近邻线索 | [来源说明与阅读边界](2026-09-05_WebGPT_论文级仓库审计/README.md)；[仓库审计原文](2026-09-05_WebGPT_论文级仓库审计/01_仓库审计原文.md)；[近邻与代码审计原文](2026-09-05_WebGPT_论文级仓库审计/02_论文级近邻与代码审计原文.md) |
 | [2026-09-05_webgpt-sync分支复核](2026-09-05_webgpt-sync分支复核/) | 对 `0e6c8c8` 与 `ed46dc3` 的分支复核：`A^O` 的 O-known/W-authoritative 分层、scenario 信息权限、历史 T25 指标失效边界、Paper-0 三刀 | [来源说明与 SHA-256](2026-09-05_webgpt-sync分支复核/README.md)；[复核原文](2026-09-05_webgpt-sync分支复核/webgpt-sync分支复核原文.txt) |
 | [2026-09-05_webgpt-sync-T42复核](2026-09-05_webgpt-sync-T42复核/) | 对 `da70afa` 的复核：确认 T42 完成，纠正任务边界，并批准转入 T09/E0 | [来源说明与 SHA-256](2026-09-05_webgpt-sync-T42复核/README.md)；[复核原文](2026-09-05_webgpt-sync-T42复核/T42复核原文.txt) |

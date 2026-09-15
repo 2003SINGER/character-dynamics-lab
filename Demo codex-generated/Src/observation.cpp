@@ -16,6 +16,64 @@ const char* to_string(KnowledgeStatus status) {
     return "unknown";
 }
 
+const char* to_string(ActionConstraintType constraint) {
+    switch (constraint) {
+    case ActionConstraintType::TargetAbsent: return "target_absent";
+    case ActionConstraintType::TargetUnusable: return "target_unusable";
+    case ActionConstraintType::ResourceRequirement: return "resource_requirement";
+    case ActionConstraintType::Precondition: return "precondition";
+    }
+    return "unknown";
+}
+
+ActionConstraintType constraint_type(RejectionReason reason) {
+    switch (reason) {
+    case RejectionReason::TargetAbsent: return ActionConstraintType::TargetAbsent;
+    case RejectionReason::TargetUnusable: return ActionConstraintType::TargetUnusable;
+    case RejectionReason::ResourceInsufficient: return ActionConstraintType::ResourceRequirement;
+    case RejectionReason::PreconditionFailed: return ActionConstraintType::Precondition;
+    case RejectionReason::None: break;
+    }
+    return ActionConstraintType::Precondition;
+}
+
+bool is_blocked(const Observation& observation, ActionType action, const std::string& target_object_id) {
+    return std::any_of(observation.action_constraints.begin(), observation.action_constraints.end(),
+        [&](const ActionConstraintBelief& belief) {
+            return !belief.satisfied && belief.action == action
+                && (belief.target_object_id.empty() || belief.target_object_id == target_object_id);
+        });
+}
+
+void resolve_constraints(Observation& observation,
+                         ActionConstraintType type,
+                         const std::string& target_object_id) {
+    for (ActionConstraintBelief& belief : observation.action_constraints) {
+        if (belief.constraint == type && !belief.satisfied
+            && (target_object_id.empty() || belief.target_object_id == target_object_id)) {
+            belief.satisfied = true;
+        }
+    }
+}
+
+void record_constraint(Observation& observation,
+                       const WorldOutcome& outcome,
+                       const std::string& observed_at) {
+    if (outcome.accepted || outcome.failure_reason == RejectionReason::None) return;
+    const ActionConstraintType type = constraint_type(outcome.failure_reason);
+    const auto existing = std::find_if(observation.action_constraints.begin(), observation.action_constraints.end(),
+        [&](const ActionConstraintBelief& belief) {
+            return belief.action == outcome.action && belief.target_object_id == outcome.target_object_id
+                && belief.constraint == type && !belief.satisfied;
+        });
+    if (existing == observation.action_constraints.end()) {
+        const std::string source = outcome.failure_reason == RejectionReason::ResourceInsufficient
+            ? "failed_resource_check" : "failed_direct_interaction";
+        observation.action_constraints.push_back({outcome.action, outcome.target_object_id, type, false,
+                                                  source, observed_at});
+    }
+}
+
 void write_fact(Observation& observation,
                 std::string key,
                 std::string value,
@@ -196,7 +254,11 @@ Observation refresh_observation(Observation observation,
         if (access.object_usability_observable) {
             write_fact(observation, "object." + object.id + ".usable",
                        object.usable ? "true" : "false", "direct_object_inspection", now);
+            if (object.usable) {
+                resolve_constraints(observation, ActionConstraintType::TargetUnusable, object.id);
+            }
         }
+        resolve_constraints(observation, ActionConstraintType::TargetAbsent, object.id);
     }
     // Objects absent from this refresh remain remembered, but no longer count
     // as current visual knowledge. This is the minimal stale/unknown hook for
@@ -233,6 +295,10 @@ Observation refresh_observation(Observation observation,
     if (access.wallet_balance_observable) {
         write_fact(observation, "wallet.balance", std::to_string(world.wallet),
                    "direct_wallet_observation", now);
+        // The actor has observed a resource update, not W's value at the
+        // moment of failure.  Reconsider the old failed requirement through
+        // the ordinary O-side wallet precondition on this refresh.
+        resolve_constraints(observation, ActionConstraintType::ResourceRequirement, {});
     }
     const bool alarm_rang = std::any_of(previous_outcome.events.begin(), previous_outcome.events.end(),
         [](const WorldEvent& event) { return event.id == "alarm-rings"; });
@@ -282,6 +348,7 @@ Observation refresh_observation(Observation observation,
         believed_object.affordances = known_object.affordances;
         for (ActionType action : known_object.affordances) {
             if (subjective_preconditions_allow(action, observation, believed_object)
+                && !is_blocked(observation, action, known_object.id)
                 && !observation_knows_action(observation, action)) {
                 observation.known_actions.push_back(action);
                 observation.action_target_bindings.push_back({action, known_object.id});
@@ -302,6 +369,7 @@ void apply_self_action_feedback(Observation& observation,
     observation.last_self_action = {true, outcome.action, outcome.accepted, outcome.task_id,
         outcome.task_completed && completion_is_observable,
         outcome.accepted ? "accepted by W" : "rejected by W", "self_action_feedback", observed_at};
+    record_constraint(observation, outcome, observed_at);
     if (!outcome.accepted && outcome.failure_reason == RejectionReason::TargetAbsent
         && !outcome.target_object_id.empty()) {
         const std::string object_key = "object." + outcome.target_object_id;
@@ -395,6 +463,15 @@ std::string observation_summary(const Observation& observation) {
         if (index + 1 < observation.known_actions.size()) output << ", ";
     }
     output << "], " << observation_updates_summary(observation)
+           << ", action_constraints=[";
+    for (std::size_t index = 0; index < observation.action_constraints.size(); ++index) {
+        const ActionConstraintBelief& belief = observation.action_constraints[index];
+        output << to_string(belief.action) << '@' << belief.target_object_id << ':'
+               << to_string(belief.constraint) << '{' << (belief.satisfied ? "resolved" : "unsatisfied")
+               << ", " << belief.source << '}';
+        if (index + 1 < observation.action_constraints.size()) output << ", ";
+    }
+    output << ']'
            << ", temperature_celsius=" << fact_value(observation, "room.temperature_celsius")
            << ", time=" << fact_value(observation, "clock.time")
            << ", light=" << fact_value(observation, "room.light")

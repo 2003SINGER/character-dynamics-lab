@@ -834,6 +834,8 @@ bool Simulation::verify(std::ostream& output) const {
         && !rejected_observation.last_self_action.accepted
         && std::find(rejected_appraisal.tags.begin(), rejected_appraisal.tags.end(), "action_rejected")
             != rejected_appraisal.tags.end();
+    const bool rejected_unusable_action_is_suppressed = !observation_knows_action(
+        rejected_observation, ActionType::UseComputer);
     const bool keeps_broken_object_visible = observation_knows_action(visible_observation, ActionType::UseComputer)
         && std::find(visible_observation.known_object_ids.begin(), visible_observation.known_object_ids.end(), "computer")
             != visible_observation.known_object_ids.end();
@@ -843,6 +845,37 @@ bool Simulation::verify(std::ostream& output) const {
     const WorldOutcome rejected_purchase = insufficient_wallet_world.execute(ActionType::ShopOnPhone);
     const bool does_not_leak_hidden_wallet = observation_knows_action(insufficient_wallet_observation, ActionType::ShopOnPhone)
         && !rejected_purchase.accepted;
+    Observation rejected_purchase_observation = insufficient_wallet_observation;
+    apply_self_action_feedback(rejected_purchase_observation, rejected_purchase,
+                               insufficient_wallet_world.time_summary());
+    rejected_purchase_observation = refresh_observation(std::move(rejected_purchase_observation),
+                                                        insufficient_wallet_world, rejected_purchase);
+    const bool rejected_resource_action_is_suppressed = !observation_knows_action(
+        rejected_purchase_observation, ActionType::ShopOnPhone)
+        && find_fact(rejected_purchase_observation, FactKey::WalletBalance) == nullptr
+        && std::any_of(rejected_purchase_observation.action_constraints.begin(),
+                       rejected_purchase_observation.action_constraints.end(),
+                       [](const ActionConstraintBelief& belief) {
+                           return belief.action == ActionType::ShopOnPhone
+                               && belief.constraint == ActionConstraintType::ResourceRequirement
+                               && !belief.satisfied
+                               && belief.source == "failed_resource_check";
+                       });
+    insufficient_wallet_world.wallet = 120;
+    InformationAccess wallet_refresh_access;
+    wallet_refresh_access.wallet_balance_observable = true;
+    const Observation refreshed_resource_observation = refresh_observation(
+        rejected_purchase_observation, insufficient_wallet_world, {}, wallet_refresh_access);
+    const bool resource_constraint_recovers_after_credible_update = observation_knows_action(
+        refreshed_resource_observation, ActionType::ShopOnPhone)
+        && has_known_fact(refreshed_resource_observation, FactKey::WalletBalance, "120")
+        && std::none_of(refreshed_resource_observation.action_constraints.begin(),
+                         refreshed_resource_observation.action_constraints.end(),
+                         [](const ActionConstraintBelief& belief) {
+                             return belief.action == ActionType::ShopOnPhone
+                                 && belief.constraint == ActionConstraintType::ResourceRequirement
+                                 && !belief.satisfied;
+                         });
     World stale_object_world;
     Observation object_observation = refresh_observation({}, stale_object_world, {});
     auto& stale_objects = stale_object_world.current_room().objects;
@@ -1060,8 +1093,11 @@ bool Simulation::verify(std::ostream& output) const {
            << ", completed_task_stays_quiet=" << completed_task_stays_quiet
            << ", deduplicates_actions=" << deduplicates_actions
            << ", preserves_rejected_feedback=" << preserves_rejected_feedback
+           << ", rejected_unusable_action_is_suppressed=" << rejected_unusable_action_is_suppressed
            << ", keeps_broken_object_visible=" << keeps_broken_object_visible
            << ", does_not_leak_hidden_wallet=" << does_not_leak_hidden_wallet
+           << ", rejected_resource_action_is_suppressed=" << rejected_resource_action_is_suppressed
+           << ", resource_constraint_recovers_after_credible_update=" << resource_constraint_recovers_after_credible_update
            << ", marks_absent_object_stale=" << marks_absent_object_stale
            << ", reports_applied_delta=" << reports_applied_delta
            << ", starts_task_commitment=" << starts_task_commitment
@@ -1088,6 +1124,8 @@ bool Simulation::verify(std::ostream& output) const {
     return reproducible && profile_sensitive && validates_world && has_primitives
         && primitives_settle && handles_interruption && completed_task_stays_quiet && deduplicates_actions
         && preserves_rejected_feedback && keeps_broken_object_visible && does_not_leak_hidden_wallet
+        && rejected_unusable_action_is_suppressed && rejected_resource_action_is_suppressed
+        && resource_constraint_recovers_after_credible_update
         && marks_absent_object_stale && reports_applied_delta
         && starts_task_commitment && suspends_for_bodily_need && resumes_task_commitment
         && completes_task_with_variable_effort && completion_requires_observable_feedback
