@@ -6,7 +6,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| SYSTEM | **Runtime v1 closure + project stabilization：READY_FOR_INDEPENDENT_REVIEW** | π selection、ΔO exactly-once、threshold continue/replace、boundary order、API/文档/审计护栏已实现；17 项 gate-labelled registrations 通过，但 CLOSED 保留给独立复核 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[Objective Readiness](Objective_Readiness_v0.md) |
+| SYSTEM | **System v1 final hardening + scheduler-native fixtures：READY_FOR_INDEPENDENT_REVIEW** | Continuous Runtime ownership、threshold/W validation、typed rejection、Deadline/Phone/Commitment fixture smoke、trace、CI 与文档护栏已完成；CLOSED 保留给独立复核 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[Objective Readiness](Objective_Readiness_v0.md) |
 
 ## 研究范围护栏
 

@@ -62,7 +62,8 @@ void RuntimeScheduler::start_action(ActionType action, std::string target_object
 
 void RuntimeScheduler::invalidate_running_action() {
     if (!running_action_.has_value()) throw std::logic_error("Cannot invalidate without a running action");
-    schedule({"action_invalidated", now_total_minutes_ + 1, true, true});
+    schedule({"action_invalidated", now_total_minutes_ + 1, true, true, std::nullopt,
+              DecisionGateReason::PlanInvalidated});
 }
 
 void RuntimeScheduler::replace_running_action(ActionType action, std::string target_object_id,
@@ -78,7 +79,9 @@ void RuntimeScheduler::reject_action(ActionType action, std::string target_objec
     // A rejection is feedback for a proposed intent. It does not modify an
     // unrelated running action; the actor receives it at the next transition.
     schedule({"action_rejected:" + to_string(action) + ":" + target_object_id,
-              now_total_minutes_ + 1, true, false, std::move(rejection)});
+              now_total_minutes_ + 1, !running_action_.has_value(), false, std::move(rejection),
+              running_action_.has_value() ? std::optional<DecisionGateReason>{}
+                                           : std::optional<DecisionGateReason>{DecisionGateReason::ActionRejected}});
 }
 
 RuntimeBoundary RuntimeScheduler::advance_to_next_boundary() {
@@ -110,13 +113,11 @@ RuntimeBoundary RuntimeScheduler::advance_to_next_boundary() {
             continue;
         }
         boundary.events.push_back(*it);
-        if (it->opens_decision_gate) add_reason(boundary.decision_gate, DecisionGateReason::StrongExternalEvent);
+        if (it->gate_reason.has_value()) add_reason(boundary.decision_gate, *it->gate_reason);
+        else if (it->opens_decision_gate) add_reason(boundary.decision_gate, DecisionGateReason::StrongExternalEvent);
         if (it->interrupts_running_action && running_action_.has_value() && running_action_->interruptible) {
             running_action_->status = RunningActionStatus::Interrupted;
             add_reason(boundary.decision_gate, DecisionGateReason::ActionInterrupted);
-        }
-        if (it->id.rfind("action_rejected:", 0) == 0) {
-            add_reason(boundary.decision_gate, DecisionGateReason::ActionRejected);
         }
         it = scheduled_events_.erase(it);
     }

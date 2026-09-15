@@ -8,7 +8,7 @@
 | threshold semantics | reconsideration 可 continue/replace；replacement 先走 W validation，失败时旧 action 保持 running；physical invalidation 仍独立 | PASS | BLOCKER_NOW 已修 |
 | exactly-once appraisal | completion/rejection/invalidation immediate；policy-generated replacement feedback 延迟到下一 boundary；Reference v0 保留 deferred | PASS | BLOCKER_NOW 已修 |
 | event→O→X→S coverage | 见 [Runtime Semantic Audit Matrix](Runtime_Semantic_Audit_Matrix.md) | PASS | FIX_BEFORE_FIXTURE_MIGRATION：逐 fixture 继续回归 |
-| commitment consumer | 尚未迁移 scheduler-native commitment consumer | known gap | DEFERRED_TO_SCHEDULER_NATIVE_COMMITMENT_FIXTURE |
+| commitment consumer | canonical boundary 在 consume 前运行 `update_commitment`；hidden completion 不清 commitment | PASS | NO_ACTION |
 | string key drift | 已登记现有 producer/consumer 边界；暂不引入 ontology framework | known risk | FIX_BEFORE_BATCH_MIGRATION |
 | test granularity | 11 个 gate 标签复用 1 个 acceptance executable | transparent | FIX_BEFORE_BATCH_MIGRATION；报告不得称 17 套独立 fixture |
 | hardcoded seeded RNG | 当前 v1 用固定 seed 保证 replay；未来 batch 迁移前需注入 run seed | known risk | FIX_BEFORE_BATCH_MIGRATION |

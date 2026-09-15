@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-// Runtime Scheduler v1 is deliberately independent of the action-step
-// reference engine. It provides the temporal backbone for a future continuous
-// runtime; it does not yet replace World settlement, O, X, S, or policy.
+// Runtime Scheduler v1 is the world-agnostic temporal primitive used by the
+// continuous runtime. It owns clock/boundary and RunningAction lifecycle;
+// ContinuousRuntime owns W/O/X/S/policy orchestration and validation.
 enum class RunningActionStatus { Running, Completed, Interrupted, Rejected };
 
 struct RunningAction {
@@ -30,14 +30,6 @@ struct RuntimeRejection {
     std::string provenance;
 };
 
-struct ScheduledRuntimeEvent {
-    std::string id;
-    int occurs_at_total_minutes = 0;
-    bool opens_decision_gate = false;
-    bool interrupts_running_action = false;
-    std::optional<RuntimeRejection> rejection;
-};
-
 enum class DecisionGateReason {
     None,
     Initial,
@@ -48,6 +40,15 @@ enum class DecisionGateReason {
     NeedThresholdCrossed,
     CommitmentReconsideration,
     PlanInvalidated
+};
+
+struct ScheduledRuntimeEvent {
+    std::string id;
+    int occurs_at_total_minutes = 0;
+    bool opens_decision_gate = false;
+    bool interrupts_running_action = false;
+    std::optional<RuntimeRejection> rejection;
+    std::optional<DecisionGateReason> gate_reason;
 };
 
 struct DecisionGate {

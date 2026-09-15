@@ -1,8 +1,13 @@
 #include "continuous_runtime.h"
 
+namespace {
+constexpr double kNeedReconsiderationThreshold = 0.40; // Runtime v1 engineering semantics.
+}
+
 ContinuousRuntime::ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation,
-                                     InformationAccess access)
-    : scheduler_(scheduler), world_runtime_(world, scheduler), observation_(observation), access_(access) {}
+                                     InformationAccess access, unsigned int policy_seed)
+    : scheduler_(scheduler), world_runtime_(world, scheduler), observation_(observation), access_(access),
+      rng_(policy_seed), policy_seed_(policy_seed) {}
 
 bool ContinuousRuntime::schedule_next_world_boundary() {
     return world_runtime_.schedule_next_world_boundary(scheduler_);
@@ -27,6 +32,7 @@ void ContinuousRuntime::invalidate_running_action() {
 
 RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& state, const Personality& personality) {
     RuntimeExecutionResult result;
+    result.policy_seed = policy_seed_;
     const CharacterState before_continuous = state;
     result.runtime.boundary = scheduler_.advance_to_next_boundary();
     const auto& action = result.runtime.boundary.action_after_boundary;
@@ -46,8 +52,10 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     }
     schedule_next_world_boundary();
     bool threshold_reconsideration = false;
-    if ((before_continuous.hunger < 0.40 && state.hunger >= 0.40)
-        || (before_continuous.bathroom_urge < 0.40 && state.bathroom_urge >= 0.40)) {
+    if ((before_continuous.hunger < kNeedReconsiderationThreshold
+         && state.hunger >= kNeedReconsiderationThreshold)
+        || (before_continuous.bathroom_urge < kNeedReconsiderationThreshold
+            && state.bathroom_urge >= kNeedReconsiderationThreshold)) {
         result.runtime.boundary.decision_gate.open = true;
         result.runtime.boundary.decision_gate.reasons.push_back(DecisionGateReason::NeedThresholdCrossed);
         threshold_reconsideration = true;
@@ -55,7 +63,9 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     if (action.has_value() && action->status == RunningActionStatus::Completed) {
         result.outcome = world_runtime_.world().settle_runtime_completion(
             action->action, action->target_object_id, action->elapsed_minutes);
-        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary(), true, false);
+        result.pre_policy_outcome = result.outcome;
+        apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary(),
+                                   access_.self_task_completion_observable, false);
     } else if (action.has_value() && action->status == RunningActionStatus::Interrupted) {
         WorldOutcome invalidation;
         invalidation.action = action->action;
@@ -64,10 +74,12 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         invalidation.provenance = "ContinuousRuntime::plan_invalidated";
         invalidation.plan_invalidated = true;
         result.outcome = invalidation;
+        result.pre_policy_outcome = result.outcome;
         apply_self_action_feedback(observation_, *result.outcome, world_runtime_.time_summary(), true, false);
     }
     result.appraisal = appraise(observation_, state, personality);
     result.impulse_state = apply_appraisal_impulse(state, result.appraisal, personality);
+    update_commitment(state, observation_, scheduler_.now_total_minutes());
     consume_appraisal_inputs(observation_);
     if (result.runtime.boundary.decision_gate.open
         && (result.outcome.has_value() || !action.has_value()
@@ -79,6 +91,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         for (const CandidateAction& candidate : result.decision.candidates) {
             if (candidate.action == selected && candidate.probability > 0.0) {
                 result.selected_action = selected;
+                result.selected_target_object_id = candidate.target_object_id;
                 // A threshold crossing is a subjective reconsideration point. Keep
                 // the running action and its elapsed progress unless an explicit
                 // physical interruption outcome was produced at this boundary.
@@ -90,6 +103,8 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
                     && !same_intent) {
                     const WorldOutcome validation = world_runtime_.validate_runtime_start(
                         candidate.action, candidate.target_object_id);
+                    result.replacement_validation_performed = true;
+                    result.replacement_validation_accepted = validation.accepted;
                     if (!validation.accepted) {
                         scheduler_.reject_action(candidate.action, candidate.target_object_id, RuntimeRejection{
                             false, candidate.action, candidate.target_object_id,
@@ -103,6 +118,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
                     reconsideration.task_session_interrupted = true;
                     reconsideration.provenance = "ContinuousRuntime::policy_reconsideration";
                     result.outcome = reconsideration;
+                    result.post_policy_outcome = reconsideration;
                     apply_self_action_feedback(observation_, reconsideration,
                                                world_runtime_.time_summary(), true, false);
                     scheduler_.replace_running_action(candidate.action, candidate.target_object_id,

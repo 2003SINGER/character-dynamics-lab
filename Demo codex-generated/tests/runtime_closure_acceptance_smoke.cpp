@@ -133,6 +133,7 @@ int main() {
     replace_state.hunger = 0.39;
     const RuntimeExecutionResult replace_tick = replace_runtime.execute_next_boundary(replace_state, personality);
     if (!replace_tick.policy_evaluated || !replace_tick.outcome.has_value()
+        || !replace_tick.replacement_validation_performed || !replace_tick.replacement_validation_accepted
         || !replace_tick.outcome->task_session_interrupted
         || replace_tick.outcome->provenance != "ContinuousRuntime::policy_reconsideration"
         || replace_scheduler.now_total_minutes() != replace_tick.runtime.boundary.at_total_minutes
@@ -176,6 +177,8 @@ int main() {
     const RuntimeExecutionResult rejected_replace_tick =
         rejected_replace_runtime.execute_next_boundary(rejected_replace_state, personality);
     if (!rejected_replace_tick.policy_evaluated || !rejected_replace_tick.selected_action.has_value()
+        || !rejected_replace_tick.replacement_validation_performed
+        || rejected_replace_tick.replacement_validation_accepted
         || *rejected_replace_tick.selected_action != ActionType::ShopOnPhone
         || !rejected_replace_scheduler.running_action().has_value()
         || rejected_replace_scheduler.running_action()->action != ActionType::StudyFocused
@@ -184,10 +187,12 @@ int main() {
         || rejected_replace_tick.outcome.has_value()) return 20;
     const RuntimeExecutionResult rejected_feedback_tick =
         rejected_replace_runtime.execute_next_boundary(rejected_replace_state, personality);
-    if (rejected_feedback_tick.runtime.boundary.decision_gate.reasons.end()
-               == std::find(rejected_feedback_tick.runtime.boundary.decision_gate.reasons.begin(),
+    if (rejected_feedback_tick.policy_evaluated
+        || rejected_feedback_tick.runtime.boundary.decision_gate.reasons.end()
+               != std::find(rejected_feedback_tick.runtime.boundary.decision_gate.reasons.begin(),
                             rejected_feedback_tick.runtime.boundary.decision_gate.reasons.end(),
                             DecisionGateReason::ActionRejected)
+        || rejected_replace_observation.action_constraints.empty()
         || rejected_replace_observation.pending_appraisal_updates.size() != 0
         || !rejected_replace_scheduler.running_action().has_value()
         || rejected_replace_scheduler.running_action()->action != ActionType::StudyFocused) return 21;

@@ -96,6 +96,16 @@ add_executable(character_dynamics_runtime_closure_acceptance_smoke tests/runtime
 target_link_libraries(character_dynamics_runtime_closure_acceptance_smoke PRIVATE character_dynamics_runtime)
 add_test(NAME character_dynamics_runtime_closure_acceptance_smoke
          COMMAND character_dynamics_runtime_closure_acceptance_smoke)
+
+add_executable(character_dynamics_runtime_trace_smoke tests/runtime_trace_smoke.cpp)
+target_link_libraries(character_dynamics_runtime_trace_smoke PRIVATE character_dynamics_runtime)
+add_test(NAME character_dynamics_runtime_trace_smoke
+         COMMAND character_dynamics_runtime_trace_smoke)
+
+add_executable(character_dynamics_runtime_mechanism_fixtures_smoke tests/runtime_mechanism_fixtures_smoke.cpp)
+target_link_libraries(character_dynamics_runtime_mechanism_fixtures_smoke PRIVATE character_dynamics_runtime)
+add_test(NAME character_dynamics_runtime_mechanism_fixtures_smoke
+         COMMAND character_dynamics_runtime_mechanism_fixtures_smoke)
 # Closure matrix names intentionally point at the same deterministic acceptance
 # binary so CI/reporting can track each gate without duplicating fixture logic.
 foreach(gate_name IN ITEMS

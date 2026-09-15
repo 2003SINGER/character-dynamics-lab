@@ -17,10 +17,10 @@
 | E typed rejection | PASS | scheduler rejection event 携带 accepted/action/target/failure/actual_elapsed/provenance typed payload，并在下一 transition 进入 O |
 | F continuous/impulse | PASS (v1 adapter) | `advance_continuous_state` 与 `apply_appraisal_impulse` 分离；chunk equivalence smoke |
 | G decision gate | PASS | weak/hidden event closed；completion/invalidation/rejection open；threshold crossing evaluates policy immediately and preserves the running action unless an explicit interruption occurs |
-| H docs/regression | PASS | 6 个基础测试 + 1 个 closure acceptance executable（以 11 个 gate 标签注册），reference `--verify` 与 repo health 通过；CI 配置已加入 |
+| H docs/regression | PASS | 基础、closure、trace、mechanism fixture registrations 均通过；reference `--verify`、repo health 与 CI 配置通过 |
 
 ## Executable evidence
 
-当前 CTest：6 个基础注册 + 1 个 closure acceptance executable + 11 个 gate-labelled registrations，共 17/17 PASS；这不是 17 套独立 fixture。
+当前 CTest：6 个基础注册 + closure acceptance + trace + mechanism fixture executable，并保留 gate-labelled closure registrations；总数随 fixture 增长，不将标签数表述为独立 fixture 数。
 
 `RUNTIME_V1_CLOSURE_AND_PROJECT_STABILIZATION = READY_FOR_INDEPENDENT_REVIEW`。π selection、completion/rejection exactly-once、threshold continue/replace、physical preemption distinction 均有 dedicated assertions；下一阶段 fixture migration 等待独立复核。
