@@ -53,6 +53,12 @@ int main() {
     CharacterState cleared; cleared.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
     update_commitment(cleared, completion_feedback, 562);
     if (cleared.commitment.status != CommitmentStatus::None) return 11;
+    Observation resume_feedback; WorldOutcome resumed; resumed.accepted = true; resumed.action = ActionType::StudyFocused;
+    resumed.task_id = "coursework"; resumed.task_completed = false; resumed.provenance = "fixture-resume";
+    apply_self_action_feedback(resume_feedback, resumed, "09:23", true, false);
+    CharacterState resumed_state; resumed_state.commitment = {CommitmentStatus::Suspended, "coursework", "fixture", 0, 0};
+    update_commitment(resumed_state, resume_feedback, 563);
+    if (resumed_state.commitment.status != CommitmentStatus::Active) return 12;
     cs.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
     World rw; rw.time.minute_of_day = 560; Observation ro = refresh_observation({}, rw, {});
     RuntimeScheduler rsch(560); ContinuousRuntime rrt(rsch, rw, ro);
@@ -66,13 +72,13 @@ int main() {
     apply_self_action_feedback(interruption_feedback, interrupted, "09:22", true, false);
     CharacterState interrupted_state; interrupted_state.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
     update_commitment(interrupted_state, interruption_feedback, 562);
-    if (interrupted_state.commitment.status != CommitmentStatus::Active) return 12;
+    if (interrupted_state.commitment.status != CommitmentStatus::Active) return 13;
 
     InformationAccess no_completion; no_completion.self_task_completion_observable = false;
     World nw; nw.time.minute_of_day = 560; nw.tasks.front().effort_target = 0.01;
     RuntimeScheduler nsch(560); Observation no = refresh_observation({}, nw, {}, no_completion);
     ContinuousRuntime nrt(nsch, nw, no, no_completion); nrt.submit_action_intent(ActionType::StudyFocused, "desk", 1);
     CharacterState ns; ns.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
-    nrt.execute_next_boundary(ns, p); if (ns.commitment.status != CommitmentStatus::Active) return 15;
+    nrt.execute_next_boundary(ns, p); if (ns.commitment.status != CommitmentStatus::Active) return 16;
     return 0;
 }
