@@ -24,7 +24,16 @@ int main() {
     Observation d = refresh_observation({}, dw, {}); apply_observable_runtime_event(d, FactKey::TaskDeadlinePassed, "1", "world_event:task-deadline", "09:00");
     CharacterState ds; ds.commitment = {CommitmentStatus::Active, "coursework", "coverage", 0, 0}; Personality dp;
     if (!has(d, "task.deadline_passed") || !has_tag(appraise(d, ds, dp), "deadline_passed")) return 6;
-    { World ew; Observation eo = refresh_observation({}, ew, {}); apply_world_events(eo, {{"evening", "evening", "clock", 1}}, ew, {}, "09:00"); if (!has(eo, "world.time_phase")) return 7; }
+    { // Evening is context-only: it projects O but creates no direct X/S impulse.
+        World ew; Observation eo = refresh_observation({}, ew, {}); consume_appraisal_inputs(eo);
+        apply_world_events(eo, {{"evening", "evening", "clock", 1}}, ew, {}, "09:00");
+        CharacterState es; Personality ep; const Appraisal evening_x = appraise(eo, es, ep);
+        const StateUpdate evening_s = apply_appraisal_impulse(es, evening_x, ep);
+        if (!has(eo, FactKey::EveningPhase) || !evening_x.tags.empty() || !evening_x.semantic_signals.empty()
+            || evening_s.applied.boredom != 0.0 || evening_s.applied.fatigue != 0.0
+            || evening_s.applied.task_pressure != 0.0 || evening_s.applied.satisfaction != 0.0
+            || evening_s.applied.anxiety != 0.0) return 7;
+    }
 
     WorldOutcome completion; completion.accepted = true; completion.action = ActionType::StudyFocused;
     completion.task_id = "coursework"; completion.task_completed = true; completion.provenance = "fixture";
