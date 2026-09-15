@@ -37,10 +37,11 @@ int main() {
     const WorldOutcome start = world.validate_runtime_start(ActionType::StudyFocused, "desk");
     if (!start.accepted) { std::cerr << "W rejected a legal study start\n"; return 1; }
     scheduler.start_action(ActionType::StudyFocused, "desk", 35, true);
-    // This is only a temporal boundary request. The actual message payload is
-    // produced by World::advance_runtime_by at its legacy deterministic 09:30
-    // schedule, not hand-written by this caller.
-    scheduler.schedule({"world_event_boundary", 9 * 60 + 30, false, false});
+    // W is the boundary source; the fixture does not duplicate its schedule.
+    if (!world_runtime.schedule_next_world_boundary(scheduler)) {
+        std::cerr << "World did not expose a next runtime boundary\n";
+        return 1;
+    }
 
     // [09:00, 09:10): continuous S receives both elapsed duration and the
     // running study action, while policy remains closed at the weak event.

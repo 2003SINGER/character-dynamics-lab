@@ -6,6 +6,7 @@
 #include "world_primitive.h"
 
 #include <string>
+#include <optional>
 #include <vector>
 
 struct WorldEvent {
@@ -105,6 +106,7 @@ struct World {
     // Scheduler-native API: time is advanced only by the runtime clock. This
     // leaves Reference v0's whole-action `settle` semantics unchanged.
     std::vector<WorldEvent> advance_runtime_by(int elapsed_minutes);
+    std::optional<WorldEvent> next_runtime_event_after(int total_minutes) const;
     WorldOutcome execute(ActionType action);
     std::string time_summary() const;
     std::string summary() const;

@@ -585,6 +585,25 @@ std::vector<WorldEvent> World::advance_runtime_by(int elapsed_minutes) {
     return transition.events;
 }
 
+std::optional<WorldEvent> World::next_runtime_event_after(int total_minutes) const {
+    const int first_day = total_minutes / kMinutesPerDay;
+    for (int day_index = first_day; day_index <= first_day + 2; ++day_index) {
+        for (const ScheduledEvent& scheduled : schedule_for_day(scenario_seed, day_index)) {
+            const int absolute_minute = day_index * kMinutesPerDay + scheduled.minute_of_day;
+            if (absolute_minute <= total_minutes) continue;
+            switch (scheduled.kind) {
+            case ScheduledEventKind::Alarm: return WorldEvent{"alarm-rings", "the alarm clock rings in the room", "room/alarm-clock", absolute_minute};
+            case ScheduledEventKind::StudyMessage: return WorldEvent{"message-study-group", "a study-group message arrives", "phone notification", absolute_minute};
+            case ScheduledEventKind::Weather: return WorldEvent{scheduled.rainy ? "weather-rain" : "weather-clear", "weather changes", "world/weather", absolute_minute};
+            case ScheduledEventKind::Temperature: return WorldEvent{"room-temperature-shift", "room temperature changes", "world/temperature", absolute_minute};
+            case ScheduledEventKind::TaskReminder: return WorldEvent{"task-reminder", "calendar reminder: a task remains due today", "calendar", absolute_minute};
+            case ScheduledEventKind::Evening: return WorldEvent{"evening", "evening begins", "world clock", absolute_minute};
+            }
+        }
+    }
+    return std::nullopt;
+}
+
 std::string World::time_summary() const {
     return ::time_summary(time);
 }

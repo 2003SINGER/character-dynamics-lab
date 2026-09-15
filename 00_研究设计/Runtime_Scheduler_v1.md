@@ -58,7 +58,9 @@ called once per clock minute. `DecisionGate` only opens for an action
 completion, rejection, a strong external event, interruption, a need
 threshold, commitment reconsideration, or plan invalidation.
 
-`World::validate_runtime_start` is the scheduler-native start gate: policy's
+`WorldRuntimeAdapter::schedule_next_world_boundary` queries W's authoritative
+event source and registers the next event; fixtures no longer copy known W
+timestamps into the scheduler. `World::validate_runtime_start` is the scheduler-native start gate: policy's
 intent must be accepted by W before a `RunningAction` is created. A later
 `World::settle_runtime_completion` applies action effects,
 counters, task effort and typed `WorldOutcome`, but never advances `World.time`
