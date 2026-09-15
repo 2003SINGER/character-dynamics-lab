@@ -1,0 +1,430 @@
+我看完了。**这次我不同意仓库里的 `CLOSED`。**
+
+HEAD 确实是 **`6757e2b docs: mark continuous runtime closure complete`**，`main` 也确实没动，仍在 `e9ad2eb`。 
+
+前面我们抓的那些坑里，很多确实修好了：deadline 现在参与“全局最早事件”比较，scheduler 有 boundary dedupe，`InformationAccess` 进了 projector，typed rejection 有 payload，`apply_appraisal_impulse()` 也独立出来了。  
+
+**但是我现在发现了至少 3 个足以把 Closure 重新打回 `NOT_CLOSED` 的硬问题。**
+
+## 1. 最严重：canonical runtime 实际上没有按 `π` 选动作
+
+现在 `ContinuousRuntime::execute_next_boundary()` 在 gate 打开以后：
+
+```cpp
+result.decision = decide(...);
+
+for (const CandidateAction& candidate : result.decision.candidates) {
+    if (candidate.probability > 0.0) {
+        submit_action_intent(candidate.action, ...);
+        break;
+    }
+}
+```
+
+也就是：
+
+> **选第一个概率 > 0 的候选。**
+
+不是 sample，也不是 argmax。
+
+偏偏 `Observation` 构造 `A^O` 时：
+
+```cpp
+observation.known_actions.push_back(ActionType::Idle);
+```
+
+**Idle 永远放第一个。** 
+
+`decide()` 又严格按 `known_actions` 顺序 push candidates，而且 Idle 阈值是 0，因此它基本一定有正概率。
+
+所以现在 canonical runtime 的真实行为很可能是：
+
+```text
+DecisionGate opens
+↓
+π 算了一堆漂亮概率
+↓
+完全不管概率
+↓
+第一个 positive candidate = Idle
+↓
+RunningAction = Idle
+```
+
+而旧 Reference 明明是：
+
+```cpp
+sample_action(decision, rng)
+```
+
+按整个概率分布采样。
+
+这不是小 bug。
+
+这是直接违反我们写进架构里的：
+
+```text
+DecisionGate
+→ A^O
+→ π
+→ ActionIntent
+```
+
+现在实际上是：
+
+```text
+DecisionGate
+→ A^O
+→ π
+→ candidate-list-order
+→ ActionIntent
+```
+
+### 为什么 17/17 没发现？
+
+因为 vertical smoke 只检查：
+
+```text
+decision.candidates 非空
+scheduler.running_action 有值
+```
+
+**根本没检查新启动的动作是不是 π 应该产生的动作。** 
+
+所以这是验收矩阵的真实漏项。
+
+---
+
+## 2. 增量数据流还有更隐蔽的 bug：ΔO 没有“消费一次后清掉”
+
+我们一直强调：
+
+> **流动的是 ΔO，不是把历史事件每次重新解释。**
+
+但当前 `execute_next_boundary()`：
+
+```text
+advance_next_boundary()
+→ apply_world_events()
+→ advance_continuous_state()
+→ appraise()
+→ apply_appraisal_impulse()
+```
+
+执行完 `appraise()` 后，我没看到它清：
+
+```text
+observation.updates_this_refresh
+observation.pending_appraisal_updates
+```
+
+也没清已经消费过的 `last_self_action`。
+
+而 `appraise()` 每次都会重新遍历：
+
+```cpp
+for (update : observation.updates_this_refresh)
+for (update : observation.pending_appraisal_updates)
+```
+
+同时只要 `last_self_action.has_action` 仍然为真，就再次解释上次动作。
+
+这意味着可能发生：
+
+```text
+09:30 message
+ΔO: unread_messages changed
+→ X
+→ task_pressure +0.08
+```
+
+然后 10:00 一个普通 max-step：
+
+```text
+没有新 message
+但旧 updates_this_refresh 还在
+→ 同一条 message 再 X 一次
+→ task_pressure 又 +0.08
+```
+
+再下一 boundary：
+
+```text
+又来一次
+```
+
+动作 completion/rejection 也可能类似：
+
+```text
+一次 Study completion
+→ last_self_action = StudyFocused
+→ 每个后续 boundary 都可能再次被 appraise 成
+  "task_effort_session"
+```
+
+这正好打中了我们这个系统最核心的概念错误：
+
+> **事件不是事件流了，而变成持久驻留、反复触发的输入。**
+
+Reference v0 其实知道这个问题，所以在 appraisal 后会：
+
+```cpp
+clear_pending_appraisal_updates(observation);
+```
+
+
+
+新 canonical runtime 把这一步漏了。
+
+因此 **F / EVENT FLOW 的 exactly-once consumption 现在不能算 PASS。**
+
+---
+
+## 3. `NeedThresholdCrossed` 会开 gate，但根本不会重新决策
+
+这个也很漂亮地骗过了 acceptance smoke。
+
+代码：
+
+```cpp
+if (hunger crossed || bathroom crossed) {
+    gate.open = true;
+    reasons.push_back(NeedThresholdCrossed);
+}
+```
+
+很好。
+
+但是后面真正运行 policy 的条件是：
+
+```cpp
+if (gate.open
+    && (outcome.has_value()
+        || !action.has_value()
+        || action->status != Running)) {
+    decide(...)
+}
+```
+
+
+
+所以：
+
+```text
+Sleep 240 min 正在 Running
+↓
+60min max-step
+↓
+hunger 穿过 threshold
+↓
+DecisionGate = OPEN
+↓
+RunningAction 仍然 Running
+↓
+条件不满足
+↓
+不运行 policy
+↓
+继续睡
+```
+
+那这个 `DecisionGate` 开了有啥意义？
+
+我们设计它的初衷明明就是：
+
+```text
+NeedThresholdCrossed
+→ reconsider current action
+→ continue / interrupt / replace
+```
+
+现在只是：
+
+> **记录了“我本来应该重新考虑”，然后啥也没做。**
+
+更关键的是 closure acceptance test 只检查：
+
+```cpp
+if (reason == NeedThresholdCrossed)
+    saw_threshold = true;
+```
+
+然后：
+
+```cpp
+if (!saw_threshold) fail;
+```
+
+它根本没检查：
+
+```text
+policy 是否真的运行
+RunningAction 是否真的被 reconsider
+```
+
+
+
+所以 B4/G 被判 PASS，实际上验的只是：
+
+> “有没有写下 NeedThresholdCrossed 这个 enum。”
+
+不是：
+
+> “threshold boundary 是否真的影响行为。”
+
+---
+
+## 4. 还有一个架构顺序和文档不一致
+
+验收矩阵写的是：
+
+> continuous → completion/invalidation → O → X → S impulse → gate 
+
+但代码实际：
+
+```text
+execute_next_boundary()
+↓
+advance_next_boundary()
+    ↓
+    scheduler advance
+    ↓
+    W advance
+    ↓
+    apply_world_events()  ← O 已经先被改了
+
+回来
+↓
+advance_continuous_state()
+↓
+completion
+↓
+appraise()
+```
+
+
+
+也就是目前：
+
+```text
+W event → O
+```
+
+发生在：
+
+```text
+S continuous Δt
+```
+
+之前。
+
+当前 `advance_continuous_state()` 暂时不读 O，所以数值上可能没炸；但它跟我们固定下来的 runtime ordering **不是同一个东西**。
+
+这至少说明 A2 的“固定顺序 PASS”写早了。
+
+---
+
+# 17/17 本身也要正确理解
+
+仓库确实注册了 17 个 CTest 名称。
+
+但其中 11 个：
+
+```text
+runtime_clock_authority_smoke
+runtime_world_event_boundary_smoke
+...
+runtime_state_threshold_boundary_smoke
+```
+
+**全部指向同一个 `runtime_closure_acceptance_smoke` executable。** 
+
+所以：
+
+> `17/17 PASS`
+
+作为 CTest 数字没撒谎。
+
+但不能理解成：
+
+> 17 套独立 fixture 全都分别验过。
+
+实际上 closure 的 11 个名字是在**重复运行同一个 acceptance binary**。
+
+那个 binary 目前也只有一组紧凑断言，而恰好漏掉了上面三个核心问题。
+
+我通过 GitHub 这里也不能替你重新执行本地 CTest，所以我不会否定 Luna 的“本地 17/17”；我的判断是：
+
+> **即使它们全绿，验收标准本身还不足以支持 CLOSED。**
+
+---
+
+## 这次哪些东西我认可已经 PASS
+
+不是全部推倒。
+
+我认可这些已经基本过了：
+
+- **单 authoritative clock**
+- W/runtime 时间同步
+- W event 自动 boundary + dedupe
+- deadline 参与最早 boundary 比较
+- start validation
+- runtime completion 不推进 clock
+- actual action elapsed provenance
+- typed rejection payload
+- ResourceInsufficient → ActionConstraintBelief
+- current RoomDemo 的 message/weather 基本 actor-local projection
+- hidden phone / curtain weather 约束
+- continuous / impulse API 形式拆分
+- invalidation API
+- Reference v0 保留
+- `main` 未修改
+
+所以过去这一小时不是白干。
+
+反而说明现在 Runtime v1 已经**非常接近闭环**了。
+
+---
+
+# 但按我们自己定的规则，状态必须改回
+
+```text
+CONTINUOUS_RUNTIME_V1 = NOT_CLOSED
+```
+
+不是开启新 milestone，不是“下一刀”。
+
+还是**同一个 closure milestone 验收失败**。
+
+当前至少有 4 个 blocker：
+
+1. **π→ActionIntent 错误**  
+   canonical owner 不能取 first-positive candidate；必须使用明确且可复现的 policy-selection 语义，并测试选择结果真的由 `π` 决定。
+
+2. **ΔO / self-action exactly-once consumption 缺失**  
+   每个 event/outcome 的 appraisal input 必须在消费后清除，不能跨 boundary 重复产生 impulse。
+
+3. **NeedThresholdCrossed gate 是假的**  
+   threshold gate 打开后必须真正进入 reconsideration，而不是 RunningAction 还在就跳过 policy。
+
+4. **boundary ordering 实现与协议不一致**  
+   `continuous Δt` 和 actor-local event projection 的实际执行顺序必须和文档一致，不能只是结果碰巧不受影响。
+
+然后给这四个补**针对性的 executable assertions**。特别必须有：
+
+```text
+policy_selection_respects_pi
+event_delta_consumed_once
+self_action_feedback_consumed_once
+threshold_gate_causes_reconsideration
+runtime_boundary_order_trace
+```
+
+现有 `runtime_closure_acceptance_smoke` 不够。
+
+所以我现在不会同意直接去迁 Deadline。
+
+**先把 repo 里的 CLOSED 撤回来，返修同一个 Closure Gate。**
+
+这次不是我又临时“发现下一刀”，而是我们第一次拿“闭环之后的完整 owner”做 end-to-end 审计，发现验收矩阵没有测到**数据流消费语义和 π→行为语义**。这俩恰恰都是 Character Dynamics 的核心，不可能带着它们宣布 runtime 闭环。

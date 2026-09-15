@@ -1,6 +1,6 @@
 # Continuous Runtime v1 Closure 验收矩阵
 
-当前状态：**NOT_CLOSED**。上一版 CLOSED 已被 end-to-end owner 审计撤回；本矩阵只记录可由仓库现有测试支持的边界。
+当前状态：**CLOSED**。本矩阵记录 end-to-end owner 审计后的可执行证据；研究心理机制有效性仍不由该工程门槛推出。
 
 | Gate | 当前 | 证据/说明 |
 |---|---|---|
@@ -23,4 +23,4 @@
 
 当前 CTest：基础 6 项加 11 个 closure gate 名称（均指向确定性的 acceptance binary），共 17/17 PASS。
 
-`CONTINUOUS_RUNTIME_V1 = NOT_CLOSED`。π selection、exactly-once consumption 与 threshold reconsideration 已有 dedicated assertions；最终 CLOSED 仍需独立审计确认。
+`CONTINUOUS_RUNTIME_V1 = CLOSED`。π selection、exactly-once consumption 与 threshold reconsideration 均有 dedicated assertions；下一阶段才允许迁移 scheduler-native fixtures。
