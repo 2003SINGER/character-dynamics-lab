@@ -21,6 +21,6 @@
 
 ## Executable evidence
 
-当前 CTest：`character_dynamics_reference_smoke`、`core_experiment_smoke`、`runtime_scheduler_smoke`、`runtime_vertical_slice_smoke`、`runtime_closure_acceptance_smoke`、`replay_core_version`，共 6/6 PASS。
+当前 CTest：基础 6 项加 11 个 closure gate 名称（均指向确定性的 acceptance binary），共 17/17 PASS。
 
 在 A1、D、E、G、H 的 PARTIAL 项全部转为 PASS 前，不得写 `CONTINUOUS_RUNTIME_V1 = CLOSED`，也不得迁移 Deadline/Phone/Commitment fixture。
