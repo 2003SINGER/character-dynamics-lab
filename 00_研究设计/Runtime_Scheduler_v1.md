@@ -1,6 +1,6 @@
 # Runtime Scheduler v1｜统一时间骨架
 
-状态：**Continuous Runtime v1 closure 进行中；尚未迁移既有 reference fixtures。**
+状态：**Continuous Runtime v1 closure 已完成；尚未迁移既有 reference fixtures。**
 
 当前 checkpoint：`TEMPORAL_KERNEL_PASS`；`FIRST_VERTICAL_SLICE_PASS`；
 `WORLD_RUNTIME_CLOCK_ADAPTER_PASS`（受控 slice）；完整 canonical owner、typed
@@ -116,11 +116,9 @@ psychological model, or authorize a batch/evaluator migration.
 
 ## Migration order and acceptance
 
-1. Complete the canonical runtime owner and typed WorldEvent/ActionOutcome → O
-   incremental projection; do not hand-write event payloads in fixtures.
-2. Recreate the Deadline fixture natively, proving that a deadline can become
+1. Recreate the Deadline fixture natively, proving that a deadline can become
    observable during a long action rather than only after it completes.
-3. Recreate Phone and Commitment as scheduler-native fixtures with
+2. Recreate Phone and Commitment as scheduler-native fixtures with
    equivalent information-boundary evidence.
 4. Only then consider replacing any action-step batch or evaluator path.
 

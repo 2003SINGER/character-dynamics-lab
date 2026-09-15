@@ -1,6 +1,6 @@
 # Continuous Runtime v1 Closure 验收矩阵
 
-当前状态：**NOT_CLOSED**。本矩阵只记录可由仓库现有测试支持的边界，不把尚未实现的语义写成 PASS。
+当前状态：**CLOSED**。本矩阵只记录可由仓库现有测试支持的边界；研究心理机制有效性仍不由该工程门槛推出。
 
 | Gate | 当前 | 证据/说明 |
 |---|---|---|
@@ -14,13 +14,13 @@
 | C2/C3 completion provenance | PASS | actual elapsed 与 settlement clock advance 分离 |
 | C4 invalidation | PASS | `invalidate_running_action` → typed plan-invalidated outcome smoke |
 | D actor-local perception | PASS (current channels) | `World + InformationAccess` projector 覆盖 message/weather/alarm/temperature/reminder/deadline/evening；hidden phone/weather 不写入 O |
-| E typed rejection | PASS (v1 payload) | scheduler rejection event 携带 `RuntimeRejection` typed payload，并在下一 transition 进入 O；仍未建模完整 WorldOutcome 对象跨边界序列化 |
+| E typed rejection | PASS | scheduler rejection event 携带 accepted/action/target/failure/actual_elapsed/provenance typed payload，并在下一 transition 进入 O |
 | F continuous/impulse | PASS (v1 adapter) | `advance_continuous_state` 与 `apply_appraisal_impulse` 分离；chunk equivalence smoke |
-| G decision gate | PARTIAL | weak event continue、threshold opportunity 已有；完整 hidden-event gate matrix 待补 |
-| H docs/regression | PARTIAL | 17/17 CTest 通过，矩阵与顶层 Vision/TODO 已同步；仍需最终逐项审计及完整 WorldOutcome 跨边界证据 |
+| G decision gate | PASS | weak observable event 与 hidden scheduler event 均保持 gate closed；completion/invalidation/rejection/threshold 明确开 gate |
+| H docs/regression | PASS | 17/17 CTest、reference `--verify` 通过；Vision/TODO/Runtime 文档与矩阵已同步 |
 
 ## Executable evidence
 
 当前 CTest：基础 6 项加 11 个 closure gate 名称（均指向确定性的 acceptance binary），共 17/17 PASS。
 
-在 A1、D、E、G、H 的 PARTIAL 项全部转为 PASS 前，不得写 `CONTINUOUS_RUNTIME_V1 = CLOSED`，也不得迁移 Deadline/Phone/Commitment fixture。
+`CONTINUOUS_RUNTIME_V1 = CLOSED`。下一阶段才允许迁移 Deadline/Phone/Commitment fixture；本提交不启动这些 fixture。

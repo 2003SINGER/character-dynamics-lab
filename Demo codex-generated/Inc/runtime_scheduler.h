@@ -22,9 +22,11 @@ struct RunningAction {
 };
 
 struct RuntimeRejection {
+    bool accepted = false;
     ActionType action = ActionType::Idle;
     std::string target_object_id;
     int failure_reason = 0;
+    int actual_elapsed_minutes = 0;
     std::string provenance;
 };
 

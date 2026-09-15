@@ -13,7 +13,7 @@ WorldOutcome ContinuousRuntime::submit_action_intent(ActionType action, const st
     WorldOutcome validation = world_runtime_.validate_runtime_start(action, target_object_id);
     if (!validation.accepted) {
         scheduler_.reject_action(action, target_object_id, RuntimeRejection{
-            action, target_object_id, static_cast<int>(validation.failure_reason), validation.provenance});
+            false, action, target_object_id, static_cast<int>(validation.failure_reason), 0, validation.provenance});
         return validation;
     }
     scheduler_.start_action(action, target_object_id, duration_minutes, interruptible);
