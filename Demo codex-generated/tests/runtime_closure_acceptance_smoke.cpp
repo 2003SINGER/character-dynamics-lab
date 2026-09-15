@@ -3,6 +3,7 @@
 #include "state.h"
 
 #include <cmath>
+#include <algorithm>
 #include <iostream>
 
 int main() {
@@ -30,7 +31,8 @@ int main() {
     CharacterState rejection_state;
     Personality rejection_personality;
     const RuntimeExecutionResult rejection_step = runtime.execute_next_boundary(rejection_state, rejection_personality);
-    if (observation.action_constraints.empty() || !rejection_step.runtime.boundary.decision_gate.open) return 4;
+    if (observation.action_constraints.empty() || !rejection_step.runtime.boundary.decision_gate.open
+        || !rejection_step.policy_evaluated || !observation.pending_appraisal_updates.empty()) return 4;
 
     // D3/D4: projection respects curtain and uses actual unread state.
     world.current_room().curtain_open = false;
@@ -101,17 +103,22 @@ int main() {
     threshold_state.hunger = 0.35;
     bool saw_threshold = false;
     bool saw_reconsideration = false;
+    bool preserved_progress = false;
     for (int step = 0; step < 8 && threshold_scheduler.running_action().has_value(); ++step) {
         const RuntimeExecutionResult tick = threshold_runtime.execute_next_boundary(threshold_state, personality);
         for (const DecisionGateReason reason : tick.runtime.boundary.decision_gate.reasons) {
             if (reason == DecisionGateReason::NeedThresholdCrossed) saw_threshold = true;
         }
-        if (tick.outcome.has_value() && tick.outcome->plan_invalidated
-            && tick.policy_evaluated) {
+        if (tick.policy_evaluated && tick.runtime.boundary.decision_gate.reasons.end()
+            != std::find(tick.runtime.boundary.decision_gate.reasons.begin(),
+                         tick.runtime.boundary.decision_gate.reasons.end(),
+                         DecisionGateReason::NeedThresholdCrossed)) {
             saw_reconsideration = true;
         }
+        if (saw_threshold && !tick.outcome.has_value() && threshold_scheduler.running_action().has_value()
+            && threshold_scheduler.running_action()->elapsed_minutes > 0) preserved_progress = true;
     }
-    if (!saw_threshold || !saw_reconsideration) return 14;
+    if (!saw_threshold || !saw_reconsideration || !preserved_progress) return 14;
 
     // Self-action completion feedback is immediate in runtime and must be consumed once.
     World completion_world;

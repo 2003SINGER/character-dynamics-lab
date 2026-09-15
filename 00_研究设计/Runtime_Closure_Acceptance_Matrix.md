@@ -9,14 +9,14 @@
 | B1 authoritative clock | PASS | adapter 强制 W time == scheduler clock；reference/vertical smoke |
 | B2 automatic W boundary | PASS | owner 每步续订；scheduler dedupe |
 | B3 earliest event + deadline | PASS | closure acceptance smoke 覆盖 deadline 早于 message |
-| B4 bounded threshold opportunity | PASS | `max_runtime_step_minutes` + threshold detection；crossing schedules invalidation and next gate cycle |
+| B4 bounded threshold opportunity | PASS | `max_runtime_step_minutes` + threshold detection；crossing opens an immediate reconsideration gate without resetting the running action |
 | C1 start validation | PASS | `submit_action_intent` 唯一 owner API；typed provenance |
 | C2/C3 completion provenance | PASS | actual elapsed 与 settlement clock advance 分离 |
 | C4 invalidation | PASS | `invalidate_running_action` → typed plan-invalidated outcome smoke |
 | D actor-local perception | PASS (current channels) | `World + InformationAccess` projector 覆盖 message/weather/alarm/temperature/reminder/deadline/evening；hidden phone/weather 不写入 O |
 | E typed rejection | PASS | scheduler rejection event 携带 accepted/action/target/failure/actual_elapsed/provenance typed payload，并在下一 transition 进入 O |
 | F continuous/impulse | PASS (v1 adapter) | `advance_continuous_state` 与 `apply_appraisal_impulse` 分离；chunk equivalence smoke |
-| G decision gate | PASS | weak/hidden event closed；completion/invalidation/rejection open；threshold crossing triggers replacement/reconsideration cycle |
+| G decision gate | PASS | weak/hidden event closed；completion/invalidation/rejection open；threshold crossing evaluates policy immediately and preserves the running action unless an explicit interruption occurs |
 | H docs/regression | PASS | 17/17 CTest、reference `--verify` 通过；Vision/TODO/Runtime 文档与矩阵已同步 |
 
 ## Executable evidence

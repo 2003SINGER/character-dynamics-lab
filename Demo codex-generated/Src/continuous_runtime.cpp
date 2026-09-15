@@ -36,7 +36,7 @@ ContinuousRuntimeStep ContinuousRuntime::advance_next_boundary() {
         rejection.target_object_id = event.rejection->target_object_id;
         rejection.failure_reason = static_cast<RejectionReason>(event.rejection->failure_reason);
         rejection.provenance = event.rejection->provenance;
-        apply_self_action_feedback(observation_, rejection, world_runtime_.time_summary());
+        apply_self_action_feedback(observation_, rejection, world_runtime_.time_summary(), true, false);
     }
     schedule_next_world_boundary();
     return {boundary, events};
@@ -59,16 +59,15 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         rejection.target_object_id = event.rejection->target_object_id;
         rejection.failure_reason = static_cast<RejectionReason>(event.rejection->failure_reason);
         rejection.provenance = event.rejection->provenance;
-        apply_self_action_feedback(observation_, rejection, world_runtime_.time_summary());
+        apply_self_action_feedback(observation_, rejection, world_runtime_.time_summary(), true, false);
     }
     schedule_next_world_boundary();
+    bool threshold_reconsideration = false;
     if ((before_continuous.hunger < 0.40 && state.hunger >= 0.40)
         || (before_continuous.bathroom_urge < 0.40 && state.bathroom_urge >= 0.40)) {
         result.runtime.boundary.decision_gate.open = true;
         result.runtime.boundary.decision_gate.reasons.push_back(DecisionGateReason::NeedThresholdCrossed);
-        if (action.has_value() && action->status == RunningActionStatus::Running) {
-            scheduler_.invalidate_running_action();
-        }
+        threshold_reconsideration = true;
     }
     if (action.has_value() && action->status == RunningActionStatus::Completed) {
         result.outcome = world_runtime_.world().settle_runtime_completion(
@@ -89,15 +88,21 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     consume_appraisal_inputs(observation_);
     if (result.runtime.boundary.decision_gate.open
         && (result.outcome.has_value() || !action.has_value()
-            || action->status != RunningActionStatus::Running)) {
+            || action->status != RunningActionStatus::Running || threshold_reconsideration)) {
         result.policy_evaluated = true;
         result.decision = decide(observation_, state, personality);
         const ActionType selected = sample_action(result.decision, rng_);
         for (const CandidateAction& candidate : result.decision.candidates) {
             if (candidate.action == selected && candidate.probability > 0.0) {
                 result.selected_action = selected;
-                submit_action_intent(candidate.action, candidate.target_object_id,
-                                     action_definition(candidate.action).default_duration_minutes);
+                // A threshold crossing is a subjective reconsideration point. Keep
+                // the running action and its elapsed progress unless an explicit
+                // physical interruption outcome was produced at this boundary.
+                if (!threshold_reconsideration || !action.has_value()
+                    || action->status != RunningActionStatus::Running) {
+                    submit_action_intent(candidate.action, candidate.target_object_id,
+                                         action_definition(candidate.action).default_duration_minutes);
+                }
                 break;
             }
         }
