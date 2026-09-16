@@ -171,12 +171,16 @@ StateUpdate advance_continuous_state(CharacterState& state,
         action_delta.screen_strain = running_action->action == ActionType::StudyAtComputer ? 0.020 * scale : 0.0;
         break;
     case ActionType::RestAtBed:
+        action_delta.boredom = 0.01 * scale;
         action_delta.fatigue = -0.050 * scale;
         action_delta.screen_strain = -0.020 * scale;
+        action_delta.anxiety = -0.018 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
         break;
     case ActionType::SleepAtBed:
+        action_delta.boredom = -0.015 * scale;
         action_delta.fatigue = -0.110 * scale;
         action_delta.screen_strain = -0.060 * scale;
+        action_delta.anxiety = -0.025 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
         break;
     case ActionType::UsePhone:
     case ActionType::ShopOnPhone:
@@ -187,8 +191,13 @@ StateUpdate advance_continuous_state(CharacterState& state,
     default:
         break;
     }
+    if (running_action->action == ActionType::Idle) action_delta.boredom = 0.025 * scale;
+    if (running_action->action == ActionType::UsePhone || running_action->action == ActionType::ShopOnPhone
+        || running_action->action == ActionType::UseComputer) action_delta.boredom = -0.025 * scale;
     state.fatigue = clamp_unit(state.fatigue + action_delta.fatigue);
     state.screen_strain = clamp_unit(state.screen_strain + action_delta.screen_strain);
+    state.boredom = clamp_unit(state.boredom + action_delta.boredom);
+    state.anxiety = clamp_unit(state.anxiety + action_delta.anxiety);
     const double metabolism = LivingDynamics::metabolism_rate(state, running_action) * scale;
     const double bathroom = LivingDynamics::bathroom_accumulation_rate(state, running_action) * scale;
     const bool recovery = running_action->action == ActionType::RestAtBed || running_action->action == ActionType::SleepAtBed;
@@ -207,6 +216,8 @@ StateUpdate advance_continuous_state(CharacterState& state,
     action_delta.fatigue = state.fatigue - before.fatigue;
     action_delta.screen_strain = state.screen_strain - before.screen_strain;
     update.requested.fatigue += action_delta.fatigue;
+    update.requested.boredom += action_delta.boredom;
+    update.applied.boredom += action_delta.boredom;
     update.requested.screen_strain += action_delta.screen_strain;
     update.applied.fatigue += action_delta.fatigue;
     update.applied.screen_strain += action_delta.screen_strain;
