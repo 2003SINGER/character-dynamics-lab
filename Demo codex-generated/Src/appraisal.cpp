@@ -35,11 +35,11 @@ Appraisal appraise(const Observation& observation,
         switch (observation.last_self_action.action) {
         case ActionType::UsePhone:
             appraisal.boredom_delta = -0.08 - 0.20 * old_state.boredom;
-            appraisal.fatigue_delta = 0.08;
+            appraisal.fatigue_delta = 0.03 + 0.08 * old_state.screen_strain;
             appraisal.task_pressure_delta = coursework_pending ? 0.07 : 0.0;
             appraisal.satisfaction_delta = 0.02 + 0.04 * old_state.boredom;
-            appraisal.screen_strain_delta = 0.12;
-            appraisal.purchase_urge_delta = 0.10;
+            appraisal.screen_strain_delta = 0.04 + 0.08 * (1.0 - old_state.screen_strain);
+            appraisal.purchase_urge_delta = 0.04 + 0.06 * old_state.boredom;
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"device_stimulation", "screen_strain", "task_deferred"}
                 : std::vector<std::string>{"device_stimulation", "screen_strain"};
@@ -52,10 +52,10 @@ Appraisal appraise(const Observation& observation,
             appraisal.tags = {"purchase_completed", "short_term_reward"};
             break;
         case ActionType::UseComputer:
-            appraisal.boredom_delta = -0.16;
-            appraisal.fatigue_delta = 0.10;
+            appraisal.boredom_delta = -0.06 - 0.14 * old_state.boredom;
+            appraisal.fatigue_delta = 0.04 + 0.07 * old_state.screen_strain;
             appraisal.task_pressure_delta = coursework_pending ? 0.05 : 0.0;
-            appraisal.screen_strain_delta = 0.11;
+            appraisal.screen_strain_delta = 0.04 + 0.07 * (1.0 - old_state.screen_strain);
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"screen_engagement", "task_deferred"}
                 : std::vector<std::string>{"screen_engagement"};
@@ -248,4 +248,3 @@ const char* appraisal_signal_name(AppraisalSignalKind kind) {
 }
 
 }
-

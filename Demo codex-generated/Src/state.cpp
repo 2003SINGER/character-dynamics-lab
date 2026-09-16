@@ -103,8 +103,9 @@ StateUpdate update_state(CharacterState& state,
 
     const double raw_task_pressure_delta = delta.task_pressure;
     if (raw_task_pressure_delta > 0.0) {
-        delta.task_pressure += 0.06 * personality.procrastination * config.state_accumulation;
-        delta.anxiety += 0.05 * personality.task_anxiety_sensitivity;
+        const double pressure_zone = std::clamp((state.task_pressure - .45) / .40, 0.0, 1.0);
+        delta.task_pressure += 0.02 * pressure_zone * personality.procrastination * config.state_accumulation;
+        delta.anxiety += 0.015 * pressure_zone * personality.task_anxiety_sensitivity;
     }
     if (raw_task_pressure_delta < 0.0) {
         delta.task_pressure *= (0.70 + 0.30 * personality.self_control) * config.state_decay;
@@ -210,8 +211,8 @@ StateUpdate advance_continuous_state(CharacterState& state,
     // Bodily needs feed back into affect continuously; the effect grows with
     // the current state and personality rather than acting as a fixed penalty.
     const double discomfort = LivingDynamics::need_discomfort(before, personality);
-    const double need_mood_cost = (0.010 + 0.018 * discomfort) * scale;
-    const double need_anxiety = (0.004 + 0.010 * discomfort)
+    const double need_mood_cost = (0.018 * discomfort) * scale;
+    const double need_anxiety = (0.010 * discomfort)
                               * personality.need_response * scale;
     state.satisfaction = clamp_unit(state.satisfaction - need_mood_cost);
     state.anxiety = clamp_unit(state.anxiety + need_anxiety);
