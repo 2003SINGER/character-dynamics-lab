@@ -113,6 +113,8 @@ add_test(NAME character_dynamics_runtime_channel_coverage_smoke
          COMMAND character_dynamics_runtime_channel_coverage_smoke)
 add_executable(character_dynamics_runtime_case_smoke tests/runtime_case_smoke.cpp)
 target_link_libraries(character_dynamics_runtime_case_smoke PRIVATE character_dynamics_runtime)
+add_executable(character_dynamics_single_room_demo Src/single_room_demo.cpp)
+target_link_libraries(character_dynamics_single_room_demo PRIVATE character_dynamics_runtime)
 # Each matrix entry executes the smallest executable that owns that semantic
 # case; labels are no longer aliases for one monolithic smoke binary.
 foreach(gate_name IN ITEMS
