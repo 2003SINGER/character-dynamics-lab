@@ -56,18 +56,24 @@ DecisionContext decide(const Observation& observation,
                                   + (commitment_can_bias_study(observation, state) ? "permits return" : "defers return");
         break;
     }
-    const double distraction = config.distraction_weight * (state.boredom * 0.65 + personality.procrastination * 0.25
+    const double boredom_activation = LivingDynamics::boredom_stimulation_drive(state);
+    const double distraction = config.distraction_weight * (boredom_activation * 0.65 + personality.procrastination * 0.25
                              + personality.stimulation_seeking * 0.20);
-    const double overload = LivingDynamics::overload(state, personality);
-    const double task_drive = config.task_drive_coefficient * (state.task_pressure * (0.70 + personality.self_control * 0.80)
-                            + state.anxiety * 0.20) * (1.0 - 0.45 * overload);
-    const double recovery_drive = config.recovery_drive_coefficient * (state.fatigue * 0.75 + state.screen_strain * 0.50
-                                + personality.rest_preference * 0.18);
-    const double hunger_drive = LivingDynamics::perceived_hunger(state, personality) * (0.85 + personality.need_response * 0.25);
-    const double bathroom_drive = LivingDynamics::perceived_bathroom(state, personality) * (0.90 + personality.need_response * 0.20);
+    const double overload = LivingDynamics::overload_risk(state, personality);
+    const double task_drive = config.task_drive_coefficient * (LivingDynamics::pressure_motivation(state)
+                            * (0.70 + personality.self_control * 0.80)
+                            * (0.85 + 0.30 * LivingDynamics::anxiety_facilitation(state))
+                            * (1.0 - 0.70 * overload - 0.35 * LivingDynamics::anxiety_impairment(state)));
+    const double recovery_drive = config.recovery_drive_coefficient * (LivingDynamics::pressure_motivation(state) * 0.05
+                                + LivingDynamics::fatigue_recovery_drive(state)
+                                + LivingDynamics::screen_aversion(state)
+                                + personality.rest_preference * 0.18 + overload * 0.08);
+    const double hunger_drive = LivingDynamics::hunger_drive(state, personality);
+    const double bathroom_drive = LivingDynamics::bathroom_drive(state, personality);
     // Above a moderate bodily-need level, leisure and task candidates lose
     // probability smoothly rather than relying on a hard scripted interrupt.
-    const double urgent_bodily_need = std::max(0.0, std::max(hunger_drive, bathroom_drive) - 0.65);
+    const double urgent_threshold = 0.65 - 0.08 * personality.need_response;
+    const double urgent_bodily_need = std::max(0.0, std::max(hunger_drive, bathroom_drive) - urgent_threshold);
 
     const double dominant = std::max({distraction, task_drive, recovery_drive, hunger_drive, bathroom_drive});
     if (dominant == bathroom_drive) {
@@ -97,14 +103,18 @@ DecisionContext decide(const Observation& observation,
         const double commitment_bonus = advances_committed_task ? 0.16 * config.commitment_bonus : 0.0;
         switch (action) {
         case ActionType::UsePhone:
-            decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * 0.30 - state.fatigue * 0.12
+            decision.candidates.push_back(candidate(action, 0.06 + distraction - LivingDynamics::screen_aversion(state) * (0.18 + 0.24 * personality.screen_strain_sensitivity) - state.fatigue * 0.12
                 - 0.34 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need + commitment_bonus, 0.12, "phone offers immediate stimulation but yields to urgent bodily needs"));
             break;
         case ActionType::ShopOnPhone:
-            decision.candidates.push_back(candidate(action, 0.03 + state.purchase_urge * 0.95 + distraction * 0.10 + commitment_bonus, 0.18, "phone supports online shopping when purchase urge activates"));
+        {
+            const double purchase_activation = LivingDynamics::purchase_urge_zone(state.purchase_urge) == LivingDynamics::ActivationZone::Low
+                ? 0.0 : std::clamp((state.purchase_urge - .25) / .75, 0.0, 1.0);
+            decision.candidates.push_back(candidate(action, 0.03 + purchase_activation * 0.95 + distraction * 0.10 + commitment_bonus, 0.18, "phone supports online shopping when purchase urge activates"));
             break;
+        }
         case ActionType::UseComputer:
-            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * 0.28 - 0.80 * urgent_bodily_need + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
+            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - LivingDynamics::screen_aversion(state) * (0.16 + 0.22 * personality.screen_strain_sensitivity) - 0.80 * urgent_bodily_need + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
             break;
         case ActionType::StudyAtComputer:
             decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 * config.study_fatigue_penalty - personality.procrastination * 0.16 + commitment_bonus, 0.18, "computer can be used for task progress"));
@@ -122,7 +132,9 @@ DecisionContext decide(const Observation& observation,
             decision.candidates.push_back(candidate(action,
                 0.06 + task_drive * 0.55 + state.boredom * 0.36
                 - 0.26 * (hunger_drive + bathroom_drive) - 0.75 * urgent_bodily_need
-                + 0.03 * static_cast<double>(state.commitment.suspended_decision_points)
+                // Reconsideration salience saturates after a few deferrals;
+                // a suspended commitment must not become an unbounded utility.
+                + 0.10 * (1.0 - std::exp(-0.55 * static_cast<double>(state.commitment.suspended_decision_points)))
                 - state.fatigue * 0.12 * config.study_fatigue_penalty - personality.self_control * 0.18
                 + commitment_bonus,
                 0.16,
@@ -284,4 +296,3 @@ std::string decision_summary(const DecisionContext& decision) {
 }
 
 }
-

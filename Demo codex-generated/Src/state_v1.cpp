@@ -73,30 +73,28 @@ StateUpdate update_state(CharacterState& state,
     delta.elapsed_minutes = elapsed_minutes;
     const double time_scale = static_cast<double>(elapsed_minutes) / 30.0;
 
-    delta.boredom = appraisal.boredom_delta
-                  + update.semantic_contribution.boredom
-                  + 0.01 * time_scale;
+    delta.boredom = appraisal.boredom_delta + update.semantic_contribution.boredom;
     delta.fatigue = appraisal.fatigue_delta
                   + update.semantic_contribution.fatigue
-                  + 0.012 * time_scale;
+                  ;
     delta.task_pressure = (appraisal.task_pressure_delta
                         + update.semantic_contribution.task_pressure)
                         * config.task_pressure_coupling;
     delta.satisfaction = appraisal.satisfaction_delta
                        + update.semantic_contribution.satisfaction
-                       - 0.01 * time_scale;
+                       ;
     delta.hunger = appraisal.hunger_delta
                  + update.semantic_contribution.hunger
-                 + 0.025 * time_scale;
+                 ;
     delta.bathroom_urge = appraisal.bathroom_urge_delta
                         + update.semantic_contribution.bathroom_urge
-                        + 0.020 * time_scale;
+                        ;
     delta.screen_strain = appraisal.screen_strain_delta
                         + update.semantic_contribution.screen_strain
-                        - 0.030 * time_scale;
+                       ;
     delta.purchase_urge = appraisal.purchase_urge_delta
                         + update.semantic_contribution.purchase_urge
-                        - 0.018 * time_scale;
+                        ;
     delta.anxiety = appraisal.anxiety_delta
                   + update.semantic_contribution.anxiety
                   + std::max(0.0, state.task_pressure - 0.55)
@@ -105,8 +103,9 @@ StateUpdate update_state(CharacterState& state,
 
     const double raw_task_pressure_delta = delta.task_pressure;
     if (raw_task_pressure_delta > 0.0) {
-        delta.task_pressure += 0.06 * personality.procrastination * config.state_accumulation;
-        delta.anxiety += 0.05 * personality.task_anxiety_sensitivity;
+        const double pressure_zone = std::clamp((state.task_pressure - .45) / .40, 0.0, 1.0);
+        delta.task_pressure += 0.02 * pressure_zone * personality.procrastination * config.state_accumulation;
+        delta.anxiety += 0.015 * pressure_zone * personality.task_anxiety_sensitivity;
     }
     if (raw_task_pressure_delta < 0.0) {
         delta.task_pressure *= (0.70 + 0.30 * personality.self_control) * config.state_decay;
@@ -173,12 +172,16 @@ StateUpdate advance_continuous_state(CharacterState& state,
         action_delta.screen_strain = running_action->action == ActionType::StudyAtComputer ? 0.020 * scale : 0.0;
         break;
     case ActionType::RestAtBed:
+        action_delta.boredom = 0.01 * scale;
         action_delta.fatigue = -0.050 * scale;
         action_delta.screen_strain = -0.020 * scale;
+        action_delta.anxiety = -0.018 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
         break;
     case ActionType::SleepAtBed:
+        action_delta.boredom = -0.015 * scale;
         action_delta.fatigue = -0.110 * scale;
         action_delta.screen_strain = -0.060 * scale;
+        action_delta.anxiety = -0.025 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
         break;
     case ActionType::UsePhone:
     case ActionType::ShopOnPhone:
@@ -189,8 +192,17 @@ StateUpdate advance_continuous_state(CharacterState& state,
     default:
         break;
     }
+    if (running_action->action == ActionType::Idle) action_delta.boredom = 0.025 * scale;
+    if (running_action->action == ActionType::UsePhone || running_action->action == ActionType::ShopOnPhone
+        || running_action->action == ActionType::UseComputer) action_delta.boredom = -0.025 * scale;
+    if (running_action->action != ActionType::UsePhone && running_action->action != ActionType::ShopOnPhone) {
+        action_delta.purchase_urge = -0.012 * state.purchase_urge * scale;
+    }
     state.fatigue = clamp_unit(state.fatigue + action_delta.fatigue);
     state.screen_strain = clamp_unit(state.screen_strain + action_delta.screen_strain);
+    state.boredom = clamp_unit(state.boredom + action_delta.boredom);
+    state.anxiety = clamp_unit(state.anxiety + action_delta.anxiety);
+    state.purchase_urge = clamp_unit(state.purchase_urge + action_delta.purchase_urge);
     const double metabolism = LivingDynamics::metabolism_rate(state, running_action) * scale;
     const double bathroom = LivingDynamics::bathroom_accumulation_rate(state, running_action) * scale;
     const bool recovery = running_action->action == ActionType::RestAtBed || running_action->action == ActionType::SleepAtBed;
@@ -199,8 +211,8 @@ StateUpdate advance_continuous_state(CharacterState& state,
     // Bodily needs feed back into affect continuously; the effect grows with
     // the current state and personality rather than acting as a fixed penalty.
     const double discomfort = LivingDynamics::need_discomfort(before, personality);
-    const double need_mood_cost = (0.010 + 0.018 * discomfort) * scale;
-    const double need_anxiety = (0.004 + 0.010 * discomfort)
+    const double need_mood_cost = (0.018 * discomfort) * scale;
+    const double need_anxiety = (0.010 * discomfort)
                               * personality.need_response * scale;
     state.satisfaction = clamp_unit(state.satisfaction - need_mood_cost);
     state.anxiety = clamp_unit(state.anxiety + need_anxiety);
@@ -209,6 +221,10 @@ StateUpdate advance_continuous_state(CharacterState& state,
     action_delta.fatigue = state.fatigue - before.fatigue;
     action_delta.screen_strain = state.screen_strain - before.screen_strain;
     update.requested.fatigue += action_delta.fatigue;
+    update.requested.boredom += action_delta.boredom;
+    update.requested.purchase_urge += action_delta.purchase_urge;
+    update.applied.boredom += action_delta.boredom;
+    update.applied.purchase_urge += action_delta.purchase_urge;
     update.requested.screen_strain += action_delta.screen_strain;
     update.applied.fatigue += action_delta.fatigue;
     update.applied.screen_strain += action_delta.screen_strain;

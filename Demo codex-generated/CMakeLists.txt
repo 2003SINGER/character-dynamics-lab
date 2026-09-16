@@ -57,7 +57,7 @@ add_library(character_dynamics_demo_living_v0 STATIC
 target_link_libraries(character_dynamics_demo_living_v0 PUBLIC character_dynamics_reference_dynamics_v0)
 target_include_directories(character_dynamics_demo_living_v0 PUBLIC Inc)
 add_library(character_dynamics_demo_living_v1 STATIC
-    Src/appraisal.cpp Src/state.cpp Src/decision.cpp Src/living_dynamics.cpp
+    Src/appraisal_v1.cpp Src/state_v1.cpp Src/decision_v1.cpp Src/living_dynamics_v1.cpp
     Src/demo_living_dynamics_v1.cpp)
 target_link_libraries(character_dynamics_demo_living_v1 PUBLIC character_dynamics_engine character_dynamics_reference_dynamics_v0)
 target_include_directories(character_dynamics_demo_living_v1 PUBLIC Inc)

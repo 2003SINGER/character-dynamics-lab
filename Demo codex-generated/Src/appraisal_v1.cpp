@@ -28,79 +28,88 @@ Appraisal appraise(const Observation& observation,
         || old_state.commitment.task_id == "coursework";
 
     if (observation.last_self_action.has_action && !observation.last_self_action.accepted) {
-        appraisal.satisfaction_delta = -0.03;
-        appraisal.anxiety_delta = 0.03;
+        // Obstruction is state-dependent: a blocked action matters more when
+        // task pressure/anxiety are already activated, and is not a fixed
+        // psychological penalty at a calm baseline.
+        const double obstruction = 0.02 * LivingDynamics::pressure_motivation(old_state)
+                                 + 0.03 * LivingDynamics::anxiety_impairment(old_state);
+        appraisal.satisfaction_delta = -obstruction;
+        appraisal.anxiety_delta = 0.02 * (0.35 + LivingDynamics::pressure_motivation(old_state));
         appraisal.tags = {"action_rejected", "goal_obstructed"};
     } else if (observation.last_self_action.has_action) {
         switch (observation.last_self_action.action) {
         case ActionType::UsePhone:
-            appraisal.boredom_delta = -0.22;
-            appraisal.fatigue_delta = 0.08;
+            appraisal.boredom_delta = -0.24 * LivingDynamics::boredom_stimulation_drive(old_state);
+            appraisal.fatigue_delta = 0.03 + 0.08 * old_state.screen_strain;
             appraisal.task_pressure_delta = coursework_pending ? 0.07 : 0.0;
-            appraisal.satisfaction_delta = 0.04;
-            appraisal.screen_strain_delta = 0.12;
-            appraisal.purchase_urge_delta = 0.10;
+            appraisal.satisfaction_delta = 0.05 * LivingDynamics::boredom_stimulation_drive(old_state)
+                                        * (1.0 - LivingDynamics::screen_aversion(old_state));
+            appraisal.screen_strain_delta = 0.04 + 0.08 * (1.0 - old_state.screen_strain);
+            appraisal.purchase_urge_delta = 0.04 + 0.06 * old_state.boredom;
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"device_stimulation", "screen_strain", "task_deferred"}
                 : std::vector<std::string>{"device_stimulation", "screen_strain"};
             break;
         case ActionType::ShopOnPhone:
-            appraisal.satisfaction_delta = 0.10;
+            appraisal.satisfaction_delta = 0.08 * LivingDynamics::boredom_stimulation_drive(old_state)
+                                         + 0.08 * old_state.purchase_urge;
             appraisal.task_pressure_delta = coursework_pending ? 0.03 : 0.0;
             appraisal.screen_strain_delta = 0.08;
-            appraisal.purchase_urge_delta = -0.55;
+            appraisal.purchase_urge_delta = -0.70 * old_state.purchase_urge;
             appraisal.tags = {"purchase_completed", "short_term_reward"};
             break;
         case ActionType::UseComputer:
-            appraisal.boredom_delta = -0.16;
-            appraisal.fatigue_delta = 0.10;
+            appraisal.boredom_delta = -0.18 * LivingDynamics::boredom_stimulation_drive(old_state);
+            appraisal.fatigue_delta = 0.04 + 0.07 * old_state.screen_strain;
             appraisal.task_pressure_delta = coursework_pending ? 0.05 : 0.0;
-            appraisal.screen_strain_delta = 0.11;
+            appraisal.screen_strain_delta = 0.04 + 0.07 * (1.0 - old_state.screen_strain);
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"screen_engagement", "task_deferred"}
                 : std::vector<std::string>{"screen_engagement"};
             break;
         case ActionType::StudyAtComputer:
         case ActionType::StudyFocused:
-            appraisal.boredom_delta = 0.02;
-            appraisal.fatigue_delta = 0.11;
-            appraisal.task_pressure_delta = -0.15;
-            appraisal.satisfaction_delta = 0.08;
-            appraisal.anxiety_delta = -0.05;
+            appraisal.boredom_delta = 0.02 * LivingDynamics::fatigue_recovery_drive(old_state);
+            appraisal.fatigue_delta = 0.06 + 0.06 * LivingDynamics::fatigue_recovery_drive(old_state);
+            appraisal.task_pressure_delta = -0.14 * LivingDynamics::pressure_motivation(old_state);
+            appraisal.satisfaction_delta = 0.08 * LivingDynamics::pressure_motivation(old_state);
+            appraisal.anxiety_delta = -0.04 * LivingDynamics::anxiety_facilitation(old_state);
             appraisal.screen_strain_delta =
                 observation.last_self_action.action == ActionType::StudyAtComputer ? 0.08 : 0.0;
             appraisal.tags = {"task_effort_session", "mental_effort"};
             break;
         case ActionType::StudyHalfhearted:
-            appraisal.boredom_delta = 0.05;
-            appraisal.fatigue_delta = 0.08;
-            appraisal.task_pressure_delta = -0.08;
-            appraisal.satisfaction_delta = 0.02;
-            appraisal.anxiety_delta = -0.02;
+            appraisal.boredom_delta = 0.04 * LivingDynamics::fatigue_recovery_drive(old_state);
+            appraisal.fatigue_delta = 0.05 + 0.04 * LivingDynamics::fatigue_recovery_drive(old_state);
+            appraisal.task_pressure_delta = -0.08 * LivingDynamics::pressure_motivation(old_state);
+            appraisal.satisfaction_delta = 0.04 * LivingDynamics::pressure_motivation(old_state);
+            appraisal.anxiety_delta = -0.02 * LivingDynamics::anxiety_facilitation(old_state);
             appraisal.tags = {"task_effort_session", "distracted_effort"};
             break;
         case ActionType::RestAtBed:
-            appraisal.boredom_delta = 0.04;
-            appraisal.fatigue_delta = -0.06 * LivingDynamics::rest_recovery_efficiency(old_state);
-            appraisal.screen_strain_delta = -0.14;
-            appraisal.task_pressure_delta = coursework_pending ? 0.03 : 0.0;
-            appraisal.satisfaction_delta = 0.05;
+            appraisal.boredom_delta = 0.03 * (1.0 - LivingDynamics::boredom_stimulation_drive(old_state));
+            appraisal.fatigue_delta = -0.10 * LivingDynamics::fatigue_recovery_drive(old_state)
+                                    * LivingDynamics::rest_recovery_efficiency(old_state);
+            appraisal.screen_strain_delta = -0.16 * (0.35 + LivingDynamics::screen_aversion(old_state));
+            appraisal.task_pressure_delta = coursework_pending ? 0.02 * old_state.task_pressure : 0.0;
+            appraisal.satisfaction_delta = 0.06 * LivingDynamics::fatigue_recovery_drive(old_state);
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"recovery", "task_still_pending"}
                 : std::vector<std::string>{"recovery"};
             break;
         case ActionType::SleepAtBed:
-            appraisal.boredom_delta = -0.08;
-            appraisal.fatigue_delta = -0.10 * LivingDynamics::rest_recovery_efficiency(old_state);
-            appraisal.screen_strain_delta = -0.30;
-            appraisal.task_pressure_delta = coursework_pending ? 0.06 : 0.0;
-            appraisal.satisfaction_delta = 0.08;
+            appraisal.boredom_delta = -0.06 * LivingDynamics::boredom_stimulation_drive(old_state);
+            appraisal.fatigue_delta = -0.20 * LivingDynamics::fatigue_recovery_drive(old_state)
+                                    * LivingDynamics::rest_recovery_efficiency(old_state);
+            appraisal.screen_strain_delta = -0.32 * (0.45 + LivingDynamics::screen_aversion(old_state));
+            appraisal.task_pressure_delta = coursework_pending ? 0.03 * old_state.task_pressure : 0.0;
+            appraisal.satisfaction_delta = 0.08 * LivingDynamics::fatigue_recovery_drive(old_state);
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"sleep_recovery", "long_unobserved_interval", "task_still_pending"}
                 : std::vector<std::string>{"sleep_recovery", "long_unobserved_interval"};
             break;
         case ActionType::GoToBathroom:
-            appraisal.satisfaction_delta = 0.07;
+            appraisal.satisfaction_delta = 0.05 * LivingDynamics::bathroom_drive(old_state, personality);
             appraisal.bathroom_urge_delta = -LivingDynamics::bathroom_relief(old_state);
             appraisal.tags = {"bodily_need_resolved", "brief_room_exit"};
             break;
@@ -132,9 +141,9 @@ Appraisal appraise(const Observation& observation,
             appraisal.tags = {"room_stimulation_reduced"};
             break;
         case ActionType::Idle:
-            appraisal.boredom_delta = 0.12;
-            appraisal.task_pressure_delta = coursework_pending ? 0.08 : 0.0;
-            appraisal.satisfaction_delta = -0.05;
+            appraisal.boredom_delta = 0.15 * LivingDynamics::boredom_stimulation_drive(old_state);
+            appraisal.task_pressure_delta = 0.0;
+            appraisal.satisfaction_delta = 0.0;
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"under_stimulation", "task_unattended"}
                 : std::vector<std::string>{"under_stimulation"};
@@ -248,5 +257,3 @@ const char* appraisal_signal_name(AppraisalSignalKind kind) {
 }
 
 }
-
-
