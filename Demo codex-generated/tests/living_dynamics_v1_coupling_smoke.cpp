@@ -1,5 +1,6 @@
 #include "living_dynamics.h"
 #include "demo_living_dynamics_v0.h"
+#include "runtime_scheduler.h"
 #include <cmath>
 #include <iostream>
 int main(){
@@ -13,5 +14,6 @@ int main(){
     s.task_pressure=.9; s.anxiety=.2; if(!(LivingDynamics::overload_risk(s,p)<.01)) return 7;
     s.task_pressure=.9; s.anxiety=.9; if(!(LivingDynamics::overload_risk(s,p)>.1)) return 8;
     DemoLivingDynamicsV0 model; s = CharacterState{}; s.hunger=0.0; s.bathroom_urge=0.0; const double sat=s.satisfaction; model.advance_continuous(s,p,nullptr,30); if(!(std::abs(s.satisfaction-sat)<0.01)) return 9;
+    s.purchase_urge=.8; const double purchase=s.purchase_urge; RunningAction idle; idle.action=ActionType::Idle; model.advance_continuous(s,p,&idle,30); if(!(s.purchase_urge<purchase)) return 10;
     std::cout<<"living_dynamics_v1_coupling_smoke: PASS\n"; return 0;
 }
