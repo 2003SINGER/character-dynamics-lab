@@ -154,6 +154,9 @@ add_test(NAME character_dynamics_reference_rule_dynamics_v0_parity
 add_test(NAME character_dynamics_demo_living_v0_artifact_guard
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/v0_artifact_guard.py"
          "${CMAKE_CURRENT_SOURCE_DIR}/..")
+add_test(NAME character_dynamics_demo_living_v1_policy_source_guard
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/v1_policy_source_guard.py"
+         "${CMAKE_CURRENT_SOURCE_DIR}/Src/decision_v1.cpp")
 set(DEMO_TRACE_DIR "${CMAKE_CURRENT_BINARY_DIR}/single-room-traces")
 add_test(NAME single_room_demo_generate_deadline
          COMMAND character_dynamics_single_room_demo --scenario deadline --output "${DEMO_TRACE_DIR}/deadline.json")

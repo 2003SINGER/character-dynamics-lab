@@ -12,33 +12,33 @@ See `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner
 
 ## Behavior distribution
 
-- study_minutes: 61061.0 minutes
-- leisure_minutes: 64290.0 minutes
-- idle_minutes: 31537.0 minutes
-- rest_minutes: 119703.0 minutes
-- sleep_minutes: 71612.0 minutes
+- study_minutes: 57289.0 minutes
+- leisure_minutes: 63449.0 minutes
+- idle_minutes: 30680.0 minutes
+- rest_minutes: 119363.0 minutes
+- sleep_minutes: 76721.0 minutes
 
 ## Stability diagnostics
 
-- ANXIETY_LOW_SATURATION: 122 actors
-- BATHROOM_URGE_HIGH_SATURATION: 1 actors
-- EXCESSIVE_SLEEP: 5 actors
-- FATIGUE_LOW_SATURATION: 115 actors
-- HUNGER_HIGH_SATURATION: 1 actors
+- ANXIETY_LOW_SATURATION: 118 actors
+- EXCESSIVE_SLEEP: 3 actors
+- FATIGUE_HIGH_SATURATION: 1 actors
+- FATIGUE_LOW_SATURATION: 112 actors
+- HUNGER_HIGH_SATURATION: 2 actors
 - NO_SLEEP_48H: 1 actors
-- SATISFACTION_HIGH_SATURATION: 110 actors
-- SCREEN_STRAIN_LOW_SATURATION: 110 actors
-- TASK_PRESSURE_HIGH_SATURATION: 41 actors
-- TASK_PRESSURE_LOW_SATURATION: 86 actors
+- SATISFACTION_HIGH_SATURATION: 106 actors
+- SCREEN_STRAIN_LOW_SATURATION: 106 actors
+- TASK_PRESSURE_HIGH_SATURATION: 47 actors
+- TASK_PRESSURE_LOW_SATURATION: 80 actors
 - UNMET_BATHROOM: 23 actors
-- UNMET_HUNGER: 12 actors
+- UNMET_HUNGER: 18 actors
 
 ## Switching distribution
 
 - median: 33.00/day
-- p90: 37.00/day
-- p95: 38.00/day
-- max: 40.00/day
+- p90: 36.50/day
+- p95: 37.00/day
+- max: 39.00/day
 
 
 ## Representative timelines

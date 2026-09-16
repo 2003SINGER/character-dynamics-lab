@@ -92,4 +92,5 @@ double distraction_drive(const CharacterState& s,const Personality& p){
                  +.14*smoothstep(.35,.75,s.boredom)*p.stimulation_seeking);
 }
 double goal_reward_support(const CharacterState& s){ return smoothstep(.25,.75,s.satisfaction); }
+double cognitive_fatigue_penalty(const CharacterState& s){ return .25*fatigue_recovery_drive(s); }
 }

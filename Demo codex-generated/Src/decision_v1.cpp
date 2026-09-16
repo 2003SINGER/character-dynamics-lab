@@ -95,7 +95,7 @@ DecisionContext decide(const Observation& observation,
         const double commitment_bonus = advances_committed_task ? 0.16 * config.commitment_bonus : 0.0;
         switch (action) {
         case ActionType::UsePhone:
-            decision.candidates.push_back(candidate(action, 0.06 + distraction - LivingDynamics::screen_aversion(state) * (0.18 + 0.24 * personality.screen_strain_sensitivity) - state.fatigue * 0.12
+            decision.candidates.push_back(candidate(action, 0.06 + distraction - LivingDynamics::screen_aversion(state) * (0.18 + 0.24 * personality.screen_strain_sensitivity) - LivingDynamics::cognitive_fatigue_penalty(state) * 0.48
                 - 0.34 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need + commitment_bonus, 0.12, "phone offers immediate stimulation but yields to urgent bodily needs"));
             break;
         case ActionType::ShopOnPhone:
@@ -109,31 +109,31 @@ DecisionContext decide(const Observation& observation,
             decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - LivingDynamics::screen_aversion(state) * (0.16 + 0.22 * personality.screen_strain_sensitivity) - 0.80 * urgent_bodily_need + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
             break;
         case ActionType::StudyAtComputer:
-            decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 * config.study_fatigue_penalty - personality.procrastination * 0.16 + commitment_bonus, 0.18, "computer can be used for task progress"));
+            decision.candidates.push_back(candidate(action, 0.04 + task_drive - LivingDynamics::cognitive_fatigue_penalty(state) * config.study_fatigue_penalty - 0.08 * LivingDynamics::distraction_drive(state, personality) + commitment_bonus, 0.18, "computer can be used for task progress"));
             break;
         case ActionType::StudyFocused:
             decision.candidates.push_back(candidate(action,
                 0.05 + task_drive + LivingDynamics::goal_reward_support(state) * 0.10
-                - state.fatigue * 0.25 * config.study_fatigue_penalty
-                - 0.38 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need - personality.procrastination * 0.18
+                - LivingDynamics::cognitive_fatigue_penalty(state) * config.study_fatigue_penalty
+                - 0.38 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need - 0.10 * LivingDynamics::distraction_drive(state, personality)
                 + commitment_bonus,
                 0.18,
                 "lit desk supports sustained focused study"));
             break;
         case ActionType::StudyHalfhearted:
             decision.candidates.push_back(candidate(action,
-                0.06 + task_drive * 0.55 + state.boredom * 0.36
+                0.06 + task_drive * 0.55 + LivingDynamics::distraction_drive(state, personality) * 0.36
                 - 0.26 * (hunger_drive + bathroom_drive) - 0.75 * urgent_bodily_need
                 // Reconsideration salience saturates after a few deferrals;
                 // a suspended commitment must not become an unbounded utility.
                 + 0.10 * (1.0 - std::exp(-0.55 * static_cast<double>(state.commitment.suspended_decision_points)))
-                - state.fatigue * 0.12 * config.study_fatigue_penalty - personality.self_control * 0.18
+                - LivingDynamics::cognitive_fatigue_penalty(state) * 0.48 * config.study_fatigue_penalty
                 + commitment_bonus,
                 0.16,
                 "lit desk permits partial study when task pressure coexists with distraction"));
             break;
         case ActionType::RestAtBed:
-            decision.candidates.push_back(candidate(action, 0.05 + recovery_drive - state.anxiety * 0.10 + overload * 0.10 + commitment_bonus, 0.16, "bed supports recovery from fatigue and screen strain"));
+            decision.candidates.push_back(candidate(action, 0.05 + recovery_drive - LivingDynamics::anxiety_impairment(state) * 0.10 + overload * 0.10 + commitment_bonus, 0.16, "bed supports recovery from fatigue and screen strain"));
             break;
         case ActionType::SleepAtBed:
             decision.candidates.push_back(candidate(action, -0.10 + recovery_drive * 1.15 + LivingDynamics::sleep_readiness(observation,state,personality) + commitment_bonus, 0.58, "bed supports a long sleep interval when fatigue becomes high"));
@@ -151,16 +151,16 @@ DecisionContext decide(const Observation& observation,
             decision.candidates.push_back(candidate(action, 0.02 + recovery_drive * 0.45 + commitment_bonus, 0.20, "darkening the room prepares a rest-oriented context"));
             break;
         case ActionType::TurnOffAlarm:
-            decision.candidates.push_back(candidate(action, 0.45 + state.anxiety * 0.25 + commitment_bonus, 0.12, "ringing alarm is immediately available to silence"));
+            decision.candidates.push_back(candidate(action, 0.45 + LivingDynamics::anxiety_facilitation(state) * 0.25 + commitment_bonus, 0.12, "ringing alarm is immediately available to silence"));
             break;
         case ActionType::OpenCurtain:
-            decision.candidates.push_back(candidate(action, 0.04 + state.boredom * 0.22 + commitment_bonus, 0.18, "opening curtains restores direct access to outside conditions"));
+            decision.candidates.push_back(candidate(action, 0.04 + LivingDynamics::boredom_stimulation_drive(state) * 0.22 + commitment_bonus, 0.18, "opening curtains restores direct access to outside conditions"));
             break;
         case ActionType::CloseCurtain:
             decision.candidates.push_back(candidate(action, 0.03 + recovery_drive * 0.22 + commitment_bonus, 0.19, "closing curtains can reduce environmental stimulation before rest"));
             break;
         case ActionType::Idle:
-            decision.candidates.push_back(candidate(action, 0.05 + state.boredom * 0.10 - state.task_pressure * 0.06 + commitment_bonus, 0.0, "no focused action wins decisively"));
+            decision.candidates.push_back(candidate(action, 0.05 + LivingDynamics::boredom_stimulation_drive(state) * 0.10 - LivingDynamics::pressure_motivation(state) * 0.06 + commitment_bonus, 0.0, "no focused action wins decisively"));
             break;
         case ActionType::Count:
             break;

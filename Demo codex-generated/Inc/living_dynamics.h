@@ -37,6 +37,7 @@ double task_engagement_drive(const CharacterState& state, const Personality& per
 double recovery_drive(const CharacterState& state, const Personality& personality);
 double distraction_drive(const CharacterState& state, const Personality& personality);
 double goal_reward_support(const CharacterState& state);
+double cognitive_fatigue_penalty(const CharacterState& state);
 double pressure_motivation(const CharacterState& state);
 double anxiety_facilitation(const CharacterState& state);
 double anxiety_impairment(const CharacterState& state);
