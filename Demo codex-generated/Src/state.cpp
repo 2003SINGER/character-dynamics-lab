@@ -181,6 +181,11 @@ StateUpdate advance_continuous_state(CharacterState& state,
     }
     state.fatigue = clamp_unit(state.fatigue + action_delta.fatigue);
     state.screen_strain = clamp_unit(state.screen_strain + action_delta.screen_strain);
+    const double metabolism = 0.025 * scale;
+    const double bathroom = 0.020 * scale;
+    const bool recovery = running_action->action == ActionType::RestAtBed || running_action->action == ActionType::SleepAtBed;
+    state.hunger = clamp_unit(state.hunger + metabolism * (recovery ? 0.7 : 1.0));
+    state.bathroom_urge = clamp_unit(state.bathroom_urge + bathroom);
     action_delta.fatigue = state.fatigue - before.fatigue;
     action_delta.screen_strain = state.screen_strain - before.screen_strain;
     update.requested.fatigue += action_delta.fatigue;

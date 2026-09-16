@@ -35,6 +35,7 @@ set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
     Src/appraisal.cpp
     Src/state.cpp
     Src/parameter_config.cpp
+    Src/living_dynamics.cpp
     Src/candidate_scoring.cpp
     Src/decision.cpp
     Src/simulation.cpp
@@ -116,6 +117,15 @@ add_executable(character_dynamics_runtime_case_smoke tests/runtime_case_smoke.cp
 target_link_libraries(character_dynamics_runtime_case_smoke PRIVATE character_dynamics_runtime)
 add_executable(character_dynamics_single_room_demo Src/single_room_demo.cpp)
 target_link_libraries(character_dynamics_single_room_demo PRIVATE character_dynamics_runtime)
+add_executable(character_dynamics_living_dynamics_smoke tests/living_dynamics_smoke.cpp)
+target_link_libraries(character_dynamics_living_dynamics_smoke PRIVATE character_dynamics_runtime)
+add_test(NAME character_dynamics_living_dynamics_smoke COMMAND character_dynamics_living_dynamics_smoke)
+add_executable(character_dynamics_free_run Src/free_run.cpp)
+target_link_libraries(character_dynamics_free_run PRIVATE character_dynamics_runtime)
+add_test(NAME character_dynamics_free_run_report
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/free_run_report.py"
+         "${CMAKE_CURRENT_SOURCE_DIR}/demo/living_dynamics_v0"
+         "$<TARGET_FILE:character_dynamics_free_run>")
 set(DEMO_TRACE_DIR "${CMAKE_CURRENT_BINARY_DIR}/single-room-traces")
 add_test(NAME single_room_demo_generate_deadline
          COMMAND character_dynamics_single_room_demo --scenario deadline --output "${DEMO_TRACE_DIR}/deadline.json")

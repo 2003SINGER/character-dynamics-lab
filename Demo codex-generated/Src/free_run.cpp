@@ -1,0 +1,7 @@
+#include "continuous_runtime.h"
+#include <filesystem>
+#include <fstream>
+#include <string>
+namespace fs=std::filesystem;
+static std::string q(const std::string&s){std::string r="\"";for(char c:s){if(c=='\"'||c=='\\')r+='\\';r+=c;}return r+"\"";}
+int main(int argc,char**argv){if(argc<4)return 2;unsigned scenario_seed=static_cast<unsigned>(std::stoul(argv[1]));unsigned seed=static_cast<unsigned>(std::stoul(argv[2]));std::string path=argv[3];fs::create_directories(fs::path(path).parent_path());std::ofstream out(path);if(!out)return 3;World w(scenario_seed);w.time.minute_of_day=480;Observation o=refresh_observation({},w,{});RuntimeScheduler sch(480);ContinuousRuntime rt(sch,w,o,{},seed);CharacterState s;Personality p;rt.submit_action_intent(ActionType::Idle,"",10);out<<"[";bool first=true;for(int i=0;i<36;++i){auto r=rt.execute_next_boundary(s,p);if(!first)out<<",";first=false;out<<"{\"timestamp\":"<<sch.now_total_minutes()<<",\"elapsed\":"<<r.runtime.boundary.elapsed_minutes<<",\"policy_seed\":"<<seed<<",\"scenario_seed\":"<<seed<<",\"action\":"<<(r.selected_action?q(to_string(*r.selected_action)):"null")<<",\"task_effort\":"<<w.tasks.front().effort_done<<",\"hunger\":"<<s.hunger<<",\"fatigue\":"<<s.fatigue<<",\"bathroom_urge\":"<<s.bathroom_urge<<",\"bootstrap\":"<<(i==0?"true":"false")<<"}";}out<<"]\n";return 0;}
