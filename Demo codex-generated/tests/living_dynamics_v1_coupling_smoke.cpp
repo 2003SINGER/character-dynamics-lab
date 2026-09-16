@@ -15,5 +15,10 @@ int main(){
     s.task_pressure=.9; s.anxiety=.9; if(!(LivingDynamics::overload_risk(s,p)>.1)) return 8;
     DemoLivingDynamicsV0 model; s = CharacterState{}; s.hunger=0.0; s.bathroom_urge=0.0; const double sat=s.satisfaction; model.advance_continuous(s,p,nullptr,30); if(!(std::abs(s.satisfaction-sat)<0.01)) return 9;
     s.purchase_urge=.8; const double purchase=s.purchase_urge; RunningAction idle; idle.action=ActionType::Idle; model.advance_continuous(s,p,&idle,30); if(!(s.purchase_urge<purchase)) return 10;
+    if (LivingDynamics::hunger_zone(.10)!=LivingDynamics::ActivationZone::Low
+        || LivingDynamics::hunger_zone(.60)!=LivingDynamics::ActivationZone::Activated
+        || LivingDynamics::hunger_zone(.95)!=LivingDynamics::ActivationZone::Extreme) return 11;
+    if (LivingDynamics::fatigue_zone(.30)!=LivingDynamics::ActivationZone::Normal
+        || LivingDynamics::anxiety_zone(.80)!=LivingDynamics::ActivationZone::High) return 12;
     std::cout<<"living_dynamics_v1_coupling_smoke: PASS\n"; return 0;
 }

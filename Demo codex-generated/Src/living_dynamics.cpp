@@ -6,6 +6,12 @@
 
 namespace LivingDynamics {
 static double clamp(double x){return std::clamp(x,0.0,1.0);}
+static ActivationZone five_zone(double v,double a,double b,double c,double d){if(v<a)return ActivationZone::Low;if(v<b)return ActivationZone::Normal;if(v<c)return ActivationZone::Activated;if(v<d)return ActivationZone::High;return ActivationZone::Extreme;}
+ActivationZone hunger_zone(double v){return five_zone(v,.25,.50,.70,.88);}
+ActivationZone bathroom_zone(double v){return five_zone(v,.25,.50,.75,.90);}
+ActivationZone fatigue_zone(double v){return five_zone(v,.25,.55,.80,.92);}
+ActivationZone pressure_zone(double v){return five_zone(v,.25,.55,.80,.92);}
+ActivationZone anxiety_zone(double v){return five_zone(v,.20,.45,.70,.88);}
 double task_absorption(const CharacterState& s){return clamp(0.65*s.satisfaction + 0.35*(1.0-s.boredom));}
 double perceived_hunger(const CharacterState& s,const Personality& p){return clamp(s.hunger + 0.16*s.anxiety + 0.10*s.boredom - 0.14*task_absorption(s));}
 double perceived_bathroom(const CharacterState& s,const Personality& p){return clamp(s.bathroom_urge + 0.10*s.anxiety - 0.05*task_absorption(s));}

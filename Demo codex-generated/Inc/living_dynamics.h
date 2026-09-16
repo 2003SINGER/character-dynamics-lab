@@ -5,6 +5,7 @@
 #include "state.h"
 
 namespace LivingDynamics {
+enum class ActivationZone { Low, Normal, Activated, High, Extreme };
 struct Config {
     double metabolism = 0.025;
     double bathroom_rate = 0.020;
@@ -31,4 +32,9 @@ double pressure_motivation(const CharacterState& state);
 double anxiety_facilitation(const CharacterState& state);
 double anxiety_impairment(const CharacterState& state);
 double overload_risk(const CharacterState& state, const Personality& personality);
+ActivationZone hunger_zone(double value);
+ActivationZone bathroom_zone(double value);
+ActivationZone fatigue_zone(double value);
+ActivationZone pressure_zone(double value);
+ActivationZone anxiety_zone(double value);
 }
