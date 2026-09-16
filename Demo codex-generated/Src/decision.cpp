@@ -133,7 +133,9 @@ DecisionContext decide(const Observation& observation,
             decision.candidates.push_back(candidate(action,
                 0.06 + task_drive * 0.55 + state.boredom * 0.36
                 - 0.26 * (hunger_drive + bathroom_drive) - 0.75 * urgent_bodily_need
-                + 0.03 * static_cast<double>(state.commitment.suspended_decision_points)
+                // Reconsideration salience saturates after a few deferrals;
+                // a suspended commitment must not become an unbounded utility.
+                + 0.10 * (1.0 - std::exp(-0.55 * static_cast<double>(state.commitment.suspended_decision_points)))
                 - state.fatigue * 0.12 * config.study_fatigue_penalty - personality.self_control * 0.18
                 + commitment_bonus,
                 0.16,

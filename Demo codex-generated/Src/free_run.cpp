@@ -1,5 +1,5 @@
 #include "continuous_runtime.h"
-#include "demo_living_dynamics_v0.h"
+#include "demo_living_dynamics_v1.h"
 #include <filesystem>
 #include <fstream>
 #include <string>
