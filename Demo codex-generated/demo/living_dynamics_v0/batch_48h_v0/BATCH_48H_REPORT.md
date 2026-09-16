@@ -11,18 +11,18 @@ See `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner
 
 ## Behavior distribution
 
-- study_minutes: 48453.0 minutes
-- leisure_minutes: 59534.0 minutes
-- idle_minutes: 13321.0 minutes
-- rest_minutes: 90917.0 minutes
-- sleep_minutes: 125921.0 minutes\n\n## Stability diagnostics\n\n- ANXIETY_HIGH_SATURATION: 1 actors\n- ANXIETY_LOW_SATURATION: 70 actors\n- BATHROOM_URGE_HIGH_SATURATION: 2 actors\n- BOREDOM_LOW_SATURATION: 90 actors\n- EXCESSIVE_SLEEP: 73 actors\n- FATIGUE_LOW_SATURATION: 110 actors\n- REJECTION_LOOP: 1 actors\n- SATISFACTION_HIGH_SATURATION: 64 actors\n- SCREEN_STRAIN_LOW_SATURATION: 101 actors\n- TASK_PRESSURE_HIGH_SATURATION: 81 actors\n- TASK_PRESSURE_LOW_SATURATION: 54 actors\n- UNMET_BATHROOM: 19 actors\n- UNMET_HUNGER: 17 actors
+- study_minutes: 48053.0 minutes
+- leisure_minutes: 62154.0 minutes
+- idle_minutes: 13209.0 minutes
+- rest_minutes: 94520.0 minutes
+- sleep_minutes: 115880.0 minutes\n\n## Stability diagnostics\n\n- ANXIETY_HIGH_SATURATION: 1 actors\n- ANXIETY_LOW_SATURATION: 61 actors\n- BATHROOM_URGE_HIGH_SATURATION: 1 actors\n- BOREDOM_HIGH_SATURATION: 2 actors\n- BOREDOM_LOW_SATURATION: 66 actors\n- EXCESSIVE_SLEEP: 59 actors\n- FATIGUE_LOW_SATURATION: 108 actors\n- HUNGER_HIGH_SATURATION: 2 actors\n- NO_SLEEP_48H: 1 actors\n- REJECTION_LOOP: 4 actors\n- SATISFACTION_HIGH_SATURATION: 116 actors\n- SCREEN_STRAIN_LOW_SATURATION: 91 actors\n- TASK_PRESSURE_HIGH_SATURATION: 75 actors\n- TASK_PRESSURE_LOW_SATURATION: 57 actors\n- UNMET_BATHROOM: 21 actors\n- UNMET_HUNGER: 18 actors
 
 ## Switching distribution
 
-- median: 30.00/day
-- p90: 37.50/day
-- p95: 39.50/day
-- max: 44.00/day
+- median: 31.50/day
+- p90: 38.50/day
+- p95: 41.00/day
+- max: 46.50/day
 
 
 ## Representative timelines

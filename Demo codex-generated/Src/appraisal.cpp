@@ -34,10 +34,10 @@ Appraisal appraise(const Observation& observation,
     } else if (observation.last_self_action.has_action) {
         switch (observation.last_self_action.action) {
         case ActionType::UsePhone:
-            appraisal.boredom_delta = -0.22;
+            appraisal.boredom_delta = -0.08 - 0.20 * old_state.boredom;
             appraisal.fatigue_delta = 0.08;
             appraisal.task_pressure_delta = coursework_pending ? 0.07 : 0.0;
-            appraisal.satisfaction_delta = 0.04;
+            appraisal.satisfaction_delta = 0.02 + 0.04 * old_state.boredom;
             appraisal.screen_strain_delta = 0.12;
             appraisal.purchase_urge_delta = 0.10;
             appraisal.tags = coursework_pending
@@ -64,9 +64,9 @@ Appraisal appraise(const Observation& observation,
         case ActionType::StudyFocused:
             appraisal.boredom_delta = 0.02;
             appraisal.fatigue_delta = 0.11;
-            appraisal.task_pressure_delta = -0.15;
-            appraisal.satisfaction_delta = 0.08;
-            appraisal.anxiety_delta = -0.05;
+            appraisal.task_pressure_delta = -0.04 - 0.12 * old_state.task_pressure;
+            appraisal.satisfaction_delta = 0.03 + 0.07 * old_state.task_pressure;
+            appraisal.anxiety_delta = -0.02 - 0.04 * old_state.anxiety;
             appraisal.screen_strain_delta =
                 observation.last_self_action.action == ActionType::StudyAtComputer ? 0.08 : 0.0;
             appraisal.tags = {"task_effort_session", "mental_effort"};
@@ -74,16 +74,16 @@ Appraisal appraise(const Observation& observation,
         case ActionType::StudyHalfhearted:
             appraisal.boredom_delta = 0.05;
             appraisal.fatigue_delta = 0.08;
-            appraisal.task_pressure_delta = -0.08;
-            appraisal.satisfaction_delta = 0.02;
-            appraisal.anxiety_delta = -0.02;
+            appraisal.task_pressure_delta = -0.02 - 0.06 * old_state.task_pressure;
+            appraisal.satisfaction_delta = 0.01 + 0.03 * old_state.task_pressure;
+            appraisal.anxiety_delta = -0.01 - 0.02 * old_state.anxiety;
             appraisal.tags = {"task_effort_session", "distracted_effort"};
             break;
         case ActionType::RestAtBed:
             appraisal.boredom_delta = 0.04;
             appraisal.fatigue_delta = -0.06 * LivingDynamics::rest_recovery_efficiency(old_state);
             appraisal.screen_strain_delta = -0.14;
-            appraisal.task_pressure_delta = coursework_pending ? 0.03 : 0.0;
+            appraisal.task_pressure_delta = coursework_pending ? 0.02 * old_state.task_pressure : 0.0;
             appraisal.satisfaction_delta = 0.05;
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"recovery", "task_still_pending"}
@@ -93,7 +93,7 @@ Appraisal appraise(const Observation& observation,
             appraisal.boredom_delta = -0.08;
             appraisal.fatigue_delta = -0.10 * LivingDynamics::rest_recovery_efficiency(old_state);
             appraisal.screen_strain_delta = -0.30;
-            appraisal.task_pressure_delta = coursework_pending ? 0.06 : 0.0;
+            appraisal.task_pressure_delta = coursework_pending ? 0.03 * old_state.task_pressure : 0.0;
             appraisal.satisfaction_delta = 0.08;
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"sleep_recovery", "long_unobserved_interval", "task_still_pending"}
@@ -133,8 +133,8 @@ Appraisal appraise(const Observation& observation,
             break;
         case ActionType::Idle:
             appraisal.boredom_delta = 0.12;
-            appraisal.task_pressure_delta = coursework_pending ? 0.08 : 0.0;
-            appraisal.satisfaction_delta = -0.05;
+            appraisal.task_pressure_delta = 0.0;
+            appraisal.satisfaction_delta = 0.0;
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"under_stimulation", "task_unattended"}
                 : std::vector<std::string>{"under_stimulation"};
@@ -248,5 +248,4 @@ const char* appraisal_signal_name(AppraisalSignalKind kind) {
 }
 
 }
-
 
