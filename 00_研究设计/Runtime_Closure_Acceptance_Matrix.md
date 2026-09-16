@@ -15,8 +15,8 @@
 | C4 invalidation | PASS | `invalidate_running_action` → typed plan-invalidated outcome smoke |
 | D actor-local perception | PASS (current channels) | `World + InformationAccess` projector 覆盖 message/weather/alarm/temperature/reminder/deadline/evening；hidden phone/weather 不写入 O |
 | E typed rejection | PASS | scheduler rejection event 携带 accepted/action/target/failure/actual_elapsed/provenance typed payload，并在下一 transition 进入 O |
-| F continuous/impulse | PASS (v1 adapter) | `advance_continuous_state` 与 `apply_appraisal_impulse` 分离；chunk equivalence smoke |
-| G decision gate | PASS | weak/hidden event closed；completion/invalidation/rejection open；threshold crossing evaluates policy immediately and preserves the running action unless an explicit interruption occurs |
+| F continuous/impulse | PASS | Kernel 在正确 boundary 调用显式 Dynamics Model 的 continuous/appraisal/impulse hooks，并隔离 Δt、O、X、S 数据边界；chunk equivalence smoke；具体 state law 不属于 Kernel 验收 |
+| G decision gate | PASS | Kernel 依据 typed reason 控制 gate；weak/hidden event closed，completion/invalidation/rejection open；threshold crossing 立即触发 model policy reconsideration，并保留 running action，除非模型明确产生 interruption |
 | H docs/regression | PASS | 基础、closure、trace、mechanism fixture registrations 均通过；reference `--verify`、repo health 与 CI 配置通过 |
 
 ## Executable evidence
@@ -24,6 +24,6 @@
 当前 CTest 包含基础、closure、trace、mechanism fixture、channel coverage，以及以 `runtime_case_smoke --case <name>` 逐 case 执行的 gate-labelled registrations。
 
 `RUNTIME_V1_CLOSURE_AND_PROJECT_STABILIZATION = CLOSED / FROZEN`。π selection、completion/rejection exactly-once、threshold continue/replace、physical preemption distinction均有可执行证据。后续不再扩 Runtime；下一条 active research work 为 M2 candidate-set admission。
-# Responsibility split (2026-09-16)
+| I dynamics-model isolation | PASS | 调用方显式选择模型；Kernel 不链接 Demo 行为源；Reference parity 对齐冻结 commit；Demo 调参不改变 Reference fixtures |
 
-Runtime Closure 只保证正确时间调用 model continuous/appraisal/policy hooks、O/W ownership、gate ordering、W validation、hidden-W 不泄漏和 model identity trace；不保证 fatigue rate、commitment law、π 权重或 hunger/mood coupling 合理。新增 Gate I：Dynamics-model isolation（显式 model 选择、Engine 不链接 Demo、Reference parity frozen、Demo tuning 不改变 Reference fixtures）。
+本矩阵只验 Kernel 的执行契约与模型边界：不保证 fatigue rate、commitment law、π 权重或 hunger/mood coupling 的心理学合理性。Reference、Theory-S 与 Demo Living 的证据地位由各自研究/应用文档单独说明。

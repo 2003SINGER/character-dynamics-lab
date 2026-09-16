@@ -1,6 +1,6 @@
 # Character Dynamics：系统主线与研究支线 v0
 
-更新时间：2026-09-09
+更新时间：2026-09-16
 
 ## 系统定位
 
@@ -45,11 +45,15 @@ W authoritative world
 
 LLM 不是整个 NPC。它最多在开放语义确实需要解释时充当受限的语义编译器；状态更新、承诺、候选动作、策略和世界结算必须保持可审计、可替换、可低成本运行。
 
-## 三个系统模块
+## 五个系统模块
 
-### Engine
+### Runtime Kernel
 
-负责 W/O/X/S/P、affordance、commitment、policy、typed world settlement、trace 和 provenance。当前 `Demo codex-generated` 是规则化 C++ reference implementation，不是心理学验证。
+共享的执行骨架，负责 authoritative clock、RunningAction、runtime boundary、World event 调度、合法的 O 投影、typed settlement、DecisionGate、trace 和 provenance。Kernel 不拥有某一套 state law、appraisal law 或 policy。
+
+### Dynamics Model
+
+由调用方显式注入的行为假设，提供 continuous state dynamics、appraisal/impulse、persistent intention 更新与 policy。`ReferenceRuleDynamicsV0` 冻结 `5d3c164` 的规则语义，仅作可复现实验基线；`DemoLivingDynamicsV0` 是 living sandbox 的应用模型，不是心理学真理。两者共享 Kernel，但不可互相替代或隐式回退。
 
 ### Evaluator
 
@@ -60,6 +64,10 @@ LLM 不是整个 NPC。它最多在开放语义确实需要解释时充当受限
 ### Optimizer
 
 在冻结 evaluator 和开发/外部场景分离后，才搜索 state update 参数、decision weights、threshold、decay/recovery constants 等。第一阶段只允许 random search / grid / CMA-ES 一类黑箱搜索；禁止看到外部评测后反复改分数定义。
+
+### Applications
+
+Room Demo、free-run、可视化与未来产品层只消费 Runtime trace 和显式模型输出。它们可以选择 Demo 模型，但不得把 Demo 行为或视觉表现写回 Reference、Evaluator 或研究结论。
 
 ## 评价边界
 
@@ -72,6 +80,3 @@ LLM 不是整个 NPC。它最多在开放语义确实需要解释时充当受限
 Paper-0 persistent representation、外部 Replay、Theory-S 和未来数据实验都是从系统中抽出的证据支线。它们为系统提供证据，不再拥有整个项目的叙事权。
 
 LIGHT 当前封口为 generic actor-local history development diagnostic；它不承担完整 Theory-S 训练准入。`COMPRESSION_DEPTH2_ALIGNED_SIGNAL_PRESENT; COMPARATIVE_SUFFICIENCY_INCONCLUSIVE` 是该支线的边界，不是整个系统的成败判定。
-# 当前模块定位补充（2026-09-16）
-
-系统由五个可区分模块组成：`Runtime Kernel`、显式选择的 `Dynamics Model`、`Evaluator`、`Optimizer`、`Applications`。产品意义上的 Engine 只是 `Runtime Kernel + selected Dynamics Model`，不再声称 Engine 拥有唯一 policy 或 state dynamics。Kernel 共享执行机制；Reference、Theory-S、Demo Living 是不同证据地位的 model/candidate。
