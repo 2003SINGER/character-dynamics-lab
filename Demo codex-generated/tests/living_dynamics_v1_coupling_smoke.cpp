@@ -13,6 +13,18 @@ int main(){
     s.bathroom_urge=.1; const double b=LivingDynamics::bathroom_relief(s); s.bathroom_urge=.85; if(!(LivingDynamics::bathroom_relief(s)>b)) return 6;
     s.task_pressure=.9; s.anxiety=.2; if(!(LivingDynamics::overload_risk(s,p)<.01)) return 7;
     s.task_pressure=.9; s.anxiety=.9; if(!(LivingDynamics::overload_risk(s,p)>.1)) return 8;
+    // Coupling matrix: pressure with calm/fresh state remains executable,
+    // while the same pressure with anxiety and fatigue enters overload.
+    s.task_pressure=.85; s.anxiety=.20; s.fatigue=.20;
+    if (!(LivingDynamics::pressure_motivation(s) > .9 && LivingDynamics::overload_risk(s,p) < .05)) return 18;
+    s.hunger=.92; s.task_pressure=.40; s.anxiety=.20; s.fatigue=.20;
+    if (!(LivingDynamics::hunger_drive(s,p) > LivingDynamics::pressure_motivation(s))) return 19;
+    s.fatigue=.90; s.screen_strain=.85; Observation clock;
+    clock.facts.push_back({"clock.total_minutes", "600", KnowledgeStatus::Known, "test", ""});
+    const double day_sleep=LivingDynamics::sleep_readiness(clock,s,p);
+    clock.facts[0].value="1320";
+    const double night_sleep=LivingDynamics::sleep_readiness(clock,s,p);
+    if (!(night_sleep > day_sleep + .15)) return 20;
     s.task_pressure=.1; const double u_low=LivingDynamics::pressure_motivation(s); s.task_pressure=.5; const double u_mid=LivingDynamics::pressure_motivation(s); s.task_pressure=.9; const double u_high=LivingDynamics::pressure_motivation(s); if (!(u_low < u_mid && u_mid <= u_high)) return 9;
     s.task_pressure=.9; s.anxiety=.2; s.fatigue=.2; const double focused=LivingDynamics::overload_risk(s,p); s.anxiety=.95; s.fatigue=.9; const double overloaded=LivingDynamics::overload_risk(s,p); if (!(focused < .05 && overloaded > focused + .25)) return 10;
     DemoLivingDynamicsV1 model; s = CharacterState{}; s.hunger=0.0; s.bathroom_urge=0.0; const double sat=s.satisfaction; model.advance_continuous(s,p,nullptr,30); if(!(std::abs(s.satisfaction-sat)<0.01)) return 11;
