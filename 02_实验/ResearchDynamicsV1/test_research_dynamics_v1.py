@@ -1,5 +1,6 @@
 import unittest
 from pathlib import Path
+import json
 from research_dynamics_v1 import State, Personality, MODEL_ID, run_intervention
 
 class ResearchDynamicsV1Test(unittest.TestCase):
@@ -35,5 +36,15 @@ class ResearchDynamicsV1Test(unittest.TestCase):
         s = State(); s.step(minutes=10000, action="study", deadline_signal=1)
         self.assertTrue(all(0 <= v <= 1 for v in vars(s).values()))
         self.assertEqual(MODEL_ID, "ResearchDynamicsV1")
+
+    def test_threshold_zones_are_explicit(self):
+        self.assertEqual(State(fatigue=.8).zones()["fatigue"], "high")
+        self.assertEqual(State(fatigue=.2).zones()["fatigue"], "low")
+
+    def test_intervention_artifacts_are_reproducible(self):
+        from run_interventions import NAMES, run_intervention
+        first = [json.dumps(run_intervention(n), sort_keys=True) for n in NAMES]
+        second = [json.dumps(run_intervention(n), sort_keys=True) for n in NAMES]
+        self.assertEqual(first, second)
 
 if __name__ == "__main__": unittest.main()

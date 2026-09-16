@@ -49,6 +49,10 @@ class State:
         peak = max(scores.values(), default=0.0)
         return {k: (v / peak if peak else 0.0) for k, v in scores.items()}
 
+    def zones(self):
+        return {k: ("high" if v >= .70 else "low" if v <= .30 else "mid")
+                for k, v in asdict(self).items()}
+
 def run_intervention(name: str) -> dict:
     s = State()
     rows = [s.step(minutes=60, action="study", deadline_signal=1.0)]

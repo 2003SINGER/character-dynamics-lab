@@ -229,7 +229,7 @@ def protocol_for(selected, rules, stateful: bool, scene_aware: bool = False):
     return "\n".join(lines) + "\n", meta, counts
 
 def run_core(executable: Path, protocol: str):
-    proc = subprocess.run([str(executable)], input=protocol, text=True,
+    proc = subprocess.run([str(executable), "--dynamics", "legacy-reference-v0"], input=protocol, text=True,
                           capture_output=True, check=True)
     result = {}
     for line in proc.stdout.splitlines():
