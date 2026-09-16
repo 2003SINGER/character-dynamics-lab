@@ -13,6 +13,20 @@ int main(){
     s.bathroom_urge=.1; const double b=LivingDynamics::bathroom_relief(s); s.bathroom_urge=.85; if(!(LivingDynamics::bathroom_relief(s)>b)) return 6;
     s.task_pressure=.9; s.anxiety=.2; if(!(LivingDynamics::overload_risk(s,p)<.01)) return 7;
     s.task_pressure=.9; s.anxiety=.9; if(!(LivingDynamics::overload_risk(s,p)>.1)) return 8;
+    s.anxiety=.10; const double anxiety_low=LivingDynamics::anxiety_facilitation(s);
+    s.anxiety=.40; const double anxiety_mid=LivingDynamics::anxiety_facilitation(s);
+    s.anxiety=.95; const double anxiety_extreme=LivingDynamics::anxiety_facilitation(s);
+    if (!(anxiety_mid > anxiety_low && anxiety_mid > anxiety_extreme
+          && LivingDynamics::anxiety_impairment(s) > .7)) return 21;
+    s.fatigue=.10; const double fresh_recovery=LivingDynamics::fatigue_recovery_drive(s);
+    s.fatigue=.65; const double tired_recovery=LivingDynamics::fatigue_recovery_drive(s);
+    s.fatigue=.95; const double exhausted_recovery=LivingDynamics::fatigue_recovery_drive(s);
+    if (!(fresh_recovery < .05 && tired_recovery > fresh_recovery && exhausted_recovery > tired_recovery)) return 22;
+    s.hunger=.05; if (!(LivingDynamics::hunger_drive(s,p) < .02)) return 23;
+    s.hunger=.85; if (!(LivingDynamics::hunger_drive(s,p) > .5)) return 24;
+    s.screen_strain=.05; const double screen_low=LivingDynamics::screen_aversion(s);
+    s.screen_strain=.90; const double screen_high=LivingDynamics::screen_aversion(s);
+    if (!(screen_low < .02 && screen_high > .4)) return 25;
     // Coupling matrix: pressure with calm/fresh state remains executable,
     // while the same pressure with anxiety and fatigue enters overload.
     s.task_pressure=.85; s.anxiety=.20; s.fatigue=.20;
