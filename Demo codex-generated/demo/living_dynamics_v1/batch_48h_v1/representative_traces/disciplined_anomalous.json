@@ -11888,7 +11888,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 1,
+        "probability": 0.449295,
         "eligible": true
       },
       {
@@ -11900,8 +11900,8 @@
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.550705,
+        "eligible": true
       },
       {
         "action": "use_computer",
@@ -12113,7 +12113,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 1,
+        "probability": 0.449908,
         "eligible": true
       },
       {
@@ -12125,8 +12125,8 @@
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.550092,
+        "eligible": true
       },
       {
         "action": "use_computer",
@@ -12179,239 +12179,14 @@
       "status": "running"
     },
     "running_action_after": {
-      "action": "idle",
-      "target": "",
+      "action": "shop_on_phone",
+      "target": "phone",
       "elapsed": 0,
-      "planned": 10,
+      "planned": 20,
       "status": "running"
     },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 17
-  },
-  {
-    "timestamp": 2022,
-    "elapsed": 10,
-    "scenario_seed": 1289,
-    "policy_seed": 5527,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "815"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "1"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "17.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.478798,
-      "fatigue": 0.41916,
-      "task_pressure": 0,
-      "satisfaction": 0.997614,
-      "hunger": 0.153035,
-      "bathroom_urge": 0.315113,
-      "anxiety": 0.0211822,
-      "screen_strain": 0.47606
-    },
-    "task_effort": 9.08923,
-    "effort_target": 9.08923,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 1,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
+    "selected_action": "shop_on_phone",
+    "selected_target": "phone",
     "pre_policy_outcome": {
       "accepted": true,
       "action": "idle",
@@ -12433,681 +12208,6 @@
   },
   {
     "timestamp": 2032,
-    "elapsed": 10,
-    "scenario_seed": 1289,
-    "policy_seed": 5527,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "815"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "1"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "17.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.497771,
-      "fatigue": 0.41916,
-      "task_pressure": 0,
-      "satisfaction": 0.996619,
-      "hunger": 0.162442,
-      "bathroom_urge": 0.322298,
-      "anxiety": 0.0210128,
-      "screen_strain": 0.47606
-    },
-    "task_effort": 9.08923,
-    "effort_target": 9.08923,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.475554,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.524446,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "use_phone",
-      "target": "phone",
-      "elapsed": 0,
-      "planned": 25,
-      "status": "running"
-    },
-    "selected_action": "use_phone",
-    "selected_target": "phone",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 17
-  },
-  {
-    "timestamp": 2057,
-    "elapsed": 25,
-    "scenario_seed": 1289,
-    "policy_seed": 5527,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "815"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "1"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "17.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0.005,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0.0740805,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.460599,
-      "fatigue": 0.498241,
-      "task_pressure": 0,
-      "satisfaction": 0.99754,
-      "hunger": 0.185991,
-      "bathroom_urge": 0.340301,
-      "anxiety": 0.0205925,
-      "screen_strain": 0.580975
-    },
-    "task_effort": 9.08923,
-    "effort_target": 9.08923,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.294855,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0.357155,
-        "eligible": true
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.347989,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "use_phone",
-      "target": "phone",
-      "elapsed": 0,
-      "planned": 25,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "rest_at_bed",
-      "target": "bed",
-      "elapsed": 0,
-      "planned": 60,
-      "status": "running"
-    },
-    "selected_action": "rest_at_bed",
-    "selected_target": "bed",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "use_phone",
-      "target": "phone",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 25,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(use_phone) via object:phone"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 17
-  },
-  {
-    "timestamp": 2117,
-    "elapsed": 60,
-    "scenario_seed": 1289,
-    "policy_seed": 5527,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "815"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "1"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "17.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": -0.1,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": -0.00124864,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.508525,
-      "fatigue": 0.396992,
-      "task_pressure": 0,
-      "satisfaction": 0.993043,
-      "hunger": 0.214202,
-      "bathroom_urge": 0.375766,
-      "anxiety": 0,
-      "screen_strain": 0.484975
-    },
-    "task_effort": 9.08923,
-    "effort_target": 9.08923,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.303766,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.333751,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0.362483,
-        "eligible": true
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "rest_at_bed",
-      "target": "bed",
-      "elapsed": 0,
-      "planned": 60,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "shop_on_phone",
-      "target": "phone",
-      "elapsed": 0,
-      "planned": 20,
-      "status": "running"
-    },
-    "selected_action": "shop_on_phone",
-    "selected_target": "phone",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "rest_at_bed",
-      "target": "bed",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 60,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(rest_at_bed) via object:bed"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 17
-  },
-  {
-    "timestamp": 2137,
     "elapsed": 20,
     "scenario_seed": 1289,
     "policy_seed": 5527,
@@ -13215,14 +12315,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.491858,
-      "fatigue": 0.404992,
+      "boredom": 0.443952,
+      "fatigue": 0.42716,
       "task_pressure": 0,
       "satisfaction": 1,
-      "hunger": 0.232873,
-      "bathroom_urge": 0.390255,
-      "anxiety": 0,
-      "screen_strain": 0.584975
+      "hunger": 0.162462,
+      "bathroom_urge": 0.322293,
+      "anxiety": 0.0210114,
+      "screen_strain": 0.57606
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -13332,7 +12432,7 @@
     "actor_id": 17
   },
   {
-    "timestamp": 2147,
+    "timestamp": 2042,
     "elapsed": 10,
     "scenario_seed": 1289,
     "policy_seed": 5527,
@@ -13440,14 +12540,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.511309,
-      "fatigue": 0.404992,
+      "boredom": 0.461295,
+      "fatigue": 0.42716,
       "task_pressure": 0,
       "satisfaction": 0.999,
-      "hunger": 0.242219,
-      "bathroom_urge": 0.397525,
-      "anxiety": 0,
-      "screen_strain": 0.584975
+      "hunger": 0.171889,
+      "bathroom_urge": 0.329497,
+      "anxiety": 0.0208433,
+      "screen_strain": 0.57606
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -13557,7 +12657,7 @@
     "actor_id": 17
   },
   {
-    "timestamp": 2157,
+    "timestamp": 2052,
     "elapsed": 10,
     "scenario_seed": 1289,
     "policy_seed": 5527,
@@ -13665,14 +12765,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.531299,
-      "fatigue": 0.404992,
+      "boredom": 0.479506,
+      "fatigue": 0.42716,
       "task_pressure": 0,
       "satisfaction": 0.998002,
-      "hunger": 0.251565,
-      "bathroom_urge": 0.404807,
-      "anxiety": 0,
-      "screen_strain": 0.584975
+      "hunger": 0.181316,
+      "bathroom_urge": 0.336711,
+      "anxiety": 0.0206766,
+      "screen_strain": 0.57606
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -13680,8 +12780,7 @@
     "decision_gate": {
       "open": true,
       "reasons": [
-        "action_completed",
-        "need_threshold_crossed"
+        "action_completed"
       ]
     },
     "policy_evaluated": true,
@@ -13689,13 +12788,238 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.475785,
+        "probability": 1,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.524215,
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "selected_action": "idle",
+    "selected_target": "",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "idle",
+      "target": "",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 10,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(idle)"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 17
+  },
+  {
+    "timestamp": 2062,
+    "elapsed": 10,
+    "scenario_seed": 1289,
+    "policy_seed": 5527,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "815"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "1"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "17.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.498508,
+      "fatigue": 0.42716,
+      "task_pressure": 0,
+      "satisfaction": 0.997006,
+      "hunger": 0.190743,
+      "bathroom_urge": 0.343937,
+      "anxiety": 0.0205112,
+      "screen_strain": 0.57606
+    },
+    "task_effort": 9.08923,
+    "effort_target": 9.08923,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.476828,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.523172,
         "eligible": true
       },
       {
@@ -13773,6 +13097,682 @@
       "task_completed": false,
       "plan_invalidated": false,
       "provenance": "World::settle(idle)"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 17
+  },
+  {
+    "timestamp": 2087,
+    "elapsed": 25,
+    "scenario_seed": 1289,
+    "policy_seed": 5527,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "815"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "1"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "17.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0.005,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0.0816805,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.461284,
+      "fatigue": 0.513841,
+      "task_pressure": 0,
+      "satisfaction": 0.997899,
+      "hunger": 0.21434,
+      "bathroom_urge": 0.362041,
+      "anxiety": 0.0201009,
+      "screen_strain": 0.672975
+    },
+    "task_effort": 9.08923,
+    "effort_target": 9.08923,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.442236,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.557764,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "selected_action": "idle",
+    "selected_target": "",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "use_phone",
+      "target": "phone",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 25,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(use_phone) via object:phone"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 17
+  },
+  {
+    "timestamp": 2097,
+    "elapsed": 10,
+    "scenario_seed": 1289,
+    "policy_seed": 5527,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "815"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "1"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "17.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.479494,
+      "fatigue": 0.513841,
+      "task_pressure": 0,
+      "satisfaction": 0.996903,
+      "hunger": 0.223983,
+      "bathroom_urge": 0.369376,
+      "anxiety": 0.0199401,
+      "screen_strain": 0.672975
+    },
+    "task_effort": 9.08923,
+    "effort_target": 9.08923,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.442435,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.557565,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "rest_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 60,
+      "status": "running"
+    },
+    "selected_action": "rest_at_bed",
+    "selected_target": "bed",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "idle",
+      "target": "",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 10,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(idle)"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 17
+  },
+  {
+    "timestamp": 2157,
+    "elapsed": 60,
+    "scenario_seed": 1289,
+    "policy_seed": 5527,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "815"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "1"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "17.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": -0.1,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": -0.00144641,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.527276,
+      "fatigue": 0.412394,
+      "task_pressure": 0,
+      "satisfaction": 0.992647,
+      "hunger": 0.252312,
+      "bathroom_urge": 0.405127,
+      "anxiety": 0,
+      "screen_strain": 0.572857
+    },
+    "task_effort": 9.08923,
+    "effort_target": 9.08923,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed",
+        "need_threshold_crossed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.476082,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.523918,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "rest_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 60,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "selected_action": "use_phone",
+    "selected_target": "phone",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "rest_at_bed",
+      "target": "bed",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 60,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(rest_at_bed) via object:bed"
     },
     "post_policy_outcome": null,
     "validation": {
@@ -13886,19 +13886,19 @@
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0.0823581,
+      "fatigue": 0.0814372,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.492178,
-      "fatigue": 0.49235,
+      "boredom": 0.488339,
+      "fatigue": 0.498831,
       "task_pressure": 0,
-      "satisfaction": 0.999267,
-      "hunger": 0.274961,
-      "bathroom_urge": 0.423048,
+      "satisfaction": 0.993919,
+      "hunger": 0.275754,
+      "bathroom_urge": 0.423385,
       "anxiety": 0,
-      "screen_strain": 0.681177
+      "screen_strain": 0.670029
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -13914,7 +13914,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.441818,
+        "probability": 0.443801,
         "eligible": true
       },
       {
@@ -13938,7 +13938,7 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.558182,
+        "probability": 0.556199,
         "eligible": true
       },
       {
@@ -14111,19 +14111,19 @@
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": -0.00117385,
+      "fatigue": -0.00125615,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.539883,
-      "fatigue": 0.391176,
+      "boredom": 0.536065,
+      "fatigue": 0.397575,
       "task_pressure": 0,
-      "satisfaction": 0.994661,
-      "hunger": 0.303127,
-      "bathroom_urge": 0.459016,
+      "satisfaction": 0.989475,
+      "hunger": 0.303969,
+      "bathroom_urge": 0.459383,
       "anxiety": 0,
-      "screen_strain": 0.580345
+      "screen_strain": 0.57016
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -14139,13 +14139,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.477245,
+        "probability": 0.477555,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.522755,
+        "probability": 0.522445,
         "eligible": true
       },
       {
@@ -14351,14 +14351,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.526549,
-      "fatigue": 0.394376,
+      "boredom": 0.522732,
+      "fatigue": 0.400775,
       "task_pressure": 0,
-      "satisfaction": 0.993078,
-      "hunger": 0.318038,
-      "bathroom_urge": 0.470769,
+      "satisfaction": 0.987908,
+      "hunger": 0.318905,
+      "bathroom_urge": 0.471146,
       "anxiety": 0,
-      "screen_strain": 0.596345
+      "screen_strain": 0.58616
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -14498,19 +14498,19 @@
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0.0820062,
+      "fatigue": 0.0812321,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.50042,
-      "fatigue": 0.478182,
+      "boredom": 0.496746,
+      "fatigue": 0.483807,
       "task_pressure": 0,
-      "satisfaction": 0.995971,
-      "hunger": 0.326429,
-      "bathroom_urge": 0.477398,
-      "anxiety": 1.71579e-05,
-      "screen_strain": 0.676917
+      "satisfaction": 0.990791,
+      "hunger": 0.327311,
+      "bathroom_urge": 0.477781,
+      "anxiety": 1.88946e-05,
+      "screen_strain": 0.667547
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -14526,7 +14526,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.44363,
+        "probability": 0.445231,
         "eligible": true
       },
       {
@@ -14550,7 +14550,7 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.55637,
+        "probability": 0.554769,
         "eligible": true
       },
       {
@@ -14728,14 +14728,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.520136,
-      "fatigue": 0.478182,
+      "boredom": 0.516352,
+      "fatigue": 0.483807,
       "task_pressure": 0,
-      "satisfaction": 0.994876,
-      "hunger": 0.335958,
-      "bathroom_urge": 0.484839,
-      "anxiety": 5.15012e-05,
-      "screen_strain": 0.676917
+      "satisfaction": 0.9897,
+      "hunger": 0.336854,
+      "bathroom_urge": 0.485227,
+      "anxiety": 5.5245e-05,
+      "screen_strain": 0.667547
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -14751,7 +14751,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.443758,
+        "probability": 0.445367,
         "eligible": true
       },
       {
@@ -14775,7 +14775,7 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.556242,
+        "probability": 0.554633,
         "eligible": true
       },
       {
@@ -14953,14 +14953,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.540292,
-      "fatigue": 0.478182,
+      "boredom": 0.536444,
+      "fatigue": 0.483807,
       "task_pressure": 0,
-      "satisfaction": 0.993672,
-      "hunger": 0.345487,
-      "bathroom_urge": 0.492291,
-      "anxiety": 0.000122347,
-      "screen_strain": 0.676917
+      "satisfaction": 0.988501,
+      "hunger": 0.346397,
+      "bathroom_urge": 0.492685,
+      "anxiety": 0.000128075,
+      "screen_strain": 0.667547
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -14976,7 +14976,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.443827,
+        "probability": 0.445449,
         "eligible": true
       },
       {
@@ -15000,7 +15000,7 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.556173,
+        "probability": 0.554551,
         "eligible": true
       },
       {
@@ -15183,14 +15183,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.549626,
-      "fatigue": 0.431516,
+      "boredom": 0.545777,
+      "fatigue": 0.437141,
       "task_pressure": 0,
-      "satisfaction": 0.989995,
-      "hunger": 0.358769,
-      "bathroom_urge": 0.509342,
-      "anxiety": 0.000304177,
-      "screen_strain": 0.65825
+      "satisfaction": 0.984836,
+      "hunger": 0.359699,
+      "bathroom_urge": 0.509749,
+      "anxiety": 0.000309833,
+      "screen_strain": 0.64888
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -15330,19 +15330,19 @@
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": -0.000995653,
+      "fatigue": -0.00106599,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.58783,
-      "fatigue": 0.377187,
+      "boredom": 0.584019,
+      "fatigue": 0.382741,
       "task_pressure": 0,
-      "satisfaction": 0.986464,
-      "hunger": 0.373734,
-      "bathroom_urge": 0.528759,
-      "anxiety": 0.000523333,
-      "screen_strain": 0.57646
+      "satisfaction": 0.981401,
+      "hunger": 0.374687,
+      "bathroom_urge": 0.529181,
+      "anxiety": 0.000529967,
+      "screen_strain": 0.567884
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -15358,13 +15358,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.470809,
+        "probability": 0.472074,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.529191,
+        "probability": 0.527926,
         "eligible": true
       },
       {
@@ -15560,14 +15560,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.613814,
-      "fatigue": 0.377187,
+      "boredom": 0.609164,
+      "fatigue": 0.382741,
       "task_pressure": 0,
-      "satisfaction": 0.984785,
-      "hunger": 0.383011,
-      "bathroom_urge": 0.536176,
-      "anxiety": 0.000754493,
-      "screen_strain": 0.57646
+      "satisfaction": 0.979726,
+      "hunger": 0.383978,
+      "bathroom_urge": 0.536603,
+      "anxiety": 0.00076321,
+      "screen_strain": 0.567884
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -15583,13 +15583,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.224649,
+        "probability": 0.225336,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.262507,
+        "probability": 0.261095,
         "eligible": true
       },
       {
@@ -15601,7 +15601,7 @@
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.254128,
+        "probability": 0.253572,
         "eligible": true
       },
       {
@@ -15619,7 +15619,7 @@
       {
         "action": "go_to_bathroom",
         "target": "door",
-        "probability": 0.258717,
+        "probability": 0.259998,
         "eligible": true
       },
       {
@@ -15785,14 +15785,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.599648,
-      "fatigue": 0.380587,
+      "boredom": 0.594997,
+      "fatigue": 0.386141,
       "task_pressure": 0,
-      "satisfaction": 0.981739,
-      "hunger": 0.398797,
-      "bathroom_urge": 0.548808,
-      "anxiety": 0.00121042,
-      "screen_strain": 0.59346
+      "satisfaction": 0.976687,
+      "hunger": 0.399787,
+      "bathroom_urge": 0.549245,
+      "anxiety": 0.00122217,
+      "screen_strain": 0.584884
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -15932,19 +15932,19 @@
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0.0858296,
+      "fatigue": 0.0852593,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.569513,
-      "fatigue": 0.469016,
+      "boredom": 0.565914,
+      "fatigue": 0.474001,
       "task_pressure": 0,
-      "satisfaction": 0.979245,
-      "hunger": 0.410877,
-      "bathroom_urge": 0.558496,
-      "anxiety": 0.00161162,
-      "screen_strain": 0.674008
+      "satisfaction": 0.974199,
+      "hunger": 0.411886,
+      "bathroom_urge": 0.55894,
+      "anxiety": 0.00162573,
+      "screen_strain": 0.666032
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -15961,7 +15961,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.289592,
+        "probability": 0.289963,
         "eligible": true
       },
       {
@@ -15985,7 +15985,7 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.360706,
+        "probability": 0.359329,
         "eligible": true
       },
       {
@@ -15997,7 +15997,7 @@
       {
         "action": "go_to_bathroom",
         "target": "door",
-        "probability": 0.349702,
+        "probability": 0.350708,
         "eligible": true
       },
       {
@@ -16158,19 +16158,19 @@
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": -0.000882798,
+      "fatigue": -0.000943856,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.616268,
-      "fatigue": 0.368133,
+      "boredom": 0.612809,
+      "fatigue": 0.373057,
       "task_pressure": 0,
-      "satisfaction": 0.968309,
-      "hunger": 0.438867,
-      "bathroom_urge": 0.595174,
-      "anxiety": 0.00207562,
-      "screen_strain": 0.573802
+      "satisfaction": 0.963353,
+      "hunger": 0.439913,
+      "bathroom_urge": 0.595643,
+      "anxiety": 0.00208966,
+      "screen_strain": 0.566492
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -16186,13 +16186,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.217666,
+        "probability": 0.218057,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.244163,
+        "probability": 0.242928,
         "eligible": true
       },
       {
@@ -16204,7 +16204,7 @@
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.24707,
+        "probability": 0.246531,
         "eligible": true
       },
       {
@@ -16222,7 +16222,7 @@
       {
         "action": "go_to_bathroom",
         "target": "door",
-        "probability": 0.2911,
+        "probability": 0.292484,
         "eligible": true
       },
       {
@@ -16383,19 +16383,19 @@
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0.0815089,
+      "fatigue": 0.0809534,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.567457,
-      "fatigue": 0.454642,
+      "boredom": 0.565205,
+      "fatigue": 0.45901,
       "task_pressure": 0,
-      "satisfaction": 0.968193,
-      "hunger": 0.462039,
-      "bathroom_urge": 0.613903,
-      "anxiety": 0.00321572,
-      "screen_strain": 0.670898
+      "satisfaction": 0.963009,
+      "hunger": 0.463116,
+      "bathroom_urge": 0.614386,
+      "anxiety": 0.0032357,
+      "screen_strain": 0.664173
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -16411,7 +16411,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.27182,
+        "probability": 0.204557,
         "eligible": true
       },
       {
@@ -16423,8 +16423,8 @@
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.24777,
+        "eligible": true
       },
       {
         "action": "use_computer",
@@ -16435,7 +16435,7 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.336302,
+        "probability": 0.25202,
         "eligible": true
       },
       {
@@ -16447,7 +16447,7 @@
       {
         "action": "go_to_bathroom",
         "target": "door",
-        "probability": 0.391878,
+        "probability": 0.295653,
         "eligible": true
       },
       {
@@ -16613,14 +16613,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.589664,
-      "fatigue": 0.454642,
+      "boredom": 0.587108,
+      "fatigue": 0.45901,
       "task_pressure": 0,
-      "satisfaction": 0.965679,
-      "hunger": 0.471513,
-      "bathroom_urge": 0.621488,
-      "anxiety": 0.00371598,
-      "screen_strain": 0.670898
+      "satisfaction": 0.960496,
+      "hunger": 0.472601,
+      "bathroom_urge": 0.621976,
+      "anxiety": 0.00373887,
+      "screen_strain": 0.664173
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -16636,7 +16636,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.269129,
+        "probability": 0.203128,
         "eligible": true
       },
       {
@@ -16648,8 +16648,8 @@
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.245357,
+        "eligible": true
       },
       {
         "action": "use_computer",
@@ -16660,7 +16660,7 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.331905,
+        "probability": 0.249527,
         "eligible": true
       },
       {
@@ -16672,7 +16672,7 @@
       {
         "action": "go_to_bathroom",
         "target": "door",
-        "probability": 0.398966,
+        "probability": 0.301988,
         "eligible": true
       },
       {
@@ -16835,17 +16835,17 @@
     "impulse_state_delta": {
       "fatigue": 0,
       "hunger": 0,
-      "bathroom_urge": -0.593087
+      "bathroom_urge": -0.593949
     },
     "state": {
-      "boredom": 0.589664,
-      "fatigue": 0.454642,
+      "boredom": 0.587108,
+      "fatigue": 0.45901,
       "task_pressure": 0,
-      "satisfaction": 0.996653,
-      "hunger": 0.485724,
-      "bathroom_urge": 0.0397956,
-      "anxiety": 0.00451771,
-      "screen_strain": 0.670898
+      "satisfaction": 0.991528,
+      "hunger": 0.486829,
+      "bathroom_urge": 0.0394284,
+      "anxiety": 0.00454481,
+      "screen_strain": 0.664173
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -16861,20 +16861,20 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.298205,
+        "probability": 0.219827,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.334032,
+        "probability": 0.245668,
         "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.264466,
+        "eligible": true
       },
       {
         "action": "use_computer",
@@ -16885,7 +16885,7 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.367763,
+        "probability": 0.270039,
         "eligible": true
       },
       {
@@ -16927,13 +16927,13 @@
       "status": "running"
     },
     "running_action_after": {
-      "action": "use_phone",
+      "action": "shop_on_phone",
       "target": "phone",
       "elapsed": 0,
-      "planned": 25,
+      "planned": 20,
       "status": "running"
     },
-    "selected_action": "use_phone",
+    "selected_action": "shop_on_phone",
     "selected_target": "phone",
     "pre_policy_outcome": {
       "accepted": true,
@@ -16955,8 +16955,8 @@
     "actor_id": 17
   },
   {
-    "timestamp": 2522,
-    "elapsed": 25,
+    "timestamp": 2517,
+    "elapsed": 20,
     "scenario_seed": 1289,
     "policy_seed": 5527,
     "dynamics_model": "demo-living-v1",
@@ -17053,24 +17053,24 @@
     },
     "observation_deltas": [],
     "continuous_state_delta": {
-      "fatigue": 0.005,
+      "fatigue": 0.004,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0.0888882,
+      "fatigue": 0.004,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.548001,
-      "fatigue": 0.548531,
+      "boredom": 0.570442,
+      "fatigue": 0.46701,
       "task_pressure": 0,
-      "satisfaction": 0.998239,
-      "hunger": 0.509444,
-      "bathroom_urge": 0.0588387,
-      "anxiety": 0.00442736,
-      "screen_strain": 0.760226
+      "satisfaction": 1,
+      "hunger": 0.505822,
+      "bathroom_urge": 0.054671,
+      "anxiety": 0.00447209,
+      "screen_strain": 0.764173
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -17086,7 +17086,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.280456,
+        "probability": 0.429659,
         "eligible": true
       },
       {
@@ -17098,8 +17098,8 @@
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0.342474,
-        "eligible": true
+        "probability": 0,
+        "eligible": false
       },
       {
         "action": "use_computer",
@@ -17110,7 +17110,7 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.37707,
+        "probability": 0.570341,
         "eligible": true
       },
       {
@@ -17145,31 +17145,256 @@
       }
     ],
     "running_action_before": {
-      "action": "use_phone",
-      "target": "phone",
-      "elapsed": 0,
-      "planned": 25,
-      "status": "running"
-    },
-    "running_action_after": {
       "action": "shop_on_phone",
       "target": "phone",
       "elapsed": 0,
       "planned": 20,
       "status": "running"
     },
-    "selected_action": "shop_on_phone",
-    "selected_target": "phone",
+    "running_action_after": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "selected_action": "idle",
+    "selected_target": "",
     "pre_policy_outcome": {
       "accepted": true,
-      "action": "use_phone",
+      "action": "shop_on_phone",
       "target": "phone",
       "failure_reason": 0,
-      "action_elapsed_minutes": 25,
+      "action_elapsed_minutes": 20,
       "task_effort_gained": 0,
       "task_completed": false,
       "plan_invalidated": false,
-      "provenance": "World::settle(use_phone) via object:phone"
+      "provenance": "World::settle(shop_on_phone) via object:phone"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 17
+  },
+  {
+    "timestamp": 2527,
+    "elapsed": 10,
+    "scenario_seed": 1289,
+    "policy_seed": 5527,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "815"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "17.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.593087,
+      "fatigue": 0.46701,
+      "task_pressure": 0,
+      "satisfaction": 0.999,
+      "hunger": 0.515328,
+      "bathroom_urge": 0.0623182,
+      "anxiety": 0.00443631,
+      "screen_strain": 0.764173
+    },
+    "task_effort": 9.08923,
+    "effort_target": 9.08923,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.292265,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.321166,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.386568,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "selected_action": "use_phone",
+    "selected_target": "phone",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "idle",
+      "target": "",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 10,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(idle)"
     },
     "post_policy_outcome": null,
     "validation": {
@@ -17181,7 +17406,7 @@
   },
   {
     "timestamp": 2538,
-    "elapsed": 16,
+    "elapsed": 11,
     "scenario_seed": 1289,
     "policy_seed": 5527,
     "dynamics_model": "demo-living-v1",
@@ -17283,7 +17508,7 @@
     },
     "observation_deltas": [],
     "continuous_state_delta": {
-      "fatigue": 0.0032,
+      "fatigue": 0.0022,
       "hunger": 0,
       "bathroom_urge": 0
     },
@@ -17293,14 +17518,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.534667,
-      "fatigue": 0.551731,
+      "boredom": 0.58392,
+      "fatigue": 0.46921,
       "task_pressure": 0,
-      "satisfaction": 0.996644,
-      "hunger": 0.524993,
-      "bathroom_urge": 0.0711897,
-      "anxiety": 0.00437069,
-      "screen_strain": 0.776226
+      "satisfaction": 0.997902,
+      "hunger": 0.525791,
+      "bathroom_urge": 0.0707447,
+      "anxiety": 0.00439727,
+      "screen_strain": 0.775173
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -17312,17 +17537,17 @@
     "policy_evaluated": false,
     "candidates": [],
     "running_action_before": {
-      "action": "shop_on_phone",
+      "action": "use_phone",
       "target": "phone",
       "elapsed": 0,
-      "planned": 20,
+      "planned": 25,
       "status": "running"
     },
     "running_action_after": {
-      "action": "shop_on_phone",
+      "action": "use_phone",
       "target": "phone",
-      "elapsed": 16,
-      "planned": 20,
+      "elapsed": 11,
+      "planned": 25,
       "status": "running"
     },
     "selected_action": null,
@@ -17337,8 +17562,8 @@
     "actor_id": 17
   },
   {
-    "timestamp": 2542,
-    "elapsed": 4,
+    "timestamp": 2552,
+    "elapsed": 14,
     "scenario_seed": 1289,
     "policy_seed": 5527,
     "dynamics_model": "demo-living-v1",
@@ -17435,24 +17660,24 @@
     },
     "observation_deltas": [],
     "continuous_state_delta": {
-      "fatigue": 0.0008,
+      "fatigue": 0.0028,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0.004,
+      "fatigue": 0.0959771,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.531334,
-      "fatigue": 0.556531,
+      "boredom": 0.5508,
+      "fatigue": 0.567987,
       "task_pressure": 0,
       "satisfaction": 1,
-      "hunger": 0.528881,
-      "bathroom_urge": 0.0742852,
-      "anxiety": 0.0043567,
-      "screen_strain": 0.860226
+      "hunger": 0.539117,
+      "bathroom_urge": 0.08149,
+      "anxiety": 0.00434802,
+      "screen_strain": 0.846039
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -17468,7 +17693,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.14576,
+        "probability": 0.198815,
         "eligible": true
       },
       {
@@ -17492,13 +17717,13 @@
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.277078,
+        "probability": 0.335219,
         "eligible": true
       },
       {
         "action": "sleep_at_bed",
         "target": "bed",
-        "probability": 0.391868,
+        "probability": 0.465966,
         "eligible": true
       },
       {
@@ -17516,8 +17741,8 @@
       {
         "action": "turn_light_off",
         "target": "light",
-        "probability": 0.185294,
-        "eligible": true
+        "probability": 0,
+        "eligible": false
       },
       {
         "action": "close_curtain",
@@ -17527,10 +17752,10 @@
       }
     ],
     "running_action_before": {
-      "action": "shop_on_phone",
+      "action": "use_phone",
       "target": "phone",
-      "elapsed": 16,
-      "planned": 20,
+      "elapsed": 11,
+      "planned": 25,
       "status": "running"
     },
     "running_action_after": {
@@ -17544,167 +17769,15 @@
     "selected_target": "bed",
     "pre_policy_outcome": {
       "accepted": true,
-      "action": "shop_on_phone",
+      "action": "use_phone",
       "target": "phone",
       "failure_reason": 0,
-      "action_elapsed_minutes": 20,
+      "action_elapsed_minutes": 25,
       "task_effort_gained": 0,
       "task_completed": false,
       "plan_invalidated": false,
-      "provenance": "World::settle(shop_on_phone) via object:phone"
+      "provenance": "World::settle(use_phone) via object:phone"
     },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 17
-  },
-  {
-    "timestamp": 2602,
-    "elapsed": 60,
-    "scenario_seed": 1289,
-    "policy_seed": 5527,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "815"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "17.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": -0.22,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.501334,
-      "fatigue": 0.336531,
-      "task_pressure": 0,
-      "satisfaction": 0.994,
-      "hunger": 0.556626,
-      "bathroom_urge": 0.111532,
-      "anxiety": 0,
-      "screen_strain": 0.740226
-    },
-    "task_effort": 9.08923,
-    "effort_target": 9.08923,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": false,
-      "reasons": []
-    },
-    "policy_evaluated": false,
-    "candidates": [],
-    "running_action_before": {
-      "action": "sleep_at_bed",
-      "target": "bed",
-      "elapsed": 0,
-      "planned": 480,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "sleep_at_bed",
-      "target": "bed",
-      "elapsed": 60,
-      "planned": 480,
-      "status": "running"
-    },
-    "selected_action": null,
-    "selected_target": "",
-    "pre_policy_outcome": null,
     "post_policy_outcome": null,
     "validation": {
       "performed": false,
@@ -17715,7 +17788,7 @@
   },
   {
     "timestamp": 2604,
-    "elapsed": 2,
+    "elapsed": 52,
     "scenario_seed": 1289,
     "policy_seed": 5527,
     "dynamics_model": "demo-living-v1",
@@ -17822,7 +17895,7 @@
       }
     ],
     "continuous_state_delta": {
-      "fatigue": -0.00733333,
+      "fatigue": -0.190667,
       "hunger": 0,
       "bathroom_urge": 0
     },
@@ -17832,14 +17905,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.500334,
-      "fatigue": 0.329197,
+      "boredom": 0.5248,
+      "fatigue": 0.377321,
       "task_pressure": 0,
-      "satisfaction": 0.993802,
-      "hunger": 0.557549,
-      "bathroom_urge": 0.112778,
+      "satisfaction": 0.9948,
+      "hunger": 0.56343,
+      "bathroom_urge": 0.113962,
       "anxiety": 0,
-      "screen_strain": 0.736226
+      "screen_strain": 0.742039
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -17853,14 +17926,14 @@
     "running_action_before": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 60,
+      "elapsed": 0,
       "planned": 480,
       "status": "running"
     },
     "running_action_after": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 62,
+      "elapsed": 52,
       "planned": 480,
       "status": "running"
     },
@@ -17984,14 +18057,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.470334,
-      "fatigue": 0.109197,
+      "boredom": 0.4948,
+      "fatigue": 0.157321,
       "task_pressure": 0,
-      "satisfaction": 0.987877,
-      "hunger": 0.583574,
-      "bathroom_urge": 0.1493,
+      "satisfaction": 0.988862,
+      "hunger": 0.589819,
+      "bathroom_urge": 0.150708,
       "anxiety": 0,
-      "screen_strain": 0.616226
+      "screen_strain": 0.622039
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -18005,14 +18078,14 @@
     "running_action_before": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 62,
+      "elapsed": 52,
       "planned": 480,
       "status": "running"
     },
     "running_action_after": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 122,
+      "elapsed": 112,
       "planned": 480,
       "status": "running"
     },
@@ -18126,7 +18199,7 @@
     },
     "observation_deltas": [],
     "continuous_state_delta": {
-      "fatigue": -0.109197,
+      "fatigue": -0.157321,
       "hunger": 0,
       "bathroom_urge": 0
     },
@@ -18136,14 +18209,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.440334,
+      "boredom": 0.4648,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.981445,
-      "hunger": 0.608774,
-      "bathroom_urge": 0.185545,
-      "anxiety": 0.000192525,
-      "screen_strain": 0.496226
+      "satisfaction": 0.982006,
+      "hunger": 0.615019,
+      "bathroom_urge": 0.18699,
+      "anxiety": 0.000330044,
+      "screen_strain": 0.502039
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -18157,14 +18230,14 @@
     "running_action_before": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 122,
+      "elapsed": 112,
       "planned": 480,
       "status": "running"
     },
     "running_action_after": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 182,
+      "elapsed": 172,
       "planned": 480,
       "status": "running"
     },
@@ -18288,14 +18361,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.410334,
+      "boredom": 0.4348,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.973437,
-      "hunger": 0.633974,
-      "bathroom_urge": 0.22194,
-      "anxiety": 0.000743345,
-      "screen_strain": 0.376226
+      "satisfaction": 0.973577,
+      "hunger": 0.640219,
+      "bathroom_urge": 0.223421,
+      "anxiety": 0.000881748,
+      "screen_strain": 0.382039
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -18309,14 +18382,14 @@
     "running_action_before": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 182,
+      "elapsed": 172,
       "planned": 480,
       "status": "running"
     },
     "running_action_after": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 242,
+      "elapsed": 232,
       "planned": 480,
       "status": "running"
     },
@@ -18440,14 +18513,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.380334,
+      "boredom": 0.4048,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.963863,
-      "hunger": 0.659174,
-      "bathroom_urge": 0.258483,
-      "anxiety": 0.00129755,
-      "screen_strain": 0.256226
+      "satisfaction": 0.963583,
+      "hunger": 0.665419,
+      "bathroom_urge": 0.260001,
+      "anxiety": 0.00143684,
+      "screen_strain": 0.262039
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -18461,14 +18534,14 @@
     "running_action_before": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 242,
+      "elapsed": 232,
       "planned": 480,
       "status": "running"
     },
     "running_action_after": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 302,
+      "elapsed": 292,
       "planned": 480,
       "status": "running"
     },
@@ -18592,14 +18665,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.350334,
+      "boredom": 0.3748,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.952732,
-      "hunger": 0.684374,
-      "bathroom_urge": 0.295174,
-      "anxiety": 0.00185514,
-      "screen_strain": 0.136226
+      "satisfaction": 0.952034,
+      "hunger": 0.690619,
+      "bathroom_urge": 0.29673,
+      "anxiety": 0.0019953,
+      "screen_strain": 0.142039
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -18613,14 +18686,14 @@
     "running_action_before": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 302,
+      "elapsed": 292,
       "planned": 480,
       "status": "running"
     },
     "running_action_after": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 362,
+      "elapsed": 352,
       "planned": 480,
       "status": "running"
     },
@@ -18744,14 +18817,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.320334,
+      "boredom": 0.3448,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.940051,
-      "hunger": 0.709574,
-      "bathroom_urge": 0.332015,
-      "anxiety": 0.00241609,
-      "screen_strain": 0.0162259
+      "satisfaction": 0.938939,
+      "hunger": 0.715819,
+      "bathroom_urge": 0.333607,
+      "anxiety": 0.00255712,
+      "screen_strain": 0.022039
     },
     "task_effort": 9.08923,
     "effort_target": 9.08923,
@@ -18765,14 +18838,14 @@
     "running_action_before": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 362,
+      "elapsed": 352,
       "planned": 480,
       "status": "running"
     },
     "running_action_after": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 422,
+      "elapsed": 412,
       "planned": 480,
       "status": "running"
     },
@@ -18788,8 +18861,8 @@
     "actor_id": 17
   },
   {
-    "timestamp": 3022,
-    "elapsed": 58,
+    "timestamp": 3024,
+    "elapsed": 60,
     "scenario_seed": 1289,
     "policy_seed": 5527,
     "dynamics_model": "demo-living-v1",
@@ -18896,13 +18969,165 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.291086,
+      "boredom": 0.3148,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.926304,
-      "hunger": 0.733934,
-      "bathroom_urge": 0.367771,
-      "anxiety": 0.00288082,
+      "satisfaction": 0.924304,
+      "hunger": 0.741019,
+      "bathroom_urge": 0.370634,
+      "anxiety": 0.0031223,
+      "screen_strain": 0
+    },
+    "task_effort": 9.08923,
+    "effort_target": 9.08923,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": false,
+      "reasons": []
+    },
+    "policy_evaluated": false,
+    "candidates": [],
+    "running_action_before": {
+      "action": "sleep_at_bed",
+      "target": "bed",
+      "elapsed": 412,
+      "planned": 480,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "sleep_at_bed",
+      "target": "bed",
+      "elapsed": 472,
+      "planned": 480,
+      "status": "running"
+    },
+    "selected_action": null,
+    "selected_target": "",
+    "pre_policy_outcome": null,
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 17
+  },
+  {
+    "timestamp": 3032,
+    "elapsed": 8,
+    "scenario_seed": 1289,
+    "policy_seed": 5527,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "815"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.310288,
+      "fatigue": 0,
+      "task_pressure": 0,
+      "satisfaction": 0.922151,
+      "hunger": 0.744379,
+      "bathroom_urge": 0.37559,
+      "anxiety": 0.000491326,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -18919,7 +19144,7 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.352757,
+        "probability": 0.342544,
         "eligible": true
       },
       {
@@ -18961,7 +19186,7 @@
       {
         "action": "get_meal",
         "target": "door",
-        "probability": 0.647243,
+        "probability": 0.657456,
         "eligible": true
       },
       {
@@ -18980,19 +19205,19 @@
     "running_action_before": {
       "action": "sleep_at_bed",
       "target": "bed",
-      "elapsed": 422,
+      "elapsed": 472,
       "planned": 480,
       "status": "running"
     },
     "running_action_after": {
-      "action": "get_meal",
-      "target": "door",
+      "action": "idle",
+      "target": "",
       "elapsed": 0,
-      "planned": 35,
+      "planned": 10,
       "status": "running"
     },
-    "selected_action": "get_meal",
-    "selected_target": "door",
+    "selected_action": "idle",
+    "selected_target": "",
     "pre_policy_outcome": {
       "accepted": true,
       "action": "sleep_at_bed",
@@ -19013,7 +19238,232 @@
     "actor_id": 17
   },
   {
-    "timestamp": 3057,
+    "timestamp": 3042,
+    "elapsed": 10,
+    "scenario_seed": 1289,
+    "policy_seed": 5527,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "815"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.320218,
+      "fatigue": 0,
+      "task_pressure": 0,
+      "satisfaction": 0.919427,
+      "hunger": 0.752713,
+      "bathroom_urge": 0.38315,
+      "anxiety": 0.00111411,
+      "screen_strain": 0
+    },
+    "task_effort": 9.08923,
+    "effort_target": 9.08923,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.336641,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0.663359,
+        "eligible": true
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "get_meal",
+      "target": "door",
+      "elapsed": 0,
+      "planned": 35,
+      "status": "running"
+    },
+    "selected_action": "get_meal",
+    "selected_target": "door",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "idle",
+      "target": "",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 10,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(idle)"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 17
+  },
+  {
+    "timestamp": 3077,
     "elapsed": 35,
     "scenario_seed": 1289,
     "policy_seed": 5527,
@@ -19117,17 +19567,17 @@
     },
     "impulse_state_delta": {
       "fatigue": 0,
-      "hunger": -0.763113,
+      "hunger": -0.781884,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.251086,
+      "boredom": 0.280218,
       "fatigue": 0,
       "task_pressure": 0,
       "satisfaction": 1,
       "hunger": 0,
-      "bathroom_urge": 0.394187,
-      "anxiety": 0.00485682,
+      "bathroom_urge": 0.409645,
+      "anxiety": 0.00338787,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -19136,7 +19586,8 @@
     "decision_gate": {
       "open": true,
       "reasons": [
-        "action_completed"
+        "action_completed",
+        "need_threshold_crossed"
       ]
     },
     "policy_evaluated": true,
@@ -19228,457 +19679,6 @@
       "task_completed": false,
       "plan_invalidated": false,
       "provenance": "World::settle(get_meal) via object:door"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 17
-  },
-  {
-    "timestamp": 3067,
-    "elapsed": 10,
-    "scenario_seed": 1289,
-    "policy_seed": 5527,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "815"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.259454,
-      "fatigue": 0,
-      "task_pressure": 0,
-      "satisfaction": 0.999,
-      "hunger": 0.00833936,
-      "bathroom_urge": 0.400854,
-      "anxiety": 0.00481797,
-      "screen_strain": 0
-    },
-    "task_effort": 9.08923,
-    "effort_target": 9.08923,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed",
-        "need_threshold_crossed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 1,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 17
-  },
-  {
-    "timestamp": 3077,
-    "elapsed": 10,
-    "scenario_seed": 1289,
-    "policy_seed": 5527,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "815"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.267909,
-      "fatigue": 0,
-      "task_pressure": 0,
-      "satisfaction": 0.998002,
-      "hunger": 0.0166787,
-      "bathroom_urge": 0.40753,
-      "anxiety": 0.00477943,
-      "screen_strain": 0
-    },
-    "task_effort": 9.08923,
-    "effort_target": 9.08923,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 1,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
     },
     "post_policy_outcome": null,
     "validation": {
@@ -19797,13 +19797,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.276502,
+      "boredom": 0.289095,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.997006,
-      "hunger": 0.0250179,
-      "bathroom_urge": 0.414217,
-      "anxiety": 0.00474119,
+      "satisfaction": 0.999,
+      "hunger": 0.00833753,
+      "bathroom_urge": 0.416311,
+      "anxiety": 0.00336076,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -20022,13 +20022,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.285283,
+      "boredom": 0.298233,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.996012,
-      "hunger": 0.0333571,
-      "bathroom_urge": 0.420914,
-      "anxiety": 0.00470326,
+      "satisfaction": 0.998002,
+      "hunger": 0.016675,
+      "bathroom_urge": 0.422988,
+      "anxiety": 0.00333388,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -20247,13 +20247,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.294303,
+      "boredom": 0.307685,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.99502,
-      "hunger": 0.0416963,
-      "bathroom_urge": 0.42762,
-      "anxiety": 0.00466563,
+      "satisfaction": 0.997006,
+      "hunger": 0.0250125,
+      "bathroom_urge": 0.429675,
+      "anxiety": 0.00330721,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -20472,13 +20472,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.303615,
+      "boredom": 0.317506,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.99403,
-      "hunger": 0.0500354,
-      "bathroom_urge": 0.434337,
-      "anxiety": 0.00462831,
+      "satisfaction": 0.996012,
+      "hunger": 0.0333499,
+      "bathroom_urge": 0.436372,
+      "anxiety": 0.00328075,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -20697,13 +20697,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.313272,
+      "boredom": 0.327752,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.993042,
-      "hunger": 0.0583745,
-      "bathroom_urge": 0.441064,
-      "anxiety": 0.00459128,
+      "satisfaction": 0.99502,
+      "hunger": 0.0416873,
+      "bathroom_urge": 0.443078,
+      "anxiety": 0.0032545,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -20922,13 +20922,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.32333,
+      "boredom": 0.338483,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.992056,
-      "hunger": 0.0667135,
-      "bathroom_urge": 0.447801,
-      "anxiety": 0.00455455,
+      "satisfaction": 0.99403,
+      "hunger": 0.0500247,
+      "bathroom_urge": 0.449795,
+      "anxiety": 0.00322847,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -21147,13 +21147,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.333847,
+      "boredom": 0.349759,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.991072,
-      "hunger": 0.0750525,
-      "bathroom_urge": 0.454547,
-      "anxiety": 0.00451812,
+      "satisfaction": 0.993042,
+      "hunger": 0.058362,
+      "bathroom_urge": 0.456522,
+      "anxiety": 0.00320264,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -21372,13 +21372,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.344883,
+      "boredom": 0.361643,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.99009,
-      "hunger": 0.0833914,
-      "bathroom_urge": 0.461304,
-      "anxiety": 0.00448197,
+      "satisfaction": 0.992056,
+      "hunger": 0.0666993,
+      "bathroom_urge": 0.463258,
+      "anxiety": 0.00317702,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -21597,13 +21597,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.3565,
+      "boredom": 0.374199,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.989109,
-      "hunger": 0.0917303,
-      "bathroom_urge": 0.468071,
-      "anxiety": 0.00444612,
+      "satisfaction": 0.991072,
+      "hunger": 0.0750366,
+      "bathroom_urge": 0.470005,
+      "anxiety": 0.0031516,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -21822,13 +21822,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.368762,
+      "boredom": 0.387489,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.988131,
-      "hunger": 0.100069,
-      "bathroom_urge": 0.474847,
-      "anxiety": 0.00441055,
+      "satisfaction": 0.99009,
+      "hunger": 0.0833739,
+      "bathroom_urge": 0.476762,
+      "anxiety": 0.00312639,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -22047,13 +22047,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.381732,
+      "boredom": 0.401572,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.987155,
-      "hunger": 0.108408,
-      "bathroom_urge": 0.481634,
-      "anxiety": 0.00437526,
+      "satisfaction": 0.989109,
+      "hunger": 0.0917111,
+      "bathroom_urge": 0.483528,
+      "anxiety": 0.00310138,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -22272,13 +22272,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.39547,
+      "boredom": 0.416499,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.986181,
-      "hunger": 0.116747,
-      "bathroom_urge": 0.488431,
-      "anxiety": 0.00434026,
+      "satisfaction": 0.988131,
+      "hunger": 0.100048,
+      "bathroom_urge": 0.490305,
+      "anxiety": 0.00307657,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -22497,13 +22497,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.410032,
+      "boredom": 0.432309,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.985208,
-      "hunger": 0.125085,
-      "bathroom_urge": 0.495238,
-      "anxiety": 0.00430554,
+      "satisfaction": 0.987155,
+      "hunger": 0.108385,
+      "bathroom_urge": 0.497092,
+      "anxiety": 0.00305195,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -22722,13 +22722,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.425461,
+      "boredom": 0.449021,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.984238,
-      "hunger": 0.133424,
-      "bathroom_urge": 0.502055,
-      "anxiety": 0.00427109,
+      "satisfaction": 0.986181,
+      "hunger": 0.116723,
+      "bathroom_urge": 0.503889,
+      "anxiety": 0.00302754,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -22947,13 +22947,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.441788,
+      "boredom": 0.466628,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.983269,
-      "hunger": 0.141763,
-      "bathroom_urge": 0.508881,
-      "anxiety": 0.00423692,
+      "satisfaction": 0.985208,
+      "hunger": 0.12506,
+      "bathroom_urge": 0.510695,
+      "anxiety": 0.00300332,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -23172,13 +23172,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.459017,
+      "boredom": 0.485084,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.982303,
-      "hunger": 0.150101,
-      "bathroom_urge": 0.515718,
-      "anxiety": 0.00420303,
+      "satisfaction": 0.984238,
+      "hunger": 0.133397,
+      "bathroom_urge": 0.517512,
+      "anxiety": 0.00297929,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -23397,13 +23397,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.477119,
+      "boredom": 0.504298,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.981338,
-      "hunger": 0.15844,
-      "bathroom_urge": 0.522565,
-      "anxiety": 0.00416941,
+      "satisfaction": 0.983269,
+      "hunger": 0.141734,
+      "bathroom_urge": 0.524339,
+      "anxiety": 0.00295546,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -23622,13 +23622,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.496025,
+      "boredom": 0.524119,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.980375,
-      "hunger": 0.166778,
-      "bathroom_urge": 0.529422,
-      "anxiety": 0.00413605,
+      "satisfaction": 0.982303,
+      "hunger": 0.150071,
+      "bathroom_urge": 0.531176,
+      "anxiety": 0.00293181,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -23847,13 +23847,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.51561,
+      "boredom": 0.544334,
       "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.979415,
-      "hunger": 0.175117,
-      "bathroom_urge": 0.536288,
-      "anxiety": 0.00410296,
+      "satisfaction": 0.981338,
+      "hunger": 0.158408,
+      "bathroom_urge": 0.538022,
+      "anxiety": 0.00290836,
       "screen_strain": 0
     },
     "task_effort": 9.08923,
@@ -23870,238 +23870,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.462667,
+        "probability": 0.306878,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0.537333,
-        "eligible": true
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "go_to_bathroom",
-      "target": "door",
-      "elapsed": 0,
-      "planned": 15,
-      "status": "running"
-    },
-    "selected_action": "go_to_bathroom",
-    "selected_target": "door",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 17
-  },
-  {
-    "timestamp": 3282,
-    "elapsed": 15,
-    "scenario_seed": 1289,
-    "policy_seed": 5527,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "815"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": -0.439017
-    },
-    "state": {
-      "boredom": 0.51561,
-      "fatigue": 0,
-      "task_pressure": 0,
-      "satisfaction": 1,
-      "hunger": 0.187624,
-      "bathroom_urge": 0.107587,
-      "anxiety": 0.00405373,
-      "screen_strain": 0
-    },
-    "task_effort": 9.08923,
-    "effort_target": 9.08923,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.47055,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.52945,
+        "probability": 0.335909,
         "eligible": true
       },
       {
@@ -24131,233 +23906,8 @@
       {
         "action": "go_to_bathroom",
         "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "go_to_bathroom",
-      "target": "door",
-      "elapsed": 0,
-      "planned": 15,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "go_to_bathroom",
-      "target": "door",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 15,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(go_to_bathroom) via object:door"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 17
-  },
-  {
-    "timestamp": 3292,
-    "elapsed": 10,
-    "scenario_seed": 1289,
-    "policy_seed": 5527,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "815"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.535687,
-      "fatigue": 0,
-      "task_pressure": 0,
-      "satisfaction": 0.999,
-      "hunger": 0.195963,
-      "bathroom_urge": 0.114479,
-      "anxiety": 0.0040213,
-      "screen_strain": 0
-    },
-    "task_effort": 9.08923,
-    "effort_target": 9.08923,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.467948,
+        "probability": 0.357213,
         "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.532052,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
       },
       {
         "action": "get_meal",
@@ -24414,7 +23964,7 @@
     "actor_id": 17
   },
   {
-    "timestamp": 3317,
+    "timestamp": 3292,
     "elapsed": 25,
     "scenario_seed": 1289,
     "policy_seed": 5527,
@@ -24522,13 +24072,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.496383,
+      "boredom": 0.504724,
       "fatigue": 0.0429,
       "task_pressure": 0,
-      "satisfaction": 1,
-      "hunger": 0.21684,
-      "bathroom_urge": 0.131743,
-      "anxiety": 0.00394087,
+      "satisfaction": 0.982843,
+      "hunger": 0.179281,
+      "bathroom_urge": 0.555174,
+      "anxiety": 0.00285019,
       "screen_strain": 0.143
     },
     "task_effort": 9.08923,
@@ -24545,13 +24095,463 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.473279,
+        "probability": 0.455025,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.526721,
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0.544975,
+        "eligible": true
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "selected_action": "idle",
+    "selected_target": "",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "use_phone",
+      "target": "phone",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 25,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(use_phone) via object:phone"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 17
+  },
+  {
+    "timestamp": 3302,
+    "elapsed": 10,
+    "scenario_seed": 1289,
+    "policy_seed": 5527,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "815"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.524556,
+      "fatigue": 0.0429,
+      "task_pressure": 0,
+      "satisfaction": 0.981878,
+      "hunger": 0.187725,
+      "bathroom_urge": 0.56209,
+      "anxiety": 0.00282739,
+      "screen_strain": 0.143
+    },
+    "task_effort": 9.08923,
+    "effort_target": 9.08923,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.451099,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0.548901,
+        "eligible": true
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "go_to_bathroom",
+      "target": "door",
+      "elapsed": 0,
+      "planned": 15,
+      "status": "running"
+    },
+    "selected_action": "go_to_bathroom",
+    "selected_target": "door",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "idle",
+      "target": "",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 10,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(idle)"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 17
+  },
+  {
+    "timestamp": 3317,
+    "elapsed": 15,
+    "scenario_seed": 1289,
+    "policy_seed": 5527,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "815"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": -0.485464
+    },
+    "state": {
+      "boredom": 0.524556,
+      "fatigue": 0.0429,
+      "task_pressure": 0,
+      "satisfaction": 1,
+      "hunger": 0.200391,
+      "bathroom_urge": 0.0870161,
+      "anxiety": 0.00279346,
+      "screen_strain": 0.143
+    },
+    "task_effort": 9.08923,
+    "effort_target": 9.08923,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.469354,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.530646,
         "eligible": true
       },
       {
@@ -24604,10 +24604,10 @@
       }
     ],
     "running_action_before": {
-      "action": "use_phone",
-      "target": "phone",
+      "action": "go_to_bathroom",
+      "target": "door",
       "elapsed": 0,
-      "planned": 25,
+      "planned": 15,
       "status": "running"
     },
     "running_action_after": {
@@ -24621,14 +24621,14 @@
     "selected_target": "",
     "pre_policy_outcome": {
       "accepted": true,
-      "action": "use_phone",
-      "target": "phone",
+      "action": "go_to_bathroom",
+      "target": "door",
       "failure_reason": 0,
-      "action_elapsed_minutes": 25,
+      "action_elapsed_minutes": 15,
       "task_effort_gained": 0,
       "task_completed": false,
       "plan_invalidated": false,
-      "provenance": "World::settle(use_phone) via object:phone"
+      "provenance": "World::settle(go_to_bathroom) via object:door"
     },
     "post_policy_outcome": null,
     "validation": {
@@ -24747,13 +24747,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.515978,
+      "boredom": 0.544777,
       "fatigue": 0.0429,
       "task_pressure": 0,
       "satisfaction": 0.999,
-      "hunger": 0.225285,
-      "bathroom_urge": 0.138705,
-      "anxiety": 0.00390934,
+      "hunger": 0.208835,
+      "bathroom_urge": 0.0939576,
+      "anxiety": 0.00277111,
       "screen_strain": 0.143
     },
     "task_effort": 9.08923,
@@ -24770,13 +24770,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.4705,
+        "probability": 0.466879,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.5295,
+        "probability": 0.533121,
         "eligible": true
       },
       {
@@ -24972,13 +24972,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.536063,
+      "boredom": 0.565139,
       "fatigue": 0.0429,
       "task_pressure": 0,
       "satisfaction": 0.998002,
-      "hunger": 0.233731,
-      "bathroom_urge": 0.145676,
-      "anxiety": 0.00387807,
+      "hunger": 0.217279,
+      "bathroom_urge": 0.100909,
+      "anxiety": 0.00274894,
       "screen_strain": 0.143
     },
     "task_effort": 9.08923,
@@ -24995,13 +24995,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.467902,
+        "probability": 0.463803,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.532098,
+        "probability": 0.536197,
         "eligible": true
       },
       {
@@ -25202,13 +25202,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.52523,
+      "boredom": 0.554306,
       "fatigue": 0.0455,
       "task_pressure": 0,
       "satisfaction": 0.996707,
-      "hunger": 0.244718,
-      "bathroom_urge": 0.154754,
-      "anxiety": 0.00383774,
+      "hunger": 0.228265,
+      "bathroom_urge": 0.109962,
+      "anxiety": 0.00272036,
       "screen_strain": 0.156
     },
     "task_effort": 9.08923,
@@ -25354,13 +25354,13 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.496744,
+      "boredom": 0.525126,
       "fatigue": 0.096668,
       "task_pressure": 0,
-      "satisfaction": 0.999366,
-      "hunger": 0.254867,
-      "bathroom_urge": 0.163153,
-      "anxiety": 0.00380089,
+      "satisfaction": 0.999511,
+      "hunger": 0.238413,
+      "bathroom_urge": 0.118337,
+      "anxiety": 0.00269424,
       "screen_strain": 0.27456
     },
     "task_effort": 9.08923,
@@ -25377,13 +25377,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.473226,
+        "probability": 0.469279,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.526774,
+        "probability": 0.530721,
         "eligible": true
       },
       {

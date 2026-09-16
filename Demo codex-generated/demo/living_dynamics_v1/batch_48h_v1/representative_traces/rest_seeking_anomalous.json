@@ -14076,31 +14076,31 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.224275,
+        "probability": 0.176539,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.263917,
+        "probability": 0.207745,
         "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.212843,
+        "eligible": true
       },
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.246079,
+        "probability": 0.193703,
         "eligible": true
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.265729,
+        "probability": 0.209171,
         "eligible": true
       },
       {
@@ -14301,31 +14301,31 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.221849,
+        "probability": 0.175102,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.268001,
+        "probability": 0.211529,
         "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.210718,
+        "eligible": true
       },
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.247898,
+        "probability": 0.195662,
         "eligible": true
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.262251,
+        "probability": 0.20699,
         "eligible": true
       },
       {
@@ -14526,31 +14526,31 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.218068,
+        "probability": 0.17283,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.274637,
+        "probability": 0.217664,
         "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.20745,
+        "eligible": true
       },
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.250753,
+        "probability": 0.198734,
         "eligible": true
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.256542,
+        "probability": 0.203323,
         "eligible": true
       },
       {
@@ -14589,681 +14589,6 @@
       "target": "",
       "elapsed": 0,
       "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 2652,
-    "elapsed": 10,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.641267,
-      "fatigue": 0.0612157,
-      "task_pressure": 0,
-      "satisfaction": 0.997006,
-      "hunger": 0.0546667,
-      "bathroom_urge": 0.157842,
-      "anxiety": 0.00116887,
-      "screen_strain": 0.364716
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.212353,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.284931,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.254979,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.247737,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 2662,
-    "elapsed": 10,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.683632,
-      "fatigue": 0.0612157,
-      "task_pressure": 0,
-      "satisfaction": 0.996012,
-      "hunger": 0.0631545,
-      "bathroom_urge": 0.164623,
-      "anxiety": 0.00115952,
-      "screen_strain": 0.364716
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.204215,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.299913,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.260726,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.235146,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "use_computer",
-      "target": "computer",
-      "elapsed": 0,
-      "planned": 30,
-      "status": "running"
-    },
-    "selected_action": "use_computer",
-    "selected_target": "computer",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 2692,
-    "elapsed": 30,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0.006,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0.0717486,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.613814,
-      "fatigue": 0.138964,
-      "task_pressure": 0,
-      "satisfaction": 0.993036,
-      "hunger": 0.0886629,
-      "bathroom_urge": 0.185011,
-      "anxiety": 0.00113169,
-      "screen_strain": 0.477086
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.217346,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.275924,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.251294,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.255436,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "use_computer",
-      "target": "computer",
-      "elapsed": 0,
-      "planned": 30,
       "status": "running"
     },
     "running_action_after": {
@@ -15277,14 +14602,14 @@
     "selected_target": "phone",
     "pre_policy_outcome": {
       "accepted": true,
-      "action": "use_computer",
-      "target": "computer",
+      "action": "idle",
+      "target": "",
       "failure_reason": 0,
-      "action_elapsed_minutes": 30,
+      "action_elapsed_minutes": 10,
       "task_effort_gained": 0,
       "task_completed": false,
       "plan_invalidated": false,
-      "provenance": "World::settle(use_computer) via object:computer"
+      "provenance": "World::settle(idle)"
     },
     "post_policy_outcome": null,
     "validation": {
@@ -15295,7 +14620,7 @@
     "actor_id": 67
   },
   {
-    "timestamp": 2717,
+    "timestamp": 2667,
     "elapsed": 25,
     "scenario_seed": 2139,
     "policy_seed": 7077,
@@ -15398,19 +14723,19 @@
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0.0741585,
+      "fatigue": 0.0656184,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.565867,
-      "fatigue": 0.218123,
+      "boredom": 0.562998,
+      "fatigue": 0.131834,
       "task_pressure": 0,
-      "satisfaction": 0.996219,
-      "hunger": 0.110399,
-      "bathroom_urge": 0.202232,
-      "anxiety": 0.00110906,
-      "screen_strain": 0.581919
+      "satisfaction": 1,
+      "hunger": 0.0674297,
+      "bathroom_urge": 0.168008,
+      "anxiety": 0.00115473,
+      "screen_strain": 0.478539
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -15426,31 +14751,31 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.175256,
+        "probability": 0.172082,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.206542,
+        "probability": 0.202554,
         "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0.217001,
+        "probability": 0.232629,
         "eligible": true
       },
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.192432,
+        "probability": 0.188848,
         "eligible": true
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.20877,
+        "probability": 0.203886,
         "eligible": true
       },
       {
@@ -15492,14 +14817,14 @@
       "status": "running"
     },
     "running_action_after": {
-      "action": "rest_at_bed",
-      "target": "bed",
+      "action": "idle",
+      "target": "",
       "elapsed": 0,
-      "planned": 60,
+      "planned": 10,
       "status": "running"
     },
-    "selected_action": "rest_at_bed",
-    "selected_target": "bed",
+    "selected_action": "idle",
+    "selected_target": "",
     "pre_policy_outcome": {
       "accepted": true,
       "action": "use_phone",
@@ -15520,8 +14845,8 @@
     "actor_id": 67
   },
   {
-    "timestamp": 2777,
-    "elapsed": 60,
+    "timestamp": 2677,
+    "elapsed": 10,
     "scenario_seed": 2139,
     "policy_seed": 7077,
     "dynamics_model": "demo-living-v1",
@@ -15618,7 +14943,7 @@
     },
     "observation_deltas": [],
     "continuous_state_delta": {
-      "fatigue": -0.1,
+      "fatigue": 0,
       "hunger": 0,
       "bathroom_urge": 0
     },
@@ -15628,14 +14953,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.612763,
-      "fatigue": 0.118123,
+      "boredom": 0.584629,
+      "fatigue": 0.131834,
       "task_pressure": 0,
-      "satisfaction": 0.990265,
-      "hunger": 0.136492,
-      "bathroom_urge": 0.236149,
-      "anxiety": 0,
-      "screen_strain": 0.485919
+      "satisfaction": 0.999,
+      "hunger": 0.076094,
+      "bathroom_urge": 0.174861,
+      "anxiety": 0.00114549,
+      "screen_strain": 0.478539
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -15651,31 +14976,31 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.171908,
+        "probability": 0.170733,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.217809,
+        "probability": 0.206343,
         "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0.209706,
+        "probability": 0.230269,
         "eligible": true
       },
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.19849,
+        "probability": 0.190839,
         "eligible": true
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.202086,
+        "probability": 0.201816,
         "eligible": true
       },
       {
@@ -15710,31 +15035,31 @@
       }
     ],
     "running_action_before": {
-      "action": "rest_at_bed",
-      "target": "bed",
+      "action": "idle",
+      "target": "",
       "elapsed": 0,
-      "planned": 60,
+      "planned": 10,
       "status": "running"
     },
     "running_action_after": {
-      "action": "rest_at_bed",
-      "target": "bed",
+      "action": "use_computer",
+      "target": "computer",
       "elapsed": 0,
-      "planned": 60,
+      "planned": 30,
       "status": "running"
     },
-    "selected_action": "rest_at_bed",
-    "selected_target": "bed",
+    "selected_action": "use_computer",
+    "selected_target": "computer",
     "pre_policy_outcome": {
       "accepted": true,
-      "action": "rest_at_bed",
-      "target": "bed",
+      "action": "idle",
+      "target": "",
       "failure_reason": 0,
-      "action_elapsed_minutes": 60,
+      "action_elapsed_minutes": 10,
       "task_effort_gained": 0,
       "task_completed": false,
       "plan_invalidated": false,
-      "provenance": "World::settle(rest_at_bed) via object:bed"
+      "provenance": "World::settle(idle)"
     },
     "post_policy_outcome": null,
     "validation": {
@@ -15745,8 +15070,8 @@
     "actor_id": 67
   },
   {
-    "timestamp": 2837,
-    "elapsed": 60,
+    "timestamp": 2707,
+    "elapsed": 30,
     "scenario_seed": 2139,
     "policy_seed": 7077,
     "dynamics_model": "demo-living-v1",
@@ -15843,24 +15168,24 @@
     },
     "observation_deltas": [],
     "continuous_state_delta": {
-      "fatigue": -0.1,
+      "fatigue": 0.006,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0,
+      "fatigue": 0.0793178,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.657135,
-      "fatigue": 0.0181228,
+      "boredom": 0.544901,
+      "fatigue": 0.217152,
       "task_pressure": 0,
-      "satisfaction": 0.984382,
-      "hunger": 0.161829,
-      "bathroom_urge": 0.269826,
-      "anxiety": 0,
-      "screen_strain": 0.389919
+      "satisfaction": 0.996006,
+      "hunger": 0.102132,
+      "bathroom_urge": 0.195466,
+      "anxiety": 0.001118,
+      "screen_strain": 0.582941
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -15876,31 +15201,31 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.167299,
+        "probability": 0.213385,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.232196,
+        "probability": 0.24728,
         "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0.200691,
+        "probability": 0.284899,
         "eligible": true
       },
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.205569,
-        "eligible": true
+        "probability": 0,
+        "eligible": false
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.194245,
+        "probability": 0.254435,
         "eligible": true
       },
       {
@@ -15935,10 +15260,10 @@
       }
     ],
     "running_action_before": {
-      "action": "rest_at_bed",
-      "target": "bed",
+      "action": "use_computer",
+      "target": "computer",
       "elapsed": 0,
-      "planned": 60,
+      "planned": 30,
       "status": "running"
     },
     "running_action_after": {
@@ -15952,14 +15277,14 @@
     "selected_target": "phone",
     "pre_policy_outcome": {
       "accepted": true,
-      "action": "rest_at_bed",
-      "target": "bed",
+      "action": "use_computer",
+      "target": "computer",
       "failure_reason": 0,
-      "action_elapsed_minutes": 60,
+      "action_elapsed_minutes": 30,
       "task_effort_gained": 0,
       "task_completed": false,
       "plan_invalidated": false,
-      "provenance": "World::settle(rest_at_bed) via object:bed"
+      "provenance": "World::settle(use_computer) via object:computer"
     },
     "post_policy_outcome": null,
     "validation": {
@@ -15970,7 +15295,7 @@
     "actor_id": 67
   },
   {
-    "timestamp": 2857,
+    "timestamp": 2727,
     "elapsed": 20,
     "scenario_seed": 2139,
     "policy_seed": 7077,
@@ -16078,14 +15403,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.640468,
-      "fatigue": 0.0261228,
+      "boredom": 0.528234,
+      "fatigue": 0.225152,
       "task_pressure": 0,
       "satisfaction": 1,
-      "hunger": 0.178607,
-      "bathroom_urge": 0.283583,
-      "anxiety": 0,
-      "screen_strain": 0.489919
+      "hunger": 0.119907,
+      "bathroom_urge": 0.209398,
+      "anxiety": 0.00110011,
+      "screen_strain": 0.682941
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -16101,13 +15426,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.212545,
+        "probability": 0.294642,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.284519,
+        "probability": 0.331319,
         "eligible": true
       },
       {
@@ -16119,13 +15444,13 @@
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.254917,
-        "eligible": true
+        "probability": 0,
+        "eligible": false
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.248019,
+        "probability": 0.374039,
         "eligible": true
       },
       {
@@ -16167,14 +15492,14 @@
       "status": "running"
     },
     "running_action_after": {
-      "action": "use_phone",
-      "target": "phone",
+      "action": "rest_at_bed",
+      "target": "bed",
       "elapsed": 0,
-      "planned": 25,
+      "planned": 60,
       "status": "running"
     },
-    "selected_action": "use_phone",
-    "selected_target": "phone",
+    "selected_action": "rest_at_bed",
+    "selected_target": "bed",
     "pre_policy_outcome": {
       "accepted": true,
       "action": "shop_on_phone",
@@ -16195,907 +15520,7 @@
     "actor_id": 67
   },
   {
-    "timestamp": 2882,
-    "elapsed": 25,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0.005,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0.0751338,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.58133,
-      "fatigue": 0.106257,
-      "task_pressure": 0,
-      "satisfaction": 1,
-      "hunger": 0.199635,
-      "bathroom_urge": 0.300848,
-      "anxiety": 0,
-      "screen_strain": 0.593725
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.22209,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.265816,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.246769,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.265324,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "use_phone",
-      "target": "phone",
-      "elapsed": 0,
-      "planned": 25,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "use_phone",
-      "target": "phone",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 25,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(use_phone) via object:phone"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 2892,
-    "elapsed": 10,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.605917,
-      "fatigue": 0.106257,
-      "task_pressure": 0,
-      "satisfaction": 0.999,
-      "hunger": 0.208234,
-      "bathroom_urge": 0.307839,
-      "anxiety": 0,
-      "screen_strain": 0.593725
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.218588,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.271889,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.24954,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.259983,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "use_phone",
-      "target": "phone",
-      "elapsed": 0,
-      "planned": 25,
-      "status": "running"
-    },
-    "selected_action": "use_phone",
-    "selected_target": "phone",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 2917,
-    "elapsed": 25,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0.005,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0.0830231,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.560486,
-      "fatigue": 0.19428,
-      "task_pressure": 0,
-      "satisfaction": 1,
-      "hunger": 0.229762,
-      "bathroom_urge": 0.325353,
-      "anxiety": 0,
-      "screen_strain": 0.689227
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.292583,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.334408,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.373009,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "use_phone",
-      "target": "phone",
-      "elapsed": 0,
-      "planned": 25,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "use_phone",
-      "target": "phone",
-      "elapsed": 0,
-      "planned": 25,
-      "status": "running"
-    },
-    "selected_action": "use_phone",
-    "selected_target": "phone",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "use_phone",
-      "target": "phone",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 25,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(use_phone) via object:phone"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 2942,
-    "elapsed": 25,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0.005,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0.0902813,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.520519,
-      "fatigue": 0.289561,
-      "task_pressure": 0,
-      "satisfaction": 1,
-      "hunger": 0.251841,
-      "bathroom_urge": 0.343107,
-      "anxiety": 0,
-      "screen_strain": 0.777089
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.291126,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.317742,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.391132,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "use_phone",
-      "target": "phone",
-      "elapsed": 0,
-      "planned": 25,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "rest_at_bed",
-      "target": "bed",
-      "elapsed": 0,
-      "planned": 60,
-      "status": "running"
-    },
-    "selected_action": "rest_at_bed",
-    "selected_target": "bed",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "use_phone",
-      "target": "phone",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 25,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(use_phone) via object:phone"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 3002,
+    "timestamp": 2787,
     "elapsed": 60,
     "scenario_seed": 2139,
     "policy_seed": 7077,
@@ -17203,14 +15628,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.568126,
-      "fatigue": 0.189561,
+      "boredom": 0.575835,
+      "fatigue": 0.125152,
       "task_pressure": 0,
       "satisfaction": 0.994,
-      "hunger": 0.278474,
-      "bathroom_urge": 0.37814,
+      "hunger": 0.146053,
+      "bathroom_urge": 0.243399,
       "anxiety": 0,
-      "screen_strain": 0.667619
+      "screen_strain": 0.581951
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -17226,13 +15651,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.294118,
+        "probability": 0.222757,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.337116,
+        "probability": 0.265574,
         "eligible": true
       },
       {
@@ -17244,13 +15669,13 @@
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.246565,
+        "eligible": true
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.368766,
+        "probability": 0.265104,
         "eligible": true
       },
       {
@@ -17320,7 +15745,7 @@
     "actor_id": 67
   },
   {
-    "timestamp": 3062,
+    "timestamp": 2847,
     "elapsed": 60,
     "scenario_seed": 2139,
     "policy_seed": 7077,
@@ -17428,14 +15853,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.614937,
-      "fatigue": 0.089561,
+      "boredom": 0.622319,
+      "fatigue": 0.0251519,
       "task_pressure": 0,
       "satisfaction": 0.988072,
-      "hunger": 0.304351,
-      "bathroom_urge": 0.412937,
+      "hunger": 0.171443,
+      "bathroom_urge": 0.27716,
       "anxiety": 0,
-      "screen_strain": 0.56795
+      "screen_strain": 0.485951
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -17443,8 +15868,7 @@
     "decision_gate": {
       "open": true,
       "reasons": [
-        "action_completed",
-        "need_threshold_crossed"
+        "action_completed"
       ]
     },
     "policy_evaluated": true,
@@ -17452,13 +15876,13 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.218464,
+        "probability": 0.215879,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.271552,
+        "probability": 0.278521,
         "eligible": true
       },
       {
@@ -17470,13 +15894,13 @@
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.25283,
+        "probability": 0.252425,
         "eligible": true
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.257154,
+        "probability": 0.253175,
         "eligible": true
       },
       {
@@ -17515,1807 +15939,6 @@
       "target": "bed",
       "elapsed": 0,
       "planned": 60,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "rest_at_bed",
-      "target": "bed",
-      "elapsed": 0,
-      "planned": 60,
-      "status": "running"
-    },
-    "selected_action": "rest_at_bed",
-    "selected_target": "bed",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "rest_at_bed",
-      "target": "bed",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 60,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(rest_at_bed) via object:bed"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 3122,
-    "elapsed": 60,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": -0.089561,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.659162,
-      "fatigue": 0,
-      "task_pressure": 0,
-      "satisfaction": 0.982215,
-      "hunger": 0.329551,
-      "bathroom_urge": 0.447534,
-      "anxiety": 0,
-      "screen_strain": 0.47195
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.210868,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.28458,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.259874,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.244678,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "rest_at_bed",
-      "target": "bed",
-      "elapsed": 0,
-      "planned": 60,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "use_computer",
-      "target": "computer",
-      "elapsed": 0,
-      "planned": 30,
-      "status": "running"
-    },
-    "selected_action": "use_computer",
-    "selected_target": "computer",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "rest_at_bed",
-      "target": "bed",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 60,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(rest_at_bed) via object:bed"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 3152,
-    "elapsed": 30,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0.006,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0.0788796,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.599827,
-      "fatigue": 0.0848796,
-      "task_pressure": 0,
-      "satisfaction": 0.97879,
-      "hunger": 0.354596,
-      "bathroom_urge": 0.468735,
-      "anxiety": 0.000192137,
-      "screen_strain": 0.576813
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.221741,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.264088,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.251713,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.262458,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "use_computer",
-      "target": "computer",
-      "elapsed": 0,
-      "planned": 30,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "use_computer",
-      "target": "computer",
-      "elapsed": 0,
-      "planned": 30,
-      "status": "running"
-    },
-    "selected_action": "use_computer",
-    "selected_target": "computer",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "use_computer",
-      "target": "computer",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 30,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(use_computer) via object:computer"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 3182,
-    "elapsed": 30,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0.006,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0.0858531,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.558338,
-      "fatigue": 0.176733,
-      "task_pressure": 0,
-      "satisfaction": 0.974866,
-      "hunger": 0.380279,
-      "bathroom_urge": 0.490229,
-      "anxiety": 0.000567097,
-      "screen_strain": 0.674336
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.297327,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.327771,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.374902,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "use_computer",
-      "target": "computer",
-      "elapsed": 0,
-      "planned": 30,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "rest_at_bed",
-      "target": "bed",
-      "elapsed": 0,
-      "planned": 60,
-      "status": "running"
-    },
-    "selected_action": "rest_at_bed",
-    "selected_target": "bed",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "use_computer",
-      "target": "computer",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 30,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(use_computer) via object:computer"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 3242,
-    "elapsed": 60,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": -0.1,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.605489,
-      "fatigue": 0.0767327,
-      "task_pressure": 0,
-      "satisfaction": 0.965864,
-      "hunger": 0.406059,
-      "bathroom_urge": 0.525577,
-      "anxiety": 0.0011929,
-      "screen_strain": 0.574102
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed",
-        "need_threshold_crossed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.22169,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.263,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.253419,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.261892,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "rest_at_bed",
-      "target": "bed",
-      "elapsed": 0,
-      "planned": 60,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "use_computer",
-      "target": "computer",
-      "elapsed": 0,
-      "planned": 30,
-      "status": "running"
-    },
-    "selected_action": "use_computer",
-    "selected_target": "computer",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "rest_at_bed",
-      "target": "bed",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 60,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(rest_at_bed) via object:bed"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 3272,
-    "elapsed": 30,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0.006,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0.0856728,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.56299,
-      "fatigue": 0.168406,
-      "task_pressure": 0,
-      "satisfaction": 0.960334,
-      "hunger": 0.431684,
-      "bathroom_urge": 0.547237,
-      "anxiety": 0.00215188,
-      "screen_strain": 0.671815
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.221856,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.241358,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.279144,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0.257641,
-        "eligible": true
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "use_computer",
-      "target": "computer",
-      "elapsed": 0,
-      "planned": 30,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "use_computer",
-      "target": "computer",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 30,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(use_computer) via object:computer"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 3282,
-    "elapsed": 10,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.58462,
-      "fatigue": 0.168406,
-      "task_pressure": 0,
-      "satisfaction": 0.958304,
-      "hunger": 0.440441,
-      "bathroom_urge": 0.554556,
-      "anxiety": 0.00253516,
-      "screen_strain": 0.671815
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.177281,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.196915,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.194966,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.22254,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0.208299,
-        "eligible": true
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 3292,
-    "elapsed": 10,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.609894,
-      "fatigue": 0.168406,
-      "task_pressure": 0,
-      "satisfaction": 0.95617,
-      "hunger": 0.449198,
-      "bathroom_urge": 0.561886,
-      "anxiety": 0.00295442,
-      "screen_strain": 0.671815
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.174797,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.201221,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.197852,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.218359,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0.207772,
-        "eligible": true
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
-      "status": "running"
-    },
-    "selected_action": "idle",
-    "selected_target": "",
-    "pre_policy_outcome": {
-      "accepted": true,
-      "action": "idle",
-      "target": "",
-      "failure_reason": 0,
-      "action_elapsed_minutes": 10,
-      "task_effort_gained": 0,
-      "task_completed": false,
-      "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
-    },
-    "post_policy_outcome": null,
-    "validation": {
-      "performed": false,
-      "accepted": false
-    },
-    "provenance": "ContinuousRuntime::execute_next_boundary",
-    "actor_id": 67
-  },
-  {
-    "timestamp": 3302,
-    "elapsed": 10,
-    "scenario_seed": 2139,
-    "policy_seed": 7077,
-    "dynamics_model": "demo-living-v1",
-    "demo_only": true,
-    "bootstrap": false,
-    "world_events": [],
-    "observation": {
-      "facts": [
-        {
-          "key": "object.phone",
-          "value": "present"
-        },
-        {
-          "key": "object.computer",
-          "value": "present"
-        },
-        {
-          "key": "object.desk",
-          "value": "present"
-        },
-        {
-          "key": "object.bed",
-          "value": "present"
-        },
-        {
-          "key": "object.door",
-          "value": "present"
-        },
-        {
-          "key": "object.light",
-          "value": "present"
-        },
-        {
-          "key": "object.alarm",
-          "value": "present"
-        },
-        {
-          "key": "object.window",
-          "value": "present"
-        },
-        {
-          "key": "room.light",
-          "value": "on"
-        },
-        {
-          "key": "room.curtain",
-          "value": "open"
-        },
-        {
-          "key": "room.alarm",
-          "value": "ringing"
-        },
-        {
-          "key": "task.coursework.status",
-          "value": "completed"
-        },
-        {
-          "key": "task.coursework.deadline_at_total_minutes",
-          "value": "1284"
-        },
-        {
-          "key": "message.unread_count",
-          "value": "2"
-        },
-        {
-          "key": "clock.time",
-          "value": "Day 1 08:00"
-        },
-        {
-          "key": "clock.total_minutes",
-          "value": "480"
-        },
-        {
-          "key": "room.temperature_celsius",
-          "value": "24.000000"
-        },
-        {
-          "key": "outside.weather",
-          "value": "clear"
-        },
-        {
-          "key": "world.time_phase",
-          "value": "evening"
-        },
-        {
-          "key": "task.reminder",
-          "value": "1"
-        },
-        {
-          "key": "task.deadline_passed",
-          "value": "1"
-        }
-      ]
-    },
-    "observation_deltas": [],
-    "continuous_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "impulse_state_delta": {
-      "fatigue": 0,
-      "hunger": 0,
-      "bathroom_urge": 0
-    },
-    "state": {
-      "boredom": 0.641743,
-      "fatigue": 0.168406,
-      "task_pressure": 0,
-      "satisfaction": 0.953929,
-      "hunger": 0.457956,
-      "bathroom_urge": 0.569227,
-      "anxiety": 0.00341089,
-      "screen_strain": 0.671815
-    },
-    "task_effort": 9.05903,
-    "effort_target": 9.05903,
-    "commitment_status": "none",
-    "decision_gate": {
-      "open": true,
-      "reasons": [
-        "action_completed"
-      ]
-    },
-    "policy_evaluated": true,
-    "candidates": [
-      {
-        "action": "idle",
-        "target": "",
-        "probability": 0.171212,
-        "eligible": true
-      },
-      {
-        "action": "use_phone",
-        "target": "phone",
-        "probability": 0.208658,
-        "eligible": true
-      },
-      {
-        "action": "shop_on_phone",
-        "target": "phone",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
-        "probability": 0.202408,
-        "eligible": true
-      },
-      {
-        "action": "rest_at_bed",
-        "target": "bed",
-        "probability": 0.212086,
-        "eligible": true
-      },
-      {
-        "action": "sleep_at_bed",
-        "target": "bed",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "go_to_bathroom",
-        "target": "door",
-        "probability": 0.205636,
-        "eligible": true
-      },
-      {
-        "action": "get_meal",
-        "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "close_curtain",
-        "target": "window",
-        "probability": 0,
-        "eligible": false
-      }
-    ],
-    "running_action_before": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 0,
-      "planned": 10,
       "status": "running"
     },
     "running_action_after": {
@@ -19329,14 +15952,14 @@
     "selected_target": "phone",
     "pre_policy_outcome": {
       "accepted": true,
-      "action": "idle",
-      "target": "",
+      "action": "rest_at_bed",
+      "target": "bed",
       "failure_reason": 0,
-      "action_elapsed_minutes": 10,
+      "action_elapsed_minutes": 60,
       "task_effort_gained": 0,
       "task_completed": false,
       "plan_invalidated": false,
-      "provenance": "World::settle(idle)"
+      "provenance": "World::settle(rest_at_bed) via object:bed"
     },
     "post_policy_outcome": null,
     "validation": {
@@ -19347,7 +15970,7 @@
     "actor_id": 67
   },
   {
-    "timestamp": 3327,
+    "timestamp": 2872,
     "elapsed": 25,
     "scenario_seed": 2139,
     "policy_seed": 7077,
@@ -19450,19 +16073,19 @@
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0.0889579,
+      "fatigue": 0.0748323,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.581982,
-      "fatigue": 0.262363,
+      "boredom": 0.571221,
+      "fatigue": 0.104984,
       "task_pressure": 0,
-      "satisfaction": 0.955633,
-      "hunger": 0.479884,
-      "bathroom_urge": 0.587614,
-      "anxiety": 0.00465196,
-      "screen_strain": 0.76107
+      "satisfaction": 0.991937,
+      "hunger": 0.192465,
+      "bathroom_urge": 0.294401,
+      "anxiety": 0,
+      "screen_strain": 0.590075
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -19478,31 +16101,31 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.208747,
+        "probability": 0.223278,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.264091,
+        "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0.24732,
-        "eligible": true
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
         "probability": 0,
         "eligible": false
       },
       {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0.245977,
+        "eligible": true
+      },
+      {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.277528,
+        "probability": 0.266654,
         "eligible": true
       },
       {
@@ -19514,8 +16137,233 @@
       {
         "action": "go_to_bathroom",
         "target": "door",
-        "probability": 0.266405,
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "selected_action": "use_phone",
+    "selected_target": "phone",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "use_phone",
+      "target": "phone",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 25,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(use_phone) via object:phone"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 2897,
+    "elapsed": 25,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0.005,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0.0827457,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.531187,
+      "fatigue": 0.19273,
+      "task_pressure": 0,
+      "satisfaction": 0.99341,
+      "hunger": 0.213986,
+      "bathroom_urge": 0.311865,
+      "anxiety": 0,
+      "screen_strain": 0.685869
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.29458,
         "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.330657,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.374763,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
       },
       {
         "action": "get_meal",
@@ -19562,6 +16410,3008 @@
       "task_completed": false,
       "plan_invalidated": false,
       "provenance": "World::settle(use_phone) via object:phone"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 2907,
+    "elapsed": 10,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.551478,
+      "fatigue": 0.19273,
+      "task_pressure": 0,
+      "satisfaction": 0.992423,
+      "hunger": 0.222801,
+      "bathroom_urge": 0.318943,
+      "anxiety": 0,
+      "screen_strain": 0.685869
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.293367,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.333458,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.373176,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "selected_action": "use_phone",
+    "selected_target": "phone",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "idle",
+      "target": "",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 10,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(idle)"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 2932,
+    "elapsed": 25,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0.005,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0.090026,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.511674,
+      "fatigue": 0.287756,
+      "task_pressure": 0,
+      "satisfaction": 0.993633,
+      "hunger": 0.24487,
+      "bathroom_urge": 0.336674,
+      "anxiety": 0,
+      "screen_strain": 0.773999
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.291698,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.316752,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.39155,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "selected_action": "use_phone",
+    "selected_target": "phone",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "use_phone",
+      "target": "phone",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 25,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(use_phone) via object:phone"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 2957,
+    "elapsed": 25,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0.005,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0.096724,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.473586,
+      "fatigue": 0.38948,
+      "task_pressure": 0,
+      "satisfaction": 0.9944,
+      "hunger": 0.267533,
+      "bathroom_urge": 0.35466,
+      "anxiety": 0,
+      "screen_strain": 0.85508
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.135507,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0.173936,
+        "eligible": true
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.241087,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0.281099,
+        "eligible": true
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0.168371,
+        "eligible": true
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "turn_light_off",
+      "target": "light",
+      "elapsed": 0,
+      "planned": 1,
+      "status": "running"
+    },
+    "selected_action": "turn_light_off",
+    "selected_target": "light",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "use_phone",
+      "target": "phone",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 25,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(use_phone) via object:phone"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 2958,
+    "elapsed": 1,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.473586,
+      "fatigue": 0.38948,
+      "task_pressure": 0,
+      "satisfaction": 1,
+      "hunger": 0.268464,
+      "bathroom_urge": 0.35539,
+      "anxiety": 0,
+      "screen_strain": 0.85508
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.135523,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0.17391,
+        "eligible": true
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.241114,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0.281062,
+        "eligible": true
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "turn_light_off",
+        "target": "light",
+        "probability": 0.168391,
+        "eligible": true
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "turn_light_off",
+      "target": "light",
+      "elapsed": 0,
+      "planned": 1,
+      "status": "running"
+    },
+    "running_action_after": null,
+    "selected_action": "turn_light_off",
+    "selected_target": "light",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "turn_light_off",
+      "target": "light",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 1,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(turn_light_off) via object:light"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 2959,
+    "elapsed": 1,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.473586,
+      "fatigue": 0.38948,
+      "task_pressure": 0,
+      "satisfaction": 0.9999,
+      "hunger": 0.268464,
+      "bathroom_urge": 0.35539,
+      "anxiety": 0.007,
+      "screen_strain": 0.85508
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_rejected"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.16307,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0.209261,
+        "eligible": true
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.290126,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0.337543,
+        "eligible": true
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": null,
+    "running_action_after": {
+      "action": "sleep_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 480,
+      "status": "running"
+    },
+    "selected_action": "sleep_at_bed",
+    "selected_target": "bed",
+    "pre_policy_outcome": null,
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3019,
+    "elapsed": 60,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": -0.22,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.443586,
+      "fatigue": 0.16948,
+      "task_pressure": 0,
+      "satisfaction": 0.993901,
+      "hunger": 0.294945,
+      "bathroom_urge": 0.390442,
+      "anxiety": 0,
+      "screen_strain": 0.73508
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": false,
+      "reasons": []
+    },
+    "policy_evaluated": false,
+    "candidates": [],
+    "running_action_before": {
+      "action": "sleep_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 480,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "sleep_at_bed",
+      "target": "bed",
+      "elapsed": 60,
+      "planned": 480,
+      "status": "running"
+    },
+    "selected_action": null,
+    "selected_target": "",
+    "pre_policy_outcome": null,
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3079,
+    "elapsed": 60,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": -0.16948,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.413586,
+      "fatigue": 0,
+      "task_pressure": 0,
+      "satisfaction": 0.987974,
+      "hunger": 0.320145,
+      "bathroom_urge": 0.424984,
+      "anxiety": 0,
+      "screen_strain": 0.61508
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "need_threshold_crossed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.289295,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0.359007,
+        "eligible": true
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.351698,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "sleep_at_bed",
+      "target": "bed",
+      "elapsed": 60,
+      "planned": 480,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "shop_on_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 20,
+      "status": "running"
+    },
+    "selected_action": "shop_on_phone",
+    "selected_target": "phone",
+    "pre_policy_outcome": null,
+    "post_policy_outcome": {
+      "accepted": false,
+      "action": "sleep_at_bed",
+      "target": "bed",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 120,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "ContinuousRuntime::policy_reconsideration"
+    },
+    "validation": {
+      "performed": true,
+      "accepted": true
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3099,
+    "elapsed": 20,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0.004,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0.004,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.396919,
+      "fatigue": 0.008,
+      "task_pressure": 0,
+      "satisfaction": 1,
+      "hunger": 0.336832,
+      "bathroom_urge": 0.439092,
+      "anxiety": 0,
+      "screen_strain": 0.71508
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.433721,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.566279,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "shop_on_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 20,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "rest_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 60,
+      "status": "running"
+    },
+    "selected_action": "rest_at_bed",
+    "selected_target": "bed",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "shop_on_phone",
+      "target": "phone",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 20,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(shop_on_phone) via object:phone"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3159,
+    "elapsed": 60,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": -0.008,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.445517,
+      "fatigue": 0,
+      "task_pressure": 0,
+      "satisfaction": 0.994,
+      "hunger": 0.362032,
+      "bathroom_urge": 0.47388,
+      "anxiety": 0,
+      "screen_strain": 0.611072
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.452264,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.547736,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "rest_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 60,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "rest_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 60,
+      "status": "running"
+    },
+    "selected_action": "rest_at_bed",
+    "selected_target": "bed",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "rest_at_bed",
+      "target": "bed",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 60,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(rest_at_bed) via object:bed"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3219,
+    "elapsed": 60,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.493581,
+      "fatigue": 0,
+      "task_pressure": 0,
+      "satisfaction": 0.986664,
+      "hunger": 0.387232,
+      "bathroom_urge": 0.508818,
+      "anxiety": 0.000508427,
+      "screen_strain": 0.51475
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.457372,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.542628,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "rest_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 60,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "rest_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 60,
+      "status": "running"
+    },
+    "selected_action": "rest_at_bed",
+    "selected_target": "bed",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "rest_at_bed",
+      "target": "bed",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 60,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(rest_at_bed) via object:bed"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3279,
+    "elapsed": 60,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.541278,
+      "fatigue": 0,
+      "task_pressure": 0,
+      "satisfaction": 0.97727,
+      "hunger": 0.412432,
+      "bathroom_urge": 0.543904,
+      "anxiety": 0.00128349,
+      "screen_strain": 0.41875
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed",
+        "need_threshold_crossed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.225409,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.247269,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.267185,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0.260138,
+        "eligible": true
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "rest_at_bed",
+      "target": "bed",
+      "elapsed": 0,
+      "planned": 60,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "selected_action": "idle",
+    "selected_target": "",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "rest_at_bed",
+      "target": "bed",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 60,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(rest_at_bed) via object:bed"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3289,
+    "elapsed": 10,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.561612,
+      "fatigue": 0,
+      "task_pressure": 0,
+      "satisfaction": 0.975367,
+      "hunger": 0.420767,
+      "bathroom_urge": 0.551066,
+      "anxiety": 0.00161575,
+      "screen_strain": 0.41875
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.179952,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.199327,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0.1973,
+        "eligible": true
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.213228,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0.210192,
+        "eligible": true
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "selected_action": "idle",
+    "selected_target": "",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "idle",
+      "target": "",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 10,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(idle)"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3299,
+    "elapsed": 10,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.583084,
+      "fatigue": 0,
+      "task_pressure": 0,
+      "satisfaction": 0.973364,
+      "hunger": 0.429102,
+      "bathroom_urge": 0.558237,
+      "anxiety": 0.00198272,
+      "screen_strain": 0.41875
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.178224,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.201357,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0.198908,
+        "eligible": true
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.210719,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0.210793,
+        "eligible": true
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "selected_action": "idle",
+    "selected_target": "",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "idle",
+      "target": "",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 10,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(idle)"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3309,
+    "elapsed": 10,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.608032,
+      "fatigue": 0,
+      "task_pressure": 0,
+      "satisfaction": 0.97126,
+      "hunger": 0.437438,
+      "bathroom_urge": 0.565419,
+      "anxiety": 0.00238462,
+      "screen_strain": 0.41875
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.175709,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.20546,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0.201667,
+        "eligible": true
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.20678,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0.210384,
+        "eligible": true
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 0,
+      "planned": 25,
+      "status": "running"
+    },
+    "selected_action": "use_phone",
+    "selected_target": "phone",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "idle",
+      "target": "",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 10,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(idle)"
     },
     "post_policy_outcome": null,
     "validation": {
@@ -19573,7 +19423,7 @@
   },
   {
     "timestamp": 3331,
-    "elapsed": 4,
+    "elapsed": 22,
     "scenario_seed": 2139,
     "policy_seed": 7077,
     "dynamics_model": "demo-living-v1",
@@ -19675,7 +19525,7 @@
     },
     "observation_deltas": [],
     "continuous_state_delta": {
-      "fatigue": 0,
+      "fatigue": 0.0044,
       "hunger": 0,
       "bathroom_urge": 0
     },
@@ -19685,14 +19535,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.585315,
-      "fatigue": 0.262363,
+      "boredom": 0.589698,
+      "fatigue": 0.0044,
       "task_pressure": 0,
-      "satisfaction": 0.954633,
-      "hunger": 0.483482,
-      "bathroom_urge": 0.590595,
-      "anxiety": 0.00486643,
-      "screen_strain": 0.76107
+      "satisfaction": 0.9664,
+      "hunger": 0.455802,
+      "bathroom_urge": 0.581248,
+      "anxiety": 0.00334885,
+      "screen_strain": 0.44075
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -19704,17 +19554,17 @@
     "policy_evaluated": false,
     "candidates": [],
     "running_action_before": {
-      "action": "idle",
-      "target": "",
+      "action": "use_phone",
+      "target": "phone",
       "elapsed": 0,
-      "planned": 10,
+      "planned": 25,
       "status": "running"
     },
     "running_action_after": {
-      "action": "idle",
-      "target": "",
-      "elapsed": 4,
-      "planned": 10,
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 22,
+      "planned": 25,
       "status": "running"
     },
     "selected_action": null,
@@ -19729,8 +19579,227 @@
     "actor_id": 67
   },
   {
-    "timestamp": 3337,
-    "elapsed": 6,
+    "timestamp": 3334,
+    "elapsed": 3,
+    "scenario_seed": 2139,
+    "policy_seed": 7077,
+    "dynamics_model": "demo-living-v1",
+    "demo_only": true,
+    "bootstrap": false,
+    "world_events": [],
+    "observation": {
+      "facts": [
+        {
+          "key": "object.phone",
+          "value": "present"
+        },
+        {
+          "key": "object.computer",
+          "value": "present"
+        },
+        {
+          "key": "object.desk",
+          "value": "present"
+        },
+        {
+          "key": "object.bed",
+          "value": "present"
+        },
+        {
+          "key": "object.door",
+          "value": "present"
+        },
+        {
+          "key": "object.light",
+          "value": "present"
+        },
+        {
+          "key": "object.alarm",
+          "value": "present"
+        },
+        {
+          "key": "object.window",
+          "value": "present"
+        },
+        {
+          "key": "room.light",
+          "value": "on"
+        },
+        {
+          "key": "room.curtain",
+          "value": "open"
+        },
+        {
+          "key": "room.alarm",
+          "value": "ringing"
+        },
+        {
+          "key": "task.coursework.status",
+          "value": "completed"
+        },
+        {
+          "key": "task.coursework.deadline_at_total_minutes",
+          "value": "1284"
+        },
+        {
+          "key": "message.unread_count",
+          "value": "2"
+        },
+        {
+          "key": "clock.time",
+          "value": "Day 1 08:00"
+        },
+        {
+          "key": "clock.total_minutes",
+          "value": "480"
+        },
+        {
+          "key": "room.temperature_celsius",
+          "value": "24.000000"
+        },
+        {
+          "key": "outside.weather",
+          "value": "clear"
+        },
+        {
+          "key": "world.time_phase",
+          "value": "evening"
+        },
+        {
+          "key": "task.reminder",
+          "value": "1"
+        },
+        {
+          "key": "task.deadline_passed",
+          "value": "1"
+        }
+      ]
+    },
+    "observation_deltas": [],
+    "continuous_state_delta": {
+      "fatigue": 0.0006,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "impulse_state_delta": {
+      "fatigue": 0.069725,
+      "hunger": 0,
+      "bathroom_urge": 0
+    },
+    "state": {
+      "boredom": 0.561967,
+      "fatigue": 0.074725,
+      "task_pressure": 0,
+      "satisfaction": 0.97095,
+      "hunger": 0.458307,
+      "bathroom_urge": 0.583413,
+      "anxiety": 0.003495,
+      "screen_strain": 0.52825
+    },
+    "task_effort": 9.05903,
+    "effort_target": 9.05903,
+    "commitment_status": "none",
+    "decision_gate": {
+      "open": true,
+      "reasons": [
+        "action_completed"
+      ]
+    },
+    "policy_evaluated": true,
+    "candidates": [
+      {
+        "action": "idle",
+        "target": "",
+        "probability": 0.177825,
+        "eligible": true
+      },
+      {
+        "action": "use_phone",
+        "target": "phone",
+        "probability": 0.192338,
+        "eligible": true
+      },
+      {
+        "action": "shop_on_phone",
+        "target": "phone",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0.195014,
+        "eligible": true
+      },
+      {
+        "action": "rest_at_bed",
+        "target": "bed",
+        "probability": 0.210703,
+        "eligible": true
+      },
+      {
+        "action": "sleep_at_bed",
+        "target": "bed",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "go_to_bathroom",
+        "target": "door",
+        "probability": 0.22412,
+        "eligible": true
+      },
+      {
+        "action": "get_meal",
+        "target": "door",
+        "probability": 0,
+        "eligible": false
+      },
+      {
+        "action": "close_curtain",
+        "target": "window",
+        "probability": 0,
+        "eligible": false
+      }
+    ],
+    "running_action_before": {
+      "action": "use_phone",
+      "target": "phone",
+      "elapsed": 22,
+      "planned": 25,
+      "status": "running"
+    },
+    "running_action_after": {
+      "action": "idle",
+      "target": "",
+      "elapsed": 0,
+      "planned": 10,
+      "status": "running"
+    },
+    "selected_action": "idle",
+    "selected_target": "",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "use_phone",
+      "target": "phone",
+      "failure_reason": 0,
+      "action_elapsed_minutes": 25,
+      "task_effort_gained": 0,
+      "task_completed": false,
+      "plan_invalidated": false,
+      "provenance": "World::settle(use_phone) via object:phone"
+    },
+    "post_policy_outcome": null,
+    "validation": {
+      "performed": false,
+      "accepted": false
+    },
+    "provenance": "ContinuousRuntime::execute_next_boundary",
+    "actor_id": 67
+  },
+  {
+    "timestamp": 3344,
+    "elapsed": 10,
     "scenario_seed": 2139,
     "policy_seed": 7077,
     "dynamics_model": "demo-living-v1",
@@ -19837,14 +19906,14 @@
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.606701,
-      "fatigue": 0.262363,
+      "boredom": 0.58348,
+      "fatigue": 0.074725,
       "task_pressure": 0,
-      "satisfaction": 0.953112,
-      "hunger": 0.488879,
-      "bathroom_urge": 0.595069,
-      "anxiety": 0.00519541,
-      "screen_strain": 0.76107
+      "satisfaction": 0.968595,
+      "hunger": 0.466831,
+      "bathroom_urge": 0.59069,
+      "anxiety": 0.00397748,
+      "screen_strain": 0.52825
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -19860,31 +19929,31 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.14258,
+        "probability": 0.175846,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0.156347,
+        "probability": 0.19377,
         "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0.168518,
-        "eligible": true
+        "probability": 0,
+        "eligible": false
       },
       {
         "action": "use_computer",
         "target": "computer",
-        "probability": 0.158299,
+        "probability": 0.19633,
         "eligible": true
       },
       {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.188705,
+        "probability": 0.207895,
         "eligible": true
       },
       {
@@ -19896,18 +19965,12 @@
       {
         "action": "go_to_bathroom",
         "target": "door",
-        "probability": 0.185552,
+        "probability": 0.226159,
         "eligible": true
       },
       {
         "action": "get_meal",
         "target": "door",
-        "probability": 0,
-        "eligible": false
-      },
-      {
-        "action": "turn_light_off",
-        "target": "light",
         "probability": 0,
         "eligible": false
       },
@@ -19921,19 +19984,19 @@
     "running_action_before": {
       "action": "idle",
       "target": "",
-      "elapsed": 4,
+      "elapsed": 0,
       "planned": 10,
       "status": "running"
     },
     "running_action_after": {
-      "action": "use_computer",
-      "target": "computer",
+      "action": "rest_at_bed",
+      "target": "bed",
       "elapsed": 0,
-      "planned": 30,
+      "planned": 60,
       "status": "running"
     },
-    "selected_action": "use_computer",
-    "selected_target": "computer",
+    "selected_action": "rest_at_bed",
+    "selected_target": "bed",
     "pre_policy_outcome": {
       "accepted": true,
       "action": "idle",
@@ -19954,8 +20017,8 @@
     "actor_id": 67
   },
   {
-    "timestamp": 3367,
-    "elapsed": 30,
+    "timestamp": 3404,
+    "elapsed": 60,
     "scenario_seed": 2139,
     "policy_seed": 7077,
     "dynamics_model": "demo-living-v1",
@@ -20052,24 +20115,24 @@
     },
     "observation_deltas": [],
     "continuous_state_delta": {
-      "fatigue": 0.006,
+      "fatigue": -0.074725,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "impulse_state_delta": {
-      "fatigue": 0.0981061,
+      "fatigue": 0,
       "hunger": 0,
       "bathroom_urge": 0
     },
     "state": {
-      "boredom": 0.563963,
-      "fatigue": 0.36647,
+      "boredom": 0.629596,
+      "fatigue": 0,
       "task_pressure": 0,
-      "satisfaction": 0.945283,
-      "hunger": 0.515911,
-      "bathroom_urge": 0.617473,
-      "anxiety": 0.00691598,
-      "screen_strain": 0.845695
+      "satisfaction": 0.953831,
+      "hunger": 0.492031,
+      "bathroom_urge": 0.626246,
+      "anxiety": 0.00330057,
+      "screen_strain": 0.43225
     },
     "task_effort": 9.05903,
     "effort_target": 9.05903,
@@ -20085,31 +20148,31 @@
       {
         "action": "idle",
         "target": "",
-        "probability": 0.155768,
+        "probability": 0.168136,
         "eligible": true
       },
       {
         "action": "use_phone",
         "target": "phone",
-        "probability": 0,
-        "eligible": false
+        "probability": 0.194906,
+        "eligible": true
       },
       {
         "action": "shop_on_phone",
         "target": "phone",
-        "probability": 0.182753,
-        "eligible": true
-      },
-      {
-        "action": "use_computer",
-        "target": "computer",
         "probability": 0,
         "eligible": false
       },
       {
+        "action": "use_computer",
+        "target": "computer",
+        "probability": 0.198574,
+        "eligible": true
+      },
+      {
         "action": "rest_at_bed",
         "target": "bed",
-        "probability": 0.255835,
+        "probability": 0.196802,
         "eligible": true
       },
       {
@@ -20121,7 +20184,7 @@
       {
         "action": "go_to_bathroom",
         "target": "door",
-        "probability": 0.219154,
+        "probability": 0.241581,
         "eligible": true
       },
       {
@@ -20131,12 +20194,6 @@
         "eligible": false
       },
       {
-        "action": "turn_light_off",
-        "target": "light",
-        "probability": 0.186491,
-        "eligible": true
-      },
-      {
         "action": "close_curtain",
         "target": "window",
         "probability": 0,
@@ -20144,31 +20201,31 @@
       }
     ],
     "running_action_before": {
-      "action": "use_computer",
-      "target": "computer",
-      "elapsed": 0,
-      "planned": 30,
-      "status": "running"
-    },
-    "running_action_after": {
       "action": "rest_at_bed",
       "target": "bed",
       "elapsed": 0,
       "planned": 60,
       "status": "running"
     },
-    "selected_action": "rest_at_bed",
-    "selected_target": "bed",
-    "pre_policy_outcome": {
-      "accepted": true,
+    "running_action_after": {
       "action": "use_computer",
       "target": "computer",
+      "elapsed": 0,
+      "planned": 30,
+      "status": "running"
+    },
+    "selected_action": "use_computer",
+    "selected_target": "computer",
+    "pre_policy_outcome": {
+      "accepted": true,
+      "action": "rest_at_bed",
+      "target": "bed",
       "failure_reason": 0,
-      "action_elapsed_minutes": 30,
+      "action_elapsed_minutes": 60,
       "task_effort_gained": 0,
       "task_completed": false,
       "plan_invalidated": false,
-      "provenance": "World::settle(use_computer) via object:computer"
+      "provenance": "World::settle(rest_at_bed) via object:bed"
     },
     "post_policy_outcome": null,
     "validation": {

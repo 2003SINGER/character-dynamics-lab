@@ -12,22 +12,22 @@ See `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner
 
 ## Behavior distribution
 
-- study_minutes: 57289.0 minutes
-- leisure_minutes: 63449.0 minutes
-- idle_minutes: 30680.0 minutes
-- rest_minutes: 119363.0 minutes
-- sleep_minutes: 76721.0 minutes
+- study_minutes: 57219.0 minutes
+- leisure_minutes: 62624.0 minutes
+- idle_minutes: 31010.0 minutes
+- rest_minutes: 118581.0 minutes
+- sleep_minutes: 77127.0 minutes
 
 ## Stability diagnostics
 
-- ANXIETY_LOW_SATURATION: 118 actors
-- EXCESSIVE_SLEEP: 3 actors
+- ANXIETY_LOW_SATURATION: 117 actors
+- EXCESSIVE_SLEEP: 2 actors
 - FATIGUE_HIGH_SATURATION: 1 actors
-- FATIGUE_LOW_SATURATION: 112 actors
+- FATIGUE_LOW_SATURATION: 110 actors
 - HUNGER_HIGH_SATURATION: 2 actors
 - NO_SLEEP_48H: 1 actors
-- SATISFACTION_HIGH_SATURATION: 106 actors
-- SCREEN_STRAIN_LOW_SATURATION: 106 actors
+- SATISFACTION_HIGH_SATURATION: 107 actors
+- SCREEN_STRAIN_LOW_SATURATION: 107 actors
 - TASK_PRESSURE_HIGH_SATURATION: 47 actors
 - TASK_PRESSURE_LOW_SATURATION: 80 actors
 - UNMET_BATHROOM: 23 actors
@@ -36,9 +36,9 @@ See `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner
 ## Switching distribution
 
 - median: 33.00/day
-- p90: 36.50/day
-- p95: 37.00/day
-- max: 39.00/day
+- p90: 35.50/day
+- p95: 36.50/day
+- max: 38.50/day
 
 
 ## Representative timelines

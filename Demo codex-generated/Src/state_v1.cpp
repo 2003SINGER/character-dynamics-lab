@@ -196,7 +196,8 @@ StateUpdate advance_continuous_state(CharacterState& state,
     if (running_action->action == ActionType::Idle) action_delta.boredom = 0.025 * scale;
     if (running_action->action == ActionType::UsePhone || running_action->action == ActionType::ShopOnPhone
         || running_action->action == ActionType::UseComputer) action_delta.boredom = -0.025 * scale;
-    if (running_action->action != ActionType::UsePhone && running_action->action != ActionType::ShopOnPhone) {
+    if (running_action->action != ActionType::UsePhone && running_action->action != ActionType::ShopOnPhone
+        && LivingDynamics::purchase_urge_zone(state.purchase_urge) != LivingDynamics::ActivationZone::Low) {
         action_delta.purchase_urge = -0.012 * state.purchase_urge * scale;
     }
     state.fatigue = clamp_unit(state.fatigue + action_delta.fatigue);
