@@ -25,3 +25,6 @@
 ## 重启条件
 
 先按 [Objective Readiness v0](Objective_Readiness_v0.md) 定义并在 development cases 与 negative cases 上验证 engineering pathology objective（例如无限重复、无人照料需求、deadline 不响应、任务完成失败），再决定是否恢复候选排序。
+# Historical checkpoint
+
+本文保持当时记录不变。当前架构边界见 [Architecture_Boundary_Runtime_Dynamics_Demo_v1](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)。

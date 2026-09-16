@@ -89,7 +89,7 @@ agnostic. Its smoke test demonstrates:
 2. action completion at +35 opens the decision gate;
 3. a strong interrupting event at +5 both opens the gate and marks an
    interruptible action interrupted;
-4. a rejected action is delivered through a one-minute runtime transition and
+3. a rejected action is delivered through a one-minute runtime transition and
    opens the next decision gate, so there cannot be a second decision at the
    same clock instant.
 
@@ -158,3 +158,6 @@ it advances continuous S, settles a completed RunningAction, projects outcome
 and events into O, applies X→S impulse, evaluates the gate, and submits the
 next policy intent through W validation. Lower-level scheduler calls remain
 temporal primitives only; fixtures must use this owner API.
+# Scope clarification (2026-09-16)
+
+Scheduler/ContinuousRuntime 是共享执行 Kernel；S continuous law、X/appraisal、commitment semantics 与 π construction 由显式 `CharacterDynamicsModel` 提供。Reference fixture 必须选择 `ReferenceRuleDynamicsV0`，living sandbox 选择 `DemoLivingDynamicsV0`。

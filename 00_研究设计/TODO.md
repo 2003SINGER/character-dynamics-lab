@@ -2,11 +2,19 @@
 
 更新时间：2026-09-16。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。
 
+## SYSTEM / APPLICATION TRACK
+
+| ID | 状态 | 下一动作 | 验收 / owner |
+|---|---|---|---|
+| BOUNDARY-V1 | **READY_FOR_INDEPENDENT_REVIEW** | 复核 Kernel / Dynamics / Demo ownership 与依赖边界 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
+| RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
+| DEMO-LIVING | **ACTIVE / DEMO ONLY** | 继续观察 `FREE_RUN_6H`；UI 后置 | `DemoLivingDynamicsV0`；不产生 research evidence |
+
 ## ACTIVE
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| SYSTEM | **System Runtime / Engine v1：CLOSED / FROZEN** | 独立复核已完成：Continuous Runtime ownership、threshold/W validation、typed rejection、Deadline/Phone/Commitment fixtures、trace、case-isolated CTest、CI 与文档护栏均已闭环。此状态仅关闭 Engine/Runtime，不代表 Evaluator、Objective、Optimizer 或 Paper-0 完成。 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[Objective Readiness](Objective_Readiness_v0.md) |
+| SYSTEM | **Shared Runtime Kernel v1：CLOSED / FROZEN** | Continuous Runtime ownership、threshold/W validation、typed rejection、fixtures、trace、case-isolated CTest、explicit DynamicsModel injection 与 isolation guard 已闭环。此状态只关闭执行 Kernel，不代表任何行为模型、Evaluator、Objective、Optimizer 或 Paper-0 完成。 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | M1 | **已完成（pre-training gate）** | 已冻结 anchor 语义边界、sign-violation 协议、decision-step 时间尺度、neutral 初始化与 trajectory reset；不再扩展机制 | [M1 冻结决策](Theory-S_M1冻结决策_2026-09-07.md)、[Theory-S v2](../02_实验/Theory_S_v2/README.md)；不得把候选实现写成心理学验证 |
 | M2 | 进行中 | 完善 SceneSnapshot → affordance → generated `A^O` 的最小 ontology 与实例绑定 | 生成不读 source `A*`；source support 仅 post-hoc 诊断；[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md) |
 | M3 | **已完成（owner audit v0）** | 保留审计边界；若要重开 D01，先完成 actor-local observation audit、跨 actor gap 编码和 X 字段准入 | [capability matrix](../02_实验/Theory_S_v2/capability_matrix.md)、[D01 LIGHT](../02_实验/T0c_LIGHT/D01_semantic_temporal_admission_v0.md)、[OPeRA candidate reconstruction](../02_实验/T0d_OPeRA/candidate_reconstruction_feasibility_v0.md)；proxy/telemetry 不升级为 A* |

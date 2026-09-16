@@ -72,3 +72,6 @@ LLM 不是整个 NPC。它最多在开放语义确实需要解释时充当受限
 Paper-0 persistent representation、外部 Replay、Theory-S 和未来数据实验都是从系统中抽出的证据支线。它们为系统提供证据，不再拥有整个项目的叙事权。
 
 LIGHT 当前封口为 generic actor-local history development diagnostic；它不承担完整 Theory-S 训练准入。`COMPRESSION_DEPTH2_ALIGNED_SIGNAL_PRESENT; COMPARATIVE_SUFFICIENCY_INCONCLUSIVE` 是该支线的边界，不是整个系统的成败判定。
+# 当前模块定位补充（2026-09-16）
+
+系统由五个可区分模块组成：`Runtime Kernel`、显式选择的 `Dynamics Model`、`Evaluator`、`Optimizer`、`Applications`。产品意义上的 Engine 只是 `Runtime Kernel + selected Dynamics Model`，不再声称 Engine 拥有唯一 policy 或 state dynamics。Kernel 共享执行机制；Reference、Theory-S、Demo Living 是不同证据地位的 model/candidate。

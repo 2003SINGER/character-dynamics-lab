@@ -16,3 +16,6 @@ Mechanism 表达力与候选集边界的独立工程验收见 [Mechanism Sanity 
 本地外部实验/基准 payload 位于 [`outputs/external_assets_2026-09-06`](../outputs/external_assets_2026-09-06/)；其 provenance 与原始复核/对话证据分开维护。该归档不代表任何数据集已经通过本项目的 adapter、语义准入或 Paper-0 candidate/action-surface gate。
 
 `T14_T20_rank_matched_probe_v1.md`、`Replay/replay_features_v1.py`、`Replay/replay_probe_v1.py` 是既有 1D 候选协议与训练设施；`Theory_S_v2/` 是后续 trainable dynamics candidate，但尚未进入真实 development training。v0 协议、`drive-linear-v0` 与 C++ `replay_core_cli` 仅作历史 diagnostic/repro path。其他数据集按各自 README 的准入状态维护。
+# 研究与 Demo 边界（2026-09-16）
+
+本目录的研究 candidate 仍以 `Theory_S_v2/` 为 canonical source；C++ `ReferenceRuleDynamicsV0` 只提供可复现的工程/reference baseline，`DemoLivingDynamicsV0` 与 `FREE_RUN_6H` 属于 application-only，不是研究 evidence。三者共享执行 Kernel 的时间/W/O contract，但不得互相冒充或倒灌。

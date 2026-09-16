@@ -1,5 +1,8 @@
 # Living Dynamics v0 / FREE_RUN_6H
 
+**STATUS: DEMO / APPLICATION ONLY**  
+**RESEARCH EVIDENCE: NONE**
+
 This is a development-only engineering sandbox for coupled living dynamics. It is not validated psychology, a research result, or proof of realism.
 
 Persistent S is unchanged. Perceived hunger, perceived bathroom need, overload, sleep readiness, recovery efficiency, and task absorption are derived transient modifiers.

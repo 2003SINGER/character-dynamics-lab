@@ -24,3 +24,6 @@
 当前 CTest 包含基础、closure、trace、mechanism fixture、channel coverage，以及以 `runtime_case_smoke --case <name>` 逐 case 执行的 gate-labelled registrations。
 
 `RUNTIME_V1_CLOSURE_AND_PROJECT_STABILIZATION = CLOSED / FROZEN`。π selection、completion/rejection exactly-once、threshold continue/replace、physical preemption distinction均有可执行证据。后续不再扩 Runtime；下一条 active research work 为 M2 candidate-set admission。
+# Responsibility split (2026-09-16)
+
+Runtime Closure 只保证正确时间调用 model continuous/appraisal/policy hooks、O/W ownership、gate ordering、W validation、hidden-W 不泄漏和 model identity trace；不保证 fatigue rate、commitment law、π 权重或 hunger/mood coupling 合理。新增 Gate I：Dynamics-model isolation（显式 model 选择、Engine 不链接 Demo、Reference parity frozen、Demo tuning 不改变 Reference fixtures）。

@@ -83,3 +83,13 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 - Anti-patch-debt baseline: `webgpt-sync@685c319`.
 - `Demo codex-generated/Src/simulation.cpp` is about 58 KB and currently owns runtime orchestration, batch, CSV, verify, E0, and profile runs. This is known debt; this rule does not authorize a large refactor now.
 - Typed `FactKey` coverage is partial. New adapters must not inject dataset-specific string keys into runtime `Observation`.
+# Runtime kernel / dynamics model / demo boundary
+
+- `ContinuousRuntime` orchestrates an explicitly selected `CharacterDynamicsModel`; it must not silently construct a default behavior model.
+- Shared Kernel patches require an execution invariant, ownership, information-boundary, scheduler, or settlement defect. Demo naturalness never qualifies.
+- State-update laws, appraisal semantics, commitment rules, utility coefficients, and candidate weights belong to a versioned Dynamics Model.
+- Runtime sources must not import Demo models. Reference models must not import Demo models. Demo artifacts are not research evidence.
+- Every Runtime caller names its model (`ReferenceRuleDynamicsV0` or `DemoLivingDynamicsV0`). Shared S schema is a data contract, not validated psychology.
+- Research dynamics changes require a frozen development protocol and a new candidate/version; do not overwrite Reference V0.
+
+See [Runtime / Dynamics / Demo boundary](00_研究设计/Architecture_Boundary_Runtime_Dynamics_Demo_v1.md).

@@ -2,6 +2,8 @@
 
 这是一个**只供阅读、运行和拆解**的 C++17 控制台参考系统。它和用户亲自编写的 `E:\Character Dynamics Demo` 完全分离：不读取、复制、修改或替代后者。
 
+本目录同时承载两条明确分开的 model track：Shared Runtime Kernel + `ReferenceRuleDynamicsV0` 用于机制/reference fixtures；Shared Runtime Kernel + `DemoLivingDynamicsV0` 用于 living sandbox/free-run。它们共享 World、O、Scheduler、RunningAction 与 trace，但可以产生不同的角色行为；Demo tuning 不改变科研/reference 语义。详见 [架构边界](../00_研究设计/Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)。
+
 它不证明任何研究结论。这里的状态、分数、规则和人格参数只是为了让你看见一条完整、可追踪的计算链：
 
 ```text
@@ -24,6 +26,8 @@ W → O → X → S → D → π(A^char) → CharacterActionPlan[a^world...] →
 - 不实现 LLM、UI、异步、玩家可见延迟、多角色、P 学习或研究用回放评测。已有睡眠/温感/窗帘的局部 O 信息差演示，但尚无正式信息干预实验。
 
 ## 阅读顺序
+
+Model 入口：`Inc/character_dynamics_model.h`；`ReferenceRuleDynamicsV0` 与 `DemoLivingDynamicsV0` 是两个显式实现。`Src/reference_*.cpp` 保留 `5d3c164` 的 Reference 规则，当前 `Src/appraisal.cpp`、`Src/state.cpp`、`Src/decision.cpp` 包在 `DemoLivingV0` 命名空间中，仅由 Demo model target 编译。
 
 1. `Src/main.cpp`：程序入口；
 2. `Src/simulation.cpp`：整条 W→O→X→S→D→A→W 链如何编排；
