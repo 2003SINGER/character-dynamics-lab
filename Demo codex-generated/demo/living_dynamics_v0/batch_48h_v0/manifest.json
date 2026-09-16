@@ -1,0 +1,22 @@
+{
+  "milestone": "DEMO_LIVING_BATCH_48H_V0",
+  "actors": 128,
+  "profiles": [
+    "balanced",
+    "disciplined",
+    "procrastinating",
+    "rest_seeking",
+    "stimulation_seeking",
+    "anxious",
+    "body_sensitive",
+    "spontaneous"
+  ],
+  "seeds": {
+    "scenario": "1000 + actor_id * 17",
+    "policy": "5000 + actor_id * 31"
+  },
+  "start_total_minutes": 480,
+  "horizon_minutes": 2880,
+  "dynamics_model": "demo-living-v0",
+  "demo_only": true
+}

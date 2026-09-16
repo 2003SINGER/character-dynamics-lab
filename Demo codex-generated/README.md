@@ -68,6 +68,16 @@ VS Code 已提供 `CMake Tools` + `clangd` 本机配置。打开本目录后选�
 
 ## 重要边界
 
+### 48h batch diagnostic
+
+`demo/living_dynamics_v0/batch_48h_v0/` 保存 128 个独立 Demo Living actor 的 48 小时工程诊断。可用以下命令从当前 binary 重生成：
+
+```bash
+python3 tools/batch_48h.py build/character_dynamics_free_run
+```
+
+该 runner 固定 8 个 demo engineering profiles × 16 seeds，检查 8 个 actor 的逐字节确定性重跑，并生成 compact traces、actor/profile summaries、aggregate diagnostics 与自动选择的 representative traces。本批次不是研究证据，也不声称人格心理学有效。
+
 - `O` 是独立的角色视图；当前同房间可直接看见绝大多数对象，但字段级来源已经存在。窗帘关上时，`outside.weather` 不再刷新、保留旧值并标为 `stale`；未来场景、消息或记忆可复用同一记录接口。
 - `X` 是受限的 appraisal 标签和数值变化，不是 LLM，也不是“真实心理学”。它现在只演示接口和简单函数关系。
 - `P` 在每次 run 内固定，只在两次对照运行之间改变。当前实际使用拖延、自控、休息偏好、刺激寻求、任务焦虑敏感度、屏幕疲劳敏感度、需求响应与行动噪声。
