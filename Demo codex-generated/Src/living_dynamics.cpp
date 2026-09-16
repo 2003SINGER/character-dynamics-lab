@@ -6,6 +6,7 @@
 
 namespace LivingDynamics {
 static double clamp(double x){return std::clamp(x,0.0,1.0);}
+double overload_risk(const CharacterState&,const Personality&);
 static ActivationZone five_zone(double v,double a,double b,double c,double d){if(v<a)return ActivationZone::Low;if(v<b)return ActivationZone::Normal;if(v<c)return ActivationZone::Activated;if(v<d)return ActivationZone::High;return ActivationZone::Extreme;}
 ActivationZone hunger_zone(double v){return five_zone(v,.25,.50,.70,.88);}
 ActivationZone bathroom_zone(double v){return five_zone(v,.25,.50,.75,.90);}
@@ -17,9 +18,9 @@ ActivationZone satisfaction_zone(double v){return five_zone(v,.20,.50,.80,.92);}
 ActivationZone screen_strain_zone(double v){return five_zone(v,.25,.55,.80,.92);}
 ActivationZone purchase_urge_zone(double v){return five_zone(v,.25,.60,.85,.95);}
 double task_absorption(const CharacterState& s){return clamp(0.65*s.satisfaction + 0.35*(1.0-s.boredom));}
-double perceived_hunger(const CharacterState& s,const Personality& p){return clamp(s.hunger + 0.16*s.anxiety + 0.10*s.boredom - 0.14*task_absorption(s));}
-double perceived_bathroom(const CharacterState& s,const Personality& p){return clamp(s.bathroom_urge + 0.10*s.anxiety - 0.05*task_absorption(s));}
-double overload(const CharacterState& s,const Personality& p){return clamp(std::max(0.0,s.task_pressure-0.45)*0.9 + 0.55*s.anxiety*p.task_anxiety_sensitivity);}
+double perceived_hunger(const CharacterState& s,const Personality& p){const double anxiety_notice=clamp((s.anxiety-.20)/.80);const double boredom_notice=clamp((s.boredom-.25)/.75);return clamp(s.hunger + 0.16*anxiety_notice + 0.10*boredom_notice - 0.14*task_absorption(s));}
+double perceived_bathroom(const CharacterState& s,const Personality& p){const double anxiety_notice=clamp((s.anxiety-.20)/.80);return clamp(s.bathroom_urge + 0.10*anxiety_notice - 0.05*task_absorption(s));}
+double overload(const CharacterState& s,const Personality& p){return overload_risk(s,p);}
 double pressure_motivation(const CharacterState& s){return s.task_pressure < .70 ? s.task_pressure/.70 : 1.0;}
 double anxiety_facilitation(const CharacterState& s){return clamp(1.0-std::abs(s.anxiety-.35)/.35);}
 double anxiety_impairment(const CharacterState& s){return clamp((s.anxiety-.70)/.30);}
