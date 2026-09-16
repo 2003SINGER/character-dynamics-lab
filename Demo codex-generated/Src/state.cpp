@@ -99,7 +99,8 @@ StateUpdate update_state(CharacterState& state,
     delta.anxiety = appraisal.anxiety_delta
                   + update.semantic_contribution.anxiety
                   + std::max(0.0, state.task_pressure - 0.55)
-                    * 0.08 * time_scale * personality.task_anxiety_sensitivity;
+                    * 0.035 * time_scale * personality.task_anxiety_sensitivity
+                  - 0.018 * state.anxiety * time_scale;
 
     const double raw_task_pressure_delta = delta.task_pressure;
     if (raw_task_pressure_delta > 0.0) {
@@ -116,6 +117,13 @@ StateUpdate update_state(CharacterState& state,
     }
     if (delta.hunger < 0.0 || delta.bathroom_urge < 0.0) {
         delta.satisfaction += 0.04 * personality.need_response;
+    }
+    // Satisfaction and anxiety have a weak homeostatic return toward the
+    // current context. This prevents repeated ordinary boundaries from
+    // pinning affect at 0/1 while preserving stronger appraisal impulses.
+    if (LivingDynamics::need_discomfort(state, personality) < 0.35) {
+        delta.satisfaction += 0.006 * time_scale;
+        delta.anxiety -= 0.006 * state.anxiety * time_scale;
     }
 
     state.boredom = clamp_unit(state.boredom + delta.boredom);
