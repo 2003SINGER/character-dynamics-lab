@@ -73,7 +73,8 @@ DecisionContext decide(const Observation& observation,
     const double bathroom_drive = std::max(0.0, (LivingDynamics::perceived_bathroom(state, personality)-.25)/.75) * (0.90 + personality.need_response * 0.20);
     // Above a moderate bodily-need level, leisure and task candidates lose
     // probability smoothly rather than relying on a hard scripted interrupt.
-    const double urgent_bodily_need = std::max(0.0, std::max(hunger_drive, bathroom_drive) - 0.65);
+    const double urgent_threshold = 0.65 - 0.08 * personality.need_response;
+    const double urgent_bodily_need = std::max(0.0, std::max(hunger_drive, bathroom_drive) - urgent_threshold);
 
     const double dominant = std::max({distraction, task_drive, recovery_drive, hunger_drive, bathroom_drive});
     if (dominant == bathroom_drive) {
@@ -103,7 +104,7 @@ DecisionContext decide(const Observation& observation,
         const double commitment_bonus = advances_committed_task ? 0.16 * config.commitment_bonus : 0.0;
         switch (action) {
         case ActionType::UsePhone:
-            decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * 0.30 - state.fatigue * 0.12
+            decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * (0.18 + 0.24 * personality.screen_strain_sensitivity) - state.fatigue * 0.12
                 - 0.34 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need + commitment_bonus, 0.12, "phone offers immediate stimulation but yields to urgent bodily needs"));
             break;
         case ActionType::ShopOnPhone:
@@ -114,7 +115,7 @@ DecisionContext decide(const Observation& observation,
             break;
         }
         case ActionType::UseComputer:
-            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * 0.28 - 0.80 * urgent_bodily_need + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
+            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * (0.16 + 0.22 * personality.screen_strain_sensitivity) - 0.80 * urgent_bodily_need + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
             break;
         case ActionType::StudyAtComputer:
             decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 * config.study_fatigue_penalty - personality.procrastination * 0.16 + commitment_bonus, 0.18, "computer can be used for task progress"));
