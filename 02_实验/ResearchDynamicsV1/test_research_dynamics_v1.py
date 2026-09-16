@@ -1,5 +1,6 @@
 import unittest
-from research_dynamics_v1 import State, MODEL_ID, run_intervention
+from pathlib import Path
+from research_dynamics_v1 import State, Personality, MODEL_ID, run_intervention
 
 class ResearchDynamicsV1Test(unittest.TestCase):
     def test_accumulation_and_recovery(self):
@@ -12,6 +13,23 @@ class ResearchDynamicsV1Test(unittest.TestCase):
         zero = run_intervention("zero")["final_state"]
         perm = run_intervention("permuted")["final_state"]
         self.assertNotEqual(zero, perm)
+
+    def test_threshold_and_personality_modulation(self):
+        s = State(); s.step(minutes=60, action="study", deadline_signal=1)
+        self.assertGreater(s.task_pressure, 0.0)
+        low = State(); high = State()
+        low.step(minutes=60, action="study", deadline_signal=1,
+                 personality=Personality(deadline_sensitivity=.5))
+        high.step(minutes=60, action="study", deadline_signal=1,
+                  personality=Personality(deadline_sensitivity=2.0))
+        self.assertGreater(high.task_pressure, low.task_pressure)
+
+    def test_policy_uses_current_state_only(self):
+        s = State(task_pressure=.9)
+        self.assertGreater(s.policy(["study", "rest"])["study"], 0)
+        source = Path(__file__).with_name("research_dynamics_v1.py").read_text()
+        self.assertNotIn("gold_action", source)
+        self.assertNotIn("outcome_t+1", source)
 
     def test_bounds_and_identity(self):
         s = State(); s.step(minutes=10000, action="study", deadline_signal=1)

@@ -65,8 +65,21 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    // Compatibility default is retained for historical scripts, but the
-    // model identity is explicit in the version contract and adapter target.
+    std::string dynamics_model = "legacy-reference-v0";
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "--dynamics" && i + 1 < argc) {
+            dynamics_model = argv[++i];
+        } else if (std::string(argv[i]) != "--version") {
+            std::cerr << "replay core failed: unknown option; use --dynamics <legacy-reference-v0>\n";
+            return 1;
+        }
+    }
+    if (dynamics_model != "legacy-reference-v0") {
+        std::cerr << "replay core failed: only legacy-reference-v0 adapter is available\n";
+        return 1;
+    }
+    // The compatibility default is retained for old scripts; new research
+    // runners must pass --dynamics explicitly and record their model id.
     Personality personality;
     CharacterState state;
     std::string active_trajectory;

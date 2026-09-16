@@ -212,3 +212,6 @@ add_test(NAME research_dynamics_v1_unit
          COMMAND ${Python3_EXECUTABLE} -m unittest discover
                  -s "${CMAKE_CURRENT_SOURCE_DIR}/../02_实验/ResearchDynamicsV1"
                  -p "test_*.py")
+add_test(NAME research_dynamics_v1_intervention_artifacts
+         COMMAND ${Python3_EXECUTABLE}
+                 "${CMAKE_CURRENT_SOURCE_DIR}/../02_实验/ResearchDynamicsV1/run_interventions.py")

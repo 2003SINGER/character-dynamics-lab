@@ -23,6 +23,16 @@ S_{t+1} = F(S_t, X_t, Δt, running_action, P)
 
 所有字段均 `[0,1]`、显式初始化、按 `Δt` 更新；阈值是 candidate engineering controls，不能直接解释为临床或人格界线。`P` 只调更新速率/偏好权重，不改变 W 合法性。
 
+## Candidate update constants and thresholds
+
+`ResearchDynamicsV1` 当前只使用下列透明 development constants（不是拟合值）：
+
+- `effort_rate = {study: 0.10, work: 0.09, screen: 0.07}` / hour；`recovery_rate = {rest: 0.16, sleep: 0.24}` / hour。
+- `deadline_rate = 0.10 * P.deadline_sensitivity`，`progress_relief = 0.16` / hour；`boredom_baseline = 0.10` / hour。
+- candidate thresholds：`0.70` high、`0.30` low，仅用于 intervention 标签；越界统一 clip 到 `[0,1]`，不触发隐藏副作用。
+
+`P.recovery_sensitivity`、`P.deadline_sensitivity`、`P.stimulation_preference` 是唯一人格调制入口；单位测试必须证明改变它们只改变声明的更新/score 路径。任何未来改动都须同步更新本协议与 model id。
+
 ## 受控证据包
 
 必须至少通过：零输入衰减、正确字段 intervention、字段置换、stale-O、未来信息泄漏与 deterministic rerun。每个 artifact 都保留 raw trace、compact summary、model id 和 config hash。未完成这些 gate 前，不启动 LIGHT 全量或正式 Paper-0 test。
