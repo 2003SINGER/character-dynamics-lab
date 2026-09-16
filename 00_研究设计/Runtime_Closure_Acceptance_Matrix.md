@@ -18,12 +18,11 @@
 | F continuous/impulse | PASS | Kernel 在正确 boundary 调用显式 Dynamics Model 的 continuous/appraisal/impulse hooks，并隔离 Δt、O、X、S 数据边界；chunk equivalence smoke；具体 state law 不属于 Kernel 验收 |
 | G decision gate | PASS | Kernel 依据 typed reason 控制 gate；weak/hidden event closed，completion/invalidation/rejection open；threshold crossing 立即触发 model policy reconsideration，并保留 running action，除非模型明确产生 interruption |
 | H docs/regression | PASS | 基础、closure、trace、mechanism fixture registrations 均通过；reference `--verify`、repo health 与 CI 配置通过 |
+| I dynamics-model isolation | PASS | 调用方显式选择模型；Kernel 不链接 Demo 行为源；Reference parity 对齐冻结 commit；Demo 调参不改变 Reference fixtures |
 
 ## Executable evidence
 
 当前 CTest 包含基础、closure、trace、mechanism fixture、channel coverage，以及以 `runtime_case_smoke --case <name>` 逐 case 执行的 gate-labelled registrations。
 
 `RUNTIME_V1_CLOSURE_AND_PROJECT_STABILIZATION = CLOSED / FROZEN`。π selection、completion/rejection exactly-once、threshold continue/replace、physical preemption distinction均有可执行证据。后续不再扩 Runtime；下一条 active research work 为 M2 candidate-set admission。
-| I dynamics-model isolation | PASS | 调用方显式选择模型；Kernel 不链接 Demo 行为源；Reference parity 对齐冻结 commit；Demo 调参不改变 Reference fixtures |
-
 本矩阵只验 Kernel 的执行契约与模型边界：不保证 fatigue rate、commitment law、π 权重或 hunger/mood coupling 的心理学合理性。Reference、Theory-S 与 Demo Living 的证据地位由各自研究/应用文档单独说明。

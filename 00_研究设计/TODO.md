@@ -6,7 +6,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| BOUNDARY-V1 | **READY_FOR_INDEPENDENT_REVIEW** | 复核 Kernel / Dynamics / Demo ownership 与依赖边界 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
+| BOUNDARY-V1 | **CLOSED / FROZEN** | Kernel / Dynamics / Demo ownership 与依赖边界已完成复核 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
 | DEMO-LIVING | **ACTIVE / DEMO ONLY** | 继续观察 `FREE_RUN_6H`；UI 后置 | `DemoLivingDynamicsV0`；不产生 research evidence |
 
