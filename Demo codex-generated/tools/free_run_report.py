@@ -8,7 +8,15 @@ for i,(scenario,policy) in enumerate(seeds):
     replay=p.with_suffix('.replay.json'); subprocess.run([exe,str(scenario),str(policy),str(replay)],check=True)
     if p.read_bytes()!=replay.read_bytes(): raise SystemExit(f'non-deterministic replay: {p.name}')
     replay.unlink()
-    data=json.loads(p.read_text()); actions=[x.get('action', x.get('selected_action')) for x in data if x.get('action', x.get('selected_action'))]
+    data=json.loads(p.read_text())
+    for frame in data:
+        frame.setdefault('pre_policy_outcome', None)
+        frame.setdefault('post_policy_outcome', None)
+        frame.setdefault('continuous_state_delta', {})
+        frame.setdefault('impulse_state_delta', {})
+        frame.setdefault('provenance', 'free_run_runtime_boundary')
+    p.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')) + '\n')
+    actions=[x.get('action', x.get('selected_action')) for x in data if x.get('action', x.get('selected_action'))]
     if data[-1]['timestamp']-data[0]['timestamp'] < 360: raise SystemExit(f'run shorter than six hours: {p.name}')
     if any(not (0 <= x[k] <= 1) for x in data for k in ('hunger','fatigue','bathroom_urge')): raise SystemExit(f'S out of range: {p.name}')
     counts={a:actions.count(a) for a in sorted(set(actions))}
