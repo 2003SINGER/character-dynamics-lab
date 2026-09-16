@@ -41,7 +41,7 @@ Appraisal appraise(const Observation& observation,
         case ActionType::UsePhone:
             appraisal.boredom_delta = -0.24 * LivingDynamics::boredom_stimulation_drive(old_state);
             appraisal.fatigue_delta = 0.03 + 0.08 * old_state.screen_strain;
-            appraisal.task_pressure_delta = coursework_pending ? 0.07 : 0.0;
+            appraisal.task_pressure_delta = coursework_pending ? 0.07 * LivingDynamics::pressure_motivation(old_state) : 0.0;
             appraisal.satisfaction_delta = 0.05 * LivingDynamics::boredom_stimulation_drive(old_state)
                                         * (1.0 - LivingDynamics::screen_aversion(old_state));
             appraisal.screen_strain_delta = 0.04 + 0.08 * (1.0 - old_state.screen_strain);
@@ -61,7 +61,7 @@ Appraisal appraise(const Observation& observation,
         case ActionType::UseComputer:
             appraisal.boredom_delta = -0.18 * LivingDynamics::boredom_stimulation_drive(old_state);
             appraisal.fatigue_delta = 0.04 + 0.07 * old_state.screen_strain;
-            appraisal.task_pressure_delta = coursework_pending ? 0.05 : 0.0;
+            appraisal.task_pressure_delta = coursework_pending ? 0.05 * LivingDynamics::pressure_motivation(old_state) : 0.0;
             appraisal.screen_strain_delta = 0.04 + 0.07 * (1.0 - old_state.screen_strain);
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"screen_engagement", "task_deferred"}
@@ -114,30 +114,30 @@ Appraisal appraise(const Observation& observation,
             appraisal.tags = {"bodily_need_resolved", "brief_room_exit"};
             break;
         case ActionType::GetMeal:
-            appraisal.boredom_delta = -0.04;
+            appraisal.boredom_delta = -0.08 * LivingDynamics::boredom_stimulation_drive(old_state);
             appraisal.satisfaction_delta = LivingDynamics::meal_satisfaction_gain(old_state, personality);
             appraisal.hunger_delta = -LivingDynamics::meal_hunger_relief(old_state);
             appraisal.tags = {"hunger_resolved", "brief_room_exit"};
             break;
         case ActionType::TurnLightOn:
-            appraisal.satisfaction_delta = 0.02;
+            appraisal.satisfaction_delta = 0.02 * LivingDynamics::pressure_motivation(old_state);
             appraisal.tags = {"room_prepared_for_activity"};
             break;
         case ActionType::TurnLightOff:
-            appraisal.satisfaction_delta = 0.02;
+            appraisal.satisfaction_delta = 0.02 * LivingDynamics::fatigue_recovery_drive(old_state);
             appraisal.tags = {"room_prepared_for_rest"};
             break;
         case ActionType::TurnOffAlarm:
-            appraisal.satisfaction_delta = 0.03;
-            appraisal.anxiety_delta = -0.02;
+            appraisal.satisfaction_delta = 0.03 * LivingDynamics::anxiety_facilitation(old_state);
+            appraisal.anxiety_delta = -0.02 * LivingDynamics::anxiety_facilitation(old_state);
             appraisal.tags = {"alarm_silenced", "interruption_resolved"};
             break;
         case ActionType::OpenCurtain:
-            appraisal.satisfaction_delta = 0.01;
+            appraisal.satisfaction_delta = 0.02 * LivingDynamics::boredom_stimulation_drive(old_state);
             appraisal.tags = {"outside_visibility_restored"};
             break;
         case ActionType::CloseCurtain:
-            appraisal.satisfaction_delta = 0.01;
+            appraisal.satisfaction_delta = 0.02 * LivingDynamics::fatigue_recovery_drive(old_state);
             appraisal.tags = {"room_stimulation_reduced"};
             break;
         case ActionType::Idle:
