@@ -13,4 +13,4 @@ build/character_dynamics_single_room_demo --scenario commitment --output demo/si
 cd demo/single_room_v0/web && python3 -m http.server 8000
 ```
 
-Open `http://localhost:8000`. Presets expose W/O/S, RunningAction, events, gate/policy context, and typed outcomes. The trace is the source of truth; scripted fixture selectors are labeled in the trace and are never presented as psychological claims. Keep W-only fields in Developer View when extending the viewer; Player View should only surface actor-visible O/S/time context.
+Open `http://localhost:8000`. Presets expose W/O/S, RunningAction, events, gate/policy context, and typed outcomes. The trace is the source of truth; scripted fixture selectors are labeled in the trace and are never presented as psychological claims. The viewer starts in Developer View and the toggle switches to Player View, hiding the W card while retaining actor-visible O/S/time context.
