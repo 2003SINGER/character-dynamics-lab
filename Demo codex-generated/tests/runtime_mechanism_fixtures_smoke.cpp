@@ -38,6 +38,9 @@ int main() {
     if (prt.submit_action_intent(ActionType::UsePhone, "phone", 10).accepted) return 7;
     CharacterState ps; auto pt = prt.execute_next_boundary(ps, p);
     if (pt.running_action_after && pt.running_action_after->action == ActionType::UsePhone) return 8;
+    const auto blocked = std::find_if(pt.decision.candidates.begin(), pt.decision.candidates.end(),
+        [](const CandidateAction& c) { return c.action == ActionType::UsePhone; });
+    if (blocked != pt.decision.candidates.end() && (blocked->eligible || blocked->probability > 0.0)) return 13;
 
     World cw; cw.time.minute_of_day = 560; cw.tasks.front().effort_target = 0.01;
     RuntimeScheduler csch(560); Observation co = refresh_observation({}, cw, {}); ContinuousRuntime crt(csch, cw, co);

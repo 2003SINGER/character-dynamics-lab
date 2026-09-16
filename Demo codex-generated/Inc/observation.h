@@ -115,6 +115,9 @@ Observation refresh_observation(Observation previous,
                                 const World& world,
                                 const WorldOutcome& previous_outcome,
                                 const InformationAccess& access = {});
+// Rebuild A^O and action-target bindings exclusively from persistent O.
+// This never consults W and is required after same-boundary feedback updates.
+void rebuild_known_actions_from_observation(Observation& observation);
 // This is the only W-outcome -> O bridge for a character's own completed
 // action. Callers may deliberately withhold completion confirmation to model
 // a task whose actual settlement is not yet observable to the character.

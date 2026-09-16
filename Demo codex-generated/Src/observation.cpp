@@ -177,6 +177,25 @@ bool subjective_preconditions_allow(ActionType action,
 }
 } // namespace
 
+void rebuild_known_actions_from_observation(Observation& observation) {
+    observation.known_actions.clear();
+    observation.action_target_bindings.clear();
+    observation.known_actions.push_back(ActionType::Idle);
+    for (const KnownObjectAffordance& known_object : observation.known_object_affordances) {
+        Object believed_object;
+        believed_object.id = known_object.id;
+        believed_object.affordances = known_object.affordances;
+        for (ActionType action : known_object.affordances) {
+            if (subjective_preconditions_allow(action, observation, believed_object)
+                && !is_blocked(observation, action, known_object.id)
+                && !observation_knows_action(observation, action)) {
+                observation.known_actions.push_back(action);
+                observation.action_target_bindings.push_back({action, known_object.id});
+            }
+        }
+    }
+}
+
 const ObservationFact* find_fact(const Observation& observation, const std::string& key) {
     const auto fact = std::find_if(observation.facts.begin(), observation.facts.end(),
         [&key](const ObservationFact& item) { return item.key == key; });
@@ -341,20 +360,7 @@ Observation refresh_observation(Observation observation,
     // affordances. It must not call W::available_actions(): W-only guards
     // (wallet, hidden task completion, object failure, room flags) are tested
     // only at settlement and can then become O through feedback.
-    observation.known_actions.push_back(ActionType::Idle);
-    for (const KnownObjectAffordance& known_object : observation.known_object_affordances) {
-        Object believed_object;
-        believed_object.id = known_object.id;
-        believed_object.affordances = known_object.affordances;
-        for (ActionType action : known_object.affordances) {
-            if (subjective_preconditions_allow(action, observation, believed_object)
-                && !is_blocked(observation, action, known_object.id)
-                && !observation_knows_action(observation, action)) {
-                observation.known_actions.push_back(action);
-                observation.action_target_bindings.push_back({action, known_object.id});
-            }
-        }
-    }
+    rebuild_known_actions_from_observation(observation);
     return observation;
 }
 

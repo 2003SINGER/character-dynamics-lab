@@ -50,6 +50,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         rejection.failure_reason = static_cast<RejectionReason>(event.rejection->failure_reason);
         rejection.provenance = event.rejection->provenance;
         apply_self_action_feedback(observation_, rejection, world_runtime_.time_summary(), true, false);
+        rebuild_known_actions_from_observation(observation_);
     }
     schedule_next_world_boundary();
     bool threshold_reconsideration = false;
@@ -66,6 +67,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
             action->action, action->target_object_id, action->elapsed_minutes);
         apply_self_action_feedback(observation_, *result.pre_policy_outcome, world_runtime_.time_summary(),
                                    access_.self_task_completion_observable, false);
+        rebuild_known_actions_from_observation(observation_);
     } else if (action.has_value() && action->status == RunningActionStatus::Interrupted) {
         WorldOutcome invalidation;
         invalidation.action = action->action;
@@ -75,6 +77,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         invalidation.plan_invalidated = true;
         result.pre_policy_outcome = invalidation;
         apply_self_action_feedback(observation_, *result.pre_policy_outcome, world_runtime_.time_summary(), true, false);
+        rebuild_known_actions_from_observation(observation_);
     }
     result.appraisal = appraise(observation_, state, personality);
     result.impulse_state = apply_appraisal_impulse(state, result.appraisal, personality);

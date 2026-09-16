@@ -19,6 +19,7 @@ static std::string status_name(RunningActionStatus s) {
     switch (s) { case RunningActionStatus::Running: return "running"; case RunningActionStatus::Completed: return "completed"; case RunningActionStatus::Interrupted: return "interrupted"; case RunningActionStatus::Rejected: return "rejected"; }
     return "unknown";
 }
+static std::string gate_reason_name(DecisionGateReason r) { return to_string(r); }
 static void write_state(std::ostream& out, const CharacterState& s) {
     out << "{\"fatigue\":" << s.fatigue << ",\"hunger\":" << s.hunger << ",\"boredom\":" << s.boredom
         << ",\"task_pressure\":" << s.task_pressure << ",\"satisfaction\":" << s.satisfaction
@@ -41,25 +42,35 @@ static void write_facts(std::ostream& out, const Observation& o) {
     }
     out << "]";
 }
-static void write_decision(std::ostream& out, const DecisionContext& d) {
-    out << "{\"gate\":true,\"dominant_need\":" << esc(d.dominant_need) << ",\"candidates\":[";
+static void write_decision(std::ostream& out, const DecisionContext& d, bool gate = false, bool evaluated = false,
+                           const std::vector<DecisionGateReason>* reasons = nullptr) {
+    out << "{\"gate\":" << (gate ? "true" : "false") << ",\"policy_evaluated\":" << (evaluated ? "true" : "false")
+        << ",\"reasons\":[";
+    if (reasons) for (std::size_t i = 0; i < reasons->size(); ++i) { if (i) out << ","; out << esc(gate_reason_name((*reasons)[i])); }
+    out << "],\"dominant_need\":" << esc(d.dominant_need) << ",\"candidates\":[";
     for (std::size_t i = 0; i < d.candidates.size(); ++i) { if (i) out << ","; const auto& c = d.candidates[i]; out << "{\"action\":" << esc(to_string(c.action)) << ",\"target\":" << esc(c.target_object_id) << ",\"probability\":" << c.probability << ",\"eligible\":" << (c.eligible ? "true" : "false") << "}"; }
     out << "]}";
 }
 static void write_frame(std::ostream& out, const std::string& scenario, int time, int elapsed,
                         const World& w, const Observation& o, const CharacterState& s,
                         const RuntimeExecutionResult* result, const std::string& note = {},
-                        const DecisionContext* decision_override = nullptr) {
+                        const DecisionContext* decision_override = nullptr,
+                        const std::string& decision_mode = "sampled",
+                        const std::string& attempted_action = {}) {
     out << "{\"scenario\":" << esc(scenario) << ",\"timestamp\":" << time << ",\"elapsed_minutes\":" << elapsed
-        << ",\"policy_seed\":1128481367,\"world\":{\"time\":" << time << ",\"room\":" << esc(w.location)
+        << ",\"policy_seed\":" << (result ? result->policy_seed : RuntimeConfig::DefaultPolicySeed) << ",\"world\":{\"time\":" << time << ",\"room\":" << esc(w.location)
         << ",\"phone_usable\":" << (w.current_room().objects.front().usable ? "true" : "false")
         << ",\"task_status\":" << esc(w.tasks.front().status == TaskStatus::Completed ? "completed" : "active")
         << ",\"task_effort\":" << w.tasks.front().effort_done << "},\"observation\":{\"facts\":"; write_facts(out, o);
-    out << ",\"actor_phone_usable_belief\":" << (observation_knows_action(o, ActionType::UsePhone) ? "true" : "false")
+    out << ",\"use_phone_in_AO\":" << (observation_knows_action(o, ActionType::UsePhone) ? "true" : "false")
+        << ",\"action_constraints\":[";
+    for (std::size_t i = 0; i < o.action_constraints.size(); ++i) { if (i) out << ","; const auto& c = o.action_constraints[i]; out << "{\"action\":" << esc(to_string(c.action)) << ",\"target\":" << esc(c.target_object_id) << ",\"satisfied\":" << (c.satisfied ? "true" : "false") << "}"; }
+    out << "]"
         << "},\"state\":"; write_state(out, s); out << ",\"running_action_before\":";
     if (result) write_action(out, result->running_action_before); else out << "null";
     out << ",\"running_action_after\":"; if (result) write_action(out, result->running_action_after); else out << "null";
-    out << ",\"decision\":"; if (result) write_decision(out, result->decision); else if (decision_override) write_decision(out, *decision_override); else out << "{\"gate\":false,\"candidates\":[]}";
+    out << ",\"decision_mode\":" << esc(decision_mode) << ",\"attempted_action\":" << (attempted_action.empty() ? "null" : esc(attempted_action))
+        << ",\"decision\":"; if (result) write_decision(out, result->decision, result->runtime.boundary.decision_gate.open, result->policy_evaluated, &result->runtime.boundary.decision_gate.reasons); else if (decision_override) write_decision(out, *decision_override); else out << "{\"gate\":false,\"policy_evaluated\":false,\"candidates\":[]}";
     out << ",\"selected_action\":" << (result ? action_name(result->selected_action) : "null")
         << ",\"note\":" << esc(note) << "}\n";
 }
@@ -69,8 +80,9 @@ static bool run_deadline(std::ostream& out) {
     RuntimeScheduler scheduler(540); Observation o = refresh_observation({}, w, {}); ContinuousRuntime runtime(scheduler, w, o);
     CharacterState state; Personality p;
     if (!runtime.submit_action_intent(ActionType::StudyFocused, "desk", 60).accepted) return false;
-    out << "[\n"; auto first = runtime.execute_next_boundary(state, p); write_frame(out, "deadline", scheduler.now_total_minutes(), first.runtime.boundary.elapsed_minutes, w, o, state, &first, "deadline event enters during StudyFocused");
-    auto second = runtime.execute_next_boundary(state, p); out << ",\n"; write_frame(out, "deadline", scheduler.now_total_minutes(), second.runtime.boundary.elapsed_minutes, w, o, state, &second, "completion boundary"); out << "]\n"; return true;
+    out << "[\n"; bool first_frame = true;
+    for (int i = 0; i < 8; ++i) { auto step = runtime.execute_next_boundary(state, p); if (!first_frame) out << ",\n"; first_frame = false; write_frame(out, "deadline", scheduler.now_total_minutes(), step.runtime.boundary.elapsed_minutes, w, o, state, &step, "runtime boundary"); if (step.pre_policy_outcome && step.pre_policy_outcome->task_completed) break; }
+    out << "]\n"; return true;
 }
 static bool run_phone(std::ostream& out) {
     World w; w.time.minute_of_day = 540; Observation o = refresh_observation({}, w, {}); InformationAccess hidden; hidden.phone_presence_observable = false;
@@ -78,13 +90,14 @@ static bool run_phone(std::ostream& out) {
     RuntimeScheduler scheduler(540); ContinuousRuntime runtime(scheduler, w, o, hidden); CharacterState state; Personality p;
     out << "[\n"; DecisionContext d = decide(o, state, p); write_frame(out, "phone", 540, 0, w, o, state, nullptr, "W phone unusable; O retains stale usable affordance; policy candidate surface prepared", &d);
     if (runtime.submit_action_intent(ActionType::UsePhone, "phone", 10).accepted) return false;
-    auto tick = runtime.execute_next_boundary(state, p); out << ",\n"; write_frame(out, "phone", scheduler.now_total_minutes(), tick.runtime.boundary.elapsed_minutes, w, o, state, &tick, "W validation rejected UsePhone: TargetUnusable; typed feedback updates O"); out << "]\n"; (void)d; return true;
+    auto tick = runtime.execute_next_boundary(state, p); out << ",\n"; write_frame(out, "phone", scheduler.now_total_minutes(), tick.runtime.boundary.elapsed_minutes, w, o, state, &tick, "W validation rejected UsePhone: TargetUnusable; typed feedback updates O", nullptr, "scripted", "use_phone"); out << "]\n"; (void)d; return true;
 }
 static bool run_commitment(std::ostream& out) {
     World w; w.time.minute_of_day = 540; Observation o = refresh_observation({}, w, {}); RuntimeScheduler scheduler(540); ContinuousRuntime runtime(scheduler, w, o); CharacterState state; Personality p;
     out << "[\n"; if (!runtime.submit_action_intent(ActionType::StudyFocused, "desk", 1).accepted) return false; auto a = runtime.execute_next_boundary(state, p); write_frame(out, "commitment", scheduler.now_total_minutes(), a.runtime.boundary.elapsed_minutes, w, o, state, &a, "Study establishes commitment");
     out << ",\n"; World rw; rw.time.minute_of_day = scheduler.now_total_minutes(); Observation ro = refresh_observation({}, rw, {}); RuntimeScheduler rs(scheduler.now_total_minutes()); ContinuousRuntime rr(rs, rw, ro); state.commitment.status = CommitmentStatus::Active; state.commitment.task_id = "coursework"; rr.submit_action_intent(ActionType::RestAtBed, "bed", 1); auto b = rr.execute_next_boundary(state, p); write_frame(out, "commitment", rs.now_total_minutes(), b.runtime.boundary.elapsed_minutes, rw, ro, state, &b, "Rest suspends commitment");
-    out << ",\n"; write_frame(out, "commitment", rs.now_total_minutes(), 0, rw, ro, state, nullptr, "Resume and visible completion semantics are covered by runtime fixture"); out << "]\n"; return true;
+    out << ",\n"; World sw; sw.time.minute_of_day = 540; sw.tasks.front().effort_target = 100.0; Observation so = refresh_observation({}, sw, {}); RuntimeScheduler ss(540); ContinuousRuntime sr(ss, sw, so); sr.set_test_action_selector([](const DecisionContext&) { return ActionType::StudyFocused; }); state.commitment.status = CommitmentStatus::Suspended; state.commitment.task_id = "coursework"; sr.submit_action_intent(ActionType::StudyFocused, "desk", 1); auto c = sr.execute_next_boundary(state, p); write_frame(out, "commitment", ss.now_total_minutes(), c.runtime.boundary.elapsed_minutes, sw, so, state, &c, "Resume commitment");
+    out << ",\n"; World cw; cw.time.minute_of_day = 540; cw.tasks.front().effort_target = 0.01; Observation co = refresh_observation({}, cw, {}); RuntimeScheduler cs(540); ContinuousRuntime cr(cs, cw, co); cr.set_test_action_selector([](const DecisionContext&) { return ActionType::StudyFocused; }); state.commitment.status = CommitmentStatus::Active; state.commitment.task_id = "coursework"; cr.submit_action_intent(ActionType::StudyFocused, "desk", 1); auto d = cr.execute_next_boundary(state, p); write_frame(out, "commitment", cs.now_total_minutes(), d.runtime.boundary.elapsed_minutes, cw, co, state, &d, "Visible completion clears commitment"); out << "]\n"; return true;
 }
 
 int main(int argc, char** argv) {
