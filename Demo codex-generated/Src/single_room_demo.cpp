@@ -73,7 +73,7 @@ static void write_frame(std::ostream& out, const std::string& scenario, int time
         [](const ScheduledRuntimeEvent& e) { return e.rejection.has_value(); });
     const RuntimeRejection* rejection = nullptr;
     if (result) for (const auto& event : result->runtime.boundary.events) if (event.rejection) { rejection = &*event.rejection; break; }
-    out << "{\"scenario\":" << esc(scenario) << ",\"timestamp\":" << time << ",\"elapsed_minutes\":" << elapsed
+    out << "{\"scenario\":" << esc(scenario) << ",\"dynamics_model\":\"reference-rule-v0\",\"demo_only\":false,\"research_evidence\":false,\"timestamp\":" << time << ",\"elapsed_minutes\":" << elapsed
         << ",\"policy_seed\":" << (result ? result->policy_seed : RuntimeConfig::DefaultPolicySeed) << ",\"world\":{\"time\":" << time << ",\"room\":" << esc(w.location)
         << ",\"phone_usable\":" << (w.current_room().objects.front().usable ? "true" : "false")
         << ",\"task_status\":" << esc(w.tasks.front().status == TaskStatus::Completed ? "completed" : "active")
