@@ -56,8 +56,7 @@ DecisionContext decide(const Observation& observation,
                                   + (commitment_can_bias_study(observation, state) ? "permits return" : "defers return");
         break;
     }
-    const double boredom_activation = LivingDynamics::boredom_zone(state.boredom) == LivingDynamics::ActivationZone::Low
-        ? 0.0 : std::clamp((state.boredom - .25) / .75, 0.0, 1.0);
+    const double boredom_activation = LivingDynamics::boredom_stimulation_drive(state);
     const double distraction = config.distraction_weight * (boredom_activation * 0.65 + personality.procrastination * 0.25
                              + personality.stimulation_seeking * 0.20);
     const double overload = LivingDynamics::overload_risk(state, personality);
@@ -66,11 +65,11 @@ DecisionContext decide(const Observation& observation,
                             * (0.85 + 0.30 * LivingDynamics::anxiety_facilitation(state))
                             * (1.0 - 0.70 * overload - 0.35 * LivingDynamics::anxiety_impairment(state)));
     const double recovery_drive = config.recovery_drive_coefficient * (LivingDynamics::pressure_motivation(state) * 0.05
-                                + (state.fatigue >= .55 ? state.fatigue : state.fatigue * .20)
-                                + (state.screen_strain >= .55 ? state.screen_strain : state.screen_strain * .20)
+                                + LivingDynamics::fatigue_recovery_drive(state)
+                                + LivingDynamics::screen_aversion(state)
                                 + personality.rest_preference * 0.18 + overload * 0.08);
-    const double hunger_drive = std::max(0.0, (LivingDynamics::perceived_hunger(state, personality)-.25)/.75) * (0.85 + personality.need_response * 0.25);
-    const double bathroom_drive = std::max(0.0, (LivingDynamics::perceived_bathroom(state, personality)-.25)/.75) * (0.90 + personality.need_response * 0.20);
+    const double hunger_drive = LivingDynamics::hunger_drive(state, personality);
+    const double bathroom_drive = LivingDynamics::bathroom_drive(state, personality);
     // Above a moderate bodily-need level, leisure and task candidates lose
     // probability smoothly rather than relying on a hard scripted interrupt.
     const double urgent_threshold = 0.65 - 0.08 * personality.need_response;
@@ -104,7 +103,7 @@ DecisionContext decide(const Observation& observation,
         const double commitment_bonus = advances_committed_task ? 0.16 * config.commitment_bonus : 0.0;
         switch (action) {
         case ActionType::UsePhone:
-            decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * (0.18 + 0.24 * personality.screen_strain_sensitivity) - state.fatigue * 0.12
+            decision.candidates.push_back(candidate(action, 0.06 + distraction - LivingDynamics::screen_aversion(state) * (0.18 + 0.24 * personality.screen_strain_sensitivity) - state.fatigue * 0.12
                 - 0.34 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need + commitment_bonus, 0.12, "phone offers immediate stimulation but yields to urgent bodily needs"));
             break;
         case ActionType::ShopOnPhone:
@@ -115,7 +114,7 @@ DecisionContext decide(const Observation& observation,
             break;
         }
         case ActionType::UseComputer:
-            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * (0.16 + 0.22 * personality.screen_strain_sensitivity) - 0.80 * urgent_bodily_need + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
+            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - LivingDynamics::screen_aversion(state) * (0.16 + 0.22 * personality.screen_strain_sensitivity) - 0.80 * urgent_bodily_need + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
             break;
         case ActionType::StudyAtComputer:
             decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 * config.study_fatigue_penalty - personality.procrastination * 0.16 + commitment_bonus, 0.18, "computer can be used for task progress"));

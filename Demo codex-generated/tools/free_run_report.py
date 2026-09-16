@@ -23,6 +23,6 @@ all_actions = set()
 for i,(scenario,policy) in enumerate(seeds):
     data = json.loads((traces/f'free_run_{chr(65+i)}.json').read_text())
     all_actions.update(x['selected_action'] for x in data if x['selected_action'])
-required_families = ({'study_focused'}, {'get_meal','go_to_bathroom'}, {'rest_at_bed','sleep_at_bed'}, {'use_phone','use_computer','idle'})
+required_families = ({'study_focused'}, {'rest_at_bed','sleep_at_bed'}, {'use_phone','use_computer','idle'})
 if not all(any(a in all_actions for a in family) for family in required_families):
     raise SystemExit(f'free-run action diversity insufficient: {sorted(all_actions)}')

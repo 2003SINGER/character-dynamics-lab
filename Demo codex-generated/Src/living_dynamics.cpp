@@ -6,6 +6,7 @@
 
 namespace LivingDynamics {
 static double clamp(double x){return std::clamp(x,0.0,1.0);}
+static double smoothstep(double e0,double e1,double x){if(e1<=e0)return x>=e1?1.0:0.0; const double t=clamp((x-e0)/(e1-e0)); return t*t*(3.0-2.0*t);}
 double overload_risk(const CharacterState&,const Personality&);
 static ActivationZone five_zone(double v,double a,double b,double c,double d){if(v<a)return ActivationZone::Low;if(v<b)return ActivationZone::Normal;if(v<c)return ActivationZone::Activated;if(v<d)return ActivationZone::High;return ActivationZone::Extreme;}
 ActivationZone hunger_zone(double v){return five_zone(v,.25,.50,.70,.88);}
@@ -53,5 +54,22 @@ double bathroom_accumulation_rate(const CharacterState& s,const RunningAction* a
 }
 double need_discomfort(const CharacterState& s,const Personality& p){
     return clamp(.62*perceived_hunger(s,p)+.48*perceived_bathroom(s,p));
+}
+double hunger_drive(const CharacterState& s,const Personality& p){
+    const double h=perceived_hunger(s,p)-.04*p.need_response;
+    return clamp(.08*smoothstep(.25,.50,h)+.28*smoothstep(.50,.70,h)+.62*smoothstep(.70,.88,h)+.38*smoothstep(.88,1.0,h));
+}
+double bathroom_drive(const CharacterState& s,const Personality& p){
+    const double u=perceived_bathroom(s,p)-.04*p.need_response;
+    return clamp(.08*smoothstep(.25,.50,u)+.30*smoothstep(.50,.75,u)+.62*smoothstep(.75,.90,u)+.35*smoothstep(.90,1.0,u));
+}
+double fatigue_recovery_drive(const CharacterState& s){
+    return clamp(.05*smoothstep(.25,.55,s.fatigue)+.35*smoothstep(.55,.80,s.fatigue)+.60*smoothstep(.80,.92,s.fatigue));
+}
+double boredom_stimulation_drive(const CharacterState& s){
+    return clamp(.08*smoothstep(.25,.55,s.boredom)+.42*smoothstep(.55,.80,s.boredom)+.50*smoothstep(.80,.92,s.boredom));
+}
+double screen_aversion(const CharacterState& s){
+    return clamp(.10*smoothstep(.55,.80,s.screen_strain)+.90*smoothstep(.80,.98,s.screen_strain));
 }
 }
