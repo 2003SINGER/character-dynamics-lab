@@ -24,5 +24,7 @@ int main(){
         || LivingDynamics::satisfaction_zone(.10)!=LivingDynamics::ActivationZone::Low
         || LivingDynamics::screen_strain_zone(.90)!=LivingDynamics::ActivationZone::High
         || LivingDynamics::purchase_urge_zone(.90)!=LivingDynamics::ActivationZone::High) return 13;
+    Observation observation; s = CharacterState{}; s.boredom=.1; observation.last_self_action.has_action=true; observation.last_self_action.action=ActionType::UsePhone; observation.last_self_action.accepted=true; const double low_boredom=model.appraise(observation,s,p).boredom_delta; s.boredom=.9; const double high_boredom=model.appraise(observation,s,p).boredom_delta; if(!(high_boredom<low_boredom)) return 14;
+    s = CharacterState{}; s.purchase_urge=.8; observation.last_self_action.action=ActionType::ShopOnPhone; if(!(model.appraise(observation,s,p).purchase_urge_delta<0.0)) return 15;
     std::cout<<"living_dynamics_v1_coupling_smoke: PASS\n"; return 0;
 }
