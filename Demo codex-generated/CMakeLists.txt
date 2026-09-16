@@ -51,6 +51,13 @@ add_library(character_dynamics_reference_dynamics_v0 STATIC
     Src/simulation.cpp)
 target_link_libraries(character_dynamics_reference_dynamics_v0 PUBLIC character_dynamics_engine)
 target_include_directories(character_dynamics_reference_dynamics_v0 PUBLIC Inc)
+
+# Historical replay compatibility is an explicit legacy model adapter.  Keep
+# it out of the generic replay target's source list so new replay consumers do
+# not silently inherit ReferenceRuleDynamicsV0 semantics.
+add_library(character_dynamics_legacy_replay_v0 STATIC Src/reference_state.cpp)
+target_link_libraries(character_dynamics_legacy_replay_v0 PUBLIC character_dynamics_engine)
+target_include_directories(character_dynamics_legacy_replay_v0 PUBLIC Inc)
 add_library(character_dynamics_demo_living_v0 STATIC
     Src/appraisal.cpp Src/state.cpp Src/decision.cpp
     Src/living_dynamics.cpp Src/demo_living_dynamics_v0.cpp)
@@ -184,10 +191,10 @@ endforeach()
 
 add_executable(character_dynamics_replay_core
     Src/replay_core_cli.cpp
-    Src/reference_state.cpp
     Src/parameter_config.cpp
     Src/candidate_scoring.cpp
 )
+target_link_libraries(character_dynamics_replay_core PRIVATE character_dynamics_legacy_replay_v0)
 target_include_directories(character_dynamics_replay_core PRIVATE Inc)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(character_dynamics_replay_core PRIVATE -Wall -Wextra -Wpedantic)
@@ -200,3 +207,8 @@ if(MINGW)
 endif()
 add_test(NAME character_dynamics_replay_core_version
          COMMAND character_dynamics_replay_core --version)
+
+add_test(NAME research_dynamics_v1_unit
+         COMMAND ${Python3_EXECUTABLE} -m unittest discover
+                 -s "${CMAKE_CURRENT_SOURCE_DIR}/../02_实验/ResearchDynamicsV1"
+                 -p "test_*.py")

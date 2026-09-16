@@ -10,3 +10,7 @@ public:
     DecisionContext build_policy(const Observation&, const CharacterState&, const Personality&) const override;
     const char* identity() const override { return "reference-rule-v0"; }
 };
+
+// Explicit research-facing identity; the historical class name remains for
+// source parity and ABI compatibility.
+using LegacyReferenceRuleDynamicsV0 = ReferenceRuleDynamicsV0;

@@ -1,5 +1,7 @@
 # 实验路由
 
+当前研究对象入口：[ResearchDynamicsV1](ResearchDynamicsV1/README.md)。旧 `Theory_S_v2` 统一标记为 `ExpectedEffectEMAProxyV0` 历史 proxy；不得把它写成已验证角色动力学。
+
 本目录是实验路由索引，不宣布全项目当前阶段。Canonical layers are: `Replay/` for source-neutral records/features/baselines, `Theory_S_v2/` for the single Python trainable dynamics candidate, and `T14_T20/` for the frozen 1D historical development harness. New external training must compose these layers rather than copy Theory-S per dataset.
 
 Mechanism 表达力与候选集边界的独立工程验收见 [Mechanism Sanity v1](Mechanism_Sanity_v1/README.md) 与 [v1.2 trajectory sanity](Mechanism_Sanity_v1_2/README.md)。它们不启动正式 NLL/Experiment B，不读取或修改 T14/T20 的 strict-v2 protocol/validator/shards/status/results。

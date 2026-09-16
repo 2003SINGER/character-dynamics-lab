@@ -1,4 +1,7 @@
-# Theory-S v2: trainable dynamics candidate
+# ExpectedEffectEMAProxyV0 (historical display name: Theory-S v2)
+
+> Historical proxy identity. This module is not the current ResearchDynamicsV1
+> and must not be described as validated character dynamics.
 
 This is a gradient-formalization consolidation, not a new topology research
 question. It joins per-field state dynamics from the mechanism design,

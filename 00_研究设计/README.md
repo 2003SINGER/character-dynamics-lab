@@ -4,6 +4,8 @@
 
 ## 项目架构定位
 
+当前研究对象：`ResearchDynamicsV1`（未冻结候选）。旧 C++ `ReferenceRuleDynamicsV0` 统一称 `LegacyReferenceRuleDynamicsV0`，旧 Python `Theory-S_v2` 统一称 `ExpectedEffectEMAProxyV0` 历史 proxy。边界与证据分类见 [Pre-V1 validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md)。
+
 Shared Runtime Kernel 已工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Python `Theory-S_v2` 仍是当前 canonical research dynamics candidate；`DemoLivingDynamicsV0` 只属于 application/demo，可为了生活感调优且没有科研证据权。科研当前按实际状态保持 PAUSED；详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)。
 
 当前只维护按职责归属的活动文档；数量不是稳定契约。按内容归属维护，不再按“某天新对话／某个模型的新总结”新增并列总纲。

@@ -19,6 +19,7 @@ const ObservationFact* find_fact(const Observation& observation, const std::stri
 
 namespace {
 inline constexpr const char* kReplayCoreVersion = "replay-core-v0";
+inline constexpr const char* kLegacyModelId = "LegacyReferenceRuleDynamicsV0";
 
 std::vector<std::string> split_tab(const std::string& line) {
     std::vector<std::string> fields;
@@ -59,10 +60,13 @@ void append_signal(Appraisal& appraisal,
 
 int main(int argc, char* argv[]) {
     if (argc > 1 && std::string(argv[1]) == "--version") {
-        std::cout << kReplayCoreVersion << "|" << kReplayCandidateScorerVersion << '\n';
+        std::cout << kReplayCoreVersion << "|" << kReplayCandidateScorerVersion
+                  << "|model=" << kLegacyModelId << '\n';
         return 0;
     }
 
+    // Compatibility default is retained for historical scripts, but the
+    // model identity is explicit in the version contract and adapter target.
     Personality personality;
     CharacterState state;
     std::string active_trajectory;
