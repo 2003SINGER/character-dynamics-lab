@@ -37,4 +37,8 @@ ActivationZone bathroom_zone(double value);
 ActivationZone fatigue_zone(double value);
 ActivationZone pressure_zone(double value);
 ActivationZone anxiety_zone(double value);
+ActivationZone boredom_zone(double value);
+ActivationZone satisfaction_zone(double value);
+ActivationZone screen_strain_zone(double value);
+ActivationZone purchase_urge_zone(double value);
 }

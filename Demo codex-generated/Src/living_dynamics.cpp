@@ -12,6 +12,10 @@ ActivationZone bathroom_zone(double v){return five_zone(v,.25,.50,.75,.90);}
 ActivationZone fatigue_zone(double v){return five_zone(v,.25,.55,.80,.92);}
 ActivationZone pressure_zone(double v){return five_zone(v,.25,.55,.80,.92);}
 ActivationZone anxiety_zone(double v){return five_zone(v,.20,.45,.70,.88);}
+ActivationZone boredom_zone(double v){return five_zone(v,.25,.55,.80,.92);}
+ActivationZone satisfaction_zone(double v){return five_zone(v,.20,.50,.80,.92);}
+ActivationZone screen_strain_zone(double v){return five_zone(v,.25,.55,.80,.92);}
+ActivationZone purchase_urge_zone(double v){return five_zone(v,.25,.60,.85,.95);}
 double task_absorption(const CharacterState& s){return clamp(0.65*s.satisfaction + 0.35*(1.0-s.boredom));}
 double perceived_hunger(const CharacterState& s,const Personality& p){return clamp(s.hunger + 0.16*s.anxiety + 0.10*s.boredom - 0.14*task_absorption(s));}
 double perceived_bathroom(const CharacterState& s,const Personality& p){return clamp(s.bathroom_urge + 0.10*s.anxiety - 0.05*task_absorption(s));}

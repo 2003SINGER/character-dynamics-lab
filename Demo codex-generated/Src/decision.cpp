@@ -56,7 +56,9 @@ DecisionContext decide(const Observation& observation,
                                   + (commitment_can_bias_study(observation, state) ? "permits return" : "defers return");
         break;
     }
-    const double distraction = config.distraction_weight * (state.boredom * 0.65 + personality.procrastination * 0.25
+    const double boredom_activation = LivingDynamics::boredom_zone(state.boredom) == LivingDynamics::ActivationZone::Low
+        ? 0.0 : std::clamp((state.boredom - .25) / .75, 0.0, 1.0);
+    const double distraction = config.distraction_weight * (boredom_activation * 0.65 + personality.procrastination * 0.25
                              + personality.stimulation_seeking * 0.20);
     const double overload = LivingDynamics::overload_risk(state, personality);
     const double task_drive = config.task_drive_coefficient * (LivingDynamics::pressure_motivation(state)
@@ -105,8 +107,12 @@ DecisionContext decide(const Observation& observation,
                 - 0.34 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need + commitment_bonus, 0.12, "phone offers immediate stimulation but yields to urgent bodily needs"));
             break;
         case ActionType::ShopOnPhone:
-            decision.candidates.push_back(candidate(action, 0.03 + state.purchase_urge * 0.95 + distraction * 0.10 + commitment_bonus, 0.18, "phone supports online shopping when purchase urge activates"));
+        {
+            const double purchase_activation = LivingDynamics::purchase_urge_zone(state.purchase_urge) == LivingDynamics::ActivationZone::Low
+                ? 0.0 : std::clamp((state.purchase_urge - .25) / .75, 0.0, 1.0);
+            decision.candidates.push_back(candidate(action, 0.03 + purchase_activation * 0.95 + distraction * 0.10 + commitment_bonus, 0.18, "phone supports online shopping when purchase urge activates"));
             break;
+        }
         case ActionType::UseComputer:
             decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * 0.28 - 0.80 * urgent_bodily_need + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
             break;

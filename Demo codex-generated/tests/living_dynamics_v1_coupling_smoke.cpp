@@ -20,5 +20,9 @@ int main(){
         || LivingDynamics::hunger_zone(.95)!=LivingDynamics::ActivationZone::Extreme) return 11;
     if (LivingDynamics::fatigue_zone(.30)!=LivingDynamics::ActivationZone::Normal
         || LivingDynamics::anxiety_zone(.80)!=LivingDynamics::ActivationZone::High) return 12;
+    if (LivingDynamics::boredom_zone(.70)!=LivingDynamics::ActivationZone::Activated
+        || LivingDynamics::satisfaction_zone(.10)!=LivingDynamics::ActivationZone::Low
+        || LivingDynamics::screen_strain_zone(.90)!=LivingDynamics::ActivationZone::High
+        || LivingDynamics::purchase_urge_zone(.90)!=LivingDynamics::ActivationZone::High) return 13;
     std::cout<<"living_dynamics_v1_coupling_smoke: PASS\n"; return 0;
 }
