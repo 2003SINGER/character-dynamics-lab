@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(CharacterDynamicsReference LANGUAGES CXX)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 set(CHARACTER_DYNAMICS_GIT_REVISION "" CACHE STRING "Revision recorded in generated experiment provenance")
 find_package(Git QUIET)
@@ -115,6 +116,19 @@ add_executable(character_dynamics_runtime_case_smoke tests/runtime_case_smoke.cp
 target_link_libraries(character_dynamics_runtime_case_smoke PRIVATE character_dynamics_runtime)
 add_executable(character_dynamics_single_room_demo Src/single_room_demo.cpp)
 target_link_libraries(character_dynamics_single_room_demo PRIVATE character_dynamics_runtime)
+set(DEMO_TRACE_DIR "${CMAKE_CURRENT_BINARY_DIR}/single-room-traces")
+add_test(NAME single_room_demo_generate_deadline
+         COMMAND character_dynamics_single_room_demo --scenario deadline --output "${DEMO_TRACE_DIR}/deadline.json")
+add_test(NAME single_room_demo_generate_phone
+         COMMAND character_dynamics_single_room_demo --scenario phone --output "${DEMO_TRACE_DIR}/phone.json")
+add_test(NAME single_room_demo_generate_commitment
+         COMMAND character_dynamics_single_room_demo --scenario commitment --output "${DEMO_TRACE_DIR}/commitment.json")
+set_tests_properties(single_room_demo_generate_deadline single_room_demo_generate_phone single_room_demo_generate_commitment
+    PROPERTIES FIXTURES_SETUP single_room_demo_traces)
+add_test(NAME single_room_demo_semantic_validation
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tests/single_room_demo_validate.py"
+         "${DEMO_TRACE_DIR}/deadline.json" "${DEMO_TRACE_DIR}/phone.json" "${DEMO_TRACE_DIR}/commitment.json")
+set_tests_properties(single_room_demo_semantic_validation PROPERTIES FIXTURES_REQUIRED single_room_demo_traces)
 # Each matrix entry executes the smallest executable that owns that semantic
 # case; labels are no longer aliases for one monolithic smoke binary.
 foreach(gate_name IN ITEMS

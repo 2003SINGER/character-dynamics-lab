@@ -2,6 +2,7 @@
 #include "decision.h"
 
 #include <filesystem>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -57,6 +58,8 @@ static void write_frame(std::ostream& out, const std::string& scenario, int time
                         const DecisionContext* decision_override = nullptr,
                         const std::string& decision_mode = "sampled",
                         const std::string& attempted_action = {}) {
+    const bool boundary_rejected = result && std::any_of(result->runtime.boundary.events.begin(), result->runtime.boundary.events.end(),
+        [](const ScheduledRuntimeEvent& e) { return e.rejection.has_value(); });
     out << "{\"scenario\":" << esc(scenario) << ",\"timestamp\":" << time << ",\"elapsed_minutes\":" << elapsed
         << ",\"policy_seed\":" << (result ? result->policy_seed : RuntimeConfig::DefaultPolicySeed) << ",\"world\":{\"time\":" << time << ",\"room\":" << esc(w.location)
         << ",\"phone_usable\":" << (w.current_room().objects.front().usable ? "true" : "false")
@@ -72,16 +75,18 @@ static void write_frame(std::ostream& out, const std::string& scenario, int time
     out << ",\"decision_mode\":" << esc(decision_mode) << ",\"attempted_action\":" << (attempted_action.empty() ? "null" : esc(attempted_action))
         << ",\"decision\":"; if (result) write_decision(out, result->decision, result->runtime.boundary.decision_gate.open, result->policy_evaluated, &result->runtime.boundary.decision_gate.reasons); else if (decision_override) write_decision(out, *decision_override); else out << "{\"gate\":false,\"policy_evaluated\":false,\"candidates\":[]}";
     out << ",\"selected_action\":" << (result ? action_name(result->selected_action) : "null")
+        << ",\"validation\":{\"accepted\":" << ((!boundary_rejected && (!result || !result->pre_policy_outcome || result->pre_policy_outcome->accepted)) ? "true" : "false")
+        << ",\"rejection_reason\":" << (result && result->pre_policy_outcome && !result->pre_policy_outcome->accepted ? esc(std::to_string(static_cast<int>(result->pre_policy_outcome->failure_reason))) : "null") << "}"
         << ",\"note\":" << esc(note) << "}\n";
 }
 
 static bool run_deadline(std::ostream& out) {
-    World w; w.time.minute_of_day = 540; w.tasks.front().due_at_total_minutes = 565;
+    World w; w.time.minute_of_day = 540; w.tasks.front().due_at_total_minutes = 565; w.tasks.front().effort_target = 1.0;
     RuntimeScheduler scheduler(540); Observation o = refresh_observation({}, w, {}); ContinuousRuntime runtime(scheduler, w, o);
     CharacterState state; Personality p;
     if (!runtime.submit_action_intent(ActionType::StudyFocused, "desk", 60).accepted) return false;
     out << "[\n"; bool first_frame = true;
-    for (int i = 0; i < 8; ++i) { auto step = runtime.execute_next_boundary(state, p); if (!first_frame) out << ",\n"; first_frame = false; write_frame(out, "deadline", scheduler.now_total_minutes(), step.runtime.boundary.elapsed_minutes, w, o, state, &step, "runtime boundary"); if (step.pre_policy_outcome && step.pre_policy_outcome->task_completed) break; }
+    for (int i = 0; i < 30; ++i) { auto step = runtime.execute_next_boundary(state, p); if (!first_frame) out << ",\n"; first_frame = false; write_frame(out, "deadline", scheduler.now_total_minutes(), step.runtime.boundary.elapsed_minutes, w, o, state, &step, "runtime boundary"); if (step.pre_policy_outcome && step.pre_policy_outcome->task_completed) break; }
     out << "]\n"; return true;
 }
 static bool run_phone(std::ostream& out) {
@@ -97,7 +102,7 @@ static bool run_commitment(std::ostream& out) {
     out << "[\n"; if (!runtime.submit_action_intent(ActionType::StudyFocused, "desk", 1).accepted) return false; auto a = runtime.execute_next_boundary(state, p); write_frame(out, "commitment", scheduler.now_total_minutes(), a.runtime.boundary.elapsed_minutes, w, o, state, &a, "Study establishes commitment");
     out << ",\n"; World rw; rw.time.minute_of_day = scheduler.now_total_minutes(); Observation ro = refresh_observation({}, rw, {}); RuntimeScheduler rs(scheduler.now_total_minutes()); ContinuousRuntime rr(rs, rw, ro); state.commitment.status = CommitmentStatus::Active; state.commitment.task_id = "coursework"; rr.submit_action_intent(ActionType::RestAtBed, "bed", 1); auto b = rr.execute_next_boundary(state, p); write_frame(out, "commitment", rs.now_total_minutes(), b.runtime.boundary.elapsed_minutes, rw, ro, state, &b, "Rest suspends commitment");
     out << ",\n"; World sw; sw.time.minute_of_day = 540; sw.tasks.front().effort_target = 100.0; Observation so = refresh_observation({}, sw, {}); RuntimeScheduler ss(540); ContinuousRuntime sr(ss, sw, so); sr.set_test_action_selector([](const DecisionContext&) { return ActionType::StudyFocused; }); state.commitment.status = CommitmentStatus::Suspended; state.commitment.task_id = "coursework"; sr.submit_action_intent(ActionType::StudyFocused, "desk", 1); auto c = sr.execute_next_boundary(state, p); write_frame(out, "commitment", ss.now_total_minutes(), c.runtime.boundary.elapsed_minutes, sw, so, state, &c, "Resume commitment");
-    out << ",\n"; World cw; cw.time.minute_of_day = 540; cw.tasks.front().effort_target = 0.01; Observation co = refresh_observation({}, cw, {}); RuntimeScheduler cs(540); ContinuousRuntime cr(cs, cw, co); cr.set_test_action_selector([](const DecisionContext&) { return ActionType::StudyFocused; }); state.commitment.status = CommitmentStatus::Active; state.commitment.task_id = "coursework"; cr.submit_action_intent(ActionType::StudyFocused, "desk", 1); auto d = cr.execute_next_boundary(state, p); write_frame(out, "commitment", cs.now_total_minutes(), d.runtime.boundary.elapsed_minutes, cw, co, state, &d, "Visible completion clears commitment"); out << "]\n"; return true;
+    out << ",\n"; World cw; cw.time.minute_of_day = 540; cw.tasks.front().effort_target = 0.0; Observation co = refresh_observation({}, cw, {}); RuntimeScheduler cs(540); ContinuousRuntime cr(cs, cw, co); cr.set_test_action_selector([](const DecisionContext&) { return ActionType::StudyFocused; }); state.commitment.status = CommitmentStatus::Active; state.commitment.task_id = "coursework"; cr.submit_action_intent(ActionType::StudyFocused, "desk", 1); auto d = cr.execute_next_boundary(state, p); write_frame(out, "commitment", cs.now_total_minutes(), d.runtime.boundary.elapsed_minutes, cw, co, state, &d, "Visible completion clears commitment"); out << "]\n"; return true;
 }
 
 int main(int argc, char** argv) {
