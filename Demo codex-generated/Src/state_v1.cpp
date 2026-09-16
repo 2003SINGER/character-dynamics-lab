@@ -121,10 +121,11 @@ StateUpdate update_state(CharacterState& state,
     // Satisfaction and anxiety have a weak homeostatic return toward the
     // current context. This prevents repeated ordinary boundaries from
     // pinning affect at 0/1 while preserving stronger appraisal impulses.
-    if (LivingDynamics::need_discomfort(state, personality) < 0.35) {
-        delta.satisfaction += 0.006 * time_scale;
-        delta.anxiety -= 0.006 * state.anxiety * time_scale;
-    }
+    // Homeostasis returns affect toward a neutral setpoint instead of
+    // rewarding every comfortable boundary until satisfaction saturates.
+    const double discomfort = LivingDynamics::need_discomfort(state, personality);
+    delta.satisfaction += 0.006 * (0.50 - state.satisfaction) * time_scale;
+    delta.anxiety -= 0.006 * state.anxiety * time_scale;
 
     state.boredom = clamp_unit(state.boredom + delta.boredom);
     state.fatigue = clamp_unit(state.fatigue + delta.fatigue);
@@ -210,9 +211,10 @@ StateUpdate advance_continuous_state(CharacterState& state,
     state.bathroom_urge = clamp_unit(state.bathroom_urge + bathroom);
     // Bodily needs feed back into affect continuously; the effect grows with
     // the current state and personality rather than acting as a fixed penalty.
-    const double discomfort = LivingDynamics::need_discomfort(before, personality);
-    const double need_mood_cost = (0.018 * discomfort) * scale;
-    const double need_anxiety = (0.010 * discomfort)
+    const double discomfort_now = LivingDynamics::need_discomfort(before, personality);
+    const double activated_discomfort = std::max(0.0, (discomfort_now - 0.35) / 0.65);
+    const double need_mood_cost = (0.018 * activated_discomfort) * scale;
+    const double need_anxiety = (0.010 * activated_discomfort)
                               * personality.need_response * scale;
     state.satisfaction = clamp_unit(state.satisfaction - need_mood_cost);
     state.anxiety = clamp_unit(state.anxiety + need_anxiety);

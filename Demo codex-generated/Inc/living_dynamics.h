@@ -33,6 +33,10 @@ double bathroom_drive(const CharacterState& state, const Personality& personalit
 double fatigue_recovery_drive(const CharacterState& state);
 double boredom_stimulation_drive(const CharacterState& state);
 double screen_aversion(const CharacterState& state);
+double task_engagement_drive(const CharacterState& state, const Personality& personality);
+double recovery_drive(const CharacterState& state, const Personality& personality);
+double distraction_drive(const CharacterState& state, const Personality& personality);
+double goal_reward_support(const CharacterState& state);
 double pressure_motivation(const CharacterState& state);
 double anxiety_facilitation(const CharacterState& state);
 double anxiety_impairment(const CharacterState& state);

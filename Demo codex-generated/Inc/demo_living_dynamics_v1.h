@@ -11,7 +11,3 @@ public:
     DecisionContext build_policy(const Observation&, const CharacterState&, const Personality&) const override;
     const char* identity() const override { return "demo-living-v1"; }
 };
-
-// Temporary source-compatible spelling for the existing demo executable; the
-// linked implementation and emitted identity are V1.
-using DemoLivingDynamicsV0 = DemoLivingDynamicsV1;

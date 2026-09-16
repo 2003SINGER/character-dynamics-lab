@@ -56,11 +56,14 @@ double need_discomfort(const CharacterState& s,const Personality& p){
     return clamp(.62*perceived_hunger(s,p)+.48*perceived_bathroom(s,p));
 }
 double hunger_drive(const CharacterState& s,const Personality& p){
-    const double h=perceived_hunger(s,p)-.04*p.need_response;
+    // High need-response shifts awareness earlier by moving the effective
+    // input upward; this is consistent with the lower urgent threshold in
+    // policy rather than reversing direction at the response layer.
+    const double h=perceived_hunger(s,p)+.04*p.need_response;
     return clamp(.08*smoothstep(.25,.50,h)+.28*smoothstep(.50,.70,h)+.62*smoothstep(.70,.88,h)+.38*smoothstep(.88,1.0,h));
 }
 double bathroom_drive(const CharacterState& s,const Personality& p){
-    const double u=perceived_bathroom(s,p)-.04*p.need_response;
+    const double u=perceived_bathroom(s,p)+.04*p.need_response;
     return clamp(.08*smoothstep(.25,.50,u)+.30*smoothstep(.50,.75,u)+.62*smoothstep(.75,.90,u)+.35*smoothstep(.90,1.0,u));
 }
 double fatigue_recovery_drive(const CharacterState& s){
@@ -72,4 +75,21 @@ double boredom_stimulation_drive(const CharacterState& s){
 double screen_aversion(const CharacterState& s){
     return clamp(.10*smoothstep(.55,.80,s.screen_strain)+.90*smoothstep(.80,.98,s.screen_strain));
 }
+double task_engagement_drive(const CharacterState& s,const Personality& p){
+    const double urgency=pressure_motivation(s);
+    const double facilitation=anxiety_facilitation(s);
+    const double impairment=anxiety_impairment(s);
+    return clamp(urgency*(.72+.28*p.self_control)*(.88+.18*facilitation)
+                 *(1.0-.70*overload_risk(s,p)-.30*impairment));
+}
+double recovery_drive(const CharacterState& s,const Personality& p){
+    return clamp(.04*pressure_motivation(s)+fatigue_recovery_drive(s)
+                 +screen_aversion(s)+.18*p.rest_preference+.08*overload_risk(s,p));
+}
+double distraction_drive(const CharacterState& s,const Personality& p){
+    return clamp(.65*boredom_stimulation_drive(s)
+                 +.16*smoothstep(.35,.75,s.boredom)*p.procrastination
+                 +.14*smoothstep(.35,.75,s.boredom)*p.stimulation_seeking);
+}
+double goal_reward_support(const CharacterState& s){ return smoothstep(.25,.75,s.satisfaction); }
 }

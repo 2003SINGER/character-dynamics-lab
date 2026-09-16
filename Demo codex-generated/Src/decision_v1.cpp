@@ -56,18 +56,10 @@ DecisionContext decide(const Observation& observation,
                                   + (commitment_can_bias_study(observation, state) ? "permits return" : "defers return");
         break;
     }
-    const double boredom_activation = LivingDynamics::boredom_stimulation_drive(state);
-    const double distraction = config.distraction_weight * (boredom_activation * 0.65 + personality.procrastination * 0.25
-                             + personality.stimulation_seeking * 0.20);
+    const double distraction = config.distraction_weight * LivingDynamics::distraction_drive(state, personality);
     const double overload = LivingDynamics::overload_risk(state, personality);
-    const double task_drive = config.task_drive_coefficient * (LivingDynamics::pressure_motivation(state)
-                            * (0.70 + personality.self_control * 0.80)
-                            * (0.85 + 0.30 * LivingDynamics::anxiety_facilitation(state))
-                            * (1.0 - 0.70 * overload - 0.35 * LivingDynamics::anxiety_impairment(state)));
-    const double recovery_drive = config.recovery_drive_coefficient * (LivingDynamics::pressure_motivation(state) * 0.05
-                                + LivingDynamics::fatigue_recovery_drive(state)
-                                + LivingDynamics::screen_aversion(state)
-                                + personality.rest_preference * 0.18 + overload * 0.08);
+    const double task_drive = config.task_drive_coefficient * LivingDynamics::task_engagement_drive(state, personality);
+    const double recovery_drive = config.recovery_drive_coefficient * LivingDynamics::recovery_drive(state, personality);
     const double hunger_drive = LivingDynamics::hunger_drive(state, personality);
     const double bathroom_drive = LivingDynamics::bathroom_drive(state, personality);
     // Above a moderate bodily-need level, leisure and task candidates lose
@@ -121,7 +113,7 @@ DecisionContext decide(const Observation& observation,
             break;
         case ActionType::StudyFocused:
             decision.candidates.push_back(candidate(action,
-                0.05 + task_drive + state.satisfaction * 0.10
+                0.05 + task_drive + LivingDynamics::goal_reward_support(state) * 0.10
                 - state.fatigue * 0.25 * config.study_fatigue_penalty
                 - 0.38 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need - personality.procrastination * 0.18
                 + commitment_bonus,
