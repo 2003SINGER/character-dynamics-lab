@@ -73,30 +73,28 @@ StateUpdate update_state(CharacterState& state,
     delta.elapsed_minutes = elapsed_minutes;
     const double time_scale = static_cast<double>(elapsed_minutes) / 30.0;
 
-    delta.boredom = appraisal.boredom_delta
-                  + update.semantic_contribution.boredom
-                  + 0.01 * time_scale;
+    delta.boredom = appraisal.boredom_delta + update.semantic_contribution.boredom;
     delta.fatigue = appraisal.fatigue_delta
                   + update.semantic_contribution.fatigue
-                  + 0.012 * time_scale;
+                  ;
     delta.task_pressure = (appraisal.task_pressure_delta
                         + update.semantic_contribution.task_pressure)
                         * config.task_pressure_coupling;
     delta.satisfaction = appraisal.satisfaction_delta
                        + update.semantic_contribution.satisfaction
-                       - 0.01 * time_scale;
+                       ;
     delta.hunger = appraisal.hunger_delta
                  + update.semantic_contribution.hunger
-                 + 0.025 * time_scale;
+                 ;
     delta.bathroom_urge = appraisal.bathroom_urge_delta
                         + update.semantic_contribution.bathroom_urge
-                        + 0.020 * time_scale;
+                        ;
     delta.screen_strain = appraisal.screen_strain_delta
                         + update.semantic_contribution.screen_strain
-                        - 0.030 * time_scale;
+                       ;
     delta.purchase_urge = appraisal.purchase_urge_delta
                         + update.semantic_contribution.purchase_urge
-                        - 0.018 * time_scale;
+                        ;
     delta.anxiety = appraisal.anxiety_delta
                   + update.semantic_contribution.anxiety
                   + std::max(0.0, state.task_pressure - 0.55)

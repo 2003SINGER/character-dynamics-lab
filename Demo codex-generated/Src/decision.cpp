@@ -58,13 +58,17 @@ DecisionContext decide(const Observation& observation,
     }
     const double distraction = config.distraction_weight * (state.boredom * 0.65 + personality.procrastination * 0.25
                              + personality.stimulation_seeking * 0.20);
-    const double overload = LivingDynamics::overload(state, personality);
-    const double task_drive = config.task_drive_coefficient * (state.task_pressure * (0.70 + personality.self_control * 0.80)
-                            + state.anxiety * 0.20) * (1.0 - 0.45 * overload);
-    const double recovery_drive = config.recovery_drive_coefficient * (state.fatigue * 0.75 + state.screen_strain * 0.50
-                                + personality.rest_preference * 0.18);
-    const double hunger_drive = LivingDynamics::perceived_hunger(state, personality) * (0.85 + personality.need_response * 0.25);
-    const double bathroom_drive = LivingDynamics::perceived_bathroom(state, personality) * (0.90 + personality.need_response * 0.20);
+    const double overload = LivingDynamics::overload_risk(state, personality);
+    const double task_drive = config.task_drive_coefficient * (LivingDynamics::pressure_motivation(state)
+                            * (0.70 + personality.self_control * 0.80)
+                            * (0.85 + 0.30 * LivingDynamics::anxiety_facilitation(state))
+                            * (1.0 - 0.70 * overload - 0.35 * LivingDynamics::anxiety_impairment(state)));
+    const double recovery_drive = config.recovery_drive_coefficient * (LivingDynamics::pressure_motivation(state) * 0.05
+                                + (state.fatigue >= .55 ? state.fatigue : state.fatigue * .20)
+                                + (state.screen_strain >= .55 ? state.screen_strain : state.screen_strain * .20)
+                                + personality.rest_preference * 0.18 + overload * 0.08);
+    const double hunger_drive = std::max(0.0, (LivingDynamics::perceived_hunger(state, personality)-.25)/.75) * (0.85 + personality.need_response * 0.25);
+    const double bathroom_drive = std::max(0.0, (LivingDynamics::perceived_bathroom(state, personality)-.25)/.75) * (0.90 + personality.need_response * 0.20);
     // Above a moderate bodily-need level, leisure and task candidates lose
     // probability smoothly rather than relying on a hard scripted interrupt.
     const double urgent_bodily_need = std::max(0.0, std::max(hunger_drive, bathroom_drive) - 0.65);
@@ -284,4 +288,3 @@ std::string decision_summary(const DecisionContext& decision) {
 }
 
 }
-
