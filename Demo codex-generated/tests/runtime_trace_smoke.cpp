@@ -1,4 +1,5 @@
 #include "continuous_runtime.h"
+#include "reference_rule_dynamics_v0.h"
 
 #include <iostream>
 
@@ -14,7 +15,8 @@ int main() {
     world.time.minute_of_day = 9 * 60 + 20;
     RuntimeScheduler scheduler(9 * 60 + 20);
     Observation observation = refresh_observation({}, world, {});
-    ContinuousRuntime runtime(scheduler, world, observation, {}, 12345U);
+    ReferenceRuleDynamicsV0 dynamics;
+    ContinuousRuntime runtime(scheduler, world, observation, dynamics, {}, 12345U);
     if (!runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 1;
     CharacterState state;
     Personality personality;

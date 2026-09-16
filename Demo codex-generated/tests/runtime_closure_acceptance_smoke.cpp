@@ -1,4 +1,5 @@
 #include "continuous_runtime.h"
+#include "reference_rule_dynamics_v0.h"
 #include "observation.h"
 #include "state.h"
 
@@ -23,7 +24,8 @@ int main() {
     // C1/E2: rejected intent is typed and reaches actor-local constraint belief.
     Observation observation = refresh_observation({}, world, {});
     world.time.minute_of_day = 9 * 60 + 25;
-    ContinuousRuntime runtime(scheduler, world, observation);
+    ReferenceRuleDynamicsV0 dynamics;
+    ContinuousRuntime runtime(scheduler, world, observation, dynamics);
     world.wallet = 0;
     const WorldOutcome rejected = runtime.submit_action_intent(ActionType::ShopOnPhone, "phone", 10);
     if (rejected.accepted || rejected.failure_reason != RejectionReason::ResourceInsufficient
@@ -84,7 +86,7 @@ int main() {
     invalid_world.time.minute_of_day = 9 * 60;
     RuntimeScheduler invalid_scheduler(9 * 60);
     Observation invalid_observation = refresh_observation({}, invalid_world, {});
-    ContinuousRuntime invalid_runtime(invalid_scheduler, invalid_world, invalid_observation);
+    ContinuousRuntime invalid_runtime(invalid_scheduler, invalid_world, invalid_observation, dynamics);
     if (!invalid_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 11;
     invalid_runtime.invalidate_running_action();
     CharacterState invalid_state;
@@ -97,7 +99,7 @@ int main() {
     threshold_world.time.minute_of_day = 1;
     RuntimeScheduler threshold_scheduler(1, 60);
     Observation threshold_observation = refresh_observation({}, threshold_world, {});
-    ContinuousRuntime threshold_runtime(threshold_scheduler, threshold_world, threshold_observation);
+    ContinuousRuntime threshold_runtime(threshold_scheduler, threshold_world, threshold_observation, dynamics);
     if (!threshold_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 13;
     CharacterState threshold_state;
     threshold_state.hunger = 0.35;
@@ -126,7 +128,7 @@ int main() {
     replace_world.time.minute_of_day = 1;
     RuntimeScheduler replace_scheduler(1, 60);
     Observation replace_observation = refresh_observation({}, replace_world, {});
-    ContinuousRuntime replace_runtime(replace_scheduler, replace_world, replace_observation);
+    ContinuousRuntime replace_runtime(replace_scheduler, replace_world, replace_observation, dynamics);
     if (!replace_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 17;
     replace_runtime.set_test_action_selector([](const DecisionContext&) { return ActionType::RestAtBed; });
     CharacterState replace_state;
@@ -167,7 +169,7 @@ int main() {
     RuntimeScheduler rejected_replace_scheduler(1, 60);
     Observation rejected_replace_observation = refresh_observation({}, rejected_replace_world, {});
     ContinuousRuntime rejected_replace_runtime(rejected_replace_scheduler, rejected_replace_world,
-                                                rejected_replace_observation);
+                                                rejected_replace_observation, dynamics);
     if (!rejected_replace_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 19;
     rejected_replace_runtime.set_test_action_selector([](const DecisionContext&) { return ActionType::ShopOnPhone; });
     CharacterState rejected_replace_state;
@@ -204,7 +206,7 @@ int main() {
     completion_world.tasks.front().effort_target = 0.01;
     RuntimeScheduler completion_scheduler(9 * 60 + 20);
     Observation completion_observation = refresh_observation({}, completion_world, {});
-    ContinuousRuntime completion_runtime(completion_scheduler, completion_world, completion_observation);
+    ContinuousRuntime completion_runtime(completion_scheduler, completion_world, completion_observation, dynamics);
     if (!completion_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 15;
     CharacterState completion_state;
     int completion_outcomes = 0;

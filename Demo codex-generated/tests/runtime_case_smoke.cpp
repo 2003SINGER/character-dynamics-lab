@@ -1,11 +1,13 @@
 #include "continuous_runtime.h"
+#include "reference_rule_dynamics_v0.h"
 #include <algorithm>
 #include <iostream>
 
 static bool has_tag(const Appraisal& a, const char* t) { return std::find(a.tags.begin(), a.tags.end(), t) != a.tags.end(); }
 static int case_run(const std::string& name) {
     Personality p; World w; w.time.minute_of_day = 0; Observation o = refresh_observation({}, w, {}); RuntimeScheduler s(0);
-    ContinuousRuntime r(s, w, o);
+    ReferenceRuleDynamicsV0 dynamics;
+    ContinuousRuntime r(s, w, o, dynamics);
     if (name == "runtime_clock_authority_smoke") {
         if (!r.submit_action_intent(ActionType::StudyFocused, "desk", 10).accepted) return 1;
         CharacterState st; auto x = r.execute_next_boundary(st, p); return x.runtime.boundary.elapsed_minutes > 0 ? 0 : 1;

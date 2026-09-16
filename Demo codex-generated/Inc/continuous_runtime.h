@@ -7,6 +7,7 @@
 #include "decision.h"
 #include "state.h"
 #include "runtime_config.h"
+#include "character_dynamics_model.h"
 #include <random>
 #include <functional>
 
@@ -42,7 +43,8 @@ struct RuntimeExecutionResult {
 class ContinuousRuntime {
 public:
     ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation,
-                      InformationAccess access = {}, unsigned int policy_seed = RuntimeConfig::DefaultPolicySeed);
+                      CharacterDynamicsModel& model, InformationAccess access = {},
+                      unsigned int policy_seed = RuntimeConfig::DefaultPolicySeed);
     bool schedule_next_world_boundary();
     WorldOutcome submit_action_intent(ActionType action, const std::string& target_object_id,
                                       int duration_minutes, bool interruptible = true);
@@ -58,6 +60,7 @@ private:
     RuntimeScheduler& scheduler_;
     WorldRuntimeAdapter world_runtime_;
     Observation& observation_;
+    CharacterDynamicsModel& model_;
     InformationAccess access_;
     std::mt19937 rng_;
     unsigned int policy_seed_ = 0;

@@ -1,4 +1,5 @@
 #include "continuous_runtime.h"
+#include "reference_rule_dynamics_v0.h"
 #include "decision.h"
 
 #include <filesystem>
@@ -103,7 +104,7 @@ static void write_frame(std::ostream& out, const std::string& scenario, int time
 
 static bool run_deadline(std::ostream& out) {
     World w; w.time.minute_of_day = 540; w.tasks.front().due_at_total_minutes = 565; w.tasks.front().effort_target = 1.0;
-    RuntimeScheduler scheduler(540); Observation o = refresh_observation({}, w, {}); ContinuousRuntime runtime(scheduler, w, o);
+    RuntimeScheduler scheduler(540); Observation o = refresh_observation({}, w, {}); ReferenceRuleDynamicsV0 dynamics; ContinuousRuntime runtime(scheduler, w, o, dynamics);
     CharacterState state; Personality p;
     if (!runtime.submit_action_intent(ActionType::StudyFocused, "desk", 60).accepted) return false;
     out << "[\n"; bool first_frame = true;
@@ -113,14 +114,14 @@ static bool run_deadline(std::ostream& out) {
 static bool run_phone(std::ostream& out) {
     World w; w.time.minute_of_day = 540; Observation o = refresh_observation({}, w, {}); InformationAccess hidden; hidden.phone_presence_observable = false;
     w.current_room().objects.front().usable = false; o = refresh_observation(o, w, {}, hidden);
-    RuntimeScheduler scheduler(540); ContinuousRuntime runtime(scheduler, w, o, hidden); CharacterState state; Personality p;
+    RuntimeScheduler scheduler(540); ReferenceRuleDynamicsV0 dynamics; ContinuousRuntime runtime(scheduler, w, o, dynamics, hidden); CharacterState state; Personality p;
     out << "[\n"; DecisionContext d = decide(o, state, p); write_frame(out, "phone", 540, 0, w, o, state, nullptr, "W phone unusable; O retains stale usable affordance; policy candidate surface prepared", &d);
     if (runtime.submit_action_intent(ActionType::UsePhone, "phone", 10).accepted) return false;
     auto tick = runtime.execute_next_boundary(state, p); out << ",\n"; write_frame(out, "phone", scheduler.now_total_minutes(), tick.runtime.boundary.elapsed_minutes, w, o, state, &tick, "W validation rejected UsePhone: TargetUnusable; typed feedback updates O", nullptr, "scripted", "use_phone"); out << "]\n"; (void)d; return true;
 }
 static bool run_commitment(std::ostream& out) {
     World w; w.time.minute_of_day = 540; w.tasks.front().effort_target = 2.0;
-    Observation o = refresh_observation({}, w, {}); RuntimeScheduler scheduler(540); ContinuousRuntime runtime(scheduler, w, o);
+    Observation o = refresh_observation({}, w, {}); RuntimeScheduler scheduler(540); ReferenceRuleDynamicsV0 dynamics; ContinuousRuntime runtime(scheduler, w, o, dynamics);
     CharacterState state; Personality p; int phase = 0;
     runtime.set_test_action_selector([&phase](const DecisionContext&) {
         return phase == 0 ? ActionType::RestAtBed : ActionType::StudyFocused;

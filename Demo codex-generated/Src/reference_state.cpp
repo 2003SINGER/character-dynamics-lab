@@ -1,7 +1,6 @@
 #include "state.h"
 
 #include "runtime_scheduler.h"
-#include "living_dynamics.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -60,7 +59,6 @@ StateDelta semantic_delta(const Appraisal& appraisal,
 }
 } // namespace
 
-namespace DemoLivingV0 {
 StateUpdate update_state(CharacterState& state,
                           const Appraisal& appraisal,
                           const Personality& personality,
@@ -100,8 +98,7 @@ StateUpdate update_state(CharacterState& state,
     delta.anxiety = appraisal.anxiety_delta
                   + update.semantic_contribution.anxiety
                   + std::max(0.0, state.task_pressure - 0.55)
-                    * 0.035 * time_scale * personality.task_anxiety_sensitivity
-                  - 0.018 * state.anxiety * time_scale;
+                    * 0.08 * time_scale * personality.task_anxiety_sensitivity;
 
     const double raw_task_pressure_delta = delta.task_pressure;
     if (raw_task_pressure_delta > 0.0) {
@@ -118,13 +115,6 @@ StateUpdate update_state(CharacterState& state,
     }
     if (delta.hunger < 0.0 || delta.bathroom_urge < 0.0) {
         delta.satisfaction += 0.04 * personality.need_response;
-    }
-    // Satisfaction and anxiety have a weak homeostatic return toward the
-    // current context. This prevents repeated ordinary boundaries from
-    // pinning affect at 0/1 while preserving stronger appraisal impulses.
-    if (LivingDynamics::need_discomfort(state, personality) < 0.35) {
-        delta.satisfaction += 0.006 * time_scale;
-        delta.anxiety -= 0.006 * state.anxiety * time_scale;
     }
 
     state.boredom = clamp_unit(state.boredom + delta.boredom);
@@ -158,7 +148,7 @@ StateUpdate advance_continuous_state(CharacterState& state,
     // Keep baseline wall-clock drift in the established updater, but isolate
     // it from all event/appraisal deltas. Running-action rates are explicitly
     // a v1 engineering adapter, not a claim about psychological parameters.
-    StateUpdate update = DemoLivingV0::update_state(state, Appraisal{}, personality, elapsed_minutes, config);
+    StateUpdate update = update_state(state, Appraisal{}, personality, elapsed_minutes, config);
     if (running_action == nullptr || elapsed_minutes == 0) return update;
 
     const CharacterState before = state;
@@ -191,31 +181,12 @@ StateUpdate advance_continuous_state(CharacterState& state,
     }
     state.fatigue = clamp_unit(state.fatigue + action_delta.fatigue);
     state.screen_strain = clamp_unit(state.screen_strain + action_delta.screen_strain);
-    const double metabolism = LivingDynamics::metabolism_rate(state, running_action) * scale;
-    const double bathroom = LivingDynamics::bathroom_accumulation_rate(state, running_action) * scale;
-    const bool recovery = running_action->action == ActionType::RestAtBed || running_action->action == ActionType::SleepAtBed;
-    state.hunger = clamp_unit(state.hunger + metabolism * (recovery ? 0.7 : 1.0));
-    state.bathroom_urge = clamp_unit(state.bathroom_urge + bathroom);
-    // Bodily needs feed back into affect continuously; the effect grows with
-    // the current state and personality rather than acting as a fixed penalty.
-    const double discomfort = LivingDynamics::need_discomfort(before, personality);
-    const double need_mood_cost = (0.010 + 0.018 * discomfort) * scale;
-    const double need_anxiety = (0.004 + 0.010 * discomfort)
-                              * personality.need_response * scale;
-    state.satisfaction = clamp_unit(state.satisfaction - need_mood_cost);
-    state.anxiety = clamp_unit(state.anxiety + need_anxiety);
-    action_delta.satisfaction -= need_mood_cost;
-    action_delta.anxiety += need_anxiety;
     action_delta.fatigue = state.fatigue - before.fatigue;
     action_delta.screen_strain = state.screen_strain - before.screen_strain;
     update.requested.fatigue += action_delta.fatigue;
     update.requested.screen_strain += action_delta.screen_strain;
     update.applied.fatigue += action_delta.fatigue;
     update.applied.screen_strain += action_delta.screen_strain;
-    update.requested.satisfaction += action_delta.satisfaction;
-    update.requested.anxiety += action_delta.anxiety;
-    update.applied.satisfaction += action_delta.satisfaction;
-    update.applied.anxiety += action_delta.anxiety;
     return update;
 }
 
@@ -223,7 +194,7 @@ StateUpdate apply_appraisal_impulse(CharacterState& state,
                                     const Appraisal& appraisal,
                                     const Personality& personality,
                                     const ParameterConfig& config) {
-    return DemoLivingV0::update_state(state, appraisal, personality, 0, config);
+    return update_state(state, appraisal, personality, 0, config);
 }
 
 std::string state_summary(const CharacterState& state) {
@@ -268,9 +239,8 @@ std::string state_delta_summary(const StateDelta& delta) {
 }
 
 std::string state_update_summary(const StateUpdate& update) {
-    return "StateUpdate{semantic_U=" + DemoLivingV0::state_delta_summary(update.semantic_contribution)
-         + ", requested=" + DemoLivingV0::state_delta_summary(update.requested)
-         + ", applied=" + DemoLivingV0::state_delta_summary(update.applied) + '}';
+    return "StateUpdate{semantic_U=" + state_delta_summary(update.semantic_contribution)
+         + ", requested=" + state_delta_summary(update.requested)
+         + ", applied=" + state_delta_summary(update.applied) + '}';
 }
 
-}

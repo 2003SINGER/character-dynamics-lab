@@ -2,7 +2,6 @@
 
 #include "personality.h"
 #include "state.h"
-#include "living_dynamics.h"
 
 #include <sstream>
 #include <cstdlib>
@@ -19,7 +18,6 @@ bool parse_int_fact(const Observation& observation, const std::string& key, int&
 }
 }
 
-namespace DemoLivingV0 {
 Appraisal appraise(const Observation& observation,
                    const CharacterState& old_state,
                    const Personality& personality) {
@@ -81,7 +79,7 @@ Appraisal appraise(const Observation& observation,
             break;
         case ActionType::RestAtBed:
             appraisal.boredom_delta = 0.04;
-            appraisal.fatigue_delta = -0.06 * LivingDynamics::rest_recovery_efficiency(old_state);
+            appraisal.fatigue_delta = -0.32;
             appraisal.screen_strain_delta = -0.14;
             appraisal.task_pressure_delta = coursework_pending ? 0.03 : 0.0;
             appraisal.satisfaction_delta = 0.05;
@@ -91,7 +89,7 @@ Appraisal appraise(const Observation& observation,
             break;
         case ActionType::SleepAtBed:
             appraisal.boredom_delta = -0.08;
-            appraisal.fatigue_delta = -0.10 * LivingDynamics::rest_recovery_efficiency(old_state);
+            appraisal.fatigue_delta = -0.58;
             appraisal.screen_strain_delta = -0.30;
             appraisal.task_pressure_delta = coursework_pending ? 0.06 : 0.0;
             appraisal.satisfaction_delta = 0.08;
@@ -101,13 +99,13 @@ Appraisal appraise(const Observation& observation,
             break;
         case ActionType::GoToBathroom:
             appraisal.satisfaction_delta = 0.07;
-            appraisal.bathroom_urge_delta = -LivingDynamics::bathroom_relief(old_state);
+            appraisal.bathroom_urge_delta = -0.62;
             appraisal.tags = {"bodily_need_resolved", "brief_room_exit"};
             break;
         case ActionType::GetMeal:
             appraisal.boredom_delta = -0.04;
-            appraisal.satisfaction_delta = LivingDynamics::meal_satisfaction_gain(old_state, personality);
-            appraisal.hunger_delta = -LivingDynamics::meal_hunger_relief(old_state);
+            appraisal.satisfaction_delta = 0.11;
+            appraisal.hunger_delta = -0.55;
             appraisal.tags = {"hunger_resolved", "brief_room_exit"};
             break;
         case ActionType::TurnLightOn:
@@ -246,7 +244,4 @@ const char* appraisal_signal_name(AppraisalSignalKind kind) {
     }
     return "unknown";
 }
-
-}
-
 

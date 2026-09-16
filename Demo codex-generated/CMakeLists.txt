@@ -21,7 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
+set(CHARACTER_DYNAMICS_ENGINE_SOURCES
     Src/action.cpp
     Src/simulation_time.cpp
     Src/object.cpp
@@ -32,25 +32,32 @@ set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
     Src/world_runtime_adapter.cpp
     Src/continuous_runtime.cpp
     Src/observation.cpp
-    Src/appraisal.cpp
-    Src/state.cpp
-    Src/living_dynamics.cpp
-    Src/parameter_config.cpp
-    Src/candidate_scoring.cpp
-    Src/decision.cpp
-    Src/simulation.cpp
     Src/runtime_scheduler.cpp
 )
 
-add_library(character_dynamics_runtime STATIC ${CHARACTER_DYNAMICS_RUNTIME_SOURCES})
-target_include_directories(character_dynamics_runtime PUBLIC Inc)
-target_compile_definitions(character_dynamics_runtime PUBLIC
+add_library(character_dynamics_engine STATIC ${CHARACTER_DYNAMICS_ENGINE_SOURCES})
+target_include_directories(character_dynamics_engine PUBLIC Inc)
+target_compile_definitions(character_dynamics_engine PUBLIC
     CHARACTER_DYNAMICS_GIT_REVISION="${CHARACTER_DYNAMICS_GIT_REVISION}")
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(character_dynamics_runtime PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(character_dynamics_engine PRIVATE -Wall -Wextra -Wpedantic)
 elseif(MSVC)
-    target_compile_options(character_dynamics_runtime PRIVATE /W4)
+    target_compile_options(character_dynamics_engine PRIVATE /W4)
 endif()
+
+add_library(character_dynamics_reference_dynamics_v0 STATIC
+    Src/reference_appraisal.cpp Src/reference_state.cpp Src/parameter_config.cpp
+    Src/candidate_scoring.cpp Src/reference_decision.cpp Src/reference_rule_dynamics_v0.cpp
+    Src/simulation.cpp)
+target_link_libraries(character_dynamics_reference_dynamics_v0 PUBLIC character_dynamics_engine)
+target_include_directories(character_dynamics_reference_dynamics_v0 PUBLIC Inc)
+add_library(character_dynamics_demo_living_v0 STATIC
+    Src/appraisal.cpp Src/state.cpp Src/decision.cpp
+    Src/living_dynamics.cpp Src/demo_living_dynamics_v0.cpp)
+target_link_libraries(character_dynamics_demo_living_v0 PUBLIC character_dynamics_reference_dynamics_v0)
+target_include_directories(character_dynamics_demo_living_v0 PUBLIC Inc)
+add_library(character_dynamics_runtime INTERFACE)
+target_link_libraries(character_dynamics_runtime INTERFACE character_dynamics_engine character_dynamics_reference_dynamics_v0)
 
 add_executable(character_dynamics_reference Src/main.cpp)
 target_link_libraries(character_dynamics_reference PRIVATE character_dynamics_runtime)
@@ -118,14 +125,23 @@ target_link_libraries(character_dynamics_runtime_case_smoke PRIVATE character_dy
 add_executable(character_dynamics_single_room_demo Src/single_room_demo.cpp)
 target_link_libraries(character_dynamics_single_room_demo PRIVATE character_dynamics_runtime)
 add_executable(character_dynamics_living_dynamics_smoke tests/living_dynamics_smoke.cpp)
-target_link_libraries(character_dynamics_living_dynamics_smoke PRIVATE character_dynamics_runtime)
+target_link_libraries(character_dynamics_living_dynamics_smoke PRIVATE character_dynamics_engine character_dynamics_demo_living_v0)
 add_test(NAME character_dynamics_living_dynamics_smoke COMMAND character_dynamics_living_dynamics_smoke)
-add_executable(character_dynamics_free_run Src/free_run_v4.cpp)
-target_link_libraries(character_dynamics_free_run PRIVATE character_dynamics_runtime)
+add_executable(character_dynamics_dynamics_model_isolation_smoke tests/dynamics_model_isolation_smoke.cpp)
+target_link_libraries(character_dynamics_dynamics_model_isolation_smoke PRIVATE character_dynamics_engine character_dynamics_reference_dynamics_v0 character_dynamics_demo_living_v0)
+add_test(NAME character_dynamics_dynamics_model_isolation_smoke COMMAND character_dynamics_dynamics_model_isolation_smoke)
+add_executable(character_dynamics_free_run Src/free_run.cpp)
+target_link_libraries(character_dynamics_free_run PRIVATE character_dynamics_engine character_dynamics_demo_living_v0)
 add_test(NAME character_dynamics_free_run_report
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/free_run_report.py"
          "${CMAKE_CURRENT_SOURCE_DIR}/demo/living_dynamics_v0"
          "$<TARGET_FILE:character_dynamics_free_run>")
+add_test(NAME character_dynamics_architecture_dependency_guard
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/architecture_dependency_guard.py"
+         "${CMAKE_CURRENT_SOURCE_DIR}")
+add_test(NAME character_dynamics_reference_rule_dynamics_v0_parity
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/reference_parity.py"
+         "${CMAKE_CURRENT_SOURCE_DIR}")
 set(DEMO_TRACE_DIR "${CMAKE_CURRENT_BINARY_DIR}/single-room-traces")
 add_test(NAME single_room_demo_generate_deadline
          COMMAND character_dynamics_single_room_demo --scenario deadline --output "${DEMO_TRACE_DIR}/deadline.json")
@@ -153,8 +169,7 @@ endforeach()
 
 add_executable(character_dynamics_replay_core
     Src/replay_core_cli.cpp
-    Src/state.cpp
-    Src/living_dynamics.cpp
+    Src/reference_state.cpp
     Src/parameter_config.cpp
     Src/candidate_scoring.cpp
 )

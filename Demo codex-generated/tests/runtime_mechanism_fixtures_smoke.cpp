@@ -1,4 +1,5 @@
 #include "continuous_runtime.h"
+#include "reference_rule_dynamics_v0.h"
 #include "decision.h"
 #include <algorithm>
 
@@ -9,7 +10,8 @@ int main() {
     Personality p;
     World w; w.time.minute_of_day = 560; w.tasks.front().due_at_total_minutes = 565;
     RuntimeScheduler sch(560); Observation o = refresh_observation({}, w, {});
-    ContinuousRuntime rt(sch, w, o);
+    ReferenceRuleDynamicsV0 dynamics;
+    ContinuousRuntime rt(sch, w, o, dynamics);
     if (!rt.submit_action_intent(ActionType::StudyFocused, "desk", 35).accepted) return 1;
     CharacterState s; auto tick = rt.execute_next_boundary(s, p);
     if (!fact(o, "task.deadline_passed") || !tag(tick.appraisal, "deadline_passed")
@@ -19,7 +21,7 @@ int main() {
     InformationAccess hidden; hidden.task_deadline_observable = false;
     World hw; hw.time.minute_of_day = 560; hw.tasks.front().due_at_total_minutes = 565;
     RuntimeScheduler hsch(560); Observation ho = refresh_observation({}, hw, {}, hidden);
-    ContinuousRuntime hrt(hsch, hw, ho, hidden); hrt.submit_action_intent(ActionType::StudyFocused, "desk", 35);
+    ContinuousRuntime hrt(hsch, hw, ho, dynamics, hidden); hrt.submit_action_intent(ActionType::StudyFocused, "desk", 35);
     CharacterState hs; auto ht = hrt.execute_next_boundary(hs, p);
     if (fact(ho, "task.deadline_passed") || tag(ht.appraisal, "deadline_passed")
         || ht.impulse_state.applied.task_pressure != 0.0) return 3;
@@ -34,7 +36,7 @@ int main() {
     const auto phone_candidate = std::find_if(phone_decision.candidates.begin(), phone_decision.candidates.end(),
         [](const CandidateAction& c) { return c.action == ActionType::UsePhone; });
     if (phone_candidate == phone_decision.candidates.end() || phone_candidate->probability <= 0.0) return 6;
-    RuntimeScheduler psch(560); ContinuousRuntime prt(psch, pw, po, hidden);
+    RuntimeScheduler psch(560); ContinuousRuntime prt(psch, pw, po, dynamics, hidden);
     if (prt.submit_action_intent(ActionType::UsePhone, "phone", 10).accepted) return 7;
     CharacterState ps; auto pt = prt.execute_next_boundary(ps, p);
     if (pt.running_action_after && pt.running_action_after->action == ActionType::UsePhone) return 8;
@@ -43,7 +45,7 @@ int main() {
     if (blocked != pt.decision.candidates.end() && (blocked->eligible || blocked->probability > 0.0)) return 13;
 
     World cw; cw.time.minute_of_day = 560; cw.tasks.front().effort_target = 0.01;
-    RuntimeScheduler csch(560); Observation co = refresh_observation({}, cw, {}); ContinuousRuntime crt(csch, cw, co);
+    RuntimeScheduler csch(560); Observation co = refresh_observation({}, cw, {}); ContinuousRuntime crt(csch, cw, co, dynamics);
     crt.set_test_action_selector([](const DecisionContext&) { return ActionType::StudyFocused; });
     if (!crt.submit_action_intent(ActionType::StudyFocused, "desk", 1).accepted) return 9;
     CharacterState cs; crt.execute_next_boundary(cs, p);
@@ -64,7 +66,7 @@ int main() {
     if (resumed_state.commitment.status != CommitmentStatus::Active) return 12;
     cs.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
     World rw; rw.time.minute_of_day = 560; Observation ro = refresh_observation({}, rw, {});
-    RuntimeScheduler rsch(560); ContinuousRuntime rrt(rsch, rw, ro);
+    RuntimeScheduler rsch(560); ContinuousRuntime rrt(rsch, rw, ro, dynamics);
     if (!rrt.submit_action_intent(ActionType::RestAtBed, "bed", 1).accepted) return 12;
     CharacterState rs; rs.commitment = cs.commitment; rrt.execute_next_boundary(rs, p);
     if (rs.commitment.status != CommitmentStatus::Suspended) return 13;
@@ -80,7 +82,7 @@ int main() {
     InformationAccess no_completion; no_completion.self_task_completion_observable = false;
     World nw; nw.time.minute_of_day = 560; nw.tasks.front().effort_target = 0.01;
     RuntimeScheduler nsch(560); Observation no = refresh_observation({}, nw, {}, no_completion);
-    ContinuousRuntime nrt(nsch, nw, no, no_completion); nrt.submit_action_intent(ActionType::StudyFocused, "desk", 1);
+    ContinuousRuntime nrt(nsch, nw, no, dynamics, no_completion); nrt.submit_action_intent(ActionType::StudyFocused, "desk", 1);
     CharacterState ns; ns.commitment = {CommitmentStatus::Active, "coursework", "fixture", 0, 0};
     nrt.execute_next_boundary(ns, p); if (ns.commitment.status != CommitmentStatus::Active) return 16;
     return 0;

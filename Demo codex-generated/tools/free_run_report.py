@@ -9,11 +9,12 @@ for i,(scenario,policy) in enumerate(seeds):
     if p.read_bytes()!=replay.read_bytes(): raise SystemExit(f'non-deterministic replay: {p.name}')
     replay.unlink()
     data=json.loads(p.read_text())
-    required = {'timestamp','elapsed','world_events','observation','observation_deltas','continuous_state_delta','impulse_state_delta','state','decision_gate','policy_evaluated','candidates','running_action_before','running_action_after','selected_action','pre_policy_outcome','post_policy_outcome','validation','provenance'}
+    required = {'timestamp','elapsed','world_events','observation','observation_deltas','continuous_state_delta','impulse_state_delta','state','decision_gate','policy_evaluated','candidates','running_action_before','running_action_after','selected_action','pre_policy_outcome','post_policy_outcome','validation','provenance','dynamics_model','demo_only'}
     if any(not required.issubset(frame) for frame in data): raise SystemExit(f'incomplete boundary trace: {p.name}')
+    if any(frame.get('dynamics_model') != 'demo-living-v0' or frame.get('demo_only') is not True for frame in data): raise SystemExit(f'model provenance missing: {p.name}')
     if any(data[i]['timestamp'] <= data[i-1]['timestamp'] or data[i]['elapsed'] <= 0 for i in range(1, len(data))): raise SystemExit(f'non-monotonic boundary: {p.name}')
     actions=[x['selected_action'] for x in data if x['selected_action']]
-    if data[-1]['timestamp']-data[0]['timestamp'] < 360: raise SystemExit(f'run shorter than six hours: {p.name}')
+    if data[-1]['timestamp'] < 840: raise SystemExit(f'run shorter than six hours: {p.name}')
     if any(not (0 <= x['state'][k] <= 1) for x in data for k in ('hunger','fatigue','bathroom_urge')): raise SystemExit(f'S out of range: {p.name}')
     counts={a:actions.count(a) for a in sorted(set(actions))}
     lines += [f'## Run {chr(65+i)} (scenario={scenario}, policy={policy})',f'- time range: {data[0]["timestamp"]}–{data[-1]["timestamp"]}',f'- boundaries: {len(data)}',f'- action counts: `{counts}`',f'- final task effort: {data[-1]["task_effort"]}', '']

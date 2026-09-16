@@ -1,6 +1,7 @@
 #include "living_dynamics.h"
 #include "decision.h"
 #include "runtime_scheduler.h"
+#include "demo_living_dynamics_v0.h"
 #include <cmath>
 int main() {
     Personality p; CharacterState calm, stressed;
@@ -22,8 +23,9 @@ int main() {
     CharacterState need_low = calm; need_low.hunger = .1;
     CharacterState need_high = calm; need_high.hunger = .9;
     RunningAction idle; idle.action = ActionType::Idle;
-    advance_continuous_state(need_low, p, &idle, 30);
-    advance_continuous_state(need_high, p, &idle, 30);
+    DemoLivingDynamicsV0 dynamics;
+    dynamics.advance_continuous(need_low, p, &idle, 30);
+    dynamics.advance_continuous(need_high, p, &idle, 30);
     if (!(need_high.satisfaction < need_low.satisfaction)) return 8;
     return 0;
 }

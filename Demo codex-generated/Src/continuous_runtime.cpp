@@ -4,9 +4,9 @@ namespace {
 }
 
 ContinuousRuntime::ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation,
-                                     InformationAccess access, unsigned int policy_seed)
-    : scheduler_(scheduler), world_runtime_(world, scheduler), observation_(observation), access_(access),
-      rng_(policy_seed), policy_seed_(policy_seed) {}
+                                     CharacterDynamicsModel& model, InformationAccess access, unsigned int policy_seed)
+    : scheduler_(scheduler), world_runtime_(world, scheduler), observation_(observation), model_(model),
+      access_(access), rng_(policy_seed), policy_seed_(policy_seed) {}
 
 bool ContinuousRuntime::schedule_next_world_boundary() {
     return world_runtime_.schedule_next_world_boundary(scheduler_);
@@ -38,7 +38,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     const auto& action = result.runtime.boundary.action_after_boundary;
     result.running_action_after = action;
     // Continuous dynamics is integrated before event projection at t.
-    result.continuous_state = advance_continuous_state(state, personality,
+    result.continuous_state = model_.advance_continuous(state, personality,
         action.has_value() ? &*action : nullptr, result.runtime.boundary.elapsed_minutes);
     result.runtime.world_events = world_runtime_.advance_to_boundary(result.runtime.boundary, scheduler_);
     apply_world_events(observation_, result.runtime.world_events, world_runtime_.world(), access_, world_runtime_.time_summary());
@@ -79,16 +79,16 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         apply_self_action_feedback(observation_, *result.pre_policy_outcome, world_runtime_.time_summary(), true, false);
         rebuild_known_actions_from_observation(observation_);
     }
-    result.appraisal = appraise(observation_, state, personality);
-    result.impulse_state = apply_appraisal_impulse(state, result.appraisal, personality);
+    result.appraisal = model_.appraise(observation_, state, personality);
+    result.impulse_state = model_.apply_impulse(state, result.appraisal, personality);
     result.observation_deltas = observation_.updates_this_refresh;
-    update_commitment(state, observation_, scheduler_.now_total_minutes());
+    model_.update_persistent_intention(state, observation_, scheduler_.now_total_minutes());
     consume_appraisal_inputs(observation_);
     if (result.runtime.boundary.decision_gate.open
         && (result.pre_policy_outcome.has_value() || !action.has_value()
             || action->status != RunningActionStatus::Running || threshold_reconsideration)) {
         result.policy_evaluated = true;
-        result.decision = decide(observation_, state, personality);
+        result.decision = model_.build_policy(observation_, state, personality);
         const ActionType selected = test_action_selector_ ? test_action_selector_(result.decision)
                                                            : sample_action(result.decision, rng_);
         for (const CandidateAction& candidate : result.decision.candidates) {

@@ -1,5 +1,4 @@
 #include "decision.h"
-#include "living_dynamics.h"
 
 #include <algorithm>
 #include <cmath>
@@ -35,7 +34,6 @@ bool commitment_can_bias_study(const Observation& observation, const CharacterSt
 }
 } // namespace
 
-namespace DemoLivingV0 {
 DecisionContext decide(const Observation& observation,
                        const CharacterState& state,
                        const Personality& personality,
@@ -58,16 +56,12 @@ DecisionContext decide(const Observation& observation,
     }
     const double distraction = config.distraction_weight * (state.boredom * 0.65 + personality.procrastination * 0.25
                              + personality.stimulation_seeking * 0.20);
-    const double overload = LivingDynamics::overload(state, personality);
     const double task_drive = config.task_drive_coefficient * (state.task_pressure * (0.70 + personality.self_control * 0.80)
-                            + state.anxiety * 0.20) * (1.0 - 0.45 * overload);
+                            + state.anxiety * 0.20);
     const double recovery_drive = config.recovery_drive_coefficient * (state.fatigue * 0.75 + state.screen_strain * 0.50
                                 + personality.rest_preference * 0.18);
-    const double hunger_drive = LivingDynamics::perceived_hunger(state, personality) * (0.85 + personality.need_response * 0.25);
-    const double bathroom_drive = LivingDynamics::perceived_bathroom(state, personality) * (0.90 + personality.need_response * 0.20);
-    // Above a moderate bodily-need level, leisure and task candidates lose
-    // probability smoothly rather than relying on a hard scripted interrupt.
-    const double urgent_bodily_need = std::max(0.0, std::max(hunger_drive, bathroom_drive) - 0.65);
+    const double hunger_drive = state.hunger * (0.85 + personality.need_response * 0.25);
+    const double bathroom_drive = state.bathroom_urge * (0.90 + personality.need_response * 0.20);
 
     const double dominant = std::max({distraction, task_drive, recovery_drive, hunger_drive, bathroom_drive});
     if (dominant == bathroom_drive) {
@@ -97,14 +91,13 @@ DecisionContext decide(const Observation& observation,
         const double commitment_bonus = advances_committed_task ? 0.16 * config.commitment_bonus : 0.0;
         switch (action) {
         case ActionType::UsePhone:
-            decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * 0.30 - state.fatigue * 0.12
-                - 0.34 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need + commitment_bonus, 0.12, "phone offers immediate stimulation but yields to urgent bodily needs"));
+            decision.candidates.push_back(candidate(action, 0.06 + distraction - state.screen_strain * 0.30 - state.fatigue * 0.12 + commitment_bonus, 0.12, "phone offers immediate stimulation but raises strain"));
             break;
         case ActionType::ShopOnPhone:
             decision.candidates.push_back(candidate(action, 0.03 + state.purchase_urge * 0.95 + distraction * 0.10 + commitment_bonus, 0.18, "phone supports online shopping when purchase urge activates"));
             break;
         case ActionType::UseComputer:
-            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * 0.28 - 0.80 * urgent_bodily_need + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
+            decision.candidates.push_back(candidate(action, 0.04 + distraction * 0.72 - state.screen_strain * 0.28 + commitment_bonus, 0.13, "computer offers longer-form stimulation"));
             break;
         case ActionType::StudyAtComputer:
             decision.candidates.push_back(candidate(action, 0.04 + task_drive - state.fatigue * 0.25 * config.study_fatigue_penalty - personality.procrastination * 0.16 + commitment_bonus, 0.18, "computer can be used for task progress"));
@@ -112,8 +105,7 @@ DecisionContext decide(const Observation& observation,
         case ActionType::StudyFocused:
             decision.candidates.push_back(candidate(action,
                 0.05 + task_drive + state.satisfaction * 0.10
-                - state.fatigue * 0.25 * config.study_fatigue_penalty
-                - 0.38 * (hunger_drive + bathroom_drive) - 0.90 * urgent_bodily_need - personality.procrastination * 0.18
+                - state.fatigue * 0.25 * config.study_fatigue_penalty - personality.procrastination * 0.18
                 + commitment_bonus,
                 0.18,
                 "lit desk supports sustained focused study"));
@@ -121,7 +113,6 @@ DecisionContext decide(const Observation& observation,
         case ActionType::StudyHalfhearted:
             decision.candidates.push_back(candidate(action,
                 0.06 + task_drive * 0.55 + state.boredom * 0.36
-                - 0.26 * (hunger_drive + bathroom_drive) - 0.75 * urgent_bodily_need
                 + 0.03 * static_cast<double>(state.commitment.suspended_decision_points)
                 - state.fatigue * 0.12 * config.study_fatigue_penalty - personality.self_control * 0.18
                 + commitment_bonus,
@@ -129,16 +120,16 @@ DecisionContext decide(const Observation& observation,
                 "lit desk permits partial study when task pressure coexists with distraction"));
             break;
         case ActionType::RestAtBed:
-            decision.candidates.push_back(candidate(action, 0.05 + recovery_drive - state.anxiety * 0.10 + overload * 0.10 + commitment_bonus, 0.16, "bed supports recovery from fatigue and screen strain"));
+            decision.candidates.push_back(candidate(action, 0.05 + recovery_drive - state.anxiety * 0.10 + commitment_bonus, 0.16, "bed supports recovery from fatigue and screen strain"));
             break;
         case ActionType::SleepAtBed:
-            decision.candidates.push_back(candidate(action, -0.10 + recovery_drive * 1.15 + LivingDynamics::sleep_readiness(observation,state,personality) + commitment_bonus, 0.58, "bed supports a long sleep interval when fatigue becomes high"));
+            decision.candidates.push_back(candidate(action, -0.10 + recovery_drive * 1.15 + state.fatigue * 0.25 + commitment_bonus, 0.58, "bed supports a long sleep interval when fatigue becomes high"));
             break;
         case ActionType::GoToBathroom:
-            decision.candidates.push_back(candidate(action, 0.03 + 1.55 * bathroom_drive + commitment_bonus, 0.16, "door supports resolving a bodily need"));
+            decision.candidates.push_back(candidate(action, 0.03 + bathroom_drive + commitment_bonus, 0.16, "door supports resolving a bodily need"));
             break;
         case ActionType::GetMeal:
-            decision.candidates.push_back(candidate(action, 0.03 + 1.45 * hunger_drive + commitment_bonus, 0.16, "door supports getting a meal"));
+            decision.candidates.push_back(candidate(action, 0.03 + hunger_drive + commitment_bonus, 0.16, "door supports getting a meal"));
             break;
         case ActionType::TurnLightOn:
             decision.candidates.push_back(candidate(action, 0.02 + task_drive * 0.55 + commitment_bonus, 0.20, "light enables currently blocked study actions"));
@@ -160,26 +151,6 @@ DecisionContext decide(const Observation& observation,
             break;
         case ActionType::Count:
             break;
-        }
-    }
-
-    // A genuinely urgent bodily need is a contextual constraint, not a
-    // scripted action: at the extreme end, ordinary leisure/work options are
-    // no longer admissible, while eating and bathroom relief remain competing
-    // choices. This keeps free-runs from repeatedly ignoring a saturated need.
-    if (LivingDynamics::perceived_bathroom(state, personality) >= 0.92
-        || LivingDynamics::perceived_hunger(state, personality) >= 0.92) {
-        const bool bathroom_urgent = LivingDynamics::perceived_bathroom(state, personality) >= 0.92;
-        const bool hunger_urgent = LivingDynamics::perceived_hunger(state, personality) >= 0.92;
-        for (CandidateAction& item : decision.candidates) {
-            const bool bodily = item.action == ActionType::GoToBathroom || item.action == ActionType::GetMeal;
-            if (bodily) {
-                if ((item.action == ActionType::GoToBathroom && bathroom_urgent)
-                    || (item.action == ActionType::GetMeal && hunger_urgent)) continue;
-                item.eligible = false;
-            } else {
-                item.eligible = false;
-            }
         }
     }
 
@@ -281,7 +252,5 @@ std::string decision_summary(const DecisionContext& decision) {
                << " | " << item.reason << '\n';
     }
     return output.str();
-}
-
 }
 

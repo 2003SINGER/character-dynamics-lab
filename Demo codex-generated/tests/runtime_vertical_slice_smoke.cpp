@@ -1,5 +1,6 @@
 #include "appraisal.h"
 #include "continuous_runtime.h"
+#include "reference_rule_dynamics_v0.h"
 #include "decision.h"
 #include "observation.h"
 #include "runtime_scheduler.h"
@@ -35,7 +36,8 @@ int main() {
     world.time.minute_of_day = 9 * 60 + 20;
     RuntimeScheduler scheduler(9 * 60 + 20);
     Observation observation = refresh_observation({}, world, {});
-    ContinuousRuntime runtime(scheduler, world, observation);
+    ReferenceRuleDynamicsV0 dynamics;
+    ContinuousRuntime runtime(scheduler, world, observation, dynamics);
     const WorldOutcome start = runtime.submit_action_intent(ActionType::StudyFocused, "desk", 35, true);
     if (!start.accepted) { std::cerr << "W rejected a legal study start\n"; return 1; }
     // [09:00, 09:10): continuous S receives both elapsed duration and the
