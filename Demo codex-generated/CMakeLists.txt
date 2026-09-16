@@ -120,7 +120,7 @@ target_link_libraries(character_dynamics_single_room_demo PRIVATE character_dyna
 add_executable(character_dynamics_living_dynamics_smoke tests/living_dynamics_smoke.cpp)
 target_link_libraries(character_dynamics_living_dynamics_smoke PRIVATE character_dynamics_runtime)
 add_test(NAME character_dynamics_living_dynamics_smoke COMMAND character_dynamics_living_dynamics_smoke)
-add_executable(character_dynamics_free_run Src/free_run.cpp)
+add_executable(character_dynamics_free_run Src/free_run_v2.cpp)
 target_link_libraries(character_dynamics_free_run PRIVATE character_dynamics_runtime)
 add_test(NAME character_dynamics_free_run_report
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/free_run_report.py"
