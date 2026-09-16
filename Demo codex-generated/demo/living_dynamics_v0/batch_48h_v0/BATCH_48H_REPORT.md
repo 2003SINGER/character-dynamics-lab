@@ -15,7 +15,24 @@ See `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner
 - leisure_minutes: 69008.0 minutes
 - idle_minutes: 17403.0 minutes
 - rest_minutes: 110611.0 minutes
-- sleep_minutes: 93025.0 minutes\n\n## Stability diagnostics\n\n- ANXIETY_LOW_SATURATION: 100 actors\n- BATHROOM_URGE_HIGH_SATURATION: 1 actors\n- BOREDOM_LOW_SATURATION: 45 actors\n- EXCESSIVE_SLEEP: 31 actors\n- FATIGUE_LOW_SATURATION: 96 actors\n- HUNGER_HIGH_SATURATION: 3 actors\n- NO_SLEEP_48H: 5 actors\n- REJECTION_LOOP: 2 actors\n- SATISFACTION_HIGH_SATURATION: 128 actors\n- SCREEN_STRAIN_LOW_SATURATION: 100 actors\n- TASK_PRESSURE_HIGH_SATURATION: 64 actors\n- TASK_PRESSURE_LOW_SATURATION: 60 actors\n- UNMET_BATHROOM: 22 actors\n- UNMET_HUNGER: 13 actors
+- sleep_minutes: 93025.0 minutes
+
+## Stability diagnostics
+
+- ANXIETY_LOW_SATURATION: 100 actors
+- BATHROOM_URGE_HIGH_SATURATION: 1 actors
+- BOREDOM_LOW_SATURATION: 45 actors
+- EXCESSIVE_SLEEP: 31 actors
+- FATIGUE_LOW_SATURATION: 96 actors
+- HUNGER_HIGH_SATURATION: 3 actors
+- NO_SLEEP_48H: 5 actors
+- REJECTION_LOOP: 2 actors
+- SATISFACTION_HIGH_SATURATION: 128 actors
+- SCREEN_STRAIN_LOW_SATURATION: 100 actors
+- TASK_PRESSURE_HIGH_SATURATION: 64 actors
+- TASK_PRESSURE_LOW_SATURATION: 60 actors
+- UNMET_BATHROOM: 22 actors
+- UNMET_HUNGER: 13 actors
 
 ## Switching distribution
 

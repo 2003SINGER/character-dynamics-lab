@@ -75,7 +75,7 @@ def main():
     shutil.rmtree(raw)
     (OUT/"BATCH_48H_REPORT.md").write_text("# DEMO_LIVING_BATCH_48H_V0\n\nDemo/application engineering diagnostic. Not research evidence and not a claim of psychological realism.\n\n- 128 independent actors, 8 demo engineering profiles × 16 seeds.\n- 48 simulated hours each; total 6144 actor-hours.\n- Selection: per profile, nearest multidimensional median and highest diagnostic count (actor_id tie-break).\n- Full raw traces remain local-only; compact audit trace contains every boundary.\n\nSee `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner), `aggregate.json`, and `representative_traces/`.\n")
     report=(OUT/"BATCH_48H_REPORT.md").read_text(); report += "\n## Behavior distribution\n\n" + "\n".join(f"- {k}: {sum(r[k] for r in rows):.1f} minutes" for k in ("study_minutes","leisure_minutes","idle_minutes","rest_minutes","sleep_minutes"))
-    report += "\\n\\n## Stability diagnostics\\n\\n" + "\\n".join(f"- {k}: {v} actors" for k,v in sorted(aggregate["diagnostic_counts"].items()))
+    report += "\n\n## Stability diagnostics\n\n" + "\n".join(f"- {k}: {v} actors" for k,v in sorted(aggregate["diagnostic_counts"].items()))
     report += f"\n\n## Switching distribution\n\n- median: {aggregate['switching_distribution']['median']:.2f}/day\n- p90: {aggregate['switching_distribution']['p90']:.2f}/day\n- p95: {aggregate['switching_distribution']['p95']:.2f}/day\n- max: {aggregate['switching_distribution']['max']:.2f}/day\n"
     report += "\n\n## Representative timelines\n\nSelection is automatic; see the 16 JSON traces for full records.\n"
     (OUT/"BATCH_48H_REPORT.md").write_text(report)
