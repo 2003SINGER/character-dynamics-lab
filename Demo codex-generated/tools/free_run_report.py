@@ -9,12 +9,17 @@ for i,(scenario,policy) in enumerate(seeds):
     if p.read_bytes()!=replay.read_bytes(): raise SystemExit(f'non-deterministic replay: {p.name}')
     replay.unlink()
     data=json.loads(p.read_text())
+    previous = None
     for frame in data:
         frame.setdefault('pre_policy_outcome', None)
         frame.setdefault('post_policy_outcome', None)
-        frame.setdefault('continuous_state_delta', {})
-        frame.setdefault('impulse_state_delta', {})
+        if previous is None:
+            frame.setdefault('continuous_state_delta', {'fatigue': 0.0, 'hunger': 0.0})
+        else:
+            frame.setdefault('continuous_state_delta', {'fatigue': frame['fatigue'] - previous['fatigue'], 'hunger': frame['hunger'] - previous['hunger']})
+        frame.setdefault('impulse_state_delta', {'fatigue': 0.0, 'hunger': 0.0})
         frame.setdefault('provenance', 'free_run_runtime_boundary')
+        previous = frame
     p.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')) + '\n')
     actions=[x.get('action', x.get('selected_action')) for x in data if x.get('action', x.get('selected_action'))]
     if data[-1]['timestamp']-data[0]['timestamp'] < 360: raise SystemExit(f'run shorter than six hours: {p.name}')
