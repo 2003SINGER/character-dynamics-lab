@@ -66,6 +66,23 @@
 - screen strain recovery 依 activity family 分层：sleep > rest > ordinary non-screen。
 - purchase urge 只有 cue/成功结算触发 active episode；无 cue 不自动激活。
 
+## Appraisal fixed-delta audit
+
+固定数值只有在语义边界清楚时保留；心理反馈必须再乘当前 zone/状态响应。当前 V1 审计如下：
+
+| Channel | Classification | V1 rule |
+|---|---|---|
+| meal/bathroom 对 hunger、bathroom inventory 的 relief | A: physical settlement | 保留单 owner，并按当前库存区间平滑 relief |
+| screen exposure 对 screen_strain 的增加 | A: contextual physical exposure | 只在 screen action 的 continuous/action outcome 路径发生 |
+| Study 对 task_pressure、satisfaction、anxiety | B: state-dependent psychological response | 使用 pressure/anxiety/fatigue zone response，不使用固定盲减 |
+| Phone/Computer 对 boredom、satisfaction | B: state-dependent psychological response | boredom 高时 relief 才明显，screen strain 高时 reward 衰减 |
+| Rest/Sleep 对 fatigue、screen_strain、anxiety | B: recovery response | 按 fatigue/strain/overload zone 与 recovery efficiency 调整 |
+| Idle 对 boredom | B: context response | 只有 under-stimulation 区间才增加；不固定增加 pressure 或扣 satisfaction |
+| 满足度/焦虑的 neutral normalization | B: homeostatic normalization | 仅向 neutral setpoint 回归，不产生单向 baseline decay/cost |
+| “时间过去所以” boredom/satisfaction/purchase urge 固定漂移 | C: removed | V1 不允许无条件心理漂移 |
+
+若未来需要 repetition history、sleep debt 或 meal cooldown，当前 schema 没有合法字段；本版本只记录为 deferred limitation，不偷偷增加隐藏状态。
+
 ## Personality threshold use
 
 只使用既有八字段：`procrastination`、`self_control`、`rest_preference`、`stimulation_seeking`、`task_anxiety_sensitivity`、`screen_strain_sensitivity`、`need_response`、`action_noise`。人格主要移动阈值、恢复速度和 zone transition，而不是对每个 activation 做无条件加法。所有 profile 仍是 demo engineering profiles，不是人格心理学定义。
