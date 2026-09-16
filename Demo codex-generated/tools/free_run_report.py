@@ -9,21 +9,19 @@ for i,(scenario,policy) in enumerate(seeds):
     if p.read_bytes()!=replay.read_bytes(): raise SystemExit(f'non-deterministic replay: {p.name}')
     replay.unlink()
     data=json.loads(p.read_text())
-    previous = None
-    for frame in data:
-        frame.setdefault('pre_policy_outcome', None)
-        frame.setdefault('post_policy_outcome', None)
-        if previous is None:
-            frame.setdefault('continuous_state_delta', {'fatigue': 0.0, 'hunger': 0.0})
-        else:
-            frame.setdefault('continuous_state_delta', {'fatigue': frame['fatigue'] - previous['fatigue'], 'hunger': frame['hunger'] - previous['hunger']})
-        frame.setdefault('impulse_state_delta', {'fatigue': 0.0, 'hunger': 0.0})
-        frame.setdefault('provenance', 'free_run_runtime_boundary')
-        previous = frame
-    p.write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')) + '\n')
-    actions=[x.get('action', x.get('selected_action')) for x in data if x.get('action', x.get('selected_action'))]
+    required = {'timestamp','elapsed','world_events','observation','observation_deltas','continuous_state_delta','impulse_state_delta','state','decision_gate','policy_evaluated','candidates','running_action_before','running_action_after','selected_action','pre_policy_outcome','post_policy_outcome','validation','provenance'}
+    if any(not required.issubset(frame) for frame in data): raise SystemExit(f'incomplete boundary trace: {p.name}')
+    if any(data[i]['timestamp'] <= data[i-1]['timestamp'] or data[i]['elapsed'] <= 0 for i in range(1, len(data))): raise SystemExit(f'non-monotonic boundary: {p.name}')
+    actions=[x['selected_action'] for x in data if x['selected_action']]
     if data[-1]['timestamp']-data[0]['timestamp'] < 360: raise SystemExit(f'run shorter than six hours: {p.name}')
-    if any(not (0 <= x[k] <= 1) for x in data for k in ('hunger','fatigue','bathroom_urge')): raise SystemExit(f'S out of range: {p.name}')
+    if any(not (0 <= x['state'][k] <= 1) for x in data for k in ('hunger','fatigue','bathroom_urge')): raise SystemExit(f'S out of range: {p.name}')
     counts={a:actions.count(a) for a in sorted(set(actions))}
     lines += [f'## Run {chr(65+i)} (scenario={scenario}, policy={policy})',f'- time range: {data[0]["timestamp"]}–{data[-1]["timestamp"]}',f'- boundaries: {len(data)}',f'- action counts: `{counts}`',f'- final task effort: {data[-1]["task_effort"]}', '']
 (root/'FREE_RUN_6H_report.md').write_text('\n'.join(lines)+'\n')
+all_actions = set()
+for i,(scenario,policy) in enumerate(seeds):
+    data = json.loads((traces/f'free_run_{chr(65+i)}.json').read_text())
+    all_actions.update(x['selected_action'] for x in data if x['selected_action'])
+required_families = ({'study_focused'}, {'get_meal','go_to_bathroom'}, {'rest_at_bed','sleep_at_bed'}, {'use_phone','use_computer','idle'})
+if not all(any(a in all_actions for a in family) for family in required_families):
+    raise SystemExit(f'free-run action diversity insufficient: {sorted(all_actions)}')
