@@ -45,7 +45,7 @@ Appraisal appraise(const Observation& observation,
                 : std::vector<std::string>{"device_stimulation", "screen_strain"};
             break;
         case ActionType::ShopOnPhone:
-            appraisal.satisfaction_delta = 0.10;
+            appraisal.satisfaction_delta = 0.04 + 0.08 * old_state.purchase_urge;
             appraisal.task_pressure_delta = coursework_pending ? 0.03 : 0.0;
             appraisal.screen_strain_delta = 0.08;
             appraisal.purchase_urge_delta = -0.55;
@@ -62,7 +62,7 @@ Appraisal appraise(const Observation& observation,
             break;
         case ActionType::StudyAtComputer:
         case ActionType::StudyFocused:
-            appraisal.boredom_delta = 0.02;
+            appraisal.boredom_delta = 0.01 + 0.03 * old_state.fatigue;
             appraisal.fatigue_delta = 0.11;
             appraisal.task_pressure_delta = -0.04 - 0.12 * old_state.task_pressure;
             appraisal.satisfaction_delta = 0.03 + 0.07 * old_state.task_pressure;
@@ -84,7 +84,7 @@ Appraisal appraise(const Observation& observation,
             appraisal.fatigue_delta = -0.06 * LivingDynamics::rest_recovery_efficiency(old_state);
             appraisal.screen_strain_delta = -0.14;
             appraisal.task_pressure_delta = coursework_pending ? 0.02 * old_state.task_pressure : 0.0;
-            appraisal.satisfaction_delta = 0.05;
+            appraisal.satisfaction_delta = 0.02 + 0.05 * old_state.fatigue;
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"recovery", "task_still_pending"}
                 : std::vector<std::string>{"recovery"};
@@ -94,7 +94,7 @@ Appraisal appraise(const Observation& observation,
             appraisal.fatigue_delta = -0.10 * LivingDynamics::rest_recovery_efficiency(old_state);
             appraisal.screen_strain_delta = -0.30;
             appraisal.task_pressure_delta = coursework_pending ? 0.03 * old_state.task_pressure : 0.0;
-            appraisal.satisfaction_delta = 0.08;
+            appraisal.satisfaction_delta = 0.03 + 0.05 * old_state.fatigue;
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"sleep_recovery", "long_unobserved_interval", "task_still_pending"}
                 : std::vector<std::string>{"sleep_recovery", "long_unobserved_interval"};
@@ -132,7 +132,7 @@ Appraisal appraise(const Observation& observation,
             appraisal.tags = {"room_stimulation_reduced"};
             break;
         case ActionType::Idle:
-            appraisal.boredom_delta = 0.12;
+            appraisal.boredom_delta = 0.03 + 0.15 * old_state.boredom;
             appraisal.task_pressure_delta = 0.0;
             appraisal.satisfaction_delta = 0.0;
             appraisal.tags = coursework_pending
