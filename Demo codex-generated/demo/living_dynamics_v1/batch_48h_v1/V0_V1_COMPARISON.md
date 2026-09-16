@@ -4,15 +4,15 @@ Application engineering diagnostics only; this does not establish psychological 
 
 | Metric | V0 mean across profiles | V1 mean across profiles |
 |---|---:|---:|
-| meals_day_mean | 1.898 | 1.148 |
-| bathroom_day_mean | 2.371 | 1.156 |
-| study_hours_day_mean | 3.402 | 3.728 |
-| leisure_hours_day_mean | 4.493 | 5.191 |
-| sleep_hours_day_mean | 6.056 | 7.553 |
-| task_completion_rate | 0.477 | 0.609 |
+| meals_day_mean | 1.898 | 1.133 |
+| bathroom_day_mean | 2.371 | 1.148 |
+| study_hours_day_mean | 3.402 | 3.747 |
+| leisure_hours_day_mean | 4.493 | 5.174 |
+| sleep_hours_day_mean | 6.056 | 7.607 |
+| task_completion_rate | 0.477 | 0.617 |
 | task_completion_time_p10 | 1369.375 | 1281.250 |
-| task_completion_time_p90 | 2122.375 | 1762.625 |
-| switches_day_mean | 32.973 | 29.770 |
+| task_completion_time_p90 | 2122.375 | 1780.750 |
+| switches_day_mean | 32.973 | 29.793 |
 
 ## V0 diagnostics
 
@@ -41,18 +41,18 @@ Switching: {"median": 32.5, "p90": 38.0, "p95": 40.0, "max": 47.0}
 
 ```json
 {
-  "TASK_PRESSURE_HIGH_SATURATION": 49,
-  "SATISFACTION_HIGH_SATURATION": 102,
-  "FATIGUE_LOW_SATURATION": 118,
-  "ANXIETY_LOW_SATURATION": 104,
-  "TASK_PRESSURE_LOW_SATURATION": 78,
-  "UNMET_BATHROOM": 56,
-  "SCREEN_STRAIN_LOW_SATURATION": 84,
-  "UNMET_HUNGER": 54,
-  "EXCESSIVE_SLEEP": 47,
-  "BOREDOM_LOW_SATURATION": 34,
-  "HUNGER_HIGH_SATURATION": 1
+  "TASK_PRESSURE_HIGH_SATURATION": 48,
+  "FATIGUE_LOW_SATURATION": 117,
+  "SATISFACTION_HIGH_SATURATION": 91,
+  "ANXIETY_LOW_SATURATION": 105,
+  "TASK_PRESSURE_LOW_SATURATION": 79,
+  "UNMET_BATHROOM": 53,
+  "SCREEN_STRAIN_LOW_SATURATION": 86,
+  "UNMET_HUNGER": 56,
+  "BOREDOM_LOW_SATURATION": 31,
+  "EXCESSIVE_SLEEP": 46,
+  "HUNGER_HIGH_SATURATION": 2
 }
 ```
 
-Switching: {"median": 29.5, "p90": 34.0, "p95": 34.5, "max": 37.5}
+Switching: {"median": 30.0, "p90": 34.0, "p95": 34.5, "max": 39.5}

@@ -28,8 +28,13 @@ Appraisal appraise(const Observation& observation,
         || old_state.commitment.task_id == "coursework";
 
     if (observation.last_self_action.has_action && !observation.last_self_action.accepted) {
-        appraisal.satisfaction_delta = -0.03;
-        appraisal.anxiety_delta = 0.03;
+        // Obstruction is state-dependent: a blocked action matters more when
+        // task pressure/anxiety are already activated, and is not a fixed
+        // psychological penalty at a calm baseline.
+        const double obstruction = 0.02 * LivingDynamics::pressure_motivation(old_state)
+                                 + 0.03 * LivingDynamics::anxiety_impairment(old_state);
+        appraisal.satisfaction_delta = -obstruction;
+        appraisal.anxiety_delta = 0.02 * (0.35 + LivingDynamics::pressure_motivation(old_state));
         appraisal.tags = {"action_rejected", "goal_obstructed"};
     } else if (observation.last_self_action.has_action) {
         switch (observation.last_self_action.action) {
@@ -46,10 +51,11 @@ Appraisal appraise(const Observation& observation,
                 : std::vector<std::string>{"device_stimulation", "screen_strain"};
             break;
         case ActionType::ShopOnPhone:
-            appraisal.satisfaction_delta = 0.04 + 0.08 * old_state.purchase_urge;
+            appraisal.satisfaction_delta = 0.08 * LivingDynamics::boredom_stimulation_drive(old_state)
+                                         + 0.08 * old_state.purchase_urge;
             appraisal.task_pressure_delta = coursework_pending ? 0.03 : 0.0;
             appraisal.screen_strain_delta = 0.08;
-            appraisal.purchase_urge_delta = -0.55;
+            appraisal.purchase_urge_delta = -0.70 * old_state.purchase_urge;
             appraisal.tags = {"purchase_completed", "short_term_reward"};
             break;
         case ActionType::UseComputer:
@@ -103,7 +109,7 @@ Appraisal appraise(const Observation& observation,
                 : std::vector<std::string>{"sleep_recovery", "long_unobserved_interval"};
             break;
         case ActionType::GoToBathroom:
-            appraisal.satisfaction_delta = 0.07;
+            appraisal.satisfaction_delta = 0.05 * LivingDynamics::bathroom_drive(old_state, personality);
             appraisal.bathroom_urge_delta = -LivingDynamics::bathroom_relief(old_state);
             appraisal.tags = {"bodily_need_resolved", "brief_room_exit"};
             break;
