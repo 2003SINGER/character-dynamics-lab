@@ -9,13 +9,14 @@
 | BOUNDARY-V1 | **CLOSED / FROZEN** | Kernel / Dynamics / Demo ownership 与依赖边界已完成复核 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
 | DEMO-LIVING | **ACTIVE / DEMO ONLY** | 继续观察 `FREE_RUN_6H`；UI 后置 | `DemoLivingDynamicsV0`；不产生 research evidence |
+| RESEARCH-DYNAMICS | **READY_FOR_INDEPENDENT_REVIEW** | 先审协议、机制单测与 intervention artifacts；不得启动大规模数据重跑 | [ResearchDynamicsV1 protocol](Research_Dynamics_V1_Protocol.md)、[validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md) |
 
 ## ACTIVE
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
 | SYSTEM | **Shared Runtime Kernel v1：CLOSED / FROZEN** | Continuous Runtime ownership、threshold/W validation、typed rejection、fixtures、trace、case-isolated CTest、explicit DynamicsModel injection 与 isolation guard 已闭环。此状态只关闭执行 Kernel，不代表任何行为模型、Evaluator、Objective、Optimizer 或 Paper-0 完成。 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
-| M1 | **已完成（pre-training gate）** | 已冻结 anchor 语义边界、sign-violation 协议、decision-step 时间尺度、neutral 初始化与 trajectory reset；不再扩展机制 | [M1 冻结决策](Theory-S_M1冻结决策_2026-09-07.md)、[Theory-S v2](../02_实验/Theory_S_v2/README.md)；不得把候选实现写成心理学验证 |
+| M1 | **历史 proxy 已审计；不再视为研究动力学冻结** | 保留旧 Theory-S 结果为 `ExpectedEffectEMAProxyV0`；新研究对象转入 ResearchDynamicsV1 review | [validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md) |
 | M2 | 进行中 | 完善 SceneSnapshot → affordance → generated `A^O` 的最小 ontology 与实例绑定 | 生成不读 source `A*`；source support 仅 post-hoc 诊断；[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md) |
 | M3 | **已完成（owner audit v0）** | 保留审计边界；若要重开 D01，先完成 actor-local observation audit、跨 actor gap 编码和 X 字段准入 | [capability matrix](../02_实验/Theory_S_v2/capability_matrix.md)、[D01 LIGHT](../02_实验/T0c_LIGHT/D01_semantic_temporal_admission_v0.md)、[OPeRA candidate reconstruction](../02_实验/T0d_OPeRA/candidate_reconstruction_feasibility_v0.md)；proxy/telemetry 不升级为 A* |
 | POOL | **已完成（routing v1；2026-09-09 superseded）** | 按 routing update 转入 LIGHT actor-local history eligibility gate；ClubFloyd Stage 0c paused，AGAIN 仍仅是 external proxy | [routing v1 + superseding update](Existing_Dataset_Pool_Routing_v1_2026-09-08.md)；不得把旧 ClubFloyd #1 排名当作当前主线 |
@@ -30,7 +31,7 @@
 ## 研究范围护栏
 
 - **ACTIVE**：Paper-0 的 persistent `S`、legal actor-local `O`、independent `A*` 与 candidate-set admission（当前唯一 active work：M2）。
-- **PAUSED**：Objective readiness、evaluator ranking、optimizer、Theory-S training、外部数据集扩展。
+- **PAUSED**：Objective readiness、evaluator ranking、optimizer、旧 proxy training、外部数据集扩展；ResearchDynamicsV1 仅做机制审计。
 - **DEFERRED SYSTEM/RESEARCH BRANCH**：ToM、multi-agent、Inverse、P drift、Q01 advanced response curves、Scene Manager 与 live LLM semantics。
 - 当前科学瓶颈是 `independent A* + actor-local O + frozen/reconstructable candidate set`；不启动 dataset tourism，也不重开 Runtime。
 
@@ -46,7 +47,7 @@
 
 - 候选集不能冻结、角色 O 无法重建、split 有未来/身份泄漏、或外部 A* 不独立：停止 formal baseline。
 - 本阶段不新增 S 字段、另造 X schema、设计 hard topology benchmark、改变 P、做 P drift、启动 multi-agent/ToM 或重构 `simulation.cpp`。
-- `Theory_S_v2` 是 canonical Python research dynamics operator；Replay 是 canonical feature/baseline layer；dataset adapter 只做 raw → ReplayRecord/SceneSnapshot/X-compatible input，不复制 Theory-S。
+- `ResearchDynamicsV1` 是当前未冻结研究候选；`Theory_S_v2` 是 `ExpectedEffectEMAProxyV0` 历史 proxy；Replay 是 canonical feature/baseline layer；dataset adapter 只做 raw → ReplayRecord/SceneSnapshot/X-compatible input，不复制 proxy。
 
 ## DEFERRED
 

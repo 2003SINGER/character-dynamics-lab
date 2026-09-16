@@ -10,7 +10,7 @@ Character Dynamics 不是一条已经被证明的心理公式，而是一个共�
 
 1. **Shared Runtime Kernel**：权威 W、Scene/Room/Object、W→O 信息边界、时钟与 Scheduler、RunningAction、WorldEvent/Outcome、DecisionGate、ActionIntent、W validation/settlement、trace/replay，以及对已有 π 的 RNG sampling。
 2. **Dynamics Model**：X/appraisal、U 与 S 演化、commitment transition、候选集与 π 构造。这里的系数和规则是候选行为假设，不是 Kernel invariant。
-3. **Research Track**：比较 Reference、Theory-S、ablation 等 dynamics candidate，保留 protocol、数据隔离和证据边界。
+3. **Research Track**：比较 `ResearchDynamicsV1`、legacy baseline 与 ablation，保留 protocol、数据隔离和证据边界。旧 Theory-S 仅作为 `ExpectedEffectEMAProxyV0` 历史 proxy。
 4. **Application/Demo**：使用明确选择的 model 做 mechanism fixture 或 living sandbox；Demo naturalness 没有科研证据权。
 
 ```text
