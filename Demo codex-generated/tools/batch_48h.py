@@ -35,6 +35,13 @@ def summary(actor, profile, scenario, policy, data):
     if baths/2>10: flags.append("BATHROOM_SPAM")
     nonboot=sum(n for a,n in mins.items() if a not in ("idle",));
     if nonboot and max(mins.values())/nonboot>.75: flags.append("ACTION_COLLAPSE")
+    waking=max(1,sum(mins.values())-sleep)
+    if sum(n for a,n in mins.items() if a and "study" in a)/waking>.75: flags.append("STUDY_LOCK")
+    if sum(mins.get(a,0) for a in ("use_phone","use_computer"))/waking>.75: flags.append("LEISURE_LOCK")
+    for key in ("hunger","fatigue","bathroom_urge","boredom","task_pressure","satisfaction","anxiety","screen_strain"):
+        hi=sum(f["elapsed"] for f in data if f["state"][key]>=.98); lo=sum(f["elapsed"] for f in data if f["state"][key]<=.02)
+        if hi>=240: flags.append("STATE_HIGH_SATURATION")
+        if lo>=240 and key not in ("satisfaction",): flags.append("STATE_LOW_SATURATION")
     if sum(f["elapsed"] for f in data if f["state"]["hunger"]>=.85)>=120: flags.append("UNMET_HUNGER")
     if sum(f["elapsed"] for f in data if f["state"]["bathroom_urge"]>=.85)>=90: flags.append("UNMET_BATHROOM")
     if switches/2>30: flags.append("RAPID_SWITCHING")

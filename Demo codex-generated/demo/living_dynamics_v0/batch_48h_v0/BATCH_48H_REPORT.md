@@ -26,8 +26,8 @@ See `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner
 - ACTION_COLLAPSE: 0 actors
 - STUDY_LOCK: 0 actors
 - LEISURE_LOCK: 0 actors
-- STATE_HIGH_SATURATION: 0 actors
-- STATE_LOW_SATURATION: 0 actors
+- STATE_HIGH_SATURATION: 128 actors
+- STATE_LOW_SATURATION: 128 actors
 - UNMET_HUNGER: 33 actors
 - UNMET_BATHROOM: 37 actors
 - RAPID_SWITCHING: 126 actors
