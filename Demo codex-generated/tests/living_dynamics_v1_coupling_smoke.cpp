@@ -41,7 +41,10 @@ int main(){
     if (!(night_sleep > day_sleep + .15)) return 20;
     s.task_pressure=.1; const double u_low=LivingDynamics::pressure_motivation(s); s.task_pressure=.5; const double u_mid=LivingDynamics::pressure_motivation(s); s.task_pressure=.9; const double u_high=LivingDynamics::pressure_motivation(s); if (!(u_low < u_mid && u_mid <= u_high)) return 9;
     s.task_pressure=.9; s.anxiety=.2; s.fatigue=.2; const double focused=LivingDynamics::overload_risk(s,p); s.anxiety=.95; s.fatigue=.9; const double overloaded=LivingDynamics::overload_risk(s,p); if (!(focused < .05 && overloaded > focused + .25)) return 10;
-    DemoLivingDynamicsV1 model; s = CharacterState{}; s.hunger=0.0; s.bathroom_urge=0.0; const double sat=s.satisfaction; model.advance_continuous(s,p,nullptr,30); if(!(std::abs(s.satisfaction-sat)<0.01)) return 11;
+    DemoLivingDynamicsV1 model; s = CharacterState{}; s.hunger=0.0; s.bathroom_urge=0.0; s.fatigue=0.0; s.anxiety=0.0; const double sat=s.satisfaction; RunningAction baseline; baseline.action=ActionType::Idle; model.advance_continuous(s,p,&baseline,30); if(!(std::abs(s.satisfaction-sat)<0.01)) return 11;
+    // Physiological inventory has one continuous owner: baseline × modifier,
+    // exactly once per 30-minute interval.
+    if (!(std::abs(s.hunger - .025) < 1e-9 && std::abs(s.bathroom_urge - .020) < 1e-9)) return 26;
     s.purchase_urge=.8; const double purchase=s.purchase_urge; RunningAction idle; idle.action=ActionType::Idle; model.advance_continuous(s,p,&idle,30); if(!(s.purchase_urge<purchase)) return 12;
     if (LivingDynamics::hunger_zone(.10)!=LivingDynamics::ActivationZone::Low
         || LivingDynamics::hunger_zone(.60)!=LivingDynamics::ActivationZone::Activated
