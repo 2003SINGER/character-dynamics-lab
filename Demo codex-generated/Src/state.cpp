@@ -194,10 +194,14 @@ StateUpdate advance_continuous_state(CharacterState& state,
     if (running_action->action == ActionType::Idle) action_delta.boredom = 0.025 * scale;
     if (running_action->action == ActionType::UsePhone || running_action->action == ActionType::ShopOnPhone
         || running_action->action == ActionType::UseComputer) action_delta.boredom = -0.025 * scale;
+    if (running_action->action != ActionType::UsePhone && running_action->action != ActionType::ShopOnPhone) {
+        action_delta.purchase_urge = -0.012 * state.purchase_urge * scale;
+    }
     state.fatigue = clamp_unit(state.fatigue + action_delta.fatigue);
     state.screen_strain = clamp_unit(state.screen_strain + action_delta.screen_strain);
     state.boredom = clamp_unit(state.boredom + action_delta.boredom);
     state.anxiety = clamp_unit(state.anxiety + action_delta.anxiety);
+    state.purchase_urge = clamp_unit(state.purchase_urge + action_delta.purchase_urge);
     const double metabolism = LivingDynamics::metabolism_rate(state, running_action) * scale;
     const double bathroom = LivingDynamics::bathroom_accumulation_rate(state, running_action) * scale;
     const bool recovery = running_action->action == ActionType::RestAtBed || running_action->action == ActionType::SleepAtBed;
@@ -217,7 +221,9 @@ StateUpdate advance_continuous_state(CharacterState& state,
     action_delta.screen_strain = state.screen_strain - before.screen_strain;
     update.requested.fatigue += action_delta.fatigue;
     update.requested.boredom += action_delta.boredom;
+    update.requested.purchase_urge += action_delta.purchase_urge;
     update.applied.boredom += action_delta.boredom;
+    update.applied.purchase_urge += action_delta.purchase_urge;
     update.requested.screen_strain += action_delta.screen_strain;
     update.applied.fatigue += action_delta.fatigue;
     update.applied.screen_strain += action_delta.screen_strain;
