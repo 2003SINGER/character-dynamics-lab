@@ -4,6 +4,14 @@ This is a development-only engineering sandbox for coupled living dynamics. It i
 
 Persistent S is unchanged. Perceived hunger, perceived bathroom need, overload, sleep readiness, recovery efficiency, and task absorption are derived transient modifiers.
 
+The first life loops are now coupled rather than fixed scripts: hunger and bathroom
+urge accumulate from elapsed time, current fatigue/anxiety, and the running action;
+their perceived discomfort feeds satisfaction and anxiety; meal relief, bathroom
+relief, and rest recovery depend on the state at the moment of completion. The
+policy sees those derived pressures when choosing whether to study, recover, eat,
+or leave the room. This is an executable sandbox coupling, not a calibrated
+physiology model.
+
 The five frozen runs use scenario/policy seeds `(17,101)`, `(29,202)`, `(43,303)`, `(61,404)`, and `(89,505)`. Generate them with:
 
 ```sh

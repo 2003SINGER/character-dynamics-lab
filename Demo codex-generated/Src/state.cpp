@@ -1,6 +1,7 @@
 #include "state.h"
 
 #include "runtime_scheduler.h"
+#include "living_dynamics.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -181,17 +182,31 @@ StateUpdate advance_continuous_state(CharacterState& state,
     }
     state.fatigue = clamp_unit(state.fatigue + action_delta.fatigue);
     state.screen_strain = clamp_unit(state.screen_strain + action_delta.screen_strain);
-    const double metabolism = 0.025 * scale;
-    const double bathroom = 0.020 * scale;
+    const double metabolism = LivingDynamics::metabolism_rate(state, running_action) * scale;
+    const double bathroom = LivingDynamics::bathroom_accumulation_rate(state, running_action) * scale;
     const bool recovery = running_action->action == ActionType::RestAtBed || running_action->action == ActionType::SleepAtBed;
     state.hunger = clamp_unit(state.hunger + metabolism * (recovery ? 0.7 : 1.0));
     state.bathroom_urge = clamp_unit(state.bathroom_urge + bathroom);
+    // Bodily needs feed back into affect continuously; the effect grows with
+    // the current state and personality rather than acting as a fixed penalty.
+    const double discomfort = LivingDynamics::need_discomfort(before, personality);
+    const double need_mood_cost = (0.010 + 0.018 * discomfort) * scale;
+    const double need_anxiety = (0.004 + 0.010 * discomfort)
+                              * personality.need_response * scale;
+    state.satisfaction = clamp_unit(state.satisfaction - need_mood_cost);
+    state.anxiety = clamp_unit(state.anxiety + need_anxiety);
+    action_delta.satisfaction -= need_mood_cost;
+    action_delta.anxiety += need_anxiety;
     action_delta.fatigue = state.fatigue - before.fatigue;
     action_delta.screen_strain = state.screen_strain - before.screen_strain;
     update.requested.fatigue += action_delta.fatigue;
     update.requested.screen_strain += action_delta.screen_strain;
     update.applied.fatigue += action_delta.fatigue;
     update.applied.screen_strain += action_delta.screen_strain;
+    update.requested.satisfaction += action_delta.satisfaction;
+    update.requested.anxiety += action_delta.anxiety;
+    update.applied.satisfaction += action_delta.satisfaction;
+    update.applied.anxiety += action_delta.anxiety;
     return update;
 }
 

@@ -1,4 +1,5 @@
 #include "living_dynamics.h"
+#include "runtime_scheduler.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -15,4 +16,18 @@ double rest_recovery_efficiency(const CharacterState& s){return clamp(.45 + .45*
 double meal_hunger_relief(const CharacterState& s){return clamp(.18+.62*s.hunger);}
 double meal_satisfaction_gain(const CharacterState& s,const Personality& p){return clamp((.02+.10*s.hunger)*(1.0-.50*s.anxiety));}
 double bathroom_relief(const CharacterState& s){return clamp(.22+.62*s.bathroom_urge);}
+double metabolism_rate(const CharacterState& s,const RunningAction* a){
+    double rate=.025*(1.0+.30*s.fatigue+.15*s.anxiety);
+    if(a && (a->action==ActionType::RestAtBed || a->action==ActionType::SleepAtBed)) rate*=.72;
+    if(a && (a->action==ActionType::StudyFocused || a->action==ActionType::StudyAtComputer)) rate*=1.12;
+    return rate;
+}
+double bathroom_accumulation_rate(const CharacterState& s,const RunningAction* a){
+    double rate=.020*(1.0+.18*s.hunger+.12*s.fatigue);
+    if(a && (a->action==ActionType::RestAtBed || a->action==ActionType::SleepAtBed)) rate*=.82;
+    return rate;
+}
+double need_discomfort(const CharacterState& s,const Personality& p){
+    return clamp(.62*perceived_hunger(s,p)+.48*perceived_bathroom(s,p));
+}
 }

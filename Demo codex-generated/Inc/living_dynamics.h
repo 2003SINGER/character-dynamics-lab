@@ -24,4 +24,7 @@ double rest_recovery_efficiency(const CharacterState& state);
 double meal_hunger_relief(const CharacterState& state);
 double meal_satisfaction_gain(const CharacterState& state, const Personality& personality);
 double bathroom_relief(const CharacterState& state);
+double metabolism_rate(const CharacterState& state, const RunningAction* action);
+double bathroom_accumulation_rate(const CharacterState& state, const RunningAction* action);
+double need_discomfort(const CharacterState& state, const Personality& personality);
 }

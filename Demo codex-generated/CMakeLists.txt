@@ -34,8 +34,8 @@ set(CHARACTER_DYNAMICS_RUNTIME_SOURCES
     Src/observation.cpp
     Src/appraisal.cpp
     Src/state.cpp
-    Src/parameter_config.cpp
     Src/living_dynamics.cpp
+    Src/parameter_config.cpp
     Src/candidate_scoring.cpp
     Src/decision.cpp
     Src/simulation.cpp
@@ -154,6 +154,7 @@ endforeach()
 add_executable(character_dynamics_replay_core
     Src/replay_core_cli.cpp
     Src/state.cpp
+    Src/living_dynamics.cpp
     Src/parameter_config.cpp
     Src/candidate_scoring.cpp
 )

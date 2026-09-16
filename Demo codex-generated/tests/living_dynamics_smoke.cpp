@@ -1,5 +1,6 @@
 #include "living_dynamics.h"
 #include "decision.h"
+#include "runtime_scheduler.h"
 #include <cmath>
 int main() {
     Personality p; CharacterState calm, stressed;
@@ -14,5 +15,15 @@ int main() {
     Observation o; o.facts.push_back({"clock.total_minutes","1380",KnowledgeStatus::Known,"test","23:00"});
     Observation d; d.facts.push_back({"clock.total_minutes","780",KnowledgeStatus::Known,"test","13:00"});
     if (!(LivingDynamics::sleep_readiness(o,calm,p)>LivingDynamics::sleep_readiness(d,calm,p))) return 5;
+    CharacterState rested = calm; rested.fatigue = .1;
+    CharacterState taxed = calm; taxed.fatigue = .9; taxed.anxiety = .7;
+    if (!(LivingDynamics::metabolism_rate(taxed, nullptr) > LivingDynamics::metabolism_rate(rested, nullptr))) return 6;
+    if (!(LivingDynamics::need_discomfort(taxed, p) > LivingDynamics::need_discomfort(rested, p))) return 7;
+    CharacterState need_low = calm; need_low.hunger = .1;
+    CharacterState need_high = calm; need_high.hunger = .9;
+    RunningAction idle; idle.action = ActionType::Idle;
+    advance_continuous_state(need_low, p, &idle, 30);
+    advance_continuous_state(need_high, p, &idle, 30);
+    if (!(need_high.satisfaction < need_low.satisfaction)) return 8;
     return 0;
 }

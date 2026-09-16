@@ -9,6 +9,14 @@
 #include <string>
 #include <vector>
 
+// replay_core intentionally links a reduced source set.  Keep the one
+// observation lookup needed by shared living-dynamics helpers local to this
+// compatibility executable rather than pulling the full W/O runtime in.
+const ObservationFact* find_fact(const Observation& observation, const std::string& key) {
+    for (const auto& fact : observation.facts) if (fact.key == key) return &fact;
+    return nullptr;
+}
+
 namespace {
 inline constexpr const char* kReplayCoreVersion = "replay-core-v0";
 
