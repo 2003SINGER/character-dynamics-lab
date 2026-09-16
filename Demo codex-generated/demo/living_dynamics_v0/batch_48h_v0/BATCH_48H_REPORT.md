@@ -21,16 +21,16 @@ See `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner
 
 - NO_SLEEP_48H: 0 actors
 - EXCESSIVE_SLEEP: 17 actors
-- MEAL_SPAM: 61 actors
+- MEAL_SPAM: 56 actors
 - BATHROOM_SPAM: 0 actors
 - ACTION_COLLAPSE: 0 actors
 - STUDY_LOCK: 0 actors
 - LEISURE_LOCK: 0 actors
-- STATE_HIGH_SATURATION: 128 actors
-- STATE_LOW_SATURATION: 128 actors
-- UNMET_HUNGER: 33 actors
+- STATE_HIGH_SATURATION: 0 actors
+- STATE_LOW_SATURATION: 0 actors
+- UNMET_HUNGER: 30 actors
 - UNMET_BATHROOM: 37 actors
-- RAPID_SWITCHING: 126 actors
+- RAPID_SWITCHING: 0 actors
 - REJECTION_LOOP: 1 actors
 
 ## Representative timelines
