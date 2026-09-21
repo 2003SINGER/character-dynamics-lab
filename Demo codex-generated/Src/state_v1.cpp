@@ -24,17 +24,14 @@ StateDelta semantic_delta(const Appraisal& appraisal,
         const double relevance = std::clamp(signal.goal_relevance, 0.0, 1.0);
         switch (signal.kind) {
         case AppraisalSignalKind::GoalProgress:
-            delta.task_pressure -= 0.12 * strength * std::max(0.25, relevance);
             delta.satisfaction += 0.04 * strength;
             delta.anxiety -= 0.03 * strength * personality.task_anxiety_sensitivity;
             break;
         case AppraisalSignalKind::GoalCompletion:
-            delta.task_pressure -= 0.85 * strength;
             delta.anxiety -= 0.55 * strength;
             delta.satisfaction += 0.32 * strength;
             break;
         case AppraisalSignalKind::GoalObstruction:
-            delta.task_pressure += 0.06 * strength * std::max(0.25, relevance);
             delta.anxiety += 0.04 * strength * personality.task_anxiety_sensitivity;
             delta.satisfaction -= 0.03 * strength;
             break;
@@ -78,9 +75,12 @@ StateUpdate update_state(CharacterState& state,
     delta.fatigue = appraisal.fatigue_delta
                   + update.semantic_contribution.fatigue
                   ;
-    delta.task_pressure = (appraisal.task_pressure_delta
-                        + update.semantic_contribution.task_pressure)
-                        * config.task_pressure_coupling;
+    // V1 pressure is not an event-impulse inventory.  Its continuously
+    // derived target is consumed here only as a bounded correction; the same
+    // target is approached during elapsed continuous time below.
+    delta.task_pressure = appraisal.has_task_pressure_target
+        ? (appraisal.task_pressure_target - state.task_pressure) * 0.12
+        : 0.0;
     delta.satisfaction = appraisal.satisfaction_delta
                        + update.semantic_contribution.satisfaction
                        ;
@@ -96,20 +96,10 @@ StateUpdate update_state(CharacterState& state,
     delta.purchase_urge = appraisal.purchase_urge_delta
                         + update.semantic_contribution.purchase_urge
                         ;
-    delta.anxiety = appraisal.anxiety_delta
-                  + update.semantic_contribution.anxiety
-                  + 0.018 * LivingDynamics::pressure_motivation(state)
-                    * time_scale * personality.task_anxiety_sensitivity;
-
-    const double raw_task_pressure_delta = delta.task_pressure;
-    if (raw_task_pressure_delta > 0.0) {
-        const double pressure_zone = std::clamp((state.task_pressure - .45) / .40, 0.0, 1.0);
-        delta.task_pressure += 0.02 * pressure_zone * personality.procrastination * config.state_accumulation;
-        delta.anxiety += 0.015 * pressure_zone * personality.task_anxiety_sensitivity;
-    }
-    if (raw_task_pressure_delta < 0.0) {
-        delta.task_pressure *= (0.70 + 0.30 * personality.self_control) * config.state_decay;
-    }
+    const double anxiety_target=.04+.40*LivingDynamics::pressure_motivation(state)
+        * personality.task_anxiety_sensitivity;
+    delta.anxiety = appraisal.anxiety_delta + update.semantic_contribution.anxiety
+                  + .18*(anxiety_target-state.anxiety)*time_scale;
     delta.fatigue += std::max(0.0, delta.screen_strain)
                    * 0.10 * personality.screen_strain_sensitivity;
     if (delta.fatigue < 0.0) {
@@ -126,7 +116,6 @@ StateUpdate update_state(CharacterState& state,
         delta.satisfaction *= 0.35 + 0.65 * (1.0 - state.satisfaction);
     }
     delta.satisfaction += 0.014 * (0.50 - state.satisfaction) * time_scale;
-    delta.anxiety += 0.003 * (0.20 - state.anxiety) * time_scale;
 
     state.boredom = clamp_unit(state.boredom + delta.boredom);
     state.fatigue = clamp_unit(state.fatigue + delta.fatigue);
@@ -152,6 +141,7 @@ StateUpdate update_state(CharacterState& state,
 }
 
 StateUpdate advance_continuous_state(CharacterState& state,
+                                     const Observation& observation,
                                      const Personality& personality,
                                      const RunningAction* running_action,
                                      int elapsed_minutes,
@@ -160,6 +150,14 @@ StateUpdate advance_continuous_state(CharacterState& state,
     // it from all event/appraisal deltas. Running-action rates are explicitly
     // a v1 engineering adapter, not a claim about psychological parameters.
     StateUpdate update = DemoLivingV0::update_state(state, Appraisal{}, personality, elapsed_minutes, config);
+    // Target pressure is an O-derived discrepancy, not an appraisal impulse.
+    // The response is time-based, so extra event boundaries cannot pump it.
+    const double pressure_before=state.task_pressure;
+    const double target=LivingDynamics::task_pressure_target(observation,state);
+    const double response=elapsed_minutes<=0 ? 0.0 : 1.0-std::exp(-static_cast<double>(elapsed_minutes)/180.0);
+    state.task_pressure=clamp_unit(state.task_pressure+(target-state.task_pressure)*response);
+    update.requested.task_pressure += state.task_pressure-pressure_before;
+    update.applied.task_pressure += state.task_pressure-pressure_before;
     if (running_action == nullptr || elapsed_minutes == 0) return update;
 
     const CharacterState before = state;

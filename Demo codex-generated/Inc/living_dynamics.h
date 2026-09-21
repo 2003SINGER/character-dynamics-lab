@@ -39,6 +39,7 @@ double distraction_drive(const CharacterState& state, const Personality& persona
 double goal_reward_support(const CharacterState& state);
 double cognitive_fatigue_penalty(const CharacterState& state);
 double pressure_motivation(const CharacterState& state);
+double task_pressure_target(const Observation& observation, const CharacterState& state);
 double anxiety_facilitation(const CharacterState& state);
 double anxiety_impairment(const CharacterState& state);
 double overload_risk(const CharacterState& state, const Personality& personality);

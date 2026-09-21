@@ -23,6 +23,22 @@ double perceived_hunger(const CharacterState& s,const Personality& p){const doub
 double perceived_bathroom(const CharacterState& s,const Personality& p){const double anxiety_notice=clamp((s.anxiety-.20)/.80);return clamp(s.bathroom_urge + 0.10*anxiety_notice - 0.05*task_absorption(s));}
 double overload(const CharacterState& s,const Personality& p){return overload_risk(s,p);}
 double pressure_motivation(const CharacterState& s){return s.task_pressure < .70 ? s.task_pressure/.70 : 1.0;}
+double task_pressure_target(const Observation& o,const CharacterState& s){
+    if (!has_known_fact(o,"task.coursework.status","active")) return .04;
+    double effort=0.0, effort_target=0.0;
+    const bool has_effort=known_double(o,"task.coursework.effort",effort);
+    const bool has_target=known_double(o,"task.coursework.effort_target",effort_target) && effort_target>0.0;
+    const double remaining=(has_effort && has_target) ? clamp(1.0-effort/effort_target) : 1.0;
+    int deadline=0, now=0;
+    const bool has_deadline=known_int(o,"task.coursework.deadline_at_total_minutes",deadline)
+        && known_int(o,"clock.total_minutes",now);
+    const double urgency=!has_deadline ? .15 : (now>=deadline ? 1.0
+        : clamp(1.0-static_cast<double>(deadline-now)/720.0));
+    int unread=0; known_int(o,"message.unread_count",unread);
+    const double commitment=s.commitment.status==CommitmentStatus::Active ? .07
+        : (s.commitment.status==CommitmentStatus::Suspended ? .03 : 0.0);
+    return clamp(.16+.26*remaining+.28*urgency+(unread>0?.04:0.0)+commitment);
+}
 double anxiety_facilitation(const CharacterState& s){return clamp(1.0-std::abs(s.anxiety-.35)/.35);}
 double anxiety_impairment(const CharacterState& s){return clamp((s.anxiety-.70)/.30);}
 double overload_risk(const CharacterState& s,const Personality& p){return clamp(std::max(0.0,(s.task_pressure-.75)/.25)*std::max(0.0,(s.anxiety-.65)/.35)*(0.65+0.35*s.fatigue*p.task_anxiety_sensitivity));}

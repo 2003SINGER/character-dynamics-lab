@@ -24,8 +24,8 @@ int main() {
     CharacterState need_high = calm; need_high.hunger = .9;
     RunningAction idle; idle.action = ActionType::Idle;
     DemoLivingDynamicsV0 dynamics;
-    dynamics.advance_continuous(need_low, p, &idle, 30);
-    dynamics.advance_continuous(need_high, p, &idle, 30);
+    dynamics.advance_continuous(need_low, o, p, &idle, 30);
+    dynamics.advance_continuous(need_high, o, p, &idle, 30);
     if (!(need_high.satisfaction < need_low.satisfaction)) return 8;
     return 0;
 }

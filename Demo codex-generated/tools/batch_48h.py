@@ -5,6 +5,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "demo/living_dynamics_v0/batch_48h_v0"
 MODEL_ID = "demo-living-v0"
 BATCH_ID = "demo-living-v0"
+CONFIG_VERSION = "demo-living-v1-calibration-pass-1"
 PROFILES = ["balanced", "disciplined", "procrastinating", "rest_seeking", "stimulation_seeking", "anxious", "body_sensitive", "spontaneous"]
 PROFILE_VALUES = {
     "balanced": [.5]*8, "disciplined": [.2,.8,.4,.35,.4,.5,.6,.25],
@@ -36,8 +37,16 @@ def compact(f, profile, scenario, policy):
     return {"actor_id":f["actor_id"],"profile":profile,"scenario_seed":scenario,"policy_seed":policy,"dynamics_model":MODEL_ID,"timestamp":f["timestamp"],"day":(f["timestamp"]-480)//1440+1,"clock":f["timestamp"]%1440,"elapsed_minutes":f["elapsed"],"selected_action":f.get("selected_action"),"selected_target":f.get("selected_target",""),"running_action_before":rb.get("action") if rb else None,"running_action_after":ra.get("action") if ra else None,**{k:s[k] for k in ("hunger","fatigue","bathroom_urge","boredom","task_pressure","satisfaction","anxiety","screen_strain")},"task_effort":f.get("task_effort",0),"effort_target":f.get("effort_target"),"commitment_status":f.get("commitment_status"),"decision_gate_reasons":f.get("decision_gate",{}).get("reasons",[]),"validation_result":f.get("validation",{}),"rejection_reason":(f.get("post_policy_outcome") or {}).get("failure_reason") if f.get("post_policy_outcome") else None,"top3_policy_candidates":[{"action":x["action"],"target":x.get("target",""),"probability":x.get("probability",0)} for x in sorted(f.get("candidates",[]),key=lambda x:x.get("probability",0),reverse=True)[:3]]}
 def summary(actor, profile, scenario, policy, data):
     acts=[f.get("selected_action") for f in data if f.get("selected_action")]; mins={a:sum(f["elapsed"] for f in data if action_name(f)==a) for a in set(action_name(f) for f in data if action_name(f))}
+    # A policy sample that deliberately keeps the current RunningAction is a
+    # reconsideration, not a behavioral switch.  Count actual action starts.
+    running_after=[(f.get("running_action_after") or {}).get("action") for f in data]
+    starts=[]
+    previous=None
+    for action in running_after:
+        if action and action != previous: starts.append(action)
+        previous=action
     def vals(k): return [f["state"][k] for f in data]
-    switches=sum(a!=b for a,b in zip(acts,acts[1:])); entropy=-sum((n/sum(mins.values()))*math.log(n/sum(mins.values())) for n in mins.values() if n)
+    switches=sum(a!=b for a,b in zip(starts,starts[1:])); entropy=-sum((n/sum(mins.values()))*math.log(n/sum(mins.values())) for n in mins.values() if n)
     flags=[]; sleep=mins.get("sleep_at_bed",0)+mins.get("sleep",0); meals=outcome_successes(data,"get_meal"); baths=outcome_successes(data,"go_to_bathroom")
     if sleep==0: flags.append("NO_SLEEP_48H")
     if sleep>960: flags.append("EXCESSIVE_SLEEP")
@@ -51,21 +60,28 @@ def summary(actor, profile, scenario, policy, data):
     for key in ("hunger","fatigue","bathroom_urge","boredom","task_pressure","satisfaction","anxiety","screen_strain"):
         hi=max_episode(data,key,.98); lo=max_episode(data,key,.02,False)
         if hi>=240: flags.append(f"{key.upper()}_HIGH_SATURATION")
-        if lo>=240 and key not in ("satisfaction",): flags.append(f"{key.upper()}_LOW_SATURATION")
+        # Screen strain is an exposure load, so an absent screen dose is not a
+        # psychological low-saturation failure.  Its executable invariant is
+        # response to real screen exposure, checked below.
+        if lo>=240 and key not in ("satisfaction","screen_strain",): flags.append(f"{key.upper()}_LOW_SATURATION")
+    screen_minutes=sum(mins.get(a,0) for a in ("use_phone","shop_on_phone","use_computer","study_at_computer"))
+    if screen_minutes>=120 and max(vals("screen_strain"))<.20: flags.append("SCREEN_STRAIN_UNRESPONSIVE")
     if max_episode(data,"hunger",.85)>=120: flags.append("UNMET_HUNGER")
     if max_episode(data,"bathroom_urge",.85)>=90: flags.append("UNMET_BATHROOM")
-    if sum(f.get("validation",{}).get("performed") and not f.get("validation",{}).get("accepted") for f in data)>1: flags.append("REJECTION_LOOP")
-    return {"actor_id":actor,"profile":profile,"scenario_seed":scenario,"policy_seed":policy,"actual_minutes":data[-1]["timestamp"]-480,"boundary_count":len(data),"decision_count":sum(f.get("policy_evaluated",False) for f in data),"study_minutes":sum(n for a,n in mins.items() if "study" in a),"leisure_minutes":sum(n for a,n in mins.items() if a in ("use_phone","use_computer")),"idle_minutes":mins.get("idle",0),"rest_minutes":mins.get("rest_at_bed",0),"sleep_minutes":sleep,"meal_count":meals,"bathroom_count":baths,"phone_count":sum(a=="use_phone" for a in acts),"computer_count":sum(a=="use_computer" for a in acts),"study_action_count":sum("study" in a for a in acts),"unique_actions":len(set(acts)),"action_entropy":round(entropy,6),"switches_per_day":switches/2,"longest_same_action_streak":max((sum(1 for _ in g) for _,g in __import__('itertools').groupby(acts)),default=0),"task_final_effort":data[-1].get("task_effort",0),"task_completed":any((f.get("pre_policy_outcome") or {}).get("task_completed") or (f.get("post_policy_outcome") or {}).get("task_completed") for f in data),"task_completion_time":next((f["timestamp"]-480 for f in data if (f.get("pre_policy_outcome") or {}).get("task_completed") or (f.get("post_policy_outcome") or {}).get("task_completed")),""),"hunger_mean":statistics.mean(vals("hunger")),"hunger_max":max(vals("hunger")),"hunger_final":vals("hunger")[-1],"fatigue_mean":statistics.mean(vals("fatigue")),"fatigue_max":max(vals("fatigue")),"fatigue_final":vals("fatigue")[-1],"bathroom_mean":statistics.mean(vals("bathroom_urge")),"bathroom_max":max(vals("bathroom_urge")),"bathroom_final":vals("bathroom_urge")[-1],"boredom_mean":statistics.mean(vals("boredom")),"boredom_max":max(vals("boredom")),"boredom_final":vals("boredom")[-1],"task_pressure_mean":statistics.mean(vals("task_pressure")),"task_pressure_max":max(vals("task_pressure")),"task_pressure_final":vals("task_pressure")[-1],"satisfaction_mean":statistics.mean(vals("satisfaction")),"satisfaction_min":min(vals("satisfaction")),"satisfaction_final":vals("satisfaction")[-1],"anxiety_mean":statistics.mean(vals("anxiety")),"anxiety_max":max(vals("anxiety")),"anxiety_final":vals("anxiety")[-1],"rejection_count":sum(f.get("validation",{}).get("performed",False) and not f.get("validation",{}).get("accepted",False) for f in data),"diagnostic_flags":"|".join(flags)}
+    rejected=[(f.get("selected_action"),f.get("selected_target","")) for f in data if f.get("validation",{}).get("performed") and not f.get("validation",{}).get("accepted")]
+    if any(rejected.count(item)>1 for item in set(rejected)): flags.append("REJECTION_LOOP")
+    return {"actor_id":actor,"profile":profile,"scenario_seed":scenario,"policy_seed":policy,"actual_minutes":data[-1]["timestamp"]-480,"boundary_count":len(data),"decision_count":sum(f.get("policy_evaluated",False) for f in data),"study_minutes":sum(n for a,n in mins.items() if "study" in a),"leisure_minutes":sum(n for a,n in mins.items() if a in ("use_phone","use_computer")),"idle_minutes":mins.get("idle",0),"rest_minutes":mins.get("rest_at_bed",0),"sleep_minutes":sleep,"meal_count":meals,"bathroom_count":baths,"phone_count":sum(a=="use_phone" for a in acts),"computer_count":sum(a=="use_computer" for a in acts),"study_action_count":sum("study" in a for a in acts),"unique_actions":len(set(starts)),"action_entropy":round(entropy,6),"switches_per_day":switches/2,"longest_same_action_streak":max((sum(1 for _ in g) for _,g in __import__('itertools').groupby(action_name(f) for f in data)),default=0),"task_final_effort":data[-1].get("task_effort",0),"task_completed":any((f.get("pre_policy_outcome") or {}).get("task_completed") or (f.get("post_policy_outcome") or {}).get("task_completed") for f in data),"task_completion_time":next((f["timestamp"]-480 for f in data if (f.get("pre_policy_outcome") or {}).get("task_completed") or (f.get("post_policy_outcome") or {}).get("task_completed")),""),"hunger_mean":statistics.mean(vals("hunger")),"hunger_max":max(vals("hunger")),"hunger_final":vals("hunger")[-1],"fatigue_mean":statistics.mean(vals("fatigue")),"fatigue_max":max(vals("fatigue")),"fatigue_final":vals("fatigue")[-1],"bathroom_mean":statistics.mean(vals("bathroom_urge")),"bathroom_max":max(vals("bathroom_urge")),"bathroom_final":vals("bathroom_urge")[-1],"boredom_mean":statistics.mean(vals("boredom")),"boredom_max":max(vals("boredom")),"boredom_final":vals("boredom")[-1],"task_pressure_mean":statistics.mean(vals("task_pressure")),"task_pressure_max":max(vals("task_pressure")),"task_pressure_final":vals("task_pressure")[-1],"satisfaction_mean":statistics.mean(vals("satisfaction")),"satisfaction_min":min(vals("satisfaction")),"satisfaction_final":vals("satisfaction")[-1],"anxiety_mean":statistics.mean(vals("anxiety")),"anxiety_max":max(vals("anxiety")),"anxiety_final":vals("anxiety")[-1],"screen_exposure_minutes":screen_minutes,"rejection_count":len(rejected),"diagnostic_flags":"|".join(flags)}
 def main():
-    global OUT, MODEL_ID, BATCH_ID
+    global OUT, MODEL_ID, BATCH_ID, CONFIG_VERSION
     exe=sys.argv[1]
     MODEL_ID=sys.argv[2] if len(sys.argv)>2 else MODEL_ID
     if len(sys.argv)>3: OUT=ROOT / sys.argv[3]
     if len(sys.argv)>4: BATCH_ID=sys.argv[4]
+    if len(sys.argv)>5: CONFIG_VERSION=sys.argv[5]
     OUT.mkdir(parents=True,exist_ok=True); raw=OUT/".raw"; raw.mkdir(exist_ok=True)
     version="v1" if MODEL_ID.endswith("v1") else "v0"
     revision=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT.parent,text=True).strip()
-    manifest={"milestone":f"DEMO_LIVING_BATCH_48H_{version.upper()}","artifact_id":BATCH_ID,"actors":128,"profiles":PROFILES,"seeds":{"scenario":"1000 + actor_id * 17","policy":"5000 + actor_id * 31"},"start_total_minutes":480,"horizon_minutes":2880,"dynamics_model":MODEL_ID,"git_revision":revision,"config_version":"demo-living-v1-calibration-pass-1","demo_only":True}
+    manifest={"milestone":f"DEMO_LIVING_BATCH_48H_{version.upper()}","artifact_id":BATCH_ID,"actors":128,"profiles":PROFILES,"seeds":{"scenario":"1000 + actor_id * 17","policy":"5000 + actor_id * 31"},"start_total_minutes":480,"horizon_minutes":2880,"dynamics_model":MODEL_ID,"git_revision":revision,"config_version":CONFIG_VERSION,"demo_only":True}
     (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2)+"\n"); (OUT/"profiles.json").write_text(json.dumps({k:{"values":v,"classification":"demo engineering profile"} for k,v in PROFILE_VALUES.items()},indent=2)+"\n")
     rows=[]; compact_lines=[]; traces={}
     for actor in range(128):

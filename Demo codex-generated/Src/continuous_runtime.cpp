@@ -37,8 +37,14 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     result.runtime.boundary = scheduler_.advance_to_next_boundary();
     const auto& action = result.runtime.boundary.action_after_boundary;
     result.running_action_after = action;
+    // The scheduler is the canonical time owner.  Its clock is an internally
+    // observable cue, so Dynamics never has to read hidden W time or operate
+    // against a stale O-side deadline.
+    apply_observable_runtime_event(observation_, "clock.total_minutes",
+                                   std::to_string(result.runtime.boundary.at_total_minutes),
+                                   "runtime_internal_clock", world_runtime_.time_summary());
     // Continuous dynamics is integrated before event projection at t.
-    result.continuous_state = model_.advance_continuous(state, personality,
+    result.continuous_state = model_.advance_continuous(state, observation_, personality,
         action.has_value() ? &*action : nullptr, result.runtime.boundary.elapsed_minutes);
     result.runtime.world_events = world_runtime_.advance_to_boundary(result.runtime.boundary, scheduler_);
     apply_world_events(observation_, result.runtime.world_events, world_runtime_.world(), access_, world_runtime_.time_summary());
@@ -62,6 +68,17 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         result.runtime.boundary.decision_gate.reasons.push_back(DecisionGateReason::NeedThresholdCrossed);
         threshold_reconsideration = true;
     }
+    DynamicsReconsideration dynamics_reconsideration;
+    if (action.has_value() && action->status == RunningActionStatus::Running) {
+        dynamics_reconsideration = model_.reconsider_running_action(
+            observation_, before_continuous, state, *action, personality);
+        if (dynamics_reconsideration.requested) {
+            result.runtime.boundary.decision_gate.open = true;
+            result.runtime.boundary.decision_gate.reasons.push_back(
+                DecisionGateReason::DynamicsReconsideration);
+            result.dynamics_reconsideration_reason = dynamics_reconsideration.reason;
+        }
+    }
     if (action.has_value() && action->status == RunningActionStatus::Completed) {
         result.pre_policy_outcome = world_runtime_.world().settle_runtime_completion(
             action->action, action->target_object_id, action->elapsed_minutes);
@@ -84,9 +101,10 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     result.observation_deltas = observation_.updates_this_refresh;
     model_.update_persistent_intention(state, observation_, scheduler_.now_total_minutes());
     consume_appraisal_inputs(observation_);
+    const bool subjective_reconsideration = threshold_reconsideration || dynamics_reconsideration.requested;
     if (result.runtime.boundary.decision_gate.open
         && (result.pre_policy_outcome.has_value() || !action.has_value()
-            || action->status != RunningActionStatus::Running || threshold_reconsideration)) {
+            || action->status != RunningActionStatus::Running || subjective_reconsideration)) {
         result.policy_evaluated = true;
         result.decision = model_.build_policy(observation_, state, personality);
         const ActionType selected = test_action_selector_ ? test_action_selector_(result.decision)
@@ -101,7 +119,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
                 const bool same_intent = action.has_value()
                     && selected == action->action
                     && candidate.target_object_id == action->target_object_id;
-                if (threshold_reconsideration && action.has_value()
+                if (subjective_reconsideration && action.has_value()
                     && action->status == RunningActionStatus::Running
                     && !same_intent) {
                     const WorldOutcome validation = world_runtime_.validate_runtime_start(
@@ -125,7 +143,7 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
                                                world_runtime_.time_summary(), true, false);
                     scheduler_.replace_running_action(candidate.action, candidate.target_object_id,
                                                       action_definition(candidate.action).default_duration_minutes);
-                } else if (!threshold_reconsideration || !action.has_value()
+                } else if (!subjective_reconsideration || !action.has_value()
                            || action->status != RunningActionStatus::Running) {
                     submit_action_intent(candidate.action, candidate.target_object_id,
                                          action_definition(candidate.action).default_duration_minutes);

@@ -9,7 +9,7 @@ void update_commitment(CharacterState&, const Observation&, int);
 DecisionContext decide(const Observation&, const CharacterState&, const Personality&, const ParameterConfig&);
 }
 
-StateUpdate DemoLivingDynamicsV0::advance_continuous(CharacterState& s, const Personality& p,
+StateUpdate DemoLivingDynamicsV0::advance_continuous(CharacterState& s, const Observation&, const Personality& p,
                                                       const RunningAction* a, int minutes) const {
     return DemoLivingV0::advance_continuous_state(s, p, a, minutes, ParameterConfig::defaults());
 }

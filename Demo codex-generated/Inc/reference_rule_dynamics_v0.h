@@ -3,7 +3,7 @@
 
 class ReferenceRuleDynamicsV0 final : public CharacterDynamicsModel {
 public:
-    StateUpdate advance_continuous(CharacterState&, const Personality&, const RunningAction*, int) const override;
+    StateUpdate advance_continuous(CharacterState&, const Observation&, const Personality&, const RunningAction*, int) const override;
     Appraisal appraise(const Observation&, const CharacterState&, const Personality&) const override;
     StateUpdate apply_impulse(CharacterState&, const Appraisal&, const Personality&) const override;
     void update_persistent_intention(CharacterState&, const Observation&, int) const override;

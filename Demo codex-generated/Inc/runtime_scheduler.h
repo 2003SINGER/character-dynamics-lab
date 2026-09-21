@@ -39,6 +39,7 @@ enum class DecisionGateReason {
     StrongExternalEvent,
     ActionInterrupted,
     NeedThresholdCrossed,
+    DynamicsReconsideration,
     CommitmentReconsideration,
     PlanInvalidated
 };

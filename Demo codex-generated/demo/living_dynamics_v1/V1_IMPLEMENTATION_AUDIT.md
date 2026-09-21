@@ -1,9 +1,11 @@
-# DemoLivingDynamicsV1 implementation audit
+# DemoLivingDynamicsV1 implementation audit (historical pre-repair audit)
 
 Date: 2026-09-21  
-Scope: `DemoLivingDynamicsV1` only. This audit does not modify Runtime,
-ResearchDynamicsV1, legacy/reference dynamics, the action surface, or V0
-artifacts.
+Scope at audit time: `DemoLivingDynamicsV1` only. This document records the
+pre-repair diagnosis that led to the later authorized interface repair; it is
+not the current ownership specification. See `MECHANISM_REPAIR_AUDIT.md` for
+the implemented current boundary. ResearchDynamicsV1, legacy/reference
+dynamics, the action surface and V0 artifacts remain untouched.
 
 ## Audit method
 

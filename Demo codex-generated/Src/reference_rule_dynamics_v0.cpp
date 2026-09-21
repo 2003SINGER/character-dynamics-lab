@@ -1,6 +1,6 @@
 #include "reference_rule_dynamics_v0.h"
 
-StateUpdate ReferenceRuleDynamicsV0::advance_continuous(CharacterState& s, const Personality& p,
+StateUpdate ReferenceRuleDynamicsV0::advance_continuous(CharacterState& s, const Observation&, const Personality& p,
                                                          const RunningAction* a, int minutes) const {
     return ::advance_continuous_state(s, p, a, minutes);
 }

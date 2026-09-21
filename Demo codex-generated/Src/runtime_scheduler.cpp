@@ -31,6 +31,7 @@ const char* to_string(DecisionGateReason reason) {
     case DecisionGateReason::StrongExternalEvent: return "strong_external_event";
     case DecisionGateReason::ActionInterrupted: return "action_interrupted";
     case DecisionGateReason::NeedThresholdCrossed: return "need_threshold_crossed";
+    case DecisionGateReason::DynamicsReconsideration: return "dynamics_reconsideration";
     case DecisionGateReason::CommitmentReconsideration: return "commitment_reconsideration";
     case DecisionGateReason::PlanInvalidated: return "plan_invalidated";
     }

@@ -32,6 +32,7 @@ struct RuntimeExecutionResult {
     std::string selected_target_object_id;
     bool replacement_validation_performed = false;
     bool replacement_validation_accepted = false;
+    std::string dynamics_reconsideration_reason;
     unsigned int policy_seed = 0;
     std::vector<ObservationFact> observation_deltas;
     bool policy_evaluated = false;

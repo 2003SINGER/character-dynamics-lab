@@ -330,8 +330,17 @@ Observation refresh_observation(Observation observation,
             && find_fact(observation, "task." + task.id + ".status") == nullptr) {
             write_fact(observation, "task." + task.id + ".status", "active", "initial_task_brief", now);
         }
-        const bool deadline_passed = task.due_at_total_minutes >= 0
-            && total_minutes(world.time) >= task.due_at_total_minutes;
+        // Workload is initial task-brief information.  Later progress is
+        // received through the actor's own typed settlement feedback below,
+        // not copied from hidden W on an ordinary refresh.
+        if (find_fact(observation, "task." + task.id + ".effort_target") == nullptr) {
+            write_fact(observation, "task." + task.id + ".effort_target",
+                       std::to_string(task.effort_target), "initial_task_brief", now);
+        }
+        if (find_fact(observation, "task." + task.id + ".effort") == nullptr) {
+            write_fact(observation, "task." + task.id + ".effort",
+                       std::to_string(task.effort_done), "initial_task_brief", now);
+        }
         if (access.task_deadline_observable) {
             const std::string key = "task." + task.id + ".deadline_at_total_minutes";
             const std::string source = find_fact(observation, key) == nullptr ? "initial_calendar" : "internal_calendar";
@@ -417,6 +426,8 @@ void apply_self_action_feedback(Observation& observation,
     } else {
         write_fact(observation, status_key, "active", "self_action_progress_feedback", observed_at);
     }
+    write_fact(observation, "task." + outcome.task_id + ".effort",
+               std::to_string(outcome.task_effort_after), "self_action_progress_feedback", observed_at);
     // Preserve only semantic feedback created by this call for the next X
     // evaluation. refresh_observation clears the per-refresh list, so without
     // this handoff a completion delta can be lost before appraisal consumes it.

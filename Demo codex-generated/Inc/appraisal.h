@@ -39,6 +39,10 @@ struct Appraisal {
     double anxiety_delta = 0.0;
     double screen_strain_delta = 0.0;
     double purchase_urge_delta = 0.0;
+    // Transient V1 X-side target.  It is not persistent state and is derived
+    // only from facts currently known in O.
+    bool has_task_pressure_target = false;
+    double task_pressure_target = 0.0;
     std::vector<AppraisalSignal> semantic_signals;
     std::vector<std::string> tags;
 };

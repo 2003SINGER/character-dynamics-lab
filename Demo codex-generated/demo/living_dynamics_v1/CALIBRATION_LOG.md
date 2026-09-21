@@ -24,5 +24,19 @@ evidence.
 | satisfaction neutral return / 30 min | `.006 × (.50-satisfaction)` | `.014 × (.50-satisfaction)` | normalization could not counter normal positive settlement | quiet periods return more visibly toward neutral |
 | generic need-resolution satisfaction bonus | `+.04 * P.need_response` | removed | meal/bathroom already have state-dependent satisfaction effects | removes a duplicated positive path |
 
-No seed, profile, action type, world settlement, state field, Runtime rule, or
-ResearchDynamics component changed in this pass.
+No seed, profile, action type, world settlement, state field or
+ResearchDynamics component changed in this calibration pass.
+
+## Mechanism repair R1 — 2026-09-21
+
+This is not a coefficient pass. It follows explicit authorization to modify
+the model/Runtime interface and O-clock projection after the calibration batch
+revealed an ownership defect.
+
+| Mechanism | Before | Repair | Boundary preserved |
+|---|---|---|---|
+| recovery fatigue / screen strain | continuous action, appraisal and semantic paths could all mutate the same load | physical loads are continuous-action-owned; events retain typed meaning only | no World/action schema change |
+| long-action reconsideration | only Kernel `.40` need crossings could open a gate | model can request a typed subjective reconsideration; same-action continuation retains elapsed progress | Kernel does not name V1 states or thresholds |
+| runtime time for model dynamics | V1 could not honestly derive deadline urgency from O | Kernel writes `clock.total_minutes` to O before model integration | model reads O, not hidden World time |
+| task pressure | event-density-dependent appraisal impulse stock | continuous relaxation toward an O-derived workload/deadline/commitment target | Reference model retains no-op hook |
+| anxiety | generic baseline/pump could sustain an artificial channel | target is driven by pressure motivation plus typed impulses | no profile or action-set change |
