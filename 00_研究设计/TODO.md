@@ -8,7 +8,7 @@
 |---|---|---|---|
 | BOUNDARY-V1 | **CLOSED / FROZEN** | Kernel / Dynamics / Demo ownership 与依赖边界已完成复核 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
-| DEMO-LIVING | **ACTIVE / DEMO ONLY** | 继续观察 `FREE_RUN_6H`；UI 后置 | `DemoLivingDynamicsV0`；不产生 research evidence |
+| DEMO-LIVING | **READY_FOR_INDEPENDENT_REVIEW / DEMO ONLY** | V1 calibrated baseline 已完成；独立验收后才进入 `DemoLayaPolicyV0` A/B | [V1 baseline status](../Demo%20codex-generated/demo/living_dynamics_v1/BASELINE_FREEZE_STATUS.md)；不产生 research evidence |
 | RESEARCH-DYNAMICS | **READY_FOR_INDEPENDENT_REVIEW** | 先审协议、机制单测与 intervention artifacts；不得启动大规模数据重跑 | [ResearchDynamicsV1 protocol](Research_Dynamics_V1_Protocol.md)、[validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md) |
 
 ## ACTIVE

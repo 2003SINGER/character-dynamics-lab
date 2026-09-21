@@ -2,7 +2,7 @@ import json, pathlib, subprocess, sys
 root=pathlib.Path(sys.argv[1]); exe=sys.argv[2]
 seeds=[(17,101),(29,202),(43,303),(61,404),(89,505)]
 traces=root/'traces'; traces.mkdir(parents=True,exist_ok=True)
-lines=['# FREE_RUN_6H report','', 'Development/demo engineering diagnostics; not a realism claim.','']
+lines=['# FREE_RUN_6H calibrated baseline report','', 'Development/demo engineering diagnostics after calibration pass 1; not a realism claim or research evidence.','']
 for i,(scenario,policy) in enumerate(seeds):
     p=traces/f'free_run_{chr(65+i)}.json'; subprocess.run([exe,str(scenario),str(policy),str(p)],check=True)
     replay=p.with_suffix('.replay.json'); subprocess.run([exe,str(scenario),str(policy),str(replay)],check=True)
@@ -18,7 +18,7 @@ for i,(scenario,policy) in enumerate(seeds):
     if any(not (0 <= x['state'][k] <= 1) for x in data for k in ('hunger','fatigue','bathroom_urge')): raise SystemExit(f'S out of range: {p.name}')
     counts={a:actions.count(a) for a in sorted(set(actions))}
     lines += [f'## Run {chr(65+i)} (scenario={scenario}, policy={policy})',f'- time range: {data[0]["timestamp"]}–{data[-1]["timestamp"]}',f'- boundaries: {len(data)}',f'- action counts: `{counts}`',f'- final task effort: {data[-1]["task_effort"]}', '']
-(root/'FREE_RUN_6H_report.md').write_text('\n'.join(lines)+'\n')
+(root/'FREE_RUN_6H_report.md').write_text('\n'.join(lines).rstrip()+'\n')
 all_actions = set()
 for i,(scenario,policy) in enumerate(seeds):
     data = json.loads((traces/f'free_run_{chr(65+i)}.json').read_text())

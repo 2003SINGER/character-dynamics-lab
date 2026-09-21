@@ -1,7 +1,6 @@
 # FREE_RUN_6H calibrated baseline report
 
-Development/demo engineering diagnostics after calibration pass 1; not a
-realism claim or research evidence.
+Development/demo engineering diagnostics after calibration pass 1; not a realism claim or research evidence.
 
 ## Run A (scenario=17, policy=101)
 - time range: 490–875
