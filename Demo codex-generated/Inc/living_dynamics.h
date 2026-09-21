@@ -43,6 +43,11 @@ double goal_reward_support(const CharacterState& state);
 double cognitive_fatigue_penalty(const CharacterState& state);
 double pressure_motivation(const CharacterState& state);
 double task_pressure_target(const Observation& observation, const CharacterState& state);
+// Same O-side workload target evaluated at an explicit runtime clock. Used by
+// the continuous integrator to make a linearly changing deadline target
+// independent of irrelevant boundary density.
+double task_pressure_target_at(const Observation& observation, const CharacterState& state,
+                               int total_minutes);
 double anxiety_facilitation(const CharacterState& state);
 double anxiety_impairment(const CharacterState& state);
 double overload_risk(const CharacterState& state, const Personality& personality);

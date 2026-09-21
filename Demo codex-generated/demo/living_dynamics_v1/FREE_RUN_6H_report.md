@@ -3,9 +3,9 @@
 Development/demo engineering diagnostics after calibration pass 1; not a realism claim or research evidence.
 
 ## Run A (scenario=17, policy=101)
-- time range: 490–840
-- boundaries: 15
-- action counts: `{'idle': 2, 'rest_at_bed': 2, 'study_at_computer': 2, 'study_focused': 1, 'study_halfhearted': 3, 'use_computer': 2}`
+- time range: 490–875
+- boundaries: 16
+- action counts: `{'get_meal': 1, 'idle': 3, 'rest_at_bed': 1, 'study_at_computer': 2, 'study_focused': 1, 'study_halfhearted': 3, 'use_computer': 2}`
 - final task effort: 3.07084
 
 ## Run B (scenario=29, policy=202)

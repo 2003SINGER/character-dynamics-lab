@@ -1,6 +1,6 @@
 # DemoLivingV1 baseline-freeze status
 
-`DEMO_LIVING_V1_MECHANISM_REPAIR_R2 = READY_FOR_INDEPENDENT_REVIEW`
+`DEMO_LIVING_V1_FINAL_PRESSURE_REPAIR = BATCH_PENDING`
 
 This is a demo/application baseline, not a research result or a claim of psychological realism. Laya is deliberately not integrated in this milestone.
 
@@ -32,7 +32,7 @@ The historical calibrated artifact and this repair artifact are compared in
 corrected along the way, changed diagnostic definitions are labelled there as
 context rather than treated as fitted improvement scores.
 
-R2 repairs the remaining rejection-replanning, perceived-need gate, screen
+R2 repaired the remaining rejection-replanning, perceived-need gate, screen
 response, contextual anxiety recovery and extreme-fatigue feasibility paths.
 `batch_48h_v1_mechanism_repair_r2/` is generated from `f829d57`, runs 128×48h
 (6144 actor-hours), and byte-compares all 128 deterministic reruns. The
@@ -46,9 +46,23 @@ R1/R2 episode semantics differ where the R2 analyzer corrects boundary-time
 attribution, so diagnostic deltas are evidence of repair direction, not a
 fitted quality score.
 
+## Final pressure repair pending batch evidence
+
+R2 review found that task pressure still moved once per appraisal boundary in
+addition to continuous elapsed-time integration. That made the value dependent
+on irrelevant scheduler-event density. The current implementation removes that
+boundary writer: pressure has exactly one state owner, the continuous
+O-derived deadline/workload integrator. Its target now spans the declared
+Normal/High/Extreme pressure ranges under observable urgent or overdue work,
+and the coupling smoke proves both boundary-density invariance and an
+O-derived path into the overload range.
+
+The prior R2 batch remains historical evidence only. A fresh same-seed 128×48h
+batch and deterministic rerun under this revision are required before any
+review state is restored.
+
 ## Next boundary
 
 No Laya or policy A/B milestone is authorized by this repair. This state is
-not `CLOSED` or a psychology claim; an independent review must decide whether
-the two remaining sparse traces warrant a separate, explicitly scoped
-Demo-dynamics follow-up.
+not `CLOSED` or a psychology claim; the pending batch must be inspected before
+any separately scoped Demo-dynamics follow-up.

@@ -55,3 +55,15 @@ Laya behavior.
 | recovery could push anxiety beneath its contextual target | continuous Rest/Sleep recovery is capped at the pressure-derived target | coupling smoke forbids a low-attractor overshoot |
 | extreme fatigue could repeatedly admit work/device candidates | extreme fatigue makes only recovery/safety candidates eligible | coupling smoke validates the feasibility boundary |
 | saturation audit over-counted end-of-boundary state | split threshold-crossing Δt rather than assigning end state to the entire interval | batch analyzer regression path |
+
+## Final pressure ownership repair — 2026-09-21
+
+This is a state-owner correction, not a policy or profile-coefficient pass.
+It follows review of the R2 trace semantics; it changes no World schema,
+action surface, profile seed, Reference dynamics, ResearchDynamics or Laya.
+
+| Defect | Repair | Executable boundary |
+|---|---|---|
+| pressure moved at every appraisal boundary | `update_state` / impulses no longer mutate task pressure; elapsed continuous integration is its sole writer | coupling smoke proves target appraisal is zero-duration pressure-neutral |
+| deadline target depended on scheduler split density | integrate the linearly changing O-clock deadline target exactly over each interval | same 300-minute O trajectory split across 2/20 irrelevant boundaries has equal final pressure |
+| High/Extreme/overload pressure range was unreachable | O-derived incomplete-work/deadline target now spans ordinary through overdue urgency | smoke reaches Extreme pressure and overload from active overdue task O facts, not an injected high pressure value |

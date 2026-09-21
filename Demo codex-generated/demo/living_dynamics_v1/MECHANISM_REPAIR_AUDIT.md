@@ -1,6 +1,6 @@
 # Demo Living V1 mechanism-repair audit
 
-Status: `DEMO_LIVING_V1_MECHANISM_REPAIR_R2 = READY_FOR_INDEPENDENT_REVIEW`. This replaces the premature
+Status: `DEMO_LIVING_V1_FINAL_PRESSURE_REPAIR = BATCH_PENDING`. This replaces the premature
 baseline-freeze claim for the Demo/application model only. It is not research
 evidence.
 
@@ -90,3 +90,27 @@ unresponsiveness, unmet hunger/bathroom, anxiety-low, fatigue-high and
 fatigue-low saturation are all 0/128. One `EXCESSIVE_SLEEP` and one
 `SATISFACTION_HIGH_SATURATION` actor remain visible as sparse review cases,
 not hidden or relabelled as proof of realism.
+
+## Final pressure ownership repair
+
+R2 review found a remaining ownership defect: every appraisal boundary exposed
+the same task-pressure target and `update_state` applied a fixed correction
+toward it. The continuous integrator then relaxed pressure toward the same
+target again. A trace with more irrelevant events therefore accumulated more
+pressure even with the same observable task/deadline trajectory.
+
+- `update_state` and appraisal impulses no longer write task pressure. The
+  unique writer is elapsed continuous integration.
+- Deadline urgency is integrated from the observable runtime clock with the
+  exact linear-target solution between boundaries, making pressure invariant to
+  irrelevant scheduler boundary density.
+- The O-derived target now reaches the declared High/Extreme ranges for an
+  active, incomplete urgent/overdue task. This is a reachability correction,
+  not a fitted behavioral claim.
+- `living_dynamics_v1_coupling_smoke` asserts: an appraisal report leaves
+  pressure unchanged; the same 300-minute O trajectory split at 2 versus 20
+  irrelevant boundaries yields the same pressure; and an overdue observed task
+  reaches Extreme pressure and overload without injecting pressure directly.
+
+No World, action schema, Runtime gate, ResearchDynamics, Reference dynamics or
+Laya behavior changed. A fresh same-seed batch is still pending.

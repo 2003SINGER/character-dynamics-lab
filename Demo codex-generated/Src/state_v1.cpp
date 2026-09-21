@@ -76,12 +76,10 @@ StateUpdate update_state(CharacterState& state,
     delta.fatigue = appraisal.fatigue_delta
                   + update.semantic_contribution.fatigue
                   ;
-    // V1 pressure is not an event-impulse inventory.  Its continuously
-    // derived target is consumed here only as a bounded correction; the same
-    // target is approached during elapsed continuous time below.
-    delta.task_pressure = appraisal.has_task_pressure_target
-        ? (appraisal.task_pressure_target - state.task_pressure) * 0.12
-        : 0.0;
+    // V1 pressure has exactly one writer: elapsed continuous relaxation in
+    // advance_continuous_state. Appraisal may expose the O-derived target for
+    // traceability, but an event boundary cannot advance pressure by itself.
+    delta.task_pressure = 0.0;
     delta.satisfaction = appraisal.satisfaction_delta
                        + update.semantic_contribution.satisfaction
                        ;
@@ -156,7 +154,22 @@ StateUpdate advance_continuous_state(CharacterState& state,
     const double pressure_before=state.task_pressure;
     const double target=LivingDynamics::task_pressure_target(observation,state);
     const double response=elapsed_minutes<=0 ? 0.0 : 1.0-std::exp(-static_cast<double>(elapsed_minutes)/180.0);
-    state.task_pressure=clamp_unit(state.task_pressure+(target-state.task_pressure)*response);
+    int now=-1;
+    const bool has_clock=known_int(observation,"clock.total_minutes",now);
+    if (elapsed_minutes>0 && has_clock) {
+        // Deadline urgency is piecewise linear between known scheduler
+        // boundaries. Integrate that linear target exactly, so splitting an
+        // otherwise identical interval at irrelevant events cannot alter S.
+        const double start_target=LivingDynamics::task_pressure_target_at(
+            observation,state,now-elapsed_minutes);
+        const double slope=(target-start_target)/static_cast<double>(elapsed_minutes);
+        const double decay=1.0-response;
+        state.task_pressure=clamp_unit(decay*pressure_before
+            +response*start_target
+            +slope*(static_cast<double>(elapsed_minutes)-180.0*response));
+    } else {
+        state.task_pressure=clamp_unit(state.task_pressure+(target-state.task_pressure)*response);
+    }
     update.requested.task_pressure += state.task_pressure-pressure_before;
     update.applied.task_pressure += state.task_pressure-pressure_before;
     if (running_action == nullptr || elapsed_minutes == 0) return update;

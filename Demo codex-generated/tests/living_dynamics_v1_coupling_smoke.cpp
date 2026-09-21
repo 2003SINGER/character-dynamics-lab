@@ -121,9 +121,61 @@ int main(){
     Appraisal obsolete_impulse; obsolete_impulse.task_pressure_delta=.50;
     const double after_target_rise=s.task_pressure; model.apply_impulse(s,obsolete_impulse,p);
     if (std::abs(s.task_pressure-after_target_rise)>1e-12) return 32;
+    // Appraisal can report the O-derived target for traceability, but it must
+    // never advance the continuous pressure channel at a zero-duration
+    // boundary.
+    const Appraisal target_report=model.appraise(task_o,s,p);
+    if (!target_report.has_task_pressure_target) return 43;
+    const double before_target_report=s.task_pressure;
+    model.apply_impulse(s,target_report,p);
+    if (std::abs(s.task_pressure-before_target_report)>1e-12) return 44;
     task_o.facts[0].value="completed";
     model.advance_continuous(s,task_o,p,&idle,60);
     if (!(s.task_pressure < after_target_rise)) return 38;
+    // The exact continuous deadline integration is invariant to irrelevant
+    // boundary density. Both trajectories see identical O-side clock/target
+    // evolution; only the number of no-op boundaries differs.
+    const auto pressure_after_boundaries = [&](int parts) {
+        Observation evolving;
+        evolving.facts={{"task.coursework.status","active",KnowledgeStatus::Known,"test",""},
+                        {"task.coursework.effort","0",KnowledgeStatus::Known,"test",""},
+                        {"task.coursework.effort_target","8",KnowledgeStatus::Known,"test",""},
+                        {"task.coursework.deadline_at_total_minutes","1200",KnowledgeStatus::Known,"test",""},
+                        {"clock.total_minutes","600",KnowledgeStatus::Known,"test",""}};
+        CharacterState split_state; split_state.task_pressure=.10;
+        for (int part=1; part<=parts; ++part) {
+            evolving.facts[4].value=std::to_string(600 + part * (300 / parts));
+            model.advance_continuous(split_state,evolving,p,&idle,300 / parts);
+            const Appraisal boundary_report=model.appraise(evolving,split_state,p);
+            model.apply_impulse(split_state,boundary_report,p);
+        }
+        return split_state.task_pressure;
+    };
+    const double two_boundary_pressure=pressure_after_boundaries(2);
+    const double twenty_boundary_pressure=pressure_after_boundaries(20);
+    if (std::abs(two_boundary_pressure-twenty_boundary_pressure)>1e-10) return 45;
+    // High/extreme pressure is reachable from the observed active-task and
+    // deadline trajectory itself, not by injecting a high pressure state.
+    Observation overdue;
+    overdue.facts={{"task.coursework.status","active",KnowledgeStatus::Known,"test",""},
+                   {"task.coursework.effort","0",KnowledgeStatus::Known,"test",""},
+                   {"task.coursework.effort_target","8",KnowledgeStatus::Known,"test",""},
+                   {"task.coursework.deadline_at_total_minutes","600",KnowledgeStatus::Known,"test",""},
+                   {"message.unread_count","1",KnowledgeStatus::Known,"test",""},
+                   {"clock.total_minutes","600",KnowledgeStatus::Known,"test",""}};
+    CharacterState reachable_pressure;
+    reachable_pressure.task_pressure=.10;
+    reachable_pressure.commitment.status=CommitmentStatus::Active;
+    reachable_pressure.commitment.task_id="coursework";
+    for (int step=1; step<=12; ++step) {
+        overdue.facts[5].value=std::to_string(600 + step * 60);
+        model.advance_continuous(reachable_pressure,overdue,p,&idle,60);
+    }
+    if (!(reachable_pressure.task_pressure>=.92
+          && LivingDynamics::pressure_zone(reachable_pressure.task_pressure)==LivingDynamics::ActivationZone::Extreme)) return 46;
+    reachable_pressure.anxiety=.90;
+    reachable_pressure.fatigue=.90;
+    if (!(LivingDynamics::overload_risk(reachable_pressure,p)>.10)) return 47;
     // Extreme fatigue is a real feasibility boundary: work/device candidates
     // cannot repeatedly keep the state saturated, while recovery remains.
     World policy_world; Observation policy_o=refresh_observation({},policy_world,{});
