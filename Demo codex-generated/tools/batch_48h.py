@@ -77,7 +77,7 @@ def main():
         candidates=[r for r in rows if r["profile"]==profile]; med=min(candidates,key=lambda r:sum(abs(r[k]-statistics.median(x[k] for x in candidates)) for k in ("study_minutes","leisure_minutes","sleep_minutes","action_entropy","switches_per_day"))); anom=max(candidates,key=lambda r:(len(r["diagnostic_flags"].split("|")) if r["diagnostic_flags"] else 0,-r["actor_id"])); (OUT/"representative_traces").mkdir(exist_ok=True); (OUT/"representative_traces"/f"{profile}_representative.json").write_text(json.dumps(traces[med["actor_id"]],indent=2)+"\n"); (OUT/"representative_traces"/f"{profile}_anomalous.json").write_text(json.dumps(traces[anom["actor_id"]],indent=2)+"\n")
     flag_counts={}; [flag_counts.__setitem__(flag,flag_counts.get(flag,0)+1) for r in rows for flag in set(filter(None,r["diagnostic_flags"].split("|")))]; switch_values=[float(r["switches_per_day"]) for r in rows]; aggregate={"actors":len(rows),"actor_hours":len(rows)*48,"total_boundaries":sum(r["boundary_count"] for r in rows),"diagnostic_counts":flag_counts,"switching_distribution":{"median":statistics.median(switch_values),"p90":sorted(switch_values)[round(.9*(len(switch_values)-1))],"p95":sorted(switch_values)[round(.95*(len(switch_values)-1))],"max":max(switch_values)}}; (OUT/"aggregate.json").write_text(json.dumps(aggregate,indent=2)+"\n")
     # Determinism audit is intentionally independent of the first pass.
-    for actor in (0, 15, 16, 31, 48, 63, 96, 127):
+    for actor in range(128):
         check=raw/f"actor_{actor:03d}_rerun.json"; run(exe, actor, check)
         original=raw/f"actor_{actor:03d}.json"
         if original.read_bytes()!=check.read_bytes(): raise SystemExit(f"non-deterministic actor {actor}")
