@@ -97,9 +97,8 @@ StateUpdate update_state(CharacterState& state,
                         ;
     delta.anxiety = appraisal.anxiety_delta
                   + update.semantic_contribution.anxiety
-                  + std::max(0.0, state.task_pressure - 0.55)
-                    * 0.035 * time_scale * personality.task_anxiety_sensitivity
-                  - 0.018 * state.anxiety * time_scale;
+                  + 0.018 * LivingDynamics::pressure_motivation(state)
+                    * time_scale * personality.task_anxiety_sensitivity;
 
     const double raw_task_pressure_delta = delta.task_pressure;
     if (raw_task_pressure_delta > 0.0) {
@@ -115,17 +114,18 @@ StateUpdate update_state(CharacterState& state,
     if (delta.fatigue < 0.0) {
         delta.fatigue *= (0.70 + 0.30 * personality.rest_preference) * config.state_recovery_strength;
     }
-    if (delta.hunger < 0.0 || delta.bathroom_urge < 0.0) {
-        delta.satisfaction += 0.04 * personality.need_response;
-    }
     // Satisfaction and anxiety have a weak homeostatic return toward the
     // current context. This prevents repeated ordinary boundaries from
     // pinning affect at 0/1 while preserving stronger appraisal impulses.
     // Homeostasis returns affect toward a neutral setpoint instead of
     // rewarding every comfortable boundary until satisfaction saturates.
-    const double discomfort = LivingDynamics::need_discomfort(state, personality);
-    delta.satisfaction += 0.006 * (0.50 - state.satisfaction) * time_scale;
-    delta.anxiety -= 0.006 * state.anxiety * time_scale;
+    if (delta.satisfaction > 0.0) {
+        // Positive outcomes retain semantic meaning but exhibit diminishing
+        // headroom near the high zone; no action receives a special bonus.
+        delta.satisfaction *= 0.35 + 0.65 * (1.0 - state.satisfaction);
+    }
+    delta.satisfaction += 0.014 * (0.50 - state.satisfaction) * time_scale;
+    delta.anxiety += 0.003 * (0.20 - state.anxiety) * time_scale;
 
     state.boredom = clamp_unit(state.boredom + delta.boredom);
     state.fatigue = clamp_unit(state.fatigue + delta.fatigue);
@@ -174,15 +174,15 @@ StateUpdate advance_continuous_state(CharacterState& state,
         break;
     case ActionType::RestAtBed:
         action_delta.boredom = 0.01 * scale;
-        action_delta.fatigue = -0.050 * scale;
+        action_delta.fatigue = -0.028 * scale;
         action_delta.screen_strain = -0.020 * scale;
-        action_delta.anxiety = -0.018 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
+        action_delta.anxiety = -0.008 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
         break;
     case ActionType::SleepAtBed:
         action_delta.boredom = -0.015 * scale;
-        action_delta.fatigue = -0.110 * scale;
+        action_delta.fatigue = -0.060 * scale;
         action_delta.screen_strain = -0.060 * scale;
-        action_delta.anxiety = -0.025 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
+        action_delta.anxiety = -0.012 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
         break;
     case ActionType::UsePhone:
     case ActionType::ShopOnPhone:

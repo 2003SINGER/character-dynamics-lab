@@ -84,7 +84,9 @@ double task_engagement_drive(const CharacterState& s,const Personality& p){
 }
 double recovery_drive(const CharacterState& s,const Personality& p){
     return clamp(.04*pressure_motivation(s)+fatigue_recovery_drive(s)
-                 +screen_aversion(s)+.18*p.rest_preference+.08*overload_risk(s,p));
+                 +screen_aversion(s)
+                 +.06*p.rest_preference*smoothstep(.35,.55,s.fatigue)
+                 +.08*overload_risk(s,p));
 }
 double distraction_drive(const CharacterState& s,const Personality& p){
     return clamp(.65*boredom_stimulation_drive(s)

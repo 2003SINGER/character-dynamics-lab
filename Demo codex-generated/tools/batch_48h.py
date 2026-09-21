@@ -4,6 +4,7 @@ import csv, json, math, pathlib, shutil, subprocess, sys, statistics
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OUT = ROOT / "demo/living_dynamics_v0/batch_48h_v0"
 MODEL_ID = "demo-living-v0"
+BATCH_ID = "demo-living-v0"
 PROFILES = ["balanced", "disciplined", "procrastinating", "rest_seeking", "stimulation_seeking", "anxious", "body_sensitive", "spontaneous"]
 PROFILE_VALUES = {
     "balanced": [.5]*8, "disciplined": [.2,.8,.4,.35,.4,.5,.6,.25],
@@ -56,13 +57,15 @@ def summary(actor, profile, scenario, policy, data):
     if sum(f.get("validation",{}).get("performed") and not f.get("validation",{}).get("accepted") for f in data)>1: flags.append("REJECTION_LOOP")
     return {"actor_id":actor,"profile":profile,"scenario_seed":scenario,"policy_seed":policy,"actual_minutes":data[-1]["timestamp"]-480,"boundary_count":len(data),"decision_count":sum(f.get("policy_evaluated",False) for f in data),"study_minutes":sum(n for a,n in mins.items() if "study" in a),"leisure_minutes":sum(n for a,n in mins.items() if a in ("use_phone","use_computer")),"idle_minutes":mins.get("idle",0),"rest_minutes":mins.get("rest_at_bed",0),"sleep_minutes":sleep,"meal_count":meals,"bathroom_count":baths,"phone_count":sum(a=="use_phone" for a in acts),"computer_count":sum(a=="use_computer" for a in acts),"study_action_count":sum("study" in a for a in acts),"unique_actions":len(set(acts)),"action_entropy":round(entropy,6),"switches_per_day":switches/2,"longest_same_action_streak":max((sum(1 for _ in g) for _,g in __import__('itertools').groupby(acts)),default=0),"task_final_effort":data[-1].get("task_effort",0),"task_completed":any((f.get("pre_policy_outcome") or {}).get("task_completed") or (f.get("post_policy_outcome") or {}).get("task_completed") for f in data),"task_completion_time":next((f["timestamp"]-480 for f in data if (f.get("pre_policy_outcome") or {}).get("task_completed") or (f.get("post_policy_outcome") or {}).get("task_completed")),""),"hunger_mean":statistics.mean(vals("hunger")),"hunger_max":max(vals("hunger")),"hunger_final":vals("hunger")[-1],"fatigue_mean":statistics.mean(vals("fatigue")),"fatigue_max":max(vals("fatigue")),"fatigue_final":vals("fatigue")[-1],"bathroom_mean":statistics.mean(vals("bathroom_urge")),"bathroom_max":max(vals("bathroom_urge")),"bathroom_final":vals("bathroom_urge")[-1],"boredom_mean":statistics.mean(vals("boredom")),"boredom_max":max(vals("boredom")),"boredom_final":vals("boredom")[-1],"task_pressure_mean":statistics.mean(vals("task_pressure")),"task_pressure_max":max(vals("task_pressure")),"task_pressure_final":vals("task_pressure")[-1],"satisfaction_mean":statistics.mean(vals("satisfaction")),"satisfaction_min":min(vals("satisfaction")),"satisfaction_final":vals("satisfaction")[-1],"anxiety_mean":statistics.mean(vals("anxiety")),"anxiety_max":max(vals("anxiety")),"anxiety_final":vals("anxiety")[-1],"rejection_count":sum(f.get("validation",{}).get("performed",False) and not f.get("validation",{}).get("accepted",False) for f in data),"diagnostic_flags":"|".join(flags)}
 def main():
-    global OUT, MODEL_ID
+    global OUT, MODEL_ID, BATCH_ID
     exe=sys.argv[1]
     MODEL_ID=sys.argv[2] if len(sys.argv)>2 else MODEL_ID
     if len(sys.argv)>3: OUT=ROOT / sys.argv[3]
+    if len(sys.argv)>4: BATCH_ID=sys.argv[4]
     OUT.mkdir(parents=True,exist_ok=True); raw=OUT/".raw"; raw.mkdir(exist_ok=True)
     version="v1" if MODEL_ID.endswith("v1") else "v0"
-    manifest={"milestone":f"DEMO_LIVING_BATCH_48H_{version.upper()}","actors":128,"profiles":PROFILES,"seeds":{"scenario":"1000 + actor_id * 17","policy":"5000 + actor_id * 31"},"start_total_minutes":480,"horizon_minutes":2880,"dynamics_model":MODEL_ID,"demo_only":True}
+    revision=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT.parent,text=True).strip()
+    manifest={"milestone":f"DEMO_LIVING_BATCH_48H_{version.upper()}","artifact_id":BATCH_ID,"actors":128,"profiles":PROFILES,"seeds":{"scenario":"1000 + actor_id * 17","policy":"5000 + actor_id * 31"},"start_total_minutes":480,"horizon_minutes":2880,"dynamics_model":MODEL_ID,"git_revision":revision,"config_version":"demo-living-v1-calibration-pass-1","demo_only":True}
     (OUT/"manifest.json").write_text(json.dumps(manifest,indent=2)+"\n"); (OUT/"profiles.json").write_text(json.dumps({k:{"values":v,"classification":"demo engineering profile"} for k,v in PROFILE_VALUES.items()},indent=2)+"\n")
     rows=[]; compact_lines=[]; traces={}
     for actor in range(128):
@@ -79,7 +82,7 @@ def main():
         original=raw/f"actor_{actor:03d}.json"
         if original.read_bytes()!=check.read_bytes(): raise SystemExit(f"non-deterministic actor {actor}")
     shutil.rmtree(raw)
-    (OUT/"BATCH_48H_REPORT.md").write_text(f"# DEMO_LIVING_BATCH_48H_{version.upper()}\n\nDemo/application engineering diagnostic. Not research evidence and not a claim of psychological realism.\n\n- 128 independent actors, 8 demo engineering profiles × 16 seeds.\n- 48 simulated hours each; total 6144 actor-hours.\n- Dynamics model: `{MODEL_ID}`.\n- Selection: per profile, nearest multidimensional median and highest diagnostic count (actor_id tie-break).\n- Full raw traces remain local-only; compact audit trace contains every boundary.\n\nSee `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner), `aggregate.json`, and `representative_traces/`.\n")
+    (OUT/"BATCH_48H_REPORT.md").write_text(f"# DEMO_LIVING_BATCH_48H_{version.upper()}\n\nDemo/application engineering diagnostic. Not research evidence and not a claim of psychological realism.\n\n- Artifact: `{BATCH_ID}`.\n- 128 independent actors, 8 demo engineering profiles × 16 seeds.\n- 48 simulated hours each; total 6144 actor-hours.\n- Dynamics model: `{MODEL_ID}`.\n- Selection: per profile, nearest multidimensional median and highest diagnostic count (actor_id tie-break).\n- Full raw traces remain local-only; compact audit trace contains every boundary.\n\nSee `actor_summary.csv`, `profile_summary.csv` (generated with this batch runner), `aggregate.json`, and `representative_traces/`.\n")
     report=(OUT/"BATCH_48H_REPORT.md").read_text(); report += "\n## Behavior distribution\n\n" + "\n".join(f"- {k}: {sum(r[k] for r in rows):.1f} minutes" for k in ("study_minutes","leisure_minutes","idle_minutes","rest_minutes","sleep_minutes"))
     report += "\n\n## Stability diagnostics\n\n" + "\n".join(f"- {k}: {v} actors" for k,v in sorted(aggregate["diagnostic_counts"].items()))
     report += f"\n\n## Switching distribution\n\n- median: {aggregate['switching_distribution']['median']:.2f}/day\n- p90: {aggregate['switching_distribution']['p90']:.2f}/day\n- p95: {aggregate['switching_distribution']['p95']:.2f}/day\n- max: {aggregate['switching_distribution']['max']:.2f}/day\n"
