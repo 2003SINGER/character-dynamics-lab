@@ -1,6 +1,6 @@
 # DemoLivingV1 baseline-freeze status
 
-`DEMO_LIVING_V1_BASELINE_FREEZE = SUPERSEDED_BY_MECHANISM_REPAIR_R1`
+`DEMO_LIVING_V1_MECHANISM_REPAIR_R1 = READY_FOR_INDEPENDENT_REVIEW`
 
 This is a demo/application baseline, not a research result or a claim of psychological realism. Laya is deliberately not integrated in this milestone.
 
@@ -19,13 +19,22 @@ The calibrated batch remains a historical comparison artifact. It was produced
 before the authorized Runtime/O projection and pressure-target repair, so it
 cannot be used as the freeze evidence for the current implementation.
 
-The replacement same-seed `batch_48h_v1_mechanism_repair/` is generated only
-after the implementation commit, with its generating revision recorded in its
-manifest. Its result determines whether a new independent-review state is
-appropriate; this document does not silently claim it in advance.
+The replacement same-seed `batch_48h_v1_mechanism_repair/` was generated from
+`685ec6a` and records 128×48h (6144 actor-hours), with a byte-for-byte
+deterministic rerun of all 128 actors. It no longer reports excessive sleep or
+task-pressure high/low saturation. It does report `SCREEN_STRAIN_UNRESPONSIVE`
+for 77 actors with at least two hours of screen exposure, 11 unmet-hunger and
+11 unmet-bathroom episodes, plus sparse fatigue/anxiety saturation. Those are
+visible Demo-model follow-ups, not hidden by the acceptance state.
+
+The historical calibrated artifact and this repair artifact are compared in
+`V1_CALIBRATED_VS_MECHANISM_REPAIR.md`. Because the audit semantics were
+corrected along the way, changed diagnostic definitions are labelled there as
+context rather than treated as fitted improvement scores.
 
 ## Next boundary
 
-No Laya or policy A/B milestone is authorized by this repair. A later policy
-experiment may be proposed only after the repaired batch is independently
-reviewed.
+No Laya or policy A/B milestone is authorized by this repair. This state is
+not `CLOSED` or a psychology claim; an independent review must decide whether
+the remaining visible diagnostics require a separate, explicitly scoped
+Demo-dynamics follow-up.
