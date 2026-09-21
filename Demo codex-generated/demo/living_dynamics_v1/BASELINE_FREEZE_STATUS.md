@@ -1,6 +1,6 @@
 # DemoLivingV1 baseline-freeze status
 
-`DEMO_LIVING_V1_MECHANISM_REPAIR_R1 = READY_FOR_INDEPENDENT_REVIEW`
+`DEMO_LIVING_V1_MECHANISM_REPAIR_R1 = SUPERSEDED_BY_R2_PENDING_BATCH`
 
 This is a demo/application baseline, not a research result or a claim of psychological realism. Laya is deliberately not integrated in this milestone.
 
@@ -31,6 +31,11 @@ The historical calibrated artifact and this repair artifact are compared in
 `V1_CALIBRATED_VS_MECHANISM_REPAIR.md`. Because the audit semantics were
 corrected along the way, changed diagnostic definitions are labelled there as
 context rather than treated as fitted improvement scores.
+
+R2 repairs the remaining rejection-replanning, perceived-need gate, screen
+response, contextual anxiety recovery and extreme-fatigue feasibility paths.
+Its same-seed batch is deliberately not claimed here until it is generated
+from the exact implementation revision and its deterministic rerun completes.
 
 ## Next boundary
 

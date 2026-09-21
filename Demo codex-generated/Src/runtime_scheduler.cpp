@@ -77,12 +77,13 @@ void RuntimeScheduler::replace_running_action(ActionType action, std::string tar
 
 void RuntimeScheduler::reject_action(ActionType action, std::string target_object_id,
                                      std::optional<RuntimeRejection> rejection) {
-    // A rejection is feedback for a proposed intent. It does not modify an
-    // unrelated running action; the actor receives it at the next transition.
+    // A rejection is feedback for a proposed intent. It never mutates an
+    // unrelated RunningAction, but it must reopen policy at the next
+    // transition: a rejected replacement cannot silently lock the actor into
+    // the old plan until a later, unrelated boundary.
     schedule({"action_rejected:" + to_string(action) + ":" + target_object_id,
               now_total_minutes_ + RuntimeConfig::RejectionFeedbackLatencyMinutes, false, std::move(rejection),
-              running_action_.has_value() ? std::optional<DecisionGateReason>{}
-                                           : std::optional<DecisionGateReason>{DecisionGateReason::ActionRejected}});
+              DecisionGateReason::ActionRejected});
 }
 
 RuntimeBoundary RuntimeScheduler::advance_to_next_boundary() {

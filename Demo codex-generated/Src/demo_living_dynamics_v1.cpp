@@ -1,4 +1,5 @@
 #include "demo_living_dynamics_v1.h"
+#include "living_dynamics.h"
 #include "runtime_scheduler.h"
 
 namespace DemoLivingV0 {
@@ -18,9 +19,12 @@ void DemoLivingDynamicsV1::update_persistent_intention(CharacterState& s, const 
 DecisionContext DemoLivingDynamicsV1::build_policy(const Observation& o, const CharacterState& s, const Personality& p) const { return DemoLivingV0::decide(o, s, p, ParameterConfig::defaults()); }
 DynamicsReconsideration DemoLivingDynamicsV1::reconsider_running_action(
     const Observation&, const CharacterState& before, const CharacterState& after,
-    const RunningAction& action, const Personality&) const {
-    const bool urgent_hunger=before.hunger<.92 && after.hunger>=.92;
-    const bool urgent_bathroom=before.bathroom_urge<.92 && after.bathroom_urge>=.92;
+    const RunningAction& action, const Personality& personality) const {
+    const double urgent_threshold=LivingDynamics::urgent_bodily_need_threshold(personality);
+    const bool urgent_hunger=LivingDynamics::perceived_hunger(before,personality)<urgent_threshold
+        && LivingDynamics::perceived_hunger(after,personality)>=urgent_threshold;
+    const bool urgent_bathroom=LivingDynamics::perceived_bathroom(before,personality)<urgent_threshold
+        && LivingDynamics::perceived_bathroom(after,personality)>=urgent_threshold;
     if (urgent_hunger || urgent_bathroom) return {true, urgent_hunger ? "urgent_hunger" : "urgent_bathroom"};
     if (action.action==ActionType::SleepAtBed && before.fatigue>.45 && after.fatigue<=.45)
         return {true,"sleep_recovery_satisfied"};

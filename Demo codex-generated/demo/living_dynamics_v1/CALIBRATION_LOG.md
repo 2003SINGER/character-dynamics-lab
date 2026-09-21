@@ -40,3 +40,18 @@ revealed an ownership defect.
 | runtime time for model dynamics | V1 could not honestly derive deadline urgency from O | Kernel writes `clock.total_minutes` to O before model integration | model reads O, not hidden World time |
 | task pressure | event-density-dependent appraisal impulse stock | continuous relaxation toward an O-derived workload/deadline/commitment target | Reference model retains no-op hook |
 | anxiety | generic baseline/pump could sustain an artificial channel | target is driven by pressure motivation plus typed impulses | no profile or action-set change |
+
+## Mechanism repair R2 — 2026-09-21
+
+R2 is a focused closure pass after the R1 same-seed audit. It changes no World
+schema, action surface, profile seed, Reference dynamics, ResearchDynamics or
+Laya behavior.
+
+| Defect | Repair | Executable boundary |
+|---|---|---|
+| rejected replacement resumed old action without re-planning | `ActionRejected` always opens the next Runtime policy gate, while the existing action remains intact until a valid replacement is chosen | closure smoke asserts feedback, gate, informed policy and retained action continuity |
+| urgent policy and runtime gate were not one law | V1 centralizes a perceived-need threshold used by its gate hook and hard eligibility constraint | reconsideration smoke crosses the model boundary during a running sleep |
+| fragmented screen exposure never affected behavior | preserve one continuous owner; rebalance device build, short-rest recovery and sleep reset timescales | coupling smoke reaches the screen-aversion zone through continuous device exposure |
+| recovery could push anxiety beneath its contextual target | continuous Rest/Sleep recovery is capped at the pressure-derived target | coupling smoke forbids a low-attractor overshoot |
+| extreme fatigue could repeatedly admit work/device candidates | extreme fatigue makes only recovery/safety candidates eligible | coupling smoke validates the feasibility boundary |
+| saturation audit over-counted end-of-boundary state | split threshold-crossing Δt rather than assigning end state to the entire interval | batch analyzer regression path |

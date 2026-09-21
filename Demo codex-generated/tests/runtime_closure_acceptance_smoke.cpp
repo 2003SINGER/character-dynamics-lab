@@ -171,7 +171,12 @@ int main() {
     ContinuousRuntime rejected_replace_runtime(rejected_replace_scheduler, rejected_replace_world,
                                                 rejected_replace_observation, dynamics);
     if (!rejected_replace_runtime.submit_action_intent(ActionType::StudyFocused, "desk", 240).accepted) return 19;
-    rejected_replace_runtime.set_test_action_selector([](const DecisionContext&) { return ActionType::ShopOnPhone; });
+    rejected_replace_runtime.set_test_action_selector([](const DecisionContext& decision) {
+        const bool shop_is_still_available = std::any_of(decision.candidates.begin(), decision.candidates.end(),
+            [](const CandidateAction& candidate) { return candidate.action == ActionType::ShopOnPhone
+                && candidate.probability > 0.0; });
+        return shop_is_still_available ? ActionType::ShopOnPhone : ActionType::StudyFocused;
+    });
     CharacterState rejected_replace_state;
     rejected_replace_state.hunger = 0.39;
     rejected_replace_state.purchase_urge = 0.90;
@@ -190,15 +195,17 @@ int main() {
         || rejected_replace_tick.post_policy_outcome.has_value()) return 20;
     const RuntimeExecutionResult rejected_feedback_tick =
         rejected_replace_runtime.execute_next_boundary(rejected_replace_state, personality);
-    if (rejected_feedback_tick.policy_evaluated
-        || rejected_feedback_tick.runtime.boundary.decision_gate.reasons.end()
-               != std::find(rejected_feedback_tick.runtime.boundary.decision_gate.reasons.begin(),
-                            rejected_feedback_tick.runtime.boundary.decision_gate.reasons.end(),
-                            DecisionGateReason::ActionRejected)
-        || rejected_replace_observation.action_constraints.empty()
-        || rejected_replace_observation.pending_appraisal_updates.size() != 0
-        || !rejected_replace_scheduler.running_action().has_value()
-        || rejected_replace_scheduler.running_action()->action != ActionType::StudyFocused) return 21;
+    if (!rejected_feedback_tick.policy_evaluated) return 31;
+    if (!rejected_feedback_tick.selected_action.has_value()) return 32;
+    if (*rejected_feedback_tick.selected_action != ActionType::StudyFocused) return 33;
+    if (rejected_feedback_tick.runtime.boundary.decision_gate.reasons.end()
+        == std::find(rejected_feedback_tick.runtime.boundary.decision_gate.reasons.begin(),
+                     rejected_feedback_tick.runtime.boundary.decision_gate.reasons.end(),
+                     DecisionGateReason::ActionRejected)) return 34;
+    if (rejected_replace_observation.action_constraints.empty()) return 35;
+    if (rejected_replace_observation.pending_appraisal_updates.size() != 0) return 36;
+    if (!rejected_replace_scheduler.running_action().has_value()) return 37;
+    if (rejected_replace_scheduler.running_action()->action != ActionType::StudyFocused) return 38;
 
     // Self-action completion feedback is immediate in runtime and must be consumed once.
     World completion_world;

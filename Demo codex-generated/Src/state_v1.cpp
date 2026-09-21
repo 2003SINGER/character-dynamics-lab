@@ -163,6 +163,13 @@ StateUpdate advance_continuous_state(CharacterState& state,
 
     const CharacterState before = state;
     const double scale = static_cast<double>(elapsed_minutes) / 30.0;
+    const double anxiety_context_target = .04 + .40 * LivingDynamics::pressure_motivation(state)
+        * personality.task_anxiety_sensitivity;
+    const auto bounded_anxiety_recovery = [&](double rate) {
+        // Recovery may discharge acute strain, but may not drive the channel
+        // below the same contextual target used by the continuous law.
+        return -std::min(rate * scale, std::max(0.0, state.anxiety - anxiety_context_target));
+    };
     StateDelta action_delta;
     action_delta.elapsed_minutes = elapsed_minutes;
     switch (running_action->action) {
@@ -170,25 +177,29 @@ StateUpdate advance_continuous_state(CharacterState& state,
     case ActionType::StudyFocused:
     case ActionType::StudyHalfhearted:
         action_delta.fatigue = 0.018 * scale;
-        action_delta.screen_strain = running_action->action == ActionType::StudyAtComputer ? 0.020 * scale : 0.0;
+        action_delta.screen_strain = running_action->action == ActionType::StudyAtComputer ? 0.035 * scale : 0.0;
         break;
     case ActionType::RestAtBed:
         action_delta.boredom = 0.01 * scale;
         action_delta.fatigue = -0.028 * scale;
-        action_delta.screen_strain = -0.020 * scale;
-        action_delta.anxiety = -0.008 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
+        // A short rest reduces acute discomfort but cannot erase a day of
+        // fragmented device exposure; sleep remains the stronger reset.
+        action_delta.screen_strain = -0.010 * scale;
+        action_delta.anxiety = bounded_anxiety_recovery(
+            0.008 * (1.0 + LivingDynamics::overload_risk(state, personality)));
         break;
     case ActionType::SleepAtBed:
         action_delta.boredom = -0.015 * scale;
         action_delta.fatigue = -0.060 * scale;
-        action_delta.screen_strain = -0.060 * scale;
-        action_delta.anxiety = -0.012 * (1.0 + LivingDynamics::overload_risk(state, personality)) * scale;
+        action_delta.screen_strain = -0.035 * scale;
+        action_delta.anxiety = bounded_anxiety_recovery(
+            0.012 * (1.0 + LivingDynamics::overload_risk(state, personality)));
         break;
     case ActionType::UsePhone:
     case ActionType::ShopOnPhone:
     case ActionType::UseComputer:
         action_delta.fatigue = 0.006 * scale;
-        action_delta.screen_strain = 0.030 * scale;
+        action_delta.screen_strain = 0.050 * scale;
         break;
     default:
         break;

@@ -27,10 +27,37 @@ def action_name(f):
 def outcome_successes(data, name):
     return sum(1 for f in data for key in ("pre_policy_outcome","post_policy_outcome") if isinstance(f.get(key),dict) and f[key].get("accepted") and f[key].get("action")==name)
 def max_episode(data, key, threshold, high=True):
-    best=cur=0
+    # Frame state is observed at the end of its elapsed interval.  Attribute
+    # exposure by the previous boundary state and linearly split an interval
+    # that crosses a threshold; assigning the end state to the full interval
+    # would invent up to one scheduler step of high/low exposure.
+    best=cur=0.0
+    previous=None
     for f in data:
-        hit=f["state"][key]>=threshold if high else f["state"][key]<=threshold
-        cur=cur+f["elapsed"] if hit else 0; best=max(best,cur)
+        end=f["state"][key]
+        if previous is None:
+            previous=end
+            continue
+        elapsed=f["elapsed"]
+        start=previous
+        start_hit=start>=threshold if high else start<=threshold
+        end_hit=end>=threshold if high else end<=threshold
+        if start_hit and end_hit:
+            cur+=elapsed
+        elif not start_hit and not end_hit:
+            cur=0.0
+        elif not start_hit:
+            # Only the tail of this interval belongs to the episode.
+            fraction=(end-threshold)/(end-start) if high else (threshold-end)/(start-end)
+            cur=elapsed*max(0.0,min(1.0,fraction))
+        else:
+            # Only the head belongs to the episode; then the episode ends.
+            fraction=(start-threshold)/(start-end) if high else (threshold-start)/(end-start)
+            cur+=elapsed*max(0.0,min(1.0,fraction))
+            best=max(best,cur)
+            cur=0.0
+        best=max(best,cur)
+        previous=end
     return best
 def compact(f, profile, scenario, policy):
     s=f["state"]; ra=f.get("running_action_after") or {}; rb=f.get("running_action_before") or {}

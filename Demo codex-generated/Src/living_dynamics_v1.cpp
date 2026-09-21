@@ -77,6 +77,12 @@ double bathroom_accumulation_rate(const CharacterState& s,const RunningAction* a
 double need_discomfort(const CharacterState& s,const Personality& p){
     return clamp(.62*perceived_hunger(s,p)+.48*perceived_bathroom(s,p));
 }
+double urgent_bodily_need_threshold(const Personality& personality){
+    // Reconsider before a bodily state is saturated. The profile changes
+    // salience slightly, while the threshold remains V1 model law rather
+    // than a hidden Runtime policy rule.
+    return .85-.04*personality.need_response;
+}
 double hunger_drive(const CharacterState& s,const Personality& p){
     // High need-response shifts awareness earlier by moving the effective
     // input upward; this is consistent with the lower urgent threshold in

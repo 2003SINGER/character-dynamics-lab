@@ -171,10 +171,11 @@ DecisionContext decide(const Observation& observation,
     // scripted action: at the extreme end, ordinary leisure/work options are
     // no longer admissible, while eating and bathroom relief remain competing
     // choices. This keeps free-runs from repeatedly ignoring a saturated need.
-    if (LivingDynamics::perceived_bathroom(state, personality) >= 0.92
-        || LivingDynamics::perceived_hunger(state, personality) >= 0.92) {
-        const bool bathroom_urgent = LivingDynamics::perceived_bathroom(state, personality) >= 0.92;
-        const bool hunger_urgent = LivingDynamics::perceived_hunger(state, personality) >= 0.92;
+    const double hard_urgent_threshold = LivingDynamics::urgent_bodily_need_threshold(personality);
+    if (LivingDynamics::perceived_bathroom(state, personality) >= hard_urgent_threshold
+        || LivingDynamics::perceived_hunger(state, personality) >= hard_urgent_threshold) {
+        const bool bathroom_urgent = LivingDynamics::perceived_bathroom(state, personality) >= hard_urgent_threshold;
+        const bool hunger_urgent = LivingDynamics::perceived_hunger(state, personality) >= hard_urgent_threshold;
         for (CandidateAction& item : decision.candidates) {
             const bool bodily = item.action == ActionType::GoToBathroom || item.action == ActionType::GetMeal;
             if (bodily) {
@@ -184,6 +185,21 @@ DecisionContext decide(const Observation& observation,
             } else {
                 item.eligible = false;
             }
+        }
+    }
+
+    // Extreme fatigue is an execution constraint, not a weak preference that
+    // can be outvoted repeatedly by task/distraction logits. Recovery and
+    // bodily safety actions remain available; normal work/device actions do
+    // not continue while the fatigue inventory is saturated.
+    if (state.fatigue >= .92) {
+        for (CandidateAction& item : decision.candidates) {
+            const bool recovery_or_safety = item.action == ActionType::RestAtBed
+                || item.action == ActionType::SleepAtBed
+                || item.action == ActionType::GetMeal
+                || item.action == ActionType::GoToBathroom
+                || item.action == ActionType::TurnOffAlarm;
+            if (!recovery_or_safety) item.eligible = false;
         }
     }
 

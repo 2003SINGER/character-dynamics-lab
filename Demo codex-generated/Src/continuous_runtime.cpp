@@ -1,5 +1,7 @@
 #include "continuous_runtime.h"
 
+#include <algorithm>
+
 namespace {
 }
 
@@ -101,7 +103,15 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     result.observation_deltas = observation_.updates_this_refresh;
     model_.update_persistent_intention(state, observation_, scheduler_.now_total_minutes());
     consume_appraisal_inputs(observation_);
-    const bool subjective_reconsideration = threshold_reconsideration || dynamics_reconsideration.requested;
+    const bool rejection_reconsideration = std::find(
+        result.runtime.boundary.decision_gate.reasons.begin(),
+        result.runtime.boundary.decision_gate.reasons.end(),
+        DecisionGateReason::ActionRejected) != result.runtime.boundary.decision_gate.reasons.end();
+    // Feedback for a rejected replacement is itself a decision opportunity.
+    // It preserves the old action unless the informed next policy sample
+    // explicitly replaces it, just like a subjective need/recovery gate.
+    const bool subjective_reconsideration = threshold_reconsideration
+        || dynamics_reconsideration.requested || rejection_reconsideration;
     if (result.runtime.boundary.decision_gate.open
         && (result.pre_policy_outcome.has_value() || !action.has_value()
             || action->status != RunningActionStatus::Running || subjective_reconsideration)) {

@@ -1,5 +1,6 @@
 #include "continuous_runtime.h"
 #include "demo_living_dynamics_v1.h"
+#include "living_dynamics.h"
 
 #include <algorithm>
 
@@ -43,14 +44,25 @@ int main() {
     RuntimeScheduler urgent_scheduler(total_minutes(urgent_world.time), 60);
     ContinuousRuntime urgent_runtime(urgent_scheduler, urgent_world, urgent_o, dynamics);
     CharacterState urgent_state;
-    urgent_state.hunger = .91;
+    // Perceived urgency crosses the V1 boundary during the next sleep
+    // integration interval rather than relying on a pre-saturated raw state.
+    urgent_state.hunger = .85;
     urgent_runtime.set_test_action_selector([](const DecisionContext&) { return ActionType::GetMeal; });
     if (!urgent_runtime.submit_action_intent(ActionType::SleepAtBed, "bed", 480).accepted) return 4;
-    const RuntimeExecutionResult urgent = urgent_runtime.execute_next_boundary(urgent_state, personality);
-    if (!has_reason(urgent, DecisionGateReason::DynamicsReconsideration)
-        || urgent.dynamics_reconsideration_reason != "urgent_hunger"
-        || !urgent.policy_evaluated || !urgent.post_policy_outcome.has_value()
-        || !urgent.running_action_after.has_value()
-        || urgent.running_action_after->action != ActionType::GetMeal) return 5;
+    RuntimeExecutionResult urgent;
+    bool saw_urgent_gate = false;
+    for (int boundary = 0; boundary < 12; ++boundary) {
+        urgent = urgent_runtime.execute_next_boundary(urgent_state, personality);
+        if (has_reason(urgent, DecisionGateReason::DynamicsReconsideration)) {
+            saw_urgent_gate = true;
+            break;
+        }
+    }
+    if (!saw_urgent_gate) return 51;
+    if (urgent.dynamics_reconsideration_reason != "urgent_hunger") return 52;
+    if (!urgent.policy_evaluated) return 53;
+    if (!urgent.post_policy_outcome.has_value()) return 54;
+    if (!urgent.running_action_after.has_value()) return 55;
+    if (urgent.running_action_after->action != ActionType::GetMeal) return 56;
     return 0;
 }

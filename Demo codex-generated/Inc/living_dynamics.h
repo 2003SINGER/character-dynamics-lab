@@ -28,6 +28,9 @@ double bathroom_relief(const CharacterState& state);
 double metabolism_rate(const CharacterState& state, const RunningAction* action);
 double bathroom_accumulation_rate(const CharacterState& state, const RunningAction* action);
 double need_discomfort(const CharacterState& state, const Personality& personality);
+// Shared by V1 policy and its model-requested Runtime reconsideration hook.
+// The Runtime itself does not own this subjective urgency threshold.
+double urgent_bodily_need_threshold(const Personality& personality);
 double hunger_drive(const CharacterState& state, const Personality& personality);
 double bathroom_drive(const CharacterState& state, const Personality& personality);
 double fatigue_recovery_drive(const CharacterState& state);

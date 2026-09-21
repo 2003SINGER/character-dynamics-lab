@@ -1,6 +1,9 @@
 #include "living_dynamics.h"
 #include "demo_living_dynamics_v1.h"
 #include "runtime_scheduler.h"
+#include "world.h"
+#include "observation.h"
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 int main(){
@@ -70,6 +73,11 @@ int main(){
     if (!(loaded_fatigue > .40)) return 27;
     RunningAction rest; rest.action=ActionType::RestAtBed; model.advance_continuous(s,clock,p,&rest,30);
     if (!(s.fatigue < loaded_fatigue && s.fatigue > .05)) return 28;
+    // Rest/Sleep discharge acute anxiety but cannot overshoot the contextual
+    // target and create a low-saturation attractor.
+    s = CharacterState{}; s.task_pressure=.0; s.anxiety=.045;
+    model.advance_continuous(s,clock,p,&rest,30);
+    if (s.anxiety < .04 - 1e-12) return 40;
     // Fatigue and screen exposure each have one action-continuous owner.
     // Settlement and a Recovery semantic signal cannot replay either effect.
     observation = {}; observation.last_self_action = {true, ActionType::SleepAtBed, true};
@@ -85,6 +93,11 @@ int main(){
     RunningAction phone; phone.action=ActionType::UsePhone; const double screen_before_phone=s.screen_strain;
     model.advance_continuous(s,clock,p,&phone,30);
     if (!(s.screen_strain > screen_before_phone)) return 37;
+    // Fragmented device exposure must enter a behaviorally meaningful zone;
+    // short rests cannot erase it on the same timescale.
+    s = CharacterState{}; s.screen_strain=.05;
+    model.advance_continuous(s,clock,p,&phone,360);
+    if (!(s.screen_strain >= .55 && LivingDynamics::screen_aversion(s) > 0.0)) return 39;
     // A quiet interval returns satisfaction toward neutral and never creates
     // an upward-only affect drift.
     s = CharacterState{}; s.satisfaction=.80; RunningAction quiet; quiet.action=ActionType::Idle;
@@ -111,5 +124,19 @@ int main(){
     task_o.facts[0].value="completed";
     model.advance_continuous(s,task_o,p,&idle,60);
     if (!(s.task_pressure < after_target_rise)) return 38;
+    // Extreme fatigue is a real feasibility boundary: work/device candidates
+    // cannot repeatedly keep the state saturated, while recovery remains.
+    World policy_world; Observation policy_o=refresh_observation({},policy_world,{});
+    s = CharacterState{}; s.fatigue=.95;
+    const DecisionContext fatigue_decision=model.build_policy(policy_o,s,p);
+    bool recovery_available=false;
+    for (const CandidateAction& item : fatigue_decision.candidates) {
+        if (item.action==ActionType::RestAtBed || item.action==ActionType::SleepAtBed)
+            recovery_available = recovery_available || item.eligible;
+        if ((item.action==ActionType::StudyFocused || item.action==ActionType::StudyHalfhearted
+             || item.action==ActionType::StudyAtComputer || item.action==ActionType::UsePhone
+             || item.action==ActionType::UseComputer) && item.eligible) return 41;
+    }
+    if (!recovery_available) return 42;
     std::cout<<"living_dynamics_v1_coupling_smoke: PASS\n"; return 0;
 }
