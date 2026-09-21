@@ -3,6 +3,7 @@
 #include "runtime_scheduler.h"
 #include "living_dynamics.h"
 
+#include <cmath>
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
