@@ -39,6 +39,11 @@ int main(){
     clock.facts[0].value="1320";
     const double night_sleep=LivingDynamics::sleep_readiness(clock,s,p);
     if (!(night_sleep > day_sleep + .15)) return 20;
+    // Sleep readiness supplies context rather than a second fatigue path:
+    // with the same clock and screen exposure, fatigue alone cannot change it.
+    s.fatigue=.20; const double low_fatigue_readiness=LivingDynamics::sleep_readiness(clock,s,p);
+    s.fatigue=.90; const double high_fatigue_readiness=LivingDynamics::sleep_readiness(clock,s,p);
+    if (std::abs(low_fatigue_readiness-high_fatigue_readiness) > 1e-12) return 33;
     s.task_pressure=.1; const double u_low=LivingDynamics::pressure_motivation(s); s.task_pressure=.5; const double u_mid=LivingDynamics::pressure_motivation(s); s.task_pressure=.9; const double u_high=LivingDynamics::pressure_motivation(s); if (!(u_low < u_mid && u_mid <= u_high)) return 9;
     s.task_pressure=.9; s.anxiety=.2; s.fatigue=.2; const double focused=LivingDynamics::overload_risk(s,p); s.anxiety=.95; s.fatigue=.9; const double overloaded=LivingDynamics::overload_risk(s,p); if (!(focused < .05 && overloaded > focused + .25)) return 10;
     DemoLivingDynamicsV1 model; s = CharacterState{}; s.hunger=0.0; s.bathroom_urge=0.0; s.fatigue=0.0; s.anxiety=0.0; const double sat=s.satisfaction; RunningAction baseline; baseline.action=ActionType::Idle; model.advance_continuous(s,p,&baseline,30); if(!(std::abs(s.satisfaction-sat)<0.01)) return 11;
@@ -65,6 +70,21 @@ int main(){
     if (!(loaded_fatigue > .40)) return 27;
     RunningAction rest; rest.action=ActionType::RestAtBed; model.advance_continuous(s,p,&rest,30);
     if (!(s.fatigue < loaded_fatigue && s.fatigue > .05)) return 28;
+    // Fatigue and screen exposure each have one action-continuous owner.
+    // Settlement and a Recovery semantic signal cannot replay either effect.
+    observation = {}; observation.last_self_action = {true, ActionType::SleepAtBed, true};
+    s = CharacterState{}; s.fatigue=.75; s.screen_strain=.75;
+    const Appraisal sleep_settlement=model.appraise(observation,s,p);
+    if (sleep_settlement.fatigue_delta != 0.0 || sleep_settlement.screen_strain_delta != 0.0) return 34;
+    Appraisal recovery; recovery.semantic_signals.push_back({AppraisalSignalKind::Recovery,1.0,1.0,1.0,0.0,"test"});
+    const double fatigue_before_recovery=s.fatigue, screen_before_recovery=s.screen_strain;
+    model.apply_impulse(s,recovery,p);
+    if (std::abs(s.fatigue-fatigue_before_recovery)>1e-12 || std::abs(s.screen_strain-screen_before_recovery)>1e-12) return 35;
+    observation.last_self_action.action=ActionType::UsePhone;
+    if (model.appraise(observation,s,p).screen_strain_delta != 0.0) return 36;
+    RunningAction phone; phone.action=ActionType::UsePhone; const double screen_before_phone=s.screen_strain;
+    model.advance_continuous(s,p,&phone,30);
+    if (!(s.screen_strain > screen_before_phone)) return 37;
     // A quiet interval returns satisfaction toward neutral and never creates
     // an upward-only affect drift.
     s = CharacterState{}; s.satisfaction=.80; RunningAction quiet; quiet.action=ActionType::Idle;

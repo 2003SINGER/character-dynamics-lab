@@ -43,8 +43,9 @@ StateDelta semantic_delta(const Appraisal& appraisal,
             delta.fatigue += 0.04 * strength;
             break;
         case AppraisalSignalKind::Recovery:
-            delta.fatigue -= 0.28 * strength;
-            delta.screen_strain -= 0.12 * strength;
+            // Recovery is already integrated by the action's continuous
+            // owner.  Keep this semantic channel for its non-fatigue meaning
+            // instead of letting it write the same inventory a second time.
             delta.satisfaction += 0.04 * strength;
             break;
         case AppraisalSignalKind::ShortTermReward:

@@ -44,7 +44,6 @@ Appraisal appraise(const Observation& observation,
             appraisal.task_pressure_delta = coursework_pending ? 0.07 * LivingDynamics::pressure_motivation(old_state) : 0.0;
             appraisal.satisfaction_delta = 0.05 * LivingDynamics::boredom_stimulation_drive(old_state)
                                         * (1.0 - LivingDynamics::screen_aversion(old_state));
-            appraisal.screen_strain_delta = 0.04 + 0.08 * (1.0 - old_state.screen_strain);
             appraisal.purchase_urge_delta = 0.04 + 0.06 * old_state.boredom;
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"device_stimulation", "screen_strain", "task_deferred"}
@@ -54,7 +53,6 @@ Appraisal appraise(const Observation& observation,
             appraisal.satisfaction_delta = 0.08 * LivingDynamics::boredom_stimulation_drive(old_state)
                                          + 0.08 * old_state.purchase_urge;
             appraisal.task_pressure_delta = coursework_pending ? 0.03 : 0.0;
-            appraisal.screen_strain_delta = 0.08;
             appraisal.purchase_urge_delta = -0.70 * old_state.purchase_urge;
             appraisal.tags = {"purchase_completed", "short_term_reward"};
             break;
@@ -62,7 +60,6 @@ Appraisal appraise(const Observation& observation,
             appraisal.boredom_delta = -0.18 * LivingDynamics::boredom_stimulation_drive(old_state);
             appraisal.fatigue_delta = 0.04 + 0.07 * old_state.screen_strain;
             appraisal.task_pressure_delta = coursework_pending ? 0.05 * LivingDynamics::pressure_motivation(old_state) : 0.0;
-            appraisal.screen_strain_delta = 0.04 + 0.07 * (1.0 - old_state.screen_strain);
             appraisal.tags = coursework_pending
                 ? std::vector<std::string>{"screen_engagement", "task_deferred"}
                 : std::vector<std::string>{"screen_engagement"};
@@ -74,8 +71,6 @@ Appraisal appraise(const Observation& observation,
             appraisal.task_pressure_delta = -0.10 * LivingDynamics::pressure_motivation(old_state);
             appraisal.satisfaction_delta = 0.08 * LivingDynamics::pressure_motivation(old_state);
             appraisal.anxiety_delta = -0.02 * LivingDynamics::anxiety_facilitation(old_state);
-            appraisal.screen_strain_delta =
-                observation.last_self_action.action == ActionType::StudyAtComputer ? 0.08 : 0.0;
             appraisal.tags = {"task_effort_session", "mental_effort"};
             break;
         case ActionType::StudyHalfhearted:
@@ -88,9 +83,8 @@ Appraisal appraise(const Observation& observation,
             break;
         case ActionType::RestAtBed:
             appraisal.boredom_delta = 0.03 * (1.0 - LivingDynamics::boredom_stimulation_drive(old_state));
-            appraisal.fatigue_delta = -0.065 * LivingDynamics::fatigue_recovery_drive(old_state)
-                                    * LivingDynamics::rest_recovery_efficiency(old_state);
-            appraisal.screen_strain_delta = -0.16 * (0.35 + LivingDynamics::screen_aversion(old_state));
+            // Fatigue recovery belongs exclusively to the running-action
+            // continuous path.  This settlement only communicates meaning.
             appraisal.task_pressure_delta = 0.0;
             appraisal.satisfaction_delta = 0.06 * LivingDynamics::fatigue_recovery_drive(old_state);
             appraisal.tags = coursework_pending
@@ -99,9 +93,7 @@ Appraisal appraise(const Observation& observation,
             break;
         case ActionType::SleepAtBed:
             appraisal.boredom_delta = -0.06 * LivingDynamics::boredom_stimulation_drive(old_state);
-            appraisal.fatigue_delta = -0.13 * LivingDynamics::fatigue_recovery_drive(old_state)
-                                    * LivingDynamics::rest_recovery_efficiency(old_state);
-            appraisal.screen_strain_delta = -0.32 * (0.45 + LivingDynamics::screen_aversion(old_state));
+            // See RestAtBed: no second fatigue settlement impulse.
             appraisal.task_pressure_delta = 0.0;
             appraisal.satisfaction_delta = 0.08 * LivingDynamics::fatigue_recovery_drive(old_state);
             appraisal.tags = coursework_pending
