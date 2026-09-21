@@ -1,6 +1,6 @@
 # DemoLivingV1 baseline-freeze status
 
-`DEMO_LIVING_V1_FINAL_PRESSURE_REPAIR = BATCH_PENDING`
+`DEMO_LIVING_V1_FINAL_PRESSURE_REPAIR = READY_FOR_INDEPENDENT_REVIEW`
 
 This is a demo/application baseline, not a research result or a claim of psychological realism. Laya is deliberately not integrated in this milestone.
 
@@ -57,12 +57,20 @@ Normal/High/Extreme pressure ranges under observable urgent or overdue work,
 and the coupling smoke proves both boundary-density invariance and an
 O-derived path into the overload range.
 
-The prior R2 batch remains historical evidence only. A fresh same-seed 128×48h
-batch and deterministic rerun under this revision are required before any
-review state is restored.
+The prior R2 batch remains historical evidence only. The replacement
+`batch_48h_v1_final_pressure_repair/` was generated from `baf29b5`, runs the
+same 128×48h (6144 actor-hours), and byte-compares every one of the 128
+deterministic reruns. Its only diagnostic flags are one
+`SATISFACTION_HIGH_SATURATION` and one `UNMET_BATHROOM` actor. These sparse
+cases remain visible for review; no behavioral-realism claim follows.
+
+`V1_MECHANISM_REPAIR_R2_VS_FINAL_PRESSURE_REPAIR.md` compares the exact
+same-seed artifacts. Mean task pressure is 0.4070 → 0.5098, while mean study
+minutes are 431.0 → 430.0; the repair changes pressure ownership rather than
+silently tuning the action policy.
 
 ## Next boundary
 
 No Laya or policy A/B milestone is authorized by this repair. This state is
-not `CLOSED` or a psychology claim; the pending batch must be inspected before
-any separately scoped Demo-dynamics follow-up.
+not `CLOSED` or a psychology claim; independent review must decide whether the
+two sparse traces warrant a separately scoped Demo-dynamics follow-up.

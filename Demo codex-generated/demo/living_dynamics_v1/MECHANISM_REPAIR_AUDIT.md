@@ -1,6 +1,6 @@
 # Demo Living V1 mechanism-repair audit
 
-Status: `DEMO_LIVING_V1_FINAL_PRESSURE_REPAIR = BATCH_PENDING`. This replaces the premature
+Status: `DEMO_LIVING_V1_FINAL_PRESSURE_REPAIR = READY_FOR_INDEPENDENT_REVIEW`. This replaces the premature
 baseline-freeze claim for the Demo/application model only. It is not research
 evidence.
 
@@ -113,4 +113,8 @@ pressure even with the same observable task/deadline trajectory.
   reaches Extreme pressure and overload without injecting pressure directly.
 
 No World, action schema, Runtime gate, ResearchDynamics, Reference dynamics or
-Laya behavior changed. A fresh same-seed batch is still pending.
+Laya behavior changed. The fresh same-seed artifact
+`batch_48h_v1_final_pressure_repair/` was generated from `baf29b5`: 128×48h,
+6144 actor-hours, and a byte-for-byte deterministic rerun of all 128 actors.
+It records one `SATISFACTION_HIGH_SATURATION` and one `UNMET_BATHROOM` actor;
+both are exposed for independent review, not waived as success.

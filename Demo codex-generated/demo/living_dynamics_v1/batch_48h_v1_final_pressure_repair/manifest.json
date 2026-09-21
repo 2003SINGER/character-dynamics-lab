@@ -1,0 +1,25 @@
+{
+  "milestone": "DEMO_LIVING_BATCH_48H_V1",
+  "artifact_id": "demo-living-v1-final-pressure-repair",
+  "actors": 128,
+  "profiles": [
+    "balanced",
+    "disciplined",
+    "procrastinating",
+    "rest_seeking",
+    "stimulation_seeking",
+    "anxious",
+    "body_sensitive",
+    "spontaneous"
+  ],
+  "seeds": {
+    "scenario": "1000 + actor_id * 17",
+    "policy": "5000 + actor_id * 31"
+  },
+  "start_total_minutes": 480,
+  "horizon_minutes": 2880,
+  "dynamics_model": "demo-living-v1",
+  "git_revision": "baf29b58900784bf2f169950635a689753003d22",
+  "config_version": "demo-living-v1-final-pressure-repair-r1",
+  "demo_only": true
+}
