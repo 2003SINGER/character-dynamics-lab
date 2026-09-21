@@ -1,6 +1,6 @@
 # DemoLivingV1 baseline-freeze status
 
-`DEMO_LIVING_V1_MECHANISM_REPAIR_R1 = SUPERSEDED_BY_R2_PENDING_BATCH`
+`DEMO_LIVING_V1_MECHANISM_REPAIR_R2 = READY_FOR_INDEPENDENT_REVIEW`
 
 This is a demo/application baseline, not a research result or a claim of psychological realism. Laya is deliberately not integrated in this milestone.
 
@@ -34,12 +34,21 @@ context rather than treated as fitted improvement scores.
 
 R2 repairs the remaining rejection-replanning, perceived-need gate, screen
 response, contextual anxiety recovery and extreme-fatigue feasibility paths.
-Its same-seed batch is deliberately not claimed here until it is generated
-from the exact implementation revision and its deterministic rerun completes.
+`batch_48h_v1_mechanism_repair_r2/` is generated from `f829d57`, runs 128×48h
+(6144 actor-hours), and byte-compares all 128 deterministic reruns. The
+systemic R1 flags are now absent: `SCREEN_STRAIN_UNRESPONSIVE`, unmet hunger,
+unmet bathroom, anxiety-low, fatigue-high and fatigue-low saturation are each
+0/128. One excessive-sleep and one satisfaction-high trace remain exposed for
+review; they are not folded into a false claim of behavioral realism.
+
+`V1_MECHANISM_REPAIR_R1_VS_R2.md` records the exact artifact comparison. The
+R1/R2 episode semantics differ where the R2 analyzer corrects boundary-time
+attribution, so diagnostic deltas are evidence of repair direction, not a
+fitted quality score.
 
 ## Next boundary
 
 No Laya or policy A/B milestone is authorized by this repair. This state is
 not `CLOSED` or a psychology claim; an independent review must decide whether
-the remaining visible diagnostics require a separate, explicitly scoped
+the two remaining sparse traces warrant a separate, explicitly scoped
 Demo-dynamics follow-up.

@@ -1,6 +1,6 @@
 # Demo Living V1 mechanism-repair audit
 
-Status: `MECHANISM_REPAIR_R2_IMPLEMENTED_AWAITING_BATCH_REVIEW`. This replaces the premature
+Status: `DEMO_LIVING_V1_MECHANISM_REPAIR_R2 = READY_FOR_INDEPENDENT_REVIEW`. This replaces the premature
 baseline-freeze claim for the Demo/application model only. It is not research
 evidence.
 
@@ -82,5 +82,11 @@ not alter World, action schema, Reference or Research dynamics.
 - The batch episode estimator now splits threshold-crossing intervals instead
   of assigning a boundary's end-state to the entire preceding Δt.
 
-The replacement same-seed batch must be generated after the R2 implementation
-commit before this document returns to independent-review status.
+The exact-revision R2 batch is `batch_48h_v1_mechanism_repair_r2/`, generated
+from `f829d57` with configuration `demo-living-v1-mechanism-repair-r2`.
+It runs 128 actors × 48h (6144 actor-hours) and byte-compares the deterministic
+rerun of every actor. The former systemic R1 diagnostics are absent: screen
+unresponsiveness, unmet hunger/bathroom, anxiety-low, fatigue-high and
+fatigue-low saturation are all 0/128. One `EXCESSIVE_SLEEP` and one
+`SATISFACTION_HIGH_SATURATION` actor remain visible as sparse review cases,
+not hidden or relabelled as proof of realism.

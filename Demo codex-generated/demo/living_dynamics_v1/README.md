@@ -11,4 +11,4 @@
 
 `character_dynamics_living_dynamics_v1_coupling_smoke` 覆盖核心非单调关系、低/高区 response、overload interaction、无条件 satisfaction drift 防回归和 purchase urge cooldown。冻结前审计见 [V1 implementation audit](V1_IMPLEMENTATION_AUDIT.md)，第一轮可解释校准见 [calibration log](CALIBRATION_LOG.md)。原始同 seed 128×48h V1 诊断保留在 `batch_48h_v1/`；新的 [calibrated batch](batch_48h_v1_calibrated/) 不覆盖它。`../living_dynamics_v0/batch_48h_v0/` 也保留为不可覆盖的历史 baseline；所有结果均明确标注为 Demo-only。
 
-当前状态见 [baseline-freeze status](BASELINE_FREEZE_STATUS.md)：授权的 [mechanism repair audit](MECHANISM_REPAIR_AUDIT.md) 已完成同 seed 128×48h 产物，当前为 `READY_FOR_INDEPENDENT_REVIEW`，而非 CLOSED。本次没有接入 Laya。
+当前状态见 [baseline-freeze status](BASELINE_FREEZE_STATUS.md)：R2 [mechanism repair audit](MECHANISM_REPAIR_AUDIT.md) 已完成 exact-revision 同 seed 128×48h 和逐 actor deterministic rerun；当前为 `READY_FOR_INDEPENDENT_REVIEW`，而非 CLOSED。R1/R2 证据对照见 [batch comparison](V1_MECHANISM_REPAIR_R1_VS_R2.md)。本次没有接入 Laya。
