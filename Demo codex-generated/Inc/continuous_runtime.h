@@ -8,6 +8,7 @@
 #include "state.h"
 #include "runtime_config.h"
 #include "character_dynamics_model.h"
+#include "character_policy.h"
 #include <random>
 #include <functional>
 
@@ -36,6 +37,8 @@ struct RuntimeExecutionResult {
     unsigned int policy_seed = 0;
     std::vector<ObservationFact> observation_deltas;
     bool policy_evaluated = false;
+    std::string policy_id;
+    std::string policy_selection_provenance;
 };
 
 // Canonical owner for Continuous Runtime v1: it advances time, integrates
@@ -45,7 +48,8 @@ class ContinuousRuntime {
 public:
     ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation,
                       CharacterDynamicsModel& model, InformationAccess access = {},
-                      unsigned int policy_seed = RuntimeConfig::DefaultPolicySeed);
+                      unsigned int policy_seed = RuntimeConfig::DefaultPolicySeed,
+                      CharacterPolicy* policy = nullptr);
     bool schedule_next_world_boundary();
     WorldOutcome submit_action_intent(ActionType action, const std::string& target_object_id,
                                       int duration_minutes, bool interruptible = true);
@@ -66,6 +70,8 @@ private:
     WorldRuntimeAdapter world_runtime_;
     Observation& observation_;
     CharacterDynamicsModel& model_;
+    RulePolicyV0 default_policy_;
+    CharacterPolicy* policy_ = nullptr;
     InformationAccess access_;
     std::mt19937 rng_;
     unsigned int policy_seed_ = 0;

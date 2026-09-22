@@ -6,9 +6,10 @@ namespace {
 }
 
 ContinuousRuntime::ContinuousRuntime(RuntimeScheduler& scheduler, World& world, Observation& observation,
-                                     CharacterDynamicsModel& model, InformationAccess access, unsigned int policy_seed)
+                                     CharacterDynamicsModel& model, InformationAccess access, unsigned int policy_seed,
+                                     CharacterPolicy* policy)
     : scheduler_(scheduler), world_runtime_(world, scheduler), observation_(observation), model_(model),
-      access_(access), rng_(policy_seed), policy_seed_(policy_seed) {}
+      policy_(policy ? policy : &default_policy_), access_(access), rng_(policy_seed), policy_seed_(policy_seed) {}
 
 bool ContinuousRuntime::schedule_next_world_boundary() {
     return world_runtime_.schedule_next_world_boundary(scheduler_);
@@ -34,6 +35,7 @@ void ContinuousRuntime::invalidate_running_action() {
 RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& state, const Personality& personality) {
     RuntimeExecutionResult result;
     result.policy_seed = policy_seed_;
+    result.policy_id = policy_->identity();
     result.running_action_before = scheduler_.running_action();
     const CharacterState before_continuous = state;
     result.runtime.boundary = scheduler_.advance_to_next_boundary();
@@ -121,8 +123,12 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
             || action->status != RunningActionStatus::Running || subjective_reconsideration)) {
         result.policy_evaluated = true;
         result.decision = model_.build_policy(observation_, state, personality);
-        const ActionType selected = test_action_selector_ ? test_action_selector_(result.decision)
-                                                           : sample_action(result.decision, rng_);
+        const PolicySelection selection = test_action_selector_
+            ? PolicySelection{test_action_selector_(result.decision), "test-selector", "test-only override"}
+            : policy_->select(result.decision, observation_, state, personality, rng_);
+        result.policy_id = selection.policy_id;
+        result.policy_selection_provenance = selection.provenance;
+        const ActionType selected = selection.action;
         for (const CandidateAction& candidate : result.decision.candidates) {
             if (candidate.action == selected && candidate.probability > 0.0) {
                 result.selected_action = selected;

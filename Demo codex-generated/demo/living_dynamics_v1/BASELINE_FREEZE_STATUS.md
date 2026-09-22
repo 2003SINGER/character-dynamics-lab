@@ -1,8 +1,12 @@
-# DemoLivingV1 baseline-freeze status
+# DemoLivingV1 baseline status
 
-`DEMO_LIVING_V1_FINAL_PRESSURE_REPAIR = READY_FOR_INDEPENDENT_REVIEW`
+`DEMO_LIVING_V1 = ACTIVE / DEMO ONLY`
 
-This is a demo/application baseline, not a research result or a claim of psychological realism. Laya is deliberately not integrated in this milestone.
+This page preserves the 48-hour calibration history below. The current active
+demo track also has an explicitly separate `LayaPolicyV0`: a strictly local,
+O/S/P-only policy adapter with cassette replay. It does not change
+`DemoLivingDynamicsV1`, Shared Runtime Kernel, Reference behavior, or research
+claims. See [LayaPolicyV0](../laya_policy_v0/README.md).
 
 ## Evidence
 
@@ -69,8 +73,9 @@ same-seed artifacts. Mean task pressure is 0.4070 → 0.5098, while mean study
 minutes are 431.0 → 430.0; the repair changes pressure ownership rather than
 silently tuning the action policy.
 
-## Next boundary
+## Status boundary
 
-No Laya or policy A/B milestone is authorized by this repair. This state is
-not `CLOSED` or a psychology claim; independent review must decide whether the
-two sparse traces warrant a separately scoped Demo-dynamics follow-up.
+The calibration artifacts are historical demo evidence, not a psychology claim
+or a closed behavior model. Any Laya-vs-rule comparison is an application-level
+policy experiment with identical Runtime/World/action validation, not evidence
+for human validity or the research track.

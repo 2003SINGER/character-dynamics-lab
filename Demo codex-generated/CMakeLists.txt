@@ -33,6 +33,7 @@ set(CHARACTER_DYNAMICS_ENGINE_SOURCES
     Src/continuous_runtime.cpp
     Src/observation.cpp
     Src/runtime_scheduler.cpp
+    Src/laya_policy_v0.cpp
 )
 
 add_library(character_dynamics_engine STATIC ${CHARACTER_DYNAMICS_ENGINE_SOURCES})
@@ -153,6 +154,9 @@ add_executable(character_dynamics_free_run Src/free_run.cpp)
 target_link_libraries(character_dynamics_free_run PRIVATE character_dynamics_engine character_dynamics_demo_living_v1)
 add_test(NAME character_dynamics_personality_wiring_smoke
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/personality_wiring_smoke.py"
+         "$<TARGET_FILE:character_dynamics_free_run>")
+add_test(NAME character_dynamics_laya_policy_loopback_smoke
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/laya_policy_loopback_smoke.py"
          "$<TARGET_FILE:character_dynamics_free_run>")
 add_executable(character_dynamics_life_tape_smoke tests/life_tape_smoke.cpp)
 target_link_libraries(character_dynamics_life_tape_smoke PRIVATE character_dynamics_engine character_dynamics_demo_living_v1)

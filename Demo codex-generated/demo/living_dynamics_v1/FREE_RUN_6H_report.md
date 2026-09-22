@@ -21,10 +21,10 @@ Development/demo engineering diagnostics after calibration pass 1; not a realism
 - final task effort: 4.95273
 
 ## Run D (scenario=61, policy=404)
-- time range: 490–862
+- time range: 490–871
 - boundaries: 18
-- action counts: `{'idle': 2, 'rest_at_bed': 2, 'study_at_computer': 2, 'study_focused': 2, 'study_halfhearted': 2, 'turn_off_alarm': 2, 'use_computer': 1, 'use_phone': 1}`
-- final task effort: 2.43899
+- action counts: `{'get_meal': 1, 'idle': 2, 'rest_at_bed': 1, 'study_at_computer': 2, 'study_focused': 2, 'study_halfhearted': 3, 'turn_off_alarm': 1, 'use_computer': 1, 'use_phone': 1}`
+- final task effort: 2.70109
 
 ## Run E (scenario=89, policy=505)
 - time range: 490–845
