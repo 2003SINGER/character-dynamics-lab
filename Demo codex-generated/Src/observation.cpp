@@ -389,6 +389,30 @@ void apply_self_action_feedback(Observation& observation,
         "self_action_feedback", observed_at};
     if (outcome.plan_invalidated) return;
     record_constraint(observation, outcome, observed_at);
+    if (outcome.accepted) {
+        // A successful room-control action is directly observable to its
+        // actor. Project the typed settled primitive, not a hidden W read;
+        // otherwise a switched-off light can remain "on" in O indefinitely
+        // and cause repeated invalid study intents.
+        for (const WorldPrimitive& primitive:outcome.settled_primitives) {
+            const SetRoomFlag* change=std::get_if<SetRoomFlag>(&primitive.payload);
+            if (!change) continue;
+            switch (change->flag) {
+            case RoomFlag::LightOn:
+                write_fact(observation,"room.light",change->value?"on":"off",
+                           "self_action_room_feedback",observed_at);
+                break;
+            case RoomFlag::AlarmRinging:
+                write_fact(observation,"room.alarm",change->value?"ringing":"silent",
+                           "self_action_room_feedback",observed_at);
+                break;
+            case RoomFlag::CurtainOpen:
+                write_fact(observation,"room.curtain",change->value?"open":"closed",
+                           "self_action_room_feedback",observed_at);
+                break;
+            }
+        }
+    }
     if (!outcome.accepted && outcome.failure_reason == RejectionReason::TargetAbsent
         && !outcome.target_object_id.empty()) {
         const std::string object_key = "object." + outcome.target_object_id;
@@ -450,7 +474,26 @@ void apply_world_events(Observation& observation, const std::vector<WorldEvent>&
                         const World& world, const InformationAccess& access,
                         const std::string& observed_at) {
     for (const WorldEvent& event : events) {
-        if (event.id == "message-study-group") {
+        if (event.id == "task-assigned") {
+            const WorldTask* task=world.task_by_id("coursework");
+            if (task==nullptr) continue;
+            apply_observable_runtime_event(observation,"task.coursework.episode",
+                std::to_string(world.life_tape_episode),"world_event:task-assigned",observed_at);
+            apply_observable_runtime_event(observation,"task.coursework.status","active",
+                "world_event:task-assigned",observed_at);
+            apply_observable_runtime_event(observation,"task.coursework.effort","0.000000",
+                "world_event:task-assigned",observed_at);
+            apply_observable_runtime_event(observation,"task.coursework.effort_target",
+                std::to_string(task->effort_target),"world_event:task-assigned",observed_at);
+            if (access.task_deadline_observable) {
+                apply_observable_runtime_event(observation,FactKey::TaskDeadlineAt,
+                    std::to_string(task->due_at_total_minutes),"world_event:task-assigned",observed_at);
+                apply_observable_runtime_event(observation,FactKey::TaskDeadlinePassed,"0",
+                    "world_event:task-assigned",observed_at);
+                apply_observable_runtime_event(observation,FactKey::TaskReminder,"0",
+                    "world_event:task-assigned",observed_at);
+            }
+        } else if (event.id == "message-study-group") {
             if (!access.phone_presence_observable) continue;
             apply_observable_runtime_event(observation, FactKey::MessageUnreadCount, std::to_string(world.unread_messages),
                                            "world_event:message-study-group", observed_at);

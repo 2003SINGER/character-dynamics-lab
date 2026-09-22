@@ -11,7 +11,14 @@ WorldRuntimeAdapter::WorldRuntimeAdapter(World& world, const RuntimeScheduler& s
 bool WorldRuntimeAdapter::schedule_next_world_boundary(RuntimeScheduler& scheduler) const {
     const auto next = world_.next_runtime_event_after(scheduler.now_total_minutes());
     if (!next.has_value()) return false;
-    scheduler.schedule({"world_event:" + next->id, next->occurred_at_total_minutes, false, std::nullopt});
+    // A new task brief supersedes the old task at the shared boundary. The
+    // same tape event preempts any current action so no old study completion
+    // can accidentally settle against the newly assigned task.
+    const bool replaces_running_task=next->id=="task-assigned";
+    scheduler.schedule({"world_event:" + next->id, next->occurred_at_total_minutes,
+                        replaces_running_task, std::nullopt,
+                        next->id=="task-assigned" ? std::optional<DecisionGateReason>(DecisionGateReason::StrongExternalEvent)
+                                                   : std::nullopt});
     return true;
 }
 

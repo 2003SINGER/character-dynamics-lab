@@ -9,6 +9,22 @@
 
 namespace {
 constexpr int kMinutesPerDay = 24 * 60;
+constexpr int kLifeTapeStartMinute = 8 * 60;
+
+WorldTask life_tape_task(unsigned int scenario_seed, int episode, int cycle_days) {
+    std::seed_seq sequence{scenario_seed, static_cast<unsigned int>(episode),
+                           0x4c494645U, 0x20260922U};
+    std::mt19937 generator(sequence);
+    const double target=std::uniform_real_distribution<double>(7.2,9.2)(generator);
+    const double desk=std::uniform_real_distribution<double>(0.38,0.56)(generator);
+    const double computer=std::uniform_real_distribution<double>(0.68,1.02)(generator);
+    const int assigned=kLifeTapeStartMinute+episode*cycle_days*kMinutesPerDay;
+    const int due=assigned+(cycle_days-1)*kMinutesPerDay;
+    return {"coursework","coursework episode " + std::to_string(episode),0.0,target,
+            TaskStatus::Active,
+            {ActionType::StudyFocused,ActionType::StudyHalfhearted,ActionType::StudyAtComputer},
+            due,desk,computer};
+}
 
 enum class ScheduledEventKind {
     Alarm,
@@ -136,7 +152,10 @@ void apply_scheduled_events(World& world, int before, int after, bool was_sleepi
 
             switch (scheduled.kind) {
             case ScheduledEventKind::Alarm:
-                if (!room.alarm_ringing) {
+                // In the opt-in life tape the external alarm event is emitted
+                // every day even if an actor left the device ringing. The
+                // external stimulus must not depend on earlier P-driven acts.
+                if (world.life_tape_enabled || !room.alarm_ringing) {
                     room.alarm_ringing = true;
                     append_event(outcome, {"alarm-rings", "the alarm clock rings in the room", "room/alarm-clock", absolute_minute});
                 }
@@ -164,7 +183,7 @@ void apply_scheduled_events(World& world, int before, int after, bool was_sleepi
                 break;
             }
             case ScheduledEventKind::TaskReminder:
-                if (world.has_pending_task()) {
+                if (world.life_tape_enabled || world.has_pending_task()) {
                     append_event(outcome, {"task-reminder", "calendar reminder: a task remains due today", "calendar", absolute_minute});
                 }
                 break;
@@ -175,7 +194,7 @@ void apply_scheduled_events(World& world, int before, int after, bool was_sleepi
         }
     }
     for (const WorldTask& task : world.tasks) {
-        if (task.status == TaskStatus::Active && task.due_at_total_minutes >= 0
+        if ((world.life_tape_enabled || task.status == TaskStatus::Active) && task.due_at_total_minutes >= 0
             && before < task.due_at_total_minutes && after >= task.due_at_total_minutes) {
             append_event(outcome, {"task-deadline", "deadline passes for task: " + task.id,
                 "world/task-calendar", task.due_at_total_minutes});
@@ -194,6 +213,16 @@ World::World(unsigned int seed) : scenario_seed(seed) {
     tasks.push_back({"coursework", "coursework", 0.0, target, TaskStatus::Active,
                      {ActionType::StudyFocused, ActionType::StudyHalfhearted, ActionType::StudyAtComputer}, due_offset,
                      desk_effort, computer_effort});
+}
+
+void World::enable_life_tape(int cycle_days) {
+    if (cycle_days < 2) throw std::invalid_argument("life tape cycle must be at least two days");
+    if (total_minutes(time) != 0 && total_minutes(time) != kLifeTapeStartMinute)
+        throw std::logic_error("life tape must be enabled before the first runtime transition");
+    life_tape_enabled=true;
+    life_tape_cycle_days=cycle_days;
+    life_tape_episode=0;
+    tasks.front()=life_tape_task(scenario_seed,0,cycle_days);
 }
 
 const WorldTask* World::task_by_id(const std::string& task_id) const {
@@ -583,6 +612,20 @@ std::vector<WorldEvent> World::advance_runtime_by(int elapsed_minutes) {
     // Reuse the exact deterministic event source used by Reference v0, but
     // emit events at their own runtime boundary rather than action completion.
     apply_scheduled_events(*this, before, after, false, transition);
+    if (life_tape_enabled) {
+        const int cycle=life_tape_cycle_days*kMinutesPerDay;
+        const int next_episode=life_tape_episode+1;
+        const int assigned=kLifeTapeStartMinute+next_episode*cycle;
+        if (before<assigned && assigned<=after) {
+            const bool previous_completed=tasks.front().status==TaskStatus::Completed;
+            tasks.front()=life_tape_task(scenario_seed,next_episode,life_tape_cycle_days);
+            life_tape_episode=next_episode;
+            append_event(transition,{"task-assigned",
+                "new coursework episode " + std::to_string(next_episode)
+                    + (previous_completed ? " after completed task" : " after expired task"),
+                "world/task-calendar",assigned});
+        }
+    }
     return transition.events;
 }
 
@@ -605,13 +648,20 @@ std::optional<WorldEvent> World::next_runtime_event_after(int total_minutes) con
             if (!earliest || candidate.occurred_at_total_minutes < earliest->occurred_at_total_minutes) earliest = candidate;
         }
         for (const WorldTask& task : tasks) {
-            if (task.status == TaskStatus::Active && task.due_at_total_minutes > total_minutes
+            if ((life_tape_enabled || task.status == TaskStatus::Active) && task.due_at_total_minutes > total_minutes
                 && task.due_at_total_minutes / kMinutesPerDay == day_index) {
                 WorldEvent candidate{"task-deadline", "deadline passes for task: " + task.id,
                                      "world/task-calendar", task.due_at_total_minutes};
                 if (!earliest || candidate.occurred_at_total_minutes < earliest->occurred_at_total_minutes) earliest = candidate;
             }
         }
+    }
+    if (life_tape_enabled) {
+        const int cycle=life_tape_cycle_days*kMinutesPerDay;
+        const int next_episode=std::max(1,(total_minutes-kLifeTapeStartMinute)/cycle+1);
+        const int assigned=kLifeTapeStartMinute+next_episode*cycle;
+        WorldEvent candidate{"task-assigned","new coursework episode","world/task-calendar",assigned};
+        if (!earliest || assigned<earliest->occurred_at_total_minutes) earliest=candidate;
     }
     return earliest;
 }

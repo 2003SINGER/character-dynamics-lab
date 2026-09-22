@@ -85,6 +85,13 @@ struct World {
     int meals_collected = 0;
     int online_orders = 0;
     ActionType last_action = ActionType::Idle;
+    // Opt-in synthetic task tape for long-horizon Demo experiments. The
+    // ordinary World/Reference fixtures retain their original single task.
+    bool life_tape_enabled = false;
+    int life_tape_cycle_days = 3;
+    int life_tape_episode = 0;
+
+    void enable_life_tape(int cycle_days = 3);
 
     const WorldTask* task_by_id(const std::string& task_id) const;
     WorldTask* task_by_id(const std::string& task_id);

@@ -256,6 +256,13 @@ ActionType sample_action(const DecisionContext& decision, std::mt19937& rng) {
 void update_commitment(CharacterState& state,
                        const Observation& observation,
                        int settled_at_total_minutes) {
+    // A newly assigned coursework episode supersedes an unfinished commitment
+    // to the previous episode. This is an observed task transition, not a
+    // spontaneous decay of intention.
+    if (std::any_of(observation.updates_this_refresh.begin(), observation.updates_this_refresh.end(),
+                    [](const ObservationFact& fact) { return fact.key=="task.coursework.episode"; })) {
+        state.commitment={};
+    }
     const ObservedAction& action = observation.last_self_action;
     if (!action.has_action || !action.accepted) return;
 

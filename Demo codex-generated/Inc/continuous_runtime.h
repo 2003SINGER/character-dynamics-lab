@@ -56,6 +56,10 @@ public:
         test_action_selector_ = std::move(selector);
     }
     unsigned int policy_seed() const { return policy_seed_; }
+    // Experiment fork support: preserve the exact policy RNG position when
+    // cloning a Runtime checkpoint; no policy law or production path changes.
+    std::mt19937 policy_rng_state() const { return rng_; }
+    void restore_policy_rng_state(const std::mt19937& state) { rng_=state; }
 
 private:
     RuntimeScheduler& scheduler_;

@@ -154,6 +154,17 @@ target_link_libraries(character_dynamics_free_run PRIVATE character_dynamics_eng
 add_test(NAME character_dynamics_personality_wiring_smoke
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/personality_wiring_smoke.py"
          "$<TARGET_FILE:character_dynamics_free_run>")
+add_executable(character_dynamics_life_tape_smoke tests/life_tape_smoke.cpp)
+target_link_libraries(character_dynamics_life_tape_smoke PRIVATE character_dynamics_engine character_dynamics_demo_living_v1)
+add_test(NAME character_dynamics_life_tape_smoke COMMAND character_dynamics_life_tape_smoke)
+add_executable(character_dynamics_room_control_feedback_smoke tests/room_control_feedback_smoke.cpp)
+target_link_libraries(character_dynamics_room_control_feedback_smoke PRIVATE character_dynamics_engine character_dynamics_demo_living_v1)
+add_test(NAME character_dynamics_room_control_feedback_smoke COMMAND character_dynamics_room_control_feedback_smoke)
+add_executable(character_dynamics_long_horizon Src/long_horizon.cpp)
+target_link_libraries(character_dynamics_long_horizon PRIVATE character_dynamics_engine character_dynamics_demo_living_v1)
+add_test(NAME character_dynamics_long_horizon_pipeline_smoke
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/long_horizon_pipeline_smoke.py"
+         "$<TARGET_FILE:character_dynamics_long_horizon>")
 add_test(NAME character_dynamics_free_run_report
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/free_run_report.py"
          "${CMAKE_CURRENT_SOURCE_DIR}/demo/living_dynamics_v1"

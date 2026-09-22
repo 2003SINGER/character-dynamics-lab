@@ -50,6 +50,10 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         action.has_value() ? &*action : nullptr, result.runtime.boundary.elapsed_minutes);
     result.runtime.world_events = world_runtime_.advance_to_boundary(result.runtime.boundary, scheduler_);
     apply_world_events(observation_, result.runtime.world_events, world_runtime_.world(), access_, world_runtime_.time_summary());
+    if (std::any_of(result.runtime.world_events.begin(), result.runtime.world_events.end(),
+                    [](const WorldEvent& event) { return event.id=="task-assigned"; })) {
+        rebuild_known_actions_from_observation(observation_);
+    }
     for (const ScheduledRuntimeEvent& event : result.runtime.boundary.events) {
         if (!event.rejection.has_value()) continue;
         WorldOutcome rejection;
