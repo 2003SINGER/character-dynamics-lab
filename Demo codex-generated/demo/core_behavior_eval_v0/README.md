@@ -40,3 +40,22 @@ actor, supersedes the prior task, and opens a decision boundary. This is an
 experimental repeated-stimulus room, not a full social life. The old 48-hour
 batch remains engineering regression evidence and must not be cited as a
 paired personality experiment.
+
+## Versioned development read-out (2026-09-22)
+
+The following compact, versioned outputs were generated from exact revision
+`6ffb4da` with same-world tapes and byte-for-byte deterministic reruns. Raw
+per-run traces remain local under ignored `runs/`; each manifest records their
+SHA-256 for audit.
+
+| Artifact | Scope | What it establishes — and what it does not |
+|---|---|---|
+| [`paired_7d_8tape_v0`](paired_7d_8tape_v0/) | 8 tapes × 8 fixed `P`, 7 days | Short-horizon paired P separation is weak (20/64 trajectory classifications; 31.25% vs 12.5% chance), not absent. |
+| [`paired_30d_8tape_v0`](paired_30d_8tape_v0/) | 8 tapes × 8 fixed `P`, 30 days | Medium-horizon separation rises to 31/64 (48.44%); episode/history reports identify the trajectory features used. |
+| [`paired_30d_v0`](paired_30d_v0/) | 3 tapes plus one-axis scans | Some declared P axes have only tiny distribution effects; this prevents treating every coefficient as behaviorally consequential. |
+| [`paired_180d_v0`](paired_180d_v0/) | 8 tapes × 8 fixed `P`, 180 days | Long-horizon trajectory classification reaches 45/64 (70.31%); the separate episode/task-response classifier remains only 19/64 (29.69%), so this is lifestyle-allocation separation rather than proof of task-response quality. |
+
+The history reports also show nonzero reset/stale fork divergences while holding
+future external tapes fixed. They establish that the current Demo state has an
+observable causal role inside this sandbox. None of these numbers establish
+human validity, a scientific effect, or a production quality threshold.

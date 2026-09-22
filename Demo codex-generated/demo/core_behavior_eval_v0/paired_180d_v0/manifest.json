@@ -1,0 +1,1166 @@
+{
+  "experiment": "DEMO_CORE_BEHAVIOR_EVAL_V0",
+  "days": 180,
+  "git_revision": "6ffb4da2b8f046fa520d7b26ad144a1e8e6d632d",
+  "executable_sha256": "0537bbb309b3107a07fbed7e438ee85fceef2fe606404b04481cde0e2cf2d338",
+  "cases": 8,
+  "same_world_within_case": true,
+  "deterministic_rerun_count": 64,
+  "scenario_seed_formula": "1000 + 17*case",
+  "policy_seed_formula": "5000 + 31*case",
+  "life_tape_cycle_days": 3,
+  "runs": [
+    {
+      "case": 0,
+      "profile": "balanced",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.5,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.5
+      },
+      "sha256": "71c651514ef5ae6b3d250e5af70b81b0f07e1123a137b2caa84d9f9ae6ae80a4",
+      "trace": "runs/case_00_balanced.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "disciplined",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.2,
+        "self_control": 0.8,
+        "rest_preference": 0.4,
+        "stimulation_seeking": 0.35,
+        "task_anxiety_sensitivity": 0.4,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.6,
+        "action_noise": 0.25
+      },
+      "sha256": "e2b7227a7c63090a363b47bcd3dce90739cb5d25504968c738c2a652d15c3f87",
+      "trace": "runs/case_00_disciplined.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "procrastinating",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.8,
+        "self_control": 0.3,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.7,
+        "task_anxiety_sensitivity": 0.65,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.55
+      },
+      "sha256": "9dcc61a4468ab8c5bc2262f46bc85987e3f40321dbbae0c69eb1080beb13da4a",
+      "trace": "runs/case_00_procrastinating.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "rest_seeking",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.8,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.65,
+        "action_noise": 0.35
+      },
+      "sha256": "fb16ae270bcb7340ecd8f00471f62e8842e4466002d3473e3238f63e20cc1524",
+      "trace": "runs/case_00_rest_seeking.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "stimulation_seeking",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.65,
+        "self_control": 0.4,
+        "rest_preference": 0.35,
+        "stimulation_seeking": 0.85,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.45,
+        "action_noise": 0.65
+      },
+      "sha256": "130818098cef198ead990a54697f042ffced4bf175fb8b1c4b8e9c3f0bdec3ba",
+      "trace": "runs/case_00_stimulation_seeking.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "anxious",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.55,
+        "self_control": 0.5,
+        "rest_preference": 0.55,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.85,
+        "screen_strain_sensitivity": 0.55,
+        "need_response": 0.65,
+        "action_noise": 0.4
+      },
+      "sha256": "91626d0b08eba6663bc51d20d0904980ee790607f2b025c1cea3de6d0f9bc8c8",
+      "trace": "runs/case_00_anxious.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "body_sensitive",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.45,
+        "self_control": 0.55,
+        "rest_preference": 0.6,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.65,
+        "need_response": 0.9,
+        "action_noise": 0.35
+      },
+      "sha256": "1025f4ce09c7c98388d1b8d8e5b797b62d40cb92b0808485cff811c11808b09d",
+      "trace": "runs/case_00_body_sensitive.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "spontaneous",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.65,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.9
+      },
+      "sha256": "3015bea07f98a206fcf131ada30002671221a609763aed1a8ec13e30636ca62a",
+      "trace": "runs/case_00_spontaneous.jsonl.gz"
+    },
+    {
+      "case": 1,
+      "profile": "balanced",
+      "scenario_seed": 1017,
+      "policy_seed": 5031,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.5,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.5
+      },
+      "sha256": "de564a131694505584780078a1fc5738d360ae7ae6e6e4a52d8fae423e1b91e7",
+      "trace": "runs/case_01_balanced.jsonl.gz"
+    },
+    {
+      "case": 1,
+      "profile": "disciplined",
+      "scenario_seed": 1017,
+      "policy_seed": 5031,
+      "personality": {
+        "procrastination": 0.2,
+        "self_control": 0.8,
+        "rest_preference": 0.4,
+        "stimulation_seeking": 0.35,
+        "task_anxiety_sensitivity": 0.4,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.6,
+        "action_noise": 0.25
+      },
+      "sha256": "fb9fd9dde0552255ae602fbc4b37d0eff575f2500a347247401bf8d424b957c9",
+      "trace": "runs/case_01_disciplined.jsonl.gz"
+    },
+    {
+      "case": 1,
+      "profile": "procrastinating",
+      "scenario_seed": 1017,
+      "policy_seed": 5031,
+      "personality": {
+        "procrastination": 0.8,
+        "self_control": 0.3,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.7,
+        "task_anxiety_sensitivity": 0.65,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.55
+      },
+      "sha256": "720eff1b7da410f8935af84e708a4aa584a591db8948ad94711e56b83297a914",
+      "trace": "runs/case_01_procrastinating.jsonl.gz"
+    },
+    {
+      "case": 1,
+      "profile": "rest_seeking",
+      "scenario_seed": 1017,
+      "policy_seed": 5031,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.8,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.65,
+        "action_noise": 0.35
+      },
+      "sha256": "200b14739e62098c56e7de0ab55ad576334411be8d98716034940b4039044ba6",
+      "trace": "runs/case_01_rest_seeking.jsonl.gz"
+    },
+    {
+      "case": 1,
+      "profile": "stimulation_seeking",
+      "scenario_seed": 1017,
+      "policy_seed": 5031,
+      "personality": {
+        "procrastination": 0.65,
+        "self_control": 0.4,
+        "rest_preference": 0.35,
+        "stimulation_seeking": 0.85,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.45,
+        "action_noise": 0.65
+      },
+      "sha256": "30972989e69ea741c1a5c298f6b35e94e15f356a65cb90e0d7bfdec198f65237",
+      "trace": "runs/case_01_stimulation_seeking.jsonl.gz"
+    },
+    {
+      "case": 1,
+      "profile": "anxious",
+      "scenario_seed": 1017,
+      "policy_seed": 5031,
+      "personality": {
+        "procrastination": 0.55,
+        "self_control": 0.5,
+        "rest_preference": 0.55,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.85,
+        "screen_strain_sensitivity": 0.55,
+        "need_response": 0.65,
+        "action_noise": 0.4
+      },
+      "sha256": "b5919aaa8ec58c268fe7b6db5424fd4a2aac2e59ac1f432bc5e9a407a15b35eb",
+      "trace": "runs/case_01_anxious.jsonl.gz"
+    },
+    {
+      "case": 1,
+      "profile": "body_sensitive",
+      "scenario_seed": 1017,
+      "policy_seed": 5031,
+      "personality": {
+        "procrastination": 0.45,
+        "self_control": 0.55,
+        "rest_preference": 0.6,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.65,
+        "need_response": 0.9,
+        "action_noise": 0.35
+      },
+      "sha256": "e95635fe5a3fb51420156177daad567a29dce112977c79c3a1e8379223112b28",
+      "trace": "runs/case_01_body_sensitive.jsonl.gz"
+    },
+    {
+      "case": 1,
+      "profile": "spontaneous",
+      "scenario_seed": 1017,
+      "policy_seed": 5031,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.65,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.9
+      },
+      "sha256": "0a30afa1a57a124cc0ace864fc19223505e8558be023eca9c4d268b460c979ff",
+      "trace": "runs/case_01_spontaneous.jsonl.gz"
+    },
+    {
+      "case": 2,
+      "profile": "balanced",
+      "scenario_seed": 1034,
+      "policy_seed": 5062,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.5,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.5
+      },
+      "sha256": "5d1fb7880931a47ce3e0c4afa06c6bb1eb5590af6a0f2e13b0d7a98f6ae20a8b",
+      "trace": "runs/case_02_balanced.jsonl.gz"
+    },
+    {
+      "case": 2,
+      "profile": "disciplined",
+      "scenario_seed": 1034,
+      "policy_seed": 5062,
+      "personality": {
+        "procrastination": 0.2,
+        "self_control": 0.8,
+        "rest_preference": 0.4,
+        "stimulation_seeking": 0.35,
+        "task_anxiety_sensitivity": 0.4,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.6,
+        "action_noise": 0.25
+      },
+      "sha256": "67e503d7f0ae331f377e7d7783fc3cd17961a7e4335b53f6b937c7e0c6ea596d",
+      "trace": "runs/case_02_disciplined.jsonl.gz"
+    },
+    {
+      "case": 2,
+      "profile": "procrastinating",
+      "scenario_seed": 1034,
+      "policy_seed": 5062,
+      "personality": {
+        "procrastination": 0.8,
+        "self_control": 0.3,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.7,
+        "task_anxiety_sensitivity": 0.65,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.55
+      },
+      "sha256": "c1e05e089a671d0555ef37910d52c2fded7af4c7d4d62109538e15609fc4b94b",
+      "trace": "runs/case_02_procrastinating.jsonl.gz"
+    },
+    {
+      "case": 2,
+      "profile": "rest_seeking",
+      "scenario_seed": 1034,
+      "policy_seed": 5062,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.8,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.65,
+        "action_noise": 0.35
+      },
+      "sha256": "860c2f29038e25cba49aa848cc06d4be9e0c29834fe526458b3f7e97e1d822bf",
+      "trace": "runs/case_02_rest_seeking.jsonl.gz"
+    },
+    {
+      "case": 2,
+      "profile": "stimulation_seeking",
+      "scenario_seed": 1034,
+      "policy_seed": 5062,
+      "personality": {
+        "procrastination": 0.65,
+        "self_control": 0.4,
+        "rest_preference": 0.35,
+        "stimulation_seeking": 0.85,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.45,
+        "action_noise": 0.65
+      },
+      "sha256": "f99e4d1056f319c7dcda9d525585f8fc15b69032287a277a7145104e1e4b58bc",
+      "trace": "runs/case_02_stimulation_seeking.jsonl.gz"
+    },
+    {
+      "case": 2,
+      "profile": "anxious",
+      "scenario_seed": 1034,
+      "policy_seed": 5062,
+      "personality": {
+        "procrastination": 0.55,
+        "self_control": 0.5,
+        "rest_preference": 0.55,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.85,
+        "screen_strain_sensitivity": 0.55,
+        "need_response": 0.65,
+        "action_noise": 0.4
+      },
+      "sha256": "7ba7787a7870fb4e09ccdab721ad4cb52a068d9c4e1fa60a8d3872ebfa74b258",
+      "trace": "runs/case_02_anxious.jsonl.gz"
+    },
+    {
+      "case": 2,
+      "profile": "body_sensitive",
+      "scenario_seed": 1034,
+      "policy_seed": 5062,
+      "personality": {
+        "procrastination": 0.45,
+        "self_control": 0.55,
+        "rest_preference": 0.6,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.65,
+        "need_response": 0.9,
+        "action_noise": 0.35
+      },
+      "sha256": "a2cc99084734b0df6cc89316bb189aee4ac7a0439719a87285bf634501a040a4",
+      "trace": "runs/case_02_body_sensitive.jsonl.gz"
+    },
+    {
+      "case": 2,
+      "profile": "spontaneous",
+      "scenario_seed": 1034,
+      "policy_seed": 5062,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.65,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.9
+      },
+      "sha256": "6cbee139850638f7295f560b8c7fd3b9bb459797c34b3f670e72f531958d38b3",
+      "trace": "runs/case_02_spontaneous.jsonl.gz"
+    },
+    {
+      "case": 3,
+      "profile": "balanced",
+      "scenario_seed": 1051,
+      "policy_seed": 5093,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.5,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.5
+      },
+      "sha256": "30546555f90972efeb63ad3e7be830bf5ea04553ae5efbd0ed7939e1e1bd047c",
+      "trace": "runs/case_03_balanced.jsonl.gz"
+    },
+    {
+      "case": 3,
+      "profile": "disciplined",
+      "scenario_seed": 1051,
+      "policy_seed": 5093,
+      "personality": {
+        "procrastination": 0.2,
+        "self_control": 0.8,
+        "rest_preference": 0.4,
+        "stimulation_seeking": 0.35,
+        "task_anxiety_sensitivity": 0.4,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.6,
+        "action_noise": 0.25
+      },
+      "sha256": "b4a056621dc5ba2a920844ca170e916944d1daa6e8a3876ecde0fb5f3471290b",
+      "trace": "runs/case_03_disciplined.jsonl.gz"
+    },
+    {
+      "case": 3,
+      "profile": "procrastinating",
+      "scenario_seed": 1051,
+      "policy_seed": 5093,
+      "personality": {
+        "procrastination": 0.8,
+        "self_control": 0.3,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.7,
+        "task_anxiety_sensitivity": 0.65,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.55
+      },
+      "sha256": "5f7d35992250bd22f81688cacfe51676c807ff66f1207b728a8cb8e8f8f7bca4",
+      "trace": "runs/case_03_procrastinating.jsonl.gz"
+    },
+    {
+      "case": 3,
+      "profile": "rest_seeking",
+      "scenario_seed": 1051,
+      "policy_seed": 5093,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.8,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.65,
+        "action_noise": 0.35
+      },
+      "sha256": "107b1795d4ab4af5c9863d6d9895c928077bdcb89c9849e844b262276b6351e4",
+      "trace": "runs/case_03_rest_seeking.jsonl.gz"
+    },
+    {
+      "case": 3,
+      "profile": "stimulation_seeking",
+      "scenario_seed": 1051,
+      "policy_seed": 5093,
+      "personality": {
+        "procrastination": 0.65,
+        "self_control": 0.4,
+        "rest_preference": 0.35,
+        "stimulation_seeking": 0.85,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.45,
+        "action_noise": 0.65
+      },
+      "sha256": "56130245180004779f4d35121da3aad18acd590c231fa41fca5b9e4aca038567",
+      "trace": "runs/case_03_stimulation_seeking.jsonl.gz"
+    },
+    {
+      "case": 3,
+      "profile": "anxious",
+      "scenario_seed": 1051,
+      "policy_seed": 5093,
+      "personality": {
+        "procrastination": 0.55,
+        "self_control": 0.5,
+        "rest_preference": 0.55,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.85,
+        "screen_strain_sensitivity": 0.55,
+        "need_response": 0.65,
+        "action_noise": 0.4
+      },
+      "sha256": "2dc12b3af6d48b3ae5c491f6bb7801001a2e3af94ac9ae041215dcc209af1057",
+      "trace": "runs/case_03_anxious.jsonl.gz"
+    },
+    {
+      "case": 3,
+      "profile": "body_sensitive",
+      "scenario_seed": 1051,
+      "policy_seed": 5093,
+      "personality": {
+        "procrastination": 0.45,
+        "self_control": 0.55,
+        "rest_preference": 0.6,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.65,
+        "need_response": 0.9,
+        "action_noise": 0.35
+      },
+      "sha256": "6485ed9df072fccc8f73e09f996d2d9ffe08c403fad64dcc5e9917ad3970a5b3",
+      "trace": "runs/case_03_body_sensitive.jsonl.gz"
+    },
+    {
+      "case": 3,
+      "profile": "spontaneous",
+      "scenario_seed": 1051,
+      "policy_seed": 5093,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.65,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.9
+      },
+      "sha256": "11d64971f80c72ebbdc5e30d1b4193cad45fbf2de0eb9550796675683c1afb9e",
+      "trace": "runs/case_03_spontaneous.jsonl.gz"
+    },
+    {
+      "case": 4,
+      "profile": "balanced",
+      "scenario_seed": 1068,
+      "policy_seed": 5124,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.5,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.5
+      },
+      "sha256": "a2360255ed8c362f17816b5d849c72bfa6cacd4964c47dba1999cc0480f4170b",
+      "trace": "runs/case_04_balanced.jsonl.gz"
+    },
+    {
+      "case": 4,
+      "profile": "disciplined",
+      "scenario_seed": 1068,
+      "policy_seed": 5124,
+      "personality": {
+        "procrastination": 0.2,
+        "self_control": 0.8,
+        "rest_preference": 0.4,
+        "stimulation_seeking": 0.35,
+        "task_anxiety_sensitivity": 0.4,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.6,
+        "action_noise": 0.25
+      },
+      "sha256": "cce8443c4022a3a3edcf71df659efd8bba858f9477402ff602b55eefce4d3ee4",
+      "trace": "runs/case_04_disciplined.jsonl.gz"
+    },
+    {
+      "case": 4,
+      "profile": "procrastinating",
+      "scenario_seed": 1068,
+      "policy_seed": 5124,
+      "personality": {
+        "procrastination": 0.8,
+        "self_control": 0.3,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.7,
+        "task_anxiety_sensitivity": 0.65,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.55
+      },
+      "sha256": "0e0a507c02e891c9de5cc13c3c3781656bd9c7ecb97474e3e82e12743cfa46b2",
+      "trace": "runs/case_04_procrastinating.jsonl.gz"
+    },
+    {
+      "case": 4,
+      "profile": "rest_seeking",
+      "scenario_seed": 1068,
+      "policy_seed": 5124,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.8,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.65,
+        "action_noise": 0.35
+      },
+      "sha256": "0258e824c15320fd56994be34c0a6de3544c9adc7ef9f48c186b928bc0e956eb",
+      "trace": "runs/case_04_rest_seeking.jsonl.gz"
+    },
+    {
+      "case": 4,
+      "profile": "stimulation_seeking",
+      "scenario_seed": 1068,
+      "policy_seed": 5124,
+      "personality": {
+        "procrastination": 0.65,
+        "self_control": 0.4,
+        "rest_preference": 0.35,
+        "stimulation_seeking": 0.85,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.45,
+        "action_noise": 0.65
+      },
+      "sha256": "857c840d8df5213a5f3879bdc15c9439638344dfc135aa78639dc4ed61861efd",
+      "trace": "runs/case_04_stimulation_seeking.jsonl.gz"
+    },
+    {
+      "case": 4,
+      "profile": "anxious",
+      "scenario_seed": 1068,
+      "policy_seed": 5124,
+      "personality": {
+        "procrastination": 0.55,
+        "self_control": 0.5,
+        "rest_preference": 0.55,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.85,
+        "screen_strain_sensitivity": 0.55,
+        "need_response": 0.65,
+        "action_noise": 0.4
+      },
+      "sha256": "f16b48a47f03cf891f351cf61e0d4a4082dbe6cdd98d936e0abc423305fd7981",
+      "trace": "runs/case_04_anxious.jsonl.gz"
+    },
+    {
+      "case": 4,
+      "profile": "body_sensitive",
+      "scenario_seed": 1068,
+      "policy_seed": 5124,
+      "personality": {
+        "procrastination": 0.45,
+        "self_control": 0.55,
+        "rest_preference": 0.6,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.65,
+        "need_response": 0.9,
+        "action_noise": 0.35
+      },
+      "sha256": "e59b6f5928d6e7f861d8c85ce41fd733319ba40926498d9db6c020f11497d4fc",
+      "trace": "runs/case_04_body_sensitive.jsonl.gz"
+    },
+    {
+      "case": 4,
+      "profile": "spontaneous",
+      "scenario_seed": 1068,
+      "policy_seed": 5124,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.65,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.9
+      },
+      "sha256": "8c69ab34d7d0d9574ae32472568a923753688a2457134c61bb2cb6d657e6dc1b",
+      "trace": "runs/case_04_spontaneous.jsonl.gz"
+    },
+    {
+      "case": 5,
+      "profile": "balanced",
+      "scenario_seed": 1085,
+      "policy_seed": 5155,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.5,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.5
+      },
+      "sha256": "0a801cce8a8ab5a9cd2aebd6a1094d0929262f02568df280f4180e1c3e83c419",
+      "trace": "runs/case_05_balanced.jsonl.gz"
+    },
+    {
+      "case": 5,
+      "profile": "disciplined",
+      "scenario_seed": 1085,
+      "policy_seed": 5155,
+      "personality": {
+        "procrastination": 0.2,
+        "self_control": 0.8,
+        "rest_preference": 0.4,
+        "stimulation_seeking": 0.35,
+        "task_anxiety_sensitivity": 0.4,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.6,
+        "action_noise": 0.25
+      },
+      "sha256": "f7b95ff4b80ed43b42a2a9e93338864ebd213ed82c2c3283da1be3d67e601900",
+      "trace": "runs/case_05_disciplined.jsonl.gz"
+    },
+    {
+      "case": 5,
+      "profile": "procrastinating",
+      "scenario_seed": 1085,
+      "policy_seed": 5155,
+      "personality": {
+        "procrastination": 0.8,
+        "self_control": 0.3,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.7,
+        "task_anxiety_sensitivity": 0.65,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.55
+      },
+      "sha256": "239282b740106b5acc065411ea2229b25382fd1026b81c8f499bca7a0674dc94",
+      "trace": "runs/case_05_procrastinating.jsonl.gz"
+    },
+    {
+      "case": 5,
+      "profile": "rest_seeking",
+      "scenario_seed": 1085,
+      "policy_seed": 5155,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.8,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.65,
+        "action_noise": 0.35
+      },
+      "sha256": "de80719414db2713677038a28ec20fb0cf3d372f9214029d2c62b6a96a787b47",
+      "trace": "runs/case_05_rest_seeking.jsonl.gz"
+    },
+    {
+      "case": 5,
+      "profile": "stimulation_seeking",
+      "scenario_seed": 1085,
+      "policy_seed": 5155,
+      "personality": {
+        "procrastination": 0.65,
+        "self_control": 0.4,
+        "rest_preference": 0.35,
+        "stimulation_seeking": 0.85,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.45,
+        "action_noise": 0.65
+      },
+      "sha256": "c28ae431cb1dfa6886f30a787dc5f41cce8e2f59ee8bfba2ddb480f80fe3dbd8",
+      "trace": "runs/case_05_stimulation_seeking.jsonl.gz"
+    },
+    {
+      "case": 5,
+      "profile": "anxious",
+      "scenario_seed": 1085,
+      "policy_seed": 5155,
+      "personality": {
+        "procrastination": 0.55,
+        "self_control": 0.5,
+        "rest_preference": 0.55,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.85,
+        "screen_strain_sensitivity": 0.55,
+        "need_response": 0.65,
+        "action_noise": 0.4
+      },
+      "sha256": "b00e0f63a3c2ec07452c3b2f9aa41a6d6eb3988fdf67d8a9f2a9a1237be62e1b",
+      "trace": "runs/case_05_anxious.jsonl.gz"
+    },
+    {
+      "case": 5,
+      "profile": "body_sensitive",
+      "scenario_seed": 1085,
+      "policy_seed": 5155,
+      "personality": {
+        "procrastination": 0.45,
+        "self_control": 0.55,
+        "rest_preference": 0.6,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.65,
+        "need_response": 0.9,
+        "action_noise": 0.35
+      },
+      "sha256": "cc16725b373648ccd1f41232db0d86a7617a698b602af95788d8f42b82eb9a2c",
+      "trace": "runs/case_05_body_sensitive.jsonl.gz"
+    },
+    {
+      "case": 5,
+      "profile": "spontaneous",
+      "scenario_seed": 1085,
+      "policy_seed": 5155,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.65,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.9
+      },
+      "sha256": "9892d1ae9962ae4842537a00cb5912c6338136dbb005f3cb00e91808509f4d9d",
+      "trace": "runs/case_05_spontaneous.jsonl.gz"
+    },
+    {
+      "case": 6,
+      "profile": "balanced",
+      "scenario_seed": 1102,
+      "policy_seed": 5186,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.5,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.5
+      },
+      "sha256": "2185c80cd94a12ff5b20f11f528ec9791a5fc482760a3a74377c50613f8aab8b",
+      "trace": "runs/case_06_balanced.jsonl.gz"
+    },
+    {
+      "case": 6,
+      "profile": "disciplined",
+      "scenario_seed": 1102,
+      "policy_seed": 5186,
+      "personality": {
+        "procrastination": 0.2,
+        "self_control": 0.8,
+        "rest_preference": 0.4,
+        "stimulation_seeking": 0.35,
+        "task_anxiety_sensitivity": 0.4,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.6,
+        "action_noise": 0.25
+      },
+      "sha256": "954f7e26b7fecec4bd1925c58907769c3608cc333953bb5150c6e5033b833bb3",
+      "trace": "runs/case_06_disciplined.jsonl.gz"
+    },
+    {
+      "case": 6,
+      "profile": "procrastinating",
+      "scenario_seed": 1102,
+      "policy_seed": 5186,
+      "personality": {
+        "procrastination": 0.8,
+        "self_control": 0.3,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.7,
+        "task_anxiety_sensitivity": 0.65,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.55
+      },
+      "sha256": "20f29b33bd29b9fd0ca7e83f627d691e521d16082535dc4f7182852d1abd02fa",
+      "trace": "runs/case_06_procrastinating.jsonl.gz"
+    },
+    {
+      "case": 6,
+      "profile": "rest_seeking",
+      "scenario_seed": 1102,
+      "policy_seed": 5186,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.8,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.65,
+        "action_noise": 0.35
+      },
+      "sha256": "3aaeb2316676a6d27549a2a21c400ad2717efbb5ecdd089006eb20c4330511f0",
+      "trace": "runs/case_06_rest_seeking.jsonl.gz"
+    },
+    {
+      "case": 6,
+      "profile": "stimulation_seeking",
+      "scenario_seed": 1102,
+      "policy_seed": 5186,
+      "personality": {
+        "procrastination": 0.65,
+        "self_control": 0.4,
+        "rest_preference": 0.35,
+        "stimulation_seeking": 0.85,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.45,
+        "action_noise": 0.65
+      },
+      "sha256": "351c702af49e4d945e3a564cf2f0e3d9efba8fb07cdd8f8d628b612f2b15204d",
+      "trace": "runs/case_06_stimulation_seeking.jsonl.gz"
+    },
+    {
+      "case": 6,
+      "profile": "anxious",
+      "scenario_seed": 1102,
+      "policy_seed": 5186,
+      "personality": {
+        "procrastination": 0.55,
+        "self_control": 0.5,
+        "rest_preference": 0.55,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.85,
+        "screen_strain_sensitivity": 0.55,
+        "need_response": 0.65,
+        "action_noise": 0.4
+      },
+      "sha256": "4ae2ce2e5f99a127d264f3e7cc9e66eec84a98991bd3be4768df77cce8e615e8",
+      "trace": "runs/case_06_anxious.jsonl.gz"
+    },
+    {
+      "case": 6,
+      "profile": "body_sensitive",
+      "scenario_seed": 1102,
+      "policy_seed": 5186,
+      "personality": {
+        "procrastination": 0.45,
+        "self_control": 0.55,
+        "rest_preference": 0.6,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.65,
+        "need_response": 0.9,
+        "action_noise": 0.35
+      },
+      "sha256": "26f8ae8f4bccc9396d43bb01a4e69a5c3201131d39a76e0b292ac2b91ebba62e",
+      "trace": "runs/case_06_body_sensitive.jsonl.gz"
+    },
+    {
+      "case": 6,
+      "profile": "spontaneous",
+      "scenario_seed": 1102,
+      "policy_seed": 5186,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.65,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.9
+      },
+      "sha256": "5ffd6f4ae3199ffa3c99ff49aaf81a6876d53404d01abdefe43601c38f439fc7",
+      "trace": "runs/case_06_spontaneous.jsonl.gz"
+    },
+    {
+      "case": 7,
+      "profile": "balanced",
+      "scenario_seed": 1119,
+      "policy_seed": 5217,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.5,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.5
+      },
+      "sha256": "f251cdce1cae08ebae9d6c2438584183c2e10110206f20ec6b3eaa17de90beed",
+      "trace": "runs/case_07_balanced.jsonl.gz"
+    },
+    {
+      "case": 7,
+      "profile": "disciplined",
+      "scenario_seed": 1119,
+      "policy_seed": 5217,
+      "personality": {
+        "procrastination": 0.2,
+        "self_control": 0.8,
+        "rest_preference": 0.4,
+        "stimulation_seeking": 0.35,
+        "task_anxiety_sensitivity": 0.4,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.6,
+        "action_noise": 0.25
+      },
+      "sha256": "32e088572c9d15754f82d69431782047490cb183d0aebc14238f559c6d8295a7",
+      "trace": "runs/case_07_disciplined.jsonl.gz"
+    },
+    {
+      "case": 7,
+      "profile": "procrastinating",
+      "scenario_seed": 1119,
+      "policy_seed": 5217,
+      "personality": {
+        "procrastination": 0.8,
+        "self_control": 0.3,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.7,
+        "task_anxiety_sensitivity": 0.65,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.55
+      },
+      "sha256": "099a91db1a395c2e854aaada7aef7b027c9f72e057557ec025479984a4c735de",
+      "trace": "runs/case_07_procrastinating.jsonl.gz"
+    },
+    {
+      "case": 7,
+      "profile": "rest_seeking",
+      "scenario_seed": 1119,
+      "policy_seed": 5217,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.8,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.65,
+        "action_noise": 0.35
+      },
+      "sha256": "47849fc87049e16cde31f05f44bbddd7c59851507759e75e30882d86aff6ac67",
+      "trace": "runs/case_07_rest_seeking.jsonl.gz"
+    },
+    {
+      "case": 7,
+      "profile": "stimulation_seeking",
+      "scenario_seed": 1119,
+      "policy_seed": 5217,
+      "personality": {
+        "procrastination": 0.65,
+        "self_control": 0.4,
+        "rest_preference": 0.35,
+        "stimulation_seeking": 0.85,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.45,
+        "action_noise": 0.65
+      },
+      "sha256": "392d09a65e236db3e399581ce5a824eb4a58e618dccb2b8de10a2bd717024844",
+      "trace": "runs/case_07_stimulation_seeking.jsonl.gz"
+    },
+    {
+      "case": 7,
+      "profile": "anxious",
+      "scenario_seed": 1119,
+      "policy_seed": 5217,
+      "personality": {
+        "procrastination": 0.55,
+        "self_control": 0.5,
+        "rest_preference": 0.55,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.85,
+        "screen_strain_sensitivity": 0.55,
+        "need_response": 0.65,
+        "action_noise": 0.4
+      },
+      "sha256": "f5423151b0a3a499e7f13eb3ffa59fc75b2be97bb20cfd42c0958a770ae82f78",
+      "trace": "runs/case_07_anxious.jsonl.gz"
+    },
+    {
+      "case": 7,
+      "profile": "body_sensitive",
+      "scenario_seed": 1119,
+      "policy_seed": 5217,
+      "personality": {
+        "procrastination": 0.45,
+        "self_control": 0.55,
+        "rest_preference": 0.6,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.65,
+        "need_response": 0.9,
+        "action_noise": 0.35
+      },
+      "sha256": "290304c3ea6ea5e8495378abea978fb58c4ceafdc22facd791ff6fe93ed9273f",
+      "trace": "runs/case_07_body_sensitive.jsonl.gz"
+    },
+    {
+      "case": 7,
+      "profile": "spontaneous",
+      "scenario_seed": 1119,
+      "policy_seed": 5217,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.65,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.9
+      },
+      "sha256": "cd7c45b1ef0d856737b442004d8cd3ec2ba710875e65f3b5b9e02c31d696e6ac",
+      "trace": "runs/case_07_spontaneous.jsonl.gz"
+    }
+  ]
+}
