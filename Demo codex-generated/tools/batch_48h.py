@@ -15,8 +15,12 @@ PROFILE_VALUES = {
 }
 def run(exe, actor, path):
     profile = PROFILES[actor % 8]; scenario = 1000 + actor*17; policy = 5000 + actor*31
-    subprocess.run([exe, str(scenario), str(policy), str(path)], check=True, stdout=subprocess.DEVNULL)
+    subprocess.run([exe, str(scenario), str(policy), str(path), profile], check=True, stdout=subprocess.DEVNULL)
     data = json.loads(path.read_text()); assert data[-1]["timestamp"] >= 3360
+    expected=dict(zip(("procrastination","self_control","rest_preference","stimulation_seeking",
+                       "task_anxiety_sensitivity","screen_strain_sensitivity","need_response","action_noise"),
+                      PROFILE_VALUES[profile]))
+    assert all(f["profile_id"] == profile and f["personality"] == expected for f in data)
     assert all(f["dynamics_model"] == MODEL_ID and f["demo_only"] for f in data)
     assert all(f["timestamp"] > data[i-1]["timestamp"] for i,f in enumerate(data) if i)
     assert all(math.isfinite(f["state"][k]) and 0 <= f["state"][k] <= 1 for f in data for k in ("hunger","fatigue","bathroom_urge","boredom","task_pressure","satisfaction","anxiety","screen_strain"))
