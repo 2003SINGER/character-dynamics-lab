@@ -53,3 +53,31 @@ DemoLivingDynamicsV1, W validation, scheduler and research evaluator are
 unchanged by the policy-only mode. A/B experiments must record the exact
 checkpoint, cassette and policy id; old RulePolicy runs cannot be renamed as
 Laya runs.
+
+## Same-world Rule/Laya experiment
+
+Use separate, initially empty output directories outside the repository. The
+Rule and Laya commands run the **same executable**, World seed/tape, initial
+O/S/I, eight P profiles and policy RNG seed. The Laya evaluator independently
+replays each live run from the growing raw-probability cassette and retains a
+copy of that cassette in its output. History forks query the actual typed π,
+not the RulePolicy proposal. The comparison refuses mismatched executable,
+world tape, initial state, personality or seed.
+
+```sh
+python3 tools/long_horizon_eval.py build/character_dynamics_long_horizon \
+  /absolute/path/to/rule-7d --days 7 --cases 8
+python3 tools/long_horizon_eval.py build/character_dynamics_long_horizon \
+  /absolute/path/to/laya-7d --days 7 --cases 8 --policy laya \
+  --laya-port 8743 --laya-cassette /absolute/path/to/laya-typed-probabilities.jsonl
+python3 tools/paired_policy_compare.py \
+  /absolute/path/to/rule-7d /absolute/path/to/laya-7d \
+  /absolute/path/to/rule-vs-laya-7d
+```
+
+`analysis.json` and `REPORT.md` include task/behavior time, history-fork
+effects, action-bout persistence, commitment-active/suspended duration,
+action entropy, switching and repeated-action patterns. These are descriptive
+Demo diagnostics with no pre-imposed pathology threshold. Longer horizons
+consume many local model calls and are not implied to have run by these
+commands or by the model-free CI smoke.

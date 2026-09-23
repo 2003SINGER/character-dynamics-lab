@@ -1,6 +1,7 @@
 #include "continuous_runtime.h"
 #include "demo_living_dynamics_v1.h"
 #include "demo_personality_profiles.h"
+#include "local_model_policy_v0.h"
 
 #include <algorithm>
 #include <cmath>
@@ -8,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -103,29 +105,45 @@ Snapshot snapshot(const World& world,const Observation& observation,
     return {world,observation,scheduler,state,runtime.policy_rng_state()};
 }
 
-double js_divergence(const DecisionContext& a,const DecisionContext& b) {
+using Distribution = std::vector<std::pair<ActionType,double>>;
+
+double js_divergence(const Distribution& a,const Distribution& b) {
     std::map<ActionType,double> left,right;
-    for (const auto& item:a.candidates) left[item.action]=item.probability;
-    for (const auto& item:b.candidates) right[item.action]=item.probability;
+    for (const auto& [action,probability]:a) left[action]=probability;
+    for (const auto& [action,probability]:b) right[action]=probability;
     double result=0.0;
     for (const auto& [action,p]:left) {
         const double q=right[action], m=(p+q)/2.0;
         if (p>0.0) result+=0.5*p*std::log(p/m);
         if (q>0.0) result+=0.5*q*std::log(q/m);
     }
+    for (const auto& [action,q]:right) {
+        if (left.count(action)) continue;
+        const double m=q/2.0;
+        if (q>0.0) result+=0.5*q*std::log(q/m);
+    }
     return result;
 }
 
-ActionType top_action(const DecisionContext& decision) {
-    const auto it=std::max_element(decision.candidates.begin(),decision.candidates.end(),
-        [](const CandidateAction& a,const CandidateAction& b){return a.probability<b.probability;});
-    return it==decision.candidates.end()?ActionType::Idle:it->action;
+ActionType top_action(const Distribution& distribution) {
+    const auto it=std::max_element(distribution.begin(),distribution.end(),
+        [](const auto& a,const auto& b){return a.second<b.second;});
+    return it==distribution.end()?ActionType::Idle:it->first;
+}
+
+Distribution actual_distribution(CharacterPolicy& policy,const Observation& observation,
+                                 const CharacterState& state,const Personality& personality,
+                                 DemoLivingDynamicsV1& model,const std::mt19937& rng) {
+    std::mt19937 probe=rng;
+    const DecisionContext decision=model.build_policy(observation,state,personality);
+    return policy.select(decision,observation,state,personality,probe).probabilities;
 }
 
 void fork_history(std::ostream& out,const Snapshot& current,const Snapshot& previous,
                   int checkpoint_day,const Personality& personality,unsigned int scenario_seed,
-                  unsigned int policy_seed,DemoLivingDynamicsV1& model) {
-    const DecisionContext correct_policy=model.build_policy(current.observation,current.state,personality);
+                  unsigned int policy_seed,DemoLivingDynamicsV1& model,CharacterPolicy& policy) {
+    const Distribution correct_policy=actual_distribution(
+        policy,current.observation,current.state,personality,model,current.rng);
     const std::vector<std::pair<std::string,CharacterState>> branches={
         {"correct",current.state},{"reset",CharacterState{}},{"stale_24h",previous.state}};
     for (const auto& [branch,starting_state]:branches) {
@@ -133,9 +151,10 @@ void fork_history(std::ostream& out,const Snapshot& current,const Snapshot& prev
         Observation observation=current.observation;
         RuntimeScheduler scheduler=current.scheduler;
         CharacterState state=starting_state;
-        ContinuousRuntime runtime(scheduler,world,observation,model,{},policy_seed);
+        ContinuousRuntime runtime(scheduler,world,observation,model,{},policy_seed,&policy);
         runtime.restore_policy_rng_state(current.rng);
-        const DecisionContext counterfactual=model.build_policy(observation,state,personality);
+        const Distribution counterfactual=actual_distribution(
+            policy,observation,state,personality,model,current.rng);
         const double js=js_divergence(correct_policy,counterfactual);
         const bool top_changed=top_action(correct_policy)!=top_action(counterfactual);
         const int start=scheduler.now_total_minutes();
@@ -152,6 +171,8 @@ void fork_history(std::ostream& out,const Snapshot& current,const Snapshot& prev
             if (elapsed!=360 && elapsed!=1440 && elapsed!=4320) continue;
             out<<"{\"type\":\"fork\",\"profile_id\":";quote(out,personality.name);
             out<<",\"scenario_seed\":"<<scenario_seed<<",\"policy_seed\":"<<policy_seed
+               <<",\"policy_id\":";quote(out,policy.identity());
+            out
                <<",\"checkpoint_day\":"<<checkpoint_day<<",\"branch\":";quote(out,branch);
             out<<",\"horizon_minutes\":"<<elapsed<<",\"immediate_pi_js\":"<<js
                <<",\"immediate_top1_changed\":"<<(top_changed?"true":"false")<<',';
@@ -176,7 +197,8 @@ bool fork_day(int day,int total_days) {
 }
 
 void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
-         const Personality& personality,const std::filesystem::path& output,bool trace_boundaries) {
+         const Personality& personality,const std::filesystem::path& output,bool trace_boundaries,
+         CharacterPolicy* selected_policy) {
     if (days<1 || days>365) throw std::invalid_argument("days must be in [1,365]");
     std::filesystem::create_directories(output.parent_path());
     std::ofstream out(output);
@@ -187,7 +209,9 @@ void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
     Observation observation=refresh_observation({},world,{});
     RuntimeScheduler scheduler(kStart);
     DemoLivingDynamicsV1 model;
-    ContinuousRuntime runtime(scheduler,world,observation,model,{},policy_seed);
+    RulePolicyV0 default_policy;
+    CharacterPolicy& policy=selected_policy ? *selected_policy : static_cast<CharacterPolicy&>(default_policy);
+    ContinuousRuntime runtime(scheduler,world,observation,model,{},policy_seed,&policy);
     CharacterState state;
     if (!runtime.submit_action_intent(ActionType::Idle,"",10).accepted)
         throw std::logic_error("initial idle intent rejected");
@@ -196,24 +220,34 @@ void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
     out<<"{\"type\":\"run\",\"profile_id\":";quote(out,personality.name);
     out<<",\"personality\":";personality_json(out,personality);
     out<<",\"scenario_seed\":"<<scenario_seed<<",\"policy_seed\":"<<policy_seed
-       <<",\"days\":"<<days<<",\"dynamics_model\":";quote(out,model.identity());
+       <<",\"days\":"<<days<<",\"policy_id\":";quote(out,policy.identity());
+    out<<",\"dynamics_model\":";quote(out,model.identity());
     out<<",\"life_tape_cycle_days\":3,\"initial_task_effort_target\":"
        <<world.tasks.front().effort_target<<",\"initial_task_deadline\":"
-       <<world.tasks.front().due_at_total_minutes<<"}\n";
+       <<world.tasks.front().due_at_total_minutes<<",\"initial_state\":";
+    state_json(out,state);
+    out<<"}\n";
     Counts day_counts;
     std::optional<Snapshot> previous_day;
     const int end=kStart+days*kDay;
     while (scheduler.now_total_minutes()<end) {
+        const std::string commitment_before=commitment_name(state);
         const RuntimeExecutionResult step=runtime.execute_next_boundary(state,personality);
         day_counts.include(step);
         if (trace_boundaries) {
             out<<"{\"type\":\"boundary\",\"profile_id\":";quote(out,personality.name);
             out<<",\"scenario_seed\":"<<scenario_seed
+               <<",\"policy_id\":";quote(out,step.policy_id);
+            out
                <<",\"timestamp\":"<<scheduler.now_total_minutes()
                <<",\"elapsed_minutes\":"<<step.runtime.boundary.elapsed_minutes
                <<",\"running_action_before\":";
             if (step.running_action_before) quote(out,to_string(step.running_action_before->action));
             else out<<"null";
+            out<<",\"running_action_started_at\":";
+            if (step.running_action_before) out<<step.running_action_before->started_at_total_minutes;
+            else out<<"null";
+            out<<",\"commitment_before\":";quote(out,commitment_before);
             out<<",\"selected_action\":";
             if (step.selected_action) quote(out,to_string(*step.selected_action));
             else out<<"null";
@@ -265,6 +299,8 @@ void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
         const int day=(now-kStart)/kDay;
         out<<"{\"type\":\"daily\",\"profile_id\":";quote(out,personality.name);
         out<<",\"scenario_seed\":"<<scenario_seed<<",\"policy_seed\":"<<policy_seed
+           <<",\"policy_id\":";quote(out,policy.identity());
+        out
            <<",\"day\":"<<day<<',';
         counts_json(out,day_counts);
         out<<",\"task_episode\":"<<world.life_tape_episode
@@ -273,7 +309,7 @@ void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
            <<",\"state\":";state_json(out,state);out<<"}\n";
         const Snapshot current=snapshot(world,observation,scheduler,state,runtime);
         if (fork_day(day,days) && previous_day)
-            fork_history(out,current,*previous_day,day,personality,scenario_seed,policy_seed,model);
+            fork_history(out,current,*previous_day,day,personality,scenario_seed,policy_seed,model,policy);
         previous_day=current;
         day_counts={};
     }
@@ -281,7 +317,7 @@ void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
 } // namespace
 
 int main(int argc,char** argv) {
-    if (argc!=7 && argc!=9) return 2;
+    if (argc<7) return 2;
     try {
         const unsigned scenario_seed=static_cast<unsigned>(std::stoul(argv[1]));
         const unsigned policy_seed=static_cast<unsigned>(std::stoul(argv[2]));
@@ -289,8 +325,19 @@ int main(int argc,char** argv) {
         Personality personality=DemoPersonalityProfiles::named(argv[4]);
         const std::filesystem::path output=argv[5];
         const bool trace_boundaries=std::string(argv[6])=="boundaries";
-        if (argc==9) DemoPersonalityProfiles::set_axis(personality,argv[7],std::stod(argv[8]));
-        run(scenario_seed,policy_seed,days,personality,output,trace_boundaries);
+        int option=7;
+        if (option<argc && std::string(argv[option]).rfind("--",0)!=0) {
+            if (option+1>=argc) return 2;
+            DemoPersonalityProfiles::set_axis(personality,argv[option],std::stod(argv[option+1]));
+            option+=2;
+        }
+        std::unique_ptr<LayaTypedPolicyV0> laya;
+        if (option<argc && std::string(argv[option])=="--laya-port" && option+1<argc) {
+            laya=std::make_unique<LayaTypedPolicyV0>(std::stoi(argv[option+1]));
+            option+=2;
+        }
+        if (option!=argc) return 2;
+        run(scenario_seed,policy_seed,days,personality,output,trace_boundaries,laya.get());
         return 0;
     } catch (const std::exception& error) {
         std::cerr<<"long_horizon: "<<error.what()<<'\n';

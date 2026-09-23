@@ -44,6 +44,7 @@ class Bridge:
         self.cassette = cassette
         self.lock = threading.Lock()
         self.replay = {}
+        self.memo = {}
         if replay:
             for line in replay.read_text().splitlines():
                 row = json.loads(line)
@@ -62,6 +63,9 @@ class Bridge:
         if key in self.replay:
             probabilities = verified_probabilities(self.replay[key]["probabilities"], candidates)
             mode = "cassette-replay"
+        elif key in self.memo:
+            probabilities = verified_probabilities(self.memo[key], candidates)
+            mode = "live-memo"
         else:
             if self.agent is None:
                 raise ValueError("cassette has no matching Laya decision")
@@ -99,6 +103,7 @@ class Bridge:
                 "laya_version": importlib.metadata.version("laya"),
             }
             with self.lock:
+                self.memo[key] = probabilities
                 self.cassette.parent.mkdir(parents=True, exist_ok=True)
                 with self.cassette.open("a") as handle:
                     handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")

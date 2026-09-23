@@ -172,6 +172,9 @@ target_link_libraries(character_dynamics_long_horizon PRIVATE character_dynamics
 add_test(NAME character_dynamics_long_horizon_pipeline_smoke
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/long_horizon_pipeline_smoke.py"
          "$<TARGET_FILE:character_dynamics_long_horizon>")
+add_test(NAME character_dynamics_laya_long_horizon_pipeline_smoke
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/laya_long_horizon_pipeline_smoke.py"
+         "$<TARGET_FILE:character_dynamics_long_horizon>")
 add_test(NAME character_dynamics_free_run_report
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/free_run_report.py"
          "${CMAKE_CURRENT_SOURCE_DIR}/demo/living_dynamics_v1"
