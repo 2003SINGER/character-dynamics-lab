@@ -1,4 +1,4 @@
-"""Strictly local bridge from DemoLayaPolicyV0 to llama-server.
+"""Historical local Qwen single-action bridge to llama-server.
 
 The companion C++ policy sends O/S/P plus eligible A^O over loopback only.
 This bridge talks only to http://127.0.0.1:8080/v1, records a local cassette,
@@ -46,7 +46,7 @@ class Bridge:
             if action not in allowed: raise ValueError("cassette action outside current A^O")
             return {"action": action, "request_hash": key, "mode": "cassette-replay"}
         messages = [
-            {"role": "system", "content": "You are LayaPolicyV0. Select exactly one supplied eligible action. You see only O, S, P and candidates. Never invent actions or world facts. Return JSON only: {\"action\":\"candidate\",\"rationale\":\"short\"}."},
+            {"role": "system", "content": "You are QwenActionPolicyV0. Select exactly one supplied eligible action. You see only O, S, P and candidates. Never invent actions or world facts. Return JSON only: {\"action\":\"candidate\",\"rationale\":\"short\"}."},
             {"role": "user", "content": json.dumps({"time": request.get("timestamp"), "personality": request["personality"], "state": request["state"], "observation": request["observation"], "eligible_candidates": request["candidates"]}, ensure_ascii=False, separators=(",", ":"))},
         ]
         # Qwen3 otherwise spends the small bounded completion budget in its
@@ -90,7 +90,7 @@ def main():
     args = parser.parse_args()
     Handler.bridge = Bridge(args.model, args.cassette, args.replay)
     service = LoopbackServer(("127.0.0.1", args.port), Handler)
-    print(json.dumps({"service": "laya-policy-proxy-v0", "bind": "127.0.0.1", "port": args.port, "model": args.model, "replay": bool(args.replay)}), flush=True)
+    print(json.dumps({"service": "qwen-action-proxy-v0", "bind": "127.0.0.1", "port": args.port, "model": args.model, "replay": bool(args.replay)}), flush=True)
     service.serve_forever()
 
 

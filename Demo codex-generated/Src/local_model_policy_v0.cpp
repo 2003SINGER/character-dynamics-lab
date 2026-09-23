@@ -1,9 +1,11 @@
-#include "laya_policy_v0.h"
+#include "local_model_policy_v0.h"
 
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cmath>
 #include <cstring>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 
@@ -82,7 +84,10 @@ std::string request_json(unsigned long long request_id,const DecisionContext& de
        <<",\"task_pressure\":"<<state.task_pressure<<",\"satisfaction\":"<<state.satisfaction
        <<",\"hunger\":"<<state.hunger<<",\"bathroom_urge\":"<<state.bathroom_urge
        <<",\"anxiety\":"<<state.anxiety<<",\"screen_strain\":"<<state.screen_strain
-       <<",\"commitment\":"<<quote(state.commitment.status==CommitmentStatus::Active?"active":state.commitment.status==CommitmentStatus::Suspended?"suspended":"none")<<"}";
+       <<",\"commitment\":"<<quote(state.commitment.status==CommitmentStatus::Active?"active":state.commitment.status==CommitmentStatus::Suspended?"suspended":"none")
+       <<",\"commitment_task_id\":"<<quote(state.commitment.task_id)
+       <<",\"commitment_reason\":"<<quote(state.commitment.reason)
+       <<",\"commitment_suspended_decision_points\":"<<state.commitment.suspended_decision_points<<"}";
     out<<",\"observation\":[";
     bool first=true;
     for (const ObservationFact& fact:observation.facts) {
@@ -137,14 +142,68 @@ std::string laya_exchange(int port,const std::string& request) {
     close_socket(socket);
     return response.substr(0,response.find('\n'));
 }
+
+std::map<ActionType,double> parse_typed_weights(const std::string& encoded,
+                                                const DecisionContext& decision) {
+    if (encoded.empty()) throw std::runtime_error("Laya returned no typed probabilities");
+    std::map<ActionType,double> weights;
+    std::istringstream entries(encoded);
+    std::string entry;
+    double sum=0.0;
+    while (std::getline(entries,entry,',')) {
+        const std::size_t separator=entry.find('=');
+        if (separator==std::string::npos || entry.find('=',separator+1)!=std::string::npos)
+            throw std::runtime_error("Laya returned malformed typed probabilities");
+        const ActionType action=parse_action(entry.substr(0,separator));
+        if (!eligible(decision,action) || weights.count(action))
+            throw std::runtime_error("Laya returned duplicate or ineligible probability");
+        const std::string encoded_number=entry.substr(separator+1);
+        std::size_t consumed=0;
+        double weight=0.0;
+        try { weight=std::stod(encoded_number,&consumed); }
+        catch (const std::exception&) { throw std::runtime_error("Laya returned nonnumeric probability"); }
+        if (consumed!=encoded_number.size() || !std::isfinite(weight) || weight<0.0 || weight>1.0)
+            throw std::runtime_error("Laya returned invalid probability");
+        weights.emplace(action,weight);
+        sum+=weight;
+    }
+    std::size_t expected=0;
+    for (const CandidateAction& candidate:decision.candidates)
+        if (candidate.eligible && candidate.probability>0.0) ++expected;
+    if (weights.size()!=expected || !std::isfinite(sum) || sum<0.5 || sum>1.5)
+        throw std::runtime_error("Laya probabilities do not cover eligible A^O");
+    for (auto& [action,weight]:weights) weight/=sum;
+    return weights;
+}
 } // namespace
 
-PolicySelection LayaSocketPolicyV0::select(const DecisionContext& decision,const Observation& observation,
+PolicySelection QwenSocketPolicyV0::select(const DecisionContext& decision,const Observation& observation,
                                             const CharacterState& state,const Personality& personality,std::mt19937&) {
     const std::string response=laya_exchange(port_,request_json(++request_index_,decision,observation,state,personality));
     const std::string error=json_field(response,"error");
     if (!error.empty()) throw std::runtime_error("Laya policy proxy rejected request: "+error);
     const ActionType action=parse_action(json_field(response,"action"));
     if (!eligible(decision,action)) throw std::runtime_error("Laya chose an action outside eligible A^O: "+to_string(action));
-    return {action,identity(),"laya-proxy request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash")};
+    return {action,identity(),"qwen-proxy request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash"),{}};
+}
+
+PolicySelection LayaTypedPolicyV0::select(const DecisionContext& decision,const Observation& observation,
+                                         const CharacterState& state,const Personality& personality,
+                                         std::mt19937& rng) {
+    const std::string response=laya_exchange(port_,request_json(++request_index_,decision,observation,state,personality));
+    const std::string error=json_field(response,"error");
+    if (!error.empty()) throw std::runtime_error("Laya typed proxy rejected request: "+error);
+    if (json_field(response,"model")!="convaiinnovations/laya-typed-decisions")
+        throw std::runtime_error("Laya typed proxy returned an unexpected checkpoint");
+    const auto weights=parse_typed_weights(json_field(response,"weights"),decision);
+    DecisionContext sampled=decision;
+    for (CandidateAction& candidate:sampled.candidates)
+        candidate.probability=weights.count(candidate.action) ? weights.at(candidate.action) : 0.0;
+    const ActionType action=sample_action(sampled,rng);
+    PolicySelection selection{action,identity(),
+        "laya-typed-decisions request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash"),{}};
+    for (const CandidateAction& candidate:sampled.candidates)
+        if (candidate.eligible && weights.count(candidate.action))
+            selection.probabilities.emplace_back(candidate.action,candidate.probability);
+    return selection;
 }

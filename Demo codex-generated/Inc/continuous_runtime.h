@@ -39,6 +39,7 @@ struct RuntimeExecutionResult {
     bool policy_evaluated = false;
     std::string policy_id;
     std::string policy_selection_provenance;
+    std::vector<std::pair<ActionType, double>> sampled_policy_probabilities;
 };
 
 // Canonical owner for Continuous Runtime v1: it advances time, integrates

@@ -1,4 +1,4 @@
-"""Executable contract for the local Laya policy socket boundary.
+"""Historical Qwen single-action socket contract, not a Laya model test.
 
 This smoke deliberately uses a tiny loopback-only stand-in rather than an LLM.
 It proves that the C++ runtime sends only O/S/P plus eligible A^O, receives one
@@ -46,9 +46,9 @@ def main():
     with LoopbackServer(("127.0.0.1", 0), Handler) as server, tempfile.TemporaryDirectory() as directory:
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
-        trace = pathlib.Path(directory) / "laya-loopback.json"
+        trace = pathlib.Path(directory) / "qwen-loopback.json"
         completed = subprocess.run(
-            [str(binary), "17", "101", str(trace), "balanced", "--laya-port", str(server.server_address[1])],
+            [str(binary), "17", "101", str(trace), "balanced", "--qwen-port", str(server.server_address[1])],
             text=True, capture_output=True, timeout=30,
         )
         server.shutdown()
@@ -67,8 +67,8 @@ def main():
         if not request["candidates"]:
             fail("request has no eligible candidate")
     decisions = [row for row in rows if row["policy_evaluated"]]
-    if not decisions or any(row["policy_id"] != "laya-policy-v0" for row in decisions):
-        fail("trace does not attribute decisions to LayaPolicyV0")
+    if not decisions or any(row["policy_id"] != "qwen-action-policy-v0" for row in decisions):
+        fail("trace does not attribute decisions to QwenActionPolicyV0")
     for row in decisions:
         eligible = {candidate["action"] for candidate in row["candidates"] if candidate["eligible"] and candidate["probability"] > 0}
         if row["selected_action"] not in eligible:

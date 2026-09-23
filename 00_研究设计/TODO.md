@@ -8,7 +8,7 @@
 |---|---|---|---|
 | BOUNDARY-V1 | **CLOSED / FROZEN** | Kernel / Dynamics / Demo ownership 与依赖边界已完成复核 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
-| DEMO-LIVING | **ACTIVE / DEMO ONLY** | 7/30/180/365-day same-world paired P/history audit 已记录；LayaPolicyV0 仅做本机 loopback A/B 与 cassette replay，不改 Dynamics/Runtime 或进入研究结论 | [core behavior eval](../Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；[Laya policy](../Demo%20codex-generated/demo/laya_policy_v0/README.md) |
+| DEMO-LIVING | **ACTIVE / DEMO ONLY** | 历史 7/30/180/365-day paired P/history audit 均为 RulePolicy；真实 LayaTypedPolicyV0 已完成本机 48h + cassette replay，下一步是同世界长周期 Rule/Laya A/B，不把旧 Qwen adapter 冒充 Laya | [core behavior eval](../Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；[actual Laya typed policy](../Demo%20codex-generated/demo/laya_typed_policy_v0/README.md)；[historical Qwen](../Demo%20codex-generated/demo/qwen_action_policy_v0/README.md) |
 | RESEARCH-DYNAMICS | **READY_FOR_INDEPENDENT_REVIEW** | 先审协议、机制单测与 intervention artifacts；不得启动大规模数据重跑 | [ResearchDynamicsV1 protocol](Research_Dynamics_V1_Protocol.md)、[validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md) |
 
 ## ACTIVE
@@ -53,7 +53,7 @@
 
 - Paper-0 正式比较：`history / summary / no-S / theory-S / naive-S / trajectory-permuted-S`，使用同一 candidate-set NLL 和冻结 protocol。
 - T20 attribution：generic/naive-S、理论语义与压缩收益的区分；不是当前机制主线。
-- 更复杂 commitment、multi-task、inverse、叙事抽取、UI/异步，等首轮 external trajectory protocol 冻结后再评估。`LayaPolicyV0` 是受限的本机 demo policy adapter，不属于此研究 protocol。
+- 更复杂 commitment、multi-task、inverse、叙事抽取、UI/异步，等首轮 external trajectory protocol 冻结后再评估。`LayaTypedPolicyV0` 是受限的本机 Demo policy adapter，不属于此研究 protocol。
 
 ## SOURCE OF TRUTH
 

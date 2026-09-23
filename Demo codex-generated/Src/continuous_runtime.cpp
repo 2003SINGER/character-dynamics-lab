@@ -124,13 +124,23 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         result.policy_evaluated = true;
         result.decision = model_.build_policy(observation_, state, personality);
         const PolicySelection selection = test_action_selector_
-            ? PolicySelection{test_action_selector_(result.decision), "test-selector", "test-only override"}
+            ? PolicySelection{test_action_selector_(result.decision), "test-selector", "test-only override", {}}
             : policy_->select(result.decision, observation_, state, personality, rng_);
         result.policy_id = selection.policy_id;
         result.policy_selection_provenance = selection.provenance;
+        result.sampled_policy_probabilities = selection.probabilities;
+        // Trace the policy distribution actually sampled. RulePolicy leaves
+        // this unchanged; Laya replaces pi without changing eligible A^O.
+        if (!selection.probabilities.empty()) {
+            for (CandidateAction& candidate : result.decision.candidates) {
+                candidate.probability = 0.0;
+                for (const auto& [action, probability] : selection.probabilities)
+                    if (candidate.action == action) candidate.probability = probability;
+            }
+        }
         const ActionType selected = selection.action;
         for (const CandidateAction& candidate : result.decision.candidates) {
-            if (candidate.action == selected && candidate.probability > 0.0) {
+            if (candidate.action == selected && candidate.eligible && candidate.probability > 0.0) {
                 result.selected_action = selected;
                 result.selected_target_object_id = candidate.target_object_id;
                 // A threshold crossing is a subjective reconsideration point. Keep

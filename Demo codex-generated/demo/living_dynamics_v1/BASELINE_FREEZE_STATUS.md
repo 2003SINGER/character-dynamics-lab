@@ -3,10 +3,11 @@
 `DEMO_LIVING_V1 = ACTIVE / DEMO ONLY`
 
 This page preserves the 48-hour calibration history below. The current active
-demo track also has an explicitly separate `LayaPolicyV0`: a strictly local,
-O/S/P-only policy adapter with cassette replay. It does not change
-`DemoLivingDynamicsV1`, Shared Runtime Kernel, Reference behavior, or research
-claims. See [LayaPolicyV0](../laya_policy_v0/README.md).
+demo track has a separate actual `LayaTypedPolicyV0` adapter with full typed
+probabilities and a historical Qwen single-action adapter formerly misnamed
+`DemoLayaPolicyV0`. Neither changes `DemoLivingDynamicsV1`, Shared Runtime
+Kernel, Reference behavior, or research claims. See [actual Laya](../laya_typed_policy_v0/README.md)
+and [historical Qwen](../qwen_action_policy_v0/README.md).
 
 ## Evidence
 
