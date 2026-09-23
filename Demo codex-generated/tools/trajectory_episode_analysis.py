@@ -14,7 +14,8 @@ STUDY = {"study_focused", "study_halfhearted", "study_at_computer"}
 
 
 def average(values):
-    return statistics.mean(values) if values else None
+    observed = [value for value in values if value is not None]
+    return statistics.mean(observed) if observed else None
 
 
 def episode_rows(trace, expected_days):
@@ -23,12 +24,21 @@ def episode_rows(trace, expected_days):
         metadata = next(rows)
         assert metadata["type"] == "run" and metadata["days"] == expected_days
         cycle = metadata["life_tape_cycle_days"] * DAY
-        episodes = [{"episode": i, "first_study_latency_minutes": None,
+        cycle_days = metadata["life_tape_cycle_days"]
+        # A 365-day confirmation run ends one day into the last three-day
+        # task. Preserve that observable partial episode, but mark it so a
+        # truncated opportunity cannot distort whole-task response summaries.
+        episode_count = (expected_days + cycle_days - 1) // cycle_days
+        episodes = [{"episode": i,
+                     "window_days": min(cycle_days, expected_days - i * cycle_days),
+                     "full_window": (i + 1) * cycle_days <= expected_days,
+                     "first_study_latency_minutes": None,
                      "completion_latency_minutes": None,
-                     "study_starts": 0, "study_by_day_minutes": [0, 0, 0],
+                     "study_starts": 0,
+                     "study_by_day_minutes": [0] * cycle_days,
                      "commitment_active_minutes": 0,
                      "commitment_suspended_minutes": 0}
-                    for i in range(expected_days * DAY // cycle)]
+                    for i in range(episode_count)]
         previous_commitment = "none"
         daily_study_minutes = 0
         for frame in rows:
@@ -50,7 +60,7 @@ def episode_rows(trace, expected_days):
                 if episode < 0 or episode >= len(episodes):
                     break
                 assigned = START + episode * cycle
-                phase = min(2, (position - assigned) // DAY)
+                phase = min(cycle_days - 1, (position - assigned) // DAY)
                 segment_end = min(end, assigned + (phase + 1) * DAY,
                                   assigned + cycle)
                 minutes = segment_end - position
@@ -85,22 +95,26 @@ def episode_rows(trace, expected_days):
 
 
 def summarize(episodes):
-    first = [row["first_study_latency_minutes"] for row in episodes
+    comparable = [row for row in episodes if row["full_window"]]
+    if not comparable:
+        raise AssertionError("no complete task window in requested horizon")
+    first = [row["first_study_latency_minutes"] for row in comparable
              if row["first_study_latency_minutes"] is not None]
-    completed = [row["completion_latency_minutes"] for row in episodes
+    completed = [row["completion_latency_minutes"] for row in comparable
                  if row["completion_latency_minutes"] is not None]
-    return {"episodes": len(episodes),
+    return {"episodes": len(comparable),
+            "truncated_episodes": len(episodes) - len(comparable),
             "first_study_latency_mean_minutes": average(first),
             "first_study_latency_p90_minutes": sorted(first)[int((len(first)-1)*0.9)] if first else None,
             "completion_latency_mean_minutes": average(completed),
             "completion_rate": len(completed) / len(episodes),
-            "study_starts_mean": average([row["study_starts"] for row in episodes]),
+            "study_starts_mean": average([row["study_starts"] for row in comparable]),
             "study_by_day_mean_minutes": [average([row["study_by_day_minutes"][i]
-                                                     for row in episodes]) for i in range(3)],
+                                                     for row in comparable]) for i in range(3)],
             "commitment_active_mean_minutes": average(
-                [row["commitment_active_minutes"] for row in episodes]),
+                [row["commitment_active_minutes"] for row in comparable]),
             "commitment_suspended_mean_minutes": average(
-                [row["commitment_suspended_minutes"] for row in episodes])}
+                [row["commitment_suspended_minutes"] for row in comparable])}
 
 
 def features(summary):
@@ -113,6 +127,10 @@ def features(summary):
             summary["commitment_suspended_mean_minutes"]]
 
 
+def hours(value):
+    return f"{value / 60:.2f}" if value is not None else "—"
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("experiment", type=pathlib.Path)
@@ -120,8 +138,6 @@ def main():
     root = args.experiment
     manifest = json.loads((root / "manifest.json").read_text())
     days = manifest["days"]
-    if days % manifest["life_tape_cycle_days"]:
-        raise ValueError("episode analysis needs a whole number of task cycles")
     actor_runs = [run for run in manifest["runs"] if "profile" in run]
     if len(actor_runs) != manifest["cases"] * len(PROFILES):
         raise AssertionError("incomplete paired profile block")
@@ -163,14 +179,16 @@ def main():
              "For each three-day task: latency from assignment to first accepted study start, "
              "latency to actual completion, study time in successive 24h windows, and "
              "time spent in Active/Suspended commitment. Means below are across the paired "
-             "world tapes; episode rows retain every individual task.", "",
+             "world tapes; episode rows retain every individual task. A final partial task "
+             "window (for example day 365 of a three-day tape) is retained in rows but "
+             "excluded from whole-task summaries.", "",
              "| Profile | First study (h) | Completion (h) | Study day 1/2/3 (min) | Active commitment (h/task) |",
              "|---|---:|---:|---:|---:|"]
     for row in profile_summary:
         phases = "/".join(f"{value:.0f}" for value in row["study_by_day_mean_minutes"])
-        lines.append(f"| {row['profile']} | {row['first_study_latency_mean_minutes']/60:.2f} | "
-                     f"{row['completion_latency_mean_minutes']/60:.2f} | {phases} | "
-                     f"{row['commitment_active_mean_minutes']/60:.2f} |")
+        lines.append(f"| {row['profile']} | {hours(row['first_study_latency_mean_minutes'])} | "
+                     f"{hours(row['completion_latency_mean_minutes'])} | {phases} | "
+                     f"{hours(row['commitment_active_mean_minutes'])} |")
     score = analysis["episode_feature_classifier"]
     if score:
         lines += ["", f"Leave-one-world-tape-out identification using only these episode-response "

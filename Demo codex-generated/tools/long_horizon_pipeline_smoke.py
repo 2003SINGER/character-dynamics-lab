@@ -22,6 +22,14 @@ def main() -> None:
         assert len(analysis["axis_interventions"]) == 8
         assert len((output / "history_fork_samples.jsonl").read_text().splitlines()) == 8 * 2 * 3
         assert len({row["sha256"] for row in manifest["runs"][:8]}) > 1
+        # The supported 7-day smoke horizon itself does not divide the
+        # three-day life tape. The episode reader must retain its terminal
+        # partial task instead of rejecting an otherwise valid trajectory.
+        episode_reader = pathlib.Path(__file__).with_name("trajectory_episode_analysis.py")
+        subprocess.run([sys.executable, str(episode_reader), str(output)], check=True)
+        episode = json.loads((output / "episode_analysis.json").read_text())
+        assert all(row["episodes"] == 2 and row["truncated_episodes"] == 1
+                   for row in episode["case_rows"])
     print("long_horizon_pipeline_smoke: PASS")
 
 

@@ -1,6 +1,6 @@
 # TODO｜active research queue
 
-更新时间：2026-09-22。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。
+更新时间：2026-09-23。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。
 
 ## SYSTEM / APPLICATION TRACK
 
@@ -8,7 +8,7 @@
 |---|---|---|---|
 | BOUNDARY-V1 | **CLOSED / FROZEN** | Kernel / Dynamics / Demo ownership 与依赖边界已完成复核 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
-| DEMO-LIVING | **ACTIVE / DEMO ONLY** | 长时程 paired P/history audit 已记录；LayaPolicyV0 仅做本机 loopback A/B 与 cassette replay，不改 Dynamics/Runtime 或进入研究结论 | [V1 baseline status](../Demo%20codex-generated/demo/living_dynamics_v1/BASELINE_FREEZE_STATUS.md)；[Laya policy](../Demo%20codex-generated/demo/laya_policy_v0/README.md) |
+| DEMO-LIVING | **ACTIVE / DEMO ONLY** | 7/30/180/365-day same-world paired P/history audit 已记录；LayaPolicyV0 仅做本机 loopback A/B 与 cassette replay，不改 Dynamics/Runtime 或进入研究结论 | [core behavior eval](../Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；[Laya policy](../Demo%20codex-generated/demo/laya_policy_v0/README.md) |
 | RESEARCH-DYNAMICS | **READY_FOR_INDEPENDENT_REVIEW** | 先审协议、机制单测与 intervention artifacts；不得启动大规模数据重跑 | [ResearchDynamicsV1 protocol](Research_Dynamics_V1_Protocol.md)、[validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md) |
 
 ## ACTIVE
