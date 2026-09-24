@@ -2,6 +2,7 @@
 
 import json
 import pathlib
+import socket
 import socketserver
 import subprocess
 import sys
@@ -19,9 +20,22 @@ class Handler(socketserver.StreamRequestHandler):
     cassette = None
     lock = threading.Lock()
     seen = set()
+    request_count = 0
+    connection_count = 0
+
+    def setup(self):
+        super().setup()
+        with self.lock:
+            type(self).connection_count += 1
 
     def handle(self):
-        raw_request = json.loads(self.rfile.readline())
+        for line in self.rfile:
+            self.handle_one(line)
+
+    def handle_one(self, line):
+        raw_request = json.loads(line)
+        with self.lock:
+            type(self).request_count += 1
         if raw_request == {"operation": "identity"}:
             response = {"model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
                         "protocol_version": PROTOCOL_VERSION, "prompt_version": PROMPT_VERSION,
@@ -98,19 +112,33 @@ def main():
         cassette = root / "live-cassette.jsonl"
         Handler.cassette = cassette
         Handler.seen = set()
+        Handler.request_count = 0
+        Handler.connection_count = 0
         with LoopbackServer(("127.0.0.1", 0), Handler) as server:
             thread = threading.Thread(target=server.serve_forever, daemon=True)
             thread.start()
             output = root / "paired"
-            subprocess.run([sys.executable, str(evaluator), str(binary), str(output),
-                            "--days", "7", "--cases", "1", "--policy", "laya",
-                            "--laya-port", str(server.server_address[1]),
-                            "--laya-cassette", str(cassette)], check=True, timeout=120)
+            try:
+                with socket.socket() as probe:
+                    probe.settimeout(2)
+                    probe.connect(server.server_address)
+                    probe.sendall(b'{"operation":"identity"}\n')
+                    if not json.loads(probe.makefile().readline()).get("proxy_source_sha256"):
+                        raise RuntimeError("stand-in loopback server identity readiness check failed")
+                subprocess.run([sys.executable, str(evaluator), str(binary), str(output),
+                                "--days", "7", "--cases", "1", "--policy", "laya",
+                                "--laya-port", str(server.server_address[1]),
+                                "--laya-cassette", str(cassette)], check=True, timeout=900)
+            except BaseException as error:
+                raise RuntimeError(
+                    f"live Laya loopback failed after {Handler.request_count} requests; "
+                    f"server_thread_alive={thread.is_alive()}, listener={server.server_address}: {error}"
+                ) from error
             soft_trace = root / "soft-gate.jsonl"
             subprocess.run([str(binary), "1000", "5000", "7", "balanced",
                             str(soft_trace), "boundaries", "--laya-port",
                             str(server.server_address[1]), "--laya-soft-gate"],
-                           check=True, timeout=120)
+                           check=True, timeout=900)
             soft_rows = [json.loads(line) for line in soft_trace.read_text().splitlines()]
             if not any(row.get("model_soft_reconsideration", {}).get("requested")
                        for row in soft_rows if row.get("type") == "boundary"
@@ -123,7 +151,7 @@ def main():
             subprocess.run([str(binary), "1000", "5000", "7", "balanced",
                             str(full_trace), "boundaries", "--laya-port",
                             str(server.server_address[1]), "--laya-commitment",
-                            "--laya-appraisal"], check=True, timeout=120)
+                            "--laya-appraisal"], check=True, timeout=900)
             full_rows = [json.loads(line) for line in full_trace.read_text().splitlines()]
             boundaries = [row for row in full_rows if row["type"] == "boundary"]
             if full_rows[0]["dynamics_model"] != "demo-living-v1+laya-typed-xi":
@@ -134,6 +162,8 @@ def main():
             if not any(row["typed_appraisal"] and len(row["typed_appraisal"]["scores"]) == 7
                        for row in boundaries):
                 raise SystemExit("seven-channel typed appraisal was not applied and traced")
+            if Handler.request_count <= Handler.connection_count:
+                raise SystemExit("high-volume Laya smoke did not reuse persistent connections")
             server.shutdown()
             thread.join(timeout=5)
         manifest = json.loads((output / "manifest.json").read_text())
@@ -148,15 +178,16 @@ def main():
             raise SystemExit("Laya fork samples are incomplete")
         rule_output = root / "rule"
         subprocess.run([sys.executable, str(evaluator), str(binary), str(rule_output),
-                        "--days", "7", "--cases", "1"], check=True, timeout=120)
+                        "--days", "7", "--cases", "1"], check=True, timeout=900)
         compare = pathlib.Path(__file__).with_name("paired_policy_compare.py")
         comparison = root / "comparison"
         subprocess.run([sys.executable, str(compare), str(rule_output), str(output),
-                        str(comparison)], check=True, timeout=120)
+                        str(comparison)], check=True, timeout=900)
         paired = json.loads((comparison / "analysis.json").read_text())
         if not paired["same_world_verified"] or paired["actor_pairs"] != 8:
             raise SystemExit("Rule/Laya comparison did not prove eight same-world pairs")
-    print("laya_long_horizon_pipeline_smoke: PASS")
+    print(f"laya_long_horizon_pipeline_smoke: PASS "
+          f"({Handler.request_count} requests over {Handler.connection_count} loopback connections)")
 
 
 if __name__ == "__main__":

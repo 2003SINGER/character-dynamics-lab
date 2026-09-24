@@ -15,6 +15,7 @@ CandidateAction candidate(ActionType action, double activation, double threshold
     result.activation = activation;
     result.threshold = threshold;
     result.eligible = activation >= threshold || action == ActionType::Idle;
+    result.rule_soft_eligible = result.eligible;
     result.reason = std::move(reason);
     return result;
 }
@@ -182,8 +183,10 @@ DecisionContext decide(const Observation& observation,
                 if ((item.action == ActionType::GoToBathroom && bathroom_urgent)
                     || (item.action == ActionType::GetMeal && hunger_urgent)) continue;
                 item.eligible = false;
+                item.hard_admissible = false;
             } else {
                 item.eligible = false;
+                item.hard_admissible = false;
             }
         }
     }
@@ -199,7 +202,10 @@ DecisionContext decide(const Observation& observation,
                 || item.action == ActionType::GetMeal
                 || item.action == ActionType::GoToBathroom
                 || item.action == ActionType::TurnOffAlarm;
-            if (!recovery_or_safety) item.eligible = false;
+            if (!recovery_or_safety) {
+                item.eligible = false;
+                item.hard_admissible = false;
+            }
         }
     }
 

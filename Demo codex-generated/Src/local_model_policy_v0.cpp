@@ -4,10 +4,12 @@
 
 #include <algorithm>
 #include <array>
+#include <cerrno>
 #include <cctype>
 #include <cmath>
 #include <cstring>
 #include <map>
+#include <mutex>
 #include <sstream>
 #include <stdexcept>
 
@@ -31,6 +33,27 @@ using Socket = int;
 constexpr Socket kInvalidSocket = -1;
 static void close_socket(Socket socket) { close(socket); }
 #endif
+
+struct PersistentLayaConnection {
+    Socket socket = kInvalidSocket;
+    std::string buffered_response;
+};
+
+struct LayaConnectionPool {
+    std::mutex mutex;
+    std::map<int, PersistentLayaConnection> by_port;
+    ~LayaConnectionPool() {
+        for (auto& [port, connection] : by_port) {
+            (void)port;
+            if (connection.socket != kInvalidSocket) close_socket(connection.socket);
+        }
+    }
+};
+
+LayaConnectionPool& laya_connection_pool() {
+    static LayaConnectionPool pool;
+    return pool;
+}
 
 namespace {
 std::string quote(const std::string& text) {
@@ -69,9 +92,15 @@ bool eligible(const DecisionContext& decision,ActionType action) {
     });
 }
 
+bool hard_admissible(const DecisionContext& decision,ActionType action) {
+    return std::any_of(decision.candidates.begin(),decision.candidates.end(),[action](const CandidateAction& item) {
+        return item.action==action && item.hard_admissible;
+    });
+}
+
 std::string request_json(unsigned long long request_id,const DecisionContext& decision,
                          const Observation& observation,const CharacterState& state,
-                         const Personality& personality) {
+                         const Personality& personality,bool include_hard_admissible=false) {
     std::ostringstream out;
     out.precision(12);
     out<<"{\"request_id\":"<<request_id<<",\"timestamp\":";
@@ -102,11 +131,15 @@ std::string request_json(unsigned long long request_id,const DecisionContext& de
     out<<"],\"candidates\":[";
     first=true;
     for (const CandidateAction& candidate:decision.candidates) {
-        if (!candidate.eligible || candidate.probability<=0.0) continue;
+        if (include_hard_admissible ? !candidate.hard_admissible
+                                    : (!candidate.eligible || candidate.probability<=0.0)) continue;
         if (!first) out<<',';
         first=false;
-        out<<"{\"action\":"<<quote(to_string(candidate.action))<<",\"target\":"<<quote(candidate.target_object_id)
-           <<",\"reason\":"<<quote(candidate.reason)<<"}";
+        out<<"{\"action\":"<<quote(to_string(candidate.action))<<",\"target\":"<<quote(candidate.target_object_id);
+        if (include_hard_admissible)
+            out<<",\"planned_minutes\":"<<action_definition(candidate.action).default_duration_minutes;
+        if (!include_hard_admissible) out<<",\"reason\":"<<quote(candidate.reason);
+        out<<"}";
     }
     out<<"]}";
     return out.str();
@@ -188,35 +221,151 @@ std::map<std::string,double> parse_named_numbers(const std::string& encoded,
 
 std::string laya_exchange(int port,const std::string& request) {
 #ifdef _WIN32
-    WinsockScope winsock;
+    static WinsockScope winsock;
+    (void)winsock;
 #endif
-    Socket socket=::socket(AF_INET,SOCK_STREAM,0);
-    if (socket==kInvalidSocket) throw std::runtime_error("cannot open Laya loopback socket");
-    sockaddr_in address{};
-    address.sin_family=AF_INET;
-    address.sin_port=htons(static_cast<unsigned short>(port));
-    address.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
-    if (::connect(socket,reinterpret_cast<sockaddr*>(&address),sizeof(address))!=0) {
-        close_socket(socket);
-        throw std::runtime_error("cannot reach Laya policy proxy on 127.0.0.1:"+std::to_string(port));
+    LayaConnectionPool& pool = laya_connection_pool();
+    std::lock_guard<std::mutex> lock(pool.mutex);
+    PersistentLayaConnection& connection = pool.by_port[port];
+    const auto discard_connection = [&connection]() {
+        if (connection.socket != kInvalidSocket) close_socket(connection.socket);
+        connection.socket = kInvalidSocket;
+        connection.buffered_response.clear();
+    };
+    if (connection.socket == kInvalidSocket) {
+        connection.socket = ::socket(AF_INET,SOCK_STREAM,0);
+        if (connection.socket == kInvalidSocket)
+            throw std::runtime_error("cannot open Laya loopback socket");
+#ifdef SO_NOSIGPIPE
+        const int no_sigpipe = 1;
+        if (::setsockopt(connection.socket, SOL_SOCKET, SO_NOSIGPIPE,
+                         reinterpret_cast<const char*>(&no_sigpipe), sizeof(no_sigpipe)) != 0) {
+            discard_connection();
+            throw std::runtime_error("cannot disable SIGPIPE for Laya loopback socket");
+        }
+#endif
+        sockaddr_in address{};
+        address.sin_family=AF_INET;
+        address.sin_port=htons(static_cast<unsigned short>(port));
+        address.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
+        if (::connect(connection.socket,reinterpret_cast<sockaddr*>(&address),sizeof(address))!=0) {
+#ifdef _WIN32
+            const int connect_error=WSAGetLastError();
+#else
+            const int connect_error=errno;
+#endif
+            discard_connection();
+            throw std::runtime_error("cannot reach Laya policy proxy on 127.0.0.1:"+
+                                     std::to_string(port)+" (socket error "+
+                                     std::to_string(connect_error)+")");
+        }
+    }
+    if (connection.socket != kInvalidSocket) {
+        fd_set readable;
+        FD_ZERO(&readable);
+        FD_SET(connection.socket, &readable);
+        timeval no_wait{};
+#ifdef _WIN32
+        const int readable_result = ::select(0, &readable, nullptr, nullptr, &no_wait);
+#else
+        const int readable_result = ::select(connection.socket + 1, &readable, nullptr, nullptr, &no_wait);
+#endif
+        if (readable_result < 0) {
+            discard_connection();
+            throw std::runtime_error("cannot inspect Laya loopback connection before request");
+        }
+        if (readable_result > 0) {
+            char peek = 0;
+            const int peeked = ::recv(connection.socket, &peek, 1, MSG_PEEK);
+            if (peeked == 0) {
+                // The prior server session closed cleanly. No bytes for this
+                // request have been sent, so reconnecting is safe.
+                discard_connection();
+            } else if (peeked > 0) {
+                discard_connection();
+                throw std::runtime_error("unexpected pending bytes on Laya connection before request");
+            } else {
+#ifdef _WIN32
+                const int peek_error = WSAGetLastError();
+                if (peek_error != WSAEWOULDBLOCK) {
+                    if (peek_error == WSAECONNRESET || peek_error == WSAENOTCONN) {
+                        discard_connection();
+                    } else {
+                        discard_connection();
+                        throw std::runtime_error("cannot inspect Laya response stream before request");
+                    }
+                }
+#else
+                const int peek_error = errno;
+                if (peek_error == ECONNRESET || peek_error == ENOTCONN || peek_error == ESHUTDOWN) {
+                    discard_connection();
+                } else if (peek_error != EAGAIN && peek_error != EWOULDBLOCK) {
+                    discard_connection();
+                    throw std::runtime_error("cannot inspect Laya response stream before request");
+                }
+#endif
+            }
+        }
+    }
+    if (connection.socket == kInvalidSocket) {
+        connection.socket = ::socket(AF_INET,SOCK_STREAM,0);
+        if (connection.socket == kInvalidSocket)
+            throw std::runtime_error("cannot reopen Laya loopback socket");
+#ifdef SO_NOSIGPIPE
+        const int no_sigpipe = 1;
+        if (::setsockopt(connection.socket, SOL_SOCKET, SO_NOSIGPIPE,
+                         reinterpret_cast<const char*>(&no_sigpipe), sizeof(no_sigpipe)) != 0) {
+            discard_connection();
+            throw std::runtime_error("cannot disable SIGPIPE for Laya loopback socket");
+        }
+#endif
+        sockaddr_in address{};
+        address.sin_family=AF_INET;
+        address.sin_port=htons(static_cast<unsigned short>(port));
+        address.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
+        if (::connect(connection.socket,reinterpret_cast<sockaddr*>(&address),sizeof(address))!=0) {
+#ifdef _WIN32
+            const int connect_error=WSAGetLastError();
+#else
+            const int connect_error=errno;
+#endif
+            discard_connection();
+            throw std::runtime_error("cannot reconnect Laya policy proxy on 127.0.0.1:"+
+                                     std::to_string(port)+" (socket error "+
+                                     std::to_string(connect_error)+")");
+        }
     }
     const std::string line=request+"\n";
     std::size_t sent=0;
     while (sent<line.size()) {
-        const int written=::send(socket,line.data()+sent,static_cast<int>(line.size()-sent),0);
-        if (written<=0) { close_socket(socket); throw std::runtime_error("Laya policy request write failed"); }
+        int send_flags = 0;
+#ifdef MSG_NOSIGNAL
+        send_flags |= MSG_NOSIGNAL;
+#endif
+        const int written=::send(connection.socket,line.data()+sent,static_cast<int>(line.size()-sent),send_flags);
+        if (written<=0) {
+            discard_connection();
+            throw std::runtime_error("Laya policy request write failed; request outcome is unknown");
+        }
         sent+=static_cast<std::size_t>(written);
     }
     std::array<char,4096> buffer{};
-    std::string response;
-    while (response.find('\n')==std::string::npos) {
-        const int read=::recv(socket,buffer.data(),static_cast<int>(buffer.size()),0);
-        if (read<=0) { close_socket(socket); throw std::runtime_error("Laya policy response missing"); }
-        response.append(buffer.data(),static_cast<std::size_t>(read));
-        if (response.size()>65536) { close_socket(socket); throw std::runtime_error("Laya policy response too large"); }
+    while (connection.buffered_response.find('\n')==std::string::npos) {
+        const int read=::recv(connection.socket,buffer.data(),static_cast<int>(buffer.size()),0);
+        if (read<=0) {
+            discard_connection();
+            throw std::runtime_error("Laya policy response missing; request outcome is unknown");
+        }
+        connection.buffered_response.append(buffer.data(),static_cast<std::size_t>(read));
+        if (connection.buffered_response.size()>65536) {
+            discard_connection();
+            throw std::runtime_error("Laya policy response too large");
+        }
     }
-    close_socket(socket);
-    return response.substr(0,response.find('\n'));
+    const std::size_t newline=connection.buffered_response.find('\n');
+    const std::string response=connection.buffered_response.substr(0,newline);
+    connection.buffered_response.erase(0,newline+1);
+    return response;
 }
 
 std::map<ActionType,double> parse_typed_weights(const std::string& encoded,
@@ -231,7 +380,7 @@ std::map<ActionType,double> parse_typed_weights(const std::string& encoded,
         if (separator==std::string::npos || entry.find('=',separator+1)!=std::string::npos)
             throw std::runtime_error("Laya returned malformed typed probabilities");
         const ActionType action=parse_action(entry.substr(0,separator));
-        if (!eligible(decision,action) || weights.count(action))
+        if (!hard_admissible(decision,action) || weights.count(action))
             throw std::runtime_error("Laya returned duplicate or ineligible probability");
         const std::string encoded_number=entry.substr(separator+1);
         std::size_t consumed=0;
@@ -245,7 +394,7 @@ std::map<ActionType,double> parse_typed_weights(const std::string& encoded,
     }
     std::size_t expected=0;
     for (const CandidateAction& candidate:decision.candidates)
-        if (candidate.eligible && candidate.probability>0.0) ++expected;
+        if (candidate.hard_admissible) ++expected;
     if (weights.size()!=expected || !std::isfinite(sum) || sum<0.5 || sum>1.5)
         throw std::runtime_error("Laya probabilities do not cover eligible A^O");
     for (auto& [action,weight]:weights) weight/=sum;
@@ -266,20 +415,22 @@ PolicySelection QwenSocketPolicyV0::select(const DecisionContext& decision,const
 PolicySelection LayaTypedPolicyV0::select(const DecisionContext& decision,const Observation& observation,
                                          const CharacterState& state,const Personality& personality,
                                          std::mt19937& rng) {
-    const std::string response=laya_exchange(port_,request_json(++request_index_,decision,observation,state,personality));
+    const std::string response=laya_exchange(port_,request_json(++request_index_,decision,observation,state,personality,true));
     const std::string error=json_field(response,"error");
     if (!error.empty()) throw std::runtime_error("Laya typed proxy rejected request: "+error);
     if (json_field(response,"model")!="convaiinnovations/laya-typed-decisions")
         throw std::runtime_error("Laya typed proxy returned an unexpected checkpoint");
     const auto weights=parse_typed_weights(json_field(response,"weights"),decision);
     DecisionContext sampled=decision;
-    for (CandidateAction& candidate:sampled.candidates)
+    for (CandidateAction& candidate:sampled.candidates) {
+        candidate.eligible=candidate.hard_admissible;
         candidate.probability=weights.count(candidate.action) ? weights.at(candidate.action) : 0.0;
+    }
     const ActionType action=sample_action(sampled,rng);
     PolicySelection selection{action,identity(),
         "laya-typed-decisions request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash"),{}};
     for (const CandidateAction& candidate:sampled.candidates)
-        if (candidate.eligible && weights.count(candidate.action))
+        if (candidate.hard_admissible && weights.count(candidate.action))
             selection.probabilities.emplace_back(candidate.action,candidate.probability);
     return selection;
 }

@@ -286,10 +286,12 @@ def verify_live_laya_identity(port, locked_laya):
 @contextlib.contextmanager
 def laya_replay_server(cassette, scratch):
     bridge = pathlib.Path(__file__).with_name("laya_typed_proxy.py")
+    stderr_path = scratch / "replay-proxy.stderr.log"
+    stderr_handle = stderr_path.open("w+")
     process = subprocess.Popen(
         [sys.executable, str(bridge), "--replay", str(cassette),
          "--cassette", str(scratch / "replay-unused.jsonl"), "--port", "0"],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        stdout=subprocess.PIPE, stderr=stderr_handle, text=True,
     )
     try:
         ready, _, _ = select.select([process.stdout], [], [], 30)
@@ -297,11 +299,26 @@ def laya_replay_server(cassette, scratch):
             raise RuntimeError("Laya cassette replay proxy did not become ready")
         announcement = process.stdout.readline()
         if not announcement:
-            raise RuntimeError("Laya cassette replay proxy exited before readiness")
+            stderr_handle.flush()
+            raise RuntimeError(
+                "Laya cassette replay proxy exited before readiness: "
+                + stderr_path.read_text()[-4000:]
+            )
         info = json.loads(announcement)
         if info.get("model") != "convaiinnovations/laya-typed-decisions":
             raise RuntimeError("unexpected Laya replay checkpoint")
         yield info["port"]
+    except BaseException as error:
+        stderr_handle.flush()
+        try:
+            with socket.create_connection(("127.0.0.1", int(info["port"])), timeout=0.2):
+                listener = "listening"
+        except (OSError, UnboundLocalError, KeyError, ValueError):
+            listener = "not listening"
+        raise RuntimeError(
+            f"Laya cassette replay proxy failure (pid={process.pid}, "
+            f"exit={process.poll()}, port_state={listener}): {stderr_path.read_text()[-4000:]}"
+        ) from error
     finally:
         process.terminate()
         try:
@@ -309,6 +326,7 @@ def laya_replay_server(cassette, scratch):
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait()
+        stderr_handle.close()
 
 PROFILES = ["balanced", "disciplined", "procrastinating", "rest_seeking",
             "stimulation_seeking", "anxious", "body_sensitive", "spontaneous"]

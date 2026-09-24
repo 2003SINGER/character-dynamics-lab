@@ -3,8 +3,11 @@
 This optional **Demo-only** policy uses the real
 [`convaiinnovations/laya-typed-decisions`](https://huggingface.co/convaiinnovations/laya-typed-decisions)
 checkpoint, not the historical Qwen action selector. The Python loopback
-bridge calls `laya.load()` once and asks a typed `choice` over the current
-eligible A^O. It records every raw option probability in a local cassette.
+bridge calls `laya.load()` once and asks a typed `choice` over O-known,
+hard-admissible A^O. Rule activation remains a soft preference used by
+RulePolicy; it does not hide otherwise admissible choices from Laya. Hard
+bodily-need and extreme-fatigue exclusions still apply. Each option includes
+its known target and planned default duration. It records every raw option probability in a local cassette.
 The C++ adapter validates and normalizes that distribution, then samples it
 with the existing seeded Runtime RNG. Its selected action still passes the
 same World validation. Neither bridge nor model sees hidden W, World
@@ -49,20 +52,30 @@ The checkpoint emitted a runtime warning that some bundled temperatures are
 invalid; treat confidence/probability calibration as unproven.
 New runs pin the checkpoint to Hugging Face revision
 `f9ab0b228f0fc0f14d873dbc99038f135c2da1b2` and record revision,
-protocol/prompt v2, decoding contract, raw typed answer, request hash, and
-state/input token counts and budgets in the local cassette. Before every typed
-policy, soft-gate, commitment, or appraisal prediction, the bridge sends compact
-JSON text and uses the loaded model tokenizer plus Laya's sequence builder to
-verify that the full state fits after the question/options prefix. An oversized
-state fails before model inference instead of being silently truncated. Token
-audit fields contain counts only; they add no state text to cassette rows.
-Old entries are never loaded into the v2 live memo, and new request hashes
-include both protocol and prompt versions. Ordinary replay accepts only matching
-v2 cassettes from the same proxy source SHA-256; legacy v1 hash fallback requires
-the explicit `--allow-v1-replay` option alongside `--replay`. The startup banner
+protocol/prompt v3, decoding contract, raw typed answer, request hash, and
+state/input/head/option token counts and budgets in the local cassette. Before
+every typed policy, soft-gate, commitment, or appraisal prediction, the bridge
+uses the loaded model tokenizer and Laya's actual sequence builder to verify
+that the complete instructions, every option, and all compact-state tokens
+enter the model sequence untruncated. The same check rejects clipped question
+heads/options and over-budget state before inference. Token audit fields contain
+counts only; they add no state text to cassette rows. Scheduler time projects
+both `clock.total_minutes` and formatted `clock.time` into O from the same
+boundary timestamp. Request hashes include protocol and prompt versions;
+ordinary replay accepts only matching v3 cassettes from the same proxy source
+SHA-256; legacy v1 hash fallback requires the explicit `--allow-v1-replay`
+option alongside `--replay`. The startup banner
 and read-only `{"operation":"identity"}` handshake expose the checkpoint and
 bridge source identity. The handshake performs no inference and adds no cassette
-row.
+row. The loopback protocol is newline-framed over a reused connection; a closed
+proxy session is detected before the next request and can be reconnected safely.
+An ambiguous send/receive failure is reported without automatic retry, so a
+possibly processed request is never silently duplicated.
+
+The earlier v2 7-day pilot cassette is retained only as invalid-input evidence,
+not as a current behavioral result: its numeric clock advanced while the
+formatted `clock.time` stayed stale, and Rule-soft-filtered actions were absent
+from the Laya choice surface. Do not resume it or replay it as a v3 experiment.
 
 The Python bridge is an application adapter only. ReferenceRuleDynamicsV0,
 DemoLivingDynamicsV1, W validation, scheduler and research evaluator are

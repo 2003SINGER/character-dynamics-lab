@@ -24,11 +24,12 @@ class Handler(socketserver.StreamRequestHandler):
     requests = []
 
     def handle(self):
-        request = json.loads(self.rfile.readline())
-        self.requests.append(request)
-        candidates = request["candidates"]
-        response = {"action": candidates[0]["action"], "request_hash": canonical_hash(request)}
-        self.wfile.write((json.dumps(response) + "\n").encode())
+        for line in self.rfile:
+            request = json.loads(line)
+            self.requests.append(request)
+            candidates = request["candidates"]
+            response = {"action": candidates[0]["action"], "request_hash": canonical_hash(request)}
+            self.wfile.write((json.dumps(response) + "\n").encode())
 
 
 class LoopbackServer(socketserver.ThreadingTCPServer):

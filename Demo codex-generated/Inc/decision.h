@@ -16,6 +16,11 @@ struct CandidateAction {
     double activation = 0.0;
     double threshold = 0.0;
     double probability = 0.0;
+    // Runtime hard constraints are separate from a policy's soft activation
+    // threshold. RulePolicy still samples only eligible candidates; a typed
+    // policy may score any O-known candidate that remains hard-admissible.
+    bool hard_admissible = true;
+    bool rule_soft_eligible = false;
     bool eligible = false;
     std::string reason;
 };

@@ -13,32 +13,33 @@ class Handler(socketserver.StreamRequestHandler):
     seen = []
 
     def handle(self):
-        request = json.loads(self.rfile.readline())
-        if request["candidates"] or "world" in request or "effort_target" in request:
-            raise ValueError("semantic adapter leaked W or A^O mutation")
-        self.seen.append(request)
-        operation = request["operation"]
-        if operation == "commitment_choice":
-            options = request["options"]
-            prior = request["state"]["commitment"]
-            if prior == "none":
-                selected = "continue"
-            elif prior == "active":
-                selected = "suspend"
+        for line in self.rfile:
+            request = json.loads(line)
+            if request["candidates"] or "world" in request or "effort_target" in request:
+                raise ValueError("semantic adapter leaked W or A^O mutation")
+            self.seen.append(request)
+            operation = request["operation"]
+            if operation == "commitment_choice":
+                options = request["options"]
+                prior = request["state"]["commitment"]
+                if prior == "none":
+                    selected = "continue"
+                elif prior == "active":
+                    selected = "suspend"
+                else:
+                    selected = "resume"
+                probabilities = {name: int(name == selected) for name in options}
+                response = {"model": CHECKPOINT, "request_hash": request_hash(request),
+                            "weights": ",".join(f"{name}={value}" for name, value in probabilities.items())}
+            elif operation == "appraisal_scores":
+                scores = {name: 4 if name == "positive_outcome" else 0 for name in
+                          ("goal_progress", "goal_obstruction", "stimulation", "uncertainty",
+                           "positive_outcome", "negative_outcome", "control_restored")}
+                response = {"model": CHECKPOINT, "request_hash": request_hash(request),
+                            "scores": ",".join(f"{name}={value}" for name, value in scores.items())}
             else:
-                selected = "resume"
-            probabilities = {name: int(name == selected) for name in options}
-            response = {"model": CHECKPOINT, "request_hash": request_hash(request),
-                        "weights": ",".join(f"{name}={value}" for name, value in probabilities.items())}
-        elif operation == "appraisal_scores":
-            scores = {name: 4 if name == "positive_outcome" else 0 for name in
-                      ("goal_progress", "goal_obstruction", "stimulation", "uncertainty",
-                       "positive_outcome", "negative_outcome", "control_restored")}
-            response = {"model": CHECKPOINT, "request_hash": request_hash(request),
-                        "scores": ",".join(f"{name}={value}" for name, value in scores.items())}
-        else:
-            raise ValueError("unexpected semantic operation")
-        self.wfile.write((json.dumps(response) + "\n").encode())
+                raise ValueError("unexpected semantic operation")
+            self.wfile.write((json.dumps(response) + "\n").encode())
 
 
 class LoopbackServer(socketserver.ThreadingTCPServer):

@@ -1,4 +1,5 @@
 #include "continuous_runtime.h"
+#include "simulation_time.h"
 
 #include <algorithm>
 
@@ -44,9 +45,15 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     // The scheduler is the canonical time owner.  Its clock is an internally
     // observable cue, so Dynamics never has to read hidden W time or operate
     // against a stale O-side deadline.
+    const int scheduler_minutes = result.runtime.boundary.at_total_minutes;
+    const SimTime scheduler_time{scheduler_minutes / (24 * 60) + 1,
+                                 scheduler_minutes % (24 * 60)};
+    const std::string scheduler_time_text = time_summary(scheduler_time);
+    apply_observable_runtime_event(observation_, FactKey::ClockTime,
+                                   scheduler_time_text, "runtime_internal_clock", scheduler_time_text);
     apply_observable_runtime_event(observation_, "clock.total_minutes",
-                                   std::to_string(result.runtime.boundary.at_total_minutes),
-                                   "runtime_internal_clock", world_runtime_.time_summary());
+                                   std::to_string(scheduler_minutes),
+                                   "runtime_internal_clock", scheduler_time_text);
     // Continuous dynamics is integrated before event projection at t.
     result.continuous_state = model_.advance_continuous(state, observation_, personality,
         action.has_value() ? &*action : nullptr, result.runtime.boundary.elapsed_minutes);
@@ -143,17 +150,20 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         result.policy_selection_provenance = selection.provenance;
         result.sampled_policy_probabilities = selection.probabilities;
         // Trace the policy distribution actually sampled. RulePolicy leaves
-        // this unchanged; Laya replaces pi without changing eligible A^O.
+        // its soft-filtered surface unchanged; typed Laya uses every O-known,
+        // hard-admissible candidate while retaining the Rule eligibility cue.
         if (!selection.probabilities.empty()) {
             for (CandidateAction& candidate : result.decision.candidates) {
                 candidate.probability = 0.0;
                 for (const auto& [action, probability] : selection.probabilities)
                     if (candidate.action == action) candidate.probability = probability;
+                if (selection.policy_id == "laya-typed-policy-v0")
+                    candidate.eligible = candidate.hard_admissible;
             }
         }
         const ActionType selected = selection.action;
         for (const CandidateAction& candidate : result.decision.candidates) {
-            if (candidate.action == selected && candidate.eligible && candidate.probability > 0.0) {
+            if (candidate.action == selected && candidate.hard_admissible && candidate.probability > 0.0) {
                 result.selected_action = selected;
                 result.selected_target_object_id = candidate.target_object_id;
                 // A threshold crossing is a subjective reconsideration point. Keep

@@ -1,6 +1,6 @@
 """Loopback-only bridge to the actual Laya typed-decisions checkpoint.
 
-C++ sends observed O, S, P/I and eligible A^O. Laya returns raw typed-choice
+ C++ sends observed O, S, P/I and hard-admissible O-known A^O. Laya returns raw typed-choice
 probabilities; C++ owns normalization and seeded sampling. There is no remote
 inference endpoint or hidden-World input.
 """
@@ -18,8 +18,8 @@ import threading
 os.environ.setdefault("USE_TF", "0")
 CHECKPOINT = "convaiinnovations/laya-typed-decisions"
 CHECKPOINT_REVISION = "f9ab0b228f0fc0f14d873dbc99038f135c2da1b2"
-PROMPT_VERSION = "character-dynamics-laya-typed-v2"
-PROTOCOL_VERSION = "laya-typed-v2"
+PROMPT_VERSION = "character-dynamics-laya-typed-v3"
+PROTOCOL_VERSION = "laya-typed-v3"
 LEGACY_PROTOCOL_VERSION = "laya-typed-v1"
 LEGACY_PROMPT_VERSION = "character-dynamics-laya-typed-v1"
 PROXY_SOURCE_SHA256 = hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()
@@ -72,43 +72,96 @@ def _token_ids(tokenizer, text):
 
 
 def predict_without_truncation(agent, state, questions):
-    """Compact state, check exact Laya tokenizer budgets, then make one predict call."""
+    """Compact state and prove the actual Laya sequence contains every input token."""
     compact_state = json.dumps(state, ensure_ascii=False, separators=(",", ":"))
     try:
-        from laya.common import build_sequence
+        from laya.common import build_sequence, render_options
         tokenizer = agent.tok
         max_len = int(agent.cfg["max_len"])
         head_max_len = int(agent.cfg["head_max_len"])
         mask_token = tokenizer.mask_token
+        if not mask_token or tokenizer.mask_token_id is None or tokenizer.cls_token_id is None \
+                or tokenizer.sep_token_id is None:
+            raise ValueError("Laya tokenizer is missing required special tokens")
         clean_state = compact_state.replace(mask_token, " ")
-        state_tokens = len(_token_ids(tokenizer, clean_state))
+        state_ids = _token_ids(tokenizer, clean_state)
         budgets = []
         actual_lengths = []
+        head_lengths = []
+        instruction_lengths = []
+        option_lengths = []
         for question_id, question in questions.items():
             agent._check_question(question_id, question)
             internal = agent._to_internal(question)
             empty_sequence, _ = build_sequence(tokenizer, "", internal, max_len, head_max_len)
-            # build_sequence(empty state) includes its final SEP, which occupies
-            # the same one token reserved after the complete state.
+            instructions = str(internal["ins"]).replace(mask_token, " ")
+            head_ids = _token_ids(tokenizer, f"{internal['t']} question: {instructions}")
+            rendered_options = render_options(internal)
+            if not rendered_options:
+                raise ValueError("Laya question has no rendered options")
+            option_token_ids = [
+                _token_ids(tokenizer, " " + option.replace(mask_token, " "))
+                for option in rendered_options
+            ]
+            if any(len(tokens) > 48 for tokens in option_token_ids):
+                raise ValueError("Laya option exceeds build_sequence 48-token limit")
+            option_ids = [[tokenizer.mask_token_id, *tokens] for tokens in option_token_ids]
+            option_head_cost = sum(len(tokens) for tokens in option_ids)
+            head_budget = head_max_len - option_head_cost
+            if head_budget < 16:
+                raise ValueError("Laya options exceed complete question head budget")
+            if len(head_ids) > max(8, head_budget):
+                raise ValueError("Laya instructions exceed complete question head budget")
+
+            expected_empty = [tokenizer.cls_token_id, *head_ids, tokenizer.sep_token_id]
+            expected_markers = []
+            for tokens in option_ids:
+                expected_markers.append(len(expected_empty))
+                expected_empty.extend(tokens)
+            expected_empty.extend([tokenizer.sep_token_id, tokenizer.sep_token_id])
+            if list(empty_sequence) != expected_empty:
+                raise ValueError("Laya build_sequence truncated or changed question instructions/options")
+            # The empty sequence includes the final SEP, which is also the
+            # separator reserved after the full state in the populated input.
             budget = max_len - len(empty_sequence)
+            if len(state_ids) > budget:
+                raise ValueError(
+                    "Laya state exceeds model input budget: "
+                    f"state_tokens={len(state_ids)}, state_budget={budget}, max_len={max_len}"
+                )
+            actual_sequence, actual_markers = build_sequence(
+                tokenizer, compact_state, internal, max_len, head_max_len)
+            if list(actual_markers) != expected_markers:
+                raise ValueError("Laya build_sequence omitted or moved an option marker")
+            expected_actual = expected_empty[:-1] + state_ids + [tokenizer.sep_token_id]
+            if list(actual_sequence) != expected_actual:
+                raise ValueError("Laya build_sequence truncated or changed compact state tokens")
+
             budgets.append(budget)
-            actual_lengths.append(len(empty_sequence) - 1 + state_tokens + 1)
+            actual_lengths.append(len(empty_sequence) - 1 + len(state_ids) + 1)
+            head_lengths.append(len(head_ids))
+            instruction_lengths.append(len(_token_ids(tokenizer, instructions)))
+            option_lengths.append([len(tokens) for tokens in option_token_ids])
     except Exception as error:
         raise ValueError(f"cannot verify Laya input token budget: {error}") from error
     if not budgets or any(budget < 0 for budget in budgets):
         raise ValueError("cannot verify Laya input token budget for empty/invalid questions")
-    if any(state_tokens > budget for budget in budgets):
+    if any(len(state_ids) > budget for budget in budgets):
         raise ValueError(
             "Laya state exceeds model input budget: "
-            f"state_tokens={state_tokens}, min_state_budget={min(budgets)}, max_len={max_len}"
+            f"state_tokens={len(state_ids)}, min_state_budget={min(budgets)}, max_len={max_len}"
         )
     answer = agent.predict(compact_state, questions)
     audit = {
-        "state_tokens": state_tokens,
+        "state_tokens": len(state_ids),
         "state_budgets": budgets,
         "input_tokens": actual_lengths,
         "max_input_tokens": max(actual_lengths),
         "max_len": max_len,
+        "head_max_len": head_max_len,
+        "question_head_tokens": head_lengths,
+        "instruction_tokens": instruction_lengths,
+        "option_tokens": option_lengths,
     }
     return answer, audit
 
@@ -209,19 +262,19 @@ class Bridge:
                 "subjective_state_and_commitment": request["state"],
                 "known_or_stale_observations": request["observation"],
             }
-            criteria = {
-                candidate["action"]: (
-                    f"Perform {candidate['action']} at {candidate['target'] or 'current location'}. "
-                    f"{candidate['reason']}"
-                ) for candidate in candidates
-            }
+            criteria = {}
+            for candidate in candidates:
+                planned_minutes = candidate.get("planned_minutes")
+                if not isinstance(planned_minutes, int) or planned_minutes <= 0:
+                    raise ValueError("Laya candidate has no valid planned duration")
+                target = candidate.get("target") or "here"
+                criteria[candidate["action"]] = f"{target} {planned_minutes}m"
             prediction, token_audit = predict_without_truncation(self.agent, state, {
                 "next_action": {
                     "type": "choice",
                     "instructions": (
-                        "Choose the character's next action using only observed facts, "
-                        "subjective state, personality and current commitment. "
-                        "Do not infer hidden World state or invent an action."
+                        "Choose one supplied action using only O, S, P and commitment. "
+                        "Use its target and duration; do not invent actions or infer hidden World facts."
                     ),
                     "criteria": criteria,
                 }
@@ -429,11 +482,12 @@ class Handler(socketserver.StreamRequestHandler):
     bridge = None
 
     def handle(self):
-        try:
-            response = self.bridge.choose(json.loads(self.rfile.readline()))
-        except Exception as error:
-            response = {"error": str(error)}
-        self.wfile.write((json.dumps(response, separators=(",", ":")) + "\n").encode())
+        for line in self.rfile:
+            try:
+                response = self.bridge.choose(json.loads(line))
+            except Exception as error:
+                response = {"error": str(error)}
+            self.wfile.write((json.dumps(response, separators=(",", ":")) + "\n").encode())
 
 
 class LoopbackServer(socketserver.ThreadingTCPServer):

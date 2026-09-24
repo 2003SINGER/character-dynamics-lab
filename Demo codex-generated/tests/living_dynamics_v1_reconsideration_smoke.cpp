@@ -1,6 +1,7 @@
 #include "continuous_runtime.h"
 #include "demo_living_dynamics_v1.h"
 #include "living_dynamics.h"
+#include "simulation_time.h"
 
 #include <algorithm>
 
@@ -10,9 +11,70 @@ bool has_reason(const RuntimeExecutionResult& result, DecisionGateReason reason)
                      result.runtime.boundary.decision_gate.reasons.end(), reason)
         != result.runtime.boundary.decision_gate.reasons.end();
 }
+
+bool clock_projection(int start_minutes, int expected_minutes, const char* expected_text) {
+    World world;
+    world.time = SimTime{start_minutes / (24 * 60) + 1, start_minutes % (24 * 60)};
+    Observation observation = refresh_observation({}, world, {});
+    RuntimeScheduler scheduler(start_minutes, 1);
+    scheduler.schedule(ScheduledRuntimeEvent{"clock-check", expected_minutes, false, std::nullopt,
+                                               DecisionGateReason::Initial});
+    DemoLivingDynamicsV1 dynamics;
+    ContinuousRuntime runtime(scheduler, world, observation, dynamics);
+    CharacterState state;
+    Personality personality;
+    const auto result = runtime.execute_next_boundary(state, personality);
+    int numeric = -1;
+    const ObservationFact* formatted = find_fact(observation, FactKey::ClockTime);
+    const ObservationFact* numeric_fact = find_fact(observation, "clock.total_minutes");
+    return result.runtime.boundary.at_total_minutes == expected_minutes
+        && known_int(observation, "clock.total_minutes", numeric)
+        && numeric == expected_minutes
+        && formatted && formatted->value == expected_text
+        && numeric_fact && numeric_fact->source == formatted->source
+        && numeric_fact->observed_at == formatted->observed_at;
+}
+
+bool forked_midnight_clock_projection() {
+    World world;
+    world.time = SimTime{1, 23 * 60 + 58};
+    Observation observation = refresh_observation({}, world, {});
+    RuntimeScheduler scheduler(1438, 1);
+    scheduler.schedule(ScheduledRuntimeEvent{"pre-midnight", 1439, false, std::nullopt,
+                                               DecisionGateReason::Initial});
+    DemoLivingDynamicsV1 dynamics;
+    ContinuousRuntime runtime(scheduler, world, observation, dynamics);
+    CharacterState state;
+    Personality personality;
+    runtime.execute_next_boundary(state, personality);
+    if (scheduler.now_total_minutes() != 1439) return false;
+
+    // An experiment fork copies O and the scheduler-owned instant; the child
+    // projects the next formatted/numeric pair from that same timestamp.
+    World fork_world = world;
+    Observation fork_observation = observation;
+    RuntimeScheduler fork_scheduler(scheduler.now_total_minutes(), 1);
+    fork_scheduler.schedule(ScheduledRuntimeEvent{"midnight", 1440, false, std::nullopt,
+                                                   DecisionGateReason::Initial});
+    ContinuousRuntime fork_runtime(fork_scheduler, fork_world, fork_observation, dynamics);
+    CharacterState fork_state = state;
+    const auto result = fork_runtime.execute_next_boundary(fork_state, personality);
+    int total = -1;
+    const ObservationFact* formatted = find_fact(fork_observation, FactKey::ClockTime);
+    const ObservationFact* numeric = find_fact(fork_observation, "clock.total_minutes");
+    return result.runtime.boundary.at_total_minutes == 1440
+        && known_int(fork_observation, "clock.total_minutes", total) && total == 1440
+        && formatted && formatted->value == "Day 2 00:00"
+        && numeric && numeric->source == formatted->source
+        && numeric->observed_at == formatted->observed_at;
+}
 }
 
 int main() {
+    if (!clock_projection(489, 490, "Day 1 08:10")) return 61;
+    if (!clock_projection(8572, 8573, "Day 6 22:53")) return 62;
+    if (!clock_projection(1439, 1440, "Day 2 00:00")) return 63;
+    if (!forked_midnight_clock_projection()) return 64;
     Personality personality;
     DemoLivingDynamicsV1 dynamics;
 
