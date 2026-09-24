@@ -156,8 +156,10 @@ An actual 1-day `balanced` full typed run on MPS (scenario `1000`, policy seed
 produced 55 boundaries and 115 live cassette rows: 51 policy choices, 9 soft
 gates, 6 commitment choices and 49 appraisal scores. Every request's numeric
 and formatted clock agreed; the smallest recorded state-token margin was 147,
-and the smallest question-head margin was 207. Strict replay reproduced the
-trace byte-for-byte (SHA-256
+and the smallest complete question-head margin was 105 tokens. This head
+margin subtracts the full question tokens and every option's tokens plus its
+MASK marker from `head_max_len`; it does not count instructions alone. Strict
+replay reproduced the trace byte-for-byte (SHA-256
 `b004f9653272adbc1afb6ff7f38fbabf4f2a18ffaf8076d38a4738de62257292`). This
 is an integration/input-contract check only, not a long-run or human-validity
 finding. A model-free contract smoke also checks visible versus hidden

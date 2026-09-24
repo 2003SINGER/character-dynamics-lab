@@ -161,7 +161,8 @@ add_executable(character_dynamics_laya_soft_gate_smoke tests/laya_soft_gate_smok
 target_link_libraries(character_dynamics_laya_soft_gate_smoke PRIVATE character_dynamics_engine character_dynamics_reference_dynamics_v0)
 add_test(NAME character_dynamics_laya_soft_gate_smoke COMMAND character_dynamics_laya_soft_gate_smoke)
 add_executable(character_dynamics_laya_semantic_contract_smoke tests/laya_semantic_contract_smoke.cpp)
-target_link_libraries(character_dynamics_laya_semantic_contract_smoke PRIVATE character_dynamics_demo_living_v1)
+target_link_libraries(character_dynamics_laya_semantic_contract_smoke PRIVATE
+    character_dynamics_engine character_dynamics_demo_living_v1 character_dynamics_engine)
 add_test(NAME character_dynamics_laya_semantic_contract_smoke
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/laya_semantic_contract_smoke.py"
          "$<TARGET_FILE:character_dynamics_laya_semantic_contract_smoke>")
