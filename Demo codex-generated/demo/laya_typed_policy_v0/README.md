@@ -39,17 +39,16 @@ that port in the free-run command. The same input/seed should yield a
 byte-identical trace. The `candidates` probabilities in the trace are the
 actual normalised π sampled by C++, not the Dynamics proposal.
 
-## Verified local evidence (2026-09-23)
+## Archived v2 integration evidence (2026-09-23; not behavioral evidence)
 
-On this Mac, actual Laya 0.3.7 on MPS produced a 48-hour balanced trajectory
-for scenario seed `1000`, policy seed `5000`: 103 boundaries, 86 typed policy
-decisions. The first decision's π assigned positive probability to six
-actions; the run selected study, rest, sleep, meals, bathroom, device use,
-room control and idle across its trajectory. Frozen-cassette replay matched
-byte-for-byte (SHA-256
-`ddae59cd972a325b0d67165ac845bfcadf24438c9097a04dc86645`).
-The checkpoint emitted a runtime warning that some bundled temperatures are
-invalid; treat confidence/probability calibration as unproven.
+An earlier 48-hour balanced run on this Mac (scenario seed `1000`, policy seed
+`5000`) exercised the local MPS bridge and byte-identical cassette replay
+(trace SHA-256 `ddae59cd972a325b0d67165ac845bfcadf24438c9097a04dc86645`).
+It is retained as transport/integration evidence only: later audit found its
+numeric scheduler clock advanced while formatted `clock.time` remained stale,
+so its behavioral trajectory is not interpretable. The checkpoint also emitted
+a warning that some bundled temperatures are invalid; probability calibration
+remains unproven.
 New runs pin the checkpoint to Hugging Face revision
 `f9ab0b228f0fc0f14d873dbc99038f135c2da1b2` and record revision,
 protocol/prompt v3, decoding contract, raw typed answer, request hash, and
@@ -152,13 +151,17 @@ self-action feedback, S/P/I, and no hidden W or executable primitive.
   can combine all three switches; its changed behavior must not be attributed
   to policy alone.
 
-An actual 1-day `balanced` full typed X/I run (scenario `1000`, policy seed
-`5000`) exercised 48 appraisal scores, 21 commitment choices and 44 policy
-choices, including continue/suspend/resume/abandon. Independent cassette
-replay reproduced its JSONL trace byte-for-byte. This is an integration test,
-not a long-run or human-validity finding. A model-free contract smoke also
-checks visible versus hidden commitment clearing and unchanged bodily-state
-updates.
+An actual 1-day `balanced` full typed run on MPS (scenario `1000`, policy seed
+`5000`; v3, checkpoint revision `f9ab0b228f0fc0f14d873dbc99038f135c2da1b2`)
+produced 55 boundaries and 115 live cassette rows: 51 policy choices, 9 soft
+gates, 6 commitment choices and 49 appraisal scores. Every request's numeric
+and formatted clock agreed; the smallest recorded state-token margin was 147,
+and the smallest question-head margin was 207. Strict replay reproduced the
+trace byte-for-byte (SHA-256
+`b004f9653272adbc1afb6ff7f38fbabf4f2a18ffaf8076d38a4738de62257292`). This
+is an integration/input-contract check only, not a long-run or human-validity
+finding. A model-free contract smoke also checks visible versus hidden
+commitment clearing and unchanged bodily-state updates.
 
 ## Historical v1 pilot record (2026-09-24; not behavioral evidence)
 
@@ -170,9 +173,10 @@ workflow run: subsequent inspection found that most model inputs may have
 silently truncated state, so the comparison is not interpretable as a
 behavioral result and must not support behavioral claims.
 
-The v2 multi-tape run has not yet been completed. The old v1 traces, cassette,
-and interrupted partial artifacts are excluded from it and must not be mixed
-into a new experiment. Each new Laya run uses a dedicated initially empty
+The earlier v2 policy-only multi-tape pilot was interrupted at 6/8 profiles
+after the stale-clock and restricted-choice-surface defects were found; it is
+invalid as behavioral evidence. The old v1 traces, v2 cassette and partial
+artifacts must not be mixed into a new experiment. Each new Laya run uses a dedicated initially empty
 cassette; the evaluator atomically records a per-actor `DONE` marker with trace
 and replay evidence, and resumes only actors whose signature and hashes validate.
 The default Rule/Laya A/B is policy-only and eligible for the existing paired
