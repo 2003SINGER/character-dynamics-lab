@@ -83,6 +83,8 @@ def compare(rule_root, laya_root):
                             "delta_laya_minus_rule": {field: b[field] - a[field] for field in fields}})
     return {
         "comparison": "RulePolicyV0 vs actual LayaTypedPolicyV0",
+        "laya_checkpoint_revision": laya_manifest.get("laya_checkpoint_revision", "unrecorded"),
+        "laya_prompt_version": laya_manifest.get("laya_prompt_version", "unrecorded"),
         "same_world_verified": True,
         "only_policy_changed": True,
         "days": rule_manifest["days"],

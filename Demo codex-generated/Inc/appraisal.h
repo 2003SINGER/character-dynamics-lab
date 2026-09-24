@@ -3,6 +3,7 @@
 #include "observation.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 // X vocabulary. A field may legitimately be present but have no effect in a
@@ -45,6 +46,9 @@ struct Appraisal {
     double task_pressure_target = 0.0;
     std::vector<AppraisalSignal> semantic_signals;
     std::vector<std::string> tags;
+    // Optional Demo typed-X provenance. Reference outputs leave these empty.
+    std::vector<std::pair<std::string, double>> typed_scores;
+    std::string typed_source;
 };
 
 struct CharacterState;

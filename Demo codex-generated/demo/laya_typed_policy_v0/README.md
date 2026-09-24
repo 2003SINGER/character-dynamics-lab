@@ -47,6 +47,11 @@ byte-for-byte (SHA-256
 `ddae59cd972a325b0d67165ac845bfcadf24438c9097a04dc86645`).
 The checkpoint emitted a runtime warning that some bundled temperatures are
 invalid; treat confidence/probability calibration as unproven.
+New runs pin the checkpoint to Hugging Face revision
+`f9ab0b228f0fc0f14d873dbc99038f135c2da1b2` and record revision,
+prompt version, decoding contract, raw typed answer and request hash in the
+local cassette. Earlier pilot cassettes predate this revision field: their
+answers remain replayable but should not be called revision-pinned evidence.
 
 The Python bridge is an application adapter only. ReferenceRuleDynamicsV0,
 DemoLivingDynamicsV1, W validation, scheduler and research evaluator are
@@ -99,6 +104,37 @@ The policy-only Rule/Laya comparison above leaves this switch off, so the
 paired experiment still changes only π. Soft-gate mode is a separate
 intervention, not evidence about policy-only effects. The checkpoint's raw
 `noul` probabilities are not calibrated psychological probabilities.
+
+## Optional typed commitment and appraisal
+
+The long-horizon executable also accepts `--laya-commitment` and
+`--laya-appraisal` after `--laya-port`. These switches replace only selected
+DemoLiving Dynamics hooks; they are **not** part of the policy-only Rule/Laya
+A/B above. The model receives actor-local O, current Delta-O, observed
+self-action feedback, S/P/I, and no hidden W or executable primitive.
+
+- Commitment is a typed choice among `continue/suspend/resume/abandon`, with
+  options constrained by current I. C++ samples the validated distribution
+  with the Runtime RNG. Visible task completion or an observed replacement of
+  the task episode clears I deterministically; hidden W completion cannot.
+  Continuing or resuming retains the original commitment start time.
+- Appraisal asks seven typed `score` questions (0–4): goal progress,
+  obstruction, stimulation, uncertainty, positive outcome, negative outcome,
+  and restored control. DemoLivingV1 still performs the deterministic S update.
+  Hunger/bathroom relief, physical fatigue, screen strain, purchase inventory
+  and O-derived task-pressure geometry remain outside Laya's control.
+  Observed task completion keeps its exactly-once canonical signal.
+- `--laya-soft-gate` is independently selectable. A full Demo intervention
+  can combine all three switches; its changed behavior must not be attributed
+  to policy alone.
+
+An actual 1-day `balanced` full typed X/I run (scenario `1000`, policy seed
+`5000`) exercised 48 appraisal scores, 21 commitment choices and 44 policy
+choices, including continue/suspend/resume/abandon. Independent cassette
+replay reproduced its JSONL trace byte-for-byte. This is an integration test,
+not a long-run or human-validity finding. A model-free contract smoke also
+checks visible versus hidden commitment clearing and unchanged bodily-state
+updates.
 
 ## First actual paired result (2026-09-24)
 

@@ -434,7 +434,19 @@ def main():
     if args.policy == "laya":
         cassette_copy = args.output / "laya_typed_probabilities.jsonl"
         shutil.copy2(args.laya_cassette, cassette_copy)
+        cassette_rows = [json.loads(line) for line in cassette_copy.read_text().splitlines()]
+        if not cassette_rows:
+            raise RuntimeError("Laya experiment produced no typed model cassette")
+        revisions = {row.get("checkpoint_revision", "unrecorded") for row in cassette_rows}
+        prompt_versions = {row.get("prompt_version", "unrecorded") for row in cassette_rows}
+        if len(revisions) != 1 or len(prompt_versions) != 1:
+            raise RuntimeError("Laya cassette mixed checkpoint or prompt versions")
         manifest["laya_checkpoint"] = "convaiinnovations/laya-typed-decisions"
+        manifest["laya_checkpoint_revision"] = revisions.pop()
+        manifest["laya_prompt_version"] = prompt_versions.pop()
+        manifest["laya_cassette_record_count"] = len(cassette_rows)
+        manifest["laya_cassette_type_counts"] = dict(collections.Counter(
+            row["type"] for row in cassette_rows))
         manifest["laya_cassette_sha256"] = hashlib.sha256(cassette_copy.read_bytes()).hexdigest()
     (args.output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     report(args.output, args.days, args.cases, actors, axes, args.policy)

@@ -2,6 +2,7 @@
 #include "demo_living_dynamics_v1.h"
 #include "demo_personality_profiles.h"
 #include "local_model_policy_v0.h"
+#include "laya_augmented_dynamics_v1.h"
 
 #include <algorithm>
 #include <cmath>
@@ -133,7 +134,7 @@ ActionType top_action(const Distribution& distribution) {
 
 Distribution actual_distribution(CharacterPolicy& policy,const Observation& observation,
                                  const CharacterState& state,const Personality& personality,
-                                 DemoLivingDynamicsV1& model,const std::mt19937& rng) {
+                                 CharacterDynamicsModel& model,const std::mt19937& rng) {
     std::mt19937 probe=rng;
     const DecisionContext decision=model.build_policy(observation,state,personality);
     return policy.select(decision,observation,state,personality,probe).probabilities;
@@ -141,7 +142,7 @@ Distribution actual_distribution(CharacterPolicy& policy,const Observation& obse
 
 void fork_history(std::ostream& out,const Snapshot& current,const Snapshot& previous,
                   int checkpoint_day,const Personality& personality,unsigned int scenario_seed,
-                  unsigned int policy_seed,DemoLivingDynamicsV1& model,CharacterPolicy& policy) {
+                  unsigned int policy_seed,CharacterDynamicsModel& model,CharacterPolicy& policy) {
     const Distribution correct_policy=actual_distribution(
         policy,current.observation,current.state,personality,model,current.rng);
     const std::vector<std::pair<std::string,CharacterState>> branches={
@@ -198,7 +199,7 @@ bool fork_day(int day,int total_days) {
 
 void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
          const Personality& personality,const std::filesystem::path& output,bool trace_boundaries,
-         CharacterPolicy* selected_policy) {
+         CharacterPolicy* selected_policy,int laya_port,bool typed_commitment,bool typed_appraisal) {
     if (days<1 || days>365) throw std::invalid_argument("days must be in [1,365]");
     std::filesystem::create_directories(output.parent_path());
     std::ofstream out(output);
@@ -208,7 +209,13 @@ void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
     world.enable_life_tape();
     Observation observation=refresh_observation({},world,{});
     RuntimeScheduler scheduler(kStart);
-    DemoLivingDynamicsV1 model;
+    DemoLivingDynamicsV1 base_model;
+    std::unique_ptr<LayaAugmentedDynamicsV1> typed_model;
+    if (typed_commitment || typed_appraisal)
+        typed_model=std::make_unique<LayaAugmentedDynamicsV1>(laya_port,typed_commitment,typed_appraisal);
+    CharacterDynamicsModel& model=typed_model
+        ? static_cast<CharacterDynamicsModel&>(*typed_model)
+        : static_cast<CharacterDynamicsModel&>(base_model);
     RulePolicyV0 default_policy;
     CharacterPolicy& policy=selected_policy ? *selected_policy : static_cast<CharacterPolicy&>(default_policy);
     ContinuousRuntime runtime(scheduler,world,observation,model,{},policy_seed,&policy);
@@ -259,6 +266,32 @@ void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
                    <<",\"provenance\":";
                 quote(out,step.model_soft_reconsideration->provenance);
                 out<<'}';
+            } else out<<"null";
+            out<<",\"typed_commitment_decision\":";
+            if (step.typed_commitment_decision) {
+                out<<"{\"choice\":";
+                quote(out,step.typed_commitment_decision->choice);
+                out<<",\"provenance\":";
+                quote(out,step.typed_commitment_decision->provenance);
+                out<<",\"probabilities\":{";
+                for (std::size_t i=0;i<step.typed_commitment_decision->probabilities.size();++i) {
+                    if (i) out<<',';
+                    quote(out,step.typed_commitment_decision->probabilities[i].first);
+                    out<<':'<<step.typed_commitment_decision->probabilities[i].second;
+                }
+                out<<"}}";
+            } else out<<"null";
+            out<<",\"typed_appraisal\":";
+            if (!step.appraisal.typed_source.empty()) {
+                out<<"{\"provenance\":";
+                quote(out,step.appraisal.typed_source);
+                out<<",\"scores\":{";
+                for (std::size_t i=0;i<step.appraisal.typed_scores.size();++i) {
+                    if (i) out<<',';
+                    quote(out,step.appraisal.typed_scores[i].first);
+                    out<<':'<<step.appraisal.typed_scores[i].second;
+                }
+                out<<"}}";
             } else out<<"null";
             out<<",\"world_light_on\":"<<(world.current_room().light_on?"true":"false");
             out<<",\"runtime_rejections\":[";
@@ -341,17 +374,24 @@ int main(int argc,char** argv) {
         }
         std::unique_ptr<LayaTypedPolicyV0> laya;
         bool laya_soft_gate=false;
+        bool laya_commitment=false;
+        bool laya_appraisal=false;
+        int laya_port=0;
         if (option<argc && std::string(argv[option])=="--laya-port" && option+1<argc) {
-            const int port=std::stoi(argv[option+1]);
+            laya_port=std::stoi(argv[option+1]);
             option+=2;
-            if (option<argc && std::string(argv[option])=="--laya-soft-gate") {
-                laya_soft_gate=true;
-                ++option;
+            while (option<argc) {
+                const std::string flag=argv[option++];
+                if (flag=="--laya-soft-gate") laya_soft_gate=true;
+                else if (flag=="--laya-commitment") laya_commitment=true;
+                else if (flag=="--laya-appraisal") laya_appraisal=true;
+                else return 2;
             }
-            laya=std::make_unique<LayaTypedPolicyV0>(port,laya_soft_gate);
+            laya=std::make_unique<LayaTypedPolicyV0>(laya_port,laya_soft_gate);
         }
         if (option!=argc) return 2;
-        run(scenario_seed,policy_seed,days,personality,output,trace_boundaries,laya.get());
+        run(scenario_seed,policy_seed,days,personality,output,trace_boundaries,laya.get(),
+            laya_port,laya_commitment,laya_appraisal);
         return 0;
     } catch (const std::exception& error) {
         std::cerr<<"long_horizon: "<<error.what()<<'\n';

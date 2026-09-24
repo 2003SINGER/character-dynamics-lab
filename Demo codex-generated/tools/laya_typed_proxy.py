@@ -17,6 +17,8 @@ import threading
 
 os.environ.setdefault("USE_TF", "0")
 CHECKPOINT = "convaiinnovations/laya-typed-decisions"
+CHECKPOINT_REVISION = "f9ab0b228f0fc0f14d873dbc99038f135c2da1b2"
+PROMPT_VERSION = "character-dynamics-laya-typed-v1"
 
 
 def request_hash(request):
@@ -47,6 +49,8 @@ class Bridge:
         self.memo = {}
         self.soft_replay = {}
         self.soft_memo = {}
+        self.semantic_replay = {}
+        self.semantic_memo = {}
         if replay:
             for line in replay.read_text().splitlines():
                 row = json.loads(line)
@@ -54,6 +58,8 @@ class Bridge:
                     self.replay.setdefault(row["request_hash"], row)
                 elif row.get("type") == "laya_noul_soft_reconsideration":
                     self.soft_replay.setdefault(row["request_hash"], row)
+                elif row.get("type") in {"laya_commitment_choice", "laya_appraisal_scores"}:
+                    self.semantic_replay.setdefault(row["request_hash"], row)
         elif cassette.exists():
             for line in cassette.read_text().splitlines():
                 row = json.loads(line)
@@ -61,14 +67,22 @@ class Bridge:
                     self.memo.setdefault(row["request_hash"], row["probabilities"])
                 elif row.get("type") == "laya_noul_soft_reconsideration" and row.get("model") == CHECKPOINT:
                     self.soft_memo.setdefault(row["request_hash"], row["probability"])
+                elif row.get("type") in {"laya_commitment_choice", "laya_appraisal_scores"} and row.get("model") == CHECKPOINT:
+                    self.semantic_memo.setdefault(row["request_hash"], row)
         self.agent = None
         if not replay:
             import laya
-            self.agent = laya.load(CHECKPOINT, device=device)
+            from huggingface_hub import snapshot_download
+            snapshot = snapshot_download(repo_id=CHECKPOINT, revision=CHECKPOINT_REVISION)
+            self.agent = laya.load(snapshot, device=device)
 
     def choose(self, request):
         if request.get("operation") == "soft_reconsideration":
             return self.soft_reconsider(request)
+        if request.get("operation") == "commitment_choice":
+            return self.commitment_choice(request)
+        if request.get("operation") == "appraisal_scores":
+            return self.appraisal_scores(request)
         if set(request) - {"request_id", "timestamp", "profile", "personality", "state", "observation", "candidates"}:
             raise ValueError("request contains fields outside O/S/P/I/A^O contract")
         candidates = request["candidates"]
@@ -112,7 +126,11 @@ class Bridge:
                 "request_hash": key,
                 "request": request,
                 "probabilities": probabilities,
+                "raw_answer": answer,
                 "model": CHECKPOINT,
+                "checkpoint_revision": CHECKPOINT_REVISION,
+                "prompt_version": PROMPT_VERSION,
+                "decoding_config": {"typed_choice": "raw_probs", "sampling": "C++ seeded RNG"},
                 "laya_version": importlib.metadata.version("laya"),
             }
             with self.lock:
@@ -166,7 +184,10 @@ class Bridge:
             mode = "local-laya-noul"
             row = {"type": "laya_noul_soft_reconsideration", "request_hash": key,
                    "request": request, "probability": probability, "raw_answer": answer,
-                   "model": CHECKPOINT, "laya_version": importlib.metadata.version("laya")}
+                   "model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
+                   "prompt_version": PROMPT_VERSION,
+                   "decoding_config": {"typed_noul": "raw_probability", "sampling": "C++ seeded RNG"},
+                   "laya_version": importlib.metadata.version("laya")}
             with self.lock:
                 self.soft_memo[key] = probability
                 self.cassette.parent.mkdir(parents=True, exist_ok=True)
@@ -177,6 +198,103 @@ class Bridge:
             raise ValueError("Laya returned invalid soft gate probability")
         return {"model": CHECKPOINT, "probability": f"{probability:.12g}",
                 "request_hash": key, "mode": mode}
+
+    @staticmethod
+    def semantic_state(request):
+        if set(request) - {"request_id", "timestamp", "profile", "personality", "state",
+                            "observation", "candidates", "operation", "observation_deltas",
+                            "last_self_action", "options"}:
+            raise ValueError("semantic request contains fields outside O/Delta-O/S/P/I contract")
+        if request["candidates"]:
+            raise ValueError("semantic model may not change A^O")
+        return {
+            "time": request["timestamp"],
+            "personality": request["personality"],
+            "subjective_state_and_commitment": request["state"],
+            "observation_deltas": request["observation_deltas"],
+            "last_self_action": request["last_self_action"],
+            "relevant_known_observations": [fact for fact in request["observation"]
+                                            if fact["key"].startswith(("task.", "message.", "room."))],
+        }
+
+    def commitment_choice(self, request):
+        state = self.semantic_state(request)
+        options = request["options"]
+        if options not in (["continue", "abandon"], ["continue", "suspend", "abandon"],
+                           ["resume", "suspend", "abandon"]):
+            raise ValueError("invalid commitment option surface")
+        key = request_hash(request)
+        row = self.semantic_replay.get(key) or self.semantic_memo.get(key)
+        if row is None:
+            if self.agent is None:
+                raise ValueError("cassette has no matching Laya commitment choice")
+            answer = self.agent.predict(state, {"commitment": {
+                "type": "choice",
+                "instructions": (
+                    "Given only observed task information, self-action feedback, current commitment, "
+                    "subjective state and personality, choose how the actor's task intention changes. "
+                    "This is subjective intention, not World task status."
+                ),
+                "criteria": {name: {
+                    "continue": "remain or become actively committed to the observed task",
+                    "suspend": "keep the task intention but temporarily pause it",
+                    "resume": "reactivate a previously suspended task intention",
+                    "abandon": "drop the subjective task intention without changing the World task",
+                }[name] for name in options},
+            }})["answers"]["commitment"]
+            probabilities = {name: float(answer["probabilities"][name]) for name in options}
+            row = {"type": "laya_commitment_choice", "request_hash": key, "request": request,
+                   "probabilities": probabilities, "raw_answer": answer,
+                   "model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
+                   "prompt_version": PROMPT_VERSION,
+                   "decoding_config": {"typed_choice": "raw_probs", "sampling": "C++ seeded RNG"},
+                   "laya_version": importlib.metadata.version("laya")}
+            with self.lock:
+                self.semantic_memo[key] = row
+                self.cassette.parent.mkdir(parents=True, exist_ok=True)
+                with self.cassette.open("a") as handle:
+                    handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+        probabilities = row["probabilities"]
+        if set(probabilities) != set(options):
+            raise ValueError("Laya commitment options mismatch")
+        weights = ",".join(f"{name}={float(probabilities[name]):.12g}" for name in options)
+        return {"model": CHECKPOINT, "weights": weights, "request_hash": key,
+                "mode": "cassette-replay" if key in self.semantic_replay else "local-laya-choice"}
+
+    def appraisal_scores(self, request):
+        state = self.semantic_state(request)
+        if request["options"]:
+            raise ValueError("appraisal cannot invent choice options")
+        keys = ("goal_progress", "goal_obstruction", "stimulation", "uncertainty",
+                "positive_outcome", "negative_outcome", "control_restored")
+        key = request_hash(request)
+        row = self.semantic_replay.get(key) or self.semantic_memo.get(key)
+        if row is None:
+            if self.agent is None:
+                raise ValueError("cassette has no matching Laya appraisal scores")
+            questions = {name: {
+                "type": "score", "instructions": f"How much {name.replace('_', ' ')} does the newly observed change mean to this actor?",
+                "criteria": ["none", "slight", "moderate", "strong", "very strong"],
+            } for name in keys}
+            answers = self.agent.predict(state, questions)["answers"]
+            scores = {name: float(answers[name]["score"]) for name in keys}
+            row = {"type": "laya_appraisal_scores", "request_hash": key, "request": request,
+                   "scores": scores, "raw_answers": answers,
+                   "model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
+                   "prompt_version": PROMPT_VERSION,
+                   "decoding_config": {"typed_score": "expected_ordinal_0_to_4", "sampling": "none"},
+                   "laya_version": importlib.metadata.version("laya")}
+            with self.lock:
+                self.semantic_memo[key] = row
+                self.cassette.parent.mkdir(parents=True, exist_ok=True)
+                with self.cassette.open("a") as handle:
+                    handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+        scores = row["scores"]
+        if set(scores) != set(keys):
+            raise ValueError("Laya appraisal channel mismatch")
+        encoded = ",".join(f"{name}={float(scores[name]):.12g}" for name in keys)
+        return {"model": CHECKPOINT, "scores": encoded, "request_hash": key,
+                "mode": "cassette-replay" if key in self.semantic_replay else "local-laya-score"}
 
 
 class Handler(socketserver.StreamRequestHandler):
@@ -205,6 +323,7 @@ def main():
     with LoopbackServer(("127.0.0.1", args.port), Handler) as service:
         print(json.dumps({"service": "laya-typed-policy-v0", "bind": "127.0.0.1",
                           "port": service.server_address[1], "model": CHECKPOINT,
+                          "checkpoint_revision": CHECKPOINT_REVISION, "prompt_version": PROMPT_VERSION,
                           "mode": "replay" if args.replay else "live"}), flush=True)
         service.serve_forever()
 

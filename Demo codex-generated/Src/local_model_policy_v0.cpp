@@ -1,4 +1,5 @@
 #include "local_model_policy_v0.h"
+#include "laya_semantic_client_v0.h"
 #include "runtime_scheduler.h"
 
 #include <algorithm>
@@ -125,6 +126,66 @@ std::string soft_gate_request_json(unsigned long long request_id,
     return payload;
 }
 
+std::string semantic_request_json(unsigned long long request_id,const char* operation,
+                                  const Observation& observation,const CharacterState& state,
+                                  const Personality& personality,
+                                  const std::vector<std::string>& options={}) {
+    const DecisionContext no_candidates;
+    std::string payload=request_json(request_id,no_candidates,observation,state,personality);
+    payload.pop_back();
+    payload+=",\"operation\":"+quote(operation)+",\"observation_deltas\":[";
+    bool first=true;
+    for (const ObservationFact& fact:observation.updates_this_refresh) {
+        if (fact.status!=KnowledgeStatus::Known && fact.status!=KnowledgeStatus::Stale) continue;
+        if (!first) payload+=',';
+        first=false;
+        payload+="{\"key\":"+quote(fact.key)+",\"value\":"+quote(fact.value)
+            +",\"status\":"+quote(fact.status==KnowledgeStatus::Known?"known":"stale")+'}';
+    }
+    payload+="],\"last_self_action\":{\"has_action\":";
+    payload+=observation.last_self_action.has_action?"true":"false";
+    payload+=",\"action\":"+quote(to_string(observation.last_self_action.action));
+    payload+=",\"accepted\":";
+    payload+=observation.last_self_action.accepted?"true":"false";
+    payload+=",\"task_id\":"+quote(observation.last_self_action.task_id);
+    payload+=",\"task_completed\":";
+    payload+=observation.last_self_action.task_completed?"true":"false";
+    payload+=",\"outcome_reason\":"+quote(observation.last_self_action.outcome_reason)+"}";
+    payload+=",\"options\":[";
+    for (std::size_t i=0;i<options.size();++i) {
+        if (i) payload+=',';
+        payload+=quote(options[i]);
+    }
+    payload+="]}";
+    return payload;
+}
+
+std::map<std::string,double> parse_named_numbers(const std::string& encoded,
+                                                  const std::vector<std::string>& expected,
+                                                  double max_value) {
+    std::map<std::string,double> values;
+    std::istringstream entries(encoded);
+    std::string entry;
+    while (std::getline(entries,entry,',')) {
+        const auto separator=entry.find('=');
+        if (separator==std::string::npos || entry.find('=',separator+1)!=std::string::npos)
+            throw std::runtime_error("Laya returned malformed typed values");
+        const std::string name=entry.substr(0,separator);
+        if (std::find(expected.begin(),expected.end(),name)==expected.end() || values.count(name))
+            throw std::runtime_error("Laya returned an unexpected or duplicate typed value");
+        std::size_t consumed=0;
+        double value=0.0;
+        const std::string number=entry.substr(separator+1);
+        try { value=std::stod(number,&consumed); }
+        catch (const std::exception&) { throw std::runtime_error("Laya returned nonnumeric typed value"); }
+        if (consumed!=number.size() || !std::isfinite(value) || value<0.0 || value>max_value)
+            throw std::runtime_error("Laya returned invalid typed value");
+        values.emplace(name,value);
+    }
+    if (values.size()!=expected.size()) throw std::runtime_error("Laya omitted a typed value");
+    return values;
+}
+
 std::string laya_exchange(int port,const std::string& request) {
 #ifdef _WIN32
     WinsockScope winsock;
@@ -243,4 +304,42 @@ std::optional<SoftReconsideration> LayaTypedPolicyV0::soft_reconsider(
     const bool requested=std::bernoulli_distribution(probability)(rng);
     return SoftReconsideration{probability,requested,
         "laya-noul request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash")};
+}
+
+LayaTypedChoice LayaSemanticClientV0::choose_commitment(
+    const Observation& observation,const CharacterState& state,const Personality& personality,
+    const std::vector<std::string>& options,std::mt19937& rng) const {
+    if (options.size()<2 || options.size()>4) throw std::invalid_argument("invalid commitment choice surface");
+    const std::string response=laya_exchange(port_,semantic_request_json(
+        ++request_index_,"commitment_choice",observation,state,personality,options));
+    const std::string error=json_field(response,"error");
+    if (!error.empty()) throw std::runtime_error("Laya commitment proxy rejected request: "+error);
+    if (json_field(response,"model")!="convaiinnovations/laya-typed-decisions")
+        throw std::runtime_error("unexpected Laya commitment checkpoint");
+    auto probabilities=parse_named_numbers(json_field(response,"weights"),options,1.0);
+    double sum=0.0;
+    for (const auto& [_,value]:probabilities) sum+=value;
+    if (sum<0.5 || sum>1.5) throw std::runtime_error("Laya commitment choice is not a distribution");
+    std::vector<double> weights;
+    for (const std::string& option:options) weights.push_back(probabilities.at(option)/sum);
+    const std::string selected=options[std::discrete_distribution<std::size_t>(
+        weights.begin(),weights.end())(rng)];
+    LayaTypedChoice result{selected,{},"laya-choice request="+std::to_string(request_index_)
+        +" hash="+json_field(response,"request_hash")};
+    for (const std::string& option:options) result.probabilities.emplace_back(option,probabilities.at(option)/sum);
+    return result;
+}
+
+LayaTypedScores LayaSemanticClientV0::score_appraisal(
+    const Observation& observation,const CharacterState& state,const Personality& personality) const {
+    static const std::vector<std::string> keys={"goal_progress","goal_obstruction","stimulation",
+        "uncertainty","positive_outcome","negative_outcome","control_restored"};
+    const std::string response=laya_exchange(port_,semantic_request_json(
+        ++request_index_,"appraisal_scores",observation,state,personality));
+    const std::string error=json_field(response,"error");
+    if (!error.empty()) throw std::runtime_error("Laya appraisal proxy rejected request: "+error);
+    if (json_field(response,"model")!="convaiinnovations/laya-typed-decisions")
+        throw std::runtime_error("unexpected Laya appraisal checkpoint");
+    return {parse_named_numbers(json_field(response,"scores"),keys,4.0),
+        "laya-score request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash")};
 }

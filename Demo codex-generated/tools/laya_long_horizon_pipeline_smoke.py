@@ -23,6 +23,26 @@ class Handler(socketserver.StreamRequestHandler):
                    "request": request, "probability": 1.0,
                    "model": CHECKPOINT, "laya_version": "stand-in"}
             response = {"model": CHECKPOINT, "request_hash": key, "probability": "1"}
+        elif request.get("operation") == "commitment_choice":
+            options = request["options"]
+            if options not in (["continue", "abandon"], ["continue", "suspend", "abandon"],
+                               ["resume", "suspend", "abandon"]):
+                raise SystemExit("invalid typed commitment surface")
+            probabilities = {name: float(index == 0) for index, name in enumerate(options)}
+            row = {"type": "laya_commitment_choice", "request_hash": key,
+                   "request": request, "probabilities": probabilities,
+                   "model": CHECKPOINT, "laya_version": "stand-in"}
+            response = {"model": CHECKPOINT, "request_hash": key,
+                        "weights": ",".join(f"{name}={value:g}" for name, value in probabilities.items())}
+        elif request.get("operation") == "appraisal_scores":
+            scores = {name: float(4 if name in {"goal_progress", "positive_outcome"} else 0)
+                      for name in ("goal_progress", "goal_obstruction", "stimulation", "uncertainty",
+                                   "positive_outcome", "negative_outcome", "control_restored")}
+            row = {"type": "laya_appraisal_scores", "request_hash": key,
+                   "request": request, "scores": scores,
+                   "model": CHECKPOINT, "laya_version": "stand-in"}
+            response = {"model": CHECKPOINT, "request_hash": key,
+                        "scores": ",".join(f"{name}={value:g}" for name, value in scores.items())}
         else:
             candidates = request["candidates"]
             probabilities = {item["action"]: float(index == len(candidates) - 1)
@@ -72,6 +92,21 @@ def main():
             if not any("model_soft_reconsideration" in row.get("gate_reasons", [])
                        for row in soft_rows if row.get("type") == "boundary"):
                 raise SystemExit("soft gate reason was not traced")
+            full_trace = root / "typed-xi.jsonl"
+            subprocess.run([str(binary), "1000", "5000", "7", "balanced",
+                            str(full_trace), "boundaries", "--laya-port",
+                            str(server.server_address[1]), "--laya-commitment",
+                            "--laya-appraisal"], check=True, timeout=120)
+            full_rows = [json.loads(line) for line in full_trace.read_text().splitlines()]
+            boundaries = [row for row in full_rows if row["type"] == "boundary"]
+            if full_rows[0]["dynamics_model"] != "demo-living-v1+laya-typed-xi":
+                raise SystemExit("full typed mode did not select its distinct Dynamics model")
+            if not any(row["typed_commitment_decision"] and
+                       row["typed_commitment_decision"]["probabilities"] for row in boundaries):
+                raise SystemExit("typed commitment was not applied and traced")
+            if not any(row["typed_appraisal"] and len(row["typed_appraisal"]["scores"]) == 7
+                       for row in boundaries):
+                raise SystemExit("seven-channel typed appraisal was not applied and traced")
             server.shutdown()
             thread.join(timeout=5)
         manifest = json.loads((output / "manifest.json").read_text())

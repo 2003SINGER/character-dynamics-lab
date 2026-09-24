@@ -5,6 +5,10 @@
 #include "state.h"
 
 #include <string>
+#include <optional>
+#include <random>
+#include <utility>
+#include <vector>
 
 // A Dynamics Model owns the subjective condition for reconsideration.  The
 // Runtime merely opens a generic decision gate and preserves the current
@@ -12,6 +16,12 @@
 struct DynamicsReconsideration {
     bool requested = false;
     std::string reason;
+};
+
+struct CommitmentDecisionTrace {
+    std::string choice;
+    std::vector<std::pair<std::string, double>> probabilities;
+    std::string provenance;
 };
 
 // Replaceable behavior-law slot. The Runtime owns time, W/O, boundaries,
@@ -34,6 +44,12 @@ public:
     virtual void update_persistent_intention(CharacterState& state,
                                               const Observation& observation,
                                               int settled_at_total_minutes) const = 0;
+    virtual std::optional<CommitmentDecisionTrace> update_persistent_intention_typed(
+        CharacterState& state, const Observation& observation, const Personality&,
+        int settled_at_total_minutes, std::mt19937&) const {
+        update_persistent_intention(state, observation, settled_at_total_minutes);
+        return std::nullopt;
+    }
     virtual DecisionContext build_policy(const Observation& observation,
                                          const CharacterState& state,
                                          const Personality& personality) const = 0;
