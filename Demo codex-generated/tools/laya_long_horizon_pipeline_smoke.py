@@ -80,8 +80,14 @@ class Handler(socketserver.StreamRequestHandler):
                         "scores": ",".join(f"{name}={value:g}" for name, value in scores.items())}
         else:
             candidates = request["candidates"]
-            probabilities = {item["action"]: float(index == len(candidates) - 1)
-                             for index, item in enumerate(candidates)}
+            # The hard-admissible Laya surface intentionally includes actions
+            # Rule soft thresholds would omit. Pick a task action when present
+            # so this fixture still exercises commitment requests on that wider
+            # surface instead of accidentally choosing the final ambient action.
+            preferred = next((item["action"] for item in candidates
+                              if item["action"] == "study_focused"), candidates[-1]["action"])
+            probabilities = {item["action"]: float(item["action"] == preferred)
+                             for item in candidates}
             row = {"type": "laya_typed_choice", "request_hash": key,
                    "request": request, "probabilities": probabilities,
                    "model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
