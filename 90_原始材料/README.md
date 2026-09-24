@@ -4,6 +4,7 @@
 
 | 包 | 内容 | 完整性/阅读入口 |
 |---|---|---|
+| [2026-09-25_用户对话_角色动力Laya引入与Demo实验路线](2026-09-25_用户对话_角色动力Laya引入与Demo实验路线/) | 2026-09-08 至 2026-09-23 的角色动力、实验审计、Demo 与 Laya 讨论导出；原文末尾停在“哪里可以引入 Laya”的问题 | [来源与阅读边界](2026-09-25_用户对话_角色动力Laya引入与Demo实验路线/README.md)；[原文](2026-09-25_用户对话_角色动力Laya引入与Demo实验路线/角色动力3_原文.md) |
 | [2026-09-15_6757e2b_Closure回退复核](2026-09-15_6757e2b_Closure回退复核.txt) | 对错误 CLOSED 的 end-to-end 审计：π selection、ΔO exactly-once、threshold reconsideration 与 boundary ordering 硬失败及修复要求 | [原文](2026-09-15_6757e2b_Closure回退复核.txt)；SHA-256 `c96ff77ef7bbc3b7b1b5a59100f9accaab47d89f5dd37c96131c3447034f8916` |
 | [2026-09-15_b9bb291_Closure_Gate复核](2026-09-15_b9bb291_Closure_Gate复核.txt) | 对 Continuous Runtime v1 Closure Gate A–H 的全量验收复核与硬失败清单 | [原文](2026-09-15_b9bb291_Closure_Gate复核.txt)；SHA-256 `18382363b05e7b4375168e83babf684d5a979bb18546a99d59a4d313e38772a7` |
 | [2026-09-15_db5ac16_Runtime全量复核意见](2026-09-15_db5ac16_Runtime全量复核意见.txt) | `Continuous Runtime v1 closure` 验收矩阵 A–H：要求完整 owner、自动 boundary、deadline source、感知权限、typed rejection、threshold fallback 与回归门槛 | [原文](2026-09-15_db5ac16_Runtime全量复核意见.txt)；SHA-256 `50b57e4208b63ed2670af039eeae4baf8a722fd1049b31dc3dab78263915e399` |
