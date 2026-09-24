@@ -8,20 +8,35 @@ import sys
 import tempfile
 import threading
 
-from laya_typed_proxy import CHECKPOINT, request_hash
+from laya_typed_proxy import (CHECKPOINT, CHECKPOINT_REVISION, PROMPT_VERSION,
+                              PROTOCOL_VERSION, request_hash, versioned_request)
+from long_horizon_eval import proxy_identity
+
+PROXY_SOURCE_SHA256 = proxy_identity(pathlib.Path(__file__).with_name("laya_typed_proxy.py"))["proxy_source_sha256"]
 
 
 class Handler(socketserver.StreamRequestHandler):
     cassette = None
     lock = threading.Lock()
+    seen = set()
 
     def handle(self):
-        request = json.loads(self.rfile.readline())
+        raw_request = json.loads(self.rfile.readline())
+        if raw_request == {"operation": "identity"}:
+            response = {"model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
+                        "protocol_version": PROTOCOL_VERSION, "prompt_version": PROMPT_VERSION,
+                        "proxy_source_sha256": PROXY_SOURCE_SHA256}
+            self.wfile.write((json.dumps(response) + "\n").encode())
+            return
+        request = versioned_request(raw_request)
         key = request_hash(request)
         if request.get("operation") == "soft_reconsideration":
             row = {"type": "laya_noul_soft_reconsideration", "request_hash": key,
                    "request": request, "probability": 1.0,
-                   "model": CHECKPOINT, "laya_version": "stand-in"}
+                   "model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
+                   "prompt_version": PROMPT_VERSION, "protocol_version": PROTOCOL_VERSION,
+                   "proxy_source_sha256": PROXY_SOURCE_SHA256,
+                   "laya_version": "stand-in"}
             response = {"model": CHECKPOINT, "request_hash": key, "probability": "1"}
         elif request.get("operation") == "commitment_choice":
             options = request["options"]
@@ -31,7 +46,10 @@ class Handler(socketserver.StreamRequestHandler):
             probabilities = {name: float(index == 0) for index, name in enumerate(options)}
             row = {"type": "laya_commitment_choice", "request_hash": key,
                    "request": request, "probabilities": probabilities,
-                   "model": CHECKPOINT, "laya_version": "stand-in"}
+                   "model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
+                   "prompt_version": PROMPT_VERSION, "protocol_version": PROTOCOL_VERSION,
+                   "proxy_source_sha256": PROXY_SOURCE_SHA256,
+                   "laya_version": "stand-in"}
             response = {"model": CHECKPOINT, "request_hash": key,
                         "weights": ",".join(f"{name}={value:g}" for name, value in probabilities.items())}
         elif request.get("operation") == "appraisal_scores":
@@ -40,7 +58,10 @@ class Handler(socketserver.StreamRequestHandler):
                                    "positive_outcome", "negative_outcome", "control_restored")}
             row = {"type": "laya_appraisal_scores", "request_hash": key,
                    "request": request, "scores": scores,
-                   "model": CHECKPOINT, "laya_version": "stand-in"}
+                   "model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
+                   "prompt_version": PROMPT_VERSION, "protocol_version": PROTOCOL_VERSION,
+                   "proxy_source_sha256": PROXY_SOURCE_SHA256,
+                   "laya_version": "stand-in"}
             response = {"model": CHECKPOINT, "request_hash": key,
                         "scores": ",".join(f"{name}={value:g}" for name, value in scores.items())}
         else:
@@ -49,12 +70,17 @@ class Handler(socketserver.StreamRequestHandler):
                              for index, item in enumerate(candidates)}
             row = {"type": "laya_typed_choice", "request_hash": key,
                    "request": request, "probabilities": probabilities,
-                   "model": CHECKPOINT, "laya_version": "stand-in"}
+                   "model": CHECKPOINT, "checkpoint_revision": CHECKPOINT_REVISION,
+                   "prompt_version": PROMPT_VERSION, "protocol_version": PROTOCOL_VERSION,
+                   "proxy_source_sha256": PROXY_SOURCE_SHA256,
+                   "laya_version": "stand-in"}
             response = {"model": CHECKPOINT, "request_hash": key,
                         "weights": ",".join(f"{name}={value:g}" for name, value in probabilities.items())}
         with self.lock:
-            with self.cassette.open("a") as handle:
-                handle.write(json.dumps(row, separators=(",", ":")) + "\n")
+            if key not in self.seen:
+                with self.cassette.open("a") as handle:
+                    handle.write(json.dumps(row, separators=(",", ":")) + "\n")
+                self.seen.add(key)
         self.wfile.write((json.dumps(response) + "\n").encode())
 
 
@@ -71,6 +97,7 @@ def main():
         root = pathlib.Path(directory)
         cassette = root / "live-cassette.jsonl"
         Handler.cassette = cassette
+        Handler.seen = set()
         with LoopbackServer(("127.0.0.1", 0), Handler) as server:
             thread = threading.Thread(target=server.serve_forever, daemon=True)
             thread.start()

@@ -49,9 +49,20 @@ The checkpoint emitted a runtime warning that some bundled temperatures are
 invalid; treat confidence/probability calibration as unproven.
 New runs pin the checkpoint to Hugging Face revision
 `f9ab0b228f0fc0f14d873dbc99038f135c2da1b2` and record revision,
-prompt version, decoding contract, raw typed answer and request hash in the
-local cassette. Earlier pilot cassettes predate this revision field: their
-answers remain replayable but should not be called revision-pinned evidence.
+protocol/prompt v2, decoding contract, raw typed answer, request hash, and
+state/input token counts and budgets in the local cassette. Before every typed
+policy, soft-gate, commitment, or appraisal prediction, the bridge sends compact
+JSON text and uses the loaded model tokenizer plus Laya's sequence builder to
+verify that the full state fits after the question/options prefix. An oversized
+state fails before model inference instead of being silently truncated. Token
+audit fields contain counts only; they add no state text to cassette rows.
+Old entries are never loaded into the v2 live memo, and new request hashes
+include both protocol and prompt versions. Ordinary replay accepts only matching
+v2 cassettes from the same proxy source SHA-256; legacy v1 hash fallback requires
+the explicit `--allow-v1-replay` option alongside `--replay`. The startup banner
+and read-only `{"operation":"identity"}` handshake expose the checkpoint and
+bridge source identity. The handshake performs no inference and adds no cassette
+row.
 
 The Python bridge is an application adapter only. ReferenceRuleDynamicsV0,
 DemoLivingDynamicsV1, W validation, scheduler and research evaluator are
@@ -136,15 +147,25 @@ not a long-run or human-validity finding. A model-free contract smoke also
 checks visible versus hidden commitment clearing and unchanged bodily-state
 updates.
 
-## First actual paired result (2026-09-24)
+## Historical v1 pilot record (2026-09-24; not behavioral evidence)
 
-One 7-day World tape was run for all eight P profiles under Rule and actual
-Laya policy, each with an independent deterministic cassette replay. The
-comparison verified matching binary hash, initial W/O/S/I, P, World tape,
-seed, and Dynamics within every pair. Across those eight pairs, Laya minus
-Rule averaged +176.25 rest minutes/day, -101.02 sleep minutes/day, -24.75
-study minutes/day, and 0.00 task completions/day. This is a one-tape pilot,
-not the requested eight-tape group result; the eight-way unseen-tape
-classifier cannot be estimated from it. Raw traces and cassettes are under
-`/Users/2003singer/Workspace/Research/_character_dynamics_laya_runs/` and
-are intentionally not committed.
+The earlier v1 one-tape run exercised the paired execution and cassette-replay
+workflow for eight P profiles. Its historical Laya-minus-Rule averages were
++176.25 rest minutes/day, -101.02 sleep minutes/day, -24.75 study minutes/day,
+and 0.00 task completions/day. Keep these numbers only as a record of that
+workflow run: subsequent inspection found that most model inputs may have
+silently truncated state, so the comparison is not interpretable as a
+behavioral result and must not support behavioral claims.
+
+The v2 multi-tape run has not yet been completed. The old v1 traces, cassette,
+and interrupted partial artifacts are excluded from it and must not be mixed
+into a new experiment. Each new Laya run uses a dedicated initially empty
+cassette; the evaluator atomically records a per-actor `DONE` marker with trace
+and replay evidence, and resumes only actors whose signature and hashes validate.
+The default Rule/Laya A/B is policy-only and eligible for the existing paired
+policy comparator. Full typed X/I modes alter Dynamics and are a separate
+supplementary track; they cannot be interpreted as changing only π or compared
+under the `only_policy_changed` claim. Soft-gate mode is likewise a separate
+factor. Raw historical artifacts remain under
+`/Users/2003singer/Workspace/Research/_character_dynamics_laya_runs/` and are
+intentionally not committed.

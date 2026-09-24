@@ -169,6 +169,8 @@ add_test(NAME character_dynamics_qwen_action_loopback_smoke
 add_test(NAME character_dynamics_laya_typed_policy_loopback_smoke
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/laya_typed_policy_loopback_smoke.py"
          "$<TARGET_FILE:character_dynamics_free_run>")
+add_test(NAME character_dynamics_laya_input_budget_smoke
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/laya_input_budget_smoke.py")
 add_executable(character_dynamics_life_tape_smoke tests/life_tape_smoke.cpp)
 target_link_libraries(character_dynamics_life_tape_smoke PRIVATE character_dynamics_engine character_dynamics_demo_living_v1)
 add_test(NAME character_dynamics_life_tape_smoke COMMAND character_dynamics_life_tape_smoke)
@@ -183,6 +185,8 @@ add_test(NAME character_dynamics_long_horizon_pipeline_smoke
 add_test(NAME character_dynamics_laya_long_horizon_pipeline_smoke
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/laya_long_horizon_pipeline_smoke.py"
          "$<TARGET_FILE:character_dynamics_long_horizon>")
+add_test(NAME character_dynamics_long_horizon_eval_resumability_smoke
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/long_horizon_eval_resumability_smoke.py")
 add_test(NAME character_dynamics_free_run_report
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/free_run_report.py"
          "${CMAKE_CURRENT_SOURCE_DIR}/demo/living_dynamics_v1"
