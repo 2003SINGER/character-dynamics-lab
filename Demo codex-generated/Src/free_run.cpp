@@ -35,13 +35,18 @@ int main(int argc,char** argv){
     const unsigned actor_id=ss>=1000?(ss-1000)/17:0;
     std::string profile_id=DemoPersonalityProfiles::names()[actor_id%8];
     std::unique_ptr<CharacterPolicy> policy;
+    std::optional<int> laya_port;
+    bool laya_soft_gate=false;
     for(int i=4;i<argc;++i) {
         const std::string argument=argv[i];
-        if(argument=="--laya-port" && i+1<argc) policy=std::make_unique<LayaTypedPolicyV0>(std::stoi(argv[++i]));
+        if(argument=="--laya-port" && i+1<argc) laya_port=std::stoi(argv[++i]);
+        else if(argument=="--laya-soft-gate") laya_soft_gate=true;
         else if(argument=="--qwen-port" && i+1<argc) policy=std::make_unique<QwenSocketPolicyV0>(std::stoi(argv[++i]));
         else if(argument.rfind("--",0)!=0) profile_id=argument;
         else return 2;
     }
+    if(laya_soft_gate && !laya_port) return 2;
+    if(laya_port) policy=std::make_unique<LayaTypedPolicyV0>(*laya_port,laya_soft_gate);
     fs::create_directories(p.parent_path());std::ofstream out(p);if(!out)return 3;
     World world(ss);world.time.minute_of_day=480;Observation observation=refresh_observation({},world,{});RuntimeScheduler scheduler(480);DemoLivingDynamicsV1 dynamics;
     ContinuousRuntime runtime(scheduler,world,observation,dynamics,{},ps,policy.get());CharacterState state;

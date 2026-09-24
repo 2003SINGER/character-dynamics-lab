@@ -252,6 +252,14 @@ void run(unsigned int scenario_seed,unsigned int policy_seed,int days,
             if (step.selected_action) quote(out,to_string(*step.selected_action));
             else out<<"null";
             out<<",\"selected_target\":";quote(out,step.selected_target_object_id);
+            out<<",\"model_soft_reconsideration\":";
+            if (step.model_soft_reconsideration) {
+                out<<"{\"probability\":"<<step.model_soft_reconsideration->probability
+                   <<",\"requested\":"<<(step.model_soft_reconsideration->requested?"true":"false")
+                   <<",\"provenance\":";
+                quote(out,step.model_soft_reconsideration->provenance);
+                out<<'}';
+            } else out<<"null";
             out<<",\"world_light_on\":"<<(world.current_room().light_on?"true":"false");
             out<<",\"runtime_rejections\":[";
             bool first_rejection=true;
@@ -332,9 +340,15 @@ int main(int argc,char** argv) {
             option+=2;
         }
         std::unique_ptr<LayaTypedPolicyV0> laya;
+        bool laya_soft_gate=false;
         if (option<argc && std::string(argv[option])=="--laya-port" && option+1<argc) {
-            laya=std::make_unique<LayaTypedPolicyV0>(std::stoi(argv[option+1]));
+            const int port=std::stoi(argv[option+1]);
             option+=2;
+            if (option<argc && std::string(argv[option])=="--laya-soft-gate") {
+                laya_soft_gate=true;
+                ++option;
+            }
+            laya=std::make_unique<LayaTypedPolicyV0>(port,laya_soft_gate);
         }
         if (option!=argc) return 2;
         run(scenario_seed,policy_seed,days,personality,output,trace_boundaries,laya.get());

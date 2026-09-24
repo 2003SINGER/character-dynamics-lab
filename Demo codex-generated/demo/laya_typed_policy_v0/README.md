@@ -81,3 +81,34 @@ action entropy, switching and repeated-action patterns. These are descriptive
 Demo diagnostics with no pre-imposed pathology threshold. Longer horizons
 consume many local model calls and are not implied to have run by these
 commands or by the model-free CI smoke.
+
+## Optional typed soft reconsideration
+
+`--laya-soft-gate` is an opt-in Demo-only extension to `--laya-port` for
+`character_dynamics_free_run` and `character_dynamics_long_horizon`. At a
+boundary with a still-running action and no existing hard gate, Laya receives
+only O/S/P/I plus the current RunningAction and answers a typed `noul` question.
+C++ validates its probability and uses the Runtime's seeded RNG to decide
+whether to **add** a decision opportunity. A false answer cannot close a
+World/need/completion/rejection gate. If the subsequent policy keeps the same
+action, its original start time and elapsed progress survive; only an explicit
+replacement is validated and interrupts it. The returned probability,
+sampled Boolean and cassette hash are traced in `model_soft_reconsideration`.
+
+The policy-only Rule/Laya comparison above leaves this switch off, so the
+paired experiment still changes only π. Soft-gate mode is a separate
+intervention, not evidence about policy-only effects. The checkpoint's raw
+`noul` probabilities are not calibrated psychological probabilities.
+
+## First actual paired result (2026-09-24)
+
+One 7-day World tape was run for all eight P profiles under Rule and actual
+Laya policy, each with an independent deterministic cassette replay. The
+comparison verified matching binary hash, initial W/O/S/I, P, World tape,
+seed, and Dynamics within every pair. Across those eight pairs, Laya minus
+Rule averaged +176.25 rest minutes/day, -101.02 sleep minutes/day, -24.75
+study minutes/day, and 0.00 task completions/day. This is a one-tape pilot,
+not the requested eight-tape group result; the eight-way unseen-tape
+classifier cannot be estimated from it. Raw traces and cassettes are under
+`/Users/2003singer/Workspace/Research/_character_dynamics_laya_runs/` and
+are intentionally not committed.

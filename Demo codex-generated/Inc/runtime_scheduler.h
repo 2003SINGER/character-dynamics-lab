@@ -40,6 +40,7 @@ enum class DecisionGateReason {
     ActionInterrupted,
     NeedThresholdCrossed,
     DynamicsReconsideration,
+    ModelSoftReconsideration,
     CommitmentReconsideration,
     PlanInvalidated
 };

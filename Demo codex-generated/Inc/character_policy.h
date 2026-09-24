@@ -3,6 +3,7 @@
 #include "decision.h"
 
 #include <random>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,6 +18,12 @@ struct PolicySelection {
     std::vector<std::pair<ActionType, double>> probabilities;
 };
 
+struct SoftReconsideration {
+    double probability = 0.0;
+    bool requested = false;
+    std::string provenance;
+};
+
 class CharacterPolicy {
 public:
     virtual ~CharacterPolicy() = default;
@@ -26,6 +33,11 @@ public:
                                    const Personality& personality,
                                    std::mt19937& rng) = 0;
     virtual const char* identity() const = 0;
+    // Optional subjective gate. This can only add a reconsideration; hard
+    // Runtime gates remain authoritative and cannot be closed by a policy.
+    virtual std::optional<SoftReconsideration> soft_reconsider(
+        const Observation&, const CharacterState&, const Personality&,
+        const RunningAction&, std::mt19937&) { return std::nullopt; }
 };
 
 class RulePolicyV0 final : public CharacterPolicy {

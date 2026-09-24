@@ -34,6 +34,7 @@ struct RuntimeExecutionResult {
     bool replacement_validation_performed = false;
     bool replacement_validation_accepted = false;
     std::string dynamics_reconsideration_reason;
+    std::optional<SoftReconsideration> model_soft_reconsideration;
     unsigned int policy_seed = 0;
     std::vector<ObservationFact> observation_deltas;
     bool policy_evaluated = false;

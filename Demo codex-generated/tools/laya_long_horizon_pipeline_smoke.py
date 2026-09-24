@@ -17,18 +17,24 @@ class Handler(socketserver.StreamRequestHandler):
 
     def handle(self):
         request = json.loads(self.rfile.readline())
-        candidates = request["candidates"]
-        probabilities = {item["action"]: float(index == len(candidates) - 1)
-                         for index, item in enumerate(candidates)}
         key = request_hash(request)
-        row = {"type": "laya_typed_choice", "request_hash": key,
-               "request": request, "probabilities": probabilities,
-               "model": CHECKPOINT, "laya_version": "stand-in"}
+        if request.get("operation") == "soft_reconsideration":
+            row = {"type": "laya_noul_soft_reconsideration", "request_hash": key,
+                   "request": request, "probability": 1.0,
+                   "model": CHECKPOINT, "laya_version": "stand-in"}
+            response = {"model": CHECKPOINT, "request_hash": key, "probability": "1"}
+        else:
+            candidates = request["candidates"]
+            probabilities = {item["action"]: float(index == len(candidates) - 1)
+                             for index, item in enumerate(candidates)}
+            row = {"type": "laya_typed_choice", "request_hash": key,
+                   "request": request, "probabilities": probabilities,
+                   "model": CHECKPOINT, "laya_version": "stand-in"}
+            response = {"model": CHECKPOINT, "request_hash": key,
+                        "weights": ",".join(f"{name}={value:g}" for name, value in probabilities.items())}
         with self.lock:
             with self.cassette.open("a") as handle:
                 handle.write(json.dumps(row, separators=(",", ":")) + "\n")
-        response = {"model": CHECKPOINT, "request_hash": key,
-                    "weights": ",".join(f"{name}={value:g}" for name, value in probabilities.items())}
         self.wfile.write((json.dumps(response) + "\n").encode())
 
 
@@ -53,6 +59,19 @@ def main():
                             "--days", "7", "--cases", "1", "--policy", "laya",
                             "--laya-port", str(server.server_address[1]),
                             "--laya-cassette", str(cassette)], check=True, timeout=120)
+            soft_trace = root / "soft-gate.jsonl"
+            subprocess.run([str(binary), "1000", "5000", "7", "balanced",
+                            str(soft_trace), "boundaries", "--laya-port",
+                            str(server.server_address[1]), "--laya-soft-gate"],
+                           check=True, timeout=120)
+            soft_rows = [json.loads(line) for line in soft_trace.read_text().splitlines()]
+            if not any(row.get("model_soft_reconsideration", {}).get("requested")
+                       for row in soft_rows if row.get("type") == "boundary"
+                       and row.get("model_soft_reconsideration")):
+                raise SystemExit("typed noul did not open a soft decision gate")
+            if not any("model_soft_reconsideration" in row.get("gate_reasons", [])
+                       for row in soft_rows if row.get("type") == "boundary"):
+                raise SystemExit("soft gate reason was not traced")
             server.shutdown()
             thread.join(timeout=5)
         manifest = json.loads((output / "manifest.json").read_text())

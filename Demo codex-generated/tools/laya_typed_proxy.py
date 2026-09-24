@@ -45,17 +45,30 @@ class Bridge:
         self.lock = threading.Lock()
         self.replay = {}
         self.memo = {}
+        self.soft_replay = {}
+        self.soft_memo = {}
         if replay:
             for line in replay.read_text().splitlines():
                 row = json.loads(line)
                 if row.get("type") == "laya_typed_choice":
                     self.replay.setdefault(row["request_hash"], row)
+                elif row.get("type") == "laya_noul_soft_reconsideration":
+                    self.soft_replay.setdefault(row["request_hash"], row)
+        elif cassette.exists():
+            for line in cassette.read_text().splitlines():
+                row = json.loads(line)
+                if row.get("type") == "laya_typed_choice" and row.get("model") == CHECKPOINT:
+                    self.memo.setdefault(row["request_hash"], row["probabilities"])
+                elif row.get("type") == "laya_noul_soft_reconsideration" and row.get("model") == CHECKPOINT:
+                    self.soft_memo.setdefault(row["request_hash"], row["probability"])
         self.agent = None
         if not replay:
             import laya
             self.agent = laya.load(CHECKPOINT, device=device)
 
     def choose(self, request):
+        if request.get("operation") == "soft_reconsideration":
+            return self.soft_reconsider(request)
         if set(request) - {"request_id", "timestamp", "profile", "personality", "state", "observation", "candidates"}:
             raise ValueError("request contains fields outside O/S/P/I/A^O contract")
         candidates = request["candidates"]
@@ -110,6 +123,60 @@ class Bridge:
         weights = ",".join(f"{candidate['action']}={probabilities[candidate['action']]:.12g}"
                            for candidate in candidates)
         return {"model": CHECKPOINT, "weights": weights, "request_hash": key, "mode": mode}
+
+    def soft_reconsider(self, request):
+        if set(request) - {"request_id", "timestamp", "profile", "personality", "state",
+                            "observation", "candidates", "operation", "running_action"}:
+            raise ValueError("soft gate request contains fields outside O/S/P/I/RunningAction contract")
+        if request["candidates"] or request["operation"] != "soft_reconsideration":
+            raise ValueError("soft gate may not change A^O")
+        running = request["running_action"]
+        if set(running) != {"action", "target", "elapsed_minutes", "planned_minutes"}:
+            raise ValueError("invalid RunningAction projection")
+        key = request_hash(request)
+        if key in self.soft_replay:
+            probability = self.soft_replay[key]["probability"]
+            mode = "cassette-replay"
+        elif key in self.soft_memo:
+            probability = self.soft_memo[key]
+            mode = "live-memo"
+        else:
+            if self.agent is None:
+                raise ValueError("cassette has no matching Laya soft gate")
+            state = {
+                "time": request["timestamp"],
+                "personality": request["personality"],
+                "subjective_state_and_commitment": request["state"],
+                "known_or_stale_observations": request["observation"],
+                "running_action": running,
+            }
+            answer = self.agent.predict(state, {
+                "reconsider": {
+                    "type": "noul",
+                    "instructions": (
+                        "Should this character reconsider their current action now? "
+                        "Use only observed facts, subjective state, personality, commitment, "
+                        "and current action. A true answer only opens a decision opportunity; "
+                        "it does not interrupt the action or override physical constraints."
+                    ),
+                    "criteria": {"true": "reconsider current action", "false": "keep current plan"},
+                }
+            })["answers"]["reconsider"]
+            probability = answer["noul"]
+            mode = "local-laya-noul"
+            row = {"type": "laya_noul_soft_reconsideration", "request_hash": key,
+                   "request": request, "probability": probability, "raw_answer": answer,
+                   "model": CHECKPOINT, "laya_version": importlib.metadata.version("laya")}
+            with self.lock:
+                self.soft_memo[key] = probability
+                self.cassette.parent.mkdir(parents=True, exist_ok=True)
+                with self.cassette.open("a") as handle:
+                    handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+        probability = float(probability)
+        if not math.isfinite(probability) or not 0 <= probability <= 1:
+            raise ValueError("Laya returned invalid soft gate probability")
+        return {"model": CHECKPOINT, "probability": f"{probability:.12g}",
+                "request_hash": key, "mode": mode}
 
 
 class Handler(socketserver.StreamRequestHandler):

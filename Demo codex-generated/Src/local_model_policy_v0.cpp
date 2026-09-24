@@ -1,4 +1,5 @@
 #include "local_model_policy_v0.h"
+#include "runtime_scheduler.h"
 
 #include <algorithm>
 #include <array>
@@ -110,6 +111,20 @@ std::string request_json(unsigned long long request_id,const DecisionContext& de
     return out.str();
 }
 
+std::string soft_gate_request_json(unsigned long long request_id,
+                                   const Observation& observation,const CharacterState& state,
+                                   const Personality& personality,const RunningAction& action) {
+    const DecisionContext no_candidates;
+    std::string payload=request_json(request_id,no_candidates,observation,state,personality);
+    payload.pop_back();
+    payload+=",\"operation\":\"soft_reconsideration\",\"running_action\":{\"action\":";
+    payload+=quote(to_string(action.action));
+    payload+=",\"target\":"+quote(action.target_object_id);
+    payload+=",\"elapsed_minutes\":"+std::to_string(action.elapsed_minutes);
+    payload+=",\"planned_minutes\":"+std::to_string(action.planned_duration_minutes)+"}}";
+    return payload;
+}
+
 std::string laya_exchange(int port,const std::string& request) {
 #ifdef _WIN32
     WinsockScope winsock;
@@ -206,4 +221,26 @@ PolicySelection LayaTypedPolicyV0::select(const DecisionContext& decision,const 
         if (candidate.eligible && weights.count(candidate.action))
             selection.probabilities.emplace_back(candidate.action,candidate.probability);
     return selection;
+}
+
+std::optional<SoftReconsideration> LayaTypedPolicyV0::soft_reconsider(
+    const Observation& observation,const CharacterState& state,const Personality& personality,
+    const RunningAction& action,std::mt19937& rng) {
+    if (!soft_gate_enabled_) return std::nullopt;
+    const std::string response=laya_exchange(port_,soft_gate_request_json(
+        ++request_index_,observation,state,personality,action));
+    const std::string error=json_field(response,"error");
+    if (!error.empty()) throw std::runtime_error("Laya soft gate proxy rejected request: "+error);
+    if (json_field(response,"model")!="convaiinnovations/laya-typed-decisions")
+        throw std::runtime_error("Laya soft gate returned an unexpected checkpoint");
+    const std::string encoded=json_field(response,"probability");
+    std::size_t consumed=0;
+    double probability=0.0;
+    try { probability=std::stod(encoded,&consumed); }
+    catch (const std::exception&) { throw std::runtime_error("Laya soft gate returned nonnumeric probability"); }
+    if (consumed!=encoded.size() || !std::isfinite(probability) || probability<0.0 || probability>1.0)
+        throw std::runtime_error("Laya soft gate returned invalid probability");
+    const bool requested=std::bernoulli_distribution(probability)(rng);
+    return SoftReconsideration{probability,requested,
+        "laya-noul request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash")};
 }

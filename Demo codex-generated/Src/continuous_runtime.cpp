@@ -86,6 +86,16 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
                 DecisionGateReason::DynamicsReconsideration);
             result.dynamics_reconsideration_reason = dynamics_reconsideration.reason;
         }
+        if (!result.runtime.boundary.decision_gate.open) {
+            result.model_soft_reconsideration = policy_->soft_reconsider(
+                observation_, state, personality, *action, rng_);
+            if (result.model_soft_reconsideration.has_value()
+                && result.model_soft_reconsideration->requested) {
+                result.runtime.boundary.decision_gate.open = true;
+                result.runtime.boundary.decision_gate.reasons.push_back(
+                    DecisionGateReason::ModelSoftReconsideration);
+            }
+        }
     }
     if (action.has_value() && action->status == RunningActionStatus::Completed) {
         result.pre_policy_outcome = world_runtime_.world().settle_runtime_completion(
@@ -117,7 +127,9 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     // It preserves the old action unless the informed next policy sample
     // explicitly replaces it, just like a subjective need/recovery gate.
     const bool subjective_reconsideration = threshold_reconsideration
-        || dynamics_reconsideration.requested || rejection_reconsideration;
+        || dynamics_reconsideration.requested || rejection_reconsideration
+        || (result.model_soft_reconsideration.has_value()
+            && result.model_soft_reconsideration->requested);
     if (result.runtime.boundary.decision_gate.open
         && (result.pre_policy_outcome.has_value() || !action.has_value()
             || action->status != RunningActionStatus::Running || subjective_reconsideration)) {
