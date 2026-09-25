@@ -3,6 +3,7 @@
 #include "appraisal.h"
 #include "decision.h"
 #include "state.h"
+#include "actor_history.h"
 
 #include <string>
 #include <optional>
@@ -38,6 +39,10 @@ public:
     virtual Appraisal appraise(const Observation& observation,
                                const CharacterState& state,
                                const Personality& personality) const = 0;
+    virtual Appraisal appraise_with_history(const Observation& observation, const CharacterState& state,
+                               const Personality& personality, const ActorHistory&) const {
+        return appraise(observation, state, personality);
+    }
     virtual StateUpdate apply_impulse(CharacterState& state,
                                       const Appraisal& appraisal,
                                       const Personality& personality) const = 0;
@@ -49,6 +54,11 @@ public:
         int settled_at_total_minutes, std::mt19937&) const {
         update_persistent_intention(state, observation, settled_at_total_minutes);
         return std::nullopt;
+    }
+    virtual std::optional<CommitmentDecisionTrace> update_persistent_intention_typed_with_history(
+        CharacterState& state, const Observation& observation, const Personality& personality,
+        int settled_at_total_minutes, std::mt19937& rng, const ActorHistory&) const {
+        return update_persistent_intention_typed(state, observation, personality, settled_at_total_minutes, rng);
     }
     virtual DecisionContext build_policy(const Observation& observation,
                                          const CharacterState& state,

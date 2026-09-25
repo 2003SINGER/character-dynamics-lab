@@ -271,8 +271,10 @@ def main():
         return test_responses[question_id], {"state_tokens": 4}
 
     base = {"timestamp": 1, "profile": "test", "personality": {}, "state": {},
-            "observation": [], "candidates": [{"action": "wait", "target": "", "reason": "test",
-                                               "planned_minutes": 2}]}
+            "observation": [], "running_action": None,
+            "recent_history": {"episodes": [], "observed_events": []},
+            "recent_factual_summary": {"window_h": 48, "actions": [], "last_sleep": None},
+            "candidates": [{"action": "wait", "target": "", "planned_minutes": 2}]}
     soft = {**base, "candidates": [], "operation": "soft_reconsideration",
             "running_action": {"action": "wait", "target": "", "elapsed_minutes": 1,
                                "planned_minutes": 2}}

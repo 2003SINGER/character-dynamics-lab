@@ -81,6 +81,30 @@ int main() {
     if (std::abs(one_chunk.fatigue - three_chunks.fatigue) > 1e-9
         || std::abs(one_chunk.screen_strain - three_chunks.screen_strain) > 1e-9) return 10;
 
+    // ActorHistory captures both a typed rejection and a simultaneous completed
+    // action, even though completion overwrites Observation::last_self_action.
+    World history_world;
+    history_world.time.minute_of_day = 8 * 60;
+    RuntimeScheduler history_scheduler(8 * 60);
+    Observation history_observation = refresh_observation({}, history_world, {});
+    ContinuousRuntime history_runtime(history_scheduler, history_world, history_observation, dynamics);
+    if (!history_runtime.submit_action_intent(ActionType::Idle, "", 1).accepted) return 12;
+    RuntimeRejection scheduled_rejection{false, ActionType::ShopOnPhone, "phone",
+        static_cast<int>(RejectionReason::TargetAbsent), 0, "same-boundary-test"};
+    history_scheduler.schedule({"same-boundary-rejection", 8 * 60 + 1, false,
+                                scheduled_rejection, DecisionGateReason::ActionRejected});
+    CharacterState history_state;
+    Personality history_personality;
+    history_runtime.execute_next_boundary(history_state, history_personality);
+    const auto& episodes = history_runtime.actor_history().episodes;
+    const auto rejected_attempts = std::count_if(episodes.begin(), episodes.end(), [](const ActorEpisode& episode) {
+        return episode.action == ActionType::ShopOnPhone && !episode.accepted;
+    });
+    const auto completed_idles = std::count_if(episodes.begin(), episodes.end(), [](const ActorEpisode& episode) {
+        return episode.action == ActionType::Idle && episode.accepted;
+    });
+    if (episodes.size() != 2 || rejected_attempts != 1 || completed_idles != 1) return 13;
+
     // C4/G: invalidation is a distinct terminal outcome on the next boundary.
     World invalid_world;
     invalid_world.time.minute_of_day = 9 * 60;

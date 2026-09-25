@@ -157,6 +157,11 @@ target_link_libraries(character_dynamics_laya_transport_reuse_smoke PRIVATE char
 add_test(NAME character_dynamics_laya_transport_reuse_smoke
          COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/laya_transport_reuse_smoke.py"
          "$<TARGET_FILE:character_dynamics_laya_transport_reuse_smoke>")
+add_executable(character_dynamics_laya_history_projection_contract tests/laya_history_projection_contract.cpp)
+target_link_libraries(character_dynamics_laya_history_projection_contract PRIVATE character_dynamics_engine character_dynamics_demo_living_v1)
+add_test(NAME character_dynamics_laya_history_projection_contract
+         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/tools/laya_history_projection_contract.py"
+         "$<TARGET_FILE:character_dynamics_laya_history_projection_contract>")
 add_executable(character_dynamics_laya_soft_gate_smoke tests/laya_soft_gate_smoke.cpp)
 target_link_libraries(character_dynamics_laya_soft_gate_smoke PRIVATE character_dynamics_engine character_dynamics_reference_dynamics_v0)
 add_test(NAME character_dynamics_laya_soft_gate_smoke COMMAND character_dynamics_laya_soft_gate_smoke)

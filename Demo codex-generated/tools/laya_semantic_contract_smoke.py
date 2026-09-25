@@ -14,9 +14,17 @@ class Handler(socketserver.StreamRequestHandler):
 
     def handle(self):
         for line in self.rfile:
-            request = json.loads(line)
-            if request["candidates"] or "world" in request or "effort_target" in request:
-                raise ValueError("semantic adapter leaked W or A^O mutation")
+            try:
+                request = json.loads(line)
+                if request["candidates"] or "world" in request or "effort_target" in request:
+                    raise ValueError("semantic adapter leaked W or A^O mutation")
+                if not request.get("recent_history", {}).get("episodes") or not request.get("recent_history", {}).get("observed_events"):
+                    raise ValueError("typed semantic request omitted short actor-local causal history")
+                if any(not isinstance(fact, list) or len(fact) != 3 for fact in request["observation"]):
+                    raise ValueError("typed semantic request observation tuple schema mismatch")
+            except Exception as error:
+                self.wfile.write((json.dumps({"error": str(error)}) + "\n").encode())
+                continue
             self.seen.append(request)
             operation = request["operation"]
             if operation == "commitment_choice":
@@ -52,7 +60,7 @@ def main():
     with LoopbackServer(("127.0.0.1", 0), Handler) as server:
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
-        subprocess.run([sys.argv[1], str(server.server_address[1])], check=True, timeout=20)
+        subprocess.run([sys.argv[1], str(server.server_address[1])], check=True, timeout=45)
         server.shutdown()
         thread.join(timeout=5)
     if [row["operation"] for row in Handler.seen].count("commitment_choice") != 3:

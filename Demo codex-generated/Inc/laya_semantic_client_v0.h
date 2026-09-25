@@ -3,6 +3,7 @@
 #include "observation.h"
 #include "personality.h"
 #include "state.h"
+#include "actor_history.h"
 
 #include <map>
 #include <random>
@@ -31,6 +32,11 @@ public:
                                       std::mt19937&) const;
     LayaTypedScores score_appraisal(const Observation&, const CharacterState&,
                                     const Personality&) const;
+    LayaTypedChoice choose_commitment_with_history(const Observation&, const CharacterState&,
+                                      const Personality&, const std::vector<std::string>&,
+                                      const ActorHistory&, std::mt19937&) const;
+    LayaTypedScores score_appraisal_with_history(const Observation&, const CharacterState&,
+                                    const Personality&, const ActorHistory&) const;
 private:
     int port_;
     mutable unsigned long long request_index_ = 0;

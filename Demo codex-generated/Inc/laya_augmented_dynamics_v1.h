@@ -16,10 +16,15 @@ public:
     StateUpdate advance_continuous(CharacterState&, const Observation&, const Personality&,
                                    const RunningAction*, int) const override;
     Appraisal appraise(const Observation&, const CharacterState&, const Personality&) const override;
+    Appraisal appraise_with_history(const Observation&, const CharacterState&, const Personality&,
+                                   const ActorHistory&) const override;
     StateUpdate apply_impulse(CharacterState&, const Appraisal&, const Personality&) const override;
     void update_persistent_intention(CharacterState&, const Observation&, int) const override;
     std::optional<CommitmentDecisionTrace> update_persistent_intention_typed(
         CharacterState&, const Observation&, const Personality&, int, std::mt19937&) const override;
+    std::optional<CommitmentDecisionTrace> update_persistent_intention_typed_with_history(
+        CharacterState&, const Observation&, const Personality&, int, std::mt19937&,
+        const ActorHistory&) const override;
     DecisionContext build_policy(const Observation&, const CharacterState&,
                                  const Personality&) const override;
     DynamicsReconsideration reconsider_running_action(const Observation&, const CharacterState&,

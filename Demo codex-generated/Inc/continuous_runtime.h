@@ -9,6 +9,7 @@
 #include "runtime_config.h"
 #include "character_dynamics_model.h"
 #include "character_policy.h"
+#include "actor_history.h"
 #include <random>
 #include <functional>
 
@@ -63,6 +64,8 @@ public:
         test_action_selector_ = std::move(selector);
     }
     unsigned int policy_seed() const { return policy_seed_; }
+    const ActorHistory& actor_history() const { return actor_history_; }
+    void restore_actor_history(const ActorHistory& history) { actor_history_ = history; }
     // Experiment fork support: preserve the exact policy RNG position when
     // cloning a Runtime checkpoint; no policy law or production path changes.
     std::mt19937 policy_rng_state() const { return rng_; }
@@ -79,4 +82,6 @@ private:
     std::mt19937 rng_;
     unsigned int policy_seed_ = 0;
     std::function<ActionType(const DecisionContext&)> test_action_selector_;
+    ActorHistory actor_history_;
+    std::string last_captured_action_key_;
 };

@@ -98,12 +98,13 @@ struct Snapshot {
     RuntimeScheduler scheduler;
     CharacterState state;
     std::mt19937 rng;
+    ActorHistory actor_history;
 };
 
 Snapshot snapshot(const World& world,const Observation& observation,
                   const RuntimeScheduler& scheduler,const CharacterState& state,
                   const ContinuousRuntime& runtime) {
-    return {world,observation,scheduler,state,runtime.policy_rng_state()};
+    return {world,observation,scheduler,state,runtime.policy_rng_state(),runtime.actor_history()};
 }
 
 using Distribution = std::vector<std::pair<ActionType,double>>;
@@ -134,17 +135,19 @@ ActionType top_action(const Distribution& distribution) {
 
 Distribution actual_distribution(CharacterPolicy& policy,const Observation& observation,
                                  const CharacterState& state,const Personality& personality,
-                                 CharacterDynamicsModel& model,const std::mt19937& rng) {
+                                 CharacterDynamicsModel& model,const std::mt19937& rng,
+                                 const ActorHistory& history,const RunningAction* running) {
     std::mt19937 probe=rng;
     const DecisionContext decision=model.build_policy(observation,state,personality);
-    return policy.select(decision,observation,state,personality,probe).probabilities;
+    return policy.select_with_history(decision,observation,state,personality,history,running,probe).probabilities;
 }
 
 void fork_history(std::ostream& out,const Snapshot& current,const Snapshot& previous,
                   int checkpoint_day,const Personality& personality,unsigned int scenario_seed,
                   unsigned int policy_seed,CharacterDynamicsModel& model,CharacterPolicy& policy) {
     const Distribution correct_policy=actual_distribution(
-        policy,current.observation,current.state,personality,model,current.rng);
+        policy,current.observation,current.state,personality,model,current.rng,current.actor_history,
+        current.scheduler.running_action() ? &*current.scheduler.running_action() : nullptr);
     const std::vector<std::pair<std::string,CharacterState>> branches={
         {"correct",current.state},{"reset",CharacterState{}},{"stale_24h",previous.state}};
     for (const auto& [branch,starting_state]:branches) {
@@ -154,8 +157,10 @@ void fork_history(std::ostream& out,const Snapshot& current,const Snapshot& prev
         CharacterState state=starting_state;
         ContinuousRuntime runtime(scheduler,world,observation,model,{},policy_seed,&policy);
         runtime.restore_policy_rng_state(current.rng);
+        runtime.restore_actor_history(current.actor_history);
         const Distribution counterfactual=actual_distribution(
-            policy,observation,state,personality,model,current.rng);
+            policy,observation,state,personality,model,current.rng,current.actor_history,
+            scheduler.running_action() ? &*scheduler.running_action() : nullptr);
         const double js=js_divergence(correct_policy,counterfactual);
         const bool top_changed=top_action(correct_policy)!=top_action(counterfactual);
         const int start=scheduler.now_total_minutes();
@@ -374,6 +379,7 @@ int main(int argc,char** argv) {
         }
         std::unique_ptr<LayaTypedPolicyV0> laya;
         bool laya_soft_gate=false;
+        bool laya_no_history=false;
         bool laya_commitment=false;
         bool laya_appraisal=false;
         int laya_port=0;
@@ -383,11 +389,12 @@ int main(int argc,char** argv) {
             while (option<argc) {
                 const std::string flag=argv[option++];
                 if (flag=="--laya-soft-gate") laya_soft_gate=true;
+                else if (flag=="--laya-no-history") laya_no_history=true;
                 else if (flag=="--laya-commitment") laya_commitment=true;
                 else if (flag=="--laya-appraisal") laya_appraisal=true;
                 else return 2;
             }
-            laya=std::make_unique<LayaTypedPolicyV0>(laya_port,laya_soft_gate);
+            laya=std::make_unique<LayaTypedPolicyV0>(laya_port,laya_soft_gate,!laya_no_history);
         }
         if (option!=argc) return 2;
         run(scenario_seed,policy_seed,days,personality,output,trace_boundaries,laya.get(),

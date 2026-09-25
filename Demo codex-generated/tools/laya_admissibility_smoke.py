@@ -16,7 +16,7 @@ class Handler(socketserver.StreamRequestHandler):
         Handler.request = request
         if request.get("timestamp") != 8573:
             raise AssertionError("Laya request timestamp differs from scheduler boundary")
-        facts = {item["key"]: item["value"] for item in request["observation"]}
+        facts = {item[0]: item[1] for item in request["observation"]}
         if facts.get("clock.time") != "Day 6 22:53" or facts.get("clock.total_minutes") != "8573":
             raise AssertionError("formatted and numeric O clocks disagree")
         sleeps = [item for item in request["candidates"] if item["action"] == "sleep_at_bed"]

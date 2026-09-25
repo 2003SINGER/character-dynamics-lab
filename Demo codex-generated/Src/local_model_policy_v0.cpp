@@ -66,6 +66,71 @@ std::string quote(const std::string& text) {
     return result+'\"';
 }
 
+std::string history_json(const ActorHistory& history, int now, const RunningAction* running,
+                         bool causal=false) {
+    std::ostringstream out;
+    out << "\"running_action\":";
+    if (running && running->status == RunningActionStatus::Running)
+        out << "{\"action\":" << quote(to_string(running->action)) << ",\"target\":" << quote(running->target_object_id)
+            << ",\"started_at_total_minutes\":" << running->started_at_total_minutes
+            << ",\"elapsed_minutes\":" << running->elapsed_minutes << ",\"planned_minutes\":" << running->planned_duration_minutes << "}";
+    else out << "null";
+    out << ",\"recent_history\":{\"episodes\":[";
+    std::vector<const ActorEpisode*> selected_episodes;
+    for (auto it=history.episodes.rbegin(); it!=history.episodes.rend()
+         && selected_episodes.size() < static_cast<std::size_t>(causal ? 5 : 16); ++it) {
+        if (now - it->end_total_minutes > (causal ? 120 : 12 * 60)) continue;
+        selected_episodes.push_back(&*it);
+    }
+    std::reverse(selected_episodes.begin(),selected_episodes.end());
+    bool first = true;
+    for (const ActorEpisode* selected : selected_episodes) {
+        const ActorEpisode& e=*selected;
+        if (!first) out << ','; first = false;
+        const char* outcome = !e.accepted ? "r" : e.outcome == "task_completed" ? "d"
+            : e.interrupted ? "i" : "s";
+        out << '[' << quote(to_string(e.action)) << ',' << quote(e.target) << ',' << e.start_total_minutes
+            << ',' << e.actual_minutes << ',' << e.planned_minutes << ',' << quote(outcome);
+        if (!e.task_id.empty()) out << ',' << quote(e.task_id);
+        out << ']';
+    }
+    out << "],\"observed_events\":["; first = true;
+    std::vector<const ActorObservedEvent*> selected_events;
+    for (auto it=history.events.rbegin(); it!=history.events.rend()
+         && selected_events.size() < static_cast<std::size_t>(causal ? 8 : 2); ++it) {
+        if (now - it->total_minutes > (causal ? 120 : 12 * 60)) continue;
+        selected_events.push_back(&*it);
+    }
+    std::reverse(selected_events.begin(),selected_events.end());
+    for (const ActorObservedEvent* selected : selected_events) {
+        const ActorObservedEvent& e=*selected;
+        if (!first) out << ','; first = false;
+        out << '[' << e.total_minutes << ',' << quote(e.key) << ',' << quote(e.value) << ']';
+    }
+    out << "]}";
+    if (causal) return out.str();
+    out << ",\"recent_factual_summary\":{\"window_h\":48,\"actions\":[";
+    std::map<std::string,int> totals, last;
+    for (const ActorEpisode& e : history.episodes) if (e.end_total_minutes > now-48*60 && e.accepted) {
+        const int clipped=std::max(0,std::min(e.end_total_minutes,now)-std::max(e.start_total_minutes,now-48*60));
+        if (clipped == 0) continue;
+        totals[to_string(e.action)] += clipped;
+        last[to_string(e.action)] = std::max(last[to_string(e.action)], e.end_total_minutes);
+    }
+    first = true;
+    for (const auto& [key,value] : totals) { if (!first) out << ','; first=false; out << '[' << quote(key) << ',' << value << ',' << std::max(0,now-last[key]) << ']'; }
+    out << "],\"last_sleep\":";
+    const ActorEpisode* sleep=nullptr;
+    for (auto it=history.episodes.rbegin();it!=history.episodes.rend();++it)
+        if (to_string(it->action)=="sleep_at_bed" && it->accepted) { sleep=&*it; break; }
+    if (sleep && now-sleep->end_total_minutes<=48*60)
+        out << '[' << std::max(0,std::min(sleep->end_total_minutes,now)-std::max(sleep->start_total_minutes,now-48*60))
+            << ',' << sleep->end_total_minutes << ']';
+    else out << "null";
+    out << "}";
+    return out.str();
+}
+
 std::string json_field(const std::string& payload,const std::string& key) {
     const std::string marker="\""+key+"\"";
     std::size_t position=payload.find(marker);
@@ -100,7 +165,9 @@ bool hard_admissible(const DecisionContext& decision,ActionType action) {
 
 std::string request_json(unsigned long long request_id,const DecisionContext& decision,
                          const Observation& observation,const CharacterState& state,
-                         const Personality& personality,bool include_hard_admissible=false) {
+                         const Personality& personality,bool include_hard_admissible=false,
+                         const ActorHistory* history=nullptr,const RunningAction* running=nullptr,
+                         bool causal=false) {
     std::ostringstream out;
     out.precision(12);
     out<<"{\"request_id\":"<<request_id<<",\"timestamp\":";
@@ -118,15 +185,25 @@ std::string request_json(unsigned long long request_id,const DecisionContext& de
        <<",\"commitment\":"<<quote(state.commitment.status==CommitmentStatus::Active?"active":state.commitment.status==CommitmentStatus::Suspended?"suspended":"none")
        <<",\"commitment_task_id\":"<<quote(state.commitment.task_id)
        <<",\"commitment_reason\":"<<quote(state.commitment.reason)
+       <<",\"commitment_started_at_total_minutes\":"<<state.commitment.started_at_total_minutes
+       <<",\"purchase_urge\":"<<state.purchase_urge
        <<",\"commitment_suspended_decision_points\":"<<state.commitment.suspended_decision_points<<"}";
+    if (history) {
+        const ObservationFact* clock=find_fact(observation,"clock.total_minutes");
+        out << ',' << history_json(*history, clock ? std::stoi(clock->value) : 0, running, causal);
+    }
     out<<",\"observation\":[";
     bool first=true;
     for (const ObservationFact& fact:observation.facts) {
         if (fact.status!=KnowledgeStatus::Known && fact.status!=KnowledgeStatus::Stale) continue;
         if (!first) out<<',';
         first=false;
-        out<<"{\"key\":"<<quote(fact.key)<<",\"value\":"<<quote(fact.value)
-           <<",\"status\":"<<quote(fact.status==KnowledgeStatus::Known?"known":"stale")<<"}";
+        if (include_hard_admissible)
+            out<<'['<<quote(fact.key)<<','<<quote(fact.value)<<','
+               <<quote(fact.status==KnowledgeStatus::Known?"k":"s")<<']';
+        else
+            out<<"{\"key\":"<<quote(fact.key)<<",\"value\":"<<quote(fact.value)
+               <<",\"status\":"<<quote(fact.status==KnowledgeStatus::Known?"known":"stale")<<"}";
     }
     out<<"],\"candidates\":[";
     first=true;
@@ -138,7 +215,7 @@ std::string request_json(unsigned long long request_id,const DecisionContext& de
         out<<"{\"action\":"<<quote(to_string(candidate.action))<<",\"target\":"<<quote(candidate.target_object_id);
         if (include_hard_admissible)
             out<<",\"planned_minutes\":"<<action_definition(candidate.action).default_duration_minutes;
-        if (!include_hard_admissible) out<<",\"reason\":"<<quote(candidate.reason);
+        else out<<",\"reason\":"<<quote(candidate.reason);
         out<<"}";
     }
     out<<"]}";
@@ -147,10 +224,13 @@ std::string request_json(unsigned long long request_id,const DecisionContext& de
 
 std::string soft_gate_request_json(unsigned long long request_id,
                                    const Observation& observation,const CharacterState& state,
-                                   const Personality& personality,const RunningAction& action) {
+                                   const Personality& personality,const RunningAction& action,
+                                   const ActorHistory* history=nullptr) {
     const DecisionContext no_candidates;
-    std::string payload=request_json(request_id,no_candidates,observation,state,personality);
+    std::string payload=request_json(request_id,no_candidates,observation,state,personality,
+                                     history!=nullptr,history,&action);
     payload.pop_back();
+    if (history) return payload + ",\"operation\":\"soft_reconsideration\"}";
     payload+=",\"operation\":\"soft_reconsideration\",\"running_action\":{\"action\":";
     payload+=quote(to_string(action.action));
     payload+=",\"target\":"+quote(action.target_object_id);
@@ -162,10 +242,13 @@ std::string soft_gate_request_json(unsigned long long request_id,
 std::string semantic_request_json(unsigned long long request_id,const char* operation,
                                   const Observation& observation,const CharacterState& state,
                                   const Personality& personality,
-                                  const std::vector<std::string>& options={}) {
+                                  const std::vector<std::string>& options={},
+                                  const ActorHistory* history=nullptr) {
     const DecisionContext no_candidates;
-    std::string payload=request_json(request_id,no_candidates,observation,state,personality);
+    std::string payload=request_json(request_id,no_candidates,observation,state,personality,true);
     payload.pop_back();
+    if (history) payload += ',' + history_json(*history, find_fact(observation,"clock.total_minutes") ?
+        std::stoi(find_fact(observation,"clock.total_minutes")->value) : 0, nullptr, true);
     payload+=",\"operation\":"+quote(operation)+",\"observation_deltas\":[";
     bool first=true;
     for (const ObservationFact& fact:observation.updates_this_refresh) {
@@ -415,7 +498,17 @@ PolicySelection QwenSocketPolicyV0::select(const DecisionContext& decision,const
 PolicySelection LayaTypedPolicyV0::select(const DecisionContext& decision,const Observation& observation,
                                          const CharacterState& state,const Personality& personality,
                                          std::mt19937& rng) {
-    const std::string response=laya_exchange(port_,request_json(++request_index_,decision,observation,state,personality,true));
+    static const ActorHistory empty;
+    return select_with_history(decision,observation,state,personality,empty,nullptr,rng);
+}
+
+PolicySelection LayaTypedPolicyV0::select_with_history(const DecisionContext& decision,const Observation& observation,
+                                         const CharacterState& state,const Personality& personality,
+                                         const ActorHistory& history,const RunningAction* running,
+                                         std::mt19937& rng) {
+    static const ActorHistory empty_history;
+    const std::string response=laya_exchange(port_,request_json(++request_index_,decision,observation,state,
+        personality,true,history_enabled_ ? &history : &empty_history,running));
     const std::string error=json_field(response,"error");
     if (!error.empty()) throw std::runtime_error("Laya typed proxy rejected request: "+error);
     if (json_field(response,"model")!="convaiinnovations/laya-typed-decisions")
@@ -427,11 +520,9 @@ PolicySelection LayaTypedPolicyV0::select(const DecisionContext& decision,const 
         candidate.probability=weights.count(candidate.action) ? weights.at(candidate.action) : 0.0;
     }
     const ActionType action=sample_action(sampled,rng);
-    PolicySelection selection{action,identity(),
-        "laya-typed-decisions request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash"),{}};
+    PolicySelection selection{action,identity(),"laya-typed-decisions request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash"),{}};
     for (const CandidateAction& candidate:sampled.candidates)
-        if (candidate.hard_admissible && weights.count(candidate.action))
-            selection.probabilities.emplace_back(candidate.action,candidate.probability);
+        if (candidate.hard_admissible && weights.count(candidate.action)) selection.probabilities.emplace_back(candidate.action,candidate.probability);
     return selection;
 }
 
@@ -454,6 +545,22 @@ std::optional<SoftReconsideration> LayaTypedPolicyV0::soft_reconsider(
         throw std::runtime_error("Laya soft gate returned invalid probability");
     const bool requested=std::bernoulli_distribution(probability)(rng);
     return SoftReconsideration{probability,requested,
+        "laya-noul request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash")};
+}
+
+std::optional<SoftReconsideration> LayaTypedPolicyV0::soft_reconsider_with_history(
+    const Observation& observation,const CharacterState& state,const Personality& personality,
+    const RunningAction& action,const ActorHistory& history,std::mt19937& rng) {
+    if (!soft_gate_enabled_) return std::nullopt;
+    const std::string response=laya_exchange(port_,soft_gate_request_json(++request_index_,observation,state,personality,action,&history));
+    const std::string error=json_field(response,"error");
+    if (!error.empty()) throw std::runtime_error("Laya soft gate proxy rejected request: "+error);
+    const std::string encoded=json_field(response,"probability");
+    std::size_t consumed=0; double probability=0.0;
+    try { probability=std::stod(encoded,&consumed); } catch (...) { throw std::runtime_error("Laya soft gate returned nonnumeric probability"); }
+    if (consumed!=encoded.size() || !std::isfinite(probability) || probability<0.0 || probability>1.0)
+        throw std::runtime_error("Laya soft gate returned invalid probability");
+    return SoftReconsideration{probability,std::bernoulli_distribution(probability)(rng),
         "laya-noul request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash")};
 }
 
@@ -481,6 +588,23 @@ LayaTypedChoice LayaSemanticClientV0::choose_commitment(
     return result;
 }
 
+LayaTypedChoice LayaSemanticClientV0::choose_commitment_with_history(
+    const Observation& observation,const CharacterState& state,const Personality& personality,
+    const std::vector<std::string>& options,const ActorHistory& history,std::mt19937& rng) const {
+    if (options.size()<2 || options.size()>4) throw std::invalid_argument("invalid commitment choice surface");
+    const std::string response=laya_exchange(port_,semantic_request_json(++request_index_,"commitment_choice",
+        observation,state,personality,options,&history));
+    if (!json_field(response,"error").empty()) throw std::runtime_error("Laya commitment proxy rejected request: "+json_field(response,"error"));
+    auto probabilities=parse_named_numbers(json_field(response,"weights"),options,1.0);
+    double sum=0.0; for (const auto& item:probabilities) sum+=item.second;
+    if (sum<0.5 || sum>1.5) throw std::runtime_error("Laya commitment choice is not a distribution");
+    std::vector<double> weights; for (const auto& option:options) weights.push_back(probabilities.at(option)/sum);
+    const std::string selected=options[std::discrete_distribution<std::size_t>(weights.begin(),weights.end())(rng)];
+    LayaTypedChoice result{selected,{},"laya-choice request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash")};
+    for (const auto& option:options) result.probabilities.emplace_back(option,probabilities.at(option)/sum);
+    return result;
+}
+
 LayaTypedScores LayaSemanticClientV0::score_appraisal(
     const Observation& observation,const CharacterState& state,const Personality& personality) const {
     static const std::vector<std::string> keys={"goal_progress","goal_obstruction","stimulation",
@@ -491,6 +615,18 @@ LayaTypedScores LayaSemanticClientV0::score_appraisal(
     if (!error.empty()) throw std::runtime_error("Laya appraisal proxy rejected request: "+error);
     if (json_field(response,"model")!="convaiinnovations/laya-typed-decisions")
         throw std::runtime_error("unexpected Laya appraisal checkpoint");
+    return {parse_named_numbers(json_field(response,"scores"),keys,4.0),
+        "laya-score request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash")};
+}
+
+LayaTypedScores LayaSemanticClientV0::score_appraisal_with_history(
+    const Observation& observation,const CharacterState& state,const Personality& personality,
+    const ActorHistory& history) const {
+    static const std::vector<std::string> keys={"goal_progress","goal_obstruction","stimulation","uncertainty",
+        "positive_outcome","negative_outcome","control_restored"};
+    const std::string response=laya_exchange(port_,semantic_request_json(++request_index_,"appraisal_scores",
+        observation,state,personality,{},&history));
+    if (!json_field(response,"error").empty()) throw std::runtime_error("Laya appraisal proxy rejected request: "+json_field(response,"error"));
     return {parse_named_numbers(json_field(response,"scores"),keys,4.0),
         "laya-score request="+std::to_string(request_index_)+" hash="+json_field(response,"request_hash")};
 }

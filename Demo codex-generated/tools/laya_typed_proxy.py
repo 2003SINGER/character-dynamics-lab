@@ -18,8 +18,8 @@ import threading
 os.environ.setdefault("USE_TF", "0")
 CHECKPOINT = "convaiinnovations/laya-typed-decisions"
 CHECKPOINT_REVISION = "f9ab0b228f0fc0f14d873dbc99038f135c2da1b2"
-PROMPT_VERSION = "character-dynamics-laya-typed-v3"
-PROTOCOL_VERSION = "laya-typed-v3"
+PROMPT_VERSION = "character-dynamics-laya-typed-v4"
+PROTOCOL_VERSION = "laya-typed-v4"
 LEGACY_PROTOCOL_VERSION = "laya-typed-v1"
 LEGACY_PROMPT_VERSION = "character-dynamics-laya-typed-v1"
 PROXY_SOURCE_SHA256 = hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()
@@ -59,6 +59,15 @@ def legacy_replay_hash(request):
     body.pop("protocol_version", None)
     body.pop("prompt_version", None)
     return request_hash(body)
+
+
+def observation_fact_key(fact):
+    """Accept compact v4 tuples and historical dict-shaped fixtures."""
+    if isinstance(fact, (list, tuple)) and fact:
+        return fact[0]
+    if isinstance(fact, dict):
+        return fact.get("key", "")
+    return ""
 
 
 def _token_ids(tokenizer, text):
@@ -241,8 +250,11 @@ class Bridge:
             return self.commitment_choice(request)
         if request.get("operation") == "appraisal_scores":
             return self.appraisal_scores(request)
-        if set(request) - {"request_id", "timestamp", "profile", "personality", "state", "observation", "candidates"}:
+        if set(request) - {"request_id", "timestamp", "profile", "personality", "state", "observation", "candidates",
+                           "running_action", "recent_history", "recent_factual_summary"}:
             raise ValueError("request contains fields outside O/S/P/I/A^O contract")
+        if "recent_history" not in request or "recent_factual_summary" not in request:
+            raise ValueError("v4 request is missing actor-local history")
         request = versioned_request(request)
         candidates = request["candidates"]
         key = request_hash(request)
@@ -261,6 +273,11 @@ class Bridge:
                 "personality": request["personality"],
                 "subjective_state_and_commitment": request["state"],
                 "known_or_stale_observations": request["observation"],
+                "actor_local_temporal_context": {
+                    "running_action": request["running_action"],
+                    "recent_history": request["recent_history"],
+                    "recent_factual_summary": request["recent_factual_summary"],
+                },
             }
             criteria = {}
             for candidate in candidates:
@@ -273,8 +290,11 @@ class Bridge:
                 "next_action": {
                     "type": "choice",
                     "instructions": (
-                        "Choose one supplied action using only O, S, P and commitment. "
-                        "Use its target and duration; do not invent actions or infer hidden World facts."
+                        "Choose one supplied action using only O, S, P, commitment and the actor-local factual recent history. "
+                        "Observation entries are [key,value,k|s]. History episodes are "
+                        "[action,target,start,actual,planned,result,optional_task], end=start+actual; result s/d/i/r means settled/task-done/interrupted/rejected. "
+                        "The factual action summary totals accepted minutes over its explicit window_h=48 horizon; each action row is [action,minutes,last_end_minutes_ago], and last_sleep is [overlap_minutes,end_total_minutes] or null. "
+                        "Use its target and duration; do not infer hidden World facts."
                     ),
                     "criteria": criteria,
                 }
@@ -303,7 +323,8 @@ class Bridge:
 
     def soft_reconsider(self, request):
         if set(request) - {"request_id", "timestamp", "profile", "personality", "state",
-                            "observation", "candidates", "operation", "running_action"}:
+                            "observation", "candidates", "operation", "running_action",
+                            "recent_history", "recent_factual_summary"}:
             raise ValueError("soft gate request contains fields outside O/S/P/I/RunningAction contract")
         if request["candidates"] or request["operation"] != "soft_reconsideration":
             raise ValueError("soft gate may not change A^O")
@@ -328,14 +349,19 @@ class Bridge:
                 "subjective_state_and_commitment": request["state"],
                 "known_or_stale_observations": request["observation"],
                 "running_action": running,
+                "actor_local_temporal_context": {
+                    "recent_history": request.get("recent_history", {"episodes": [], "observed_events": []}),
+                    "recent_factual_summary": request.get("recent_factual_summary", {}),
+                },
             }
             prediction, token_audit = predict_without_truncation(self.agent, state, {
                 "reconsider": {
                     "type": "noul",
                     "instructions": (
                         "Should this character reconsider their current action now? "
-                        "Use only observed facts, subjective state, personality, commitment, "
-                        "and current action. A true answer only opens a decision opportunity; "
+                        "Use only observed facts, subjective state, personality, commitment and actor-local factual recent history, "
+                        "and current action. Episode tuples are [action,target,start,actual,planned,result,optional_task], "
+                        "with end=start+actual; events are [minute,key,value]. A true answer only opens a decision opportunity; "
                         "it does not interrupt the action or override physical constraints."
                     ),
                     "criteria": {"true": "reconsider current action", "false": "keep current plan"},
@@ -364,7 +390,8 @@ class Bridge:
     def semantic_state(request):
         if set(request) - {"request_id", "timestamp", "profile", "personality", "state",
                             "observation", "candidates", "operation", "observation_deltas",
-                            "last_self_action", "options"}:
+                            "last_self_action", "options", "running_action", "recent_history",
+                            "recent_factual_summary"}:
             raise ValueError("semantic request contains fields outside O/Delta-O/S/P/I contract")
         if request["candidates"]:
             raise ValueError("semantic model may not change A^O")
@@ -374,8 +401,9 @@ class Bridge:
             "subjective_state_and_commitment": request["state"],
             "observation_deltas": request["observation_deltas"],
             "last_self_action": request["last_self_action"],
+            "actor_local_causal_history": request.get("recent_history", {"episodes": [], "observed_events": []}),
             "relevant_known_observations": [fact for fact in request["observation"]
-                                            if fact["key"].startswith(("task.", "message.", "room."))],
+                                            if observation_fact_key(fact).startswith(("task.", "message.", "room."))],
         }
 
     def _replay_row(self, rows, request, key):
@@ -411,7 +439,8 @@ class Bridge:
             prediction, token_audit = predict_without_truncation(self.agent, state, {"commitment": {
                 "type": "choice",
                 "instructions": (
-                    "Given only observed task information, self-action feedback, current commitment, "
+                    "Given only observed task information, actor-local causal history, self-action feedback, current commitment. "
+                    "Episode tuples are [action,target,start,actual,planned,result,optional_task], with end=start+actual; result s/d/i/r means settled/task-done/interrupted/rejected. "
                     "subjective state and personality, choose how the actor's task intention changes. "
                     "This is subjective intention, not World task status."
                 ),
@@ -454,7 +483,7 @@ class Bridge:
             if self.agent is None:
                 raise ValueError("cassette has no matching Laya appraisal scores")
             questions = {name: {
-                "type": "score", "instructions": f"How much {name.replace('_', ' ')} does the newly observed change mean to this actor?",
+                "type": "score", "instructions": f"Using only this actor's short factual causal history (episode tuples [action,target,start,actual,planned,result,task], end=start+actual), how much {name.replace('_', ' ')} does the newly observed change mean to this actor?",
                 "criteria": ["none", "slight", "moderate", "strong", "very strong"],
             } for name in keys}
             prediction, token_audit = predict_without_truncation(self.agent, state, questions)

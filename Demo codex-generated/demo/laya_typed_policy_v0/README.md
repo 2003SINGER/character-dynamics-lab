@@ -49,7 +49,7 @@ numeric scheduler clock advanced while formatted `clock.time` remained stale,
 so its behavioral trajectory is not interpretable. The checkpoint also emitted
 a warning that some bundled temperatures are invalid; probability calibration
 remains unproven.
-New runs pin the checkpoint to Hugging Face revision
+Historical v3 runs pinned the checkpoint to Hugging Face revision
 `f9ab0b228f0fc0f14d873dbc99038f135c2da1b2` and record revision,
 protocol/prompt v3, decoding contract, raw typed answer, request hash, and
 state/input/head/option token counts and budgets in the local cassette. Before
@@ -61,7 +61,7 @@ heads/options and over-budget state before inference. Token audit fields contain
 counts only; they add no state text to cassette rows. Scheduler time projects
 both `clock.total_minutes` and formatted `clock.time` into O from the same
 boundary timestamp. Request hashes include protocol and prompt versions;
-ordinary replay accepts only matching v3 cassettes from the same proxy source
+ordinary v3 replay accepted only matching v3 cassettes from the same proxy source
 SHA-256; legacy v1 hash fallback requires the explicit `--allow-v1-replay`
 option alongside `--replay`. The startup banner
 and read-only `{"operation":"identity"}` handshake expose the checkpoint and
@@ -75,6 +75,28 @@ The earlier v2 7-day pilot cassette is retained only as invalid-input evidence,
 not as a current behavioral result: its numeric clock advanced while the
 formatted `clock.time` stayed stale, and Rule-soft-filtered actions were absent
 from the Laya choice surface. Do not resume it or replay it as a v3 experiment.
+
+## v4 actor-local history contract
+
+New requests use protocol/prompt v4. `ContinuousRuntime` owns an `ActorHistory`
+separate from O and S. It records only observed self-action feedback and
+known/stale O deltas; no World event log is projected directly. Policy and
+soft-gate requests include current action progress, up to 16 chronological
+episodes from the last 12 hours, up to 2 observed events, and mechanical
+explicit 48-hour action totals, last occurrences, and the last observed sleep interval.
+Typed appraisal and commitment receive a shorter causal slice (up to five
+episodes and eight observed events from two hours). Purchase urge and the
+commitment start minute are included in the state projection. Rule activation,
+probability and candidate reason remain outside the Laya payload.
+
+These history limits bound request growth. The actual tokenizer/sequence-builder
+guard checks the complete v4 sequence and fails closed before inference if it
+does not fit; no history or question is silently truncated. Use
+`--laya-no-history` with the same seeds and executable for a v4 no-history
+policy ablation. v3 cassettes cannot replay as v4 because protocol, prompt and
+request hashes changed. This is a factual actor-local autobiography for the
+Demo adapter, not evidence of psychological validity. No sleep-specific
+preference or behavior parameter was added.
 
 The Python bridge is an application adapter only. ReferenceRuleDynamicsV0,
 DemoLivingDynamicsV1, W validation, scheduler and research evaluator are

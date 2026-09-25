@@ -1,6 +1,7 @@
 #pragma once
 
 #include "decision.h"
+#include "actor_history.h"
 
 #include <random>
 #include <optional>
@@ -32,12 +33,23 @@ public:
                                    const CharacterState& state,
                                    const Personality& personality,
                                    std::mt19937& rng) = 0;
+    virtual PolicySelection select_with_history(const DecisionContext& decision,
+                                   const Observation& observation, const CharacterState& state,
+                                   const Personality& personality, const ActorHistory&,
+                                   const RunningAction*, std::mt19937& rng) {
+        return select(decision, observation, state, personality, rng);
+    }
     virtual const char* identity() const = 0;
     // Optional subjective gate. This can only add a reconsideration; hard
     // Runtime gates remain authoritative and cannot be closed by a policy.
     virtual std::optional<SoftReconsideration> soft_reconsider(
         const Observation&, const CharacterState&, const Personality&,
         const RunningAction&, std::mt19937&) { return std::nullopt; }
+    virtual std::optional<SoftReconsideration> soft_reconsider_with_history(
+        const Observation& observation, const CharacterState& state, const Personality& personality,
+        const RunningAction& action, const ActorHistory&, std::mt19937& rng) {
+        return soft_reconsider(observation, state, personality, action, rng);
+    }
 };
 
 class RulePolicyV0 final : public CharacterPolicy {

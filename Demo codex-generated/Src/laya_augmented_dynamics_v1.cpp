@@ -33,10 +33,17 @@ StateUpdate LayaAugmentedDynamicsV1::advance_continuous(
 Appraisal LayaAugmentedDynamicsV1::appraise(
     const Observation& observation, const CharacterState& state,
     const Personality& personality) const {
+    static const ActorHistory empty;
+    return appraise_with_history(observation,state,personality,empty);
+}
+
+Appraisal LayaAugmentedDynamicsV1::appraise_with_history(
+    const Observation& observation, const CharacterState& state,
+    const Personality& personality, const ActorHistory& history) const {
     Appraisal appraisal = base_.appraise(observation, state, personality);
     if (!typed_appraisal_) return appraisal;
     if (!material_update(observation)) return appraisal;
-    const LayaTypedScores typed = client_.score_appraisal(observation, state, personality);
+    const LayaTypedScores typed = client_.score_appraisal_with_history(observation, state, personality, history);
     std::vector<AppraisalSignal> canonical_completion;
     for (const AppraisalSignal& signal : appraisal.semantic_signals)
         if (signal.kind == AppraisalSignalKind::GoalCompletion)
@@ -84,6 +91,13 @@ void LayaAugmentedDynamicsV1::update_persistent_intention(
 std::optional<CommitmentDecisionTrace> LayaAugmentedDynamicsV1::update_persistent_intention_typed(
     CharacterState& state, const Observation& observation, const Personality& personality,
     int now, std::mt19937& rng) const {
+    static const ActorHistory empty;
+    return update_persistent_intention_typed_with_history(state,observation,personality,now,rng,empty);
+}
+
+std::optional<CommitmentDecisionTrace> LayaAugmentedDynamicsV1::update_persistent_intention_typed_with_history(
+    CharacterState& state, const Observation& observation, const Personality& personality,
+    int now, std::mt19937& rng, const ActorHistory& history) const {
     if (!typed_commitment_) {
         base_.update_persistent_intention(state, observation, now);
         return std::nullopt;
@@ -109,8 +123,8 @@ std::optional<CommitmentDecisionTrace> LayaAugmentedDynamicsV1::update_persisten
     case CommitmentStatus::Active: options = {"continue", "suspend", "abandon"}; break;
     case CommitmentStatus::Suspended: options = {"resume", "suspend", "abandon"}; break;
     }
-    const LayaTypedChoice choice = client_.choose_commitment(
-        observation, state, personality, options, rng);
+    const LayaTypedChoice choice = client_.choose_commitment_with_history(
+        observation, state, personality, options, history, rng);
     if (choice.selected == "abandon") state.commitment = {};
     else if (choice.selected == "suspend") {
         state.commitment.status = CommitmentStatus::Suspended;

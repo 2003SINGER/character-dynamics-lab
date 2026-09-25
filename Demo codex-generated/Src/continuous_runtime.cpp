@@ -42,6 +42,21 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
     result.runtime.boundary = scheduler_.advance_to_next_boundary();
     const auto& action = result.runtime.boundary.action_after_boundary;
     result.running_action_after = action;
+    const auto capture_episode = [&](const RunningAction& episode, int end, bool interrupted,
+                                     const std::string& outcome, bool accepted, const std::string& task_id,
+                                     const std::string& identity_suffix) {
+        const std::string key = std::to_string(episode.started_at_total_minutes) + ":" +
+            std::to_string(static_cast<int>(episode.action)) + ":" + episode.target_object_id + ":" + identity_suffix;
+        if (key == last_captured_action_key_) return;
+        actor_history_.episodes.push_back({episode.action, episode.target_object_id,
+            episode.started_at_total_minutes, end, episode.planned_duration_minutes,
+            std::max(0, end - episode.started_at_total_minutes), accepted, interrupted,
+            outcome, task_id});
+        last_captured_action_key_ = key;
+        while (!actor_history_.episodes.empty()
+               && end - actor_history_.episodes.front().end_total_minutes > 48 * 60)
+            actor_history_.episodes.pop_front();
+    };
     // The scheduler is the canonical time owner.  Its clock is an internally
     // observable cue, so Dynamics never has to read hidden W time or operate
     // against a stale O-side deadline.
@@ -71,6 +86,13 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         rejection.failure_reason = static_cast<RejectionReason>(event.rejection->failure_reason);
         rejection.provenance = event.rejection->provenance;
         apply_self_action_feedback(observation_, rejection, world_runtime_.time_summary(), true, false);
+        RunningAction rejected_attempt;
+        rejected_attempt.action = event.rejection->action;
+        rejected_attempt.target_object_id = event.rejection->target_object_id;
+        rejected_attempt.started_at_total_minutes = scheduler_minutes;
+        rejected_attempt.planned_duration_minutes = action_definition(rejected_attempt.action).default_duration_minutes;
+        capture_episode(rejected_attempt, scheduler_minutes, false, "rejected", false, "",
+                        "rejection:" + event.id);
         rebuild_known_actions_from_observation(observation_);
     }
     schedule_next_world_boundary();
@@ -94,8 +116,8 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
             result.dynamics_reconsideration_reason = dynamics_reconsideration.reason;
         }
         if (!result.runtime.boundary.decision_gate.open) {
-            result.model_soft_reconsideration = policy_->soft_reconsider(
-                observation_, state, personality, *action, rng_);
+            result.model_soft_reconsideration = policy_->soft_reconsider_with_history(
+                observation_, state, personality, *action, actor_history_, rng_);
             if (result.model_soft_reconsideration.has_value()
                 && result.model_soft_reconsideration->requested) {
                 result.runtime.boundary.decision_gate.open = true;
@@ -121,11 +143,28 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         apply_self_action_feedback(observation_, *result.pre_policy_outcome, world_runtime_.time_summary(), true, false);
         rebuild_known_actions_from_observation(observation_);
     }
-    result.appraisal = model_.appraise(observation_, state, personality);
+    if (result.running_action_before && action.has_value()
+        && (action->status == RunningActionStatus::Completed || action->status == RunningActionStatus::Interrupted)) {
+        const WorldOutcome* feedback = result.pre_policy_outcome ? &*result.pre_policy_outcome : nullptr;
+        const ObservedAction& observed = observation_.last_self_action;
+        capture_episode(*result.running_action_before, scheduler_minutes,
+            action->status == RunningActionStatus::Interrupted || (feedback && feedback->task_session_interrupted),
+            observed.has_action ? (observed.accepted ? (observed.task_completed ? "task_completed" : "settled") : "rejected") : "settled",
+            observed.has_action ? observed.accepted : true,
+            observed.has_action ? observed.task_id : std::string{}, "terminal");
+    }
+    for (const ObservationFact& fact : observation_.updates_this_refresh) {
+        if (fact.status != KnowledgeStatus::Known && fact.status != KnowledgeStatus::Stale) continue;
+        if (fact.key == "clock.total_minutes" || fact.key == FactKey::ClockTime || fact.key == FactKey::EveningPhase) continue;
+        actor_history_.events.push_back({scheduler_minutes, fact.key, fact.value});
+    }
+    while (!actor_history_.events.empty() && scheduler_minutes - actor_history_.events.front().total_minutes > 48 * 60)
+        actor_history_.events.pop_front();
+    result.appraisal = model_.appraise_with_history(observation_, state, personality, actor_history_);
     result.impulse_state = model_.apply_impulse(state, result.appraisal, personality);
     result.observation_deltas = observation_.updates_this_refresh;
-    result.typed_commitment_decision = model_.update_persistent_intention_typed(
-        state, observation_, personality, scheduler_.now_total_minutes(), rng_);
+    result.typed_commitment_decision = model_.update_persistent_intention_typed_with_history(
+        state, observation_, personality, scheduler_.now_total_minutes(), rng_, actor_history_);
     consume_appraisal_inputs(observation_);
     const bool rejection_reconsideration = std::find(
         result.runtime.boundary.decision_gate.reasons.begin(),
@@ -145,7 +184,8 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
         result.decision = model_.build_policy(observation_, state, personality);
         const PolicySelection selection = test_action_selector_
             ? PolicySelection{test_action_selector_(result.decision), "test-selector", "test-only override", {}}
-            : policy_->select(result.decision, observation_, state, personality, rng_);
+            : policy_->select_with_history(result.decision, observation_, state, personality,
+                                           actor_history_, action ? &*action : nullptr, rng_);
         result.policy_id = selection.policy_id;
         result.policy_selection_provenance = selection.provenance;
         result.sampled_policy_probabilities = selection.probabilities;
@@ -194,6 +234,8 @@ RuntimeExecutionResult ContinuousRuntime::execute_next_boundary(CharacterState& 
                     result.post_policy_outcome = reconsideration;
                     apply_self_action_feedback(observation_, reconsideration,
                                                world_runtime_.time_summary(), true, false);
+                    capture_episode(*action, scheduler_minutes, true, "policy_replaced", true,
+                                    observation_.last_self_action.task_id, "replacement");
                     scheduler_.replace_running_action(candidate.action, candidate.target_object_id,
                                                       action_definition(candidate.action).default_duration_minutes);
                 } else if (!subjective_reconsideration || !action.has_value()
