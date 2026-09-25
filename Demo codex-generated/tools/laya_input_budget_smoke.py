@@ -248,7 +248,7 @@ def main():
         "running_action": {"action": "study_focused", "target": "desk",
                            "started_at_total_minutes": 150, "elapsed_minutes": 17, "planned_minutes": 35},
         "recent_history": {"episodes": [
-            ["study_focused", "desk", 130, 3, 35, "r"],
+            ["study_focused", "", 130, 3, 35, "r"],
             ["study_at_computer", "computer", 120, 10, 30, "d", "coursework"]],
             "observed_events": [[150, "task.coursework.status", "active"]]},
         "recent_factual_summary": {"window_h": 48,
@@ -260,6 +260,92 @@ def main():
                 "recent_history", "recent_factual_summary"):
         if decoded[key] != roundtrip_request[key]:
             raise SystemExit(f"compact policy projection round-trip mismatch in {key}: {decoded[key]!r}")
+
+    stress_request = dict(roundtrip_request)
+    stress_request["personality"] = dict(roundtrip_request["personality"])
+    stress_request["state"] = dict(roundtrip_request["state"])
+    stress_request["observation"] = [
+        ["object.phone", "present", "k"], ["object.computer", "present", "k"],
+        ["object.desk", "present", "k"], ["object.bed", "present", "k"],
+        ["object.door", "present", "k"], ["object.light", "present", "k"],
+        ["object.alarm", "present", "k"], ["object.window", "present", "k"],
+        ["room.light", "on", "k"], ["room.curtain", "open", "k"],
+        ["room.alarm", "ringing", "k"], ["task.coursework.status", "active", "k"],
+        ["task.coursework.effort_target", "8.397383", "k"],
+        ["task.coursework.effort", "1.174382", "k"],
+        ["task.coursework.deadline_at_total_minutes", "3360", "k"],
+        ["message.unread_count", "1", "k"], ["clock.time", "Day 2 07:33", "k"],
+        ["clock.total_minutes", "1893", "k"], ["room.temperature_celsius", "24.000000", "k"],
+        ["outside.weather", "rain", "k"], ["task.reminder", "1", "k"],
+        ["world.time_phase", "evening", "k"],
+    ]
+    stress_request["timestamp"] = 1893
+    stress_request["running_action"] = {
+        "action": "study_focused", "target": "desk", "started_at_total_minutes": 1867,
+        "elapsed_minutes": 26, "planned_minutes": 35,
+    }
+    outcomes = [
+        ["sleep_at_bed", "bed", 1173, 350, 480, "i"],
+        ["rest_at_bed", "bed", 1629, 35, 60, "i"],
+        ["use_phone", "phone", 1664, 25, 25, "s"],
+        ["use_computer", "computer", 1689, 30, 30, "s"],
+        ["study_focused", "desk", 1719, 35, 35, "s", "coursework"],
+        ["study_halfhearted", "desk", 1754, 20, 35, "i", "coursework"],
+        ["get_meal", "door", 1774, 35, 35, "s"],
+        ["go_to_bathroom", "door", 1809, 10, 15, "i"],
+        ["turn_light_off", "light", 1819, 1, 1, "s"],
+        ["turn_off_alarm", "alarm", 1820, 1, 1, "s"],
+        ["shop_on_phone", "phone", 1821, 0, 20, "r"],
+        ["open_curtain", "window", 1821, 1, 1, "s"],
+        ["sleep_at_bed", "bed", 1822, 30, 480, "i"],
+        ["rest_at_bed", "bed", 1852, 15, 60, "i"],
+        ["use_computer", "computer", 1867, 0, 30, "r"],
+        ["study_at_computer", "computer", 1867, 0, 35, "r"],
+    ]
+    stress_request["recent_history"] = {
+        "episodes": outcomes,
+        "observed_events": [[1893, "clock.total_minutes", "1893"],
+                            [1893, "room.alarm", "silent"]],
+    }
+    stress_request["recent_factual_summary"] = {
+        "window_h": 48,
+        "actions": [], "last_sleep": [30, 1852],
+    }
+    h2_names = ["study_focused", "use_computer", "study_halfhearted", "shop_on_phone",
+                "study_at_computer", "get_meal", "go_to_bathroom", "sleep_at_bed",
+                "rest_at_bed", "turn_light_off", "use_phone", "turn_off_alarm", "open_curtain"]
+    accepted = [row for row in outcomes if row[5] != "r"]
+    for index, name in enumerate(h2_names):
+        rows = [row for row in accepted if row[0] == name]
+        mins = sum(row[3] for row in rows)
+        age = 1893 - max(row[2] + row[3] for row in rows) if rows else 900 + index * 10
+        stress_request["recent_factual_summary"]["actions"].append(
+            [name, mins if rows else 10 + index, age])
+    stress_state = policy_model_state(stress_request)
+    stress_decoded = expand_policy_model_state(stress_state)
+    for key in ("observation", "recent_history", "recent_factual_summary"):
+        if stress_decoded[key] != stress_request[key]:
+            raise SystemExit(f"max-history projection round-trip mismatch in {key}")
+    if (len(stress_decoded["recent_history"]["episodes"]) != 16
+            or len(stress_decoded["recent_history"]["observed_events"]) != 2
+            or len(stress_decoded["recent_factual_summary"]["actions"]) != 13
+            or {row[5] for row in outcomes} != {"s", "i", "r"}
+            or any(row[2] + row[3] > stress_request["timestamp"] for row in outcomes)
+            or stress_request["running_action"]["started_at_total_minutes"]
+               + stress_request["running_action"]["elapsed_minutes"] != stress_request["timestamp"]):
+        raise SystemExit("maximum mixed-history fixture omitted required episode/event/H2 outcomes")
+    for name, minutes, age in stress_request["recent_factual_summary"]["actions"]:
+        rows = [row for row in accepted if row[0] == name]
+        if rows:
+            if minutes < sum(row[3] for row in rows) or age != 1893 - max(row[2] + row[3] for row in rows):
+                raise SystemExit(f"H2 summary contradicts accepted H1 episodes for {name}")
+        elif minutes <= 0 or not 720 < age <= 48 * 60:
+            raise SystemExit(f"H2-only action lacks an older 48h episode for {name}")
+    latest_sleep = max((row for row in accepted if row[0] == "sleep_at_bed"),
+                       key=lambda row: row[2] + row[3])
+    if stress_request["recent_factual_summary"]["last_sleep"] != [
+            latest_sleep[3], latest_sleep[2] + latest_sleep[3]]:
+        raise SystemExit("last_sleep does not match the latest accepted sleep episode")
 
     request = {"timestamp": 1, "state": {"x": 1}}
     if request_hash(versioned_request(request)) == legacy_replay_hash(request):
@@ -311,8 +397,12 @@ def main():
         "reconsider": {"answers": {"reconsider": {"noul": 0.25}}},
         "commitment": {"answers": {"commitment": {"probabilities": {"continue": 1.0}}}},
     }
+    observed_policy_projections = []
 
     def fake_predict(_agent, _state, questions):
+        if set(questions) == {"next_action"}:
+            observed_policy_projections.append(expand_policy_model_state(
+                json.loads(_state) if isinstance(_state, str) else _state))
         if set(questions) == {"commitment"}:
             options = questions["commitment"]["criteria"]
             probabilities = {name: 1.0 / len(options) for name in options}
@@ -367,11 +457,21 @@ def main():
             live_bridge.agent = object()
             live_bridge.choose(request_row)
             row = json.loads(cassette.read_text().splitlines()[0])
+            if name == "policy":
+                if len(observed_policy_projections) != 1:
+                    raise SystemExit("runtime policy request did not pass one compact projection to Laya")
+                runtime_projection = observed_policy_projections.pop()
+                for key in ("timestamp", "profile", "personality", "state", "observation",
+                            "running_action", "recent_history", "recent_factual_summary"):
+                    if runtime_projection[key] != request_row[key]:
+                        raise SystemExit(f"runtime request projection changed {key}")
+                if row["request"] != versioned_request(request_row):
+                    raise SystemExit("raw runtime request/cassette was compacted or changed")
             if row["type"] != expected_type or row.get("proxy_source_sha256") != PROXY_SOURCE_SHA256:
                 raise SystemExit(f"{name} live cassette row omitted the running proxy source hash")
             if row["proxy_source_sha256"] != live_cassette_provenance(row["token_budget"])["proxy_source_sha256"]:
                 raise SystemExit(f"{name} live cassette source hash differs from canonical identity")
-    print(f"laya_input_budget_smoke: PASS (expanded={expanded_tokens}, compact={compact_tokens}, state_budget={state_budget}, max_options=16, initial13_head_margin={initial_margin})")
+    print(f"laya_input_budget_smoke: PASS (expanded={expanded_tokens}, compact={compact_tokens}, state_budget={state_budget}, max_options=16, initial13_head_margin={initial_margin}, roundtrip=16 mixed episodes/2 events/13 H2 actions/22 O facts)")
 
 
 if __name__ == "__main__":

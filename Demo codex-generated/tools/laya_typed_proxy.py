@@ -14,11 +14,12 @@ import os
 import pathlib
 import socketserver
 import threading
+from urllib.parse import quote, unquote
 
 os.environ.setdefault("USE_TF", "0")
 CHECKPOINT = "convaiinnovations/laya-typed-decisions"
 CHECKPOINT_REVISION = "f9ab0b228f0fc0f14d873dbc99038f135c2da1b2"
-PROMPT_VERSION = "character-dynamics-laya-typed-v4.2"
+PROMPT_VERSION = "character-dynamics-laya-typed-v4.3"
 PROTOCOL_VERSION = "laya-typed-v4"
 LEGACY_PROTOCOL_VERSION = "laya-typed-v1"
 LEGACY_PROMPT_VERSION = "character-dynamics-laya-typed-v1"
@@ -96,31 +97,52 @@ def policy_model_state(request):
         if action[0] not in names:
             names.append(action[0])
     action_ids = {name: index for index, name in enumerate(names)}
-    episodes = [
-        [action_ids[item[0]], *item[1:]] for item in history["episodes"]
-    ]
-    totals = [[action_ids[item[0]], *item[1:]] for item in factual["actions"]]
+    def encode_rows(rows):
+        encoded = []
+        for row in rows:
+            fields = []
+            for value in row:
+                if isinstance(value, str):
+                    escaped = quote(value, safe="-._~")
+                    fields.append("~" + escaped if not value or escaped != value or value.startswith("~") else value)
+                else:
+                    fields.append(json.dumps(value))
+            encoded.append(" ".join(fields))
+        return "\n".join(encoded)
+
+    if any(any(character.isspace() for character in name) for name in names):
+        raise ValueError("action names containing whitespace cannot be projected losslessly")
+    episode_rows = [[action_ids[item[0]], *item[1:]] for item in history["episodes"]]
+    previous_start = None
+    for row in episode_rows:
+        start = row[2]
+        row[2] = start if previous_start is None else start - previous_start
+        previous_start = start
+    episodes = ";".join(encode_rows(episode_rows).splitlines())
+    totals = ";".join(encode_rows([[action_ids[item[0]], *item[1:]] for item in factual["actions"]]).splitlines())
     running = request["running_action"]
     if running is not None:
         running = [running["action"], running["target"], running["started_at_total_minutes"],
                    running["elapsed_minutes"], running["planned_minutes"]]
+    statuses = "".join(fact[2] for fact in request["observation"])
+    status_runs = []
+    for status in statuses:
+        if status_runs and status_runs[-1][1] == status:
+            status_runs[-1][0] += 1
+        else:
+            status_runs.append([1, status])
+    statuses = "".join(f"{count}{status}" for count, status in status_runs)
     return {
         "t": request["timestamp"],
         "id": request["profile"],
-        "schema": {"o": ["facts:[key,value]", "status in same order (k=known,s=stale)"],
-                   "h": {"r": ["action", "target", "start", "elapsed", "planned"],
-                         "e": ["action_id", "target", "start", "actual", "planned", "result", "task?"],
-                         "v": ["minute", "key", "value"],
-                         "f": [{"window_h": 48}, ["actions", ["action_id", "minutes", "last_end_ago"]],
-                               ["last_sleep_minutes", "end_total"]],
-                         "result": {"s": "settled", "d": "task_done", "i": "interrupted", "r": "rejected"}}},
-        "p": [request["personality"][key] for key in personality_keys],
+        "legend": "O=[key,value],status count+code k=known/s=stale;h.r=[action,target,start,elapsed,planned];h.a=action names;H1 h.e=[action#,target,startΔ(first absolute),actual,planned,outcome,task?];~=empty/percent-text;s=settled,d=task_done,i=interrupted,r=rejected;h.v=[minute,key,value];H2 h.f=[48h,rows=[action#,minutes,last_end_age],sleep=[minutes,end]].",
+        "p": " ".join(json.dumps(request["personality"][key]) for key in personality_keys),
         "s": [request["state"][key] for key in state_keys],
         "o": [[fact[:2] for fact in request["observation"]],
-              "".join(fact[2] for fact in request["observation"])],
+              statuses],
         "h": {
             "r": running,
-            "a": names,
+            "a": " ".join(names),
             "e": episodes,
             "v": history["observed_events"],
             "f": [factual["window_h"], totals, factual["last_sleep"]],
@@ -130,34 +152,66 @@ def policy_model_state(request):
 
 def expand_policy_model_state(model_state):
     """Decode the compact model projection for a value-level round-trip contract."""
-    schema = model_state["schema"]
     history = model_state["h"]
-    names = history["a"]
-    episodes = [[names[item[0]], *item[1:]] for item in history["e"]]
-    totals = [[names[item[0]], *item[1:]] for item in history["f"][1]]
+    names = history["a"].split(" ") if history["a"] else []
+    def decode_rows(encoded, numeric_columns):
+        rows = []
+        for line in encoded.split(";"):
+            if not line:
+                continue
+            row = []
+            for index, value in enumerate(line.split(" ")):
+                if value.startswith("~"):
+                    row.append(unquote(value[1:]))
+                elif index in numeric_columns:
+                    row.append(json.loads(value))
+                else:
+                    row.append(value)
+            rows.append(row)
+        return rows
+
+    decoded_episode_rows = decode_rows(history["e"], {0, 2, 3, 4})
+    previous_start = None
+    for row in decoded_episode_rows:
+        row[2] = row[2] if previous_start is None else previous_start + row[2]
+        previous_start = row[2]
+    episodes = [[names[item[0]], *item[1:]] for item in decoded_episode_rows]
+    totals = [[names[item[0]], *item[1:]] for item in decode_rows(history["f"][1], {0, 1, 2})]
     running = history["r"]
     if running is not None:
-        running = dict(zip(schema["h"]["r"], running))
+        running = dict(zip(("action", "target", "start", "elapsed", "planned"), running))
         running["started_at_total_minutes"] = running.pop("start")
         running["elapsed_minutes"] = running.pop("elapsed")
         running["planned_minutes"] = running.pop("planned")
+    statuses = _expand_status_runs(model_state["o"][1])
+    if len(statuses) != len(model_state["o"][0]):
+        raise ValueError("observation status run count does not match O facts")
     return {
         "timestamp": model_state["t"],
         "profile": model_state["id"],
         "personality": dict(zip(("procrastination", "self_control", "rest_preference", "stimulation_seeking",
                                  "task_anxiety_sensitivity", "screen_strain_sensitivity", "need_response", "action_noise"),
-                                model_state["p"])),
+                                [json.loads(value) for value in model_state["p"].split()])),
         "state": dict(zip(("boredom", "fatigue", "task_pressure", "satisfaction", "hunger", "bathroom_urge",
                            "anxiety", "screen_strain", "commitment", "commitment_task_id", "commitment_reason",
                            "commitment_started_at_total_minutes", "purchase_urge", "commitment_suspended_decision_points"),
                           model_state["s"])),
         "observation": [[pair[0], pair[1], status]
-                        for pair, status in zip(model_state["o"][0], model_state["o"][1])],
+                        for pair, status in zip(model_state["o"][0], statuses)],
         "running_action": running,
         "recent_history": {"episodes": episodes, "observed_events": history["v"]},
         "recent_factual_summary": {"window_h": history["f"][0], "actions": totals,
                                     "last_sleep": history["f"][2]},
     }
+
+
+def _expand_status_runs(encoded):
+    import re
+
+    runs = re.findall(r"(\d+)([A-Za-z])", encoded)
+    if "".join(count + code for count, code in runs) != encoded:
+        raise ValueError("invalid observation status runs")
+    return "".join(code * int(count) for count, code in runs)
 
 
 def _token_ids(tokenizer, text):

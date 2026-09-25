@@ -89,32 +89,51 @@ episodes and eight observed events from two hours). Purchase urge and the
 commitment start minute are included in the state projection. Rule activation,
 probability and candidate reason remain outside the Laya payload.
 
-These history limits bound request growth. Policy state is losslessly projected
-for the model: P/S use fixed-order arrays with a decoding schema, H episodes and
-48h totals reference a local action-name table, and O uses ordered key/value
-pairs plus an aligned known/stale status code. The original full request remains
-in the cassette for audit and replay identity. Prompt identity is
-`character-dynamics-laya-typed-v4.2` (wire protocol remains v4). The actual
-tokenizer/sequence-builder guard checks the complete sequence and fails closed
-before inference if it does not fit; no facts, history, or question are silently
-truncated. Use
+These history limits bound request growth. The v4.3 model projection keeps the
+full request untouched in the cassette. It uses ordered P/S values, an action
+name table, semicolon-separated episode and H2 rows, and run-length known/stale
+O statuses. Episode starts after the first are offsets from the preceding
+episode start; action result, target, actual/planned duration, and optional task
+remain explicit. Empty strings use `~`, while strings needing whitespace
+escaping use `~` plus percent encoding. A value-level decoder and a self-contained
+22-O/16-episode/13-action mixed-history fixture check this projection in the
+local regression test. Prompt identity is
+`character-dynamics-laya-typed-v4.3` (wire protocol remains v4). v4.2 cassettes
+cannot replay under v4.3 because prompt identity and request hash differ. The
+actual tokenizer/sequence-builder guard checks the complete sequence and fails
+closed before inference if it does not fit; no facts, history, or question are
+silently truncated. Use
 `--laya-no-history` with the same seeds and executable for a v4 no-history
 policy ablation. v3 cassettes cannot replay as v4 because protocol, prompt and
 request hashes changed. This is a factual actor-local autobiography for the
 Demo adapter, not evidence of psychological validity. No sleep-specific
 preference or behavior parameter was added.
 
-The preserved first exact-HEAD v4 1-day attempt failed closed on its initial
-13-option question: the old prompt required 153 question-head tokens against a
-138-token budget (the O/S/P/H state was 530 tokens and was not the limiting
-factor). It produced no Laya cassette decision and was not rerun in place. The
-repaired prompt/projection was audited with the actual checkpoint tokenizer:
-the captured initial request now uses 118/138 question-head tokens and
-483/784 state tokens. A dense 16-episode/2-event history with 13 options uses
-755/784 state tokens and 995/1024 total input tokens; adding a 22nd O fact uses
-763/784 and 1003/1024. The last fixture has 21 tokens of state/input margin and
-20 tokens of question-head margin. These are input-fit checks, not policy outcomes; the
-exact-head 1-day gate remains unrun pending independent review/freeze.
+The preserved v4.2 exact-HEAD 1-day attempt stopped at request 11 because its
+history-bearing state used 789 tokens against a 784-token allowance. v4.3 was
+audited without inference using the captured complex v4 request, the actual
+checkpoint tokenizer, and the captured v3 request with the largest 22-fact O
+surface. The joint fixture has 22 O facts, a current RunningAction, 16
+chronological episodes within 12 hours, two observed events, 13 H2 action
+types, and 13 candidates. Sleep/rest durations, settled/interrupted/rejected
+outcomes, task-tagged episodes, and clock time were preserved; rejected
+episodes have zero actual duration. H2 totals and last-occurrence ages agree
+with accepted H1 episodes; H1-absent actions have explicit older 48-hour
+contributions, and `last_sleep` matches the latest accepted sleep. It uses
+760/784 state tokens and 1000/1024 complete input tokens (24-token margins);
+the question head uses 118/138 tokens (20-token margin). The repository
+regression test also exercises this maximum-history shape. The offline audit
+command is:
+
+```sh
+python3 tools/laya_v4_token_margin_audit.py \
+  /absolute/path/to/v4.2-history-cassette.jsonl \
+  /absolute/path/to/laya-checkpoint-snapshot \
+  --stress /absolute/path/to/v3-1d-cassette.jsonl
+```
+
+These are input-fit checks, not policy outcomes. No v4.3 live 1-day or 64-actor
+run was started; the exact-HEAD gate still awaits independent review.
 
 The Python bridge is an application adapter only. ReferenceRuleDynamicsV0,
 DemoLivingDynamicsV1, W validation, scheduler and research evaluator are
