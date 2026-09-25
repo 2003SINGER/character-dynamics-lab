@@ -89,14 +89,32 @@ episodes and eight observed events from two hours). Purchase urge and the
 commitment start minute are included in the state projection. Rule activation,
 probability and candidate reason remain outside the Laya payload.
 
-These history limits bound request growth. The actual tokenizer/sequence-builder
-guard checks the complete v4 sequence and fails closed before inference if it
-does not fit; no history or question is silently truncated. Use
+These history limits bound request growth. Policy state is losslessly projected
+for the model: P/S use fixed-order arrays with a decoding schema, H episodes and
+48h totals reference a local action-name table, and O uses ordered key/value
+pairs plus an aligned known/stale status code. The original full request remains
+in the cassette for audit and replay identity. Prompt identity is
+`character-dynamics-laya-typed-v4.2` (wire protocol remains v4). The actual
+tokenizer/sequence-builder guard checks the complete sequence and fails closed
+before inference if it does not fit; no facts, history, or question are silently
+truncated. Use
 `--laya-no-history` with the same seeds and executable for a v4 no-history
 policy ablation. v3 cassettes cannot replay as v4 because protocol, prompt and
 request hashes changed. This is a factual actor-local autobiography for the
 Demo adapter, not evidence of psychological validity. No sleep-specific
 preference or behavior parameter was added.
+
+The preserved first exact-HEAD v4 1-day attempt failed closed on its initial
+13-option question: the old prompt required 153 question-head tokens against a
+138-token budget (the O/S/P/H state was 530 tokens and was not the limiting
+factor). It produced no Laya cassette decision and was not rerun in place. The
+repaired prompt/projection was audited with the actual checkpoint tokenizer:
+the captured initial request now uses 118/138 question-head tokens and
+483/784 state tokens. A dense 16-episode/2-event history with 13 options uses
+755/784 state tokens and 995/1024 total input tokens; adding a 22nd O fact uses
+763/784 and 1003/1024. The last fixture has 21 tokens of state/input margin and
+20 tokens of question-head margin. These are input-fit checks, not policy outcomes; the
+exact-head 1-day gate remains unrun pending independent review/freeze.
 
 The Python bridge is an application adapter only. ReferenceRuleDynamicsV0,
 DemoLivingDynamicsV1, W validation, scheduler and research evaluator are

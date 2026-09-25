@@ -18,7 +18,7 @@ import threading
 os.environ.setdefault("USE_TF", "0")
 CHECKPOINT = "convaiinnovations/laya-typed-decisions"
 CHECKPOINT_REVISION = "f9ab0b228f0fc0f14d873dbc99038f135c2da1b2"
-PROMPT_VERSION = "character-dynamics-laya-typed-v4"
+PROMPT_VERSION = "character-dynamics-laya-typed-v4.2"
 PROTOCOL_VERSION = "laya-typed-v4"
 LEGACY_PROTOCOL_VERSION = "laya-typed-v1"
 LEGACY_PROMPT_VERSION = "character-dynamics-laya-typed-v1"
@@ -70,6 +70,96 @@ def observation_fact_key(fact):
     return ""
 
 
+def policy_instructions():
+    """Keep the model-facing contract and real-tokenizer audits on one source."""
+    return (
+        "Schema/action table. p=[procrast,self_control,rest_pref,stimulation,task_anxiety,screen_strain,need_response,action_noise]; "
+        "s=[boredom,fatigue,task_pressure,satisfaction,hunger,bathroom_urge,anxiety,screen_strain,commitment,task_id,reason,started_at,purchase_urge,suspended_count]. "
+        "Choose listed target+minutes from O/S/P and actor facts; no hidden W."
+    )
+
+
+def policy_model_state(request):
+    """Losslessly compact the model-facing state; the raw request stays in cassette."""
+    personality_keys = ["procrastination", "self_control", "rest_preference", "stimulation_seeking",
+                        "task_anxiety_sensitivity", "screen_strain_sensitivity", "need_response", "action_noise"]
+    state_keys = ["boredom", "fatigue", "task_pressure", "satisfaction", "hunger", "bathroom_urge",
+                  "anxiety", "screen_strain", "commitment", "commitment_task_id", "commitment_reason",
+                  "commitment_started_at_total_minutes", "purchase_urge", "commitment_suspended_decision_points"]
+    history = request["recent_history"]
+    factual = request["recent_factual_summary"]
+    names = []
+    for episode in history["episodes"]:
+        if episode[0] not in names:
+            names.append(episode[0])
+    for action in factual["actions"]:
+        if action[0] not in names:
+            names.append(action[0])
+    action_ids = {name: index for index, name in enumerate(names)}
+    episodes = [
+        [action_ids[item[0]], *item[1:]] for item in history["episodes"]
+    ]
+    totals = [[action_ids[item[0]], *item[1:]] for item in factual["actions"]]
+    running = request["running_action"]
+    if running is not None:
+        running = [running["action"], running["target"], running["started_at_total_minutes"],
+                   running["elapsed_minutes"], running["planned_minutes"]]
+    return {
+        "t": request["timestamp"],
+        "id": request["profile"],
+        "schema": {"o": ["facts:[key,value]", "status in same order (k=known,s=stale)"],
+                   "h": {"r": ["action", "target", "start", "elapsed", "planned"],
+                         "e": ["action_id", "target", "start", "actual", "planned", "result", "task?"],
+                         "v": ["minute", "key", "value"],
+                         "f": [{"window_h": 48}, ["actions", ["action_id", "minutes", "last_end_ago"]],
+                               ["last_sleep_minutes", "end_total"]],
+                         "result": {"s": "settled", "d": "task_done", "i": "interrupted", "r": "rejected"}}},
+        "p": [request["personality"][key] for key in personality_keys],
+        "s": [request["state"][key] for key in state_keys],
+        "o": [[fact[:2] for fact in request["observation"]],
+              "".join(fact[2] for fact in request["observation"])],
+        "h": {
+            "r": running,
+            "a": names,
+            "e": episodes,
+            "v": history["observed_events"],
+            "f": [factual["window_h"], totals, factual["last_sleep"]],
+        },
+    }
+
+
+def expand_policy_model_state(model_state):
+    """Decode the compact model projection for a value-level round-trip contract."""
+    schema = model_state["schema"]
+    history = model_state["h"]
+    names = history["a"]
+    episodes = [[names[item[0]], *item[1:]] for item in history["e"]]
+    totals = [[names[item[0]], *item[1:]] for item in history["f"][1]]
+    running = history["r"]
+    if running is not None:
+        running = dict(zip(schema["h"]["r"], running))
+        running["started_at_total_minutes"] = running.pop("start")
+        running["elapsed_minutes"] = running.pop("elapsed")
+        running["planned_minutes"] = running.pop("planned")
+    return {
+        "timestamp": model_state["t"],
+        "profile": model_state["id"],
+        "personality": dict(zip(("procrastination", "self_control", "rest_preference", "stimulation_seeking",
+                                 "task_anxiety_sensitivity", "screen_strain_sensitivity", "need_response", "action_noise"),
+                                model_state["p"])),
+        "state": dict(zip(("boredom", "fatigue", "task_pressure", "satisfaction", "hunger", "bathroom_urge",
+                           "anxiety", "screen_strain", "commitment", "commitment_task_id", "commitment_reason",
+                           "commitment_started_at_total_minutes", "purchase_urge", "commitment_suspended_decision_points"),
+                          model_state["s"])),
+        "observation": [[pair[0], pair[1], status]
+                        for pair, status in zip(model_state["o"][0], model_state["o"][1])],
+        "running_action": running,
+        "recent_history": {"episodes": episodes, "observed_events": history["v"]},
+        "recent_factual_summary": {"window_h": history["f"][0], "actions": totals,
+                                    "last_sleep": history["f"][2]},
+    }
+
+
 def _token_ids(tokenizer, text):
     encoded = tokenizer(text, add_special_tokens=False)
     ids = encoded["input_ids"]
@@ -117,10 +207,26 @@ def predict_without_truncation(agent, state, questions):
             option_ids = [[tokenizer.mask_token_id, *tokens] for tokens in option_token_ids]
             option_head_cost = sum(len(tokens) for tokens in option_ids)
             head_budget = head_max_len - option_head_cost
+            expected_head_tokens = len(head_ids) + option_head_cost + 4
+            estimated_state_budget = max_len - expected_head_tokens
             if head_budget < 16:
-                raise ValueError("Laya options exceed complete question head budget")
+                raise ValueError(
+                    "Laya options exceed complete question head budget: "
+                    f"candidate_count={len(rendered_options)}, instruction_tokens={len(head_ids)}, "
+                    f"option_tokens={[len(tokens) for tokens in option_token_ids]}, "
+                    f"option_mask_tokens={option_head_cost}, head_budget={head_budget}, "
+                    f"state_tokens={len(state_ids)}, estimated_state_budget={estimated_state_budget}, "
+                    f"head_max_len={head_max_len}, max_len={max_len}"
+                )
             if len(head_ids) > max(8, head_budget):
-                raise ValueError("Laya instructions exceed complete question head budget")
+                raise ValueError(
+                    "Laya instructions exceed complete question head budget: "
+                    f"candidate_count={len(rendered_options)}, instruction_tokens={len(head_ids)}, "
+                    f"option_tokens={[len(tokens) for tokens in option_token_ids]}, "
+                    f"option_mask_tokens={option_head_cost}, head_budget={head_budget}, "
+                    f"state_tokens={len(state_ids)}, estimated_state_budget={estimated_state_budget}, "
+                    f"head_max_len={head_max_len}, max_len={max_len}"
+                )
 
             expected_empty = [tokenizer.cls_token_id, *head_ids, tokenizer.sep_token_id]
             expected_markers = []
@@ -169,6 +275,9 @@ def predict_without_truncation(agent, state, questions):
         "max_len": max_len,
         "head_max_len": head_max_len,
         "question_head_tokens": head_lengths,
+        "option_mask_tokens": [sum(length + 1 for length in lengths) for lengths in option_lengths],
+        "head_budgets": [head_max_len - sum(length + 1 for length in lengths) for lengths in option_lengths],
+        "candidate_counts": [len(lengths) for lengths in option_lengths],
         "instruction_tokens": instruction_lengths,
         "option_tokens": option_lengths,
     }
@@ -268,17 +377,7 @@ class Bridge:
         else:
             if self.agent is None:
                 raise ValueError("cassette has no matching Laya decision")
-            state = {
-                "time": request["timestamp"],
-                "personality": request["personality"],
-                "subjective_state_and_commitment": request["state"],
-                "known_or_stale_observations": request["observation"],
-                "actor_local_temporal_context": {
-                    "running_action": request["running_action"],
-                    "recent_history": request["recent_history"],
-                    "recent_factual_summary": request["recent_factual_summary"],
-                },
-            }
+            state = policy_model_state(request)
             criteria = {}
             for candidate in candidates:
                 planned_minutes = candidate.get("planned_minutes")
@@ -289,13 +388,7 @@ class Bridge:
             prediction, token_audit = predict_without_truncation(self.agent, state, {
                 "next_action": {
                     "type": "choice",
-                    "instructions": (
-                        "Choose one supplied action using only O, S, P, commitment and the actor-local factual recent history. "
-                        "Observation entries are [key,value,k|s]. History episodes are "
-                        "[action,target,start,actual,planned,result,optional_task], end=start+actual; result s/d/i/r means settled/task-done/interrupted/rejected. "
-                        "The factual action summary totals accepted minutes over its explicit window_h=48 horizon; each action row is [action,minutes,last_end_minutes_ago], and last_sleep is [overlap_minutes,end_total_minutes] or null. "
-                        "Use its target and duration; do not infer hidden World facts."
-                    ),
+                    "instructions": policy_instructions(),
                     "criteria": criteria,
                 }
             })

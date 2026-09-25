@@ -24,6 +24,9 @@ from laya_typed_proxy import (
     predict_without_truncation,
     request_hash,
     versioned_request,
+    policy_instructions,
+    policy_model_state,
+    expand_policy_model_state,
 )
 
 
@@ -171,6 +174,29 @@ def main():
                + sum(1 + size for size in wide_audit["option_tokens"][0]) > wide_audit["head_max_len"]):
         raise SystemExit("maximum Laya candidate surface did not fit complete question head")
 
+    initial_candidates = {"next_action": {"type": "choice", "instructions": policy_instructions(),
+        "criteria": {name: f"{target} {duration}m" for name, target, duration in [
+            ("idle", "here", 10), ("use_phone", "phone", 25),
+            ("shop_on_phone", "phone", 20), ("use_computer", "computer", 30),
+            ("study_at_computer", "computer", 35), ("study_focused", "desk", 35),
+            ("study_halfhearted", "desk", 35), ("rest_at_bed", "bed", 60),
+            ("sleep_at_bed", "bed", 480), ("go_to_bathroom", "door", 15),
+            ("get_meal", "door", 35), ("turn_light_off", "light", 1),
+            ("close_curtain", "window", 1)]}}}
+    initial_agent = Agent()
+    initial_agent.cfg["head_max_len"] = 256
+    _, initial_audit = predict_without_truncation(initial_agent, {
+        "t": 490, "p": {}, "s": {}, "o": [],
+        "h": {"run": None, "hist": {"episodes": [], "observed_events": []},
+              "sum": {"window_h": 48, "actions": [], "last_sleep": None}},
+    }, initial_candidates)
+    initial_margin = (initial_audit["head_budgets"][0]
+                      - initial_audit["question_head_tokens"][0])
+    if initial_audit["candidate_counts"] != [13] or initial_margin < 13:
+        raise SystemExit(
+            f"13-option initial-context regression lacks 13-token head margin: {initial_audit}"
+        )
+
     too_many_options = {"decision": {"type": "choice", "instructions": "choose",
         "criteria": {f"option_{index}": "long " * 60 for index in range(16)}}}
     option_agent = Agent()
@@ -207,6 +233,33 @@ def main():
         raise SystemExit("over-budget state was not rejected")
     if agent.prediction_calls != 1:
         raise SystemExit("over-budget state reached agent.predict")
+
+    roundtrip_request = {
+        "timestamp": 177, "profile": "balanced",
+        "personality": {"procrastination": .2, "self_control": .3, "rest_preference": .4,
+                        "stimulation_seeking": .5, "task_anxiety_sensitivity": .6,
+                        "screen_strain_sensitivity": .7, "need_response": .8, "action_noise": .9},
+        "state": {"boredom": .1, "fatigue": .2, "task_pressure": .3, "satisfaction": .4,
+                  "hunger": .5, "bathroom_urge": .6, "anxiety": .7, "screen_strain": .8,
+                  "commitment": "active", "commitment_task_id": "coursework", "commitment_reason": "deadline",
+                  "commitment_started_at_total_minutes": 120, "purchase_urge": .2,
+                  "commitment_suspended_decision_points": 1},
+        "observation": [["clock.time", "Day 1 02:57", "k"], ["task.coursework.status", "active", "s"]],
+        "running_action": {"action": "study_focused", "target": "desk",
+                           "started_at_total_minutes": 150, "elapsed_minutes": 17, "planned_minutes": 35},
+        "recent_history": {"episodes": [
+            ["study_focused", "desk", 130, 3, 35, "r"],
+            ["study_at_computer", "computer", 120, 10, 30, "d", "coursework"]],
+            "observed_events": [[150, "task.coursework.status", "active"]]},
+        "recent_factual_summary": {"window_h": 48,
+                                   "actions": [["study_at_computer", 10, 47]],
+                                   "last_sleep": [420, 110]},
+    }
+    decoded = expand_policy_model_state(policy_model_state(roundtrip_request))
+    for key in ("timestamp", "profile", "personality", "state", "observation", "running_action",
+                "recent_history", "recent_factual_summary"):
+        if decoded[key] != roundtrip_request[key]:
+            raise SystemExit(f"compact policy projection round-trip mismatch in {key}: {decoded[key]!r}")
 
     request = {"timestamp": 1, "state": {"x": 1}}
     if request_hash(versioned_request(request)) == legacy_replay_hash(request):
@@ -270,7 +323,14 @@ def main():
         question_id = next(iter(questions))
         return test_responses[question_id], {"state_tokens": 4}
 
-    base = {"timestamp": 1, "profile": "test", "personality": {}, "state": {},
+    base = {"timestamp": 1, "profile": "test",
+            "personality": {key: 0.5 for key in ("procrastination", "self_control", "rest_preference",
+                "stimulation_seeking", "task_anxiety_sensitivity", "screen_strain_sensitivity",
+                "need_response", "action_noise")},
+            "state": {key: 0 for key in ("boredom", "fatigue", "task_pressure", "satisfaction", "hunger",
+                "bathroom_urge", "anxiety", "screen_strain", "commitment_started_at_total_minutes",
+                "purchase_urge", "commitment_suspended_decision_points")}
+                | {"commitment": "none", "commitment_task_id": "", "commitment_reason": ""},
             "observation": [], "running_action": None,
             "recent_history": {"episodes": [], "observed_events": []},
             "recent_factual_summary": {"window_h": 48, "actions": [], "last_sleep": None},
@@ -311,7 +371,7 @@ def main():
                 raise SystemExit(f"{name} live cassette row omitted the running proxy source hash")
             if row["proxy_source_sha256"] != live_cassette_provenance(row["token_budget"])["proxy_source_sha256"]:
                 raise SystemExit(f"{name} live cassette source hash differs from canonical identity")
-    print(f"laya_input_budget_smoke: PASS (expanded={expanded_tokens}, compact={compact_tokens}, state_budget={state_budget}, max_options=16)")
+    print(f"laya_input_budget_smoke: PASS (expanded={expanded_tokens}, compact={compact_tokens}, state_budget={state_budget}, max_options=16, initial13_head_margin={initial_margin})")
 
 
 if __name__ == "__main__":
