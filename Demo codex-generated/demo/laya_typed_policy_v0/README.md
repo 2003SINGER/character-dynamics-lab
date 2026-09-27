@@ -244,6 +244,7 @@ The default Rule/Laya A/B is policy-only and eligible for the existing paired
 policy comparator. Full typed X/I modes alter Dynamics and are a separate
 supplementary track; they cannot be interpreted as changing only π or compared
 under the `only_policy_changed` claim. Soft-gate mode is likewise a separate
-factor. Raw historical artifacts remain under
-`/Users/2003singer/Workspace/Research/_character_dynamics_laya_runs/` and are
-intentionally not committed.
+factor. Raw historical artifacts are under the project-local
+`../../../outputs/laya_runs/` directory and are intentionally not committed.
+Archived `COMMANDS.md` files preserve their original execution paths; replace
+their former Research-root run directory with `outputs/laya_runs/` when rerunning.
