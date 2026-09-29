@@ -2,6 +2,8 @@
 
 > 一个面向可持续运行 NPC 的角色动力学框架：让常规决策由可审计的局部观察、持续状态与廉价策略完成，只在必要时调用开放语义模型，并同时优化长期行为质量与运行成本。
 
+本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`，当前活动分支为 `webgpt-sync`。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
+
 当前已有规则化 C++ 参考模拟与批量日志；**Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**：统一时钟、RunningAction、事件/信息边界、DecisionGate、typed rejection、scheduler-native fixtures、trace、case-isolated CTest 与 CI 已闭环。Evaluator、Objective、Optimizer 与 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
 
 ## 从这里进入

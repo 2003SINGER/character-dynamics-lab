@@ -1,5 +1,7 @@
 # 实验路由
 
+本机工作区、历史 checkout 与运行产物的路径边界见[本地工作区布局](Local_Workspace_Layout.md)。迁移不改变实验条件或 run ID，也不授权启动新实验。
+
 当前研究对象入口：[ResearchDynamicsV1](ResearchDynamicsV1/README.md)。旧 `Theory_S_v2` 统一标记为 `ExpectedEffectEMAProxyV0` 历史 proxy；不得把它写成已验证角色动力学。
 
 本目录是实验路由索引，不宣布全项目当前阶段。Canonical layers are: `Replay/` for source-neutral records/features/baselines, `Theory_S_v2/` for the single Python trainable dynamics candidate, and `T14_T20/` for the frozen 1D historical development harness. New external training must compose these layers rather than copy Theory-S per dataset.

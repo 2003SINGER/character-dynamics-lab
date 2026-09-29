@@ -3,6 +3,7 @@
 ## Scope
 
 - `D:\desk\科研\character-dynamics` owns exploration of dynamic character behavior consistency and conditional behavior prediction in constrained worlds.
+- The single canonical macOS checkout is `/Users/2003singer/Workspace/Research/character-dynamics-lab`; do not create a parallel `character-dynamics-laya-work` project root.
 - It is independent of the paused `D:\desk\科研\characters` state-stream coupling project. Do not silently merge their questions, sources, or claims.
 
 ## First Read
