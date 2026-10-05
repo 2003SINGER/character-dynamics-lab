@@ -14,7 +14,7 @@
 
 当前正式文献审计入口：[全量近邻精读总表（2026-10-06）](全量近邻精读总表_2026-10-06.md)。该表明确区分 Codex/Luna 代理全文审读、委派全文审读并经主代理复核、仅筛查、以及 Cho 方法全文文本审阅；本地有 PDF 或链接可下载均不等于已读。后续近邻/算法谱系判断以该阅读等级和证据边界为准，不重复在 README 摘录全表。
 
-LIGHT 的官方任务与本地训练输入不等价；来源映射、遗漏通道、candidate/turn 边界与下一动作由[LIGHT 任务准入审计](精读_LIGHT与本地预测任务准入_2026-10-06.md)维护。已归档官方 2019 正文 PDF；附录与历史 worker UI 仍未审，不据下载宣称完整准入。
+LIGHT 的官方任务与本地训练输入不等价；来源映射、before-turn 候选重建、信息流负控与剩余 source contract 由[LIGHT 任务准入审计](精读_LIGHT与本地预测任务准入_2026-10-06.md)维护。官方正文与附录已归档；附录 D / Figure 9、2019-03 官方交互代码已核对，collection log → small7 的确切映射仍未证实，不据此宣称完整准入。
 
 针对第一个 Replay 实验缺少独立 `A*` 的问题，见[行为真值 A* 可行性审计](专题审计_行为真值A星可行性_2026-09-05.md)。结论是：BehaviorChain 完整数据当前不可公开获取；CharacterBox 不是独立行为真值；SOTOPIA 可作为**外部合成轨迹代理**进入小切片验证，但不是人类行为数据。
 
@@ -43,7 +43,7 @@ LIGHT 的官方任务与本地训练输入不等价；来源映射、遗漏通�
 
 | 类别 | 本地 PDF | 官方来源 | 与项目的关系 |
 |---|---|---|---|
-| grounded action/dialogue | [LIGHT](PDF/2019_LIGHT_Learning_to_Speak_and_Act.pdf) | [ACL](https://aclanthology.org/D19-1062/) | 官方正文已核对；[本地任务准入审计](精读_LIGHT与本地预测任务准入_2026-10-06.md)，不等于本地 `O/A^O` 已准入 |
+| grounded action/dialogue | [LIGHT 正文](PDF/2019_LIGHT_Learning_to_Speak_and_Act.pdf)、[官方附录](PDF/2019_LIGHT_Appendix.pdf) | [ACL](https://aclanthology.org/D19-1062/) | 正文与附录 D / Figure 9 已核对（非全部附录精读）；[本地任务准入审计](精读_LIGHT与本地预测任务准入_2026-10-06.md)，不等于本地 `O/A^O` 已准入 |
 | 角色系统 | [Generative Agents](PDF/2023_Generative_Agents_Interactive_Simulacra_of_Human_Behavior.pdf) | [arXiv](https://arxiv.org/abs/2304.03442) | 观察—记忆—反思—计划式角色 agent 的基础近邻 |
 | 角色评测 | [InCharacter](PDF/2024_InCharacter.pdf) | [ACL](https://aclanthology.org/2024.acl-long.102/) | 人格 fidelity 的直接近邻 |
 | 局部可观测 | [TimeToM](PDF/2024_TimeToM_Temporal_Belief_State_Chain.pdf) | [ACL](https://aclanthology.org/2024.findings-acl.685/) | 时间化角色 belief state，避免把遮罩单独误作创新 |

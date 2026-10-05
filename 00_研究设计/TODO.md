@@ -15,7 +15,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| PREDICTION-BASELINE-V1 | **DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW** | 来源映射/重复/support 结构复核完成，formal admission 未过；先做 before-turn 输入重建 feasibility 与时序负控，不自动追加模型或调参 | [唯一数值结果](../02_实验/PredictionBaselineV1/RESULTS.md)；[LIGHT 任务准入与下一动作](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。人工准入仍 PENDING；已暴露数据不是 untouched formal test |
+| PREDICTION-BASELINE-V1 | **DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW** | before-turn 候选重建及全量信息流负控已验收；下一步核对 small7 当前 context/support 时点与 partner 动作可见表示，来源准入后再冻结新 protocol，不自动追加模型或调参 | [唯一数值结果](../02_实验/PredictionBaselineV1/RESULTS.md)；[LIGHT 任务准入与下一动作](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。候选重建未授权训练，人工准入仍 PENDING；已暴露数据不是 untouched formal test |
 | SYSTEM | **Shared Runtime Kernel v1：CLOSED / FROZEN** | Continuous Runtime ownership、threshold/W validation、typed rejection、fixtures、trace、case-isolated CTest、explicit DynamicsModel injection 与 isolation guard 已闭环。此状态只关闭执行 Kernel，不代表任何行为模型、Evaluator、Objective、Optimizer 或 Paper-0 完成。 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | M1 | **历史 proxy 已审计；不作为新研究模型** | 保留旧 Theory-S 结果为 `ExpectedEffectEMAProxyV0` diagnostic，不延伸其心理解释 | [研究重建审计](研究重建审计_2026-10-06.md)；[Pre-V1 validity audit（2026-09阶段边界）](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md) |
 | M2 | **Paper-0 formal blocker；不是全部开发的前置门** | 为正式 Paper-0 补齐 SceneSnapshot → affordance → generated actor-local `A^O` 的最小 ontology 与实例绑定 | 生成不得读 source `A*`；source support 仅 post-hoc 诊断；[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md) |
@@ -31,7 +31,7 @@
 
 ## 研究重建顺序与范围护栏
 
-- **开发顺序**：PredictionBaselineV1 development fit 与复现、LIGHT source/结构复核已完成 → before-turn 输入重建与时序 gate → 新 protocol 冻结 → 可执行更新与强弱 baseline → 独立验证。现有模型数值只维护于[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)，数据 gate 见[任务准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。
+- **开发顺序**：PredictionBaselineV1 development fit 与复现、LIGHT source/结构复核、before-turn 候选投影与信息流负控已完成 → 源字段时点/观察权限 gate → 新 protocol 冻结 → 可执行更新与强弱 baseline → 独立验证。投影器 PASS 不证明 processed context 在动作前记录。现有模型数值只维护于[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)，数据 gate 见[任务准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。
 - **Paper-0 formal gates**：persistent `S`、legal actor-local `O`、independent `A*`、可复核有限 `A^O`、episode/user-disjoint split 和预注册指标；M2 是 candidate-set formal admission 工作，不阻塞开发方法基座。
 - **PAUSED**：Objective readiness、Evaluator ranking、Optimizer、旧 proxy training、外部数据集扩展；ResearchDynamicsV1 不作为已训练模型，仅记录为尚未准入的 toy/fixture。
 - **DEFERRED SYSTEM/RESEARCH BRANCH**：ToM、multi-agent、Inverse、P drift、Q01 advanced response curves、Scene Manager 与 live LLM semantics。
