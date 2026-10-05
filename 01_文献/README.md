@@ -1,7 +1,7 @@
 # 本地文献库
 
-更新时间：2026-09-05  
-状态：**82 篇 PDF 已下载并以 `%PDF-` 文件头校验；4 篇已定位但待取得。** 下载只表示可离线阅读，不表示已精读、已认可其中论断，或已完成查新。
+入口更新：2026-10-06；下载盘点快照：2026-09-05
+截至该盘点快照：**82 篇 PDF 已下载并以 `%PDF-` 文件头校验；4 篇已定位但待取得。** 这不是今日全库统计。下载只表示可离线阅读，不表示已精读、已认可其中论断，或已完成查新。
 
 2026-09-05 四批新增共 54 篇，**全部尚未导入 Zotero，也未执行「检索 PDF 元数据」**：
 
@@ -11,6 +11,8 @@
 - **Game AI Pro A 级 34 篇**（4 卷 146 章中按相关度筛出的 A 级 43 章，扣除本库已有的 9 章）。核读见 [Game AI Pro 全景与工程 Gap](专题核读_GameAIPro全景与工程Gap_2026-09-05.md)。**其中逐节核读仅 8 章，其余 35 章已下载并提取文本但未读**，未读状态由 TODO 的 T23b 跟踪。全部为行业书籍章节，无同行评审、无学术索引。
 
 已完成的项目审计入口：[全量近邻精读总表（2026-09-01）](全量近邻精读总表_2026-09-01.md)。它记录了每篇的覆盖范围、对本项目的边界、可借方法和必读顺序。
+
+当前正式文献审计入口：[全量近邻精读总表（2026-10-06）](全量近邻精读总表_2026-10-06.md)。该表明确区分 Codex/Luna 代理全文审读、委派全文审读并经主代理复核、仅筛查、以及 Cho 方法全文文本审阅；本地有 PDF 或链接可下载均不等于已读。后续近邻/算法谱系判断以该阅读等级和证据边界为准，不重复在 README 摘录全表。
 
 针对第一个 Replay 实验缺少独立 `A*` 的问题，见[行为真值 A* 可行性审计](专题审计_行为真值A星可行性_2026-09-05.md)。结论是：BehaviorChain 完整数据当前不可公开获取；CharacterBox 不是独立行为真值；SOTOPIA 可作为**外部合成轨迹代理**进入小切片验证，但不是人类行为数据。
 
@@ -90,15 +92,9 @@
 
 > SyncStream 文件由 KDD 2014 会议镜像获取。该镜像 TLS 证书已过期，下载时仅为取得用户指定的公开论文而绕过证书校验；随后已校验 `%PDF-` 文件头、首页标题、页码（412 起）及 SHA-256：`9E8A74135B3CDDFC1E21868D8BC6ADF21D3B5D10790658DA3AED2A5B08A3C259`。其规范书目信息以 ACM DOI 为准。
 
-## 当前阅读入口（按计算职责，不按大词相似）
+## 当前审计路由（按证据等级）
 
-先读以下五篇，而不是顺着库逐篇读：
-
-1. [Generative Agents](PDF/2023_Generative_Agents_Interactive_Simulacra_of_Human_Behavior.pdf)：核验对象世界、局部观察、记忆和行为之间到底怎样接口；它是 `W → O` 的强工程近邻。
-2. [PsychSim](PDF/2005_PsychSim_Modeling_Theory_of_Mind_with_Decision_Theoretic_Agents.pdf)：核验 factored ground-truth decision state、belief/preference 决策与有限 inverse revision；它的 `World` 不应直接等同为本项目对象化可执行 `W`。
-3. [Dynamic Persona Coherence](PDF/2026_Dynamic_Persona_Coherence.pdf)：核验稳定 identity、动态状态和长中短期更新具体怎样实现。
-4. [BehaviorChain](PDF/2025_BehaviorChain.pdf)：核验 raw history/context 如何直接得到下一行为；它可提供预测任务，却不替代内部状态动力学。
-5. [FAtiMA](PDF/2012_FAtiMA_Creating_Adaptive_Affective_Autonomous_NPCs.pdf)（EMA 附件待取得）：核验事件怎样进入 belief/memory/appraisal/affect 并影响行为。
+先读[2026-10-06 全量近邻精读总表](全量近邻精读总表_2026-10-06.md)确定文献覆盖、方法和迁移边界。若要继续读原文，优先补完标为“仅筛查”的 HSSA；Cho 全文方法已由主代理核验，但本地无 PDF，引用以正式 ACL/全文入口为准。2009 EMA 本地 PDF 已存在并纳入本轮代理全文审读，替代早前“附件待取得”的路由状态。下载、书目核验、摘要浏览均不可自动记作精读；项目实时阶段见[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)，PredictionBaselineV1 的具体边界见其[开发协议](../02_实验/PredictionBaselineV1/README.md)。
 
 另有两份**工程对照清单**，做 T18 查新或任何"机制新颖"表述前，先过一遍：
 

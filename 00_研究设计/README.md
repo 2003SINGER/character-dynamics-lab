@@ -1,18 +1,19 @@
 # 研究设计：唯一维护入口
 
-整理日期：2026-09-16
+整理日期：2026-10-06
 
 ## 项目架构定位
 
-当前研究对象：`ResearchDynamicsV1`（未冻结候选）。旧 C++ `ReferenceRuleDynamicsV0` 统一称 `LegacyReferenceRuleDynamicsV0`，旧 Python `Theory-S_v2` 统一称 `ExpectedEffectEMAProxyV0` 历史 proxy。边界与证据分类见 [Pre-V1 validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md)。
+`PredictionBaselineV1` 的 development fit 与独立 seed 复现已完成，当前为 `DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW`；数值与训练细节只维护在[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)。之后再推进监督信号准入、可执行更新、基线比较和独立验证。它不是心理状态 `S` 或 Runtime policy 的训练证据。`ResearchDynamicsV1` 是手写数值 fixture/candidate，不是已训练科学模型；旧 C++ `ReferenceRuleDynamicsV0` 统一称 `LegacyReferenceRuleDynamicsV0`，旧 Python `Theory-S_v2` 统一称 `ExpectedEffectEMAProxyV0` 历史诊断 proxy。失败证据和当前推进边界以[研究重建审计](研究重建审计_2026-10-06.md)为准；[Pre-V1 validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md)记录的是 2026-09 阶段状态，冲突时服从本次审计。
 
-Shared Runtime Kernel 已工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Python `Theory-S_v2` 仍是当前 canonical research dynamics candidate；`DemoLivingDynamicsV0` 只属于 application/demo，可为了生活感调优且没有科研证据权。科研当前按实际状态保持 PAUSED；详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)。
+Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
 
 当前只维护按职责归属的活动文档；数量不是稳定契约。按内容归属维护，不再按“某天新对话／某个模型的新总结”新增并列总纲。
 
 | 文件 | 唯一职责 | 不在这里维护 |
 |---|---|---|
 | **[项目现状速览（通俗版）](项目现状速览_通俗版.md)** | **大白话入口**：在做什么、走到哪、有没有走偏、待拍板事项 | 新论证；术语定义 |
+| **[研究重建审计](研究重建审计_2026-10-06.md)** | **唯一综合审计**：确证失败、证据强度、科学距离与重建顺序 | 易变 TODO 与逐项代码进度 |
 | [完整机制说明 v0](完整机制说明_v0.md) | 已确认的 W/O/X/S/P/D/A 语义、任务承诺、场景/动作、时间、低耦合及消融约束 | 未采纳公式、代码完成清单 |
 | [前台问题与候选创新](前台问题与候选创新.md) | 课题锚、Forward/Inverse、研究候选、评价、近邻边界及后续分支 | 再写一套机制总说明 |
 | [未决问题与机制候选](未决问题与机制候选.md) | 具体缺口、备选计算、用户原意、决策条件 | 把提案写成已实现或已验证 |
@@ -36,7 +37,7 @@ Shared Runtime Kernel 已工程冻结：它负责时间、世界、动作执行�
 | [Theory-S M1 冻结决策](Theory-S_M1冻结决策_2026-09-07.md) | pre-training 的语义与协议冻结边界 | Theory-S 已训练/有效的声明 |
 | [Existing Dataset Pool Routing](Existing_Dataset_Pool_Routing_v1_2026-09-08.md) | 历史数据集 routing、已 superseded 的 benchmark next-action | 新 dataset 搜索或训练授权 |
 | [Architecture Audit Policy](architecture_audit_policy.md) | AI-heavy 工程的审计范围、已知债与不授权重构边界 | 当前 Runtime 的待办 |
-| 本 README | 阅读路由与维护规则 | 复制其他七页的内容 |
+| 本 README | 阅读路由与维护规则 | 复制其他页面的内容 |
 
 ## 从哪里读
 
@@ -46,7 +47,7 @@ Shared Runtime Kernel 已工程冻结：它负责时间、世界、动作执行�
 
 理解项目：研究问题 → 完整机制。
 
-继续改造：先看系统愿景与 Runtime closure；Runtime 已冻结时，直接读 Paper-0 问题卡 → TODO 的 M2，不重开 Engine。
+继续研究开发：先看[研究重建审计](研究重建审计_2026-10-06.md)和通俗速览，再按 TODO 的 PredictionBaselineV1 → 监督信号 → 可执行更新 → 基线比较 → 独立验证推进；M2 candidate-set admission 仍阻止 Paper-0 formal test，但不阻止开发方法基座。Runtime 已冻结，不因行为模型问题重开 Engine。
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 

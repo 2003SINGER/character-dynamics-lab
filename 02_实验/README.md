@@ -2,9 +2,11 @@
 
 本机工作区、历史 checkout 与运行产物的路径边界见[本地工作区布局](Local_Workspace_Layout.md)。迁移不改变实验条件或 run ID，也不授权启动新实验。
 
-当前研究对象入口：[ResearchDynamicsV1](ResearchDynamicsV1/README.md)。旧 `Theory_S_v2` 统一标记为 `ExpectedEffectEMAProxyV0` 历史 proxy；不得把它写成已验证角色动力学。
+当前方法开发入口：[PredictionBaselineV1](PredictionBaselineV1/README.md) development fit 与独立 seed 复现已完成，待外审；唯一数值结果见[RESULTS](PredictionBaselineV1/RESULTS.md)。它是 DEVELOPMENT 条件预测基座，不是已学习的心理 `S` 或 Runtime policy；研究重建顺序与证据边界见[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)。`ResearchDynamicsV1` 是手写固定-law fixture，当前机制验收不足，未作为 admitted science model。旧 `Theory_S_v2` 是 `ExpectedEffectEMAProxyV0` 历史诊断 proxy；不得把它写成已验证角色动力学。
 
-本目录是实验路由索引，不宣布全项目当前阶段。Canonical layers are: `Replay/` for source-neutral records/features/baselines, `Theory_S_v2/` for the single Python trainable dynamics candidate, and `T14_T20/` for the frozen 1D historical development harness. New external training must compose these layers rather than copy Theory-S per dataset.
+本目录是实验路由索引，不宣布全项目当前阶段。Canonical layers are: `Replay/` for source-neutral records/features, `PredictionBaselineV1` for the fitted and reproducible development prediction method base awaiting independent review, `ExpectedEffectEMAProxyV0` for historical Theory-S diagnostics, and `T14_T20/` for the frozen 1D development harness. Source action labels and source candidate lists retain dataset provenance; source candidates are not character `A^O`. New method work must use episode-grouped train/validation. All previously exposed datasets are development data, not untouched formal test.
+
+`PredictionBaselineV1` compares standard categorical cross-entropy O-only, low-order history, mean-history, and executable sequence baselines such as GRU. This is not a total-capacity-matched comparison and does not claim psychological semantics or Paper-0 formal PASS. Development fit and exact seed reproduction are complete; independent review is pending. Paper-0 candidate-set admission remains a formal blocker but no longer prevents development method learning.
 
 Mechanism 表达力与候选集边界的独立工程验收见 [Mechanism Sanity v1](Mechanism_Sanity_v1/README.md) 与 [v1.2 trajectory sanity](Mechanism_Sanity_v1_2/README.md)。它们不启动正式 NLL/Experiment B，不读取或修改 T14/T20 的 strict-v2 protocol/validator/shards/status/results。
 
@@ -19,7 +21,7 @@ Mechanism 表达力与候选集边界的独立工程验收见 [Mechanism Sanity 
 
 本地外部实验/基准 payload 位于 [`outputs/external_assets_2026-09-06`](../outputs/external_assets_2026-09-06/)；其 provenance 与原始复核/对话证据分开维护。该归档不代表任何数据集已经通过本项目的 adapter、语义准入或 Paper-0 candidate/action-surface gate。
 
-`T14_T20_rank_matched_probe_v1.md`、`Replay/replay_features_v1.py`、`Replay/replay_probe_v1.py` 是既有 1D 候选协议与训练设施；`Theory_S_v2/` 是后续 trainable dynamics candidate，但尚未进入真实 development training。v0 协议、`drive-linear-v0` 与 C++ `replay_core_cli` 仅作历史 diagnostic/repro path。其他数据集按各自 README 的准入状态维护。
-# 研究与 Demo 边界（2026-09-16）
+`T14_T20_rank_matched_probe_v1.md`、`Replay/replay_features_v1.py`、`Replay/replay_probe_v1.py` 是既有 1D development 协议与训练设施；不构成正式独立验证。H0b/compression 的旧 actor-unit split 有 episode overlap：见 [read-only split audit](../outputs/research_reset_audit_20261006/split_audit_v3.json)，旧数值/artifact 保留但泛化强度降级。`Theory_S_v2/` 保留为历史 proxy implementation/repro path，不是当前已训练模型。其他数据集按各自 README 的 admission 状态维护。
+# 历史研究与 Demo 边界记录（2026-09-16）
 
-本目录的研究 candidate 仍以 `Theory_S_v2/` 为 canonical source；C++ `ReferenceRuleDynamicsV0` 只提供可复现的工程/reference baseline，`DemoLivingDynamicsV0` 与 `FREE_RUN_6H` 属于 application-only，不是研究 evidence。三者共享执行 Kernel 的时间/W/O contract，但不得互相冒充或倒灌。
+这段保留 2026-09-16 的阶段描述，不再定义当前 research candidate。当前方法入口与状态以本 README 上文及[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)为准。C++ `ReferenceRuleDynamicsV0` 是工程/reference baseline，`DemoLivingDynamicsV0` 与 `FREE_RUN_6H` 是 application-only；共用 Runtime contract 不等于研究证据。

@@ -17,8 +17,9 @@
 | 本机 Laya typed policy（O/S/P 驱动的可回放 policy A/B） | [Laya typed policy](Demo%20codex-generated/demo/laya_typed_policy_v0/README.md)；本机运行数据在 `outputs/laya_runs/`（Git 忽略），只连 loopback 本地 checkpoint，不进入科研线 |
 | 整体机制、各层职责、任务/承诺、时间与低耦合 | [完整机制说明](00_研究设计/完整机制说明_v0.md) |
 | 研究问题、Forward/Inverse、候选创新及评价边界 | [研究问题](00_研究设计/前台问题与候选创新.md) |
+| 项目历史失败、科研证据距离与研究重建顺序 | [研究重建审计（2026-10-06）](00_研究设计/研究重建审计_2026-10-06.md) |
 | 尚未定下的计算、具体机制/实现缺口 | [未决问题](00_研究设计/未决问题与机制候选.md) |
-| 下一动作、依赖与验收 | [TODO](00_研究设计/TODO.md)；当前仅推进 M2 candidate-set admission |
+| 下一动作、依赖与验收 | [TODO](00_研究设计/TODO.md)；PredictionBaselineV1 development fit 与独立 seed 复现已完成，待外审；Paper-0 candidate-set admission 仍是正式验证 blocker |
 | Self-Play / Self-Evaluation v0 | [评测协议](02_实验/Self_Evaluation_v0.md)；[scorecard runner](tools/self_evaluation_v0.py)；[scenario manifest](tools/self_evaluation_scenarios_v0.json) |
 | 实验导出器、切片与可复现记录 | [实验总路由](02_实验/README.md)；[跨数据集 Replay 接口草案](02_实验/跨数据集Replay接口_v0.md)；[机制识别循环与反事实诊断](02_实验/机制识别循环与反事实诊断_v0.md) |
 | 文献 PDF、职责级阅读与证据 | [文献库](01_文献/README.md) |
@@ -26,7 +27,7 @@
 
 仓库治理护栏：[ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md)；廉价健康检查可运行 `python tools/repo_health_check.py`，ReplayRecord 样例可用 `python tools/validate_replay_record.py <record.json>` 校验。护栏只预警文件膨胀/重复归档，明确的 schema、CTest 和 provenance 错误才阻断对应检查。
 
-新想法只在直接服务“维护行为相关状态／预测生成行为”时进入当前主线。效率—效果与可控性是第二评价维度，比较对象必须包含强 summary，不能用便宜或能跑替代研究证明。
+当前研究重建按方法基座 → 监督信号 → 可执行更新 → 基线比较 → 独立验证推进。PredictionBaselineV1 是 `DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW`，但不构成心理状态 `S` 或 Runtime policy 的训练证据；[训练结果与边界](02_实验/PredictionBaselineV1/RESULTS.md)为数值唯一来源。来源动作标签和候选列表不自动等于人物真值 `A*` 与主观候选集 `A^O`。效率—效果与可控性仍需与强 summary 比较，不能用便宜或能跑替代研究证明。
 
 ## 代码与材料的归属
 
@@ -39,4 +40,4 @@
 
 用户原话是一手方向；模型赞扬、公式、文献线索和新颖性判断不是已证实结论。已有可运行 demo 不代表有经验证研究结果，定向文献库也不能保证没人做过。
 
-按[项目规则](AGENTS.md)和[研究设计路由](00_研究设计/README.md)维护；修改后保存配置、版本、错误和负结果。本地验证后提交，只有用户本轮明确要求才推送。
+按[项目规则](AGENTS.md)和[研究设计路由](00_研究设计/README.md)维护；修改后保存配置、版本、错误和负结果。Verified scoped edits 按 AGENTS.md 提交并推送至 `webgpt-sync`；`main` 受保护，除非对该分支的该次操作有明确授权。
