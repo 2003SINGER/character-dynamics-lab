@@ -15,7 +15,8 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| PREDICTION-BASELINE-V1 | **DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW** | 有界来源/时点诊断完成；下一步形成逐 channel 权限与任务协议，区分来源条件排名和行动前预测，再决定可解释的新开发比较，不自动训练或调参 | [唯一数值结果](../02_实验/PredictionBaselineV1/RESULTS.md)；[LIGHT 任务准入与下一动作](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。完整 actor-visible contract 未过，候选重建未授权训练，人工准入仍 PENDING；已暴露数据不是 untouched formal test |
+| PREDICTION-BASELINE-V1 | **DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW** | 保留旧 fits 与冻结协议，不将旧 physical-history view 冒称完整观察；新比较另由 SOURCE-RANKING-V1 维护 | [唯一旧数值结果](../02_实验/PredictionBaselineV1/RESULTS.md)；[LIGHT 来源准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。完整 actor-visible contract / 人工准入未过，已暴露数据不是 untouched formal test |
+| SOURCE-RANKING-V1 | **INPUT_PARENT_AUDIT_PASS / READY_FOR_INDEPENDENT_REVIEW；TRAINER_NOT_IMPLEMENTED** | 按冻结规格实现训练器及合成功能合同，再独立验收；通过前不拟合。只做来源记录条件排名，不替代 Paper-0 | [任务/通道/拟训练规格](../02_实验/LIGHT_SourceRankingV1/README.md)；[唯一输入实现验收与下一动作](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)，training_authorized=false |
 | SYSTEM | **Shared Runtime Kernel v1：CLOSED / FROZEN** | Continuous Runtime ownership、threshold/W validation、typed rejection、fixtures、trace、case-isolated CTest、explicit DynamicsModel injection 与 isolation guard 已闭环。此状态只关闭执行 Kernel，不代表任何行为模型、Evaluator、Objective、Optimizer 或 Paper-0 完成。 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | M1 | **历史 proxy 已审计；不作为新研究模型** | 保留旧 Theory-S 结果为 `ExpectedEffectEMAProxyV0` diagnostic，不延伸其心理解释 | [研究重建审计](研究重建审计_2026-10-06.md)；[Pre-V1 validity audit（2026-09阶段边界）](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md) |
 | M2 | **Paper-0 formal blocker；不是全部开发的前置门** | 为正式 Paper-0 补齐 SceneSnapshot → affordance → generated actor-local `A^O` 的最小 ontology 与实例绑定 | 生成不得读 source `A*`；source support 仅 post-hoc 诊断；[Mechanism Sanity v1](../02_实验/Mechanism_Sanity_v1/README.md) |
@@ -31,7 +32,7 @@
 
 ## 研究重建顺序与范围护栏
 
-- **开发顺序**：现有 development fit/复现、候选重建与有界来源诊断完成 → 逐 channel 权限/时点与任务协议 → 协议准入及实现复核 → 可执行更新与强弱 baseline → 独立验证。不得用事后模式筛选替代观察权限，不据诊断计数关闭完整 actor-visible contract。现有模型数值只维护于[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)，下一动作与数据 gate 见[任务准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。
+- **开发顺序**：已完成旧 fit/复现、来源诊断及 SourceRankingV1 任务/输入投影 → 训练器实现与独立复核 → 可执行更新与强弱 baseline → 独立验证。新任务是 source-conditional development 比较，不替代完整 actor-visible gate；后续推进位置只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)，旧数值仍只见[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)。
 - **Paper-0 formal gates**：persistent `S`、legal actor-local `O`、independent `A*`、可复核有限 `A^O`、episode/user-disjoint split 和预注册指标；M2 是 candidate-set formal admission 工作，不阻塞开发方法基座。
 - **PAUSED**：Objective readiness、Evaluator ranking、Optimizer、旧 proxy training、外部数据集扩展；ResearchDynamicsV1 不作为已训练模型，仅记录为尚未准入的 toy/fixture。
 - **DEFERRED SYSTEM/RESEARCH BRANCH**：ToM、multi-agent、Inverse、P drift、Q01 advanced response curves、Scene Manager 与 live LLM semantics。

@@ -19,7 +19,7 @@
 | 研究问题、Forward/Inverse、候选创新及评价边界 | [研究问题](00_研究设计/前台问题与候选创新.md) |
 | 项目历史失败、科研证据距离与研究重建顺序 | [研究重建审计（2026-10-06）](00_研究设计/研究重建审计_2026-10-06.md) |
 | 尚未定下的计算、具体机制/实现缺口 | [未决问题](00_研究设计/未决问题与机制候选.md) |
-| 下一动作、依赖与验收 | [TODO](00_研究设计/TODO.md)；[LIGHT 有界来源/时点诊断](01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)已完成，下一步形成逐 channel 权限与任务协议；完整 actor-visible contract / Paper-0 formal admission 仍未过，不立即重训 |
+| 下一动作、依赖与验收 | [TODO](00_研究设计/TODO.md)；[LIGHT source-conditional 任务规格](02_实验/LIGHT_SourceRankingV1/README.md)与[输入投影验收](02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)已落地，训练器待实现/审查；[完整 actor-visible / Paper-0 准入](01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)仍未过 |
 | Self-Play / Self-Evaluation v0 | [评测协议](02_实验/Self_Evaluation_v0.md)；[scorecard runner](tools/self_evaluation_v0.py)；[scenario manifest](tools/self_evaluation_scenarios_v0.json) |
 | 实验导出器、切片与可复现记录 | [实验总路由](02_实验/README.md)；[跨数据集 Replay 接口草案](02_实验/跨数据集Replay接口_v0.md)；[机制识别循环与反事实诊断](02_实验/机制识别循环与反事实诊断_v0.md) |
 | 文献 PDF、职责级阅读与证据 | [文献库](01_文献/README.md) |

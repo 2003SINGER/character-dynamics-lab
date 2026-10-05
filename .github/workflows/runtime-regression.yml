@@ -26,5 +26,6 @@ jobs:
           python3 tools/audit_light_source_lineage_v1.py --self-test
           python3 tools/test_build_light_before_turn_v1.py
           python3 tools/test_audit_light_snapshot_timing_v1.py
+          python3 02_实验/LIGHT_SourceRankingV1/test_project_inputs.py
       - name: Repository health
         run: python3 tools/repo_health_check.py
