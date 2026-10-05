@@ -6,7 +6,7 @@
 
 本目录是实验路由索引，不宣布全项目当前阶段。Canonical layers are: `Replay/` for source-neutral records/features, `PredictionBaselineV1` for the fitted and reproducible development prediction method base awaiting independent review, `ExpectedEffectEMAProxyV0` for historical Theory-S diagnostics, and `T14_T20/` for the frozen 1D development harness. Source action labels and source candidate lists retain dataset provenance; source candidates are not character `A^O`. New method work must use episode-grouped train/validation. All previously exposed datasets are development data, not untouched formal test.
 
-当前数据 gate：[LIGHT source/任务准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。原始映射、before-turn 候选重建及全量代码信息流检查完成；当前源 context/support 的时点和 partner 动作可见表示仍未准入。下一动作是 source/observation contract 验收，不是追加训练或调 Runtime。
+当前数据 gate：[LIGHT source/任务准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。候选重建、信息流检查与有界来源/时点诊断完成，完整 actor-visible contract 仍未准入。下一步形成逐 channel 权限/时点与任务协议，区分来源条件排名和行动前预测；不是追加训练或调 Runtime。
 
 `PredictionBaselineV1` compares standard categorical cross-entropy O-only, low-order history, mean-history, and executable sequence baselines such as GRU. This is not a total-capacity-matched comparison and does not claim psychological semantics or Paper-0 formal PASS. Development fit and exact seed reproduction are complete; independent review is pending. Paper-0 candidate-set admission remains a formal blocker but no longer prevents development method learning.
 
