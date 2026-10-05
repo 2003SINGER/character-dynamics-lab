@@ -67,4 +67,6 @@ Primary full text: [Cho et al., arXiv:1406.1078v3](https://arxiv.org/html/1406.1
 
 ## Review gate
 
+Post-run source/measurement review: [LIGHT task admission audit](../../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md) confirms an environmental-snapshot/physical-history task, not full dialogue or actor-observed history. Source-field copies match; temporal permission, recorded support versus `A^O`, and human semantic admission remain unverified. This clarifies the frozen run's interpretation without changing its protocol, snapshots, trainer or fitted outputs.
+
 The approved synthetic contract test file passed before fitting. Both development runs exited successfully. The parent independently verified the reproduction manifests, input/source/protocol hashes, split and counts, all 36 checkpoint tensors, all 105 epoch records, and all 27,070 per-row loss fields as exact seed-7 rerun matches. A separate statistical audit also checked the cohort, buckets, checkpoint selection, and episode-cluster intervals. Status is therefore **READY_FOR_INDEPENDENT_REVIEW / DEVELOPMENT ONLY**; see [RESULTS.md](RESULTS.md). This is not `CLOSED`, does not validate Paper-0, and does not authorize a commit.

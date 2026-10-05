@@ -1,5 +1,7 @@
 # LIGHT T0c｜准入审计与 Replay slice
 
+当前解释以[2026-10-06 研究重建审计](../../00_研究设计/研究重建审计_2026-10-06.md)和[LIGHT 任务准入审计](../../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)为准。下面保留原批次记录；H0b/compression 的旧 actor-unit split 有 episode overlap，不作为已证实泛化。新的 episode-disjoint development fit 也只使用环境快照/physical history，不等于完整角色观察。
+
 原始资产位于被 Git 忽略的 `outputs/external_assets_2026-09-06/LIGHT/`，与 ClubFloyd 和 runtime 分离。来源为 ParlAI LIGHT 的 `light-dialog-processed-small7.pkl`，文件 SHA-256 记录在 manifest 中。
 
 ## 已完成
