@@ -6,7 +6,7 @@
 
 本目录是实验路由索引，不宣布全项目当前阶段。Canonical layers are: `Replay/` for source-neutral records/features, `PredictionBaselineV1` for the fitted and reproducible development prediction method base awaiting independent review, `ExpectedEffectEMAProxyV0` for historical Theory-S diagnostics, and `T14_T20/` for the frozen 1D development harness. Source action labels and source candidate lists retain dataset provenance; source candidates are not character `A^O`. New method work must use episode-grouped train/validation. All previously exposed datasets are development data, not untouched formal test.
 
-当前数据 gate：[LIGHT source/任务准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)，完整 actor-visible contract 仍未准入。[LIGHT_SourceRankingV1](LIGHT_SourceRankingV1/README.md)是另立的 DEVELOPMENT 来源记录条件排名协议；[INPUT_REVIEW](LIGHT_SourceRankingV1/INPUT_REVIEW.md)维护投影证据和训练器实现前置验收，不替代 Paper-0 或调 Runtime。
+当前数据 gate：[LIGHT source/任务准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)，完整 actor-visible contract 仍未准入。[LIGHT_SourceRankingV1](LIGHT_SourceRankingV1/README.md)是另立的 DEVELOPMENT 来源记录条件排名协议；[INPUT_REVIEW](LIGHT_SourceRankingV1/INPUT_REVIEW.md)维护已内部通过的输入/训练器合成验收及真实拟合前置准入，真实拟合未执行；不替代 Paper-0 或调 Runtime。
 
 `PredictionBaselineV1` compares standard categorical cross-entropy O-only, low-order history, mean-history, and executable sequence baselines such as GRU. This is not a total-capacity-matched comparison and does not claim psychological semantics or Paper-0 formal PASS. Development fit and exact seed reproduction are complete; independent review is pending. Paper-0 candidate-set admission remains a formal blocker but no longer prevents development method learning.
 

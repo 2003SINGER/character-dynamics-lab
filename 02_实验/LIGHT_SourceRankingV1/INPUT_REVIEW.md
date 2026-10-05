@@ -1,8 +1,8 @@
-# SourceRankingV1 输入投影验收
+# SourceRankingV1 实现验收与下一动作
 
-日期：2026-10-06。状态：**INPUT_IMPLEMENTED / PARENT_AUDIT_PASS / READY_FOR_INDEPENDENT_REVIEW**；不是 `CLOSED`。`training_authorized=false`；**TRAINER_NOT_IMPLEMENTED**。
+日期：2026-10-06。状态：**INPUT_PARENT_AUDIT_PASS / TRAINER_SYNTHETIC_PARENT_AUDIT_PASS / READY_FOR_INDEPENDENT_REVIEW**；不是 `CLOSED`。`training_authorized=false`；**REAL_FIT_NOT_RUN**。
 
-本页只维护投影实现、验收与当前下一动作。[README](README.md)冻结任务、通道和拟训练规格；[LIGHT 来源审计](../../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)拥有 source/observation 的未准入结论。输入投影通过不等于演员可见观察契约、Paper-0 或训练通过。
+本页唯一维护投影/训练器实现验收与当前下一动作。[README](README.md)冻结任务、通道和拟训练规格，保留冻结时的未准入状态，不随实现进度改写；[LIGHT 来源审计](../../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)拥有 source/observation 的未准入结论。以下投影证据和合成训练证据分别成立，不等于演员可见观察契约、Paper-0 或真实数据上的预测通过。
 
 ## 修订与执行证据
 
@@ -39,8 +39,39 @@ python3 02_实验/LIGHT_SourceRankingV1/project_inputs.py \
 
 合成测试已注册 CI。全量本地材料被忽略，**CI 不执行本机全量数据验收**；不能把 CI 绿当作独立人类准入。
 
+## 训练器：合成功能验收
+
+[train.py](train.py)已实现冻结的九个条件：context-only、last2、learned pool、GRU core、三个命名消融、partner raw command diagnostic 和 uniform。学习条件实际执行 Adam / cross-entropy 更新，不是把手写分数改名为训练；uniform 无参数。训练器不接入 Runtime。
+
+- [20 个合成合同测试](test_train.py)全部通过。涵盖独立 hash oracle、metadata/label noninterference、合法通道正控、mask 的文本及 presence bits、pool permutation / GRU order / last2 padding、八个学习条件的 encoder/head 梯度与参数更新、训练 loss 下降、validation 无梯度与错误 split 拒绝、earliest-min checkpoint 深复制、同 seed 复现、candidate-order tie ranks、非等长 episode 的 row-weighted cluster bootstrap、九条件同一有序 cohort、输出/符号链接拒绝及 provenance。合成 loss 下降只证明更新路径，不证明真实任务有效。
+- 主代理另存一次完整 CLI 合成运行：8 个生成行，固定 seeds 7/19/31、15 epochs；24 个学习 checkpoint + 3 个 uniform 条件运行。独立 verifier 不调用训练器的训练/指标/汇总 helpers，重新构造特征、加载全部 checkpoint，核对 **360 条 epoch 记录、216 条逐行预测**、NLL/top1/MRR、参数量、earliest-min selection、两项主比较及六个 depth strata 的 seed-average / episode bootstrap。全部相符；它仍复用模型类加载参数，不声称第二套完全独立的神经网络实现。
+- 再次使用同一 output 路径退出 1 / `refusing existing output`；随后独立核验全部输出 hash 不变。报告文件、逐行预测、checkpoint 与实际 code/test/protocol/input 原字节 snapshots 均被 provenance 覆盖；provenance 不对自身做循环 hash。snapshot 中的 INPUT_REVIEW 是运行前历史状态，不冒充更新后的本页。
+- 只读核验 pinned 真实输入的 13,463 行、hash、split 与 source/cohort digest 通过；真实拟合入口随后按预期拒绝。没有真实 source 拟合、bucket9 评分、超参数搜索或旧 fit 重算。
+
+本机产物（Git 忽略）：`outputs/light_source_ranking_v1_20261006/trainer_synthetic_parent_v1/`；独立核验脚本 `outputs/light_source_ranking_v1_20261006/parent_trainer_audit_v1.py`。
+
+| 项 | SHA-256 |
+|---|---|
+| train.py | `d6aa61f48ddce875c4d763680cf0028cad0e243e60ee190bbff62e39c248a037` |
+| test_train.py | `2684094f830a84caf9313db4b2c7e3ff056cdecad3c3d344c591ed7535f3ca46` |
+| parent trainer audit script | `ca9e56bf1f245d2ea4eafcc7c9e31bef1c10c809ca9be40cbad890d33768ea6a` |
+| synthetic provenance.json | `97aa9caa749f5f8556b06617fe01435f194065d0ac5012bcacc4070a1bcccf3e` |
+
+```sh
+/opt/homebrew/opt/python@3.12/bin/python3.12 02_实验/LIGHT_SourceRankingV1/test_train.py
+/opt/homebrew/opt/python@3.12/bin/python3.12 outputs/light_source_ranking_v1_20261006/parent_trainer_audit_v1.py \
+  outputs/light_source_ranking_v1_20261006/trainer_synthetic_parent_v1
+# 新合成运行需换未存在的路径；不加载真实输入。
+/opt/homebrew/opt/python@3.12/bin/python3.12 02_实验/LIGHT_SourceRankingV1/train.py \
+  --synthetic --out outputs/light_source_ranking_v1_20261006/trainer_synthetic_recheck_new
+```
+
+本机 Python 3.12 / torch 2.14.0 / numpy 2.5.3；CI 独立 job 使用 Python 3.12 / torch 2.14.0+cpu / numpy 2.5.3，仅执行合成合同。不声称 Mac/Linux 跨平台 bitwise 一致。cost 是该进程的运行/推理耗时与全进程 peak RSS，不是模型独立内存测量或效率优势证据。
+
+既有 build 通过；full CTest 在允许 loopback 的执行环境 **49/49** 通过，Reference verification 全部通过。首次受限环境的 7 个 socket 测试因 bind 权限失败，未计作代码 PASS。既有 CTest 的 ResearchDynamicsV1 intervention fixture 会重写历史 JSON；本次这些 tracked 内容逐字节未变，但不声称所有既有测试无写副作用。新合成测试不重算这些旧 fixtures。Repository health 退出 0，有 3 个警告：原有大 simulation.cpp / 重复原始材料，加新 train.py 52,810 bytes 的体量警告；不隐藏警告，也不在本阶段扩模块重构。
+
 ## 当前下一动作与不变边界
 
-唯一下一动作：按冻结规格实现 source-conditional ranking 训练器及合成功能合同，再由主代理独立核对实际 tensors、特征权限、训练/validation 隔离、pool/GRU 公平条件与输出证据；通过前不拟合真实数据。方法来源与迁移边界见[近邻总表 §12 的 Cho 方法核验](../../01_文献/全量近邻精读总表_2026-10-06.md)及 README 的 Deep Sets 方法段。
+唯一下一动作：独立复核此实现，再建立单独的、明确允许 DEVELOPMENT 来源条件排名的训练准入记录及执行入口，绑定已验收的输入/code/协议和固定配置；之后才拟合相同 cohort / seeds 的真实数据。当前 CLI 没有真实训练或授权 override，不能把合成 PASS 当成已获真实任务准入。该窄任务不要求把未证明的 source 信息偷称 actor-visible；完整演员观察契约仍需另行验证。方法来源与迁移边界见[近邻总表 §12 的 Cho 方法核验](../../01_文献/全量近邻精读总表_2026-10-06.md)及 README 的 Deep Sets 方法段。
 
-本轮没有拟合、超参数搜索、Runtime/Demo/reference 修改或旧结果重算。后续结果最多回答本协议的 DEVELOPMENT 条件排名问题；完整演员观察权限、动作 settlement、`A^O`、独立正式 test、具名心理 `S`、闭环 policy 和新颖性仍未由它证明。整个科研改造目标未完成。
+本轮只有合成拟合，没有真实拟合、超参数搜索、Runtime/Demo/reference 内容修改或旧拟合结果重算。后续结果最多回答本协议的 DEVELOPMENT 条件排名问题；完整演员观察权限、动作 settlement、`A^O`、独立正式 test、具名心理 `S`、闭环 policy 和新颖性仍未由它证明。整个科研改造目标未完成。
