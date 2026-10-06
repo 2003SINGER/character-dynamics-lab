@@ -2,7 +2,7 @@
 
 **Status: READY_FOR_INDEPENDENT_REVIEW** — implementation and local tests are complete. The raw cancellation case preserves a verified upstream candidate-alias failure; explicit-binding variants isolate its effect. This is not `CLOSED`, not evidence that either organization is superior, and not player validation.
 
-Start with [results and research decision](RESULTS.md), then [independent parent review](PARENT_REVIEW.md) for exact run IDs and remaining evidence. Implementation tests do not complete the player-meaning / mechanism-gap step.
+Start with [results and research decision](RESULTS.md), then [independent parent review](PARENT_REVIEW.md) for exact run IDs and the requirement-by-requirement audit. The bounded research decision is **NO_GO for an activity-organization behavioral-advantage claim in this shared fixture**. This follows the goal's negative-decision branch, not a claim of player meaning, author-cost savings, or a new general mechanism gap. Implementation tests alone do not establish those claims.
 
 The [offline shared viewer](presentation/README.md) projects existing traces into the same anonymous A/B presentation, including targets, public states and events. It is development inspection, not a player experiment; the source identity can be explicitly revealed.
 

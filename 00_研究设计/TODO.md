@@ -16,7 +16,7 @@
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
 | PRAXISH-ACTIVITY-PILOT | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** | 前两步执行证据与原件保持不变；后续比较另立输入和 outputs，不覆盖旧结果 | [原件运行与验收 owner](../02_实验/Praxish_Activity_Pilot_v0/README.md)；[原文/源码证据](../01_文献/精读_Praxish论文与原始实现_2026-10-06.md) |
-| PRAXISH-UTILITY-COMPARISON | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** | 比较与同构公共 viewer 已复跑；下一步检视具体体验，再核查组合变更的维护瓶颈。当前未显示行为优势，源实现 bug 不作收益；玩家意义/机制 gap 未验证，不自动开发新机制/招募玩家 | [唯一结果与研究判断](../02_实验/Praxish_Utility_Comparison_v0/RESULTS.md)；[公共 viewer](../02_实验/Praxish_Utility_Comparison_v0/presentation/README.md)；[父代理验收](../02_实验/Praxish_Utility_Comparison_v0/PARENT_REVIEW.md) |
+| PRAXISH-UTILITY-COMPARISON | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；有界立项 NO_GO** | 原执行目标已产出否定分支：不以活动组织本身改善该共同场景行为立项。作者成本/玩家偏好仍未知；下一问题待准入，不自动扩方法/训练/招募 | [唯一结果与研究判断](../02_实验/Praxish_Utility_Comparison_v0/RESULTS.md)；[公共 viewer](../02_实验/Praxish_Utility_Comparison_v0/presentation/README.md)；[逐项完成审计](../02_实验/Praxish_Utility_Comparison_v0/PARENT_REVIEW.md#原-thread-goal-逐项完成审计) |
 | NPC-CONTINUITY-PILOT | **既有 DEVELOPMENT 探针，保留** | 原 utility/历史 LLM 接口证据保留；本轮不扩展、也不把未提交 paired 材料混入 Praxish 工作 | [原问题与限制](研究重建审计_2026-10-06.md#玩家目标的第一个可比较问题)；[实现验收与限制](../Demo%20codex-generated/applications/npc_continuity_v0/README.md)。无玩家结果 |
 | PREDICTION-BASELINE-V1 | **DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW** | 保留旧 fits 与冻结协议，不将旧 physical-history view 冒称完整观察；新比较另由 SOURCE-RANKING-V1 维护 | [唯一旧数值结果](../02_实验/PredictionBaselineV1/RESULTS.md)；[LIGHT 来源准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。完整 actor-visible contract / 人工准入未过，已暴露数据不是 untouched formal test |
 | SOURCE-RANKING-V1 | **DEVELOPMENT_TRAINED / PARENT_ARTIFACT_AUDIT_PASS / READY_FOR_INDEPENDENT_REVIEW** | 复核固定比较并确定下一可识别问题；不调参挽救假设，不替代 Paper-0 | [冻结任务/通道规格](../02_实验/LIGHT_SourceRankingV1/README.md)；[唯一结果与下一动作](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)，执行准入与 actor-visible 准入分开 |
@@ -35,7 +35,7 @@
 
 ## 研究重建顺序与范围护栏
 
-- **当前目标**：2026-10-07 授权继续第 3 步，比较 Praxish 活动组织与独立参数化 utility，保留实际配置变化与失败；具体状态由[第 3 步 owner](../02_实验/Praxish_Utility_Comparison_v0/README.md)维护。当前不新增心理机制、不跑旧长批次，不启动正式玩家招募。SourceRankingV1 已完成，不继续训练挽救假设，结果仍只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)。
+- **当前检查点**：Praxish 原件、共同场景、独立参数化 utility 比较及有界否定判断已交付，具体状态由[实验 owner](../02_实验/Praxish_Utility_Comparison_v0/README.md)维护，仓库 milestone 仍待用户外审，不自行 CLOSED。后续问题待准入；不新增心理机制、不跑旧长批次、不启动正式玩家招募。SourceRankingV1 已完成，不继续训练挽救假设，结果仍只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)。
 - **Paper-0 formal gates**：persistent `S`、legal actor-local `O`、independent `A*`、可复核有限 `A^O`、episode/user-disjoint split 和预注册指标；M2 是 candidate-set formal admission 工作，不阻塞开发方法基座。
 - **PAUSED**：Objective readiness、Evaluator ranking、Optimizer、旧 proxy training、外部数据集扩展；ResearchDynamicsV1 不作为已训练模型，仅记录为尚未准入的 toy/fixture。
 - **DEFERRED SYSTEM/RESEARCH BRANCH**：ToM、multi-agent、Inverse、P drift、Q01 advanced response curves、Scene Manager 与 live LLM semantics。

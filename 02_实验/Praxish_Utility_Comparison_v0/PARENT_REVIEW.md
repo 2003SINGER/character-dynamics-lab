@@ -1,6 +1,21 @@
-# 父代理独立验收｜第 1—3 步与剩余证据
+# 父代理独立验收｜第 1—4 步与判断边界
 
-日期：2026-10-07。结论：开发比较已独立复跑并逐项核对；正式状态保留 `READY_FOR_INDEPENDENT_REVIEW`，不自行 CLOSED。第 4 步仍缺玩家意义与具体机制缺口证据，完整 thread goal 不因此完成。
+日期：2026-10-07。结论：开发比较已独立复跑并逐项核对；正式状态保留 `READY_FOR_INDEPENDENT_REVIEW`，不自行 CLOSED。最终 audit 按原 thread goal 第 4 步允许的**有界否定分支**给出 NO_GO，详见下节；未宣称玩家效度、作者成本或总体 NPC 课题完成。
+
+## 原 thread goal 逐项完成审计
+
+本轮重新执行原件与比较，核对输入 bytes、实际轨迹及可见投影；逐项验收如下。
+
+| 原要求 | 实际证据 | 判断 / 不外推的边界 |
+|---|---|---|
+| 1 吃透并运行 Praxish original，能解释行为 | AIIDE release pin 与原始三脚本；本次 fresh `parent-goal-audit-original-d839d37-20261007-01` 成功，83 log records，最终 DB hash 与旧复跑相同；原 tick 候选、绝对后状态 utility、角色轮换与 seeded tie 已源码核验 | 已做到原件机制解释与运行；不是多步规划、原浏览器 UI 或心理学验证 |
+| 2 共同小场景，少量动作与明确后果，可重复 | 自己的备货 phase、访客请求状态、事件不指定动作；普通/低优先级请求改变选项与顺序，工作状态保留并最终完成；旧 pilot tests 11/11 本次重跑 | 已做到有限离散回合 fixture；不是长期生活模拟 |
+| 3 合格的一种参数化基线，匹配能力/知识/展示，成功失败及修改账本 | 独立 native utility 的角色参数、通用动作模板、前置/效果与目标；12 cases、32 tie seeds、原件 alias 及 workspace 共性失败、适配前后输入和可重放 diff；13/13 tests 与 7/7 投影 tests 已父审，完整源码/配置已读 | 已做到匹配的一步效用比较，不声称覆盖全部 utility/BT/GOAP；作者工时 unknown |
+| 4 检查可见差异、定位 gap 或明确否掉一个问题 | 同构公共投影 11/12 完全相同，raw low-cancel 一组 7 回合差异是 alias，绑定 workaround 恢复相同；两侧 workspace 各加通用条件即修复。Luna 只读审计与父代理 raw trace 复核一致 | **NO_GO：否掉活动组织本身在本共同场景产生可观察行为改善的立项理由**；没有声称玩家偏好、更广泛 gap 或作者成本优势 |
+
+本次 fresh comparison `parent-goal-audit-comparison-d839d37-20261007-01` 的七项执行输入哈希与 `git show d839d37:<path>` 一致，**31 个非 manifest artifacts** 与先前 exact-input run 逐字节相同。父代理读回 raw low-cancel 与 workaround 全部动作及 post facts：前者是 Cancel/未服务，后者是 Wait → Answer → Finish，与 native 相同。[执行提交 exact-head CI](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37504092850)为 success，包含原件、比较、公共投影/导出与既有全回归；main 仍为 `e9ad2ebf329e8259b35f3ee0ef0492485d85c3ff`。
+
+第 4 步以有界 NO_GO 收口，不以“玩家在意”或“成本更低”的正向主张收口；后两者仍需新证据。开发反馈问题已向用户提出，回答只影响下一候选，不被伪造为本轮效度证据。这个执行目标的负结果交付不等于仓库 milestone 被用户批准 CLOSED。
 
 ## 最终复跑
 
@@ -8,7 +23,7 @@
 - 最终 runner SHA-256：`b3c16ebbdbd06cd937649e186682e9f124354e5b21e9a03662edf9b51db054f8`。
 - 独立 fresh runs：`parent-final-comparison-20261007-02` 与 `parent-final-comparison-20261007-03`，项目内 `outputs/praxish_utility_comparison_v0/runs/`。除时间/run ID manifest 外，**31 个 artifacts 逐字节相同**；父代理重新计算七项输入/依赖哈希，与 manifest 一致。两次均为提交前的 worktree 执行。
 - 12 cases / 32 tie seeds / 三个实际负控；仅两个已诊断取消差异，workspace 行为审计通过。最终 gate 会拒绝 raw cancel 后续回合的新错误；两侧同时删除关闭条件，即使 parity 通过，也被行为 contract 拒绝。
-- `git diff --check`、workflow YAML 解析通过；repo health return 0，三个既有警告保留，未扩大清理范围。新增独立 Node CI job 会从 pin 下载原件，运行旧/新 tests 与 fresh comparison；CI artifact 只上传比较结果，不包含 source-cache。
+- `git diff --check`、workflow YAML 解析通过；repo health return 0，三个既有警告保留，未扩大清理范围。独立 Node CI job 从 pin 下载原件，运行旧/新 tests 与 fresh comparison；CI artifact 上传比较结果及公共 presentation，不包含 source-cache。
 
 执行提交：`df0c7ac46f97aa88e7787228d46d526804245387`。提交后 fresh run `parent-exact-head-df0c7ac-20261007-01` 成功，父代理用 `git show <revision>:<path>` 重新计算七项执行输入哈希，与 manifest 一致；结果与最终提交前 artifacts 相同。受保护 main 读回仍为 `e9ad2ebf329e8259b35f3ee0ef0492485d85c3ff`。
 
@@ -31,7 +46,7 @@
 
 新增公共投影的父审：完整读取 exporter/template/tests，要求补全动作 target/actor 绑定校验，拒绝同 key 冲突状态，去掉由全局 roster 推断“在场”的文案。以已提交比较 run `parent-exact-head-df0c7ac-20261007-01` 为输入，投影 tests **7/7**，fresh bundle `outputs/praxish_utility_comparison_v0/presentation/parent-review-20261007-01/`，input/generator/template hashes 留在 manifest。12 组含目标与公共状态的轨迹仍为 **11 相同 / 1 上游 bug 分歧**，共 97 相同 / 7 不同回合对。
 
-父代理另作不调用快照/动作归一化 helper 的 raw-fact/target 读回，**208 side-turns** 的工作状态、请求状态和目标一致。父代理在本机 in-app browser 通过仅监听 loopback 的临时 HTTP 服务真正打开，核对默认匿名、空动作、前后翻页、自动播放到末回合停止、场景切换、来源揭示/隐藏，以及窄窗口 A/B 堆叠与下滚可读。截图留在该 bundle 的 `browser-review.jpg`；服务和临时 tab 已关闭。应用不允许 `file:` 导航，所以直接双击离线文件未作该浏览器的实测；生成 HTML 无网络资源依赖。未把 DOM fake smoke 代替真实浏览器验收；没有真人偏好、成本或可置信性结果。viewer 是阶段 4 的证据呈现，不是阶段 4 完成。
+父代理另作不调用快照/动作归一化 helper 的 raw-fact/target 读回，**208 side-turns** 的工作状态、请求状态和目标一致。父代理在本机 in-app browser 通过仅监听 loopback 的临时 HTTP 服务真正打开，核对默认匿名、空动作、前后翻页、自动播放到末回合停止、场景切换、来源揭示/隐藏，以及窄窗口 A/B 堆叠与下滚可读。截图留在该 bundle 的 `browser-review.jpg`；服务和临时 tab 已关闭。应用不允许 `file:` 导航，所以直接双击离线文件未作该浏览器的实测；生成 HTML 无网络资源依赖。未把 DOM fake smoke 代替真实浏览器验收；没有真人偏好、成本或可置信性结果。viewer 本身是证据呈现；阶段 4 的有界 NO_GO 来自上面的比较与因果复核，不来自“页面完成”。
 
 传统 utility 本身可模块化。参考[Game AI Pro 原始章节](https://www.gameaipro.com/GameAIPro/GameAIPro_Chapter09_An_Introduction_to_Utility_Theory.pdf)的方法基座，此处 baseline 使用可复用角色绑定、前置条件、效果和目标因子；它不是该章节所有响应曲线、惯性或商业系统的复现。匹配的是 Praxish 当前一步 goal-based law，不能推广为击败/覆盖所有 utility、BT 或 GOAP。
 
