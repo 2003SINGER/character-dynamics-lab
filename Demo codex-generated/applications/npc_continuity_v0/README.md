@@ -35,8 +35,30 @@ Contract coverage: candidate surface unaffected by S/P; no hidden-W input to can
 
 Parent verification also built every target in this build directory, ran the full CTest suite (**51/51 passed**, including frozen-source parity), and ran `character_dynamics_reference --verify` successfully. Existing socket tests required loopback permission outside the execution sandbox. These are regression/contract checks, not 51 independent NPC behavior experiments or live LLM inference.
 
+## History LLM interface — actual local probe
+
+`HistoryLlmPolicyV0` now overrides the real Runtime history entry point. It serializes O-known/stale facts, a **known numeric current O clock**, the complete supplied actor-visible ledger (Runtime already prunes it to 48h), RunningAction and the same application hard candidates. It does not send S/P, hidden W or utility scores. Candidates include targets, nominal duration and remaining duration/progress retention for a continuing intent. Ambiguous multiple targets for one ActionType are rejected because the current PolicySelection cannot express that choice. Prompt principles concern goals/events/continuation, not an alarm answer.
+
+The application-only Python worker uses standard-library JSON/HTTP/SHA256, fixed argv via `posix_spawn`, no shell, no system proxy, and loopback-only HTTP without redirects. It journals canonical request hashes, responses, API usage, latency and errors. Strict candidate-ID JSON schema and parsing remain mandatory; no JSON repair, automatic retry or utility fallback. Transport is currently POSIX (Mac/Linux), not verified on Windows.
+
+Parent artifacts: `outputs/npc_continuity_v0/stage2_live_llm_20261006_4htWYT/` (local, ignored). Qwen3-4B Q4_K_M SHA256 `7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5`; llama-server build10809 / `5266f24da`, context 16384, one slot, no context shift, temperature 0, thinking disabled. These settings do not guarantee cross-platform determinism.
+
+The first v0 call failed: the model returned bare `c5`, strict parsing rejected it, and no policy intent executed. Its raw trace/call journal remain separate. The installed [backend parser](https://github.com/ggml-org/llama.cpp/blob/5266f24da/tools/server/server-common.cpp#L1091-L1104) reads `response_format.json_schema.schema`; the initial flat `response_format.schema` did not supply that schema. v1 uses the actual nested contract and an explicit JSON-format instruction; tests guard against the old shape.
+
+v1 `trace_v1.jsonl` / `live_v1/history_llm_calls.jsonl` contain **3 real decisions over exactly 90 simulated minutes**, ending at the horizon, not task completion. At 09:00 the LLM chose StudyHalfhearted; at 09:35 and 10:10 it chose StudyAtComputer. It did not turn off the alarm. Parent checked canonical hashes, known text/numeric clock against each boundary, candidate ID→action/target→World validation, durations, temporal increments and growing history. All 3 selections were accepted. API totals: 4963 prompt tokens + 24 completion tokens; summed HTTP wall time 20.693s (not total application runtime). Total live calls including the failed v0 call: 4. The service was stopped after the probe. This difference is a development observation, **not a paired effect, a pathology diagnosis or a strong LLM baseline result**.
+
+Reproduce with an already running verified loopback model and a **nonexistent** child run directory (no live-model CTest):
+
+```sh
+"Demo codex-generated/build/npc-continuity-v0/character_dynamics_npc_history_llm_harness" --run-directory outputs/npc_continuity_v0/NEW_RUN --model-id npc-qwen3-4b-q4km --max-calls 7
+```
+
+The two new CTest contracts distinguish fake transport/HTTP responses from a real worker connection-failure check (port 1, no model inference). They test history, current-clock admission, hard candidate mapping, no S/P scores, same-action remaining time, ambiguous targets, strict response failures/no retry and journal hashes/usage. They are not human or behavioral validation.
+
+After the final v1 protocol and trace edits, parent rebuilt all targets and reran the entire suite: **53/53 CTest passed**; Reference `--verify` and repository health also passed (three existing health warnings remain). Live inference is the separate probe above, not part of CTest. `source_sha256.txt` in the run root identifies the inspected pre-commit source bytes; the compiled revision remains `7ace737`, not a claim that the new code was already committed at execution time.
+
 ## Remaining stage 2 work
 
-Actual history LLM selection, matched multi-condition input/gate audit, player-generated World input and a unified watchable/player-facing presentation are still absent. This CLI is not interactive and does not implement a fake player button or use cassette/mock choices as live model evidence. Local Mac Qwen3-4B assets were found, but this slice did not start a model or make inference calls; that small checkpoint is not automatically a strong LLM baseline.
+Matched multi-condition input/gate audits, adequate baseline breadth and unified watchable/player-facing presentation remain. The existing Player View toggle still exposes O/S/π; it is not a blind participant interface. World only supplies its prearranged event tape: no player-event injection API was found. Do not fake interaction by writing directly into O or mutating the player display. A true player input seam requires a separate scoped interface decision; no Runtime/World source was changed here. This CLI is not interactive. The small model probe does not automatically establish a strong LLM baseline, and the minimal utility is still a single-task contract.
 
 Research status and the stop-after-stage-3 decision are owned by [the research audit](../../../00_研究设计/研究重建审计_2026-10-06.md#玩家目标的第一个可比较问题). Do not add a new psychological mechanism because this contract passes.

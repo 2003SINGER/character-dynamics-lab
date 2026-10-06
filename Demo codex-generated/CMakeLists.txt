@@ -139,10 +139,14 @@ target_link_libraries(character_dynamics_runtime_case_smoke PRIVATE character_dy
 add_executable(character_dynamics_single_room_demo Src/single_room_demo.cpp)
 target_link_libraries(character_dynamics_single_room_demo PRIVATE character_dynamics_runtime)
 add_library(character_dynamics_npc_continuity_v0 STATIC
-    applications/npc_continuity_v0/npc_continuity_application_v0.cpp)
+    applications/npc_continuity_v0/npc_continuity_application_v0.cpp
+    applications/npc_continuity_v0/history_llm_policy_v0.cpp)
 target_link_libraries(character_dynamics_npc_continuity_v0 PUBLIC character_dynamics_runtime)
 target_include_directories(character_dynamics_npc_continuity_v0 PUBLIC
     applications/npc_continuity_v0)
+target_compile_definitions(character_dynamics_npc_continuity_v0 PRIVATE
+    NPC_HISTORY_LLM_PYTHON="${Python3_EXECUTABLE}"
+    NPC_HISTORY_LLM_WORKER="${CMAKE_CURRENT_SOURCE_DIR}/applications/npc_continuity_v0/history_llm_worker_v0.py")
 add_executable(character_dynamics_npc_continuity_harness
     applications/npc_continuity_v0/npc_continuity_harness.cpp)
 target_link_libraries(character_dynamics_npc_continuity_harness PRIVATE
@@ -155,6 +159,19 @@ add_test(NAME character_dynamics_npc_continuity_contract
     COMMAND character_dynamics_npc_continuity_contract)
 add_test(NAME character_dynamics_npc_continuity_alarm_cli
     COMMAND character_dynamics_npc_continuity_harness alarm)
+add_executable(character_dynamics_npc_history_llm_harness
+    applications/npc_continuity_v0/npc_history_llm_harness.cpp)
+target_link_libraries(character_dynamics_npc_history_llm_harness PRIVATE
+    character_dynamics_npc_continuity_v0)
+add_executable(character_dynamics_npc_history_llm_contract
+    tests/npc_history_llm_policy_contract.cpp)
+target_link_libraries(character_dynamics_npc_history_llm_contract PRIVATE
+    character_dynamics_npc_continuity_v0)
+add_test(NAME character_dynamics_npc_history_llm_contract
+    COMMAND character_dynamics_npc_history_llm_contract)
+add_test(NAME character_dynamics_npc_history_llm_worker_contract
+    COMMAND ${Python3_EXECUTABLE}
+            "${CMAKE_CURRENT_SOURCE_DIR}/applications/npc_continuity_v0/history_llm_worker_contract_v0.py")
 add_executable(character_dynamics_living_dynamics_smoke tests/living_dynamics_smoke.cpp)
 target_link_libraries(character_dynamics_living_dynamics_smoke PRIVATE character_dynamics_engine character_dynamics_demo_living_v0)
 add_test(NAME character_dynamics_living_dynamics_smoke COMMAND character_dynamics_living_dynamics_smoke)
