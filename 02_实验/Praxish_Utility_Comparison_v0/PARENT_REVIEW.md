@@ -29,6 +29,10 @@
 
 ## 公平性与结论边界
 
+新增公共投影的父审：完整读取 exporter/template/tests，要求补全动作 target/actor 绑定校验，拒绝同 key 冲突状态，去掉由全局 roster 推断“在场”的文案。以已提交比较 run `parent-exact-head-df0c7ac-20261007-01` 为输入，投影 tests **7/7**，fresh bundle `outputs/praxish_utility_comparison_v0/presentation/parent-review-20261007-01/`，input/generator/template hashes 留在 manifest。12 组含目标与公共状态的轨迹仍为 **11 相同 / 1 上游 bug 分歧**，共 97 相同 / 7 不同回合对。
+
+父代理另作不调用快照/动作归一化 helper 的 raw-fact/target 读回，**208 side-turns** 的工作状态、请求状态和目标一致。父代理在本机 in-app browser 通过仅监听 loopback 的临时 HTTP 服务真正打开，核对默认匿名、空动作、前后翻页、自动播放到末回合停止、场景切换、来源揭示/隐藏，以及窄窗口 A/B 堆叠与下滚可读。截图留在该 bundle 的 `browser-review.jpg`；服务和临时 tab 已关闭。应用不允许 `file:` 导航，所以直接双击离线文件未作该浏览器的实测；生成 HTML 无网络资源依赖。未把 DOM fake smoke 代替真实浏览器验收；没有真人偏好、成本或可置信性结果。viewer 是阶段 4 的证据呈现，不是阶段 4 完成。
+
 传统 utility 本身可模块化。参考[Game AI Pro 原始章节](https://www.gameaipro.com/GameAIPro/GameAIPro_Chapter09_An_Introduction_to_Utility_Theory.pdf)的方法基座，此处 baseline 使用可复用角色绑定、前置条件、效果和目标因子；它不是该章节所有响应曲线、惯性或商业系统的复现。匹配的是 Praxish 当前一步 goal-based law，不能推广为击败/覆盖所有 utility、BT 或 GOAP。
 
 世界关闭 hard constraint 是独立审计规则；raw 两侧违规仍执行并记录，不偷偷回滚成正确 trajectory。适配是内容前置条件，不是新增 runtime validator。

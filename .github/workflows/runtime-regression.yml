@@ -25,12 +25,20 @@ jobs:
         run: node "02_实验/Praxish_Utility_Comparison_v0/tools/compare.mjs" test
       - name: Fresh matched comparison
         run: node "02_实验/Praxish_Utility_Comparison_v0/tools/compare.mjs" run --run-id ci-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Shared public projection and viewer contracts
+        env:
+          PRESENTATION_RUN_ID: ci-${{ github.run_id }}-${{ github.run_attempt }}
+        run: node --test "02_实验/Praxish_Utility_Comparison_v0/presentation/projection.test.mjs"
+      - name: Export offline developmental viewer
+        run: node "02_实验/Praxish_Utility_Comparison_v0/presentation/export.mjs" --run-id ci-${{ github.run_id }}-${{ github.run_attempt }} --presentation-id ci-${{ github.run_id }}-${{ github.run_attempt }} --presentation-seed 20261007
       - name: Preserve comparison evidence, including failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: praxish-comparison-${{ github.run_id }}-${{ github.run_attempt }}
-          path: outputs/praxish_utility_comparison_v0/runs/
+          path: |
+            outputs/praxish_utility_comparison_v0/runs/
+            outputs/praxish_utility_comparison_v0/presentation/
           if-no-files-found: ignore
           retention-days: 7
   source-ranking-contract:
