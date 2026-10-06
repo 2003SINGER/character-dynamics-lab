@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-`PredictionBaselineV1` 的 development fit 与独立 seed 复现已完成，当前为 `DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW`；数值与训练细节只维护在[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)。`SourceRankingV1` 的九条件来源条件比较也已完成，结果与唯一下一动作只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)；它不是 actor forecast、心理状态 `S` 或 Runtime policy 的训练证据。之后先在既有 LIGHT 准入审计中判定 actor 行动前 `O`、候选与独立标签是否可识别，再决定是否继续完整心理 dynamics 开发。`ResearchDynamicsV1` 是手写数值 fixture/candidate，不是已训练科学模型；旧 C++ `ReferenceRuleDynamicsV0` 统一称 `LegacyReferenceRuleDynamicsV0`，旧 Python `Theory-S_v2` 统一称 `ExpectedEffectEMAProxyV0` 历史诊断 proxy。失败证据和当前推进边界以[研究重建审计](研究重建审计_2026-10-06.md)为准；[Pre-V1 validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md)记录的是 2026-09 阶段状态，冲突时服从本次审计。
+`PredictionBaselineV1` 的 development fit 与独立 seed 复现已完成，当前为 `DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW`；数值与训练细节只维护在[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)。`SourceRankingV1` 的九条件来源条件比较也已完成，结果与下一动作只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)；它不是 actor forecast、心理状态 `S` 或 Runtime policy 的训练证据。完整心理 dynamics / Paper-0 分支仍受 LIGHT 行动前 `O`、候选与独立标签的准入限制，但用户确认的玩家可置信 NPC 目标不以此为必经前提。`ResearchDynamicsV1` 是手写数值 fixture/candidate，不是已训练科学模型；旧 C++ `ReferenceRuleDynamicsV0` 统一称 `LegacyReferenceRuleDynamicsV0`，旧 Python `Theory-S_v2` 统一称 `ExpectedEffectEMAProxyV0` 历史诊断 proxy。失败证据和当前推进边界以[研究重建审计](研究重建审计_2026-10-06.md)为准；[Pre-V1 validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md)记录的是 2026-09 阶段状态，冲突时服从本次审计。
 
 Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。完整机制说明中已确认的内容是工程语义与模块契约，不是已验证心理规律。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
 
@@ -33,7 +33,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [Optimizer v0](Optimizer_v0.md) | optimizer 的开发护栏与 no-selection 状态 | 开始参数搜索的授权 |
 | [Development Split v1](Development_Split_v1.md) | synthetic train/holdout 的冻结 split 协议 | 正式外部 test 声明 |
 | [ParameterConfig v0](ParameterConfig_v0.md) | 参数 owner、序列化与 sensitivity 边界 | 心理学参数解释 |
-| **[Paper-0 问题卡](Paper-0问题卡.md)** | 当前科研主问题、A* / O / candidate-set admission 前提 | 系统工程完成宣称 |
+| **[Paper-0 问题卡](Paper-0问题卡.md)** | 冻结的行为预测研究分支、A* / O / candidate-set admission 前提 | 全部游戏 NPC 目标的统一前置要求；系统工程完成宣称 |
 | [Theory-S M1 冻结决策](Theory-S_M1冻结决策_2026-09-07.md) | pre-training 的语义与协议冻结边界 | Theory-S 已训练/有效的声明 |
 | [Existing Dataset Pool Routing](Existing_Dataset_Pool_Routing_v1_2026-09-08.md) | 历史数据集 routing、已 superseded 的 benchmark next-action | 新 dataset 搜索或训练授权 |
 | [Architecture Audit Policy](architecture_audit_policy.md) | AI-heavy 工程的审计范围、已知债与不授权重构边界 | 当前 Runtime 的待办 |
@@ -47,7 +47,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 理解项目：研究问题 → 完整机制。
 
-继续研究开发：先看[研究重建审计](研究重建审计_2026-10-06.md)和通俗速览，再按 TODO 的 PredictionBaselineV1 → 监督信号 → 可执行更新 → 基线比较 → 独立验证推进；M2 candidate-set admission 仍阻止 Paper-0 formal test，但不阻止开发方法基座。Runtime 已冻结，不因行为模型问题重开 Engine。
+继续研究开发：先看[研究重建审计的用户目标校正](研究重建审计_2026-10-06.md#用户目标校正游戏中的可置信-npc)，再看[NPC 评测定向核查](../01_文献/定向核查_NPC可置信性评测_2026-10-06.md)。先选择能检验玩家感知的场景、比较基线与评价方法，不以真人动作预测作为统一前置任务。M2 candidate-set admission 仍阻止旧 Paper-0 formal test；PredictionBaselineV1 / SourceRankingV1 保留为有限开发证据。Runtime 已冻结，不因行为模型问题重开 Engine。
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 

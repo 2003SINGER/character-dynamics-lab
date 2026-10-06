@@ -16,7 +16,9 @@
 
 LIGHT 的官方任务与本地训练输入不等价；来源映射、候选重建、信息流负控与有界时点诊断由[LIGHT 任务准入审计](精读_LIGHT与本地预测任务准入_2026-10-06.md)维护。完整 actor-visible 准入仍未过；新[SourceRankingV1 协议](../02_实验/LIGHT_SourceRankingV1/README.md)及[输入验收](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)只将来源记录条件排名落成开发任务，不升级为合法 O 或官方复现。
 
-针对第一个 Replay 实验缺少独立 `A*` 的问题，见[行为真值 A* 可行性审计](专题审计_行为真值A星可行性_2026-09-05.md)。结论是：BehaviorChain 完整数据当前不可公开获取；CharacterBox 不是独立行为真值；SOTOPIA 可作为**外部合成轨迹代理**进入小切片验证，但不是人类行为数据。
+针对第一个 Replay 实验缺少独立 `A*` 的问题，见[行为真值 A* 可行性审计](专题审计_行为真值A星可行性_2026-09-05.md)。结论是：BehaviorChain 完整数据当前不可公开获取；CharacterBox 不是独立行为真值；SOTOPIA 可作为**外部合成轨迹代理**进入小切片验证，但不是人类行为数据。此限制针对旧预测问题，不否定它们用于游戏角色评测的价值。
+
+玩家视角的当前评测路由见[NPC 可置信性评测定向核查](定向核查_NPC可置信性评测_2026-10-06.md)：比较 NPC-Bench / CharacterBox 的任务、评分方式与接入限制，另核 NCP-Bench / Generative Agents 的方法边界。这是来源与评测章节核查，不是全文精读或已运行 benchmark；目标校正仅由[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)维护。
 
 ## 检索原则
 
@@ -107,7 +109,7 @@ LIGHT 的官方任务与本地训练输入不等价；来源映射、候选重�
 - [三方向近邻核读 §2](专题核读_三方向近邻_2026-09-05.md)：项目当前的 π(A)、承诺惯性、目标优先级、对象动作、前置条件校验 与 2005–2013 年 utility-AI / GOAP 实践的逐条对应物。
 - [工程三空白核读 §5](专题核读_工程三空白_2026-09-05.md)：**`W ≠ O` 的先例清单**。Talk of the Town 已实现 ground-truth 与 belief facet 的显式分离、错误信念、证据来源追踪与 Accuracy 对照；HTN 的 world state 与 ETQ 的 context object 是另外两条佐证。**这一条比上一轮清单更硬，直接覆盖原本认为最站得住的那条差异。**
 - [Game AI Pro 全景与工程 Gap §1](专题核读_GameAIPro全景与工程Gap_2026-09-05.md)：**为什么有技术却没有游戏这么做**。六条 gap，逐条带原文引句。最硬的一条是 V3 C01 §1.3.6 正面否定"模拟内部状态"路线（"weird obsession… misguided"）；另一条是 V3 C34 记录的主动放弃——planner 性能超预期仍被弃用，理由是"wrong level of abstraction"和"too many of them… to care about them in detail"。**§2 给出"LLM 打破了哪几条、没打破哪几条"的对照表，直接决定项目定位。**
-- [工程可复用资产](专题核读_工程可复用资产_2026-09-05.md)（姊妹篇，讲**资产可用性**而非立场）：**代码 11 个包**（官网 `gameaipro.com/code/`，只对得上 V1 与 V3，V2/OE21 无），已下载 3 个存于 `代码/GameAIPro/`，**C09（Utility Theory 导论）链接已实测 404——站点正在腐烂**。`ngram_lib`（1762 行 header-only）的 `Probability_Next_Is(event)` 可直接作 R01 的**非理论基线地板**；`BackgroundAI`（10,758 行小镇模拟器）可作世界底座，或至少抄其 `ActionDefinition`/`ActionInstance` 切法与三类日程组合子（Sequential / WeightedRandom / Simple）。**实验方面最重要的发现是：全 146 章只有 1 个真人受试实验（V3 C04）**，其余命中 "evaluation" 的全是架构里的"评估树"或性能评测。**「83% of players were unable to recognize an AI that was literally nothing more than a random number generator」**——人类感知是低分辨率信道，是"用 held-out NLL 而非人类评分"迄今最强的支持证据。**二阶知识：Game AI Pro 全库零命中**（`theory of mind`/`second-order`/`nested belief` 检索 0 结果）——⚠️ **严格限于那套工业书 146 章，不是"学术界没人做"**。本地库里 **TimeToM 已区分 self-world 与 social-world belief 回答不同阶 ToM**，DYNToM 评 belief–emotion–intention–action 轨迹，PsychSim 是决策论 ToM 先例，见[全量近邻精读总表](全量近邻精读总表_2026-09-01.md) 与 TODO R2b。
+- [工程可复用资产](专题核读_工程可复用资产_2026-09-05.md)：代码包、下载与接口建议以该历史核读为准。其 V3 C04 的玩家辨别结果提示评分可能不敏感，**不支持普遍用 held-out NLL 取代玩家评价**：动作预测与玩家可置信性是不同目标，应分别验证测量方法。二阶知识的零命中严格限于当时检索的 Game AI Pro 146 章，不是“学术界没人做”；TimeToM、DYNToM 与 PsychSim 的近邻边界另见[全量近邻精读总表](全量近邻精读总表_2026-09-01.md)。
 
 每篇统一填写：`W 如何表示 / O 如何受限 / P 如何进入 / S 如何更新 / affordance 如何产生 / action 如何选 / 真实行为如何用于修正或评价`。不能因为论文含有 world、state、belief、action 任一名词就判定与本项目同构。
 

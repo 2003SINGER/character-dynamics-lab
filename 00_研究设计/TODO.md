@@ -32,11 +32,11 @@
 
 ## 研究重建顺序与范围护栏
 
-- **开发顺序**：已完成旧 fit/复现、来源诊断及 SourceRankingV1 任务/输入投影 → 训练器实现与独立复核 → 可执行更新与强弱 baseline → 独立验证。新任务是 source-conditional development 比较，不替代完整 actor-visible gate；后续推进位置只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)，旧数值仍只见[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)。
+- **当前目标与下一讨论项**：用户确认关心“NPC 在玩家眼中在游戏里面活起来”；先讨论可置信性评测场景与比较基线，具体实验未批准执行。方向唯一解释见[研究重建审计](研究重建审计_2026-10-06.md#用户目标校正游戏中的可置信-npc)，来源见[NPC 评测定向核查](../01_文献/定向核查_NPC可置信性评测_2026-10-06.md)。SourceRankingV1 已完成，不继续训练挽救假设，其结果仍只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)。
 - **Paper-0 formal gates**：persistent `S`、legal actor-local `O`、independent `A*`、可复核有限 `A^O`、episode/user-disjoint split 和预注册指标；M2 是 candidate-set formal admission 工作，不阻塞开发方法基座。
 - **PAUSED**：Objective readiness、Evaluator ranking、Optimizer、旧 proxy training、外部数据集扩展；ResearchDynamicsV1 不作为已训练模型，仅记录为尚未准入的 toy/fixture。
 - **DEFERRED SYSTEM/RESEARCH BRANCH**：ToM、multi-agent、Inverse、P drift、Q01 advanced response curves、Scene Manager 与 live LLM semantics。
-- 所有开发结果标为 DEVELOPMENT；任何已暴露数据都不是 untouched formal test。科学瓶颈仍是独立行为标签、actor-local O、可重建 `A^O` 与适当 episode/user split；不靠 dataset tourism 或重开 Runtime 绕过。
+- 所有开发结果标为 DEVELOPMENT；任何已暴露数据都不是 untouched formal test。独立行为标签、actor-local O、可重建 `A^O` 与 episode/user split 是旧 Paper-0 预测主张的缺口，不自动成为玩家可置信性目标的前置门；后者也不能以模型裁判得分冒称玩家认可。不靠 dataset tourism 或重开 Runtime 绕过对应证据要求。
 
 ## COMPLETED CHECKPOINTS
 

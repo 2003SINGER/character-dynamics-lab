@@ -27,7 +27,7 @@
 
 仓库治理护栏：[ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md)；廉价健康检查可运行 `python tools/repo_health_check.py`，ReplayRecord 样例可用 `python tools/validate_replay_record.py <record.json>` 校验。护栏只预警文件膨胀/重复归档，明确的 schema、CTest 和 provenance 错误才阻断对应检查。
 
-当前研究重建按方法基座 → 监督信号 → 可执行更新 → 基线比较 → 独立验证推进。PredictionBaselineV1 是 `DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW`，但不构成心理状态 `S` 或 Runtime policy 的训练证据；[训练结果与边界](02_实验/PredictionBaselineV1/RESULTS.md)为数值唯一来源。来源动作标签和候选列表不自动等于人物真值 `A*` 与主观候选集 `A^O`。效率—效果与可控性仍需与强 summary 比较，不能用便宜或能跑替代研究证明。
+当前应用目标由用户确认是“NPC 在玩家眼中在游戏里面活起来”，不要求先拟合真实人物心理；下一讨论项是评测场景、比较基线与玩家体验证据，见[目标校正与研究分支边界](00_研究设计/研究重建审计_2026-10-06.md#用户目标校正游戏中的可置信-npc)和[现成 NPC 评测核查](01_文献/定向核查_NPC可置信性评测_2026-10-06.md)。既有 PredictionBaselineV1 / SourceRankingV1 只保留为有限来源预测开发证据，不是 NPC 可置信性、心理状态 `S` 或 Runtime policy 训练证据；Paper-0 的独立 `A*` 准入要求仍约束该冻结分支，而非全部游戏开发。不能用便宜、能跑或自有评分器的分数替代独立研究证明。
 
 ## 代码与材料的归属
 
