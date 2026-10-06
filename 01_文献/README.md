@@ -18,7 +18,7 @@ LIGHT 的官方任务与本地训练输入不等价；来源映射、候选重�
 
 针对第一个 Replay 实验缺少独立 `A*` 的问题，见[行为真值 A* 可行性审计](专题审计_行为真值A星可行性_2026-09-05.md)。结论是：BehaviorChain 完整数据当前不可公开获取；CharacterBox 不是独立行为真值；SOTOPIA 可作为**外部合成轨迹代理**进入小切片验证，但不是人类行为数据。此限制针对旧预测问题，不否定它们用于游戏角色评测的价值。
 
-玩家视角的当前评测路由见[NPC 可置信性评测定向核查](定向核查_NPC可置信性评测_2026-10-06.md)：比较 NPC-Bench / CharacterBox 的任务、评分方式与接入限制，另核 NCP-Bench / Generative Agents 的方法边界。这是来源与评测章节核查，不是全文精读或已运行 benchmark；目标校正仅由[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)维护。
+玩家视角的评测选择见[NPC 可置信性评测定向核查](定向核查_NPC可置信性评测_2026-10-06.md)：NPC-Bench 等仍是来源/评测章节核查。CharacterBox 已提升为主代理全文审读（20 页含全部附录），方法、训练与本项目接口限制只由[唯一精读报告](精读_CharacterBox_2026-10-06.md)维护；未运行或复现该 benchmark。目标与下一阶段设计判断仅由[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)维护。
 
 ## 检索原则
 
@@ -49,7 +49,7 @@ LIGHT 的官方任务与本地训练输入不等价；来源映射、候选重�
 | 角色系统 | [Generative Agents](PDF/2023_Generative_Agents_Interactive_Simulacra_of_Human_Behavior.pdf) | [arXiv](https://arxiv.org/abs/2304.03442) | 观察—记忆—反思—计划式角色 agent 的基础近邻 |
 | 角色评测 | [InCharacter](PDF/2024_InCharacter.pdf) | [ACL](https://aclanthology.org/2024.acl-long.102/) | 人格 fidelity 的直接近邻 |
 | 局部可观测 | [TimeToM](PDF/2024_TimeToM_Temporal_Belief_State_Chain.pdf) | [ACL](https://aclanthology.org/2024.findings-acl.685/) | 时间化角色 belief state，避免把遮罩单独误作创新 |
-| 角色系统 | [CharacterBox](PDF/2025_CharacterBox.pdf) | [ACL](https://aclanthology.org/2025.naacl-long.323/) | 文本虚拟世界与行为轨迹近邻 |
+| 角色系统 | [CharacterBox](PDF/2025_CharacterBox.pdf) | [ACL](https://aclanthology.org/2025.naacl-long.323/) | 文本行为轨迹、裁判校准与微调近邻；[全文方法/接口审计](精读_CharacterBox_2026-10-06.md)，非复现 |
 | 连续行为 | [BehaviorChain](PDF/2025_BehaviorChain.pdf) | [ACL](https://aclanthology.org/2025.findings-acl.813/) | 连续人物行为预测近邻；不是本项目可重复声称的空白 |
 | 角色逻辑 | [Codifying Character Logic](PDF/2025_Codifying_Character_Logic.pdf) | [NeurIPS](https://papers.neurips.cc/paper_files/paper/2025/hash/15294ba2dcfb4521274f7aa1c26f4dd4-Abstract-Conference.html) | 可执行角色逻辑、场景决策近邻 |
 | 决策评测 | [HEART-Bench](PDF/2025_HEART_Bench.pdf) | [ACL](https://aclanthology.org/2025.findings-emnlp.368/) | 人格、情景与行为决策评测近邻 |

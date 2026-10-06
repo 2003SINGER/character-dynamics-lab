@@ -32,7 +32,7 @@
 
 ## 研究重建顺序与范围护栏
 
-- **当前目标与下一讨论项**：用户确认关心“NPC 在玩家眼中在游戏里面活起来”；先讨论可置信性评测场景与比较基线，具体实验未批准执行。方向唯一解释见[研究重建审计](研究重建审计_2026-10-06.md#用户目标校正游戏中的可置信-npc)，来源见[NPC 评测定向核查](../01_文献/定向核查_NPC可置信性评测_2026-10-06.md)。SourceRankingV1 已完成，不继续训练挽救假设，其结果仍只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)。
+- **当前目标与下一讨论项**：用户确认关心“NPC 在玩家眼中在游戏里面活起来”；CharacterBox [全文/接口审计](../01_文献/精读_CharacterBox_2026-10-06.md)已完成，下一步只讨论一个小场景的机制、匹配基线与玩家评价方案，具体实验未批准执行。设计约束唯一解释见[研究重建审计](研究重建审计_2026-10-06.md#玩家目标的第一个可比较问题proposal未执行)。SourceRankingV1 已完成，不继续训练挽救假设，其结果仍只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)。
 - **Paper-0 formal gates**：persistent `S`、legal actor-local `O`、independent `A*`、可复核有限 `A^O`、episode/user-disjoint split 和预注册指标；M2 是 candidate-set formal admission 工作，不阻塞开发方法基座。
 - **PAUSED**：Objective readiness、Evaluator ranking、Optimizer、旧 proxy training、外部数据集扩展；ResearchDynamicsV1 不作为已训练模型，仅记录为尚未准入的 toy/fixture。
 - **DEFERRED SYSTEM/RESEARCH BRANCH**：ToM、multi-agent、Inverse、P drift、Q01 advanced response curves、Scene Manager 与 live LLM semantics。
