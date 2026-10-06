@@ -4,9 +4,9 @@
 
 ## 项目架构定位
 
-`PredictionBaselineV1` 的 development fit 与独立 seed 复现已完成，当前为 `DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW`；数值与训练细节只维护在[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)。之后再推进监督信号准入、可执行更新、基线比较和独立验证。它不是心理状态 `S` 或 Runtime policy 的训练证据。`ResearchDynamicsV1` 是手写数值 fixture/candidate，不是已训练科学模型；旧 C++ `ReferenceRuleDynamicsV0` 统一称 `LegacyReferenceRuleDynamicsV0`，旧 Python `Theory-S_v2` 统一称 `ExpectedEffectEMAProxyV0` 历史诊断 proxy。失败证据和当前推进边界以[研究重建审计](研究重建审计_2026-10-06.md)为准；[Pre-V1 validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md)记录的是 2026-09 阶段状态，冲突时服从本次审计。
+`PredictionBaselineV1` 的 development fit 与独立 seed 复现已完成，当前为 `DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW`；数值与训练细节只维护在[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)。`SourceRankingV1` 的九条件来源条件比较也已完成，结果与唯一下一动作只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)；它不是 actor forecast、心理状态 `S` 或 Runtime policy 的训练证据。之后先在既有 LIGHT 准入审计中判定 actor 行动前 `O`、候选与独立标签是否可识别，再决定是否继续完整心理 dynamics 开发。`ResearchDynamicsV1` 是手写数值 fixture/candidate，不是已训练科学模型；旧 C++ `ReferenceRuleDynamicsV0` 统一称 `LegacyReferenceRuleDynamicsV0`，旧 Python `Theory-S_v2` 统一称 `ExpectedEffectEMAProxyV0` 历史诊断 proxy。失败证据和当前推进边界以[研究重建审计](研究重建审计_2026-10-06.md)为准；[Pre-V1 validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md)记录的是 2026-09 阶段状态，冲突时服从本次审计。
 
-Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
+Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。完整机制说明中已确认的内容是工程语义与模块契约，不是已验证心理规律。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
 
 当前只维护按职责归属的活动文档；数量不是稳定契约。按内容归属维护，不再按“某天新对话／某个模型的新总结”新增并列总纲。
 
@@ -14,7 +14,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 |---|---|---|
 | **[项目现状速览（通俗版）](项目现状速览_通俗版.md)** | **大白话入口**：在做什么、走到哪、有没有走偏、待拍板事项 | 新论证；术语定义 |
 | **[研究重建审计](研究重建审计_2026-10-06.md)** | **唯一综合审计**：确证失败、证据强度、科学距离与重建顺序 | 易变 TODO 与逐项代码进度 |
-| [完整机制说明 v0](完整机制说明_v0.md) | 已确认的 W/O/X/S/P/D/A 语义、任务承诺、场景/动作、时间、低耦合及消融约束 | 未采纳公式、代码完成清单 |
+| [完整机制说明 v0](完整机制说明_v0.md) | 已确认的 W/O/X/S/P/D/A 工程语义、任务承诺、场景/动作、时间、低耦合及消融约束 | 心理规律已验证的声明；未采纳公式、代码完成清单 |
 | [前台问题与候选创新](前台问题与候选创新.md) | 课题锚、Forward/Inverse、研究候选、评价、近邻边界及后续分支 | 再写一套机制总说明 |
 | [未决问题与机制候选](未决问题与机制候选.md) | 具体缺口、备选计算、用户原意、决策条件 | 把提案写成已实现或已验证 |
 | **[整合系统视角复核](审核_整合系统视角复核_2026-09-05.md)** | **判断复核**：回到实现核对旧判断的前提是否成立 | 文献层面的重新论证 |
@@ -23,7 +23,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [TODO](TODO.md) | 下一动作、依赖、验收、完成状态 | 长篇机制论证 |
 | [后置机制候选｜AU 考古](后置机制候选_AU考古.md) | 保存暂不进入主线的 AU 候选及升格条件 | 当前 runtime、Paper-0 主张与主线 TODO |
 | [当前实现进度](当前实现进度.md) | 代码版本、实际能力、未实现项、验证证据 | 从目标设计推断完成 |
-| **[System Vision v0](Character_Dynamics_System_Vision_v0.md)** | Engine / Evaluator / Optimizer 的系统边界与 runtime 三流模型 | 把 Engine 冻结误写为全系统完成 |
+| **[System Vision v0](Character_Dynamics_System_Vision_v0.md)** | Runtime Kernel / Dynamics Model / Evaluator / Optimizer / Applications 的边界与 runtime 三流模型 | 把 Kernel 冻结误写为全系统完成 |
 | **[Runtime Scheduler v1](Runtime_Scheduler_v1.md)** | 已冻结的统一时间、RunningAction、DecisionGate 与 outcome contract | 新研究目标或 batch/evaluator 迁移授权 |
 | **[Runtime Closure Matrix](Runtime_Closure_Acceptance_Matrix.md)** | Runtime / Engine v1 closure 的 gate 与可执行证据 | 心理机制或科研有效性结论 |
 | [Runtime Semantic Audit Matrix](Runtime_Semantic_Audit_Matrix.md) | runtime channel 的 W/O/X/S 消费边界 | 增加新 runtime 功能 |
@@ -65,4 +65,4 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 原 13 份工作稿均保留在[整合前快照与逐项去向](归档/README.md)。旧稿只作为历史推理/证据，不继续维护现行结论；旧路径引用按“当前入口”或“历史证据”分别处理。
 
-用户亲写的 `E:\Character Dynamics Demo` 不在本轮范围；本次仅整理研究文档，未修改参考 C++。本地提交，不自动推送。
+用户亲写的 `E:\Character Dynamics Demo` 不在本轮范围；本次仅整理研究文档，未修改参考 C++。历史记录：此前曾采用“本地提交，不自动推送”的阶段性约定；当前版本控制操作遵循项目 `AGENTS.md`，已验证项目改动应提交并推送至 `webgpt-sync`，不得直接推送 `main`。
