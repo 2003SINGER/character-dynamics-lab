@@ -15,6 +15,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| NPC-CONTINUITY-PILOT | **阶段 1 问题选择完成 / 阶段 2 实施中 / DEVELOPMENT** | 先完成独立 utility 的同场景短轨迹与共同硬候选核验，再接真实历史 LLM 和玩家交互呈现；阶段 3 后与用户讨论，不自动开发新机制 | [唯一阶段与问题 owner](研究重建审计_2026-10-06.md#玩家目标的第一个可比较问题)；[全文文献与反例](../01_文献/精读_玩家可置信性问题选择_2026-10-06.md)。代码委派不等于基线比较通过，无玩家结果 |
 | PREDICTION-BASELINE-V1 | **DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW** | 保留旧 fits 与冻结协议，不将旧 physical-history view 冒称完整观察；新比较另由 SOURCE-RANKING-V1 维护 | [唯一旧数值结果](../02_实验/PredictionBaselineV1/RESULTS.md)；[LIGHT 来源准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。完整 actor-visible contract / 人工准入未过，已暴露数据不是 untouched formal test |
 | SOURCE-RANKING-V1 | **DEVELOPMENT_TRAINED / PARENT_ARTIFACT_AUDIT_PASS / READY_FOR_INDEPENDENT_REVIEW** | 复核固定比较并确定下一可识别问题；不调参挽救假设，不替代 Paper-0 | [冻结任务/通道规格](../02_实验/LIGHT_SourceRankingV1/README.md)；[唯一结果与下一动作](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)，执行准入与 actor-visible 准入分开 |
 | SYSTEM | **Shared Runtime Kernel v1：CLOSED / FROZEN** | Continuous Runtime ownership、threshold/W validation、typed rejection、fixtures、trace、case-isolated CTest、explicit DynamicsModel injection 与 isolation guard 已闭环。此状态只关闭执行 Kernel，不代表任何行为模型、Evaluator、Objective、Optimizer 或 Paper-0 完成。 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
@@ -32,7 +33,7 @@
 
 ## 研究重建顺序与范围护栏
 
-- **当前目标与下一讨论项**：用户确认关心“NPC 在玩家眼中在游戏里面活起来”；CharacterBox [全文/接口审计](../01_文献/精读_CharacterBox_2026-10-06.md)已完成，下一步只讨论一个小场景的机制、匹配基线与玩家评价方案，具体实验未批准执行。设计约束唯一解释见[研究重建审计](研究重建审计_2026-10-06.md#玩家目标的第一个可比较问题proposal未执行)。SourceRankingV1 已完成，不继续训练挽救假设，其结果仍只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)。
+- **当前目标**：新 active goal 已推进玩家可置信 NPC 的阶段 1—3，问题/阶段只见[研究重建审计](研究重建审计_2026-10-06.md#玩家目标的第一个可比较问题)。当前不新增心理机制、不跑旧长批次，不启动正式玩家招募；阶段 3 后先讨论。SourceRankingV1 已完成，不继续训练挽救假设，其结果仍只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)。
 - **Paper-0 formal gates**：persistent `S`、legal actor-local `O`、independent `A*`、可复核有限 `A^O`、episode/user-disjoint split 和预注册指标；M2 是 candidate-set formal admission 工作，不阻塞开发方法基座。
 - **PAUSED**：Objective readiness、Evaluator ranking、Optimizer、旧 proxy training、外部数据集扩展；ResearchDynamicsV1 不作为已训练模型，仅记录为尚未准入的 toy/fixture。
 - **DEFERRED SYSTEM/RESEARCH BRANCH**：ToM、multi-agent、Inverse、P drift、Q01 advanced response curves、Scene Manager 与 live LLM semantics。
