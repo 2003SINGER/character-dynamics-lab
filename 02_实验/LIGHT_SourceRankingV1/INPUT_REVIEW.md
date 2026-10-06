@@ -1,8 +1,8 @@
 # SourceRankingV1 实现验收与下一动作
 
-日期：2026-10-06。状态：**INPUT / TRAINER_SYNTHETIC / EXECUTION_PARENT_AUDIT_PASS / REAL_FIT_RUNNING**；实现为 `READY_FOR_INDEPENDENT_REVIEW`，不是 `CLOSED`。冻结投影仍为 `training_authorized=false`；单独的 `SOURCE_CONDITIONAL_DEVELOPMENT` 执行记录已准入。这不升级 actor-visible / Runtime policy / formal test / 心理有效性。
+日期：2026-10-06。状态：**DEVELOPMENT_TRAINED / PARENT_ARTIFACT_AUDIT_PASS / READY_FOR_INDEPENDENT_REVIEW**；不是 `CLOSED`。冻结投影仍为 `training_authorized=false`；单独的 `SOURCE_CONDITIONAL_DEVELOPMENT` 执行记录已准入并完成本次固定拟合。这不升级 actor-visible / Runtime policy / formal test / 心理有效性。
 
-本页唯一维护投影/训练器实现验收与当前下一动作。[README](README.md)冻结任务、通道和拟训练规格，保留冻结时的未准入状态，不随实现进度改写；[LIGHT 来源审计](../../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)拥有 source/observation 的未准入结论。以下投影证据和合成训练证据分别成立，不等于演员可见观察契约、Paper-0 或真实数据上的预测通过。
+本页唯一维护投影/训练器实现验收、真实 DEVELOPMENT 结果与当前下一动作。[README](README.md)冻结任务、通道和拟训练规格，保留冻结时的未准入状态，不随实现进度改写；[LIGHT 来源审计](../../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)拥有 source/observation 的未准入结论。投影、合成合同和真实来源条件排名结果是不同层次的证据，均不等于演员可见观察契约或 Paper-0 通过。
 
 ## 修订与执行证据
 
@@ -92,14 +92,54 @@ python3 02_实验/LIGHT_SourceRankingV1/project_inputs.py \
 
 原始 13,463 行、9 条件、seeds 7/19/31、15 epochs 与冻结配置不变；bucket9 不训练、不评分。新输出必须是固定 `outputs/light_source_ranking_v1_20261006/trainer_runs/` 的未存在子目录；记录会连同输入/code 原字节保存，epoch 与阶段 checkpoint 实时 flush/fsync。没有覆盖或 resume 入口；中断产物不得冒充完整报告。
 
-### 实际运行记录
+### 实际运行与全量产物验收
 
-已验收实现提交并推送为 `c8acd057c503788b79e7ff635f6c4a85fee8daf7`，远端 main 仍为 `e9ad2ebf329e8259b35f3ee0ef0492485d85c3ff`。本机真实运行根：`outputs/light_source_ranking_v1_20261006/trainer_runs/source_conditional_dev_c8acd05_20261006_v1/`（忽略，不上传源数据）。进程已实际完成 `context_only` 三个 seeds 的各 15 epochs，保存 checkpoint 与逐行预测；此观察不代表九条件对比已完成或任何模型胜出。
+已验收实现提交并推送为 `c8acd057c503788b79e7ff635f6c4a85fee8daf7`，远端 main 仍为 `e9ad2ebf329e8259b35f3ee0ef0492485d85c3ff`。本机真实运行根：`outputs/light_source_ranking_v1_20261006/trainer_runs/source_conditional_dev_c8acd05_20261006_v1/`（忽略，不上传源数据）。实际运行退出 **0**，九条件 × 三 seeds 全部完成：24 个学习 checkpoints、360 条学习 epoch records、329,265 条 train/validation predictions。uniform 无参数，也按固定三 seeds 记录；bucket9 没有拟合或评分。
 
-运行中以该目录 `progress.jsonl` 为实际进度 authority，而非本页的即时计数；本页不逐 epoch 更新。启动调用为 `fit_source.py --out outputs/light_source_ranking_v1_20261006/trainer_runs/source_conditional_dev_c8acd05_20261006_v1`，当前执行 session `9472` / 初始 PID `83166` 仅用于本机会话接续，不能替代产物证据。进程消失时先核验原目录是否有完整 report/provenance 或失败，不再启动同名/替代运行冒充原 run。InputReview snapshot 是运行前历史状态，不冒充当前 owner 状态。
+启动调用为 `fit_source.py --out outputs/light_source_ranking_v1_20261006/trainer_runs/source_conditional_dev_c8acd05_20261006_v1`。历史 session `9472` / PID `83166` 已完成，不是待继续运行。`progress.jsonl` 终点为 `analysis_complete`，完整 report/provenance 已存在；不得重启来冒充原 run。InputReview snapshot 是运行前历史状态，不冒充当前 owner 状态。
+
+父代理先用 `parent_partial_fit_audit_v1.py` 独立核对 context 三 seeds 的实际参数更新、45 epochs 和 36,585 predictions。再用独立 `parent_trainer_audit_v3.py` 核对完整文件清单/hash、源字节/准入/cohort、全部 24 个学习模型相对同 seed 初始化确有参数变化、earliest-min checkpoint、329,265 条原位概率/rank/NLL、指标及两项主比较/六个 strata 的 seed-average 与 episode bootstrap，退出 **0 / PASS**。它不调用训练、指标或 bootstrap helpers；仍复用模型类加载网络，不声称第二套完全独立神经网络实现。首次全量 verifier 因遗留合成断言将全部行数当作可评分行数而拒绝；修为独立重建 eligibility 后先通过合成回归，再通过本次全量核验。没有重跑训练或放宽 eligibility。
+
+可评分 train = **9,488 rows / 3,479 episodes**；validation = **2,707 rows / 985 episodes**。这与原始 train 9,530 / 3,490、validation 2,717 / 986 的总行/episode 数是不同分母；歧义标签保留但不训练/评分。产物共 337,839,453 bytes；本次报告阶段 wall time 为 1,176.54 s（约 19.6 min，起点在特征构造后，不是完整预处理耗时），全进程 peak RSS 为 3,332,800,512 bytes（约 3.10 GiB）。不据此声称某模型独立内存或效率优势。
+
+| 全量证据 | SHA-256 |
+|---|---|
+| report.json | `3777b8a72f76702cde78cb4002e2df88eea32db9b0cd5e30b156989496ecff26` |
+| provenance.json | `87431a40e99b34f1be40258ecbb55a385c4138555bf1fcaeb232f4491b5bf583` |
+| parent_trainer_audit_v3.py | `ea031b234fc0f7594e9cf28e29251b80965fc72d6f788addbdde3106aa478fdb` |
+| parent_partial_fit_audit_v1.py | `ce96c4074171d5c9e2d6c695cf13f241f72996258e26082615e9b8dc39f205ea` |
+
+实现提交 `c8acd05` 的 exact-head CI `37396816807`、运行进度提交 `53cd632` 的 exact-head CI `37397125302` 全部 success；它们验证代码/合成合同/既有回归，**不执行上述本地真实数据拟合或全量验收**。
+
+## 本次 DEVELOPMENT 结果
+
+下表是固定 validation 的三 seeds 均值；NLL 越小越好。top1 / MRR 按冻结的 source-order tie rule；uniform 的 top1 是等分时选原列表第一项，不是随机抽样准确率。此比较共享输入/训练规则，但不是总参数容量匹配。
+
+| 条件 | NLL | top1 | MRR | 可训练参数 |
+|---|---:|---:|---:|---:|
+| uniform | 2.333493 | 0.114518 | 0.302832 | 0 |
+| context_only | 2.288309 | 0.177072 | 0.373151 | 25,153 |
+| last2_core | 2.281749 | 0.186061 | 0.382453 | 39,665 |
+| pooled_core | 2.261169 | 0.201576 | 0.396584 | 41,281 |
+| gru_core | 2.277577 | 0.192095 | 0.389107 | 47,761 |
+| gru_no_context | 2.280667 | 0.188154 | 0.384960 | 47,761 |
+| gru_no_dialogue | 2.257462 | 0.205393 | 0.398856 | 47,761 |
+| gru_no_persona | 2.279979 | 0.191356 | 0.387189 | 47,761 |
+| gru_plus_partner_raw_commands（unverified diagnostic） | 2.255712 | 0.208718 | 0.404783 | 47,761 |
+
+两个预先固定主比较的 ΔNLL 均为 **GRU − 对照**；先平均每行三 seeds，再以 episode 做 row-weighted paired cluster bootstrap（2,000 draws，seed 104729）。以下是同一 validation 选 checkpoint 后的 **DEVELOPMENT 描述区间**，不是 untouched test/generalization CI，也没有预定实用收益阈值。
+
+| 主比较 | 平均 ΔNLL | 95% development 区间 | seed 7 / 19 / 31 |
+|---|---:|---|---|
+| GRU − context | −0.010732 | [−0.020397, −0.001838] | −0.014389 / −0.006798 / −0.011010 |
+| GRU − pooled | +0.016407 | [+0.003805, +0.029517] | +0.008954 / +0.022833 / +0.017434 |
+
+本规格下，core history 相对 context 有小的条件排名增益；**GRU 三个 seeds 都差于该 pooled baseline，不支持本 GRU 相对本 pool 的优势或有序状态编码必要性**。不能据此泛化成“顺序无用”：架构、容量、优化与表示均有边界。no-dialogue 的描述分数更好，没有新增事后比较或借此筛样本；它不证明自然对话普遍无用。partner raw command diagnostic 分数较好也不赋予该通道 actor-visible 权限。
+
+固定 validation 深度 strata：1–4 为 305 rows / 234 episodes，5–8 为 909 / 572，≥9 为 1,493 / 798。GRU−context 各为 +0.025349、−0.005124、−0.021517，前两个区间包含 0，≥9 为 [−0.032863, −0.009174]；GRU−pooled 三个 strata 区间均包含 0。完整 train/validation、每 seed、availability 与区间只保存在本次 report/raw predictions；不作长时程人物行为结论或独立 strata 贡献主张。
 
 ## 当前下一动作与不变边界
 
-唯一下一动作：监测已启动的固定 cohort / seeds DEVELOPMENT 运行，完成后独立读回 checkpoints、逐行预测及两项主比较；不重复启动、不调参、不逐通道增跑、不追逐正结果。`train.py` 默认入口仍拒绝真实拟合；只有独立 `fit_source.py` 核对记录后允许上述窄执行。该任务不把未证明的 source 信息偷称 actor-visible；完整演员观察契约仍需另行验证。方法来源与迁移边界见[近邻总表 §12 的 Cho 方法核验](../../01_文献/全量近邻精读总表_2026-10-06.md)及 README 的 Deep Sets 方法段。
+唯一下一动作：独立复核本次固定 DEVELOPMENT 对比及其证据边界，再确定下一项真正可识别的研究问题。保留 pooled 作为本任务的已学习对照，不为挽救 GRU 假设重调系数/编码器或扩大拟合。`train.py` 默认入口仍拒绝真实拟合；单独准入只覆盖本冻结协议。完整演员观察契约、心理 S 与 Runtime policy 仍需各自的数据/监督/验证，不由这次来源排名替代。方法来源与迁移边界见[近邻总表 §12 的 Cho 方法核验](../../01_文献/全量近邻精读总表_2026-10-06.md)及 README 的 Deep Sets 方法段。
 
-本轮真实拟合已启动，尚未完成全套对比和独立产物验收；没有超参数搜索、Runtime/Demo/reference 内容修改或旧拟合结果重算。结果最多回答本协议的 DEVELOPMENT 条件排名问题；完整演员观察权限、动作 settlement、`A^O`、独立正式 test、具名心理 `S`、闭环 policy 和新颖性仍未由它证明。整个科研改造目标未完成。
+本轮真实拟合与父代理全量产物验收完成；没有超参数搜索、Runtime/Demo/reference 内容修改或旧拟合结果重算。结果最多回答本协议的 DEVELOPMENT 条件排名问题；完整演员观察权限、动作 settlement、`A^O`、独立正式 test、具名心理 `S`、闭环 policy 和新颖性仍未由它证明。整个科研改造目标未完成。
