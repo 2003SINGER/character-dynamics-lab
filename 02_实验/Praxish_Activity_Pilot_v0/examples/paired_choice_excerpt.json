@@ -1,0 +1,86 @@
+{
+  "evidence_kind": "trimmed_excerpt_from_generated_typed_traces",
+  "generated_from_run": "outputs/praxish_activity_pilot_v0/runs/paired-review-20261006-04",
+  "scenario_id": "worker_request_activity_v0",
+  "seed": "0x5eed1234",
+  "scoring_semantics": "absolute satisfied-goal value; utility multiplied by post-action match count",
+  "request_event": {
+    "turn": 1,
+    "outcome": "insert practice.request.worker.visitor",
+    "effect": {
+      "work_phase_before": "working",
+      "work_phase_after": "working",
+      "request_status_after": "pending"
+    }
+  },
+  "worker_choice_turn": 2,
+  "no_request": {
+    "pre_facts": {
+      "work_phase": "working",
+      "request_status": null
+    },
+    "candidates": [
+      {
+        "name": "worker: Finish restocking",
+        "roles": {
+          "Worker": "worker"
+        },
+        "goal_contributions": {
+          "keep_working": 0,
+          "finish_work": 5,
+          "serve_visitor": 0
+        },
+        "score": 5
+      }
+    ],
+    "selected": "worker: Finish restocking",
+    "post_facts": {
+      "work_phase": "complete",
+      "request_status": null
+    }
+  },
+  "request": {
+    "pre_facts": {
+      "work_phase": "working",
+      "request_status": "pending"
+    },
+    "candidates": [
+      {
+        "name": "worker: Finish restocking",
+        "roles": {
+          "Worker": "worker"
+        },
+        "goal_contributions": {
+          "keep_working": 0,
+          "finish_work": 5,
+          "serve_visitor": 0
+        },
+        "score": 5
+      },
+      {
+        "name": "worker: Answer visitor's request",
+        "roles": {
+          "Worker": "worker",
+          "Visitor": "visitor"
+        },
+        "goal_contributions": {
+          "keep_working": 1,
+          "finish_work": 0,
+          "serve_visitor": 10
+        },
+        "score": 11
+      }
+    ],
+    "selected": "worker: Answer visitor's request",
+    "post_facts": {
+      "work_phase": "working",
+      "request_status": "served"
+    },
+    "later_worker_choice_turn": 4,
+    "later_selected": "worker: Finish restocking",
+    "later_post_facts": {
+      "work_phase": "complete",
+      "request_status": "served"
+    }
+  }
+}

@@ -2,6 +2,8 @@
 
 本机工作区、历史 checkout 与运行产物的路径边界见[本地工作区布局](Local_Workspace_Layout.md)。迁移不改变实验条件或 run ID，也不授权启动新实验。
 
+当前玩家 NPC 路线的新开发入口：[Praxish Activity Pilot v0](Praxish_Activity_Pilot_v0/README.md)。本轮只落实原件运行/机制解释与“自有工作＋外来请求”的共同场景；采用原件离散 turn 和共享 DB，不接 ContinuousRuntime，不训练，也不把条件演示当作方法胜出。后续匹配基线和玩家意义仍待讨论；既有 coursework/历史 LLM 探针保留但不混入本实验。
+
 当前方法开发入口：[PredictionBaselineV1](PredictionBaselineV1/README.md) development fit 与独立 seed 复现已完成，待外审；唯一数值结果见[RESULTS](PredictionBaselineV1/RESULTS.md)。它是 DEVELOPMENT 条件预测基座，不是已学习的心理 `S` 或 Runtime policy；研究重建顺序与证据边界见[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)。`ResearchDynamicsV1` 是手写固定-law fixture，当前机制验收不足，未作为 admitted science model。旧 `Theory_S_v2` 是 `ExpectedEffectEMAProxyV0` 历史诊断 proxy；不得把它写成已验证角色动力学。
 
 本目录是实验路由索引，不宣布全项目当前阶段。Canonical layers are: `Replay/` for source-neutral records/features, `PredictionBaselineV1` for the fitted and reproducible development prediction method base awaiting independent review, `ExpectedEffectEMAProxyV0` for historical Theory-S diagnostics, and `T14_T20/` for the frozen 1D development harness. Source action labels and source candidate lists retain dataset provenance; source candidates are not character `A^O`. New method work must use episode-grouped train/validation. All previously exposed datasets are development data, not untouched formal test.
