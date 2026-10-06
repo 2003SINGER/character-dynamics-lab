@@ -15,7 +15,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| NPC-CONTINUITY-PILOT | **阶段 1 问题选择完成 / 阶段 2 实施中 / DEVELOPMENT** | 先完成独立 utility 的同场景短轨迹与共同硬候选核验，再接真实历史 LLM 和玩家交互呈现；阶段 3 后与用户讨论，不自动开发新机制 | [唯一阶段与问题 owner](研究重建审计_2026-10-06.md#玩家目标的第一个可比较问题)；[全文文献与反例](../01_文献/精读_玩家可置信性问题选择_2026-10-06.md)。代码委派不等于基线比较通过，无玩家结果 |
+| NPC-CONTINUITY-PILOT | **阶段 1 问题选择完成 / 阶段 2 实施中 / DEVELOPMENT** | 独立 utility CLI 合同已验收；下一条接真实历史 LLM，随后配对输入与玩家交互呈现；阶段 3 后与用户讨论，不自动开发新机制 | [唯一阶段与问题 owner](研究重建审计_2026-10-06.md#玩家目标的第一个可比较问题)；[实现验收与限制](../Demo%20codex-generated/applications/npc_continuity_v0/README.md)。回归通过不等于行为比较通过，无玩家结果 |
 | PREDICTION-BASELINE-V1 | **DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW** | 保留旧 fits 与冻结协议，不将旧 physical-history view 冒称完整观察；新比较另由 SOURCE-RANKING-V1 维护 | [唯一旧数值结果](../02_实验/PredictionBaselineV1/RESULTS.md)；[LIGHT 来源准入审计](../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)。完整 actor-visible contract / 人工准入未过，已暴露数据不是 untouched formal test |
 | SOURCE-RANKING-V1 | **DEVELOPMENT_TRAINED / PARENT_ARTIFACT_AUDIT_PASS / READY_FOR_INDEPENDENT_REVIEW** | 复核固定比较并确定下一可识别问题；不调参挽救假设，不替代 Paper-0 | [冻结任务/通道规格](../02_实验/LIGHT_SourceRankingV1/README.md)；[唯一结果与下一动作](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)，执行准入与 actor-visible 准入分开 |
 | SYSTEM | **Shared Runtime Kernel v1：CLOSED / FROZEN** | Continuous Runtime ownership、threshold/W validation、typed rejection、fixtures、trace、case-isolated CTest、explicit DynamicsModel injection 与 isolation guard 已闭环。此状态只关闭执行 Kernel，不代表任何行为模型、Evaluator、Objective、Optimizer 或 Paper-0 完成。 | [Runtime Scheduler v1](Runtime_Scheduler_v1.md)、[Closure 验收矩阵](Runtime_Closure_Acceptance_Matrix.md)、[架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
