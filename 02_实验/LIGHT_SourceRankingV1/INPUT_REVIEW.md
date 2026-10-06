@@ -1,6 +1,6 @@
 # SourceRankingV1 实现验收与下一动作
 
-日期：2026-10-06。状态：**INPUT / TRAINER_SYNTHETIC / EXECUTION_PARENT_AUDIT_PASS / READY_FOR_INDEPENDENT_REVIEW**；不是 `CLOSED`。冻结投影仍为 `training_authorized=false`；单独的 `SOURCE_CONDITIONAL_DEVELOPMENT` 执行记录已准入，**REAL_FIT_NOT_RUN**。这不升级 actor-visible / Runtime policy / formal test / 心理有效性。
+日期：2026-10-06。状态：**INPUT / TRAINER_SYNTHETIC / EXECUTION_PARENT_AUDIT_PASS / REAL_FIT_RUNNING**；实现为 `READY_FOR_INDEPENDENT_REVIEW`，不是 `CLOSED`。冻结投影仍为 `training_authorized=false`；单独的 `SOURCE_CONDITIONAL_DEVELOPMENT` 执行记录已准入。这不升级 actor-visible / Runtime policy / formal test / 心理有效性。
 
 本页唯一维护投影/训练器实现验收与当前下一动作。[README](README.md)冻结任务、通道和拟训练规格，保留冻结时的未准入状态，不随实现进度改写；[LIGHT 来源审计](../../01_文献/精读_LIGHT与本地预测任务准入_2026-10-06.md)拥有 source/observation 的未准入结论。以下投影证据和合成训练证据分别成立，不等于演员可见观察契约、Paper-0 或真实数据上的预测通过。
 
@@ -92,8 +92,14 @@ python3 02_实验/LIGHT_SourceRankingV1/project_inputs.py \
 
 原始 13,463 行、9 条件、seeds 7/19/31、15 epochs 与冻结配置不变；bucket9 不训练、不评分。新输出必须是固定 `outputs/light_source_ranking_v1_20261006/trainer_runs/` 的未存在子目录；记录会连同输入/code 原字节保存，epoch 与阶段 checkpoint 实时 flush/fsync。没有覆盖或 resume 入口；中断产物不得冒充完整报告。
 
+### 实际运行记录
+
+已验收实现提交并推送为 `c8acd057c503788b79e7ff635f6c4a85fee8daf7`，远端 main 仍为 `e9ad2ebf329e8259b35f3ee0ef0492485d85c3ff`。本机真实运行根：`outputs/light_source_ranking_v1_20261006/trainer_runs/source_conditional_dev_c8acd05_20261006_v1/`（忽略，不上传源数据）。进程已实际完成 `context_only` 三个 seeds 的各 15 epochs，保存 checkpoint 与逐行预测；此观察不代表九条件对比已完成或任何模型胜出。
+
+运行中以该目录 `progress.jsonl` 为实际进度 authority，而非本页的即时计数；本页不逐 epoch 更新。启动调用为 `fit_source.py --out outputs/light_source_ranking_v1_20261006/trainer_runs/source_conditional_dev_c8acd05_20261006_v1`，当前执行 session `9472` / 初始 PID `83166` 仅用于本机会话接续，不能替代产物证据。进程消失时先核验原目录是否有完整 report/provenance 或失败，不再启动同名/替代运行冒充原 run。InputReview snapshot 是运行前历史状态，不冒充当前 owner 状态。
+
 ## 当前下一动作与不变边界
 
-唯一下一动作：使用已审查入口和单独准入记录执行固定 cohort / seeds 的真实 DEVELOPMENT 对比，随后独立读回 checkpoints、逐行预测及两项主比较；不调参、不逐通道增跑、不追逐正结果。`train.py` 默认入口仍拒绝真实拟合；只有独立 `fit_source.py` 核对记录后允许上述窄执行。该任务不把未证明的 source 信息偷称 actor-visible；完整演员观察契约仍需另行验证。方法来源与迁移边界见[近邻总表 §12 的 Cho 方法核验](../../01_文献/全量近邻精读总表_2026-10-06.md)及 README 的 Deep Sets 方法段。
+唯一下一动作：监测已启动的固定 cohort / seeds DEVELOPMENT 运行，完成后独立读回 checkpoints、逐行预测及两项主比较；不重复启动、不调参、不逐通道增跑、不追逐正结果。`train.py` 默认入口仍拒绝真实拟合；只有独立 `fit_source.py` 核对记录后允许上述窄执行。该任务不把未证明的 source 信息偷称 actor-visible；完整演员观察契约仍需另行验证。方法来源与迁移边界见[近邻总表 §12 的 Cho 方法核验](../../01_文献/全量近邻精读总表_2026-10-06.md)及 README 的 Deep Sets 方法段。
 
-截至本次执行准入，只完成合成拟合与实现验收，真实拟合尚未启动；没有超参数搜索、Runtime/Demo/reference 内容修改或旧拟合结果重算。后续结果最多回答本协议的 DEVELOPMENT 条件排名问题；完整演员观察权限、动作 settlement、`A^O`、独立正式 test、具名心理 `S`、闭环 policy 和新颖性仍未由它证明。整个科研改造目标未完成。
+本轮真实拟合已启动，尚未完成全套对比和独立产物验收；没有超参数搜索、Runtime/Demo/reference 内容修改或旧拟合结果重算。结果最多回答本协议的 DEVELOPMENT 条件排名问题；完整演员观察权限、动作 settlement、`A^O`、独立正式 test、具名心理 `S`、闭环 policy 和新颖性仍未由它证明。整个科研改造目标未完成。
