@@ -10,7 +10,11 @@
 - 12 cases / 32 tie seeds / 三个实际负控；仅两个已诊断取消差异，workspace 行为审计通过。最终 gate 会拒绝 raw cancel 后续回合的新错误；两侧同时删除关闭条件，即使 parity 通过，也被行为 contract 拒绝。
 - `git diff --check`、workflow YAML 解析通过；repo health return 0，三个既有警告保留，未扩大清理范围。新增独立 Node CI job 会从 pin 下载原件，运行旧/新 tests 与 fresh comparison；CI artifact 只上传比较结果，不包含 source-cache。
 
-提交后可再次运行 `node 02_实验/Praxish_Utility_Comparison_v0/tools/compare.mjs run --run-id <fresh-id>`；该 manifest 的 Git HEAD 与文件哈希能核验对应提交。远端 exact-head CI 以 GitHub Actions 对该提交的状态为准，不能用本地 tests 代替。
+执行提交：`df0c7ac46f97aa88e7787228d46d526804245387`。提交后 fresh run `parent-exact-head-df0c7ac-20261007-01` 成功，父代理用 `git show <revision>:<path>` 重新计算七项执行输入哈希，与 manifest 一致；结果与最终提交前 artifacts 相同。受保护 main 读回仍为 `e9ad2ebf329e8259b35f3ee0ef0492485d85c3ff`。
+
+[该执行提交的 exact-head CI](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37500083388) 已核验 `success`：`praxish-contract` 真正下载/验证 pin、运行旧/新 tests 与 fresh comparison；`regression` 的 Configure/Build/CTest/Reference verification/Repository health 全绿；`source-ranking-contract` 也 success。这是执行提交的证据，不自动证明以后文档或代码提交的 CI 状态。
+
+复跑：`node 02_实验/Praxish_Utility_Comparison_v0/tools/compare.mjs run --run-id <fresh-id>`。每次使用新 ID；精确执行版本与输入 bytes 以 manifest 核对，不能用本地 tests 代替远端 exact-head CI。
 
 ## 已直接核对的证据
 
