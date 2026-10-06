@@ -21,7 +21,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence
 
 import numpy as np
 import torch
@@ -50,6 +50,28 @@ DIMENSIONS = {"persona": 256, "context": 256, "candidate": 256,
 BATCH_SIZE, MAX_EPOCHS, LEARNING_RATE = 32, 15, 0.001
 BOOTSTRAP_REPLICATES, BOOTSTRAP_SEED = 2_000, 104_729
 TOKEN_RE = re.compile(r"\w+", flags=re.UNICODE)
+
+
+def frozen_training_config() -> dict[str, Any]:
+    return {"batch_size": BATCH_SIZE, "max_epochs": MAX_EPOCHS, "learning_rate": LEARNING_RATE,
+            "optimizer": "Adam", "weight_decay": 0.0, "scheduler": None, "dropout": 0.0,
+            "bootstrap_replicates": BOOTSTRAP_REPLICATES, "bootstrap_seed": BOOTSTRAP_SEED,
+            "device": "cpu", "torch_threads": 1, "deterministic_algorithms": True}
+
+
+def validate_new_output_path(path: Path) -> Path:
+    path = Path(path).absolute()
+    outputs_root = (ROOT / "outputs").resolve()
+    if path.exists() or path.is_symlink():
+        raise FileExistsError(f"refusing existing output: {path}")
+    if outputs_root not in path.resolve().parents:
+        raise ValueError("run output must be under ROOT/outputs")
+    for parent in (path, *path.parents):
+        if parent == ROOT or parent == outputs_root:
+            break
+        if parent.is_symlink():
+            raise ValueError(f"symlink output path forbidden: {parent}")
+    return path
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -328,7 +350,9 @@ def _nll(model: RankingModel, examples: Sequence[Example]) -> float | None:
 
 
 def train_one(model: RankingModel, train_rows: Sequence[Example], validation_rows: Sequence[Example],
-              seed: int, max_epochs: int = MAX_EPOCHS) -> dict[str, Any]:
+              seed: int, max_epochs: int = MAX_EPOCHS,
+              progress_callback: Callable[[dict[str, Any]], None] | None = None,
+              checkpoint_callback: Callable[[int, dict[str, torch.Tensor]], None] | None = None) -> dict[str, Any]:
     if any(e.split != "train" for e in train_rows):
         raise ValueError("training loader received a non-train episode")
     if any(e.split != "validation" for e in validation_rows):
@@ -365,8 +389,13 @@ def train_one(model: RankingModel, train_rows: Sequence[Example], validation_row
         epoch_log.append({"epoch": _epoch + 1, "mean_train_nll": train_loss_sum / train_row_count,
                           "mean_validation_nll": val_nll,
                           "mean_preclip_gradient_norm": float(np.mean(gradient_norms))})
-        if best_state is None or val_nll < min(epoch_nlls[:-1]):
+        if progress_callback is not None:
+            progress_callback(epoch_log[-1])
+        is_new_best = best_state is None or val_nll < min(epoch_nlls[:-1])
+        if is_new_best:
             best_state = {k: v.detach().clone() for k, v in model.state_dict().items()}
+            if checkpoint_callback is not None:
+                checkpoint_callback(_epoch + 1, best_state)
     best_epoch = select_best_checkpoint(epoch_nlls)
     model.load_state_dict(best_state)
     return {"model": model, "best_epoch": best_epoch, "validation_nll_by_epoch": epoch_nlls,
@@ -425,20 +454,25 @@ def paired_episode_bootstrap(left: Sequence[Example], right: Sequence[Example],
             "ci95": [float(x) for x in np.quantile(draws, [0.025, 0.975])], "replicates": replicates, "seed": seed}
 
 
-def read_jsonl(path: Path) -> list[dict[str, Any]]:
+def read_jsonl(path: Path, *, payload: bytes | None = None) -> list[dict[str, Any]]:
     rows = []
-    with path.open(encoding="utf-8") as stream:
-        for line_no, line in enumerate(stream, 1):
-            if not line.strip():
-                raise ValueError(f"blank JSONL line {line_no}")
-            row = json.loads(line)
-            if not isinstance(row, dict):
-                raise ValueError(f"line {line_no} must be object")
-            rows.append(row)
+    if payload is None:
+        with path.open(encoding="utf-8") as stream:
+            lines = list(stream)
+    else:
+        lines = payload.decode("utf-8").splitlines(keepends=True)
+    for line_no, line in enumerate(lines, 1):
+        if not line.strip():
+            raise ValueError(f"blank JSONL line {line_no}")
+        row = json.loads(line)
+        if not isinstance(row, dict):
+            raise ValueError(f"line {line_no} must be object")
+        rows.append(row)
     return rows
 
 
-def verify_pinned_input() -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def verify_pinned_input(*, projected_payload: bytes | None = None,
+                        source_payload: bytes | None = None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Verify the existing accepted projection and all snapshot/source pins."""
     manifest_path = CONTRACT_DIR / "manifest.json"
     if not PROJECTED_PATH.is_file() or not manifest_path.is_file():
@@ -455,19 +489,23 @@ def verify_pinned_input() -> tuple[list[dict[str, Any]], dict[str, Any]]:
                           ("test_project_inputs_snapshot.py", "test_sha256")):
         if sha256_file(CONTRACT_DIR / filename) != manifest[key]:
             raise ValueError(f"pinned snapshot hash mismatch: {filename}")
-    payload = PROJECTED_PATH.read_bytes()
+    payload = PROJECTED_PATH.read_bytes() if projected_payload is None else projected_payload
     if sha256_bytes(payload) != EXPECTED_PROJECTED_SHA256:
         raise ValueError("projected input artifact hash mismatch")
-    rows = read_jsonl(PROJECTED_PATH)
+    rows = read_jsonl(PROJECTED_PATH, payload=payload)
     if len(rows) != EXPECTED_ROWS:
         raise ValueError(f"expected {EXPECTED_ROWS} projected rows, got {len(rows)}")
     import project_inputs
     current_pins = {"protocol": sha256_file(HERE / "README.md"),
-                    "builder": sha256_file(HERE / "project_inputs.py")}
-    if current_pins != {"protocol": EXPECTED_PROTOCOL_SHA256, "builder": EXPECTED_BUILDER_SHA256}:
-        raise ValueError("current protocol or projection source differs from accepted snapshot")
-    if project_inputs.SOURCE.is_file():
-        if sha256_file(project_inputs.SOURCE) != EXPECTED_INPUT_SHA256:
+                    "builder": sha256_file(HERE / "project_inputs.py"),
+                    "builder_test": sha256_file(HERE / "test_project_inputs.py")}
+    if current_pins != {"protocol": EXPECTED_PROTOCOL_SHA256, "builder": EXPECTED_BUILDER_SHA256,
+                        "builder_test": EXPECTED_TEST_SHA256}:
+        raise ValueError("current protocol, projection source, or projection test differs from accepted snapshot")
+    if project_inputs.SOURCE.is_file() or source_payload is not None:
+        actual_source_hash = (sha256_file(project_inputs.SOURCE) if source_payload is None
+                              else sha256_bytes(source_payload))
+        if actual_source_hash != EXPECTED_INPUT_SHA256:
             raise ValueError("pinned upstream source bytes changed")
     else:
         raise FileNotFoundError(f"pinned upstream source missing: {project_inputs.SOURCE}")
@@ -606,26 +644,76 @@ def _jsonl_write_exclusive(path: Path, records: Iterable[dict[str, Any]]) -> Non
             f.write(json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n")
 
 
-def run_experiment(examples_by_condition: dict[str, list[Example]], out: Path, *,
+def _torch_save_exclusive(path: Path, payload: Any) -> None:
+    with path.open("xb") as f:
+        torch.save(payload, f)
+        f.flush()
+        os.fsync(f.fileno())
+
+
+def run_experiment(examples_by_condition: dict[str, list[Example]] | None, out: Path, *,
                    run_kind: str, input_manifest: dict[str, Any] | None = None,
                    seeds: Sequence[int] = SEEDS, max_epochs: int = MAX_EPOCHS,
                    bootstrap_replicates: int = BOOTSTRAP_REPLICATES,
-                   input_snapshot: bytes | None = None) -> dict[str, Any]:
+                   input_snapshot: bytes | None = None,
+                   execution_admission_snapshot: bytes | None = None,
+                   projected_input_snapshot: bytes | None = None,
+                   source_input_snapshot: bytes | None = None) -> dict[str, Any]:
     """Complete run/evidence pipeline shared by synthetic and future admitted runs."""
-    out = out.absolute()
-    outputs_root = (ROOT / "outputs").resolve()
-    if out.exists() or out.is_symlink():
-        raise FileExistsError(f"refusing existing output: {out}")
-    if outputs_root not in out.resolve().parents:
-        raise ValueError("run output must be under ROOT/outputs")
-    for parent in (out, *out.parents):
-        if parent == ROOT or parent == outputs_root:
-            break
-        if parent.is_symlink():
-            raise ValueError(f"symlink output path forbidden: {parent}")
-    if run_kind != "SYNTHETIC_CONTRACT_ONLY":
-        raise PermissionError("this trainer revision accepts synthetic contract runs only")
-    if set(examples_by_condition) != set(CONDITIONS):
+    out = validate_new_output_path(out)
+    execution_record = None
+    source_snapshots: dict[str, bytes] = {}
+    if run_kind == "SYNTHETIC_CONTRACT_ONLY":
+        if input_snapshot is None or any(x is not None for x in
+                                          (execution_admission_snapshot, projected_input_snapshot, source_input_snapshot)):
+            raise ValueError("synthetic runs require only a synthetic input snapshot")
+    elif run_kind == "SOURCE_CONDITIONAL_DEVELOPMENT":
+        if DEFAULT_RUN_ROOT.resolve() not in out.resolve().parents:
+            raise ValueError("development run output must be a new child of the fixed trainer run root")
+        if (execution_admission_snapshot is None or projected_input_snapshot is None or
+                source_input_snapshot is None or input_snapshot is not None):
+            raise PermissionError("development run requires captured admission, projected, and source bytes")
+        from fit_source import verify_execution_admission_bytes
+        execution_record = verify_execution_admission_bytes(execution_admission_snapshot)
+        pins = execution_record["pins"]
+        pinned_names = set(pins["source_sha256"])
+        required_snapshot_names = {"README.md", "INPUT_REVIEW.md", "project_inputs.py", "test_project_inputs.py"}
+        for name in sorted(pinned_names | required_snapshot_names):
+            source = HERE / name
+            if not source.is_file():
+                raise FileNotFoundError(f"execution-pinned source disappeared: {source}")
+            source_snapshots[name] = source.read_bytes()
+        if not set(pins["source_sha256"]).issubset(source_snapshots):
+            raise ValueError("an execution-pinned source snapshot is missing")
+        captured_pins = {name: sha256_bytes(source_snapshots[name]) for name in pins["source_sha256"]}
+        if captured_pins != pins["source_sha256"]:
+            raise ValueError("captured execution source bytes differ from the accepted admission pins")
+        if (sha256_bytes(source_snapshots["README.md"]) != EXPECTED_PROTOCOL_SHA256 or
+                sha256_bytes(source_snapshots["project_inputs.py"]) != EXPECTED_BUILDER_SHA256 or
+                sha256_bytes(source_snapshots["test_project_inputs.py"]) != EXPECTED_TEST_SHA256):
+            raise ValueError("captured protocol/builder/projection-test snapshots differ from frozen pins")
+        if (sha256_bytes(projected_input_snapshot) != pins["projected_sha256"] or
+                sha256_bytes(source_input_snapshot) != pins["input_sha256"]):
+            raise ValueError("captured source/projected bytes do not match the accepted execution pins")
+        if (tuple(seeds) != SEEDS or max_epochs != MAX_EPOCHS or
+                bootstrap_replicates != BOOTSTRAP_REPLICATES or pins["config"] != frozen_training_config() or
+                pins["conditions"] != list(CONDITIONS) or pins["seeds"] != list(SEEDS)):
+            raise ValueError("development run settings differ from frozen execution configuration")
+        # The admitted path always regenerates tensors from the exact bound
+        # bytes. Caller-supplied Example objects are never accepted for real runs.
+        real_rows, verified_manifest = verify_pinned_input(projected_payload=projected_input_snapshot,
+                                                            source_payload=source_input_snapshot)
+        if input_manifest is not None and input_manifest != verified_manifest:
+            raise ValueError("provided projection manifest is not the verified manifest for captured bytes")
+        if (verified_manifest.get("training_authorized") is not False or
+                verified_manifest.get("output_sha256") != pins["projected_sha256"] or
+                verified_manifest.get("input_sha256") != pins["input_sha256"]):
+            raise ValueError("projection admission evidence does not match execution pins")
+        input_manifest = verified_manifest
+        examples_by_condition = build_examples(real_rows)
+    else:
+        raise PermissionError("unknown run kind; no authorization fallback is available")
+    if examples_by_condition is None or set(examples_by_condition) != set(CONDITIONS):
         raise ValueError("experiment must contain exactly the nine frozen conditions")
     reference = examples_by_condition["gru_core"]
     signature = lambda e: (e.source_row, e.trajectory_id, e.actor, e.bucket, e.support,
@@ -634,13 +722,14 @@ def run_experiment(examples_by_condition: dict[str, list[Example]], out: Path, *
     for condition in CONDITIONS:
         if [signature(e) for e in examples_by_condition[condition]] != expected_signature:
             raise ValueError(f"condition row cohort differs from gru_core: {condition}")
-    # Freeze exact source bytes and the synthetic input before any optimizer runs.
-    source_snapshots = {}
-    for name in ("train.py", "README.md", "INPUT_REVIEW.md", "project_inputs.py", "test_project_inputs.py", "test_train.py"):
-        source = HERE / name
-        if source.is_file():
-            source_snapshots[name] = source.read_bytes()
-    if input_snapshot is None:
+    # These synthetic snapshots do not authorize or load source data. Real-run
+    # snapshots were captured and hash-checked before any input parsing/features.
+    if execution_record is None:
+        for name in ("train.py", "README.md", "INPUT_REVIEW.md", "project_inputs.py", "test_project_inputs.py", "test_train.py"):
+            source = HERE / name
+            if source.is_file():
+                source_snapshots[name] = source.read_bytes()
+    if run_kind == "SYNTHETIC_CONTRACT_ONLY" and input_snapshot is None:
         raise ValueError("synthetic run requires serialized input bytes for provenance")
     out.mkdir(parents=True, exist_ok=False)
     snapshot_dir = out / "snapshots"
@@ -650,13 +739,42 @@ def run_experiment(examples_by_condition: dict[str, list[Example]], out: Path, *
         with (snapshot_dir / name).open("xb") as f:
             f.write(payload)
         snapshot_hashes[name] = sha256_bytes(payload)
-    with (snapshot_dir / "synthetic_input.jsonl").open("xb") as f:
-        f.write(input_snapshot)
-    snapshot_hashes["synthetic_input.jsonl"] = sha256_bytes(input_snapshot)
+    if run_kind == "SYNTHETIC_CONTRACT_ONLY":
+        with (snapshot_dir / "synthetic_input.jsonl").open("xb") as f:
+            f.write(input_snapshot)
+        snapshot_hashes["synthetic_input.jsonl"] = sha256_bytes(input_snapshot)
+    else:
+        for filename, content in (("projected_input.jsonl", projected_input_snapshot),
+                                  ("source_input.jsonl", source_input_snapshot),
+                                  ("execution_admission.json", execution_admission_snapshot)):
+            with (snapshot_dir / filename).open("xb") as f:
+                f.write(content)
+            snapshot_hashes[filename] = sha256_bytes(content)
+    progress_stream = (out / "progress.jsonl").open("x", encoding="utf-8")
+    def progress(event: str, **fields: Any) -> None:
+        progress_stream.write(json.dumps({"time_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                                          "event": event, **fields}, ensure_ascii=False,
+                                         sort_keys=True, separators=(",", ":")) + "\n")
+        progress_stream.flush()
+        os.fsync(progress_stream.fileno())
+    progress("run_started", run_kind=run_kind, run_root=str(out),
+             training_authorized=run_kind == "SOURCE_CONDITIONAL_DEVELOPMENT")
     started = time.perf_counter()
     report: dict[str, Any] = {"schema": "light_source_ranking_trainer_run_v1", "run_kind": run_kind,
-                              "research_evidence": False, "real_source_loaded": False,
-                              "claims": "Synthetic contract run only; no source data or research evidence.",
+                              "training_authorized": execution_record is not None,
+                              "projection_training_authorized": False,
+                              "execution_training_authorized": execution_record is not None,
+                              "research_evidence": (False if execution_record is None else "SOURCE_CONDITIONAL_DEVELOPMENT"),
+                              "real_source_loaded": execution_record is not None,
+                              "claims": ("Synthetic contract run only; no source data or research evidence."
+                                         if execution_record is None else
+                                         "Development ranking evidence only; no actor-visible, runtime-policy, formal-test, or psychological-validity admission."),
+                              "admissions": {"projection_training_authorized": False,
+                                             "execution_training_authorized": execution_record is not None,
+                                             "actor_forecast": False, "runtime_policy": False,
+                                             "formal_test": False, "psychological_validity": False,
+                                             "authorization_basis": (execution_record.get("authorization_basis")
+                                                                      if execution_record else None)},
                               "dataset": dataset_report(examples_by_condition["gru_core"]),
                               "conditions": {}, "paired_comparisons": {}, "strata": {},
                               "excluded_bucket9": {"trained": False, "scored": False, "metrics": None}}
@@ -667,7 +785,20 @@ def run_experiment(examples_by_condition: dict[str, list[Example]], out: Path, *
         runs = []
         predictions_by_condition[condition] = {}
         for seed in seeds:
-            fitted = fit_condition(condition_examples, condition, int(seed), max_epochs=max_epochs)
+            callback = lambda record, c=condition, s=int(seed): progress("epoch_complete", condition=c, seed=s, **record)
+            progress_checkpoints: list[str] = []
+            def save_progress_checkpoint(epoch: int, state: dict[str, torch.Tensor],
+                                         c: str = condition, s: int = int(seed)) -> None:
+                name = f"checkpoint_progress_{c}_seed{s}_epoch{epoch}.pt"
+                _torch_save_exclusive(out / name, {"condition": c, "seed": s, "epoch": epoch,
+                                                   "state_dict": state, "run_kind": run_kind,
+                                                   "selected_as_of_epoch": True})
+                progress_checkpoints.append(name)
+                progress("best_checkpoint_progress_saved", condition=c, seed=s, epoch=epoch,
+                         checkpoint=name)
+            fitted = fit_condition(condition_examples, condition, int(seed), max_epochs=max_epochs,
+                                   progress_callback=callback,
+                                   checkpoint_callback=(save_progress_checkpoint if execution_record else None))
             model = fitted["model"]
             per_split = {}
             pred_for_seed: dict[str, dict[int, dict[str, Any]]] = {}
@@ -687,9 +818,12 @@ def run_experiment(examples_by_condition: dict[str, list[Example]], out: Path, *
             if model is not None:
                 checkpoint_file = f"checkpoint_{condition}_seed{seed}.pt"
                 ckpt_path = out / checkpoint_file
-                torch.save({"condition": condition, "seed": int(seed), "best_epoch": fitted["best_epoch"],
-                            "state_dict": {k: v.detach().cpu().clone() for k, v in model.state_dict().items()},
-                            "run_kind": run_kind}, ckpt_path)
+                _torch_save_exclusive(ckpt_path,
+                                      {"condition": condition, "seed": int(seed), "best_epoch": fitted["best_epoch"],
+                                       "state_dict": {k: v.detach().cpu().clone() for k, v in model.state_dict().items()},
+                                       "run_kind": run_kind})
+                progress("checkpoint_written", condition=condition, seed=int(seed), epoch=fitted["best_epoch"],
+                         checkpoint=checkpoint_file, bytes=ckpt_path.stat().st_size)
                 fresh = RankingModel(condition)
                 data = torch.load(ckpt_path, map_location="cpu", weights_only=True)
                 fresh.load_state_dict(data["state_dict"], strict=True)
@@ -711,8 +845,11 @@ def run_experiment(examples_by_condition: dict[str, list[Example]], out: Path, *
                    "selected_validation_nll": fitted["validation_nll"], "fresh_reload_validation_nll": reload_nll,
                    "trainable_parameters": fitted["trainable_parameters"],
                    "training_seconds": fitted["training_seconds"], "metrics": per_split,
+                   "progress_checkpoint_files": progress_checkpoints,
                    "prediction_file": pred_file, "checkpoint_file": checkpoint_file}
             runs.append(run)
+            progress("condition_seed_complete", condition=condition, seed=int(seed),
+                     best_epoch=fitted["best_epoch"], selected_validation_nll=fitted["validation_nll"])
         report["conditions"][condition] = runs
         records_all = [r for seed in seeds for split in ("train", "validation")
                        for r in predictions_by_condition[condition][int(seed)][split].values()]
@@ -720,8 +857,7 @@ def run_experiment(examples_by_condition: dict[str, list[Example]], out: Path, *
                                          "total_inference_seconds": sum(r["inference_seconds"] for r in records_all),
                                          "mean_inference_seconds_per_row": (float(np.mean([r["inference_seconds"] for r in records_all]))
                                                                             if records_all else None),
-                                         "checkpoint_bytes": sum((out / r["checkpoint_file"]).stat().st_size
-                                                                  for r in runs if r["checkpoint_file"])}
+                                         "checkpoint_bytes": sum(p.stat().st_size for p in out.glob(f"checkpoint*_{condition}_seed*.pt"))}
     report["cost"] = {"by_condition": per_condition_cost,
                        "total_wall_seconds": time.perf_counter() - started,
                        "process_peak_rss_bytes": int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss *
@@ -796,28 +932,46 @@ def run_experiment(examples_by_condition: dict[str, list[Example]], out: Path, *
         report["strata"][f"{split}:depth_0_unstratified"] = {
             "rows": sum(_stratum(len(e.features["history"])) == "depth_0" for e in rows),
             "reason": "outside predeclared prior-group-depth strata"}
-    config = {"conditions": list(CONDITIONS), "seeds": list(seeds), "batch_size": BATCH_SIZE,
-              "max_epochs": max_epochs, "learning_rate": LEARNING_RATE, "weight_decay": 0.0,
-              "optimizer": "Adam", "bootstrap_replicates": bootstrap_replicates,
-              "bootstrap_seed": BOOTSTRAP_SEED, "split": "whole-episode SHA256 bucket; 0-6 train, 7-8 validation, 9 excluded"}
+    config = {**frozen_training_config(), "max_epochs": max_epochs,
+              "bootstrap_replicates": bootstrap_replicates,
+              "conditions": list(CONDITIONS), "seeds": list(seeds),
+              "split": "whole-episode SHA256 bucket; 0-6 train, 7-8 validation, 9 excluded"}
     snapshots = {"trainer_source_sha256": snapshot_hashes.get("train.py"),
                  "protocol_sha256": snapshot_hashes.get("README.md"),
                  "input_review_sha256": snapshot_hashes.get("INPUT_REVIEW.md"),
                  "project_inputs_source_sha256": snapshot_hashes.get("project_inputs.py"),
                  "test_source_sha256": snapshot_hashes.get("test_project_inputs.py"),
                  "trainer_test_source_sha256": snapshot_hashes.get("test_train.py"),
-                 "synthetic_input_sha256": snapshot_hashes["synthetic_input.jsonl"]}
+                 "execution_runner_sha256": snapshot_hashes.get("fit_source.py"),
+                 "execution_guard_test_sha256": snapshot_hashes.get("test_execution_admission.py")}
+    if "synthetic_input.jsonl" in snapshot_hashes:
+        snapshots["synthetic_input_sha256"] = snapshot_hashes["synthetic_input.jsonl"]
+    else:
+        snapshots.update({"projected_input_sha256": snapshot_hashes["projected_input.jsonl"],
+                          "source_input_sha256": snapshot_hashes["source_input.jsonl"],
+                          "execution_admission_sha256": snapshot_hashes["execution_admission.json"]})
     manifest = {"schema": "light_source_ranking_run_provenance_v1", "run_kind": run_kind,
-                "training_authorized": False,
+                "training_authorized": execution_record is not None,
+                "projection_training_authorized": False,
+                "execution_training_authorized": execution_record is not None,
+                "actor_forecast": False, "runtime_policy": False, "formal_test": False,
+                "psychological_validity": False, "execution_admission": execution_record,
                 "input_contract_manifest": input_manifest, "snapshots": snapshots, "config": config,
                 "dataset_report_sha256": sha256_bytes(canonical_json(report["dataset"]).encode()),
                 "created_by": "train.py", "output_scope": str(out),
                 "output_hash_scope_excludes": ["provenance.json"]}
-    with (out / "SYNTHETIC_ONLY.txt").open("x", encoding="utf-8") as f:
-        f.write("Synthetic contract exercise only. Not source data or research evidence.\n")
+    if execution_record is None:
+        with (out / "SYNTHETIC_ONLY.txt").open("x", encoding="utf-8") as f:
+            f.write("Synthetic contract exercise only. Not source data or research evidence.\n")
+    else:
+        with (out / "DEVELOPMENT_ONLY.txt").open("x", encoding="utf-8") as f:
+            f.write("Source-conditional DEVELOPMENT ranking only; no actor-visible, runtime-policy, formal-test, or psychological-validity admission.\n")
+    progress("analysis_complete", condition_count=len(CONDITIONS), seed_count=len(seeds))
+    progress_stream.close()
     report["cost"]["total_wall_seconds"] = time.perf_counter() - started
     _atomic_json(out / "report.json", report)
-    _atomic_json(out / "synthetic_report.json", report)
+    if execution_record is None:
+        _atomic_json(out / "synthetic_report.json", report)
     output_hashes = {p.relative_to(out).as_posix(): sha256_file(p) for p in out.rglob("*") if p.is_file()}
     manifest["output_files_sha256"] = output_hashes
     _atomic_json(out / "provenance.json", manifest)
@@ -831,7 +985,9 @@ def _seed_everything(seed: int) -> None:
 
 
 def fit_condition(examples: Sequence[Example], condition: str, seed: int,
-                  max_epochs: int = MAX_EPOCHS) -> dict[str, Any]:
+                  max_epochs: int = MAX_EPOCHS,
+                  progress_callback: Callable[[dict[str, Any]], None] | None = None,
+                  checkpoint_callback: Callable[[int, dict[str, torch.Tensor]], None] | None = None) -> dict[str, Any]:
     parts = split_examples(examples)
     train_rows = _eligible(parts["train"])
     val_rows = _eligible(parts["validation"])
@@ -841,7 +997,8 @@ def fit_condition(examples: Sequence[Example], condition: str, seed: int,
                 "training_seconds": 0.0, "seed": seed}
     _seed_everything(seed)
     model = RankingModel(condition)
-    result = train_one(model, train_rows, val_rows, seed, max_epochs=max_epochs)
+    result = train_one(model, train_rows, val_rows, seed, max_epochs=max_epochs,
+                       progress_callback=progress_callback, checkpoint_callback=checkpoint_callback)
     result["seed"] = seed
     return result
 
