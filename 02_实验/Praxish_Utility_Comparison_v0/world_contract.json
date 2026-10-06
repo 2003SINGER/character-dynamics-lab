@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "predicates": ["work_phase", "request_status", "workspace_open"],
+  "actor_order": "round_robin_in_declared_character_order",
+  "utility": "sum over authored goals of weight times post-action absolute match count",
+  "tie_break": "uniform seeded LCG draw among max-score candidates, preserving authored candidate order",
+  "hard_constraints": [
+    { "id": "closed_workspace_blocks_finish", "action": "finish_restocking", "when": ["workspace_open=false"], "violation": "finish while workspace is closed" }
+  ],
+  "rng": { "algorithm": "LCG32", "multiplier": 1664525, "increment": 1013904223, "modulus": 4294967296 }
+}

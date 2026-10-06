@@ -1,0 +1,33 @@
+{
+  "presentation": "common_typed_timeline_no_method_or_utility_fields",
+  "cases": [
+    {
+      "case": "no_request",
+      "baseline": [
+        { "turn": 0, "actor": "worker", "action": "start_restocking" },
+        { "turn": 1, "actor": "visitor", "action": null },
+        { "turn": 2, "actor": "worker", "action": "finish_restocking" }
+      ],
+      "praxish": [
+        { "turn": 0, "actor": "worker", "action": "start_restocking" },
+        { "turn": 1, "actor": "visitor", "action": null },
+        { "turn": 2, "actor": "worker", "action": "finish_restocking" }
+      ]
+    },
+    {
+      "case": "request",
+      "baseline": [
+        { "turn": 0, "actor": "worker", "action": "start_restocking" },
+        { "turn": 1, "actor": "visitor", "action": "wait_for_answer" },
+        { "turn": 2, "actor": "worker", "action": "answer_request" },
+        { "turn": 4, "actor": "worker", "action": "finish_restocking" }
+      ],
+      "praxish": [
+        { "turn": 0, "actor": "worker", "action": "start_restocking" },
+        { "turn": 1, "actor": "visitor", "action": "wait_for_answer" },
+        { "turn": 2, "actor": "worker", "action": "answer_request" },
+        { "turn": 4, "actor": "worker", "action": "finish_restocking" }
+      ]
+    }
+  ]
+}

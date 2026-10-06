@@ -2,7 +2,7 @@
 
 本机工作区、历史 checkout 与运行产物的路径边界见[本地工作区布局](Local_Workspace_Layout.md)。迁移不改变实验条件或 run ID，也不授权启动新实验。
 
-当前玩家 NPC 路线的新开发入口：[Praxish Activity Pilot v0](Praxish_Activity_Pilot_v0/README.md)。本轮只落实原件运行/机制解释与“自有工作＋外来请求”的共同场景；采用原件离散 turn 和共享 DB，不接 ContinuousRuntime，不训练，也不把条件演示当作方法胜出。后续匹配基线和玩家意义仍待讨论；既有 coursework/历史 LLM 探针保留但不混入本实验。
+当前玩家 NPC 路线的新开发入口：[Praxish 与参数化 utility 的匹配比较](Praxish_Utility_Comparison_v0/README.md)（2026-10-07 授权第 3 步）。前两步原件运行/机制解释与“自有工作＋外来请求”场景由[Praxish Activity Pilot v0](Praxish_Activity_Pilot_v0/README.md)保留。比较采用原件离散 turn 和全共享知识，不接 ContinuousRuntime，不训练，也不把条件演示当作方法胜出；共同事件、能力与目标匹配，记录新增条件的配置修改、失败与修正，玩家意义仍未验证。既有 coursework/历史 LLM 探针保留但不混入本实验。
 
 当前方法开发入口：[PredictionBaselineV1](PredictionBaselineV1/README.md) development fit 与独立 seed 复现已完成，待外审；唯一数值结果见[RESULTS](PredictionBaselineV1/RESULTS.md)。它是 DEVELOPMENT 条件预测基座，不是已学习的心理 `S` 或 Runtime policy；研究重建顺序与证据边界见[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)。`ResearchDynamicsV1` 是手写固定-law fixture，当前机制验收不足，未作为 admitted science model。旧 `Theory_S_v2` 是 `ExpectedEffectEMAProxyV0` 历史诊断 proxy；不得把它写成已验证角色动力学。
 

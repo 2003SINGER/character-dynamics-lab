@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "seed": "0x5eed1234",
+  "base_cases": ["no_request", "request", "lowpriority"],
+  "extensions": ["request_cancellation", "request_cancellation_low_motivation", "cancellation_explicit_binding_workaround", "cancellation_explicit_binding_workaround_low_motivation", "second_worker_visitor_pair", "multiple_requests_one_worker", "workspace_closure_unadapted", "workspace_closure_adapted", "equal_score_tie"],
+  "turns": 8,
+  "case_turns": { "second_worker_visitor_pair": 12, "multiple_requests_one_worker": 12 },
+  "actor_orders": {
+    "default": ["worker", "visitor"],
+    "second_worker_visitor_pair": ["worker", "worker2", "visitor", "visitor2"],
+    "multiple_requests_one_worker": ["worker", "visitor", "visitor2"]
+  },
+  "events": { "request": { "before_turn": 1 }, "close": { "before_turn": 1 }, "reopen": { "before_turn": 5 } },
+  "preferences": { "default": { "serve_visitor": 10, "cancel_request": 1 }, "lowpriority": { "serve_visitor": 1 }, "cancel_low_motivation": { "cancel_request": -1 } },
+  "tie_preferences": { "serve_visitor": 4, "keep_working": 1, "finish_work": 5 }
+}

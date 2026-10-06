@@ -24,7 +24,7 @@ LIGHT 的官方任务与本地训练输入不等价；来源映射、候选重�
 
 “作者定义角色/活动，而非逐情境枚举反应”的学术路线见[低编排可控 NPC 框架定向调研](专题调研_低编排可控NPC框架_2026-10-06.md)：比较 CiF、Versu/Praxish、CiF-CK、FAtiMA 作者研究、意图规划和 LLM 混合/复用机制。逐篇标注主代理/委派阅读范围、版本、玩家证据与作者成本证据；不是穷尽查新或已选定方法。共享玩家能力、商人/伐木工均仍是候选，不因本次调研启动实现。
 
-用户随后授权落实 Praxish 原件核查与共同小场景：[论文/源码精读](精读_Praxish论文与原始实现_2026-10-06.md)记录正式标题、release attachment 与 tag/master 的区别、一步绝对后果 utility、共享 DB 及原脚本确定性执行证据；[实验 owner](../02_实验/Praxish_Activity_Pilot_v0/README.md)维护新场景及验收。不是传统基线比较、作者成本优势或玩家效度证明。
+用户随后授权落实 Praxish 原件核查与共同小场景：[论文/源码精读](精读_Praxish论文与原始实现_2026-10-06.md)记录正式标题、release attachment 与 tag/master 的区别、一步绝对后果 utility、共享 DB 及原脚本确定性执行证据；[原实验 owner](../02_实验/Praxish_Activity_Pilot_v0/README.md)维护前两步。2026-10-07 新增的[独立参数化 utility 比较](../02_实验/Praxish_Utility_Comparison_v0/RESULTS.md)另维护匹配、原件对象别名失败及配置账本；其开发结果不能提升为论文原有实验、作者成本优势或玩家效度证明。
 
 ## 检索原则
 

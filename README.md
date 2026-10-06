@@ -27,7 +27,7 @@
 
 仓库治理护栏：[ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md)；廉价健康检查可运行 `python tools/repo_health_check.py`，ReplayRecord 样例可用 `python tools/validate_replay_record.py <record.json>` 校验。护栏只预警文件膨胀/重复归档，明确的 schema、CTest 和 provenance 错误才阻断对应检查。
 
-当前应用目标由用户确认是“NPC 在玩家眼中在游戏里面活起来”，不要求先拟合真实人物心理。[当前研究推进](00_研究设计/研究重建审计_2026-10-06.md#当前推进近邻原件与共同小场景)先落实 Praxish 原件机制解释与[共同小场景](02_实验/Praxish_Activity_Pilot_v0/README.md)，交付后讨论匹配基线与具体瓶颈；不自动开发新机制，尚无玩家比较结果。既有 coursework/历史 LLM 探针保留，PredictionBaselineV1 / SourceRankingV1 只作有限来源预测开发证据，不是 NPC 可置信性、心理状态 `S` 或 Runtime policy 训练证据；Paper-0 的独立 `A*` 准入只约束该冻结分支。不能用便宜、能跑或自有评分器的分数替代独立研究证明。
+当前应用目标由用户确认是“NPC 在玩家眼中在游戏里面活起来”，不要求先拟合真实人物心理。[当前研究推进](00_研究设计/研究重建审计_2026-10-06.md#当前推进近邻原件与共同小场景)的 Praxish 原件解释与[共同小场景](02_实验/Praxish_Activity_Pilot_v0/README.md)已有执行证据；2026-10-07 授权的第 3 步已形成[活动组织与独立参数化 utility 的匹配比较结果](02_实验/Praxish_Utility_Comparison_v0/RESULTS.md)，保留真实失败与修改账本，待外审。当前小场景未显示活动组织行为优势；原件 bug 不作为方法收益，不据此开发新心理机制，尚无玩家比较结果。既有 coursework/历史 LLM 探针保留，PredictionBaselineV1 / SourceRankingV1 只作有限来源预测开发证据，不是 NPC 可置信性、心理状态 `S` 或 Runtime policy 训练证据；Paper-0 的独立 `A*` 准入只约束该冻结分支。不能用便宜、能跑或自有评分器的分数替代独立研究证明。
 
 ## 代码与材料的归属
 
