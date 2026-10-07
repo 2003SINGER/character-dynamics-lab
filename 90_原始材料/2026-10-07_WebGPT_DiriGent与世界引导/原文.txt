@@ -1,0 +1,836 @@
+次我不再靠“我记得你之前想过什么”来概括。我会把 4a44ee2 当成唯一事实源，重点重读 原始构想 → 机制骨架 → Task/Commitment → 未决问题 → 研究重建 → 10 月 7 日算法/外围调研，然后给你指出：哪些东西其实早就有、哪些是最近被我误读成新想法、哪些才是真正还没接上的部分。
+
+梳理并审阅仓库研究设计、机制及项目约束文档
+
+
+
+
+我再往里扫，不只读“现行总纲”。我现在要专门找仓库里有没有被后来的科研收缩压掉的旧语义：作者预设剧情事实/节点、外部事件怎样进 W、角色变化能不能被硬约束、节点之间是否由角色自己走、世界是否允许主动干预以维持剧情可达性。这次会把归档和原始材料也算进去。
+
+厘清了叙事控制
+
+
+
+
+梳理研究文档中的作者约束与角色动力学机制
+
+
+
+
+
+
+
+
+
+
+
+这次我确实把仓库重新按“原始构想 → 现行机制 → 代码 → 10 月研究重建”串着读了一遍。前面我还是把你的项目理解窄了。
+最关键的纠正是：你的原始设计本来就不只是“人物有个动态 S，然后根据 S 选行为”。它从一开始就是“可执行世界 + affordance + 局部认知 + 持续人物状态 + 行为反过来改变世界”的闭环。 9 月 1 日原始材料已经写得很清楚：世界对象自己有状态和 affordance，时间和事件会让世界自行变化，角色并不是世界唯一的驱动力；后来的正式机制则把它固定成 W → O → X → S → D → A^O → W settle。这不是我刚才从 Sims 得到的新启发，而是你原来的母体。
+而且 Sims/Smart Object 跟你确实非常像。仓库 完整机制说明_v0.md 和 未决问题与机制候选.md#Q05 已经明确写了：Object 提供基础 affordance，Scene/Room 组合人物动作，角色侧依据 O 形成 A^O，W 再做真实合法性校验与结算。当前代码里也已经有 known_object_affordances、known_actions、ActionConstraintBelief、World::validate_runtime_start() 和 World::settle()。所以“物体提供行为，人按需求/状态选”这一块，你早就在做，而且仓库自己也已经因为 Sims/SmartObject/GOAP 先例把它降级成背景工程实践，明确不当 novelty 了。
+我前面另一个说得太粗的地方是“你关心 trajectory，而 Sims 只是 state→action”。仓库其实早就已经把 trajectory continuity 做进 Task/Commitment 了。 你那份 任务_承诺_单步行为改造方案_v0.md 的分层很漂亮：
+WorldTask        —— 世界里长期存在的事情
+TaskCommitment   —— 角色正在坚持/暂停的方向
+Action           —— 当前这一小步实际做什么
+
+而且明确允许：
+推进 coursework
+→ 饿了，Suspended
+→ 吃饭
+→ 休息
+→ 条件恢复
+→ 用另一种学习方式继续 coursework
+
+也就是说，你从来没打算把“意图”绑死在一个动作上。 这已经是“人在进行一件事情，而每一步行为只是这段过程的一部分”。
+更重要的是，你仓库还特别坚持：
+W completed → O 确认 → X 意义 → S/commitment 改变
+
+连“任务其实已经完成，但是角色还不知道”这种情况都不允许 W 偷偷越过认知边界把 commitment 清掉。
+这个细节非常重要，因为它证明你原设计的核心不是一个行为选择器，而是世界事实、人物经历和人物持续过程必须沿因果路径传播。
+所以你刚才补充的“作者约束”，现在我终于知道应该插在哪里了。
+目前正式架构的 W 已经有：
+time
+external schedule
+external events
+objects
+world rules
+action preconditions / effects
+
+甚至 完整机制说明 里写了：
+时间、外部消息、DDL、脚本实体或上一动作的后果更新 W，并产生带来源的 ΔW。
+
+所以“作者施加剧情干预”实际上已经有入口的影子。
+但是，我通读现行文档和代码以后，结论是：
+作者约束目前还没有成为仓库的一等机制。
+也就是说，你已经有：
+世界动力
+角色动力
+任务/承诺
+外部事件
+provenance
+
+但目前没有正式定义：
+Author Constraint
+Landmark
+Future State Constraint
+Deadline / order constraint
+Forbidden trajectory region
+Constraint satisfaction / steering
+
+也没有定义：
+当自主世界的发展看起来无法合理抵达作者节点时，系统到底允许采取什么干预。
+
+这个才是当前真正缺的一块。
+而且你刚才说的东西，比我之前理解的“作者在轨迹上打几个点”还要细。
+你的意思不是简单：
+L1
+↓
+planner
+↓
+L2
+
+而更像：
+                   AUTHOR
+                     │
+       少量未来约束 / 强制变化
+                     │
+                     ▼
+────────────────────────────────
+                  WORLD
+       自己的时间 / 资源 / 事件
+       Object / affordance / rule
+               ↕
+        NPC A    NPC B    NPC C
+       O/S/P    O/S/P    O/S/P
+        goal / commitment
+────────────────────────────────
+
+过去发生的事情继续约束未来
+
+同时：
+
+作者要求未来出现节点 N
+
+如果世界自然能够走到 N：
+    不干预
+
+如果逐渐偏离，但仍可调整：
+    优先改变世界条件 / 触发合理事件
+
+NPC 观察这些真实发生的东西
+    ↓
+自己更新 O/S/goal/commitment
+    ↓
+自己行动
+
+最终：
+轨迹合理地进入 N
+
+这里面一句特别关键：
+系统保证节点“变得合理”，而不是保证角色“执行节点脚本”。
+
+这跟我上一轮说的普通 landmark planning 确实不是完全一回事。
+你甚至还允许一种更强的作者权力：
+某个条件达成以后，作者就是可以规定这个角色发生某种变化。
+
+这个在你的体系里也不是不能做。
+但按照仓库现有的 provenance 哲学，必须分清来源。
+例如：
+父亲死亡
+    ↓
+角色观察
+    ↓
+X
+    ↓
+自然产生 distrust +0.3
+
+这是 Character Dynamics 自己推出来的。
+而：
+剧情节点 N 达成
+    ↓
+作者规定：
+A 从此开始怀疑组织
+
+也完全可以存在，但应该明确成为：
+source = AuthorConstraint
+
+而不能事后假装：
+“看，我们心理模型自动推出来了。”
+
+这和你仓库现在变态强调 source / provenance / requested delta / applied delta 反而非常契合。
+作者可以作弊，但系统必须诚实地记录是谁作弊的。
+这句话我觉得特别适合你这个系统。
+还有一件我之前确实没意识到的事：
+你最早那套世界想法其实比现在 10 月 6 日研究重建稿里的“低编排 NPC”要大得多。
+9 月 1 日原始材料里已经明确有：
+WORLD RULES
+↓
+WORLD GENERATOR(seed)
+↓
+WORLD SIMULATION
+↓
+character perception/action
+
+还有：
+seed + runtime delta
+
+以及“不需要每秒 tick 所有物体，可以按时间函数/事件队列懒更新”。
+所以你最早真正想的是：
+一个真正会运行的、可计算的世界。
+
+后来为了把本科科研压成可验证问题，仓库故意把它缩成小房间、有限动作、单人物预测。这没错，因为科研必须收缩。
+但是收缩的是 Paper-0，不应该反过来改写整个 Character Dynamics 的长期身份。
+你自己归档里其实已经写过一句特别重要的话：
+“收束的是一次可否证实验，不是整个好奇心。”
+
+这句话现在应该重新拿回来。
+因此我现在会把仓库理解成 三层，不是两层：
+第一层：World Dynamics
+你最早的东西。
+object
+state
+affordance
+time
+event
+resource
+location
+causal settlement
+
+世界即使 NPC 不碰它也会演化。
+第二层：Character Dynamics
+目前仓库最成熟的语义部分。
+W ≠ O
+history → persistent consequences
+goal / commitment
+appraisal
+state dynamics
+action choice
+interruption / recovery
+
+角色不是每步重新从 persona 开始。
+第三层：Authorial Dynamics / Constraints
+现在真正尚未正式建模的部分。
+作者想让未来发生什么
+什么必须发生
+什么最好发生
+什么绝不能发生
+什么角色变化可以直接指定
+什么只能通过世界诱发
+
+↓
+系统如何最小程度地干预
+↓
+仍然让世界和人物自己产生中间轨迹
+
+而玩家存在于第一、二层闭环里，是 world actor，不是整个系统的触发中心。
+这还解释了你为什么这么喜欢 Watch Dogs Legion。
+它跟你仓库里已经存在的思想正好补成一个环：
+          HISTORY
+             │
+       已发生的世界事实
+             ↓
+       人物/关系/知识
+             ↓
+       current world
+        ↙          ↘
+过去限制未来       作者约束未来
+        ↘          ↙
+       feasible futures
+             ↓
+          ACTION
+             ↓
+          HISTORY'
+
+Character Dynamics 本来就在研究左半边：过去怎样继续活在未来行为里。
+你现在突然意识到：
+作者还需要控制右半边：未来必须往哪几个区域靠。
+然后 World 是两边真正会合的地方。
+我觉得这个理解终于比之前所有“心理状态 NPC”“低编排 NPC”“utility vs activity”都更接近你的完整想法。
+另外一个需要明确纠正的地方：
+Praxish 那轮现在看起来地位更低了。
+它验证的是：
+activity organization 能不能在一个小共同场景里比认真 utility 自动表现更好。
+
+答案 NO-GO，有价值。
+但它真正覆盖的只是你整个系统里的一个非常局部问题：
+当前候选动作怎么组织/评分
+
+它几乎没碰：
+- 世界长期自主演化；
+- 历史改变未来可达空间；
+- 多角色之间的因果传播；
+- 稀疏作者约束；
+- 作者通过世界而不是 policy 进行 steering；
+- 关键节点前后如何保持人物连续性。
+所以以后不能再让 Praxish 那个小实验左右整个项目叙事。
+它就是一块已经排除掉的局部候选机制。
+最后还有一个很实在的事实：
+你当前代码离这个完整愿景还很远。
+Runtime 的抽象是对的，但实际还是：
+- 一个小 Scene；
+- 16 个 ActionType；
+- 单一/少量 task；
+- 手写 dynamics；
+- 没有 generic multi-agent world；
+- 没有 author constraint；
+- 没有 landmark reachability；
+- 没有世界 steering；
+- 没有 constraint conflict；
+- 没有“自然发展 vs 作者干预”的 arbitration。
+所以现在绝对不能说：
+“仓库已经有这个方法。”
+
+没有。
+你有的是一个很早就搭对了很多语义边界的底座，以及一些后来为了论文验证拆出来的支线。
+我现在认为你这个仓库真正应该保持的总图是：
+              AUTHOR
+      sparse future constraints
+     / hard / soft / forbidden
+                │
+                ▼
+        ┌────────────────┐
+        │       W        │
+        │ executable     │
+        │ persistent     │
+        │ causal world   │
+        └───────┬────────┘
+                │ observation
+        ┌───────▼────────┐
+        │      O_i       │
+        └───────┬────────┘
+                │
+          history matters
+                │
+        ┌───────▼────────┐
+        │ Character i    │
+        │ S / P / goal   │
+        │ commitment     │
+        └───────┬────────┘
+                │
+             A^O
+                │
+        ┌───────▼────────┐
+        │  W validates   │
+        │  and settles   │
+        └───────┬────────┘
+                │
+                └────────────→ history
+
+PLAYER = another participant in W
+
+这个，才是我现在读完仓库以后理解的 Character Dynamics。
+下一轮外围调研也应该彻底围绕这个图重做，而不是继续泛查“哪个 NPC 很活”。
+真正的近邻搜索轴现在已经很明确：
+World-owned affordance / actor-local autonomy / persistent commitment & history / sparse future author constraints / world-mediated steering / player-legible causality。
+然后逐篇问：
+哪篇到底覆盖了这六个职责中的哪几个？
+
+这样才不会再发生“看见别人也有 world/goal/affordance，就以为把你整个东西做完了”这种错误。
+
+
+
+
+
+
+
+
+
+
+
+
+
+那你继续做一下相关调研！！！
+
+
+
+
+
+
+
+
+
+
+
+
+思考了 6m 17s
+好，这次我按我们刚刚重新对齐的六个职责来查，不再泛泛搜“活人 NPC”：world-owned affordance、actor-local autonomy、persistent history/commitment、稀疏未来约束、通过世界而非直接接管角色的 steering、玩家可读的因果链。我会优先找“真正同时覆盖多个职责”的近邻，而不是再堆一串名字。
+
+已搜索 16 个网站
+
+
+
+
+最危险的近邻已经出现了：DiriGent（AIIDE 2025）几乎就是“角色不知道作者意图，系统通过调整 narrative world，让作者需要的行为变成角色自己看来最合理的选择”。这跟你刚刚那句“系统主要作为世界上的干预”非常接近，所以我会把它当第一优先级拆到机制层，而不是绕开它。
+
+梳理研究资料并比较实践案例
+
+已搜索 9 个网站
+
+
+
+
+我再补一层商业/系统案例，因为“通过世界来引导，而不是直接遥控角色”不只存在 narrative-AI 论文里。RimWorld 的 Storyteller、Left 4 Dead 的 Director、Wildermyth 的事件/角色 casting 都可能是很好的反例或工程先例：它们未必有你的角色动力学，但很可能已经证明“世界层干预”在游戏里怎么落地、哪里有效、哪里仍然靠脚本。
+
+核查系统细节
+
+拓展了比较框架
+
+已搜索 40 个网站
+
+
+
+
+识别研究缺口并辨析系统差异
+
+继续核对机制
+
+已搜索 34 个网站
+
+
+
+
+
+
+
+
+
+
+
+继续挖以后，这次确实撞到核心近邻了，而且比前面 Praxish、Sims 那些都更值得你警惕。
+最重要的一篇是 DiriGent，AIIDE 2025。它几乎就在研究你刚刚那句话：
+角色不知道作者想让剧情去哪；系统通过调整角色所处的世界，使作者需要的行为逐渐变成角色自己看来最合理的选择。
+
+论文自己就是这么定义矛盾的：纯 planning 能守剧情，但角色容易像木偶；纯 emergent simulation 角色自主，但故事容易散。DiriGent 因此把角色自己的 belief / ideal worlds 和作者 storyline 分开，利用二者之间的 tension 引导行为。AAAI Publications
+1. DiriGent 真的和你现在想的非常近
+它有三个东西：
+Director
+    │
+    ├── World Generator
+    │
+    └── Protagonist
+
+Director 先拿作者的 story prompt 生成一个sequence-level script。很关键：论文故意选 sequence 这个抽象层，因为它要求故事朝某个方向发展，但不把角色的每一个具体动作写死。然后世界和角色轮流产生 beat。AAAI Publications
+角色本身没有拿到那份 script，也没有拿到 Director 对世界的指导。角色看到的是自己的 perceived reality，然后依据：
+自己的 beliefs
++
+role-based ideal worlds
++
+当前现实和理想之间的 tension
+
+去想候选行为，再选择最能解决自己 tension 的行为。
+所以它想制造的是：
+作者：
+    我需要 Hestia 最后反抗 Zeus
+
+角色：
+    我不知道作者要这个
+
+系统：
+    那我不断创造/选择一些世界事件，
+    让 Hestia 自己现有的价值观和现实发生越来越强的冲突
+
+角色：
+    按我自己的理由来看，
+    现在反抗 Zeus 确实最合理
+
+这他妈的已经非常接近“系统让节点变得合理”了。
+而且它甚至明确说，目标是让 narratively required action 成为角色最逻辑的选择，同时角色不知道 overarching narrative needs。AAAI Publications
+但这里有一个特别有意思的破绽。
+DiriGent 正常情况下确实会优先通过 World Generator 增强某种 tension。比如作者需要角色接受某个任务，就让世界发生一些事，使“不接受任务”越来越违背这个人的信念。
+可是如果故事迟迟不往下走，它进入 Story Enforcement Mode。
+这时候它有两招：
+如果下一 beat 由 World Generator 产生：
+    → 要求 World Generator 加强目标 tension
+
+如果下一 beat 由 Protagonist 产生：
+    → 直接把作者所需 action
+      塞进角色 brainstorm 的候选 action 里
+
+然后一直循环，直到角色终于选中那个行为。这个流程就在论文 Figure 1 和 Story Enforcement 里写得非常清楚。AAAI Publications
+所以它实际上是：
+world-mediated steering
+        ↓
+不行？
+        ↓
+action-space intervention
+
+而你现在的直觉显然更偏：
+world-mediated steering
+        ↓
+角色仍然只依据自己真正拥有的
+O / S / goal / commitment / affordance 做决定
+
+必要时作者可以硬规定人物状态发生变化，但这个硬规定要显式记账，而不是偷偷伪装成角色自己推出来的。
+这个区别非常值得研究。
+2. 然后我又找到 Awash：它已经把“干预强度”分得非常漂亮
+2023 年的 Awash 是 Emergent Narrative 这条线。
+它不是先决定完整故事，而是在 simulation 正在运行时用 incremental story sifter 看：
+“诶，现在这个世界正在形成一个可能挺完整的故事。”
+
+然后 Drama Manager 尝试让这个正在冒头的故事更可能继续完成。南安普顿大学电子档案库
+最牛逼的是，它直接把干预分成三档：
+干预方式	含义
+Generative	系统直接生成所需 event/action
+Direct	在现有可能性里直接指定一个发生
+Indirect	不指定，只提高某些已有可能性发生的概率
+
+
+Awash 故意选择第三种，因为他们担心干预过强会破坏 emergent narrative 那种“事情自己长出来”的感觉。它把这种方法叫 stage direction：影响 AI character 的决策 policy，但不直接替它选动作。南安普顿大学电子档案库
+所以：
+“不要直接命令角色，只轻推它”也已经有人做了。
+这个不能当我们的新点。
+但它和你的区别又出来了：
+Awash 更像
+角色 policy：
+A = 0.30
+B = 0.35
+C = 0.35
+
+Drama Manager：
+我想要 B
+
+→ 给 B 某种 influence
+
+A = 0.25
+B = 0.50
+C = 0.25
+
+而你目前更感兴趣的是
+角色 policy 不一定碰
+
+W 发生了某个合法事件 E
+
+角色真的观察到 E
+        ↓
+O 改变
+        ↓
+goal / commitment / state 改变
+        ↓
+B 对角色自己而言自然变得更值得做
+
+这两个都叫“indirect”，但干预位置完全不同。
+我觉得这是目前特别值得抓住的 distinction：
+policy-mediated steering
+versus
+world-mediated steering
+
+前者改“角色想做什么的权重”。
+后者改“角色生活在什么处境里”。
+3. StoryVerse 也很近，但它还是更像“导演角色”
+StoryVerse 2024 允许作者写 abstract acts：
+A 开始怀疑 B
+↓
+双方关系破裂
+↓
+A 最后选择离开
+
+不用作者具体写：
+A 先去哪
+跟谁说什么
+拿了什么
+然后怎样……
+
+但它的 Narrative Planner 最后会根据当前 world state，把 abstract act 展开成具体 character action sequence。Autodesk Research
+所以它基本是：
+Author
+  ↓ abstract act
+
+Act Director
+  ↓
+
+[action1
+ action2
+ action3
+ action4]
+
+角色执行
+
+而你的味道越来越明显是：
+Author
+  ↓ future constraint
+
+World / Director
+  ↓ 改变可执行世界条件
+
+NPC
+  ↓ 自己走
+
+World
+  ↓
+
+NPC
+  ↓
+
+……
+
+最终碰到 constraint
+
+也就是说 StoryVerse 问的是：
+“这个剧情段应该怎样展开成行动？”
+
+你可能更关心：
+“这个未来约束应该怎样改变世界，使角色自己产生一条合理轨迹？”
+
+这不是同一个搜索对象。
+4. AIIDE 2025 同期甚至还有 CoDi，所以这块现在很热
+CoDi 也是 Director–Actor。
+作者给 high-level narrative goals；Director 可以：
+- 加入新事件；
+- 选择哪个 NPC 参与；
+- 显式规定 narrative outcome。
+然后演员 Agent 在这个框架下行动。AAAI Publications
+所以现在其实已经能看出一整个谱系：
+直接写剧情
+    ↓
+Author Goals / landmarks
+    ↓
+Drama Manager
+    ↓
+Story Facilitator
+    ↓
+Indirect intervention / Awash
+    ↓
+Abstract Acts / StoryVerse
+    ↓
+Director + world tension steering / DiriGent
+
+你不是突然凭空想到一个没人碰过的领域。
+恰恰相反：
+你正撞进 Interactive Narrative / Emergent Narrative 一条二三十年的核心问题。
+这其实是好事，因为说明问题是真的。
+5. 但是这里有一个特别大的空档：这些系统的 “world” 和你仓库里的 W 根本不是一回事
+这个我觉得现在是最需要继续追的。
+DiriGent 的 World Generator，本质还是：
+LLM 生成下一个 story beat。
+
+例如：
+“一声雷鸣响彻奥林匹斯，Zeus 命令 Hestia 下凡。”
+
+这是 narrative world。
+它并不是你仓库现在要求的：
+object exists?
+resource available?
+where is A?
+what does A know?
+does this action's precondition hold?
+who owns this item?
+did the previous action actually settle?
+is the road closed?
+did A actually witness B?
+
+这样的可执行 world。
+DiriGent 的角色最后选择一个行为以后，LLM 再把它 formulate 成 story beat；它没有你现在 W.validate → typed settlement → ΔW → legal O projection 这种硬执行链。AAAI Publications
+所以：
+“adjust the narrative world”
+和
+“intervene in an authoritative executable world”
+
+真的不是一回事。
+这不是说后者就天然新，但职责上一定要分开。
+6. 甚至你仓库的 W ≠ O → A^O → W validate 也有一个更危险的祖先
+DiriGent 的理论基础往回追，就是 Tension Space Analysis。
+这条线已经明确用 possible worlds 来建模 emergent narrative，研究角色自己的世界认知和真实世界之间的张力，然后由角色的目标/理想世界驱动行为。2021 年正式发表于 IEEE Transactions on Games。IEEE Xplore
+所以我们以后千万不能再试图把：
+W ≠ O
+
+或者：
+“角色根据自己以为的世界选择，而真实世界最后验证”
+
+拿来当核心 novelty。
+这一族比我们想象得近。
+反而真正该问的是：
+当这个 W 不再只是 narrative proposition vector，而是一个持续运行、有 object/affordance/resource/action settlement 的游戏世界时，steering 会发生什么？
+
+这个问题目前就有意思多了。
+7. 我现在觉得可以把周围工作放到一条“控制作用在哪里”的轴上
+这张图现在特别清楚：
+最强控制
+│
+│  Script / cutscene
+│       直接规定结果和动作
+│
+│  StoryVerse
+│       abstract act → action sequence
+│
+│  DiriGent fallback
+│       把 required action 加入候选
+│
+│  Awash
+│       改 action/policy 概率
+│
+│  DiriGent world steering
+│       改 narrative environment / tension
+│
+│  你现在最感兴趣的区域
+│       改 executable W
+│       → actor 合法观察
+│       → actor 自己改变判断
+│       → actor 自己行动
+│
+│  Pure emergence
+│       不管它
+│
+最弱控制
+
+这就比一句“autonomy vs control”具体多了。
+我们真正可以研究的是：
+控制应该注入系统的哪一层？
+不是：
+要不要控制。
+
+8. 而且作者侧的新研究提醒我们：千万别把贡献写成“省作者工作量”
+2026 年刚正式发表的 Beyond Authorial Burden 访谈了 14 位互动叙事作者，又用 8 位专家做验证。
+它把劳动拆成：
+Content Creation
+Dynamic Authoring
+Programming / Tool Creation
+
+然后一个很重要的结论是：
+reuse / generation / decoupling 很多时候并没有真正减少总劳动，只是把劳动从一种地方搬到另一种地方。
+
+比如你少写 100 条 branch，可能换成：
+写世界规则 + 调约束 + debug emergent behavior。
+
+作者未必觉得这更轻松，更不一定觉得这更有创作价值。数字对象识别
+所以我们以后如果做 author study，问题不能只问：
+“写了多少行？”
+
+反而要问：
+作者把时间花在哪？
+哪部分工作是他想保留的创作劳动？
+哪部分是他妈的组合状态维护和 glue？
+
+这和你自己的直觉挺一致：
+不是 AI 替作者创作。
+作者仍然应该能说：
+“这个角色最终就是要发生这种变化。”
+
+系统只是承担：
+“那我怎么让它在这个世界里发生得不像强行改剧本？”
+
+9. 所以我现在看到的“可能研究缝”已经比之前窄很多了
+我不会叫它创新点，现在只能叫值得查到底的 candidate gap：
+在一个持续运行、具有硬世界规则的可执行环境中，角色仅依据自己的局部认知、历史和持续承诺自主行动；给定作者对未来轨迹的稀疏约束，能否通过最小的、可追溯的世界层干预，让约束成为角色自身因果链下的合理结果，而不是直接覆写角色行为？
+
+英文甚至可以暂时写成：
+World-mediated steering of persistent autonomous characters under sparse authorial constraints.
+这里几个词一个都不能随便删：
+world-mediated
+
+区别于 Awash 的 policy influence 和 StoryVerse 的 action planning。
+persistent
+
+不是为某一个剧情 beat 临时造一个 Agent；角色之前有生活、任务、历史、关系。
+autonomous
+
+作者约束不应该自动变成人物 action。
+sparse authorial constraints
+
+作者仍然有真正的创作控制。
+executable world
+
+世界变化必须是真的、合法的、会留下后果的，不是 LLM 说一句“恰好发生了 X”。
+10. 最关键的是：这个问题已经可以设计一个非常小、非常狠的实验
+甚至暂时完全不用新心理学模型。
+假设作者要求：
+两天内，A 与 B 的关系必须明显恶化。
+
+三种系统都拿同一个作者约束：
+C:
+relationship(A,B) < threshold
+before day 3
+
+然后比较：
+Direct steering
+直接：
+A insults B
+
+Policy steering
+不直接指定，但：
+utility(insult_B) += 100
+
+或者类似 Awash 的 influence。
+World steering
+角色 policy 不碰。
+系统只能使用合法 world interventions，例如：
+资源冲突
+错误信息真的传播到了 A
+B 没有完成承诺
+第三人的行为导致误会
+共同资源被占用
+某个工作条件发生变化
+
+然后：
+ΔW
+↓
+合法进入 O_A
+↓
+A 根据自己的历史/目标/commitment
+作出反应
+↓
+B 再观察 A 的行为
+↓
+……
+
+最终也许达到：
+relationship(A,B) < threshold
+
+这时比较的就不是：
+哪个方法成功率最高。
+
+因为直接强制肯定最容易成功。
+真正有趣的是一个 trade-off：
+\[
+\text{Constraint Satisfaction}
+\quad vs \quad
+\text{Intervention Cost}
+\quad vs \quad
+\text{Character Causal Integrity}
+\]
+再加上人类玩家：
+“你觉得这段关系恶化是自然发生的，还是系统硬安排的？”
+
+这个实验我现在觉得比我们之前那个 Praxish 小场景强太多了。
+而且这里会马上冒出来一个很好的反问题：
+如果世界为了满足作者目标，老是“恰好”发生方便的事情，那不是另一种木偶戏吗？
+
+完全对。
+角色没被控制，不代表玩家不会看到一只：
+“上帝之手”。
+所以 world steering 还必须有：
+intervention budget
+plausibility
+causal provenance
+timing
+repetition
+world consistency
+
+否则：
+作者要他们吵架
+→ 明天正好钱包丢了
+→ 后天正好有人造谣
+→ 大后天正好又撞见误会
+
+玩家照样会：
+你这编剧能不能别按头了。
+
+这反而可能成为真正漂亮的问题：
+不是如何满足作者约束，而是作者控制能有多隐形、多少干预才够。
+
+所以这轮之后，我对路线的排序已经变了。
+第一优先级不再是继续读 Utility / GOAP / Praxish。 那些是角色行动层基础设施。
+现在最应该精读的是：
+DiriGent → Awash → Tension Space → Story Facilitator / Late Commitment → StoryVerse / CoDi。
+尤其 DiriGent 必须拆到 prompt、变量、enforcement、失败模式和 evaluation。它现在是我们最危险也最有价值的直接近邻。
+然后可以把你仓库现有的结构直接拿出来对：
+它的 Narrative World      vs  我们的 authoritative W
+它的 knowledge world      vs  O
+它的 tensions/beliefs     vs  S/X/P 的部分职责
+它的 protagonist action   vs  A^O
+它的 Director             vs  尚不存在的 Author Constraint layer
+它的 World Generator      vs  尚不存在的 W-steering operator
+
+这样一对，Character Dynamics 现在缺的那块会非常赤裸。
+我暂时不会往仓库里写任何“我们找到了创新点”这种东西。现在得到的是更重要的结果：
+我们已经从“NPC 活不活”这种大雾里，走到了一个有明确直接近邻、明确控制层差异、甚至已经能构造对照实验的问题。
+
+这才开始像真的研究。
