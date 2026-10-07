@@ -1,0 +1,934 @@
+你这句“作者只在轨迹上打几个点，剩下交给角色和世界；世界不必真实，只要玩家看起来因果合理，最后还能导向某些节点”我觉得比“自主 vs 控制”又更具体了一层。它已经很接近一类成熟研究问题了：作者只规定稀疏约束 / 关键 beats，系统负责把中间过程生成出来。我先对照你刚推上去的审阅入口，再专门查这条线和 Sims 到底是“设计错了”还是“组合仲裁难”。
+
+获取并梳理算法拆解与NPC活人感文献
+
+
+
+
+规划叙事研究并区分叙事架构
+
+已搜索 9 个网站
+
+
+
+
+这条线我找到“祖先”了，而且非常像你刚才那句话：Riedl 2009 直接把作者约束叫 author goals / islands——作者指定若干必须经过的中间世界状态以及它们的顺序，planner 负责补出能经过这些点的完整轨迹。更早的 drama management 也是作者给 plot points / 质量目标，系统在运行时引导。也就是说“轨迹上打几个点”本身已经有很强先例，但它们大多是故事中心的全局导演，而你想要的是“世界/NPC 本来就在生活，只被稀疏地引导”，这两者差别很关键。 
+
+定位研究方向并诊断系统偏差
+
+已搜索 3 个网站
+
+
+
+
+
+
+
+
+
+对，我觉得你现在这个想法终于和一条非常明确的研究脉络接上了。
+而且先回答你对 The Sims“是不是走错了” 的直觉：我觉得不是审核没做好，也不能简单说设计错了；更准确地说，是它那套设计目标和我们要的东西不一样，而它的架构天然容易在规模扩大后出现“局部合理、整体发癫”。
+EA 今年 9 月这次 autonomy 大修特别能说明问题：他们修的不是一个统一的“大脑 bug”，而是一堆分散问题——重复 interaction 入队、sleep/chat 的 priority 和 cancellation、Ranch Hand 跑去给别人家铲雪、某些动作加 cooldown、所有权条件、interaction queue 卡死等等。艺电
+这不是 QA 多测几遍就能根治的类型。
+Sims 到底哪里“不对劲”
+Sims 的经典思想其实非常漂亮：
+物体告诉 Sim“我能提供什么行为”，Sim 根据自己的 needs 去评价。
+
+于是冰箱、床、电视、厕所都是 affordance 提供者，角色不用写死“饿了→冰箱”。这个我们完全应该吸收。
+问题出在：
+它基本是“此刻有什么值得做”的局部选择系统。
+大概像：
+现在：
+Hunger 很低
+Fun 也低
+Social 也低
+
+冰箱：+Hunger
+电视：+Fun
+朋友：+Social
+
+→ 算分
+→ 选一个
+
+当世界很小的时候，非常漂亮。
+但一旦扩成：
+我正在睡觉
+孩子需要洗澡
+朋友在聊天
+伴侣想互动
+工作快迟到
+冰箱有饭
+音响可以跳舞
+院子有雪
+马需要照顾
+又来了一个新 DLC interaction
+……
+
+所有局部规则可能各自都对。
+最后却变成：
+“你他妈为什么现在去跳舞？”
+
+所以 Sims 现在修的大量东西，本质就是给局部自主系统不断增加：
+priority
+cooldown
+ownership
+duplicate suppression
+cancel rule
+queue rule
+eligibility
+special-case tags
+
+EA 甚至明确说有些问题今后发现新实例还要继续逐个套修法。艺电
+所以我会区分：
+QA/audit 是发现症状的困难。
+architecture 是为什么这类症状不断出现。
+但这不表示 Sims 设计失败了——因为 Sims 本身追求的是一个玩家可以不断插手的 dollhouse sandbox。局部 opportunistic autonomy 其实非常适合它。
+只是对你的目标：
+“这是一个人在世界里过一段持续的生活。”
+
+纯 Sims 式 utility 就可能不够。
+因为它比较弱的是：
+trajectory。
+它很会回答：
+“现在最值得干什么？”
+
+但不天然回答：
+“我这段时间究竟在做什么？”
+
+然后你说的“作者在轨迹上打几个点”，已经有非常直接的祖先
+这个我查到以后第一反应就是：
+卧槽，这不就是你说的东西。
+Riedl 在 2009 年专门提出了 Author Goals。
+它的来源更早叫 planning 中的 islands。
+作者不是把整条轨迹写出来，而是规定：
+初始状态
+
+      ↓
+ [必须曾到达状态 A]
+
+      ↓
+    ?????
+
+      ↓
+ [必须曾到达状态 B]
+
+      ↓
+    ?????
+
+      ↓
+最终状态 C
+
+中间由 planner 自己补。
+而且这些中间状态可以有顺序约束。
+论文的定义差不多就是：
+author goal 表示在故事开始和最终 outcome 之间，世界必须在某个时刻达到的状态；如果一条 plan 没有经过这个状态，它就不是有效解。AAAI
+
+比如：
+初始：
+Alice 富有
+
+作者点 1：
+Alice 必须失去财富
+
+作者点 2：
+Alice 必须发现 Bob 背叛她
+
+最终：
+Alice 再次富有
+
+作者没有写：
+Alice 去赌场
+→ Bob 偷钱
+→ Alice 找证据
+→ ...
+
+Planner 自己找一条因果成立的路径经过这些点。
+这已经和你说的：
+作者只在轨迹上打几个点。
+
+高度一致。
+所以这句话本身不能当创新。
+更早还有 Drama Manager：作者不控制每一步，只控制“故事应该往哪里去”
+Declarative Optimization-based Drama Management 更像：
+玩家/世界实际发生：
+p1 → p7 → p4 ...
+
+               ↑
+          Drama Manager
+               │
+作者给：
+plot points
+story quality
+允许的干预方式
+
+Drama Manager 看当前体验，然后做有限干预，让整个过程更符合作者想要的结构，而不完全拿走玩家 agency。AAAI出版物
+Façade 更直接：
+下面是角色的 reactive behaviors，上面是 beats。
+Drama manager 决定现在应该进入什么 beat，角色的行为 repertoire 随 beat 改变，而不是让两个完全自由的 NPC 靠局部决策自己碰巧演出戏剧结构。卡内基梅隆大学计算机科学系
+所以：
+autonomous actors + sparse narrative control
+
+这个问题真的研究了二十多年。
+但是这里有一个我认为对你非常重要的区别
+上面很多系统其实还是：
+Story-centric
+它问：
+我要让故事走到作者想要的状态，角色怎样配合？
+
+而你想的其实越来越像：
+World-centric + sparse author steering
+即：
+      WORLD 持续运行
+       ↓     ↓     ↓
+      NPC   NPC   NPC
+       ↓     ↓     ↓
+        自主生活
+
+───────────────
+作者只插几个约束：
+
+          [L1]
+       某事实发生
+
+               [L2]
+          某关系改变
+
+                        [L3]
+                  剧情节点发生
+───────────────
+
+中间怎么过去：
+
+世界 + NPC 自己产生
+
+这个区别非常大。
+因为在经典 narrative planner 里，经常有一个：
+omniscient centralized storyteller
+
+Sabre 甚至明确把自己叫：
+centralized, omniscient decision maker
+
+它有 author goal，然后确保所有角色行为既推进 author goal，又能由人物自己的 intention / belief 解释。AAAI出版物
+也就是说，本质还是：
+导演写戏，只不过要求演员的行为看起来合理。
+
+你现在想要的更像：
+演员本来就在活；导演偶尔规定这部戏将来必须经过几个点。
+
+这味道明显不一样。
+而且最近研究正在往你这个方向靠
+这不是我硬凑。
+2024 年有个东西叫 Shepherd。
+它做的正是：
+让原本完全自主运行的角色 simulation 继续跑，然后 story sifter 从正在发生的世界里寻找潜在的有趣故事，再由 drama manager 稍微引导自主角色走向更有叙事价值的选择。AAAI出版物
+
+这就已经非常接近：
+不是：
+story → actors
+
+而是：
+actors/world → emergent events
+                  ↓
+              observe
+                  ↓
+        适当的时候轻推一下
+
+2025 年甚至有篇 doctoral work 明确提出一个三角：
+Emergent simulation
+        △
+       / \
+      /   \
+Reactive — Planning
+
+然后想做 landmark-guided hybrid，在全自主模拟和中央规划之间找位置。AAAI出版物
+所以你现在撞到的其实是一个还活着的研究问题，不是古墓。
+我觉得你真正要的不是“作者给几个 goal”
+而是：
+Author specifies constraints on the future, not the trajectory itself.
+
+中文就是：
+作者约束未来，但不编写抵达未来的完整路径。
+
+这个表述我特别喜欢。
+例如：
+作者硬约束：
+
+Day 3 前：
+村长必须知道矿井出事了
+
+Act II 结束：
+A 和 B 必须发生冲突
+
+最终：
+玩家必须获得进入城堡的资格
+
+但是作者不规定：
+谁去告诉村长。
+
+不规定：
+A 和 B 具体因为什么冲突。
+
+不规定：
+玩家一定通过完成“皇家通行证任务”进入城堡。
+
+这些由运行中的世界找路径。
+甚至可以分成“硬点”和“软点”
+这我觉得非常适合你。
+Hard landmark
+必须满足：
+某人死亡
+钥匙转移
+战争开始
+角色知道某秘密
+玩家获得权限
+
+否则主线无法成立。
+Soft landmark
+作者希望：
+A 和 B 关系恶化
+玩家逐渐怀疑 C
+城市越来越紧张
+NPC X 获得一定存在感
+
+如果世界自然产生了别的同等好结果，也允许。
+再加：
+Forbidden region
+作者明确不允许：
+重要 NPC 提前死亡
+角色无信息来源突然知道秘密
+关键人物无理由背叛
+经济系统把任务物品永久吃掉
+
+于是作者不是画：
+完整行为树
+
+而是在状态空间里画：
+       可接受区域
+
+     ┌────────────┐
+start│            │
+  ●──┤    L1      │
+     │       ●    │
+     │            │
+     │  XXXXX     │ ← 禁区
+     │            │
+     │      L2 ●──┼──→ ending
+     └────────────┘
+
+角色和世界负责在里面走。
+这和你那句“轨迹上打几个点”就完全对应了。
+Watch Dogs Legion 为什么会让你特别有感觉，现在也解释得通了
+因为它里面有一个你很在意的东西：
+past → future constraint
+昨天的事情不是一条日志。
+它改变：
+人物关系
+人物态度
+人物可用性
+后续 encounter
+系统以后能把谁重新放进事件
+
+所以：
+HISTORY
+   ↓
+CURRENT WORLD
+   ↓
+FUTURE POSSIBILITY
+
+而不是：
+HISTORY
+   ↓
+一段回忆文本
+
+这正是你之前 Character Dynamics 想做的“状态不是漂亮 summary，而是过去留下的、能约束未来的后果”。
+所以我现在觉得你喜欢 Legion 不是偶然。
+它与你原项目最核心的一个东西其实是同一个：
+历史必须进入未来的因果结构。
+
+然后这反过来解释了 Sims 为什么让你觉得“不对”
+Sims 更接近：
+World now
+  ↓
+Needs now
+  ↓
+available interactions
+  ↓
+best action now
+
+你想的是：
+Past
+ ↓
+当前人物是谁、在做什么、欠了什么、经历过什么
+ ↓
+Current World
+ ↓
+未来还有哪些轨迹仍然合理
+ ↓
+当前行为
+ ↓
+新的历史
+
+也就是：
+Sims 偏 state → action
+而你真正关心的是：
+trajectory → state → action → trajectory
+所以你以前一直执着 persistent state，其实不完全是走偏。
+走偏的是我们曾经把它缩成：
+fatigue/stress/motivation 这种心理数值。
+
+真正重要的 persistence 可能根本不是“情绪持续”。
+可能是：
+- 我正在做什么；
+- 为什么开始做；
+- 做到哪一步；
+- 我欠谁什么；
+- 谁帮过我；
+- 哪件事失败过；
+- 我知道什么；
+- 什么承诺还没兑现；
+- 哪个作者 landmark 还在未来；
+- 世界过去发生的什么已经使某些未来不再合理。
+这才是 Character Dynamics。
+但这里有个极其重要的设计原则
+你刚才说：
+世界不一定要真实，而是要为了让玩家看到这是合理的。
+
+我非常同意。
+而且这句话可能比“world simulation”还重要。
+我们不是做：
+Reality Simulator。
+
+我们做的更像：
+Causally legible world.
+
+世界后台根本不用把所有事情真的一秒一秒模拟出来。
+只要玩家重新遇见某个人时：
+过去：
+他在当铁匠
+
+现在：
+铁匠铺关了
+他说材料没到
+另一个 NPC 确实抢走了矿石
+他因此去了市场
+
+
+整条链是能查回去的。
+甚至后台可以抽象成：
+offscreen transition:
+Blacksmith
+Working → Blocked(material)
+→ Seeking(material)
+
+根本不用真的模拟：
+他走 1734 步到了市场。
+
+玩家需要的是世界对因果负责，而不是世界对物理细节负责。
+这和 Rain World/KCD 那种 LOD 也非常吻合。
+所以我现在第一次能比较准确地写出你想做的东西
+不是：
+一个更聪明的 NPC 系统。
+
+也不是：
+一个心理状态模拟器。
+
+甚至不是：
+一个动态剧情生成器。
+
+而更像：
+一个受稀疏作者约束的持续角色—世界动力系统：作者规定关键未来状态、角色身份和不可违反的边界；世界与角色在这些约束之间自主产生因果可解释、保留历史后果的行为轨迹。
+
+然后玩家是这个系统的参与者。
+           AUTHOR
+       sparse constraints
+        ↓    ↓    ↓
+       L1    L2   ending
+        │         │
+════════════════════════
+        WORLD
+   ↙      ↓       ↘
+ NPC A   NPC B    NPC C
+   ↘      ↓       ↙
+      interactions
+          ↑
+        PLAYER
+════════════════════════
+         ↓
+      HISTORY
+         ↓
+ changes future possibilities
+
+这个图我觉得第一次真正像你要做的 Character Dynamics。
+但我们现在必须保持住一个边界：
+“稀疏 landmark + 自动补轨迹”已有很强先例。
+所以如果之后真要从这里做论文，不能说：
+“我们提出作者只设置几个剧情点。”
+
+那个 2009 年已经有人基本这么干了。AAAI
+真正值得继续查的是：
+现有 author-goal / drama-management / narrative-planning 方法，在“长期运行的世界 + 多个局部自主 NPC + actor-local knowledge + 历史持续改变未来”这个组合里，到底缺什么？
+
+尤其我现在最想继续深挖的三条是：
+1. Author Goals / Mimesis / Façade / IPOCL / Sabre：它们究竟多“导演中心”，角色自主到什么程度。
+2. Shepherd / story sifting / emergent narrative：有没有已经做到“先让世界活，再轻推剧情”。
+3. Sims 这类 autonomy 系统的长期失败模式：到底哪些问题属于缺少 trajectory-level commitment/control，而不是普通 tuning bug。
+如果这三条最后真的在一个接口上会合，那个接口可能就比我们之前挖的 S 四个心理字段有价值得多。
+顺带说一句，你刚推的 4a44ee2 我也看了公开审阅入口。现在仓库把“世界中心外围调研”和“算法拆解”已经单独列成了正式审阅路线，而且发布索引明确没有把未验收 C++ 混进去。这个时间点先别再写新机制是对的——这条 authorial steering / autonomous world 的祖谱值得先挖透。doi.org
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+Sims 到底哪里“不对劲”
+Sims 的经典思想其实非常漂亮：
+物体告诉 Sim“我能提供什么行为”，Sim 根据自己的 needs 去评价。
+
+于是冰箱、床、电视、厕所都是 affordance 提供者，角色不用写死“饿了→冰箱”。这个我们完全应该吸收。
+这个和我之前的很像啊。诶，不想多说了这个或者说节点也叫做作者约束，比如某个条件达成之后，作者可以硬性规定这个角色会发生什么变化，然后在这个节点前后的合理性交给角色自己和世界，系统（主要作为世界上的干预）保证使其变得合理。再深度读一下我们已有的仓库！！！我看你还不熟悉啊。。。然后再调研一遍
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+思考了 5m 25s
+你说得对，我前面还是把你仓库里的东西读成了“world-centric + autonomy”，但没有把你原先更关键的那层——作者可以在世界轨迹上施加硬约束/状态变化，系统负责让约束前后的因果链成立——重新拼回来。这次我先不急着外推，我会先把仓库里和 W/O/S/P、任务/承诺、世界结算、作者干预、剧情节点、动作 affordance、历史→未来这些相关的设计文档和原始讨论重新读一遍，再拿它去对外部工作。
+
+梳理研究方向
+
+
+
+
+检索并梳理角色模拟研究设计及对话机制文档
+
+
+
+
+先给你一个纠正后的判断：The Sims 的 object affordance 和你原来 W/Scene/Object → A^W 的思路确实非常像，不只是“有点像”。 你仓库现在自己也写着：Object 提供 affordance fragments，Scene/Room 组合，W 做跨对象前置条件和最终结算；角色只能从自己知道的 A^O 里选。区别主要不在“物体提供动作”，而在你还一直坚持的 W≠O、持续历史/承诺、世界自己演化、以及作者干预如何进入世界而不是直接劫持 policy。这几个才该拿来重新对外比。
+
+检索并深入检视承诺与行动选择相关文档
+
+
+
+
+已搜索 37 个网站
+
+
+
+
+我现在还发现一个更重要的误读：你原仓库并不是“角色模型在世界上方做决定”，而是已经把世界对象/场景先生成可行动作，角色只在自己可知的候选里做人物级选择，最后仍由 W 结算。这和 Sims 的 object-advertisement 真的是同一家族；而你真正多出来的野心，是让作者约束也成为世界动力的一部分，它可以改变 W、信息、任务、关系或未来可达空间，但不直接替角色写下一步动作。这个区别我接下来会拿代码层再核。
+
+深入分析仓库核心运行架构与作者约束机制
+
+
+
+
+已搜索 30 个网站
+
+
+
+
+分析了世界观、物体与角色关系
+
+
+
+
+核对了相近研究
+
+确认研究重合度
+
+
+
+
+已搜索 35 个网站
+
+
+
+
+检索并梳理角色自主性与叙事控制研究
+
+
+
+
+建模约束轨迹
+
+已搜索 8 个网站
+
+
+
+
+
+
+
+
+
+对，你这次纠正得很关键。我前两轮确实没有把你仓库最初那套东西重新拼完整，所以把 Sims 的 object affordance 讲得像是一个后来才发现的启发。重新把原始对话、机制总说明、Task/Commitment、Q04/Q05 和现在的 Runtime 代码一起读下来以后，情况其实是：
+你一开始就已经在做和 Sims 同一家族的“世界/对象提供可能性，角色负责选择，世界负责结算”的东西。
+现在真正需要研究的，不是把这个重新发明一次，而是你刚说的另一层：
+作者只规定少量关键约束；角色和世界负责把约束之间的轨迹活出来；必要时系统优先干预世界，使目标节点变得因果上合理，而不是直接接管角色。
+
+而这次重新查外部工作，我找到的近邻比前两轮都要近。甚至有一条非常非常像你现在描述的东西。
+先把你仓库恢复成它本来是什么
+你 9 月 1 日最早的构想里其实已经明确有：
+世界由带状态和 affordance 的对象构成；角色的主观状态负责选择；客观世界按规则结算；世界还会随时间和自身事件继续变化。
+
+后面现在的正式机制里又进一步固定成了：
+World / Scene / Object
+        ↓
+客观可供性 A^W
+
+        ↓ perception
+
+角色自己的 O
+        ↓
+角色认为可做的 A^O
+        ↓
+S / goal / commitment / P
+        ↓
+选择人物级行为
+
+        ↓
+
+W validate + settle
+
+而且当前代码真的已经这么分了，不只是文档概念：
+Observation 里保存 known_object_affordances 和 known_actions = A^O；隐藏的世界条件不能偷跑进 A^O；角色尝试失败以后只能通过 self-feedback 学到“现在这个动作似乎不行”，而不是获得上帝真值。World 自己拥有 available_actions / expand_action / settle / validate_runtime_start。
+所以 Sims 对我们最有价值的不是“提供了一个新架构”。
+它反而是一个极强 baseline：
+Object advertises possible interactions → character evaluates them by internal needs → choose → execute.
+
+你仓库的 Object/Scene/Affordance 这条线，本来就是这一大类东西的更严格、带信息边界的版本。
+Sims 也没有“走错”
+这个我这次找到了一条特别关键的 2026 年访谈。
+《Sims 4》前 lead AI programmer David “Rez” Graham 今年明确说：
+“Sims don't plan anything.”
+
+Sim 基本就是不断重新问：
+我根据 motives、traits 等，现在下一件最想干什么？
+
+他们其实尝试过给 Sims 加长期 planning，《Sims 3》有人试过，他自己做《Sims 4》时也试过。
+最后都被否掉了，而且 Graham 现在认为否掉是有道理的。
+原因主要不是 planner 做不出来，而是：
+**第一，玩家必须看懂它为什么这么做。**一个 NPC 为未来三小时后的目标提前采取行动，如果表现层没有把推理告诉玩家，很容易被玩家理解成 bug。
+**第二，Sims 本质上是玩家讲故事的 dollhouse。**NPC 自主规划能力太强，玩家可能从“导演自己的家庭故事”变成“看鱼缸里的小人自己生活”。Graham 自己仍然认为这里应该存在某个中间点。PC Gamer
+所以你感觉 Sims“不太对”，准确说不是：
+Sims AI 设计失败。
+
+而是：
+Sims 有意选择了一个比你想要的世界更靠近“玩家控制”端的位置。
+
+这反而正好定义我们的坐标。
+然后真正撞到你“作者约束”的祖宗了
+先说最普通的一层。
+Riedl 2009 的 Author Goals 已经允许作者指定：
+某些中间 world state 必须在故事过程中出现。
+
+也就是所谓 planning 的 islands。
+作者可以规定：
+start
+  ↓
+???
+  ↓
+[必须达到 L1]
+  ↓
+???
+  ↓
+[必须达到 L2]
+  ↓
+???
+  ↓
+ending
+
+甚至规定 L1/L2 的先后顺序；planner 搜出来的任何轨迹，只要没有经过这些状态，就不是合法解。Georgia Tech Sites
+所以你所谓：
+“节点也是作者约束。”
+
+这个抽象本身已经有了，而且非常明确。
+但这还不是最像你的。
+真正惊到我的是 Emergent Narrative / Story Facilitator
+这条你仓库目前完全没有检索命中：Story Facilitator / late commitment / Swartjes / Louchart / Emergent Narrative 都是 0。
+而它们 2008 年就在讨论：
+Autonomous Characters 和 Authorial Control 怎么同时存在？
+
+他们甚至明确反对一种东西：
+为了满足故事结构，直接命令自主角色去做指定动作，会破坏角色 autonomy。
+
+然后提出 Story Facilitator：
+不是：
+导演：
+A，现在去攻击 B。
+
+而是间接控制：
+加入一个角色
+移走一个角色
+加入一个物品
+改变场景
+限制当前可考虑的一部分 goal
+设置 episode
+触发外部事件
+
+↓
+
+角色继续根据自己的 goal / belief 自主行动
+
+Swartjes 的总结甚至明确把它称作 indirect narrative control；episode 有进入条件和结束条件，而 episode 内角色仍然自主行动。信阳大学研究信息
+这个跟你刚才说：
+“系统主要作为世界上的干预，保证使其变得合理。”
+
+已经不是相似了。
+是直系近邻。
+更离谱的是，他们甚至已经做过“世界帮角色找理由”
+2008 年还有一个叫 Late Commitment 的东西。
+核心思想是：
+如果现在角色需要一个合理条件才能产生某个目标或行动，可以在运行时补充尚未确定的 story-world information。
+
+论文举的例子非常直白：
+角色需要：
+看清接近的船是敌是友。
+
+计划需要 binocular。
+世界之前没有明确 binocular 在哪。
+系统可以现在确定：
+原来船长舱里一直有一个望远镜。
+
+于是角色自己的 planner 就可以：
+想辨认船
+→ 我需要望远镜
+→ 船长室有望远镜
+→ 去船长室
+→ 拿望远镜
+→ 观察
+
+而不是直接命令：
+去拿望远镜。
+
+它甚至可以通过补入“附近有一艘船”“这个人原来是 pirate captain”等 context，让某个 goal 的前置条件成立。ResearchGate
+这真的已经踩到你想法最中心的位置了：
+不替角色写行为。
+改变/补足世界条件。
+让角色自己的机制产生作者希望看到的行为。
+
+所以这条必须进仓库，而且得精读。
+但这里恰好出现了一个我们可能不认同它的地方
+Late Commitment 有时相当于：
+“我们现在决定这个事实其实从故事开始就是真的。”
+
+这是一种 improv 式 retroactive framing。
+这跟你现在仓库的哲学其实有一点冲突。
+你的 W 很强调：
+authoritative world
+provenance
+runtime delta
+过去发生过的东西不能悄悄被改写
+W ≠ O
+
+所以我反而觉得我们的世界观更适合：
+不是：
+
+为了合理化 A
+→ 声称过去其实一直有 X
+
+而是：
+
+作者要求未来达到 A
+→ 从现在开始选择一个合法世界干预 E
+→ E 被真实写入 W
+→ NPC 合法观察到 E
+→ E 经 O → X → S / goal
+→ NPC 自己做出行为
+→ 最终到 A
+
+这就不是 retroactive justification，而是 prospective causal steering。
+注意：这个词现在只是我用来描述区别，不是说它是新方法。
+StoryVerse 2024 更是必须正面对比
+StoryVerse 的问题定义简直就是：
+emergent character simulation 很自由，但作者很难控制 plot progression。
+
+它让作者写 abstract acts——高层 plot outline / turning point。
+然后系统维护：
+Act Director
+Character Simulator
+Game Environment
+
+没有作者 act 可以执行时，Character Simulator 自己驱动人物。
+某个 abstract act 前置条件满足以后，Act Director 接管这一段，结合当前 world state 把抽象 act 实例化为一串 concrete character actions。
+然后 Game Environment 执行并更新 world；玩家也可以改变 world state。Autodesk
+所以它已经非常接近：
+作者打几个点，中间让角色活。
+
+但是这里我看到一个非常重要的区别：
+StoryVerse 是：
+作者约束满足
+     ↓
+Act Director
+     ↓
+直接生成角色 action sequence
+     ↓
+角色去执行
+
+而你现在描述的更像：
+作者约束 / future landmark
+        ↓
+检查当前世界发展能不能合理到达
+        ↓
+必要时干预 W
+        ↓
+W 的变化进入角色自己的 O
+        ↓
+角色自己的 dynamics / goal / commitment
+        ↓
+角色自己选择行为
+        ↓
+逐渐抵达 landmark
+
+也就是说：
+StoryVerse 在关键时候临时成为角色导演。
+你想要的更像：
+作者导演世界条件，角色还是角色自己。
+这个边界非常值得追。
+但因为刚才的 Story Facilitator / Late Commitment 已经存在，所以现在还不能说它是 novelty。
+而且 2025 年研究者自己都承认这个三角还没解决完
+AIIDE 2025 有一篇博士研究提案直接画了一个“三角”：
+Emergent multi-agent simulation：角色有本地智能、没有全局视野，所以故事容易散。
+Reactive systems：反应快、好控制，但长期结构需要大量手写规则。
+Centralized narrative planning：全局连贯，但成本高，而且容易牺牲局部 autonomy。
+作者明确提出继续研究 landmark-guided hybrid。AAAI出版物
+这至少说明：
+“自主角色 + 全局作者约束”这个 tension 到 2025 年仍然是活研究问题。
+
+不是 2008 年之后彻底解决掉了。
+所以现在我会重新理解你说的“节点”
+它其实不该只是传统 RPG：
+Quest Node 17:
+播放动画
+A 好感 -20
+开启任务 B
+
+而应该更像一个trajectory constraint：
+作者规定	系统不一定规定
+什么条件下约束生效	角色下一步具体做什么
+某未来状态必须/最好出现	中间必须经过哪一串 action
+某些事情绝不能发生	每个 NPC 的局部选择
+角色某处必须发生某种变化	这个变化前后的所有微行为
+节点间顺序/时间窗	玩家怎么介入
+必要时允许哪些世界干预	每条完整剧情分支
+
+
+这个就比“剧情节点”这个词准确很多。
+数学上甚至可以很朴素地写成：
+\[
+C_k:\quad \exists t\in[t_a,t_b],\ \phi_k(W_t,S_t)=true
+\]
+意思只是：
+在某个时间窗口里，这个作者约束应该成立。
+
+作者约束的是 trajectory 的性质，而不一定约束每一个 action。
+Riedl 的 Author Goals 已经覆盖其中相当一部分。Georgia Tech Sites
+然后你说“作者可以硬规定角色发生变化”，这里我觉得仓库原来的 provenance 思想正好能救我们
+比如作者规定：
+父亲死亡后，A 必须进入“开始怀疑组织”的人物阶段。
+
+这是完全合法的创作需求。
+但系统应该区分两种情况。
+一种是：
+father dies        ← 作者规定 W 事件
+   ↓
+A 得知
+   ↓
+A appraisal
+   ↓
+A 自己逐渐产生 distrust
+
+这是 Dynamics 导出来的。
+另一种是作者明确说：
+当节点 N 到达：
+A.distrust 必须提升
+
+也可以。
+但是 trace 必须老老实实写：
+source = author_constraint
+
+不能再伪装成“我们的心理动力学自然算出了这个变化”。
+然后系统可以做的，是围绕这个硬变化创造/选择足够合理的上下文，让玩家不感觉：
+“他昨天还好好的怎么突然发病了？”
+
+这正好把你仓库原来变态严格的 provenance，从科研负担变成了一个很合理的系统能力：
+哪些变化是人物自己演化出来的，哪些是作者要求的，哪些是世界强制发生的，一眼能区分。
+
+这又重新解释了 Watch Dogs Legion 为什么那么贴你
+Legion 的重点不只是 memory。
+它其实满足：
+过去发生的东西
+      ↓
+改变人物 / 关系 / 世界状态
+      ↓
+改变未来哪些事件合理、哪些人物可以出现
+      ↓
+未来重新遇见过去的人
+
+你要的 Author Constraint 又从另一边进来：
+作者希望的未来
+      ↓
+限制 / 调节未来可能空间
+
+所以最终可能是：
+        HISTORY
+           ↓
+     current world
+      ↙         ↘
+角色自己的过去   作者未来约束
+      ↘         ↙
+    possible futures
+           ↓
+     当前行动与事件
+           ↓
+        HISTORY'
+
+过去约束未来，作者也约束未来。
+而当前 Character Dynamics 的 W/O/S/commitment，其实已经能承接“过去约束未来”这一边。
+你现在缺出来的是右边那一块。
+所以这轮调研之后，我对 Character Dynamics 的理解变了
+以前仓库实际上有两套东西没有接上。
+第一套是你最早的：
+世界对象 + affordance + 时间变化 + 角色主观状态 + 世界结算。
+
+第二套是后来为了科研压出来的：
+history → O/X/S → future behavior，commitment 维持跨时间连续性。
+
+现在你提出的 author constraint 恰好可以把它们重新接起来：
+一个过去有历史、当前有目标/承诺的角色，在持续运行的世界里自主行动；作者只对未来轨迹施加稀疏约束；系统通过尽量少、尽量世界内的干预保持目标可达，而角色仍根据自己实际看到和经历的世界作决定。
+
+这个比我前几轮说的：
+“找个组合 edge case，看 utility 会不会炸。”
+
+大得多，也更忠于你原来的东西。
+但现在也终于知道真正需要打的近邻是谁了，而不是 Praxish。
+最危险的已经变成：
+Riedl Author Goals / narrative planning → Story Facilitator / Emergent Narrative / Late Commitment → character-based plot management → StoryVerse → 2025 landmark-guided hybrids。
+另外 2026 的 Elsewise 从作者工具侧也在讲同一个现实问题：生成式系统让 possibility space 变得巨大以后，作者越来越难知道玩家最终会经历什么；它干脆把问题定义成帮助作者理解和塑造 possibility space，并在 12 人作者研究里报告了更好的预判和控制。arXiv 今年另一项对 14 位互动叙事作者的访谈也把 authorial burden 明确拆出了 Dynamic Authoring，不只是“写的文本太多”。DOI
+所以“作者控制 vs 自主世界”绝对是真问题。
+但我们的具体新问题还没被证明。
+现在最值得做的不是写新代码，而是做一次针对这条祖谱的职责级查重：
+谁控制 W？谁控制角色？作者约束表示什么？系统可以用什么手段干预？角色是否只根据自己的局部知识行动？历史是否持续改变未来？到不了作者节点时怎么办？系统是修改世界、修改人物目标、直接替角色行动，还是回溯改历史？玩家能否看懂为什么最后会到这个节点？
+
+这次查完以后，我们才能知道真正剩下的那条缝有多宽。
+而且有一个挺好的消息：你仓库当前的 W/O/affordance/commitment/provenance 并没有因此变废。 恰恰相反，它们现在终于有可能不只是“心理状态预测实验的脚手架”，而成为研究“稀疏作者约束下的自主世界”时非常合适的实验底座。
+只是 S=焦虑0.63 那种东西，地位确实应该继续往下降。它只是角色动力的一种可能内容，不再是整个 Character Dynamics 的中心。
