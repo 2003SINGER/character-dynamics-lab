@@ -1,0 +1,648 @@
+{
+  "summaries": {
+    "no_history": {
+      "profile": "balanced",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "days": 1,
+      "boundaries": 37,
+      "policy_decisions": 17,
+      "action_counts": {
+        "idle": 3,
+        "study_halfhearted": 1,
+        "use_phone": 2,
+        "sleep_at_bed": 5,
+        "rest_at_bed": 1,
+        "get_meal": 2,
+        "go_to_bathroom": 1,
+        "turn_light_off": 1,
+        "shop_on_phone": 1
+      },
+      "distinct_actions": 9,
+      "consecutive_switches": 15,
+      "switch_rate": 0.9375,
+      "sleep_summary_minutes": 1149,
+      "sleep_running_minutes": 1149,
+      "rest_summary_minutes": 60,
+      "rest_running_minutes": 60,
+      "study_summary_minutes": 35,
+      "study_running_minutes": 35,
+      "leisure_minutes": 70,
+      "idle_minutes": 41,
+      "bodily_minutes": 85,
+      "task_completions": 0,
+      "task_assignments": 0,
+      "task_effort": 0.233743943738,
+      "task_effort_target": 8.3973833894,
+      "runtime_rejections": 0,
+      "raw_answer_choice_matches_runtime_sample": 3,
+      "raw_answer_choice_differs_from_runtime_sample": 14,
+      "min_state_margin": 284,
+      "min_full_input_margin": 284,
+      "min_question_head_margin": 20,
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "need_ranges": {
+        "hunger": [
+          0.0,
+          0.723164527515
+        ],
+        "bathroom_urge": [
+          0.0117380974407,
+          0.881185410104
+        ],
+        "fatigue": [
+          0.0,
+          0.263333333333
+        ],
+        "screen_strain": [
+          0.0,
+          0.0916666666667
+        ],
+        "anxiety": [
+          0.17199623875,
+          0.290588654868
+        ],
+        "task_pressure": [
+          0.46188718639,
+          0.541893920336
+        ]
+      },
+      "selected_action_rows": [
+        {
+          "timestamp": 490,
+          "action": "idle",
+          "target": "",
+          "running_before": "idle",
+          "started_at": 480,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 500,
+          "action": "study_halfhearted",
+          "target": "desk",
+          "running_before": "idle",
+          "started_at": 490,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 535,
+          "action": "use_phone",
+          "target": "phone",
+          "running_before": "study_halfhearted",
+          "started_at": 500,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 560,
+          "action": "sleep_at_bed",
+          "target": "bed",
+          "running_before": "use_phone",
+          "started_at": 535,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 740,
+          "action": "sleep_at_bed",
+          "target": "bed",
+          "running_before": "sleep_at_bed",
+          "started_at": 560,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 926,
+          "action": "rest_at_bed",
+          "target": "bed",
+          "running_before": "sleep_at_bed",
+          "started_at": 560,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 986,
+          "action": "idle",
+          "target": "",
+          "running_before": "rest_at_bed",
+          "started_at": 926,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 996,
+          "action": "sleep_at_bed",
+          "target": "bed",
+          "running_before": "idle",
+          "started_at": 986,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1476,
+          "action": "get_meal",
+          "target": "door",
+          "running_before": "sleep_at_bed",
+          "started_at": 996,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1511,
+          "action": "sleep_at_bed",
+          "target": "bed",
+          "running_before": "get_meal",
+          "started_at": 1476,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1691,
+          "action": "go_to_bathroom",
+          "target": "door",
+          "running_before": "sleep_at_bed",
+          "started_at": 1511,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1706,
+          "action": "get_meal",
+          "target": "door",
+          "running_before": "go_to_bathroom",
+          "started_at": 1691,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1741,
+          "action": "turn_light_off",
+          "target": "light",
+          "running_before": "get_meal",
+          "started_at": 1706,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1742,
+          "action": "shop_on_phone",
+          "target": "phone",
+          "running_before": "turn_light_off",
+          "started_at": 1741,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1762,
+          "action": "idle",
+          "target": "",
+          "running_before": "shop_on_phone",
+          "started_at": 1742,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1772,
+          "action": "use_phone",
+          "target": "phone",
+          "running_before": "idle",
+          "started_at": 1762,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1797,
+          "action": "sleep_at_bed",
+          "target": "bed",
+          "running_before": "use_phone",
+          "started_at": 1772,
+          "pre_rejections": []
+        }
+      ],
+      "final_state": {
+        "boredom": 0.0419970758955,
+        "fatigue": 0,
+        "task_pressure": 0.46188718639,
+        "satisfaction": 0.487020969894,
+        "hunger": 0.101292630737,
+        "bathroom_urge": 0.140942753837,
+        "anxiety": 0.194698762466,
+        "screen_strain": 0,
+        "commitment": "suspended"
+      },
+      "trace_lines": 39,
+      "trace_sha256": "ad871a5fab19629bc3e414e59cbd726c47d007e3299fd8c704b72c8f8f735e75",
+      "replay_sha256": "ad871a5fab19629bc3e414e59cbd726c47d007e3299fd8c704b72c8f8f735e75",
+      "trace_byte_identical": true,
+      "cassette_rows": 17,
+      "cassette_sha256": "6a0593fe9bfe8b2e23f0e5fd96c527dac8378045467fbe330c6dcbbe7b49dc4d"
+    },
+    "history": {
+      "profile": "balanced",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "days": 1,
+      "boundaries": 46,
+      "policy_decisions": 35,
+      "action_counts": {
+        "idle": 4,
+        "study_halfhearted": 6,
+        "study_at_computer": 6,
+        "use_phone": 2,
+        "rest_at_bed": 5,
+        "sleep_at_bed": 2,
+        "shop_on_phone": 2,
+        "study_focused": 3,
+        "get_meal": 2,
+        "go_to_bathroom": 1,
+        "turn_light_off": 1,
+        "use_computer": 1
+      },
+      "distinct_actions": 12,
+      "consecutive_switches": 28,
+      "switch_rate": 0.8235,
+      "sleep_summary_minutes": 360,
+      "sleep_running_minutes": 360,
+      "rest_summary_minutes": 300,
+      "rest_running_minutes": 300,
+      "study_summary_minutes": 525,
+      "study_running_minutes": 525,
+      "leisure_minutes": 119,
+      "idle_minutes": 51,
+      "bodily_minutes": 85,
+      "task_completions": 0,
+      "task_assignments": 0,
+      "task_effort": 7.37370900791,
+      "task_effort_target": 8.3973833894,
+      "runtime_rejections": 0,
+      "raw_answer_choice_matches_runtime_sample": 13,
+      "raw_answer_choice_differs_from_runtime_sample": 22,
+      "min_state_margin": 33,
+      "min_full_input_margin": 33,
+      "min_question_head_margin": 20,
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "need_ranges": {
+        "hunger": [
+          0.0462150791238,
+          0.848740950614
+        ],
+        "bathroom_urge": [
+          0.0,
+          0.865641814522
+        ],
+        "fatigue": [
+          0.15,
+          1.0
+        ],
+        "screen_strain": [
+          0.0,
+          0.211666666667
+        ],
+        "anxiety": [
+          0.10445871891,
+          0.261262872466
+        ],
+        "task_pressure": [
+          0.265345119059,
+          0.541893920336
+        ]
+      },
+      "selected_action_rows": [
+        {
+          "timestamp": 490,
+          "action": "idle",
+          "target": "",
+          "running_before": "idle",
+          "started_at": 480,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 500,
+          "action": "idle",
+          "target": "",
+          "running_before": "idle",
+          "started_at": 490,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 510,
+          "action": "idle",
+          "target": "",
+          "running_before": "idle",
+          "started_at": 500,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 520,
+          "action": "study_halfhearted",
+          "target": "desk",
+          "running_before": "idle",
+          "started_at": 510,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 555,
+          "action": "study_halfhearted",
+          "target": "desk",
+          "running_before": "study_halfhearted",
+          "started_at": 520,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 590,
+          "action": "study_at_computer",
+          "target": "computer",
+          "running_before": "study_halfhearted",
+          "started_at": 555,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 625,
+          "action": "use_phone",
+          "target": "phone",
+          "running_before": "study_at_computer",
+          "started_at": 590,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 650,
+          "action": "study_halfhearted",
+          "target": "desk",
+          "running_before": "use_phone",
+          "started_at": 625,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 685,
+          "action": "rest_at_bed",
+          "target": "bed",
+          "running_before": "study_halfhearted",
+          "started_at": 650,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 745,
+          "action": "study_halfhearted",
+          "target": "desk",
+          "running_before": "rest_at_bed",
+          "started_at": 685,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 780,
+          "action": "study_at_computer",
+          "target": "computer",
+          "running_before": "study_halfhearted",
+          "started_at": 745,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 815,
+          "action": "rest_at_bed",
+          "target": "bed",
+          "running_before": "study_at_computer",
+          "started_at": 780,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 875,
+          "action": "sleep_at_bed",
+          "target": "bed",
+          "running_before": "rest_at_bed",
+          "started_at": 815,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 935,
+          "action": "study_at_computer",
+          "target": "computer",
+          "running_before": "sleep_at_bed",
+          "started_at": 875,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 970,
+          "action": "idle",
+          "target": "",
+          "running_before": "study_at_computer",
+          "started_at": 935,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 980,
+          "action": "shop_on_phone",
+          "target": "phone",
+          "running_before": "idle",
+          "started_at": 970,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1000,
+          "action": "study_focused",
+          "target": "desk",
+          "running_before": "shop_on_phone",
+          "started_at": 980,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1035,
+          "action": "study_focused",
+          "target": "desk",
+          "running_before": "study_focused",
+          "started_at": 1000,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1070,
+          "action": "study_at_computer",
+          "target": "computer",
+          "running_before": "study_focused",
+          "started_at": 1035,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1105,
+          "action": "study_halfhearted",
+          "target": "desk",
+          "running_before": "study_at_computer",
+          "started_at": 1070,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1140,
+          "action": "shop_on_phone",
+          "target": "phone",
+          "running_before": "study_halfhearted",
+          "started_at": 1105,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1160,
+          "action": "get_meal",
+          "target": "door",
+          "running_before": "shop_on_phone",
+          "started_at": 1140,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1195,
+          "action": "study_halfhearted",
+          "target": "desk",
+          "running_before": "get_meal",
+          "started_at": 1160,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1230,
+          "action": "rest_at_bed",
+          "target": "bed",
+          "running_before": "study_halfhearted",
+          "started_at": 1195,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1290,
+          "action": "study_focused",
+          "target": "desk",
+          "running_before": "rest_at_bed",
+          "started_at": 1230,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1325,
+          "action": "get_meal",
+          "target": "door",
+          "running_before": "study_focused",
+          "started_at": 1290,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1360,
+          "action": "rest_at_bed",
+          "target": "bed",
+          "running_before": "get_meal",
+          "started_at": 1325,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1420,
+          "action": "rest_at_bed",
+          "target": "bed",
+          "running_before": "rest_at_bed",
+          "started_at": 1360,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1480,
+          "action": "go_to_bathroom",
+          "target": "door",
+          "running_before": "rest_at_bed",
+          "started_at": 1420,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1495,
+          "action": "use_phone",
+          "target": "phone",
+          "running_before": "go_to_bathroom",
+          "started_at": 1480,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1520,
+          "action": "sleep_at_bed",
+          "target": "bed",
+          "running_before": "use_phone",
+          "started_at": 1495,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1820,
+          "action": "study_at_computer",
+          "target": "computer",
+          "running_before": "sleep_at_bed",
+          "started_at": 1520,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1855,
+          "action": "study_at_computer",
+          "target": "computer",
+          "running_before": "study_at_computer",
+          "started_at": 1820,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1890,
+          "action": "turn_light_off",
+          "target": "light",
+          "running_before": "study_at_computer",
+          "started_at": 1855,
+          "pre_rejections": []
+        },
+        {
+          "timestamp": 1891,
+          "action": "use_computer",
+          "target": "computer",
+          "running_before": "turn_light_off",
+          "started_at": 1890,
+          "pre_rejections": []
+        }
+      ],
+      "final_state": {
+        "boredom": 0.526434802167,
+        "fatigue": 0.509278329246,
+        "task_pressure": 0.266682838688,
+        "satisfaction": 0.801528360468,
+        "hunger": 0.439293077518,
+        "bathroom_urge": 0.276207115136,
+        "anxiety": 0.140139759684,
+        "screen_strain": 0.13,
+        "commitment": "active"
+      },
+      "trace_lines": 48,
+      "trace_sha256": "96e7bab3afedda43ff9b6caa2dec50ddf4aaa19b50a1cfa81b280301fbe46f31",
+      "replay_sha256": "96e7bab3afedda43ff9b6caa2dec50ddf4aaa19b50a1cfa81b280301fbe46f31",
+      "trace_byte_identical": true,
+      "cassette_rows": 35,
+      "cassette_sha256": "21babae4eda7460e114aa474cdc0b0d93be3d3d34b70e84dc04d72f2cb34f52a"
+    },
+    "rule": {
+      "boundaries": 46,
+      "policy_decisions": 35,
+      "action_counts": {
+        "idle": 5,
+        "study_at_computer": 7,
+        "use_phone": 3,
+        "study_focused": 6,
+        "rest_at_bed": 4,
+        "study_halfhearted": 4,
+        "get_meal": 1,
+        "use_computer": 1,
+        "sleep_at_bed": 2,
+        "go_to_bathroom": 1,
+        "turn_light_off": 1
+      },
+      "sleep_summary_minutes": 419,
+      "sleep_running_minutes": 419,
+      "rest_minutes": 210,
+      "study_minutes": 595,
+      "task_completions": 1,
+      "task_assignments": 0,
+      "task_effort": 8.3973833894,
+      "task_effort_target": 8.3973833894,
+      "runtime_rejections": 0,
+      "trace_lines": 48,
+      "trace_sha256": "c77e13c4f70d3eb6b69f04e11076140ebc4ea4fd782e4a7bde5543badf70ce92"
+    }
+  },
+  "request_audit_rows": 52,
+  "request_checks_all_pass": true,
+  "violations": []
+}

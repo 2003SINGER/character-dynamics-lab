@@ -16,7 +16,7 @@
 
 ## 本机可复核产物
 
-路径：`outputs/light_source_ranking_v1_20261006/contract_v1/`（Git 忽略）。包括 projected JSONL、manifest 和协议/code/test 的原字节 snapshots；不改旧 source、旧 fits 或 cohort。
+路径：`outputs/light_source_ranking_v1_20261006/contract_v1/`。manifest 和协议/code/test 的原字节 snapshots 已纳入[公开审阅清单](../PUBLIC_REVIEW_INDEX_2026-10-07.md)；projected JSONL 属于数据集输入，仍仅本地保存。不改旧 source、旧 fits 或 cohort。
 
 | 文件 / 项 | SHA-256 |
 |---|---|
@@ -48,7 +48,7 @@ python3 02_实验/LIGHT_SourceRankingV1/project_inputs.py \
 - 再次使用同一 output 路径退出 1 / `refusing existing output`；随后独立核验全部输出 hash 不变。报告文件、逐行预测、checkpoint 与实际 code/test/protocol/input 原字节 snapshots 均被 provenance 覆盖；provenance 不对自身做循环 hash。snapshot 中的 INPUT_REVIEW 是运行前历史状态，不冒充更新后的本页。
 - 只读核验 pinned 真实输入的 13,463 行、hash、split 与 source/cohort digest 通过；真实拟合入口随后按预期拒绝。没有真实 source 拟合、bucket9 评分、超参数搜索或旧 fit 重算。
 
-本机产物（Git 忽略）：`outputs/light_source_ranking_v1_20261006/trainer_synthetic_parent_v1/`；独立核验脚本 `outputs/light_source_ranking_v1_20261006/parent_trainer_audit_v1.py`。
+产物：`outputs/light_source_ranking_v1_20261006/trainer_synthetic_parent_v1/`；独立核验脚本 `outputs/light_source_ranking_v1_20261006/parent_trainer_audit_v1.py`。可公开的合成结果/代码快照现已按原路径跟踪，详见[公开审阅清单](../PUBLIC_REVIEW_INDEX_2026-10-07.md)。
 
 | 项 | SHA-256 |
 |---|---|
@@ -80,7 +80,7 @@ python3 02_实验/LIGHT_SourceRankingV1/project_inputs.py \
 
 当前版本合成产物 `outputs/light_source_ranking_v1_20261006/trainer_synthetic_parent_v3/` 经父代理独立 `parent_trainer_audit_v2.py` 核验：24 checkpoints、360 epoch records、216 predictions、loss/rank/metrics/paired intervals/provenance 全部相符。此前 `parent_v2` 保留为开发阶段产物，其 verifier 首次因要求当时未保存的新入口 snapshot 而拒绝，不记作已通过的最终验收。
 
-实际执行记录（Git 忽略）为 `outputs/light_source_ranking_v1_20261006/execution_admission_v1/EXECUTION_ADMISSION.json`，SHA-256 `391b263d434c053f06738c99771246ed07abbb823398bcb0fe7ce9b1cc01b837`。依据是用户授权的 DEVELOPMENT 目标下的父代理实现审查，不是人类语义准入。其 `training_authorized=true` **仅限来源条件 DEVELOPMENT 排名**；actor_forecast / runtime_policy / formal_test / psychological_validity 全 false。原始 protocol/projected 的 false 原样保留，两者不是同一授权。
+实际执行记录为 `outputs/light_source_ranking_v1_20261006/execution_admission_v1/EXECUTION_ADMISSION.json`（现已公开），SHA-256 `391b263d434c053f06738c99771246ed07abbb823398bcb0fe7ce9b1cc01b837`。依据是用户授权的 DEVELOPMENT 目标下的父代理实现审查，不是人类语义准入。其 `training_authorized=true` **仅限来源条件 DEVELOPMENT 排名**；actor_forecast / runtime_policy / formal_test / psychological_validity 全 false。原始 protocol/projected 的 false 原样保留，两者不是同一授权。
 
 | 当前执行 pin | SHA-256 |
 |---|---|

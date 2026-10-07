@@ -1,0 +1,36 @@
+{
+  "run_id": "comparison-closure-fix-20261007-b",
+  "status": "failed",
+  "node_version": "v26.8.2",
+  "seed": "0x5eed1234",
+  "runner_sha256": "614aac2869feef90cf7d6efc5099dd46c5780027e018bd1a0b286556461eeb80",
+  "input_hashes": {
+    "utility_baseline.json": "45d7b27223b3276ff7caf01090ae2aa3ac80954c8b3ff91b766815c9a3f43465",
+    "cases.json": "fc0d2e177ade29eb516b639f4c4274cb3d825abdd8634c1f89a8647c97cb47bd",
+    "world_contract.json": "7daa7ebc1823401eb936def9d4df9dc809c310f2523beb0c107cacfcb709dceb"
+  },
+  "source_pin": {
+    "tag": "aiide-23",
+    "commit": "4729b0c469a7ecb423622f543ca116315616a76b",
+    "archive_sha256": "a5418432db8f2af8387a8eead2e4ad1392465833d862eda9273c614b883a8c77",
+    "files": {
+      "db.js": "acb98656dcc0fe461ba7d6b2875bd3429ae4068735b1795297a5722d0469c46c",
+      "praxish.js": "ef2f77999b08dd24c9893a531ae2096ef33189a9cf46bf342d024ffa44e1c088",
+      "tests.js": "7b9a41281ec8620d43bcf0062b39cbcbaad22349483fe9cae55b3ef823486947"
+    }
+  },
+  "started_at": "2026-10-06T16:28:18.621Z",
+  "cases": 9,
+  "parity_failures": [
+    "request_cancellation"
+  ],
+  "timeline_mismatches": [],
+  "negative_controls_detected": [
+    "bad_effect",
+    "bad_role",
+    "bad_filter"
+  ],
+  "tie_seed_count": 32,
+  "closure_constraint_violation_recorded": true,
+  "completed_at": "2026-10-06T16:28:18.696Z"
+}

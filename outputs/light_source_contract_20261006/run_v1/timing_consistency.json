@@ -1,0 +1,3296 @@
+{
+  "schema": "light_snapshot_timing_consistency_v1",
+  "claim_boundary": "Posthoc recorded-action consistency only; not label-independent replay, source-admission, serializer timing proof, or partner-visible-history proof.",
+  "admission": {
+    "training_authorized": false,
+    "source_contract_admitted": false
+  },
+  "source": {
+    "pickle_sha256": "7c83cf49818586db9999ea67a4a6ad087afbd91c26ed629a9f00e21d0b84058f",
+    "episodes": 10268,
+    "physical_targets": 25001,
+    "schema_fields": [
+      "action",
+      "agents",
+      "all_descriptions",
+      "available_actions",
+      "carrying",
+      "character",
+      "context",
+      "emote",
+      "room_agents",
+      "room_objects",
+      "setting",
+      "speech",
+      "wearing",
+      "wielding"
+    ]
+  },
+  "frozen_target_view": {
+    "sha256": "e6f214b91ed644b60543cf442fdae4255ff177d26a25fccd750ab5c7381ba195",
+    "rows_join_verified": 13463
+  },
+  "method": {
+    "recorded_action_role": "Posthoc event description defining expected state relation; not independent timing evidence.",
+    "families": [
+      "drop",
+      "get",
+      "remove",
+      "wear"
+    ],
+    "normalization": "Casefold + whitespace collapse + at most two leading a/an/the tokens; no binding by substring, plural, synonym, or stemming.",
+    "alias_risk_exclusion": "Exclude when target is a substring of another recorded room/possession label plus 's', reflecting historical desc_to_nodes risk; never use this to bind an entity. Other aliases/object IDs remain unknown.",
+    "multiplicity": "Preserved; multiple exact appearances or alias risk remain ambiguous.",
+    "neighbor_rule": "Same actor only. Previous anchor must have no physical command; any command between anchors excludes. Next anchor and turns between must have no physical command.",
+    "available_actions": "Read for raw examples only, never used in timing predicate.",
+    "partner_result": "Pickle has raw action and state arrays but no graph_copy; exact partner-facing result cannot be identified from this probe.",
+    "context_limit": "Context text is retained in examples but not parsed as a state oracle.",
+    "excluded": [
+      "support/gold membership as timing evidence",
+      "model outputs",
+      "forward replay"
+    ]
+  },
+  "scopes": {
+    "all_source": {
+      "physical_targets": 25001,
+      "family_counts": {
+        "drop": 1262,
+        "get": 5066,
+        "remove": 2001,
+        "unsupported": 16035,
+        "wear": 637
+      },
+      "current_state_counts": {
+        "after_consistent": 5,
+        "ambiguous_alias_risk": 291,
+        "ambiguous_duplicate_surface": 276,
+        "before_consistent": 7682,
+        "excluded:unsupported_action_family": 16035,
+        "excluded:unsupported_command_relation": 256,
+        "no_exact_state_pattern": 456
+      },
+      "same_actor_neighbor_counts": {
+        "next:anchor_ambiguous": 185,
+        "next:current_not_before_consistent": 154,
+        "next:current_pre_to_next_post_consistent": 2534,
+        "next:excluded_intervening_physical_commands": 2442,
+        "next:excluded_next_snapshot_has_physical_command": 2204,
+        "next:no_expected_pre_to_post_transition": 1,
+        "next:no_same_actor_snapshot": 1190,
+        "previous:anchor_ambiguous": 238,
+        "previous:anchor_not_before_consistent": 214,
+        "previous:excluded_intervening_physical_commands": 2475,
+        "previous:excluded_previous_snapshot_has_physical_command": 1458,
+        "previous:no_expected_pre_to_post_transition": 3329,
+        "previous:no_same_actor_snapshot": 996
+      },
+      "movement_like_first_token_counts": {},
+      "examples": {
+        "after_consistent": [
+          {
+            "episode_index": 1894,
+            "raw_turn_index": 13,
+            "actor": "tribesman",
+            "frozen_view_line": 2290,
+            "diagnostic": {
+              "included": true,
+              "family": "remove",
+              "target_surface": "a knife",
+              "current_state": {
+                "class": "after_consistent",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 1,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 11,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "after_consistent",
+                "previous_intervening_commands": [],
+                "previous_status": "anchor_not_before_consistent",
+                "next_status": "no_same_actor_snapshot"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 11,
+                "actor": "tribesman",
+                "action": null,
+                "room_objects": [
+                  "a wooden spit",
+                  "a colorful lizard",
+                  "an a colorful lizard",
+                  "a A small fire",
+                  "a cup",
+                  "a coconut",
+                  "a rock"
+                ],
+                "carrying": [
+                  "an a knife"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Bamboo hut.\nBuilt of bamboo trunks and a bamboo leaf roof, this small hut has one window on each side and a short door, where those who enter must stoop down so they don't hit their heads. A dirt floor is covered with palm fronds gathered from the jungle; four small rocks are placed around the center of the room, forming a place for the occupants to sit. A small fire burns just outside of the hut, and a wooden spit is suspended over the fire. One of the support poles of the hut has a woven grass bag hanging from it. The bag contains a half-dozen coconuts, clearly gathered for consuming at a later time. A colorful lizard is sleeping in the sun in one of the windows.\nThere's a rock, a wooden spit, a A small fire, an a colorful lizard, a cup, a colorful lizard, and a coconut here.\nA thief is here. You are carrying an a knife. ",
+                "available_actions_reread_only": [
+                  "wear a knife",
+                  "put knife in a colorful lizard",
+                  "hit thief",
+                  "put a knife in wooden spit",
+                  "drop a knife",
+                  "wear knife",
+                  "drop knife",
+                  "give knife to thief",
+                  "get coconut",
+                  "get cup",
+                  "get wooden spit",
+                  "get rock",
+                  "steal meat from thief",
+                  "put a knife in colorful lizard",
+                  "hug thief",
+                  "remove knife",
+                  "steal Potato from thief",
+                  "put knife in wooden spit",
+                  "put knife in A small fire",
+                  "put a knife in cup",
+                  "give a knife to thief",
+                  "put knife in colorful lizard",
+                  "put knife in cup",
+                  "put a knife in A small fire",
+                  "put a knife in a colorful lizard",
+                  "remove a knife"
+                ]
+              },
+              {
+                "raw_turn_index": 13,
+                "actor": "tribesman",
+                "action": "remove a knife",
+                "room_objects": [
+                  "a wooden spit",
+                  "a colorful lizard",
+                  "an a colorful lizard",
+                  "a A small fire",
+                  "a cup",
+                  "a coconut",
+                  "a rock"
+                ],
+                "carrying": [
+                  "an a knife"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Bamboo hut.\nBuilt of bamboo trunks and a bamboo leaf roof, this small hut has one window on each side and a short door, where those who enter must stoop down so they don't hit their heads. A dirt floor is covered with palm fronds gathered from the jungle; four small rocks are placed around the center of the room, forming a place for the occupants to sit. A small fire burns just outside of the hut, and a wooden spit is suspended over the fire. One of the support poles of the hut has a woven grass bag hanging from it. The bag contains a half-dozen coconuts, clearly gathered for consuming at a later time. A colorful lizard is sleeping in the sun in one of the windows.\nThere's a rock, a wooden spit, a A small fire, an a colorful lizard, a cup, a colorful lizard, and a coconut here.\nA thief is here. You are carrying an a knife. ",
+                "available_actions_reread_only": [
+                  "wear a knife",
+                  "put knife in a colorful lizard",
+                  "hit thief",
+                  "put a knife in wooden spit",
+                  "drop a knife",
+                  "wear knife",
+                  "drop knife",
+                  "give knife to thief",
+                  "get coconut",
+                  "get cup",
+                  "get wooden spit",
+                  "get rock",
+                  "steal meat from thief",
+                  "put a knife in colorful lizard",
+                  "hug thief",
+                  "remove knife",
+                  "steal Potato from thief",
+                  "put knife in wooden spit",
+                  "put knife in A small fire",
+                  "put a knife in cup",
+                  "give a knife to thief",
+                  "put knife in colorful lizard",
+                  "put knife in cup",
+                  "put a knife in A small fire",
+                  "put a knife in a colorful lizard",
+                  "remove a knife"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 2209,
+            "raw_turn_index": 11,
+            "actor": "archer",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": true,
+              "family": "remove",
+              "target_surface": "arrow",
+              "current_state": {
+                "class": "after_consistent",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 1,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 9,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "after_consistent",
+                "previous_intervening_commands": [],
+                "previous_status": "anchor_not_before_consistent",
+                "next_raw_turn": 13,
+                "next_snapshot_action": "hug spirit",
+                "next_snapshot_state": "ambiguous_alias_risk",
+                "next_intervening_commands": [
+                  {
+                    "raw_turn_index": 12,
+                    "actor": "spirit",
+                    "action": "hug archer"
+                  }
+                ],
+                "next_status": "excluded_intervening_physical_commands"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 9,
+                "actor": "archer",
+                "action": null,
+                "room_objects": [
+                  "a wildflower",
+                  "a sword",
+                  "a fields",
+                  "a grass"
+                ],
+                "carrying": [
+                  "a String",
+                  "an arrow"
+                ],
+                "wearing": [
+                  "a feather",
+                  "a leather glove"
+                ],
+                "wielding": [],
+                "context": "You are in the Hunting grounds.\nThe hunting grounds are spacious and full of wildlife. A variety of hogs and oxen cross the grounds every day. The fields are lush with green and the skies always deep blue.\nThere's a wildflower, a grass, a fields, and a sword here.\nA spirit is here. You are carrying an arrow and a String,\nand wearing a leather glove and a feather. ",
+                "available_actions_reread_only": [
+                  "get wildflower",
+                  "give String to spirit",
+                  "hug spirit",
+                  "drop String",
+                  "get sword",
+                  "remove arrow",
+                  "remove feather",
+                  "remove Bow and arrow",
+                  "remove knife",
+                  "drop arrow",
+                  "remove leather glove",
+                  "hit spirit",
+                  "give arrow to spirit"
+                ]
+              },
+              {
+                "raw_turn_index": 11,
+                "actor": "archer",
+                "action": "remove arrow",
+                "room_objects": [
+                  "a wildflower",
+                  "a sword",
+                  "a fields",
+                  "a grass"
+                ],
+                "carrying": [
+                  "a String",
+                  "an arrow"
+                ],
+                "wearing": [
+                  "a feather",
+                  "a leather glove"
+                ],
+                "wielding": [],
+                "context": "You are in the Hunting grounds.\nThe hunting grounds are spacious and full of wildlife. A variety of hogs and oxen cross the grounds every day. The fields are lush with green and the skies always deep blue.\nThere's a wildflower, a grass, a fields, and a sword here.\nA spirit is here. You are carrying an arrow and a String,\nand wearing a leather glove and a feather. ",
+                "available_actions_reread_only": [
+                  "get wildflower",
+                  "give String to spirit",
+                  "hug spirit",
+                  "drop String",
+                  "get sword",
+                  "remove arrow",
+                  "remove feather",
+                  "remove Bow and arrow",
+                  "remove knife",
+                  "drop arrow",
+                  "remove leather glove",
+                  "hit spirit",
+                  "give arrow to spirit"
+                ]
+              },
+              {
+                "raw_turn_index": 13,
+                "actor": "archer",
+                "action": "hug spirit",
+                "room_objects": [
+                  "a wildflower",
+                  "a sword",
+                  "a fields",
+                  "a grass"
+                ],
+                "carrying": [
+                  "a String",
+                  "a Bow and arrow",
+                  "an arrow"
+                ],
+                "wearing": [
+                  "a feather",
+                  "a leather glove"
+                ],
+                "wielding": [],
+                "context": "You are in the Hunting grounds.\nThe hunting grounds are spacious and full of wildlife. A variety of hogs and oxen cross the grounds every day. The fields are lush with green and the skies always deep blue.\nThere's a wildflower, a grass, a fields, and a sword here.\nA spirit is here. You are carrying an arrow, a Bow and arrow, and a String,\nand wearing a leather glove and a feather. ",
+                "available_actions_reread_only": [
+                  "get wildflower",
+                  "give String to spirit",
+                  "hug spirit",
+                  "drop String",
+                  "get sword",
+                  "remove feather",
+                  "remove knife",
+                  "drop arrow",
+                  "remove leather glove",
+                  "hit spirit",
+                  "give arrow to spirit",
+                  "drop Bow and arrow",
+                  "give Bow and arrow to spirit"
+                ]
+              }
+            ]
+          }
+        ],
+        "ambiguous_alias_risk": [
+          {
+            "episode_index": 46,
+            "raw_turn_index": 4,
+            "actor": "king",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "hammers",
+              "current_state": {
+                "class": "ambiguous_alias_risk",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                },
+                "other_labels_containing_target": [
+                  "hammer"
+                ]
+              },
+              "neighbors": {
+                "previous_raw_turn": 2,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "ambiguous_alias_risk",
+                "previous_intervening_commands": [],
+                "previous_status": "anchor_ambiguous",
+                "next_raw_turn": 6,
+                "next_snapshot_action": "give hammer to sell swords",
+                "next_snapshot_state": "ambiguous_alias_risk",
+                "next_intervening_commands": [
+                  {
+                    "raw_turn_index": 5,
+                    "actor": "sell swords",
+                    "action": "get iron"
+                  }
+                ],
+                "next_status": "excluded_intervening_physical_commands"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 2,
+                "actor": "king",
+                "action": null,
+                "room_objects": [
+                  "a stone",
+                  "a hammers",
+                  "an iron",
+                  "a tongs",
+                  "a tongs",
+                  "a hammer",
+                  "a The forge",
+                  "a wooden workbench",
+                  "a tool"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Black Smiths shop.\nIts hot, the fire glows as it prepares to accept new iron to be melted down. The forge is large and contained by a stone like well. Nearby his wooden workbench is full of hammers and tongs used for making several items. The forge is outside it seems no building is needed to be a blacksmith.\nThere's a wooden workbench, two tongss, a hammer, a The forge, a hammers, a stone, an iron, and a tool here.\nA sell swords is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get tongs",
+                  "get hammers",
+                  "get hammer",
+                  "get tool",
+                  "hug sell swords",
+                  "get stone",
+                  "hit sell swords",
+                  "get iron"
+                ]
+              },
+              {
+                "raw_turn_index": 4,
+                "actor": "king",
+                "action": "get hammers",
+                "room_objects": [
+                  "a stone",
+                  "a hammers",
+                  "an iron",
+                  "a tongs",
+                  "a tongs",
+                  "a hammer",
+                  "a The forge",
+                  "a wooden workbench",
+                  "a tool"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Black Smiths shop.\nIts hot, the fire glows as it prepares to accept new iron to be melted down. The forge is large and contained by a stone like well. Nearby his wooden workbench is full of hammers and tongs used for making several items. The forge is outside it seems no building is needed to be a blacksmith.\nThere's a wooden workbench, two tongss, a hammer, a The forge, a hammers, a stone, an iron, and a tool here.\nA sell swords is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get tongs",
+                  "get hammers",
+                  "get hammer",
+                  "get tool",
+                  "hug sell swords",
+                  "get stone",
+                  "hit sell swords",
+                  "get iron"
+                ]
+              },
+              {
+                "raw_turn_index": 6,
+                "actor": "king",
+                "action": "give hammer to sell swords",
+                "room_objects": [
+                  "a stone",
+                  "a hammers",
+                  "a tongs",
+                  "a tongs",
+                  "a The forge",
+                  "a wooden workbench",
+                  "a tool"
+                ],
+                "carrying": [
+                  "a hammer"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Black Smiths shop.\nIts hot, the fire glows as it prepares to accept new iron to be melted down. The forge is large and contained by a stone like well. Nearby his wooden workbench is full of hammers and tongs used for making several items. The forge is outside it seems no building is needed to be a blacksmith.\nThere's a wooden workbench, two tongss, a The forge, a hammers, a stone, and a tool here.\nA sell swords is here. You are carrying a hammer. ",
+                "available_actions_reread_only": [
+                  "get tongs",
+                  "drop hammers",
+                  "get tool",
+                  "get hammers",
+                  "get hammer",
+                  "drop hammer",
+                  "put hammers in wooden workbench",
+                  "hug sell swords",
+                  "get stone",
+                  "give hammer to sell swords",
+                  "hit sell swords",
+                  "put hammer in The forge",
+                  "give hammers to sell swords",
+                  "steal iron from sell swords",
+                  "put hammer in wooden workbench",
+                  "put hammers in The forge"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 78,
+            "raw_turn_index": 7,
+            "actor": "brother",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "bar",
+              "current_state": {
+                "class": "ambiguous_alias_risk",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                },
+                "other_labels_containing_target": [
+                  "bar stool"
+                ]
+              },
+              "neighbors": {
+                "previous_raw_turn": 5,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "ambiguous_alias_risk",
+                "previous_intervening_commands": [],
+                "previous_status": "anchor_ambiguous",
+                "next_raw_turn": 9,
+                "next_snapshot_action": null,
+                "next_snapshot_state": "ambiguous_alias_risk",
+                "next_intervening_commands": [],
+                "next_status": "anchor_ambiguous"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 5,
+                "actor": "brother",
+                "action": null,
+                "room_objects": [
+                  "a shelf",
+                  "a Wine",
+                  "a Bar stool",
+                  "a bar",
+                  "a Market",
+                  "a Tavern",
+                  "a Tempior Market"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Market Center.\nLocated in the middle of the famous Tempior Market of the Kingdom. Wooden tables line the floor and a bar serves several customers. The finest wines across the Kingdom are lined across the shelves behind the bar and a barb sings songs. The atmosphere is one of joy and camaraderie.\nThere's a Market, a Wine, a bar, a Bar stool, a Tavern, a Tempior Market, and a shelf here.\nA customer is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit customer",
+                  "hug customer",
+                  "get Wine",
+                  "get bar"
+                ]
+              },
+              {
+                "raw_turn_index": 7,
+                "actor": "brother",
+                "action": "get bar",
+                "room_objects": [
+                  "a shelf",
+                  "a Wine",
+                  "a Bar stool",
+                  "a bar",
+                  "a Market",
+                  "a Tavern",
+                  "a Tempior Market"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Market Center.\nLocated in the middle of the famous Tempior Market of the Kingdom. Wooden tables line the floor and a bar serves several customers. The finest wines across the Kingdom are lined across the shelves behind the bar and a barb sings songs. The atmosphere is one of joy and camaraderie.\nThere's a Market, a Wine, a bar, a Bar stool, a Tavern, a Tempior Market, and a shelf here.\nA customer is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit customer",
+                  "hug customer",
+                  "get Wine",
+                  "get bar"
+                ]
+              },
+              {
+                "raw_turn_index": 9,
+                "actor": "brother",
+                "action": null,
+                "room_objects": [
+                  "a shelf",
+                  "a Wine",
+                  "a Bar stool",
+                  "a Market",
+                  "a Tavern",
+                  "a Tempior Market"
+                ],
+                "carrying": [
+                  "a bar"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Market Center.\nLocated in the middle of the famous Tempior Market of the Kingdom. Wooden tables line the floor and a bar serves several customers. The finest wines across the Kingdom are lined across the shelves behind the bar and a barb sings songs. The atmosphere is one of joy and camaraderie.\nThere's a Market, a Wine, a Bar stool, a Tavern, a Tempior Market, and a shelf here.\nA customer is here. You are carrying a bar. ",
+                "available_actions_reread_only": [
+                  "hug customer",
+                  "get Wine",
+                  "hit customer",
+                  "drop bar",
+                  "give bar to customer"
+                ]
+              }
+            ]
+          }
+        ],
+        "ambiguous_duplicate_surface": [
+          {
+            "episode_index": 26,
+            "raw_turn_index": 2,
+            "actor": "pirate",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "bone",
+              "current_state": {
+                "class": "ambiguous_duplicate_surface",
+                "counts": {
+                  "room_objects": 2,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 0,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "ambiguous_duplicate_surface",
+                "previous_intervening_commands": [],
+                "previous_status": "anchor_ambiguous",
+                "next_raw_turn": 4,
+                "next_snapshot_action": "hit ghost",
+                "next_snapshot_state": "ambiguous_duplicate_surface",
+                "next_intervening_commands": [
+                  {
+                    "raw_turn_index": 3,
+                    "actor": "ghost",
+                    "action": "hit pirate"
+                  }
+                ],
+                "next_status": "excluded_intervening_physical_commands"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 0,
+                "actor": "pirate",
+                "action": null,
+                "room_objects": [
+                  "a wall",
+                  "a rock",
+                  "a torch",
+                  "a Bone",
+                  "an opening",
+                  "a bone",
+                  "a passage"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Cave.\nCold and dark, the moist cool walls enclose all who proceed. With just torches to light the way the large opening gets smaller and smaller.\nThere's a torch, a rock, a Bone, a wall, a bone, an opening, and a passage here.\nA ghost is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get bone",
+                  "hug ghost",
+                  "hit ghost",
+                  "get Bone"
+                ]
+              },
+              {
+                "raw_turn_index": 2,
+                "actor": "pirate",
+                "action": "get bone",
+                "room_objects": [
+                  "a wall",
+                  "a rock",
+                  "a torch",
+                  "a Bone",
+                  "an opening",
+                  "a bone",
+                  "a passage"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Cave.\nCold and dark, the moist cool walls enclose all who proceed. With just torches to light the way the large opening gets smaller and smaller.\nThere's a torch, a rock, a Bone, a wall, a bone, an opening, and a passage here.\nA ghost is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get bone",
+                  "hug ghost",
+                  "hit ghost",
+                  "get Bone"
+                ]
+              },
+              {
+                "raw_turn_index": 4,
+                "actor": "pirate",
+                "action": "hit ghost",
+                "room_objects": [
+                  "a wall",
+                  "a rock",
+                  "a torch",
+                  "an opening",
+                  "a bone",
+                  "a passage"
+                ],
+                "carrying": [
+                  "a Bone"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Cave.\nCold and dark, the moist cool walls enclose all who proceed. With just torches to light the way the large opening gets smaller and smaller.\nThere's a torch, a rock, a wall, a bone, an opening, and a passage here.\nA ghost is here. You are carrying a Bone. ",
+                "available_actions_reread_only": [
+                  "hug ghost",
+                  "give Bone to ghost",
+                  "get bone",
+                  "drop bone",
+                  "hit ghost",
+                  "give bone to ghost",
+                  "drop Bone",
+                  "get Bone"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 26,
+            "raw_turn_index": 7,
+            "actor": "ghost",
+            "frozen_view_line": 38,
+            "diagnostic": {
+              "included": true,
+              "family": "drop",
+              "target_surface": "bone",
+              "current_state": {
+                "class": "ambiguous_duplicate_surface",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 1,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 5,
+                "previous_snapshot_action": "steal Bone from pirate",
+                "previous_snapshot_state": "after_consistent",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 6,
+                    "actor": "pirate",
+                    "action": "hit ghost"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_raw_turn": 9,
+                "next_snapshot_action": null,
+                "next_snapshot_state": "ambiguous_duplicate_surface",
+                "next_intervening_commands": [],
+                "next_status": "anchor_ambiguous"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 5,
+                "actor": "ghost",
+                "action": "steal Bone from pirate",
+                "room_objects": [
+                  "a wall",
+                  "a rock",
+                  "a torch",
+                  "an opening",
+                  "a bone",
+                  "a passage"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Cave.\nCold and dark, the moist cool walls enclose all who proceed. With just torches to light the way the large opening gets smaller and smaller.\nThere's a torch, a rock, a wall, a bone, an opening, and a passage here.\nA pirate is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit pirate",
+                  "get bone",
+                  "steal bone from pirate",
+                  "steal Bone from pirate",
+                  "hug pirate",
+                  "get Bone"
+                ]
+              },
+              {
+                "raw_turn_index": 7,
+                "actor": "ghost",
+                "action": "drop bone",
+                "room_objects": [
+                  "a wall",
+                  "a rock",
+                  "a torch",
+                  "an opening",
+                  "a bone",
+                  "a passage"
+                ],
+                "carrying": [
+                  "a Bone"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Cave.\nCold and dark, the moist cool walls enclose all who proceed. With just torches to light the way the large opening gets smaller and smaller.\nThere's a torch, a rock, a wall, a bone, an opening, and a passage here.\nA pirate is here. You are carrying a Bone. ",
+                "available_actions_reread_only": [
+                  "give Bone to pirate",
+                  "hug pirate",
+                  "hit pirate",
+                  "give bone to pirate",
+                  "get bone",
+                  "drop bone",
+                  "drop Bone",
+                  "get Bone"
+                ]
+              },
+              {
+                "raw_turn_index": 9,
+                "actor": "ghost",
+                "action": null,
+                "room_objects": [
+                  "a wall",
+                  "a rock",
+                  "a torch",
+                  "a Bone",
+                  "an opening",
+                  "a bone",
+                  "a passage"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Cave.\nCold and dark, the moist cool walls enclose all who proceed. With just torches to light the way the large opening gets smaller and smaller.\nThere's a torch, a rock, a Bone, a wall, a bone, an opening, and a passage here.\nA pirate is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug pirate",
+                  "get bone",
+                  "hit pirate",
+                  "get Bone"
+                ]
+              }
+            ]
+          }
+        ],
+        "before_consistent": [
+          {
+            "episode_index": 2,
+            "raw_turn_index": 10,
+            "actor": "witch",
+            "frozen_view_line": 3,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "dirty wooden bucket",
+              "current_state": {
+                "class": "before_consistent",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 8,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "before_consistent",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 9,
+                    "actor": "fairy",
+                    "action": "put lantern in small bed"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_raw_turn": 12,
+                "next_snapshot_action": "give dirty wooden bucket to fairy",
+                "next_snapshot_state": "after_consistent",
+                "next_intervening_commands": [],
+                "next_status": "excluded_next_snapshot_has_physical_command"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 8,
+                "actor": "witch",
+                "action": null,
+                "room_objects": [
+                  "a small bed",
+                  "a dirty wooden bucket"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a small bed and a dirty wooden bucket here.\nA fairy is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "steal lantern from fairy",
+                  "hug fairy",
+                  "hit fairy",
+                  "get dirty wooden bucket"
+                ]
+              },
+              {
+                "raw_turn_index": 10,
+                "actor": "witch",
+                "action": "get dirty wooden bucket",
+                "room_objects": [
+                  "a small bed",
+                  "a dirty wooden bucket"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a small bed and a dirty wooden bucket here.\nA fairy is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get lantern from small bed",
+                  "hug fairy",
+                  "hit fairy",
+                  "get dirty wooden bucket"
+                ]
+              },
+              {
+                "raw_turn_index": 12,
+                "actor": "witch",
+                "action": "give dirty wooden bucket to fairy",
+                "room_objects": [
+                  "a small bed"
+                ],
+                "carrying": [
+                  "a dirty wooden bucket"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a small bed here.\nA fairy is here. You are carrying a dirty wooden bucket. ",
+                "available_actions_reread_only": [
+                  "hit fairy",
+                  "put dirty wooden bucket in small bed",
+                  "give dirty wooden bucket to fairy",
+                  "drop dirty wooden bucket",
+                  "get lantern from small bed",
+                  "hug fairy"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 6,
+            "raw_turn_index": 7,
+            "actor": "garter snake",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": true,
+              "family": "wear",
+              "target_surface": "Tack for the work horses",
+              "current_state": {
+                "class": "before_consistent",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 1,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 5,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "no_exact_state_pattern",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 6,
+                    "actor": "field mice",
+                    "action": "give Tack for the work horses to garter snake"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_raw_turn": 9,
+                "next_snapshot_action": "hug field mice",
+                "next_snapshot_state": "after_consistent",
+                "next_intervening_commands": [
+                  {
+                    "raw_turn_index": 8,
+                    "actor": "field mice",
+                    "action": "hug garter snake"
+                  }
+                ],
+                "next_status": "excluded_intervening_physical_commands"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 5,
+                "actor": "garter snake",
+                "action": null,
+                "room_objects": [
+                  "a door"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Barn.\nThe old rustic barn was settled on the outermost edge of the farm.  Standing tall over the fields, this two-story red barn cast a long shadow over the field surrounding it.  Large wooden doors that could be propped open with great effort would lead you directly inside.\nThere's a door here.\nA field mice is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "steal Tack for the work horses from field mice",
+                  "hit field mice",
+                  "hug field mice"
+                ]
+              },
+              {
+                "raw_turn_index": 7,
+                "actor": "garter snake",
+                "action": "wear Tack for the work horses",
+                "room_objects": [
+                  "a door"
+                ],
+                "carrying": [
+                  "a Tack for the work horses"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Barn.\nThe old rustic barn was settled on the outermost edge of the farm.  Standing tall over the fields, this two-story red barn cast a long shadow over the field surrounding it.  Large wooden doors that could be propped open with great effort would lead you directly inside.\nThere's a door here.\nA field mice is here. You are carrying a Tack for the work horses. ",
+                "available_actions_reread_only": [
+                  "give Tack for the work horses to field mice",
+                  "hit field mice",
+                  "wear Tack for the work horses",
+                  "hug field mice",
+                  "drop Tack for the work horses"
+                ]
+              },
+              {
+                "raw_turn_index": 9,
+                "actor": "garter snake",
+                "action": "hug field mice",
+                "room_objects": [
+                  "a door"
+                ],
+                "carrying": [],
+                "wearing": [
+                  "a Tack for the work horses"
+                ],
+                "wielding": [],
+                "context": "You are in the Barn.\nThe old rustic barn was settled on the outermost edge of the farm.  Standing tall over the fields, this two-story red barn cast a long shadow over the field surrounding it.  Large wooden doors that could be propped open with great effort would lead you directly inside.\nThere's a door here.\nA field mice is here. You are carrying nothing,\nand wearing a Tack for the work horses. ",
+                "available_actions_reread_only": [
+                  "hit field mice",
+                  "remove Tack for the work horses",
+                  "hug field mice"
+                ]
+              }
+            ]
+          }
+        ],
+        "excluded:unsupported_action_family": [
+          {
+            "episode_index": 0,
+            "raw_turn_index": 11,
+            "actor": "soldier",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": false,
+              "family": null,
+              "reason": "unsupported_action_family"
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 11,
+                "actor": "soldier",
+                "action": "hug court wizard",
+                "room_objects": [
+                  "an alarm horn"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Watchtower.\nThe tower is the largest section of the castle. It contains an observatory for nighttime scouting, but is also used by the wise men to study the stars. Armed guardsmen are always to be found keeping watch.\nThere's an alarm horn here.\nA court wizard is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit court wizard",
+                  "hug court wizard"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 0,
+            "raw_turn_index": 12,
+            "actor": "court wizard",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": false,
+              "family": null,
+              "reason": "unsupported_action_family"
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 12,
+                "actor": "court wizard",
+                "action": "hit soldier",
+                "room_objects": [
+                  "an alarm horn"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Watchtower.\nThe tower is the largest section of the castle. It contains an observatory for nighttime scouting, but is also used by the wise men to study the stars. Armed guardsmen are always to be found keeping watch.\nThere's an alarm horn here.\nA soldier is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit soldier",
+                  "hug soldier"
+                ]
+              }
+            ]
+          }
+        ],
+        "excluded:unsupported_command_relation": [
+          {
+            "episode_index": 112,
+            "raw_turn_index": 13,
+            "actor": "a shape-shifting cat",
+            "frozen_view_line": 144,
+            "diagnostic": {
+              "included": false,
+              "family": "get",
+              "reason": "unsupported_command_relation"
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 13,
+                "actor": "a shape-shifting cat",
+                "action": "get robe from a wardrobe",
+                "room_objects": [
+                  "a fire place",
+                  "a big rug",
+                  "a table",
+                  "a trinket",
+                  "a quilts",
+                  "a fire place",
+                  "a shoe",
+                  "a tapestry",
+                  "a Flower",
+                  "a soft bed",
+                  "a Flower",
+                  "a tapestry",
+                  "a rug",
+                  "a bed",
+                  "an a table",
+                  "a window",
+                  "an a wardrobe",
+                  "a big window",
+                  "a drapes"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Princess' Chamber.\nThis chamber is the bedroom of a princess who lives in the castle. The bedroom is very luxurious and ornate, with a soft bed piled in quilts and a nice warm fire place adorned with trinkets. On the floor there is a big rug with a beautiful design. On the wall, there is a tapestry depicting a romantic looking garden scene. There are some fresh flowers on a table near the bed. There is one big window framed with heavy drapes near the bed.\nThere's a big window, a rug, two fire places, an a wardrobe, a shoe, two tapestrys, a drapes, a big rug, two Flowers, a trinket, a window, an a table, a quilts, a table, a bed, and a soft bed here.\nA cat is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get trinket",
+                  "get robe",
+                  "hit cat",
+                  "hug cat",
+                  "get quilts",
+                  "get trinket from rug",
+                  "get shoe",
+                  "get robe from a wardrobe",
+                  "steal quilts from cat"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 117,
+            "raw_turn_index": 3,
+            "actor": "man",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": false,
+              "family": "get",
+              "reason": "unsupported_command_relation"
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 3,
+                "actor": "man",
+                "action": "get bait buckets from Boat",
+                "room_objects": [
+                  "a Boat",
+                  "a bait buckets",
+                  "a rope"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Boathouse.\nThe boathouse is a very small building with peeling paint. It is made out of wood, with one half planted in the water on stilts. Inside, there are boats floating in the water. There are hinged doors which can be opened to allow boats to come in and out. There are some ropes and other tools a boater may need stored in the boathouse.\nThere's a Boat, a rope, and a bait buckets here.\nA small child cleaning boat is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit Boat",
+                  "hit small child cleaning boat",
+                  "hug Boat",
+                  "hug small child cleaning boat",
+                  "get rope",
+                  "get rope from Boat",
+                  "get bait buckets from Boat",
+                  "get bait buckets"
+                ]
+              }
+            ]
+          }
+        ],
+        "isolated_current_pre_to_next_post": [
+          {
+            "episode_index": 2,
+            "raw_turn_index": 5,
+            "actor": "fairy",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "lantern",
+              "current_state": {
+                "class": "before_consistent",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 3,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "before_consistent",
+                "previous_intervening_commands": [],
+                "previous_status": "no_expected_pre_to_post_transition",
+                "next_raw_turn": 7,
+                "next_snapshot_action": null,
+                "next_snapshot_state": "after_consistent",
+                "next_intervening_commands": [],
+                "next_status": "current_pre_to_next_post_consistent"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 3,
+                "actor": "fairy",
+                "action": null,
+                "room_objects": [
+                  "a dirty wooden bucket",
+                  "a lantern",
+                  "a small bed"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a lantern, a small bed, and a dirty wooden bucket here.\nA witch is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit witch",
+                  "hug witch",
+                  "get lantern",
+                  "get dirty wooden bucket"
+                ]
+              },
+              {
+                "raw_turn_index": 5,
+                "actor": "fairy",
+                "action": "get lantern",
+                "room_objects": [
+                  "a dirty wooden bucket",
+                  "a lantern",
+                  "a small bed"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a lantern, a small bed, and a dirty wooden bucket here.\nA witch is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit witch",
+                  "hug witch",
+                  "get lantern",
+                  "get dirty wooden bucket"
+                ]
+              },
+              {
+                "raw_turn_index": 7,
+                "actor": "fairy",
+                "action": null,
+                "room_objects": [
+                  "a small bed",
+                  "a dirty wooden bucket"
+                ],
+                "carrying": [
+                  "a lantern"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a small bed and a dirty wooden bucket here.\nA witch is here. You are carrying a lantern. ",
+                "available_actions_reread_only": [
+                  "put lantern in small bed",
+                  "hug witch",
+                  "get dirty wooden bucket",
+                  "drop lantern",
+                  "give lantern to witch",
+                  "hit witch"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 6,
+            "raw_turn_index": 2,
+            "actor": "field mice",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "Tack for the work horses",
+              "current_state": {
+                "class": "before_consistent",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 0,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "before_consistent",
+                "previous_intervening_commands": [],
+                "previous_status": "no_expected_pre_to_post_transition",
+                "next_raw_turn": 4,
+                "next_snapshot_action": null,
+                "next_snapshot_state": "after_consistent",
+                "next_intervening_commands": [],
+                "next_status": "current_pre_to_next_post_consistent"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 0,
+                "actor": "field mice",
+                "action": null,
+                "room_objects": [
+                  "a door",
+                  "a Tack for the work horses"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Barn.\nThe old rustic barn was settled on the outermost edge of the farm.  Standing tall over the fields, this two-story red barn cast a long shadow over the field surrounding it.  Large wooden doors that could be propped open with great effort would lead you directly inside.\nThere's a Tack for the work horses and a door here.\nA garter snake is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit garter snake",
+                  "get Tack for the work horses",
+                  "hug garter snake"
+                ]
+              },
+              {
+                "raw_turn_index": 2,
+                "actor": "field mice",
+                "action": "get Tack for the work horses",
+                "room_objects": [
+                  "a door",
+                  "a Tack for the work horses"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Barn.\nThe old rustic barn was settled on the outermost edge of the farm.  Standing tall over the fields, this two-story red barn cast a long shadow over the field surrounding it.  Large wooden doors that could be propped open with great effort would lead you directly inside.\nThere's a Tack for the work horses and a door here.\nA garter snake is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit garter snake",
+                  "get Tack for the work horses",
+                  "hug garter snake"
+                ]
+              },
+              {
+                "raw_turn_index": 4,
+                "actor": "field mice",
+                "action": null,
+                "room_objects": [
+                  "a door"
+                ],
+                "carrying": [
+                  "a Tack for the work horses"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Barn.\nThe old rustic barn was settled on the outermost edge of the farm.  Standing tall over the fields, this two-story red barn cast a long shadow over the field surrounding it.  Large wooden doors that could be propped open with great effort would lead you directly inside.\nThere's a door here.\nA garter snake is here. You are carrying a Tack for the work horses. ",
+                "available_actions_reread_only": [
+                  "hug garter snake",
+                  "wear Tack for the work horses",
+                  "hit garter snake",
+                  "give Tack for the work horses to garter snake",
+                  "drop Tack for the work horses"
+                ]
+              }
+            ]
+          }
+        ],
+        "no_exact_state_pattern": [
+          {
+            "episode_index": 220,
+            "raw_turn_index": 10,
+            "actor": "a scullery boy",
+            "frozen_view_line": 249,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "gold",
+              "current_state": {
+                "class": "no_exact_state_pattern",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 8,
+                "previous_snapshot_action": "give gold to castle guards",
+                "previous_snapshot_state": "after_consistent",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 9,
+                    "actor": "castle guards",
+                    "action": "put gold in wall"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_raw_turn": 12,
+                "next_snapshot_action": "hit castle guards",
+                "next_snapshot_state": "no_exact_state_pattern",
+                "next_intervening_commands": [
+                  {
+                    "raw_turn_index": 11,
+                    "actor": "castle guards",
+                    "action": "hit a scullery boy"
+                  }
+                ],
+                "next_status": "excluded_intervening_physical_commands"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 8,
+                "actor": "a scullery boy",
+                "action": "give gold to castle guards",
+                "room_objects": [
+                  "a wall",
+                  "an observation deck",
+                  "a stair",
+                  "a Wall",
+                  "a Stair",
+                  "a beautiful land",
+                  "a beautiful farmland",
+                  "a castle",
+                  "a countryside",
+                  "a vessel"
+                ],
+                "carrying": [
+                  "a gold"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Inside Tower.\nThe walls and are made of marble and trimmed in gold.  So too are the winding stairs that lead up to the observation deck.  Ivy lines the outside of the walls and sprawls all the way up the side to just near the top of the tower.  The tower itself is intimidating for those who dare to approach.  The tower stands tall so as to see out way across the beautiful land it watches over.\nThere's a vessel, a stair, a castle, an observation deck, a wall, a beautiful farmland, a beautiful land, a Wall, a Stair, and a countryside here.\nA castle guards is here. You are carrying a gold. ",
+                "available_actions_reread_only": [
+                  "put gold in stair",
+                  "put gold in Stair",
+                  "hug castle guards",
+                  "hug castle",
+                  "put gold in observation deck",
+                  "give gold to castle",
+                  "hit castle",
+                  "put gold in Wall",
+                  "drop gold",
+                  "give gold to castle guards",
+                  "put gold in beautiful farmland",
+                  "put gold in wall",
+                  "get vessel",
+                  "hit castle guards"
+                ]
+              },
+              {
+                "raw_turn_index": 10,
+                "actor": "a scullery boy",
+                "action": "get gold",
+                "room_objects": [
+                  "a wall",
+                  "an observation deck",
+                  "a stair",
+                  "a Wall",
+                  "a Stair",
+                  "a beautiful land",
+                  "a beautiful farmland",
+                  "a castle",
+                  "a countryside",
+                  "a vessel"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Inside Tower.\nThe walls and are made of marble and trimmed in gold.  So too are the winding stairs that lead up to the observation deck.  Ivy lines the outside of the walls and sprawls all the way up the side to just near the top of the tower.  The tower itself is intimidating for those who dare to approach.  The tower stands tall so as to see out way across the beautiful land it watches over.\nThere's a vessel, a stair, a castle, an observation deck, a wall, a beautiful farmland, a beautiful land, a Wall, a Stair, and a countryside here.\nA castle guards is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug castle",
+                  "hug castle guards",
+                  "hit castle",
+                  "get gold",
+                  "get vessel",
+                  "get gold from wall",
+                  "hit castle guards"
+                ]
+              },
+              {
+                "raw_turn_index": 12,
+                "actor": "a scullery boy",
+                "action": "hit castle guards",
+                "room_objects": [
+                  "a wall",
+                  "an observation deck",
+                  "a stair",
+                  "a Wall",
+                  "a Stair",
+                  "a beautiful land",
+                  "a beautiful farmland",
+                  "a castle",
+                  "a countryside",
+                  "a vessel"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Inside Tower.\nThe walls and are made of marble and trimmed in gold.  So too are the winding stairs that lead up to the observation deck.  Ivy lines the outside of the walls and sprawls all the way up the side to just near the top of the tower.  The tower itself is intimidating for those who dare to approach.  The tower stands tall so as to see out way across the beautiful land it watches over.\nThere's a vessel, a stair, a castle, an observation deck, a wall, a beautiful farmland, a beautiful land, a Wall, a Stair, and a countryside here.\nA castle guards is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug castle",
+                  "hug castle guards",
+                  "hit castle",
+                  "get gold",
+                  "get vessel",
+                  "get gold from wall",
+                  "hit castle guards"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 486,
+            "raw_turn_index": 4,
+            "actor": "mariner",
+            "frozen_view_line": null,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "cargo",
+              "current_state": {
+                "class": "no_exact_state_pattern",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 2,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "no_exact_state_pattern",
+                "previous_intervening_commands": [],
+                "previous_status": "anchor_not_before_consistent",
+                "next_raw_turn": 6,
+                "next_snapshot_action": null,
+                "next_snapshot_state": "no_exact_state_pattern",
+                "next_intervening_commands": [],
+                "next_status": "current_not_before_consistent"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 2,
+                "actor": "mariner",
+                "action": null,
+                "room_objects": [
+                  "a giant golden Buddha",
+                  "a statue",
+                  "a statue",
+                  "a giant golden Buddha",
+                  "a mats on the ground"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Meditation room.\nThe floor and walls are wooden and polished to a shine. Golden meditating statues line the walls, the air is cool and many monks sit still with their eyes closed on mats on the ground. In the far center of the room there is a giant golden Buddha towering over everyone in its pedestal.\nThere's two giant golden Buddhas, two statues, and a mats on the ground here.\nA resting travelers is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug resting travelers",
+                  "get statue",
+                  "hit resting travelers"
+                ]
+              },
+              {
+                "raw_turn_index": 4,
+                "actor": "mariner",
+                "action": "get cargo",
+                "room_objects": [
+                  "a giant golden Buddha",
+                  "a statue",
+                  "a statue",
+                  "a giant golden Buddha",
+                  "a mats on the ground"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Meditation room.\nThe floor and walls are wooden and polished to a shine. Golden meditating statues line the walls, the air is cool and many monks sit still with their eyes closed on mats on the ground. In the far center of the room there is a giant golden Buddha towering over everyone in its pedestal.\nThere's two giant golden Buddhas, two statues, and a mats on the ground here.\nA resting travelers is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug resting travelers",
+                  "get statue",
+                  "hit resting travelers"
+                ]
+              },
+              {
+                "raw_turn_index": 6,
+                "actor": "mariner",
+                "action": null,
+                "room_objects": [
+                  "a giant golden Buddha",
+                  "a statue",
+                  "a statue",
+                  "a giant golden Buddha",
+                  "a mats on the ground"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Meditation room.\nThe floor and walls are wooden and polished to a shine. Golden meditating statues line the walls, the air is cool and many monks sit still with their eyes closed on mats on the ground. In the far center of the room there is a giant golden Buddha towering over everyone in its pedestal.\nThere's two giant golden Buddhas, two statues, and a mats on the ground here.\nA resting travelers is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug resting travelers",
+                  "get statue",
+                  "hit resting travelers"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "frozen_target_cohort": {
+      "physical_targets": 13463,
+      "family_counts": {
+        "drop": 756,
+        "get": 2305,
+        "remove": 996,
+        "unsupported": 9021,
+        "wear": 385
+      },
+      "current_state_counts": {
+        "after_consistent": 2,
+        "ambiguous_alias_risk": 153,
+        "ambiguous_duplicate_surface": 113,
+        "before_consistent": 3771,
+        "excluded:unsupported_action_family": 9021,
+        "excluded:unsupported_command_relation": 172,
+        "no_exact_state_pattern": 231
+      },
+      "same_actor_neighbor_counts": {
+        "next:anchor_ambiguous": 73,
+        "next:current_not_before_consistent": 58,
+        "next:current_pre_to_next_post_consistent": 1039,
+        "next:excluded_intervening_physical_commands": 1161,
+        "next:excluded_next_snapshot_has_physical_command": 1044,
+        "next:no_same_actor_snapshot": 895,
+        "previous:anchor_ambiguous": 71,
+        "previous:anchor_not_before_consistent": 74,
+        "previous:excluded_intervening_physical_commands": 1626,
+        "previous:excluded_previous_snapshot_has_physical_command": 1458,
+        "previous:no_expected_pre_to_post_transition": 1041
+      },
+      "movement_like_first_token_counts": {},
+      "examples": {
+        "after_consistent": [
+          {
+            "episode_index": 1894,
+            "raw_turn_index": 13,
+            "actor": "tribesman",
+            "frozen_view_line": 2290,
+            "diagnostic": {
+              "included": true,
+              "family": "remove",
+              "target_surface": "a knife",
+              "current_state": {
+                "class": "after_consistent",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 1,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 11,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "after_consistent",
+                "previous_intervening_commands": [],
+                "previous_status": "anchor_not_before_consistent",
+                "next_status": "no_same_actor_snapshot"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 11,
+                "actor": "tribesman",
+                "action": null,
+                "room_objects": [
+                  "a wooden spit",
+                  "a colorful lizard",
+                  "an a colorful lizard",
+                  "a A small fire",
+                  "a cup",
+                  "a coconut",
+                  "a rock"
+                ],
+                "carrying": [
+                  "an a knife"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Bamboo hut.\nBuilt of bamboo trunks and a bamboo leaf roof, this small hut has one window on each side and a short door, where those who enter must stoop down so they don't hit their heads. A dirt floor is covered with palm fronds gathered from the jungle; four small rocks are placed around the center of the room, forming a place for the occupants to sit. A small fire burns just outside of the hut, and a wooden spit is suspended over the fire. One of the support poles of the hut has a woven grass bag hanging from it. The bag contains a half-dozen coconuts, clearly gathered for consuming at a later time. A colorful lizard is sleeping in the sun in one of the windows.\nThere's a rock, a wooden spit, a A small fire, an a colorful lizard, a cup, a colorful lizard, and a coconut here.\nA thief is here. You are carrying an a knife. ",
+                "available_actions_reread_only": [
+                  "wear a knife",
+                  "put knife in a colorful lizard",
+                  "hit thief",
+                  "put a knife in wooden spit",
+                  "drop a knife",
+                  "wear knife",
+                  "drop knife",
+                  "give knife to thief",
+                  "get coconut",
+                  "get cup",
+                  "get wooden spit",
+                  "get rock",
+                  "steal meat from thief",
+                  "put a knife in colorful lizard",
+                  "hug thief",
+                  "remove knife",
+                  "steal Potato from thief",
+                  "put knife in wooden spit",
+                  "put knife in A small fire",
+                  "put a knife in cup",
+                  "give a knife to thief",
+                  "put knife in colorful lizard",
+                  "put knife in cup",
+                  "put a knife in A small fire",
+                  "put a knife in a colorful lizard",
+                  "remove a knife"
+                ]
+              },
+              {
+                "raw_turn_index": 13,
+                "actor": "tribesman",
+                "action": "remove a knife",
+                "room_objects": [
+                  "a wooden spit",
+                  "a colorful lizard",
+                  "an a colorful lizard",
+                  "a A small fire",
+                  "a cup",
+                  "a coconut",
+                  "a rock"
+                ],
+                "carrying": [
+                  "an a knife"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Bamboo hut.\nBuilt of bamboo trunks and a bamboo leaf roof, this small hut has one window on each side and a short door, where those who enter must stoop down so they don't hit their heads. A dirt floor is covered with palm fronds gathered from the jungle; four small rocks are placed around the center of the room, forming a place for the occupants to sit. A small fire burns just outside of the hut, and a wooden spit is suspended over the fire. One of the support poles of the hut has a woven grass bag hanging from it. The bag contains a half-dozen coconuts, clearly gathered for consuming at a later time. A colorful lizard is sleeping in the sun in one of the windows.\nThere's a rock, a wooden spit, a A small fire, an a colorful lizard, a cup, a colorful lizard, and a coconut here.\nA thief is here. You are carrying an a knife. ",
+                "available_actions_reread_only": [
+                  "wear a knife",
+                  "put knife in a colorful lizard",
+                  "hit thief",
+                  "put a knife in wooden spit",
+                  "drop a knife",
+                  "wear knife",
+                  "drop knife",
+                  "give knife to thief",
+                  "get coconut",
+                  "get cup",
+                  "get wooden spit",
+                  "get rock",
+                  "steal meat from thief",
+                  "put a knife in colorful lizard",
+                  "hug thief",
+                  "remove knife",
+                  "steal Potato from thief",
+                  "put knife in wooden spit",
+                  "put knife in A small fire",
+                  "put a knife in cup",
+                  "give a knife to thief",
+                  "put knife in colorful lizard",
+                  "put knife in cup",
+                  "put a knife in A small fire",
+                  "put a knife in a colorful lizard",
+                  "remove a knife"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 8173,
+            "raw_turn_index": 13,
+            "actor": "archer",
+            "frozen_view_line": 11725,
+            "diagnostic": {
+              "included": true,
+              "family": "remove",
+              "target_surface": "Arrow",
+              "current_state": {
+                "class": "after_consistent",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 1,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 11,
+                "previous_snapshot_action": "drop Ball",
+                "previous_snapshot_state": "after_consistent",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 12,
+                    "actor": "court jester",
+                    "action": "remove Pantaloon"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_status": "no_same_actor_snapshot"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 11,
+                "actor": "archer",
+                "action": "drop Ball",
+                "room_objects": [],
+                "carrying": [
+                  "a Flower",
+                  "a Ball",
+                  "a Arrow"
+                ],
+                "wearing": [
+                  "a feather",
+                  "a leather glove"
+                ],
+                "wielding": [],
+                "context": "You are in the arrow house.\nA small shed with an earthen floor, holds two tables upon which rests neatly arrayed wooden boxes, each of which holds a score of newly made arrows. A third table holds several more large boxes, wherein spent and damaged arrows are placed, so any part still serviceable may be harvested. A few worn practice bows hang upon the walls and a small number tools, as well as replacement strings and polishing equipment rests in boxes under the shelves. Another set of neatly arranged boxes contains newly made parts, for the Fletcher to transform into viable arrows. A small wooden chair completes the furnishings.\nA court jester and a knight are here. You are carrying a Ball, a Arrow, and a Flower,\nand wearing a feather and a leather glove. ",
+                "available_actions_reread_only": [
+                  "give Flower to knight",
+                  "wear Arrow",
+                  "give Ball to knight",
+                  "drop Flower",
+                  "hit court jester",
+                  "give Ball to court jester",
+                  "give Arrow to court jester",
+                  "drop Arrow",
+                  "remove feather",
+                  "remove knife",
+                  "remove leather glove",
+                  "give Arrow to knight",
+                  "hit knight",
+                  "give Flower to court jester",
+                  "remove Bow and arrow",
+                  "hug court jester",
+                  "remove Arrow",
+                  "eat Flower",
+                  "hug knight",
+                  "drop Ball"
+                ]
+              },
+              {
+                "raw_turn_index": 13,
+                "actor": "archer",
+                "action": "remove Arrow",
+                "room_objects": [
+                  "a Ball"
+                ],
+                "carrying": [
+                  "a Flower",
+                  "a Arrow"
+                ],
+                "wearing": [
+                  "a feather",
+                  "a leather glove"
+                ],
+                "wielding": [],
+                "context": "You are in the arrow house.\nA small shed with an earthen floor, holds two tables upon which rests neatly arrayed wooden boxes, each of which holds a score of newly made arrows. A third table holds several more large boxes, wherein spent and damaged arrows are placed, so any part still serviceable may be harvested. A few worn practice bows hang upon the walls and a small number tools, as well as replacement strings and polishing equipment rests in boxes under the shelves. Another set of neatly arranged boxes contains newly made parts, for the Fletcher to transform into viable arrows. A small wooden chair completes the furnishings.\nThere's a Ball here.\nA court jester and a knight are here. You are carrying a Arrow and a Flower,\nand wearing a feather and a leather glove. ",
+                "available_actions_reread_only": [
+                  "give Flower to knight",
+                  "wear Arrow",
+                  "hit court jester",
+                  "drop Flower",
+                  "steal Pantaloon from court jester",
+                  "remove knife",
+                  "give Arrow to court jester",
+                  "drop Arrow",
+                  "remove feather",
+                  "get Ball",
+                  "remove leather glove",
+                  "give Arrow to knight",
+                  "hit knight",
+                  "give Flower to court jester",
+                  "remove Bow and arrow",
+                  "hug court jester",
+                  "remove Arrow",
+                  "eat Flower",
+                  "hug knight"
+                ]
+              }
+            ]
+          }
+        ],
+        "ambiguous_alias_risk": [
+          {
+            "episode_index": 112,
+            "raw_turn_index": 11,
+            "actor": "a shape-shifting cat",
+            "frozen_view_line": 142,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "robe",
+              "current_state": {
+                "class": "ambiguous_alias_risk",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                },
+                "other_labels_containing_target": [
+                  "wardrobe"
+                ]
+              },
+              "neighbors": {
+                "previous_raw_turn": 9,
+                "previous_snapshot_action": "hug cat",
+                "previous_snapshot_state": "ambiguous_alias_risk",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 10,
+                    "actor": "cat",
+                    "action": "put trinket in rug"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_raw_turn": 13,
+                "next_snapshot_action": "get robe from a wardrobe",
+                "next_snapshot_state": "ambiguous_alias_risk",
+                "next_intervening_commands": [
+                  {
+                    "raw_turn_index": 12,
+                    "actor": "cat",
+                    "action": "get quilts"
+                  }
+                ],
+                "next_status": "excluded_intervening_physical_commands"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 9,
+                "actor": "a shape-shifting cat",
+                "action": "hug cat",
+                "room_objects": [
+                  "a fire place",
+                  "a big rug",
+                  "a table",
+                  "a trinket",
+                  "a quilts",
+                  "a fire place",
+                  "a shoe",
+                  "a tapestry",
+                  "a Flower",
+                  "a soft bed",
+                  "a Flower",
+                  "a tapestry",
+                  "a rug",
+                  "a bed",
+                  "an a table",
+                  "a window",
+                  "an a wardrobe",
+                  "a big window",
+                  "a drapes",
+                  "a quilts"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Princess' Chamber.\nThis chamber is the bedroom of a princess who lives in the castle. The bedroom is very luxurious and ornate, with a soft bed piled in quilts and a nice warm fire place adorned with trinkets. On the floor there is a big rug with a beautiful design. On the wall, there is a tapestry depicting a romantic looking garden scene. There are some fresh flowers on a table near the bed. There is one big window framed with heavy drapes near the bed.\nThere's a big window, a rug, two fire places, an a wardrobe, a shoe, two tapestrys, a drapes, a big rug, two Flowers, a trinket, a window, an a table, two quiltss, a table, a bed, and a soft bed here.\nA cat is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get trinket",
+                  "get robe",
+                  "hit cat",
+                  "hug cat",
+                  "get quilts",
+                  "get shoe",
+                  "steal trinket from cat",
+                  "get robe from a wardrobe"
+                ]
+              },
+              {
+                "raw_turn_index": 11,
+                "actor": "a shape-shifting cat",
+                "action": "get robe",
+                "room_objects": [
+                  "a fire place",
+                  "a big rug",
+                  "a table",
+                  "a trinket",
+                  "a quilts",
+                  "a fire place",
+                  "a shoe",
+                  "a tapestry",
+                  "a Flower",
+                  "a soft bed",
+                  "a Flower",
+                  "a tapestry",
+                  "a rug",
+                  "a bed",
+                  "an a table",
+                  "a window",
+                  "an a wardrobe",
+                  "a big window",
+                  "a drapes",
+                  "a quilts"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Princess' Chamber.\nThis chamber is the bedroom of a princess who lives in the castle. The bedroom is very luxurious and ornate, with a soft bed piled in quilts and a nice warm fire place adorned with trinkets. On the floor there is a big rug with a beautiful design. On the wall, there is a tapestry depicting a romantic looking garden scene. There are some fresh flowers on a table near the bed. There is one big window framed with heavy drapes near the bed.\nThere's a big window, a rug, two fire places, an a wardrobe, a shoe, two tapestrys, a drapes, a big rug, two Flowers, a trinket, a window, an a table, two quiltss, a table, a bed, and a soft bed here.\nA cat is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get trinket",
+                  "get robe",
+                  "hit cat",
+                  "hug cat",
+                  "get quilts",
+                  "get trinket from rug",
+                  "get shoe",
+                  "get robe from a wardrobe"
+                ]
+              },
+              {
+                "raw_turn_index": 13,
+                "actor": "a shape-shifting cat",
+                "action": "get robe from a wardrobe",
+                "room_objects": [
+                  "a fire place",
+                  "a big rug",
+                  "a table",
+                  "a trinket",
+                  "a quilts",
+                  "a fire place",
+                  "a shoe",
+                  "a tapestry",
+                  "a Flower",
+                  "a soft bed",
+                  "a Flower",
+                  "a tapestry",
+                  "a rug",
+                  "a bed",
+                  "an a table",
+                  "a window",
+                  "an a wardrobe",
+                  "a big window",
+                  "a drapes"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Princess' Chamber.\nThis chamber is the bedroom of a princess who lives in the castle. The bedroom is very luxurious and ornate, with a soft bed piled in quilts and a nice warm fire place adorned with trinkets. On the floor there is a big rug with a beautiful design. On the wall, there is a tapestry depicting a romantic looking garden scene. There are some fresh flowers on a table near the bed. There is one big window framed with heavy drapes near the bed.\nThere's a big window, a rug, two fire places, an a wardrobe, a shoe, two tapestrys, a drapes, a big rug, two Flowers, a trinket, a window, an a table, a quilts, a table, a bed, and a soft bed here.\nA cat is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get trinket",
+                  "get robe",
+                  "hit cat",
+                  "hug cat",
+                  "get quilts",
+                  "get trinket from rug",
+                  "get shoe",
+                  "get robe from a wardrobe",
+                  "steal quilts from cat"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 218,
+            "raw_turn_index": 4,
+            "actor": "vulture",
+            "frozen_view_line": 242,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "mud",
+              "current_state": {
+                "class": "ambiguous_alias_risk",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                },
+                "other_labels_containing_target": [
+                  "mudpit"
+                ]
+              },
+              "neighbors": {
+                "previous_raw_turn": 2,
+                "previous_snapshot_action": "hit insects",
+                "previous_snapshot_state": "ambiguous_alias_risk",
+                "previous_intervening_commands": [],
+                "previous_status": "excluded_previous_snapshot_has_physical_command",
+                "next_raw_turn": 6,
+                "next_snapshot_action": "drop mud",
+                "next_snapshot_state": "ambiguous_alias_risk",
+                "next_intervening_commands": [
+                  {
+                    "raw_turn_index": 5,
+                    "actor": "insects",
+                    "action": "hug vulture"
+                  }
+                ],
+                "next_status": "excluded_intervening_physical_commands"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 2,
+                "actor": "vulture",
+                "action": "hit insects",
+                "room_objects": [
+                  "a mud",
+                  "a vegetation",
+                  "a mudpit"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Mud pit.\nThe mudpit is dark and brown. The mud inside is sticky and hard to escape. The vegetation surrounding the area is matted down.\nThere's a mud, a mudpit, and a vegetation here.\nAn insects is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get vegetation",
+                  "hit insects",
+                  "get mud",
+                  "hug insects"
+                ]
+              },
+              {
+                "raw_turn_index": 4,
+                "actor": "vulture",
+                "action": "get mud",
+                "room_objects": [
+                  "a mud",
+                  "a vegetation",
+                  "a mudpit"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Mud pit.\nThe mudpit is dark and brown. The mud inside is sticky and hard to escape. The vegetation surrounding the area is matted down.\nThere's a mud, a mudpit, and a vegetation here.\nAn insects is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get vegetation",
+                  "hit insects",
+                  "get mud",
+                  "hug insects"
+                ]
+              },
+              {
+                "raw_turn_index": 6,
+                "actor": "vulture",
+                "action": "drop mud",
+                "room_objects": [
+                  "a vegetation",
+                  "a mudpit"
+                ],
+                "carrying": [
+                  "a mud"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Mud pit.\nThe mudpit is dark and brown. The mud inside is sticky and hard to escape. The vegetation surrounding the area is matted down.\nThere's a mudpit and a vegetation here.\nAn insects is here. You are carrying a mud. ",
+                "available_actions_reread_only": [
+                  "drop mud",
+                  "hug insects",
+                  "give mud to insects",
+                  "get vegetation",
+                  "hit insects"
+                ]
+              }
+            ]
+          }
+        ],
+        "ambiguous_duplicate_surface": [
+          {
+            "episode_index": 26,
+            "raw_turn_index": 7,
+            "actor": "ghost",
+            "frozen_view_line": 38,
+            "diagnostic": {
+              "included": true,
+              "family": "drop",
+              "target_surface": "bone",
+              "current_state": {
+                "class": "ambiguous_duplicate_surface",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 1,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 5,
+                "previous_snapshot_action": "steal Bone from pirate",
+                "previous_snapshot_state": "after_consistent",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 6,
+                    "actor": "pirate",
+                    "action": "hit ghost"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_raw_turn": 9,
+                "next_snapshot_action": null,
+                "next_snapshot_state": "ambiguous_duplicate_surface",
+                "next_intervening_commands": [],
+                "next_status": "anchor_ambiguous"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 5,
+                "actor": "ghost",
+                "action": "steal Bone from pirate",
+                "room_objects": [
+                  "a wall",
+                  "a rock",
+                  "a torch",
+                  "an opening",
+                  "a bone",
+                  "a passage"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Cave.\nCold and dark, the moist cool walls enclose all who proceed. With just torches to light the way the large opening gets smaller and smaller.\nThere's a torch, a rock, a wall, a bone, an opening, and a passage here.\nA pirate is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit pirate",
+                  "get bone",
+                  "steal bone from pirate",
+                  "steal Bone from pirate",
+                  "hug pirate",
+                  "get Bone"
+                ]
+              },
+              {
+                "raw_turn_index": 7,
+                "actor": "ghost",
+                "action": "drop bone",
+                "room_objects": [
+                  "a wall",
+                  "a rock",
+                  "a torch",
+                  "an opening",
+                  "a bone",
+                  "a passage"
+                ],
+                "carrying": [
+                  "a Bone"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Cave.\nCold and dark, the moist cool walls enclose all who proceed. With just torches to light the way the large opening gets smaller and smaller.\nThere's a torch, a rock, a wall, a bone, an opening, and a passage here.\nA pirate is here. You are carrying a Bone. ",
+                "available_actions_reread_only": [
+                  "give Bone to pirate",
+                  "hug pirate",
+                  "hit pirate",
+                  "give bone to pirate",
+                  "get bone",
+                  "drop bone",
+                  "drop Bone",
+                  "get Bone"
+                ]
+              },
+              {
+                "raw_turn_index": 9,
+                "actor": "ghost",
+                "action": null,
+                "room_objects": [
+                  "a wall",
+                  "a rock",
+                  "a torch",
+                  "a Bone",
+                  "an opening",
+                  "a bone",
+                  "a passage"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Cave.\nCold and dark, the moist cool walls enclose all who proceed. With just torches to light the way the large opening gets smaller and smaller.\nThere's a torch, a rock, a Bone, a wall, a bone, an opening, and a passage here.\nA pirate is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug pirate",
+                  "get bone",
+                  "hit pirate",
+                  "get Bone"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 29,
+            "raw_turn_index": 11,
+            "actor": "village chief",
+            "frozen_view_line": 43,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "mud",
+              "current_state": {
+                "class": "ambiguous_duplicate_surface",
+                "counts": {
+                  "room_objects": 2,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 9,
+                "previous_snapshot_action": "get a basket",
+                "previous_snapshot_state": "ambiguous_duplicate_surface",
+                "previous_intervening_commands": [],
+                "previous_status": "excluded_previous_snapshot_has_physical_command",
+                "next_raw_turn": 13,
+                "next_snapshot_action": null,
+                "next_snapshot_state": "ambiguous_duplicate_surface",
+                "next_intervening_commands": [],
+                "next_status": "anchor_ambiguous"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 9,
+                "actor": "village chief",
+                "action": "get a basket",
+                "room_objects": [
+                  "a river",
+                  "a gurgling water",
+                  "a mud",
+                  "a the land",
+                  "a dirt",
+                  "a clear air",
+                  "a dirt",
+                  "a river",
+                  "an a basket",
+                  "a mud",
+                  "a water"
+                ],
+                "carrying": [
+                  "a fish",
+                  "a worm"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Riverbed.\nWith clear air and the sound of gurgling water near it, the river bed is silty and muddy. The river rushes by the land as more and more dirt separates from the land. The land of the riverbed slick with mud and filled with bugs and worms/\nThere's a gurgling water, a the land, a water, two dirts, an a basket, two muds, two rivers, and a clear air here.\nA dogs is here. You are carrying a fish and a worm. ",
+                "available_actions_reread_only": [
+                  "eat worm",
+                  "hug dogs",
+                  "hit dogs",
+                  "give fish to dogs",
+                  "drop fish",
+                  "put worm in the land",
+                  "give worm to dogs",
+                  "get a basket",
+                  "put fish in the land",
+                  "drop worm",
+                  "get mud"
+                ]
+              },
+              {
+                "raw_turn_index": 11,
+                "actor": "village chief",
+                "action": "get mud",
+                "room_objects": [
+                  "a river",
+                  "a gurgling water",
+                  "a mud",
+                  "a the land",
+                  "a dirt",
+                  "a clear air",
+                  "a dirt",
+                  "a river",
+                  "a mud",
+                  "a water"
+                ],
+                "carrying": [
+                  "an a basket",
+                  "a fish",
+                  "a worm"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Riverbed.\nWith clear air and the sound of gurgling water near it, the river bed is silty and muddy. The river rushes by the land as more and more dirt separates from the land. The land of the riverbed slick with mud and filled with bugs and worms/\nThere's a gurgling water, a the land, a water, two dirts, two muds, two rivers, and a clear air here.\nA dogs is here. You are carrying a fish, an a basket, and a worm. ",
+                "available_actions_reread_only": [
+                  "eat worm",
+                  "hug dogs",
+                  "put a basket in the land",
+                  "hit dogs",
+                  "drop a basket",
+                  "drop fish",
+                  "put worm in the land",
+                  "give fish to dogs",
+                  "give worm to dogs",
+                  "give a basket to dogs",
+                  "put fish in the land",
+                  "drop worm",
+                  "get mud"
+                ]
+              },
+              {
+                "raw_turn_index": 13,
+                "actor": "village chief",
+                "action": null,
+                "room_objects": [
+                  "a river",
+                  "a gurgling water",
+                  "a the land",
+                  "a dirt",
+                  "a clear air",
+                  "a dirt",
+                  "a river",
+                  "a mud",
+                  "a water"
+                ],
+                "carrying": [
+                  "an a basket",
+                  "a fish",
+                  "a mud",
+                  "a worm"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Riverbed.\nWith clear air and the sound of gurgling water near it, the river bed is silty and muddy. The river rushes by the land as more and more dirt separates from the land. The land of the riverbed slick with mud and filled with bugs and worms/\nThere's a gurgling water, a the land, a water, two dirts, a mud, two rivers, and a clear air here.\nA dogs is here. You are carrying a mud, a fish, an a basket, and a worm. ",
+                "available_actions_reread_only": [
+                  "put mud in the land",
+                  "drop mud",
+                  "give mud to dogs",
+                  "eat worm",
+                  "hug dogs",
+                  "put a basket in the land",
+                  "hit dogs",
+                  "drop a basket",
+                  "drop fish",
+                  "put worm in the land",
+                  "give fish to dogs",
+                  "give worm to dogs",
+                  "give a basket to dogs",
+                  "put fish in the land",
+                  "drop worm",
+                  "get mud"
+                ]
+              }
+            ]
+          }
+        ],
+        "before_consistent": [
+          {
+            "episode_index": 2,
+            "raw_turn_index": 10,
+            "actor": "witch",
+            "frozen_view_line": 3,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "dirty wooden bucket",
+              "current_state": {
+                "class": "before_consistent",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 8,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "before_consistent",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 9,
+                    "actor": "fairy",
+                    "action": "put lantern in small bed"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_raw_turn": 12,
+                "next_snapshot_action": "give dirty wooden bucket to fairy",
+                "next_snapshot_state": "after_consistent",
+                "next_intervening_commands": [],
+                "next_status": "excluded_next_snapshot_has_physical_command"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 8,
+                "actor": "witch",
+                "action": null,
+                "room_objects": [
+                  "a small bed",
+                  "a dirty wooden bucket"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a small bed and a dirty wooden bucket here.\nA fairy is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "steal lantern from fairy",
+                  "hug fairy",
+                  "hit fairy",
+                  "get dirty wooden bucket"
+                ]
+              },
+              {
+                "raw_turn_index": 10,
+                "actor": "witch",
+                "action": "get dirty wooden bucket",
+                "room_objects": [
+                  "a small bed",
+                  "a dirty wooden bucket"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a small bed and a dirty wooden bucket here.\nA fairy is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get lantern from small bed",
+                  "hug fairy",
+                  "hit fairy",
+                  "get dirty wooden bucket"
+                ]
+              },
+              {
+                "raw_turn_index": 12,
+                "actor": "witch",
+                "action": "give dirty wooden bucket to fairy",
+                "room_objects": [
+                  "a small bed"
+                ],
+                "carrying": [
+                  "a dirty wooden bucket"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a small bed here.\nA fairy is here. You are carrying a dirty wooden bucket. ",
+                "available_actions_reread_only": [
+                  "hit fairy",
+                  "put dirty wooden bucket in small bed",
+                  "give dirty wooden bucket to fairy",
+                  "drop dirty wooden bucket",
+                  "get lantern from small bed",
+                  "hug fairy"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 21,
+            "raw_turn_index": 8,
+            "actor": "a messenger",
+            "frozen_view_line": 26,
+            "diagnostic": {
+              "included": true,
+              "family": "drop",
+              "target_surface": "stones",
+              "current_state": {
+                "class": "before_consistent",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 1,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 6,
+                "previous_snapshot_action": "get stones",
+                "previous_snapshot_state": "after_consistent",
+                "previous_intervening_commands": [],
+                "previous_status": "excluded_previous_snapshot_has_physical_command",
+                "next_raw_turn": 10,
+                "next_snapshot_action": "steal sword of the guards from the prince",
+                "next_snapshot_state": "after_consistent",
+                "next_intervening_commands": [],
+                "next_status": "excluded_next_snapshot_has_physical_command"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 6,
+                "actor": "a messenger",
+                "action": "get stones",
+                "room_objects": [
+                  "a wood trim",
+                  "a castle",
+                  "a lookout tower",
+                  "a wood trim",
+                  "a stones"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Tower.\nThis outside tower is made from big stones. It is grey with wood trim. There is one glass window that is used as a lookout tower.\nThere's two wood trims, a castle, a lookout tower, and a stones here.\nA the prince is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug the prince",
+                  "hit the prince",
+                  "steal sword of the guards from the prince",
+                  "get stones"
+                ]
+              },
+              {
+                "raw_turn_index": 8,
+                "actor": "a messenger",
+                "action": "drop stones",
+                "room_objects": [
+                  "a castle",
+                  "a lookout tower",
+                  "a wood trim",
+                  "a wood trim"
+                ],
+                "carrying": [
+                  "a stones"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Tower.\nThis outside tower is made from big stones. It is grey with wood trim. There is one glass window that is used as a lookout tower.\nThere's two wood trims, a castle, and a lookout tower here.\nA the prince is here. You are carrying a stones. ",
+                "available_actions_reread_only": [
+                  "hug the prince",
+                  "hit the prince",
+                  "drop stones",
+                  "give stones to the prince",
+                  "steal sword of the guards from the prince"
+                ]
+              },
+              {
+                "raw_turn_index": 10,
+                "actor": "a messenger",
+                "action": "steal sword of the guards from the prince",
+                "room_objects": [
+                  "a wood trim",
+                  "a castle",
+                  "a lookout tower",
+                  "a wood trim",
+                  "a stones"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Tower.\nThis outside tower is made from big stones. It is grey with wood trim. There is one glass window that is used as a lookout tower.\nThere's two wood trims, a castle, a lookout tower, and a stones here.\nA the prince is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug the prince",
+                  "hit the prince",
+                  "steal sword of the guards from the prince",
+                  "get stones"
+                ]
+              }
+            ]
+          }
+        ],
+        "excluded:unsupported_action_family": [
+          {
+            "episode_index": 0,
+            "raw_turn_index": 13,
+            "actor": "soldier",
+            "frozen_view_line": 1,
+            "diagnostic": {
+              "included": false,
+              "family": null,
+              "reason": "unsupported_action_family"
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 13,
+                "actor": "soldier",
+                "action": "hit court wizard",
+                "room_objects": [
+                  "an alarm horn"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Watchtower.\nThe tower is the largest section of the castle. It contains an observatory for nighttime scouting, but is also used by the wise men to study the stars. Armed guardsmen are always to be found keeping watch.\nThere's an alarm horn here.\nA court wizard is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit court wizard",
+                  "hug court wizard"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 2,
+            "raw_turn_index": 9,
+            "actor": "fairy",
+            "frozen_view_line": 2,
+            "diagnostic": {
+              "included": false,
+              "family": null,
+              "reason": "unsupported_action_family"
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 9,
+                "actor": "fairy",
+                "action": "put lantern in small bed",
+                "room_objects": [
+                  "a small bed",
+                  "a dirty wooden bucket"
+                ],
+                "carrying": [
+                  "a lantern"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Prison room.\nUp at the top of the tower, among the gray clouds, is the prison room. The room is round, with a circumference of about 15 feet. The walls are barren and made of stone; only one barred window gives a view out onto the vast landscape. A small bed and a dirty wooden bucket are the only decorations. The desolate princess spends day and night laying on that small bed, wondering where things went wrong\nThere's a small bed and a dirty wooden bucket here.\nA witch is here. You are carrying a lantern. ",
+                "available_actions_reread_only": [
+                  "put lantern in small bed",
+                  "hug witch",
+                  "get dirty wooden bucket",
+                  "drop lantern",
+                  "give lantern to witch",
+                  "hit witch"
+                ]
+              }
+            ]
+          }
+        ],
+        "excluded:unsupported_command_relation": [
+          {
+            "episode_index": 112,
+            "raw_turn_index": 13,
+            "actor": "a shape-shifting cat",
+            "frozen_view_line": 144,
+            "diagnostic": {
+              "included": false,
+              "family": "get",
+              "reason": "unsupported_command_relation"
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 13,
+                "actor": "a shape-shifting cat",
+                "action": "get robe from a wardrobe",
+                "room_objects": [
+                  "a fire place",
+                  "a big rug",
+                  "a table",
+                  "a trinket",
+                  "a quilts",
+                  "a fire place",
+                  "a shoe",
+                  "a tapestry",
+                  "a Flower",
+                  "a soft bed",
+                  "a Flower",
+                  "a tapestry",
+                  "a rug",
+                  "a bed",
+                  "an a table",
+                  "a window",
+                  "an a wardrobe",
+                  "a big window",
+                  "a drapes"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Princess' Chamber.\nThis chamber is the bedroom of a princess who lives in the castle. The bedroom is very luxurious and ornate, with a soft bed piled in quilts and a nice warm fire place adorned with trinkets. On the floor there is a big rug with a beautiful design. On the wall, there is a tapestry depicting a romantic looking garden scene. There are some fresh flowers on a table near the bed. There is one big window framed with heavy drapes near the bed.\nThere's a big window, a rug, two fire places, an a wardrobe, a shoe, two tapestrys, a drapes, a big rug, two Flowers, a trinket, a window, an a table, a quilts, a table, a bed, and a soft bed here.\nA cat is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get trinket",
+                  "get robe",
+                  "hit cat",
+                  "hug cat",
+                  "get quilts",
+                  "get trinket from rug",
+                  "get shoe",
+                  "get robe from a wardrobe",
+                  "steal quilts from cat"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 117,
+            "raw_turn_index": 10,
+            "actor": "small child cleaning boat",
+            "frozen_view_line": 156,
+            "diagnostic": {
+              "included": false,
+              "family": "get",
+              "reason": "unsupported_command_relation"
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 10,
+                "actor": "small child cleaning boat",
+                "action": "get rope from Boat",
+                "room_objects": [
+                  "a Boat",
+                  "a rope"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Boathouse.\nThe boathouse is a very small building with peeling paint. It is made out of wood, with one half planted in the water on stilts. Inside, there are boats floating in the water. There are hinged doors which can be opened to allow boats to come in and out. There are some ropes and other tools a boater may need stored in the boathouse.\nThere's a Boat and a rope here.\nA man is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hit Boat",
+                  "steal bait buckets from man",
+                  "hug Boat",
+                  "get rope",
+                  "hit man",
+                  "get rope from Boat",
+                  "hug man"
+                ]
+              }
+            ]
+          }
+        ],
+        "isolated_current_pre_to_next_post": [
+          {
+            "episode_index": 22,
+            "raw_turn_index": 9,
+            "actor": "friend",
+            "frozen_view_line": 31,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "moss",
+              "current_state": {
+                "class": "before_consistent",
+                "counts": {
+                  "room_objects": 1,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 7,
+                "previous_snapshot_action": "hug townsperson",
+                "previous_snapshot_state": "before_consistent",
+                "previous_intervening_commands": [],
+                "previous_status": "excluded_previous_snapshot_has_physical_command",
+                "next_raw_turn": 11,
+                "next_snapshot_action": null,
+                "next_snapshot_state": "after_consistent",
+                "next_intervening_commands": [],
+                "next_status": "current_pre_to_next_post_consistent"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 7,
+                "actor": "friend",
+                "action": "hug townsperson",
+                "room_objects": [
+                  "a Lagoon",
+                  "a moss"
+                ],
+                "carrying": [
+                  "a lily pad"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the The Lagoon.\nThe Lagoon is a dark and mysterious place during the night hours.  A lot of moss and lily pads surround the shore.  The water is very murky.\nThere's a Lagoon and a moss here.\nA townsperson is here. You are carrying a lily pad. ",
+                "available_actions_reread_only": [
+                  "give lily pad to townsperson",
+                  "hit townsperson",
+                  "get moss",
+                  "hug townsperson",
+                  "drop lily pad"
+                ]
+              },
+              {
+                "raw_turn_index": 9,
+                "actor": "friend",
+                "action": "get moss",
+                "room_objects": [
+                  "a Lagoon",
+                  "a moss"
+                ],
+                "carrying": [
+                  "a lily pad"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the The Lagoon.\nThe Lagoon is a dark and mysterious place during the night hours.  A lot of moss and lily pads surround the shore.  The water is very murky.\nThere's a Lagoon and a moss here.\nA townsperson is here. You are carrying a lily pad. ",
+                "available_actions_reread_only": [
+                  "give lily pad to townsperson",
+                  "hit townsperson",
+                  "get moss",
+                  "hug townsperson",
+                  "drop lily pad"
+                ]
+              },
+              {
+                "raw_turn_index": 11,
+                "actor": "friend",
+                "action": null,
+                "room_objects": [
+                  "a Lagoon"
+                ],
+                "carrying": [
+                  "a moss",
+                  "a lily pad"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the The Lagoon.\nThe Lagoon is a dark and mysterious place during the night hours.  A lot of moss and lily pads surround the shore.  The water is very murky.\nThere's a Lagoon here.\nA townsperson is here. You are carrying a lily pad and a moss. ",
+                "available_actions_reread_only": [
+                  "give lily pad to townsperson",
+                  "hit townsperson",
+                  "drop moss",
+                  "give moss to townsperson",
+                  "hug townsperson",
+                  "drop lily pad"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 49,
+            "raw_turn_index": 7,
+            "actor": "rival",
+            "frozen_view_line": 67,
+            "diagnostic": {
+              "included": true,
+              "family": "wear",
+              "target_surface": "shackle",
+              "current_state": {
+                "class": "before_consistent",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 1,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 5,
+                "previous_snapshot_action": "steal shackle from rat",
+                "previous_snapshot_state": "no_exact_state_pattern",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 6,
+                    "actor": "rat",
+                    "action": "hit rival"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_raw_turn": 9,
+                "next_snapshot_action": null,
+                "next_snapshot_state": "after_consistent",
+                "next_intervening_commands": [],
+                "next_status": "current_pre_to_next_post_consistent"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 5,
+                "actor": "rival",
+                "action": "steal shackle from rat",
+                "room_objects": [
+                  "an a knife"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Torture Chamber.\nDamp and dingy, the torture chamber contains almost nothing other than some shackles on the wall and a knife. There are no windows. The walls are made of solid concrete and the floor made of wood. Large dark stains are on the floor.\nThere's an a knife here.\nA rat is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "steal shackle from rat",
+                  "hit rat",
+                  "get a knife",
+                  "hug rat"
+                ]
+              },
+              {
+                "raw_turn_index": 7,
+                "actor": "rival",
+                "action": "wear shackle",
+                "room_objects": [
+                  "an a knife"
+                ],
+                "carrying": [
+                  "a shackle"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Torture Chamber.\nDamp and dingy, the torture chamber contains almost nothing other than some shackles on the wall and a knife. There are no windows. The walls are made of solid concrete and the floor made of wood. Large dark stains are on the floor.\nThere's an a knife here.\nA rat is here. You are carrying a shackle. ",
+                "available_actions_reread_only": [
+                  "drop shackle",
+                  "hug rat",
+                  "give shackle to rat",
+                  "hit rat",
+                  "wear shackle",
+                  "get a knife"
+                ]
+              },
+              {
+                "raw_turn_index": 9,
+                "actor": "rival",
+                "action": null,
+                "room_objects": [
+                  "an a knife"
+                ],
+                "carrying": [],
+                "wearing": [
+                  "a shackle"
+                ],
+                "wielding": [],
+                "context": "You are in the Torture Chamber.\nDamp and dingy, the torture chamber contains almost nothing other than some shackles on the wall and a knife. There are no windows. The walls are made of solid concrete and the floor made of wood. Large dark stains are on the floor.\nThere's an a knife here.\nA rat is here. You are carrying nothing,\nand wearing a shackle. ",
+                "available_actions_reread_only": [
+                  "remove shackle",
+                  "hit rat",
+                  "get a knife",
+                  "hug rat"
+                ]
+              }
+            ]
+          }
+        ],
+        "no_exact_state_pattern": [
+          {
+            "episode_index": 220,
+            "raw_turn_index": 10,
+            "actor": "a scullery boy",
+            "frozen_view_line": 249,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "gold",
+              "current_state": {
+                "class": "no_exact_state_pattern",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 8,
+                "previous_snapshot_action": "give gold to castle guards",
+                "previous_snapshot_state": "after_consistent",
+                "previous_intervening_commands": [
+                  {
+                    "raw_turn_index": 9,
+                    "actor": "castle guards",
+                    "action": "put gold in wall"
+                  }
+                ],
+                "previous_status": "excluded_intervening_physical_commands",
+                "next_raw_turn": 12,
+                "next_snapshot_action": "hit castle guards",
+                "next_snapshot_state": "no_exact_state_pattern",
+                "next_intervening_commands": [
+                  {
+                    "raw_turn_index": 11,
+                    "actor": "castle guards",
+                    "action": "hit a scullery boy"
+                  }
+                ],
+                "next_status": "excluded_intervening_physical_commands"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 8,
+                "actor": "a scullery boy",
+                "action": "give gold to castle guards",
+                "room_objects": [
+                  "a wall",
+                  "an observation deck",
+                  "a stair",
+                  "a Wall",
+                  "a Stair",
+                  "a beautiful land",
+                  "a beautiful farmland",
+                  "a castle",
+                  "a countryside",
+                  "a vessel"
+                ],
+                "carrying": [
+                  "a gold"
+                ],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Inside Tower.\nThe walls and are made of marble and trimmed in gold.  So too are the winding stairs that lead up to the observation deck.  Ivy lines the outside of the walls and sprawls all the way up the side to just near the top of the tower.  The tower itself is intimidating for those who dare to approach.  The tower stands tall so as to see out way across the beautiful land it watches over.\nThere's a vessel, a stair, a castle, an observation deck, a wall, a beautiful farmland, a beautiful land, a Wall, a Stair, and a countryside here.\nA castle guards is here. You are carrying a gold. ",
+                "available_actions_reread_only": [
+                  "put gold in stair",
+                  "put gold in Stair",
+                  "hug castle guards",
+                  "hug castle",
+                  "put gold in observation deck",
+                  "give gold to castle",
+                  "hit castle",
+                  "put gold in Wall",
+                  "drop gold",
+                  "give gold to castle guards",
+                  "put gold in beautiful farmland",
+                  "put gold in wall",
+                  "get vessel",
+                  "hit castle guards"
+                ]
+              },
+              {
+                "raw_turn_index": 10,
+                "actor": "a scullery boy",
+                "action": "get gold",
+                "room_objects": [
+                  "a wall",
+                  "an observation deck",
+                  "a stair",
+                  "a Wall",
+                  "a Stair",
+                  "a beautiful land",
+                  "a beautiful farmland",
+                  "a castle",
+                  "a countryside",
+                  "a vessel"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Inside Tower.\nThe walls and are made of marble and trimmed in gold.  So too are the winding stairs that lead up to the observation deck.  Ivy lines the outside of the walls and sprawls all the way up the side to just near the top of the tower.  The tower itself is intimidating for those who dare to approach.  The tower stands tall so as to see out way across the beautiful land it watches over.\nThere's a vessel, a stair, a castle, an observation deck, a wall, a beautiful farmland, a beautiful land, a Wall, a Stair, and a countryside here.\nA castle guards is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug castle",
+                  "hug castle guards",
+                  "hit castle",
+                  "get gold",
+                  "get vessel",
+                  "get gold from wall",
+                  "hit castle guards"
+                ]
+              },
+              {
+                "raw_turn_index": 12,
+                "actor": "a scullery boy",
+                "action": "hit castle guards",
+                "room_objects": [
+                  "a wall",
+                  "an observation deck",
+                  "a stair",
+                  "a Wall",
+                  "a Stair",
+                  "a beautiful land",
+                  "a beautiful farmland",
+                  "a castle",
+                  "a countryside",
+                  "a vessel"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Inside Tower.\nThe walls and are made of marble and trimmed in gold.  So too are the winding stairs that lead up to the observation deck.  Ivy lines the outside of the walls and sprawls all the way up the side to just near the top of the tower.  The tower itself is intimidating for those who dare to approach.  The tower stands tall so as to see out way across the beautiful land it watches over.\nThere's a vessel, a stair, a castle, an observation deck, a wall, a beautiful farmland, a beautiful land, a Wall, a Stair, and a countryside here.\nA castle guards is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "hug castle",
+                  "hug castle guards",
+                  "hit castle",
+                  "get gold",
+                  "get vessel",
+                  "get gold from wall",
+                  "hit castle guards"
+                ]
+              }
+            ]
+          },
+          {
+            "episode_index": 1313,
+            "raw_turn_index": 12,
+            "actor": "horse",
+            "frozen_view_line": 1541,
+            "diagnostic": {
+              "included": true,
+              "family": "get",
+              "target_surface": "hay",
+              "current_state": {
+                "class": "no_exact_state_pattern",
+                "counts": {
+                  "room_objects": 0,
+                  "carrying": 0,
+                  "wearing": 0,
+                  "wielding": 0
+                }
+              },
+              "neighbors": {
+                "previous_raw_turn": 10,
+                "previous_snapshot_action": null,
+                "previous_snapshot_state": "no_exact_state_pattern",
+                "previous_intervening_commands": [],
+                "previous_status": "anchor_not_before_consistent",
+                "next_status": "no_same_actor_snapshot"
+              }
+            },
+            "snapshots": [
+              {
+                "raw_turn_index": 10,
+                "actor": "horse",
+                "action": null,
+                "room_objects": [
+                  "a fresh red paint",
+                  "a loft",
+                  "a barn",
+                  "a ladder",
+                  "a loft",
+                  "a ladder",
+                  "a pitchfork"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Barn.\nThe barn is old and rustic on the inside, with fresh red paint on the outside. Inside there is a ladder leading up to a loft. There is hay everywhere.\nThere's two lofts, a fresh red paint, a pitchfork, two ladders, and a barn here.\nA cat is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get hay",
+                  "get hay from loft",
+                  "hit cat",
+                  "hug cat",
+                  "get hay from barn",
+                  "get fresh red paint",
+                  "get fresh red paint from barn",
+                  "get pitchfork",
+                  "get pitchfork from barn"
+                ]
+              },
+              {
+                "raw_turn_index": 12,
+                "actor": "horse",
+                "action": "get hay",
+                "room_objects": [
+                  "a fresh red paint",
+                  "a loft",
+                  "a barn",
+                  "a ladder",
+                  "a loft",
+                  "a ladder",
+                  "a pitchfork"
+                ],
+                "carrying": [],
+                "wearing": [],
+                "wielding": [],
+                "context": "You are in the Barn.\nThe barn is old and rustic on the inside, with fresh red paint on the outside. Inside there is a ladder leading up to a loft. There is hay everywhere.\nThere's two lofts, a fresh red paint, a pitchfork, two ladders, and a barn here.\nA cat is here. You are carrying nothing. ",
+                "available_actions_reread_only": [
+                  "get hay",
+                  "get hay from loft",
+                  "hit cat",
+                  "hug cat",
+                  "get hay from barn",
+                  "get fresh red paint",
+                  "get fresh red paint from barn",
+                  "get pitchfork",
+                  "get pitchfork from barn"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "raw_structure_counts": {
+    "raw_turns": 130772,
+    "nonempty_wearing_snapshots": 61189,
+    "nonempty_wielding_snapshots": 0,
+    "context_literal_wearing_mentions": 61272,
+    "context_literal_wielding_mentions": 0,
+    "remove_actions": 2001,
+    "remove_actions_with_all_possession_arrays_empty": 79,
+    "context_interpretation": "Literal substring counts only; they do not validate or refute dedicated per-turn arrays."
+  },
+  "audit_tool_sha256": "2170f78691654a295575161b824c76746ad19ace5ff5c3584a4d34fda7a5df2f",
+  "test_file_sha256": "23a9aa6c99a4502b6b436d5beeabae600dc35c1294ec3d3f6e8b58af3d6f0d9d"
+}

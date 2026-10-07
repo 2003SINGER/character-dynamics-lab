@@ -1,0 +1,52 @@
+[
+  {
+    "op": "add",
+    "path": "/utility_baseline/roles/Visitor/-",
+    "value": "visitor2"
+  },
+  {
+    "op": "replace",
+    "path": "/praxish_scenario/turns",
+    "value": 12
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/characters/-",
+    "value": {
+      "name": "visitor2",
+      "goals": []
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/conditions/run/events/-",
+    "value": {
+      "before_turn": 1,
+      "id": "second_visible_request",
+      "outcome": "insert practice.request.worker.visitor2"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/trace_fact_patterns/-",
+    "value": {
+      "id": "request_status_2",
+      "pattern": "practice.request.worker.visitor2.status!Value"
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/shared_case_schedule/case_id",
+    "value": "multiple_requests_one_worker"
+  },
+  {
+    "op": "replace",
+    "path": "/shared_case_schedule/turns",
+    "value": 12
+  },
+  {
+    "op": "add",
+    "path": "/shared_case_schedule/actor_order/-",
+    "value": "visitor2"
+  }
+]

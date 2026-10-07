@@ -1,0 +1,92 @@
+{
+  "schema_version": "character_dynamics_self_evaluation_v0",
+  "batch_dir": "outputs\\self_evaluation_v0\\run_1788952312120_0",
+  "metadata": {
+    "run_directory": "D:\\Tools\\cd-selfeval-v0\\run_1788952312120_0",
+    "config_version": "task-commitment-v0",
+    "git_revision": "unknown",
+    "personality_generation": "deterministic_uniform_[0,1]",
+    "personality_generation_seed": "20260904",
+    "personality_count": "32",
+    "world_scenario_seed_count": "8",
+    "steps_per_run": "256",
+    "total_decision_points": "65536",
+    "task_model": "single_world_task_with_continuous_effort",
+    "task_effort_target": "seeded_[7.2,9.2]_or_8.0_for_legacy_seed",
+    "task_effort_settlement": "base_effort_x_duration_x_interruption_x_seeded_variation_[0.90,1.10]",
+    "world_events": "per-day deterministic schedule generated from each scenario seed",
+    "note": "This is a synthetic rule-based stress run, not an LLM result or a psychological validation."
+  },
+  "counts": {
+    "trajectory_rows": 65536,
+    "runs": 256,
+    "personalities": 32,
+    "scenario_seeds": 8,
+    "event_rows": 8441,
+    "completed_runs": 256
+  },
+  "checks": {
+    "probability_sum_max_abs_error": 2.9999999999752447e-06,
+    "all_accepted_values_binary": true
+  },
+  "scores": {
+    "WorldValidity": {
+      "score": 1.0,
+      "basis": "accepted is binary and all trajectory rows parse"
+    },
+    "InformationIntegrity": {
+      "score": null,
+      "status": "not_scored",
+      "reason": "current batch has no hidden-information intervention labels"
+    },
+    "CausalResponsiveness": {
+      "score": 0.9301081659336741,
+      "basis": "diagnostic action-change rate after emitted world events; not an intervention causal estimate"
+    },
+    "Persistence": {
+      "score": 0.9795011957635804,
+      "basis": "active commitment carried to next decision with same task id or suspension"
+    },
+    "Recovery": {
+      "score": 0.0,
+      "basis": "interrupted task returns to active/suspended within five decisions"
+    },
+    "Commitment": {
+      "score": 0.9795011957635804,
+      "basis": "same as persistence continuity diagnostic"
+    },
+    "Adaptivity": {
+      "score": 0.9301081659336741,
+      "basis": "event-following action change diagnostic"
+    },
+    "CharacterDifferentiation": {
+      "score": 0.011092276831293171,
+      "basis": "pairwise Jensen-Shannon divergence of chosen-action distributions across generated personalities"
+    },
+    "BehavioralDiversity": {
+      "score": 0.0566253662109375,
+      "basis": "unique chosen actions / decision points per run"
+    },
+    "Believability": {
+      "score": null,
+      "status": "not_scored",
+      "reason": "no blind external judge or human pairwise panel in v0"
+    },
+    "Efficiency": {
+      "score": 0.0,
+      "basis": "synthetic batch uses zero LLM calls; runtime/token telemetry not yet instrumented",
+      "decision_points": 65536,
+      "model_calls": 0
+    }
+  },
+  "interpretation": {
+    "use": "internal development scorecard only",
+    "not_claimed": [
+      "psychological validity",
+      "external naturalness",
+      "causal effect from event rows",
+      "Theory-S validation"
+    ],
+    "next": "freeze this evaluator, add explicit paired intervention scenarios, then optimize only on a separate development split"
+  }
+}

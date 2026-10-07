@@ -1,0 +1,3882 @@
+[
+  {
+    "condition": "activity",
+    "lambda": 0.0001,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.2954128297197196,
+    "train_regularized_objective": 1.3006711454867026,
+    "validation_nll": 1.9066006290430795,
+    "weights_theta": [
+      -0.06667321771373085,
+      0.1147263251821589,
+      -0.10666349896374028,
+      0.0,
+      0.0,
+      0.06667321771377369,
+      -0.10032646244198802,
+      3.7955143525889055,
+      0.0,
+      1.285502212950074,
+      -5.334178069028446,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.15350979928289687,
+      -0.2783704692007841,
+      -0.0687506295846715,
+      0.0,
+      0.0,
+      -0.1535097992828694,
+      0.2870695015496103,
+      6.524206558629323,
+      0.0,
+      0.6973297751329361,
+      4.165047783981397,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 59,
+      "function_evaluations": 71,
+      "gradient_evaluations": 71,
+      "final_objective": 1.3006711454867026,
+      "final_data_nll": 1.2954128297197196,
+      "final_l2_penalty": 0.0052583157669829905,
+      "final_gradient_norm": 7.203052691658527e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.388506478808297,
+        "gradient_norm": 0.21161036349545032
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3738091596427364,
+        "gradient_norm": 0.1348922599318513
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3505297056920382,
+        "gradient_norm": 0.07204011881011796
+      },
+      {
+        "iteration": 4,
+        "objective": 1.336521587454685,
+        "gradient_norm": 0.05077680060623863
+      },
+      {
+        "iteration": 5,
+        "objective": 1.331124688927466,
+        "gradient_norm": 0.10466528989426267
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3261800380604474,
+        "gradient_norm": 0.03079680605238425
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3255083894994342,
+        "gradient_norm": 0.018517487392766603
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3244404863401467,
+        "gradient_norm": 0.022638906678694087
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3236098620837444,
+        "gradient_norm": 0.02596699308674798
+      },
+      {
+        "iteration": 10,
+        "objective": 1.321523385700974,
+        "gradient_norm": 0.03151732550631036
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3175467137963368,
+        "gradient_norm": 0.014812322898713887
+      },
+      {
+        "iteration": 12,
+        "objective": 1.315053111035029,
+        "gradient_norm": 0.05338277355201136
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3132060706232642,
+        "gradient_norm": 0.03932985759189563
+      },
+      {
+        "iteration": 14,
+        "objective": 1.311330690202312,
+        "gradient_norm": 0.0446477788966405
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3052604198084632,
+        "gradient_norm": 0.03508334516235934
+      },
+      {
+        "iteration": 16,
+        "objective": 1.303575237623261,
+        "gradient_norm": 0.023780130751576724
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3023339046970894,
+        "gradient_norm": 0.009061575800087129
+      },
+      {
+        "iteration": 18,
+        "objective": 1.3019180376208392,
+        "gradient_norm": 0.004994482465750601
+      },
+      {
+        "iteration": 19,
+        "objective": 1.3018809344243425,
+        "gradient_norm": 0.0029793894651222045
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3018698882011255,
+        "gradient_norm": 0.0014358378940797674
+      },
+      {
+        "iteration": 21,
+        "objective": 1.3018654355736774,
+        "gradient_norm": 0.0007193945295947384
+      },
+      {
+        "iteration": 22,
+        "objective": 1.301862827334622,
+        "gradient_norm": 0.0009035559153555083
+      },
+      {
+        "iteration": 23,
+        "objective": 1.301850393497464,
+        "gradient_norm": 0.0016498196398104911
+      },
+      {
+        "iteration": 24,
+        "objective": 1.3018429916585976,
+        "gradient_norm": 0.006951745327347217
+      },
+      {
+        "iteration": 25,
+        "objective": 1.3018154895801397,
+        "gradient_norm": 0.006290853175447038
+      },
+      {
+        "iteration": 26,
+        "objective": 1.3016949138533909,
+        "gradient_norm": 0.006941138054726791
+      },
+      {
+        "iteration": 27,
+        "objective": 1.3014821319862548,
+        "gradient_norm": 0.010146205903536641
+      },
+      {
+        "iteration": 28,
+        "objective": 1.3011163617369184,
+        "gradient_norm": 0.012858445266147482
+      },
+      {
+        "iteration": 29,
+        "objective": 1.300989634671101,
+        "gradient_norm": 0.011467926357379216
+      },
+      {
+        "iteration": 30,
+        "objective": 1.3008727247186,
+        "gradient_norm": 0.014534160167120152
+      },
+      {
+        "iteration": 31,
+        "objective": 1.300764454594185,
+        "gradient_norm": 0.0050380897374304005
+      },
+      {
+        "iteration": 32,
+        "objective": 1.3007471574109013,
+        "gradient_norm": 0.004393694095444216
+      },
+      {
+        "iteration": 33,
+        "objective": 1.3007089188801007,
+        "gradient_norm": 0.0024303729950478138
+      },
+      {
+        "iteration": 34,
+        "objective": 1.300698858392425,
+        "gradient_norm": 0.0015059036109781375
+      },
+      {
+        "iteration": 35,
+        "objective": 1.3006977988088952,
+        "gradient_norm": 0.0020637637877233502
+      },
+      {
+        "iteration": 36,
+        "objective": 1.300695334862198,
+        "gradient_norm": 0.0013422686052999178
+      },
+      {
+        "iteration": 37,
+        "objective": 1.3006925504143756,
+        "gradient_norm": 0.0006185392668955952
+      },
+      {
+        "iteration": 38,
+        "objective": 1.300691986421828,
+        "gradient_norm": 0.0005688937846904554
+      },
+      {
+        "iteration": 39,
+        "objective": 1.300690483668638,
+        "gradient_norm": 0.0005223114324314388
+      },
+      {
+        "iteration": 40,
+        "objective": 1.3006891935044933,
+        "gradient_norm": 0.0004090931570023431
+      },
+      {
+        "iteration": 41,
+        "objective": 1.3006885381477773,
+        "gradient_norm": 0.0002571679249939766
+      },
+      {
+        "iteration": 42,
+        "objective": 1.300688457470494,
+        "gradient_norm": 0.00016866569272528463
+      },
+      {
+        "iteration": 43,
+        "objective": 1.3006883869774355,
+        "gradient_norm": 0.00015354760136291457
+      },
+      {
+        "iteration": 44,
+        "objective": 1.3006881002901929,
+        "gradient_norm": 0.00023853810749487417
+      },
+      {
+        "iteration": 45,
+        "objective": 1.3006875583079824,
+        "gradient_norm": 0.0004549237739581063
+      },
+      {
+        "iteration": 46,
+        "objective": 1.3006864066497896,
+        "gradient_norm": 0.00047662570309517713
+      },
+      {
+        "iteration": 47,
+        "objective": 1.3006861360484918,
+        "gradient_norm": 0.0015013685853813039
+      },
+      {
+        "iteration": 48,
+        "objective": 1.3006839904634508,
+        "gradient_norm": 0.001208629236536249
+      },
+      {
+        "iteration": 49,
+        "objective": 1.3006796038070036,
+        "gradient_norm": 0.0008033269546385894
+      },
+      {
+        "iteration": 50,
+        "objective": 1.300674481683926,
+        "gradient_norm": 0.000854041394995116
+      },
+      {
+        "iteration": 51,
+        "objective": 1.3006732256546545,
+        "gradient_norm": 0.0007190806281070341
+      },
+      {
+        "iteration": 52,
+        "objective": 1.3006716805416205,
+        "gradient_norm": 0.00023767579995553038
+      },
+      {
+        "iteration": 53,
+        "objective": 1.3006714178125751,
+        "gradient_norm": 6.160919338923789e-05
+      },
+      {
+        "iteration": 54,
+        "objective": 1.3006713642492436,
+        "gradient_norm": 3.0475732120208603e-05
+      },
+      {
+        "iteration": 55,
+        "objective": 1.3006712862006933,
+        "gradient_norm": 0.0001335871979707944
+      },
+      {
+        "iteration": 56,
+        "objective": 1.3006712335616242,
+        "gradient_norm": 0.00016097138170699282
+      },
+      {
+        "iteration": 57,
+        "objective": 1.3006711735288268,
+        "gradient_norm": 8.596810829655408e-05
+      },
+      {
+        "iteration": 58,
+        "objective": 1.3006711466788194,
+        "gradient_norm": 3.368904789697582e-05
+      },
+      {
+        "iteration": 59,
+        "objective": 1.3006711454867026,
+        "gradient_norm": 7.203052691658527e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "activity",
+    "lambda": 0.001,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3081654200295685,
+    "train_regularized_objective": 1.314816437175345,
+    "validation_nll": 1.7722018267486976,
+    "weights_theta": [
+      -0.06690935785180063,
+      0.105722059061405,
+      -0.04275422844086495,
+      0.0,
+      0.0,
+      0.0669093578518003,
+      -0.099851359918222,
+      1.0907470816343647,
+      0.0,
+      0.9430159657699994,
+      -1.8342308456019485,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.15428172185605882,
+      -0.2668023860733753,
+      -0.027156371995450256,
+      0.0,
+      0.0,
+      -0.15428172185605432,
+      0.26997917233365365,
+      2.0406567191259537,
+      0.0,
+      0.5118591936640711,
+      1.7910887690090207,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 51,
+      "function_evaluations": 57,
+      "gradient_evaluations": 57,
+      "final_objective": 1.314816437175345,
+      "final_data_nll": 1.3081654200295685,
+      "final_l2_penalty": 0.006651017145776539,
+      "final_gradient_norm": 5.8792356974946634e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3885191051666688,
+        "gradient_norm": 0.21146267393061996
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3738493910806253,
+        "gradient_norm": 0.13466797357984692
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3507386168560498,
+        "gradient_norm": 0.07170893781409016
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3369923695575452,
+        "gradient_norm": 0.050185133098423367
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3318180406972597,
+        "gradient_norm": 0.10239558227672857
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3271213151972912,
+        "gradient_norm": 0.02958262108333005
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3264953795301104,
+        "gradient_norm": 0.017558927164904536
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3255486150870914,
+        "gradient_norm": 0.0210051205457491
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3247797420168999,
+        "gradient_norm": 0.024575022073205506
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3230089046751154,
+        "gradient_norm": 0.029015866394833993
+      },
+      {
+        "iteration": 11,
+        "objective": 1.319893722148218,
+        "gradient_norm": 0.012308245397262071
+      },
+      {
+        "iteration": 12,
+        "objective": 1.318449226693107,
+        "gradient_norm": 0.04802403242335493
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3174876880721824,
+        "gradient_norm": 0.02848734351775988
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3169116509478491,
+        "gradient_norm": 0.022295798356122984
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3159911718741142,
+        "gradient_norm": 0.007038110167264925
+      },
+      {
+        "iteration": 16,
+        "objective": 1.31590605656098,
+        "gradient_norm": 0.0030882524270052078
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3158662182282654,
+        "gradient_norm": 0.0023525918183542154
+      },
+      {
+        "iteration": 18,
+        "objective": 1.3158282968452695,
+        "gradient_norm": 0.008813717848830458
+      },
+      {
+        "iteration": 19,
+        "objective": 1.3157328173761635,
+        "gradient_norm": 0.004558539958446088
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3155746426652406,
+        "gradient_norm": 0.004420763477103649
+      },
+      {
+        "iteration": 21,
+        "objective": 1.315203908251743,
+        "gradient_norm": 0.01102207054484555
+      },
+      {
+        "iteration": 22,
+        "objective": 1.31504530167648,
+        "gradient_norm": 0.008833816818597268
+      },
+      {
+        "iteration": 23,
+        "objective": 1.315021568806858,
+        "gradient_norm": 0.0074243016621120305
+      },
+      {
+        "iteration": 24,
+        "objective": 1.3149968664296814,
+        "gradient_norm": 0.013147634042683815
+      },
+      {
+        "iteration": 25,
+        "objective": 1.31495317397333,
+        "gradient_norm": 0.001577286754483932
+      },
+      {
+        "iteration": 26,
+        "objective": 1.3149503592538538,
+        "gradient_norm": 0.0010931304109963761
+      },
+      {
+        "iteration": 27,
+        "objective": 1.3149493167442203,
+        "gradient_norm": 0.0016556742494292474
+      },
+      {
+        "iteration": 28,
+        "objective": 1.3149470660310791,
+        "gradient_norm": 0.0009305075107573729
+      },
+      {
+        "iteration": 29,
+        "objective": 1.314943602418802,
+        "gradient_norm": 0.0006990959077509968
+      },
+      {
+        "iteration": 30,
+        "objective": 1.3149336110450758,
+        "gradient_norm": 0.0021177588789304436
+      },
+      {
+        "iteration": 31,
+        "objective": 1.3149171246146816,
+        "gradient_norm": 0.0037770504311003053
+      },
+      {
+        "iteration": 32,
+        "objective": 1.3148880839574488,
+        "gradient_norm": 0.00514077256008056
+      },
+      {
+        "iteration": 33,
+        "objective": 1.3148534866228005,
+        "gradient_norm": 0.005845141686658887
+      },
+      {
+        "iteration": 34,
+        "objective": 1.3148493357043003,
+        "gradient_norm": 0.005539288411597572
+      },
+      {
+        "iteration": 35,
+        "objective": 1.3148267703337555,
+        "gradient_norm": 0.0019264477699256417
+      },
+      {
+        "iteration": 36,
+        "objective": 1.3148217233715223,
+        "gradient_norm": 0.002542369354470203
+      },
+      {
+        "iteration": 37,
+        "objective": 1.314819867632982,
+        "gradient_norm": 0.0009326469191252865
+      },
+      {
+        "iteration": 38,
+        "objective": 1.3148194490339902,
+        "gradient_norm": 0.0007948819383105872
+      },
+      {
+        "iteration": 39,
+        "objective": 1.3148181585651648,
+        "gradient_norm": 0.0002177069251372493
+      },
+      {
+        "iteration": 40,
+        "objective": 1.3148172281221213,
+        "gradient_norm": 0.00027310318126922334
+      },
+      {
+        "iteration": 41,
+        "objective": 1.3148166885314345,
+        "gradient_norm": 0.00032147172378543066
+      },
+      {
+        "iteration": 42,
+        "objective": 1.3148166377524608,
+        "gradient_norm": 0.0002111420878677717
+      },
+      {
+        "iteration": 43,
+        "objective": 1.3148165448590101,
+        "gradient_norm": 3.804484959730746e-05
+      },
+      {
+        "iteration": 44,
+        "objective": 1.3148165384354589,
+        "gradient_norm": 3.465780911929883e-05
+      },
+      {
+        "iteration": 45,
+        "objective": 1.314816519149361,
+        "gradient_norm": 7.874049556711951e-05
+      },
+      {
+        "iteration": 46,
+        "objective": 1.3148164968109735,
+        "gradient_norm": 0.0001005552665112959
+      },
+      {
+        "iteration": 47,
+        "objective": 1.314816483697019,
+        "gradient_norm": 0.000143913320565406
+      },
+      {
+        "iteration": 48,
+        "objective": 1.3148164578207266,
+        "gradient_norm": 0.00011447061121439475
+      },
+      {
+        "iteration": 49,
+        "objective": 1.314816447052971,
+        "gradient_norm": 0.00012247245870220755
+      },
+      {
+        "iteration": 50,
+        "objective": 1.3148164397619504,
+        "gradient_norm": 4.1730075653440464e-05
+      },
+      {
+        "iteration": 51,
+        "objective": 1.314816437175345,
+        "gradient_norm": 5.8792356974946634e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "activity",
+    "lambda": 0.01,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3225874653741212,
+    "train_regularized_objective": 1.3316820295750276,
+    "validation_nll": 1.6819101750003855,
+    "weights_theta": [
+      -0.06674713389549443,
+      0.08982433106869617,
+      -0.03965302729145796,
+      0.0,
+      0.0,
+      0.06674713389549454,
+      -0.08439307153378335,
+      -0.018294372553796553,
+      0.0,
+      0.6034567796484412,
+      -0.3363722520213803,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.15308991815817105,
+      -0.2254713385416552,
+      -0.02506075644973412,
+      0.0,
+      0.0,
+      -0.153089918158171,
+      0.22843727049532966,
+      0.7564532572150532,
+      0.0,
+      0.3412692043676188,
+      0.6902102991932922,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 36,
+      "function_evaluations": 41,
+      "gradient_evaluations": 41,
+      "final_objective": 1.3316820295750276,
+      "final_data_nll": 1.3225874653741212,
+      "final_l2_penalty": 0.009094564200906374,
+      "final_gradient_norm": 1.927255196138489e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3886444746402307,
+        "gradient_norm": 0.20999735019396978
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3742472483154888,
+        "gradient_norm": 0.13245067482375195
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3527352601422213,
+        "gradient_norm": 0.06854850728705301
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3412714081252717,
+        "gradient_norm": 0.04497178508199967
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3375643785231244,
+        "gradient_norm": 0.08271362602107639
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3346011061391878,
+        "gradient_norm": 0.022449184014473537
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3341445103483718,
+        "gradient_norm": 0.012779803005400037
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3336132343631124,
+        "gradient_norm": 0.013266417831895883
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3330052686089617,
+        "gradient_norm": 0.016622824249371976
+      },
+      {
+        "iteration": 10,
+        "objective": 1.332263496223549,
+        "gradient_norm": 0.017867356378282878
+      },
+      {
+        "iteration": 11,
+        "objective": 1.331963580892424,
+        "gradient_norm": 0.01349332780310718
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3317859392288953,
+        "gradient_norm": 0.0071054476813048745
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3317613166561304,
+        "gradient_norm": 0.00966497662113714
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3317333017990254,
+        "gradient_norm": 0.0034126179146534465
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3317161379327334,
+        "gradient_norm": 0.002035514767805735
+      },
+      {
+        "iteration": 16,
+        "objective": 1.331706979643911,
+        "gradient_norm": 0.0015343244256212224
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3317004674010557,
+        "gradient_norm": 0.0009389963319763833
+      },
+      {
+        "iteration": 18,
+        "objective": 1.331695589787998,
+        "gradient_norm": 0.0019770190507669527
+      },
+      {
+        "iteration": 19,
+        "objective": 1.3316925589103057,
+        "gradient_norm": 0.0012349258525521391
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3316905377143544,
+        "gradient_norm": 0.0008196629701479701
+      },
+      {
+        "iteration": 21,
+        "objective": 1.3316884350607274,
+        "gradient_norm": 0.0009630720938280449
+      },
+      {
+        "iteration": 22,
+        "objective": 1.33168652120045,
+        "gradient_norm": 0.0013019452037205804
+      },
+      {
+        "iteration": 23,
+        "objective": 1.331684202659708,
+        "gradient_norm": 0.0012601328288711243
+      },
+      {
+        "iteration": 24,
+        "objective": 1.3316835507867384,
+        "gradient_norm": 0.000647056180744368
+      },
+      {
+        "iteration": 25,
+        "objective": 1.3316827004454976,
+        "gradient_norm": 0.0007115709306822118
+      },
+      {
+        "iteration": 26,
+        "objective": 1.331682516072959,
+        "gradient_norm": 0.0002435092522628991
+      },
+      {
+        "iteration": 27,
+        "objective": 1.3316824370655191,
+        "gradient_norm": 0.00020349853607941999
+      },
+      {
+        "iteration": 28,
+        "objective": 1.3316823269431093,
+        "gradient_norm": 0.00011074996457808565
+      },
+      {
+        "iteration": 29,
+        "objective": 1.3316822501793557,
+        "gradient_norm": 0.00013578217524698149
+      },
+      {
+        "iteration": 30,
+        "objective": 1.3316821337572708,
+        "gradient_norm": 0.00018207652679262665
+      },
+      {
+        "iteration": 31,
+        "objective": 1.331682088682784,
+        "gradient_norm": 0.0002316862190113765
+      },
+      {
+        "iteration": 32,
+        "objective": 1.3316820480838805,
+        "gradient_norm": 5.531269217636383e-05
+      },
+      {
+        "iteration": 33,
+        "objective": 1.3316820444490136,
+        "gradient_norm": 3.9931612764829764e-05
+      },
+      {
+        "iteration": 34,
+        "objective": 1.3316820361828325,
+        "gradient_norm": 3.330198666317725e-05
+      },
+      {
+        "iteration": 35,
+        "objective": 1.3316820302034778,
+        "gradient_norm": 4.073688868538772e-05
+      },
+      {
+        "iteration": 36,
+        "objective": 1.3316820295750276,
+        "gradient_norm": 1.927255196138489e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "activity",
+    "lambda": 0.1,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3455727038546197,
+    "train_regularized_objective": 1.3618501087315562,
+    "validation_nll": 1.565858082511262,
+    "weights_theta": [
+      -0.05339874994531992,
+      0.04512719087320285,
+      -0.029657182358977588,
+      0.0,
+      0.0,
+      0.053398749945319894,
+      -0.04110152026773886,
+      -0.10090468251607074,
+      0.0,
+      0.30267583465290077,
+      -0.0075661381193544534,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.11080976298720518,
+      -0.09532859378181255,
+      -0.01892631015653464,
+      0.0,
+      0.0,
+      -0.11080976298720513,
+      0.09769243344512056,
+      0.24670114199375603,
+      0.0,
+      0.17647198344858847,
+      0.27899329089422836,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 14,
+      "function_evaluations": 16,
+      "gradient_evaluations": 16,
+      "final_objective": 1.3618501087315562,
+      "final_data_nll": 1.3455727038546197,
+      "final_l2_penalty": 0.01627740487693652,
+      "final_gradient_norm": 3.767337371948421e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.389814898895593,
+        "gradient_norm": 0.1964139419779154
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3778202451758088,
+        "gradient_norm": 0.11261641818229007
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3664102623399779,
+        "gradient_norm": 0.047411105524849964
+      },
+      {
+        "iteration": 4,
+        "objective": 1.363342259077254,
+        "gradient_norm": 0.024867170794120194
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3622870448393187,
+        "gradient_norm": 0.021976947489410634
+      },
+      {
+        "iteration": 6,
+        "objective": 1.362044309661165,
+        "gradient_norm": 0.019185374653047663
+      },
+      {
+        "iteration": 7,
+        "objective": 1.361873866138642,
+        "gradient_norm": 0.003832711483665441
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3618607570907428,
+        "gradient_norm": 0.0018282670907252365
+      },
+      {
+        "iteration": 9,
+        "objective": 1.361854969658178,
+        "gradient_norm": 0.0013412568148780464
+      },
+      {
+        "iteration": 10,
+        "objective": 1.361850342904631,
+        "gradient_norm": 0.0004993029036360822
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3618501519647517,
+        "gradient_norm": 0.00026581193050129436
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3618501406589902,
+        "gradient_norm": 0.00038189643172918805
+      },
+      {
+        "iteration": 13,
+        "objective": 1.361850110087558,
+        "gradient_norm": 5.055937708939094e-05
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3618501087315562,
+        "gradient_norm": 3.767337371948421e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "activity",
+    "lambda": 1.0,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.384064738038471,
+    "train_regularized_objective": 1.3935225658744514,
+    "validation_nll": 1.4980926048940133,
+    "weights_theta": [
+      -0.0218445198702308,
+      0.01928229276716475,
+      -0.014495112379366785,
+      0.0,
+      0.0,
+      0.02184451987023082,
+      -0.017319309990818255,
+      -0.0022828541775517706,
+      0.0,
+      0.08818380341915487,
+      0.019909266271622175,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.022483563969508052,
+      -0.01081792667186912,
+      -0.009328397808577858,
+      0.0,
+      0.0,
+      -0.022483563969508055,
+      0.01204281189545016,
+      0.04395231062076554,
+      0.0,
+      0.05224422798095947,
+      0.05366638018367555,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 7,
+      "function_evaluations": 9,
+      "gradient_evaluations": 9,
+      "final_objective": 1.3935225658744514,
+      "final_data_nll": 1.384064738038471,
+      "final_l2_penalty": 0.009457827835980481,
+      "final_gradient_norm": 1.079576329881097e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.396701834128162,
+        "gradient_norm": 0.11979320456858589
+      },
+      {
+        "iteration": 2,
+        "objective": 1.393853543712678,
+        "gradient_norm": 0.03071272197044122
+      },
+      {
+        "iteration": 3,
+        "objective": 1.393560127992973,
+        "gradient_norm": 0.00975548469285819
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3935241642311624,
+        "gradient_norm": 0.002063184900550813
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3935226015032003,
+        "gradient_norm": 0.0003812318139741883
+      },
+      {
+        "iteration": 6,
+        "objective": 1.393522568536386,
+        "gradient_norm": 0.00011293363742835586
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3935225658744514,
+        "gradient_norm": 1.079576329881097e-05
+      }
+    ],
+    "selected": true
+  },
+  {
+    "condition": "support",
+    "lambda": 0.0001,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.325140336033678,
+    "train_regularized_objective": 1.3287075247915274,
+    "validation_nll": 2.0728974221819496,
+    "weights_theta": [
+      -0.03490575780236886,
+      0.049429496887285554,
+      -0.11467124936464122,
+      0.0,
+      0.0,
+      0.03490575780229291,
+      -0.03407076177243103,
+      -1.3078264041303425,
+      0.0,
+      1.3812782635268053,
+      1.3175787579673022,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.1704602256327169,
+      -0.1219176727063848,
+      -0.0737358453180696,
+      0.0,
+      0.0,
+      -0.17046022563270413,
+      0.1315395220993808,
+      7.126153613695095,
+      0.0,
+      0.6370943310637373,
+      -3.8323047880196253,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 61,
+      "function_evaluations": 73,
+      "gradient_evaluations": 73,
+      "final_objective": 1.3287075247915274,
+      "final_data_nll": 1.325140336033678,
+      "final_l2_penalty": 0.0035671887578494488,
+      "final_gradient_norm": 1.6417243617920754e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3927749744629847,
+        "gradient_norm": 0.15892430111167466
+      },
+      {
+        "iteration": 2,
+        "objective": 1.383280356065264,
+        "gradient_norm": 0.10946080119036701
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3671640530427212,
+        "gradient_norm": 0.045445828399946736
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3587070302752733,
+        "gradient_norm": 0.03452780105472012
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3506427640741545,
+        "gradient_norm": 0.052835846674291344
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3478462154246809,
+        "gradient_norm": 0.016942823975394244
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3475084658529572,
+        "gradient_norm": 0.010002387276690883
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3472221401116276,
+        "gradient_norm": 0.009924888973543185
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3463315871602664,
+        "gradient_norm": 0.01452138655892837
+      },
+      {
+        "iteration": 10,
+        "objective": 1.344749625115764,
+        "gradient_norm": 0.015445474780394526
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3431394519802562,
+        "gradient_norm": 0.03883026757922055
+      },
+      {
+        "iteration": 12,
+        "objective": 1.342166235468107,
+        "gradient_norm": 0.058514750334433666
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3414319436338504,
+        "gradient_norm": 0.011982641363644131
+      },
+      {
+        "iteration": 14,
+        "objective": 1.341298407238361,
+        "gradient_norm": 0.011793516472597335
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3406739702431771,
+        "gradient_norm": 0.012576072654471809
+      },
+      {
+        "iteration": 16,
+        "objective": 1.3388214419816704,
+        "gradient_norm": 0.011569537598503793
+      },
+      {
+        "iteration": 17,
+        "objective": 1.336259599920923,
+        "gradient_norm": 0.02876214435775667
+      },
+      {
+        "iteration": 18,
+        "objective": 1.3351001146546808,
+        "gradient_norm": 0.03927270806883866
+      },
+      {
+        "iteration": 19,
+        "objective": 1.334064055546265,
+        "gradient_norm": 0.01119727832532153
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3335114360952185,
+        "gradient_norm": 0.009948936574789681
+      },
+      {
+        "iteration": 21,
+        "objective": 1.3330981132117707,
+        "gradient_norm": 0.012530713701591594
+      },
+      {
+        "iteration": 22,
+        "objective": 1.3316963338797365,
+        "gradient_norm": 0.01454791101349263
+      },
+      {
+        "iteration": 23,
+        "objective": 1.330820573632186,
+        "gradient_norm": 0.022014056787893498
+      },
+      {
+        "iteration": 24,
+        "objective": 1.329838986298566,
+        "gradient_norm": 0.05233806797110134
+      },
+      {
+        "iteration": 25,
+        "objective": 1.329396733850412,
+        "gradient_norm": 0.020879966000189588
+      },
+      {
+        "iteration": 26,
+        "objective": 1.32918786314242,
+        "gradient_norm": 0.004263409521779291
+      },
+      {
+        "iteration": 27,
+        "objective": 1.3291733205704728,
+        "gradient_norm": 0.002372328096546225
+      },
+      {
+        "iteration": 28,
+        "objective": 1.3291611438754967,
+        "gradient_norm": 0.0014975058673991652
+      },
+      {
+        "iteration": 29,
+        "objective": 1.3291520288087202,
+        "gradient_norm": 0.0012208749381248368
+      },
+      {
+        "iteration": 30,
+        "objective": 1.3291428787973367,
+        "gradient_norm": 0.001299159927097155
+      },
+      {
+        "iteration": 31,
+        "objective": 1.3291417243803776,
+        "gradient_norm": 0.001497637143731077
+      },
+      {
+        "iteration": 32,
+        "objective": 1.3291390426475025,
+        "gradient_norm": 0.0007731903767797606
+      },
+      {
+        "iteration": 33,
+        "objective": 1.329136664067973,
+        "gradient_norm": 0.0009557022406980755
+      },
+      {
+        "iteration": 34,
+        "objective": 1.3291338296037707,
+        "gradient_norm": 0.0012510723735144186
+      },
+      {
+        "iteration": 35,
+        "objective": 1.3291309781511789,
+        "gradient_norm": 0.0011975943352641055
+      },
+      {
+        "iteration": 36,
+        "objective": 1.3291299620276003,
+        "gradient_norm": 0.0007240238203613432
+      },
+      {
+        "iteration": 37,
+        "objective": 1.3291280071390599,
+        "gradient_norm": 0.0008412260394500767
+      },
+      {
+        "iteration": 38,
+        "objective": 1.3291250988793266,
+        "gradient_norm": 0.0011918757930749362
+      },
+      {
+        "iteration": 39,
+        "objective": 1.3291208068191704,
+        "gradient_norm": 0.002048233941136261
+      },
+      {
+        "iteration": 40,
+        "objective": 1.3291150478240648,
+        "gradient_norm": 0.0010684147627063258
+      },
+      {
+        "iteration": 41,
+        "objective": 1.329109766362248,
+        "gradient_norm": 0.0013089630693975444
+      },
+      {
+        "iteration": 42,
+        "objective": 1.3291028517259855,
+        "gradient_norm": 0.0014908404368299847
+      },
+      {
+        "iteration": 43,
+        "objective": 1.329076393376452,
+        "gradient_norm": 0.0036235782053634998
+      },
+      {
+        "iteration": 44,
+        "objective": 1.3290325170976767,
+        "gradient_norm": 0.004307343423328979
+      },
+      {
+        "iteration": 45,
+        "objective": 1.3289581250638296,
+        "gradient_norm": 0.004659892283532574
+      },
+      {
+        "iteration": 46,
+        "objective": 1.3288378388064512,
+        "gradient_norm": 0.004757775234859229
+      },
+      {
+        "iteration": 47,
+        "objective": 1.328802788974402,
+        "gradient_norm": 0.008440975845202781
+      },
+      {
+        "iteration": 48,
+        "objective": 1.328741654730219,
+        "gradient_norm": 0.002546328565579178
+      },
+      {
+        "iteration": 49,
+        "objective": 1.3287307187564048,
+        "gradient_norm": 0.002216596687911387
+      },
+      {
+        "iteration": 50,
+        "objective": 1.3287204855316301,
+        "gradient_norm": 0.002088251124101195
+      },
+      {
+        "iteration": 51,
+        "objective": 1.328712733685735,
+        "gradient_norm": 0.0007112638233811834
+      },
+      {
+        "iteration": 52,
+        "objective": 1.3287090581328318,
+        "gradient_norm": 0.00042703224900623635
+      },
+      {
+        "iteration": 53,
+        "objective": 1.3287077595627823,
+        "gradient_norm": 0.0002536563504754611
+      },
+      {
+        "iteration": 54,
+        "objective": 1.3287076628045655,
+        "gradient_norm": 0.00026197119980143766
+      },
+      {
+        "iteration": 55,
+        "objective": 1.3287075515320694,
+        "gradient_norm": 4.8884141235789904e-05
+      },
+      {
+        "iteration": 56,
+        "objective": 1.328707544889361,
+        "gradient_norm": 3.5573028754484e-05
+      },
+      {
+        "iteration": 57,
+        "objective": 1.3287075387233107,
+        "gradient_norm": 4.6567787668498334e-05
+      },
+      {
+        "iteration": 58,
+        "objective": 1.328707535676366,
+        "gradient_norm": 8.34032155583017e-05
+      },
+      {
+        "iteration": 59,
+        "objective": 1.3287075296108566,
+        "gradient_norm": 3.8286546835300036e-05
+      },
+      {
+        "iteration": 60,
+        "objective": 1.3287075259184693,
+        "gradient_norm": 1.647305654998813e-05
+      },
+      {
+        "iteration": 61,
+        "objective": 1.3287075247915274,
+        "gradient_norm": 1.6417243617920754e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "support",
+    "lambda": 0.001,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.334089449713832,
+    "train_regularized_objective": 1.3400567726436712,
+    "validation_nll": 1.8423005731562396,
+    "weights_theta": [
+      -0.03460115415482638,
+      0.04438915944917061,
+      -0.03583853789902271,
+      0.0,
+      0.0,
+      0.0346011541548304,
+      -0.03954120140515712,
+      -0.7597183397489153,
+      0.0,
+      1.0065586168684717,
+      0.6571233678160254,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.16655334121419663,
+      -0.11826117104599033,
+      -0.022726541106271755,
+      0.0,
+      0.0,
+      -0.1665533412141967,
+      0.12109337976434192,
+      2.8041599066579472,
+      0.0,
+      0.4507962149536361,
+      -1.3244296516800695,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 46,
+      "function_evaluations": 54,
+      "gradient_evaluations": 54,
+      "final_objective": 1.3400567726436712,
+      "final_data_nll": 1.334089449713832,
+      "final_l2_penalty": 0.005967322929839147,
+      "final_gradient_norm": 2.9152464497998484e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3927839646734108,
+        "gradient_norm": 0.1588265221679892
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3833061069479964,
+        "gradient_norm": 0.10929792125962572
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3673035078503368,
+        "gradient_norm": 0.04519911066080497
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3590232325938871,
+        "gradient_norm": 0.03412780068770612
+      },
+      {
+        "iteration": 5,
+        "objective": 1.351336566980046,
+        "gradient_norm": 0.051765605361482094
+      },
+      {
+        "iteration": 6,
+        "objective": 1.348739381672611,
+        "gradient_norm": 0.015832845490995562
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3484510839624206,
+        "gradient_norm": 0.00928262535999827
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3482062193320818,
+        "gradient_norm": 0.009326234330026429
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3474332873290376,
+        "gradient_norm": 0.01365595620707395
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3462185423782882,
+        "gradient_norm": 0.014247907400985546
+      },
+      {
+        "iteration": 11,
+        "objective": 1.344894487299941,
+        "gradient_norm": 0.023924690226990168
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3446504294591368,
+        "gradient_norm": 0.029251310285612
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3443393579318936,
+        "gradient_norm": 0.015334912832506981
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3441426717528326,
+        "gradient_norm": 0.010320213434626907
+      },
+      {
+        "iteration": 15,
+        "objective": 1.343882751645724,
+        "gradient_norm": 0.01348835009640932
+      },
+      {
+        "iteration": 16,
+        "objective": 1.3432078031521915,
+        "gradient_norm": 0.022608447069773153
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3422664148747252,
+        "gradient_norm": 0.027081120111886632
+      },
+      {
+        "iteration": 18,
+        "objective": 1.342133888191646,
+        "gradient_norm": 0.03309470813489438
+      },
+      {
+        "iteration": 19,
+        "objective": 1.341078774787655,
+        "gradient_norm": 0.010266861911977343
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3408048713038512,
+        "gradient_norm": 0.006045011413663522
+      },
+      {
+        "iteration": 21,
+        "objective": 1.340555832957922,
+        "gradient_norm": 0.006957909600695957
+      },
+      {
+        "iteration": 22,
+        "objective": 1.340346546359407,
+        "gradient_norm": 0.007218017110578241
+      },
+      {
+        "iteration": 23,
+        "objective": 1.3401788027543335,
+        "gradient_norm": 0.013845991491015864
+      },
+      {
+        "iteration": 24,
+        "objective": 1.3401043837895672,
+        "gradient_norm": 0.0034264137765756533
+      },
+      {
+        "iteration": 25,
+        "objective": 1.3400898807033932,
+        "gradient_norm": 0.0015007555436013485
+      },
+      {
+        "iteration": 26,
+        "objective": 1.3400830004026625,
+        "gradient_norm": 0.0017365959970273106
+      },
+      {
+        "iteration": 27,
+        "objective": 1.3400765641991224,
+        "gradient_norm": 0.0018059396354632878
+      },
+      {
+        "iteration": 28,
+        "objective": 1.3400712097943739,
+        "gradient_norm": 0.0006876725062644666
+      },
+      {
+        "iteration": 29,
+        "objective": 1.3400686025817088,
+        "gradient_norm": 0.000612910246580651
+      },
+      {
+        "iteration": 30,
+        "objective": 1.3400667505100845,
+        "gradient_norm": 0.0026957811950976416
+      },
+      {
+        "iteration": 31,
+        "objective": 1.3400639509914951,
+        "gradient_norm": 0.0012416158586263733
+      },
+      {
+        "iteration": 32,
+        "objective": 1.3400623838341914,
+        "gradient_norm": 0.00046382051249854896
+      },
+      {
+        "iteration": 33,
+        "objective": 1.3400616289557745,
+        "gradient_norm": 0.0005257849146999195
+      },
+      {
+        "iteration": 34,
+        "objective": 1.3400610258507228,
+        "gradient_norm": 0.0004630692518590258
+      },
+      {
+        "iteration": 35,
+        "objective": 1.3400608070762485,
+        "gradient_norm": 0.0010502906900057144
+      },
+      {
+        "iteration": 36,
+        "objective": 1.3400601575129334,
+        "gradient_norm": 0.0006439886926201255
+      },
+      {
+        "iteration": 37,
+        "objective": 1.3400592914389295,
+        "gradient_norm": 0.0003645746932373455
+      },
+      {
+        "iteration": 38,
+        "objective": 1.3400581368185396,
+        "gradient_norm": 0.0003086601723353928
+      },
+      {
+        "iteration": 39,
+        "objective": 1.3400573406799905,
+        "gradient_norm": 0.0004621574307203448
+      },
+      {
+        "iteration": 40,
+        "objective": 1.3400570297362953,
+        "gradient_norm": 0.0003521465223057025
+      },
+      {
+        "iteration": 41,
+        "objective": 1.3400568629717957,
+        "gradient_norm": 0.00017650441368225435
+      },
+      {
+        "iteration": 42,
+        "objective": 1.3400568014770957,
+        "gradient_norm": 9.28198705702519e-05
+      },
+      {
+        "iteration": 43,
+        "objective": 1.340056793151724,
+        "gradient_norm": 8.370182860441307e-05
+      },
+      {
+        "iteration": 44,
+        "objective": 1.3400567843572475,
+        "gradient_norm": 5.866676297420962e-05
+      },
+      {
+        "iteration": 45,
+        "objective": 1.3400567755699055,
+        "gradient_norm": 2.4148608287664826e-05
+      },
+      {
+        "iteration": 46,
+        "objective": 1.3400567726436712,
+        "gradient_norm": 2.9152464497998484e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "support",
+    "lambda": 0.01,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3470883876110045,
+    "train_regularized_objective": 1.3540983173085013,
+    "validation_nll": 1.6728354077061236,
+    "weights_theta": [
+      -0.03311981321170135,
+      0.039558445740263445,
+      -0.03710877898973924,
+      0.0,
+      0.0,
+      0.03311981321170075,
+      -0.03454924718988625,
+      -0.2878730072842469,
+      0.0,
+      0.6415193488992085,
+      0.1414721481551853,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.1473921548656916,
+      -0.09132435459861293,
+      -0.023533477042967998,
+      0.0,
+      0.0,
+      -0.14739215486569188,
+      0.0943086017266191,
+      0.8383793099150617,
+      0.0,
+      0.2941522121068454,
+      0.17487664326729635,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 33,
+      "function_evaluations": 38,
+      "gradient_evaluations": 38,
+      "final_objective": 1.3540983173085013,
+      "final_data_nll": 1.3470883876110045,
+      "final_l2_penalty": 0.007009929697496808,
+      "final_gradient_norm": 4.318287346177585e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3928732994503379,
+        "gradient_norm": 0.15785542525691892
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3835610272992542,
+        "gradient_norm": 0.10768584896350779
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3686370787503817,
+        "gradient_norm": 0.042849432224703034
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3618838777141309,
+        "gradient_norm": 0.030609785107988
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3568352785382853,
+        "gradient_norm": 0.04285587485002826
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3553585160623318,
+        "gradient_norm": 0.011093136388766215
+      },
+      {
+        "iteration": 7,
+        "objective": 1.355220759085685,
+        "gradient_norm": 0.006794453692033839
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3550139651301516,
+        "gradient_norm": 0.008725116798661826
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3547064400114346,
+        "gradient_norm": 0.011019261308201725
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3544136351707496,
+        "gradient_norm": 0.00599323926882299
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3542803194852076,
+        "gradient_norm": 0.0029354075254175043
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3542292609076068,
+        "gradient_norm": 0.006120437316981246
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3541980782045004,
+        "gradient_norm": 0.007422718159605646
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3541719311653428,
+        "gradient_norm": 0.003539466158940426
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3541555410033603,
+        "gradient_norm": 0.0020515753054921896
+      },
+      {
+        "iteration": 16,
+        "objective": 1.354148452227301,
+        "gradient_norm": 0.0025461985967244415
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3541267987600667,
+        "gradient_norm": 0.0029555205937604385
+      },
+      {
+        "iteration": 18,
+        "objective": 1.3541190555222715,
+        "gradient_norm": 0.004213292242978572
+      },
+      {
+        "iteration": 19,
+        "objective": 1.354105125155785,
+        "gradient_norm": 0.001569847555362139
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3541007818575126,
+        "gradient_norm": 0.0005447632095352306
+      },
+      {
+        "iteration": 21,
+        "objective": 1.3540995777224394,
+        "gradient_norm": 0.0005724779893615553
+      },
+      {
+        "iteration": 22,
+        "objective": 1.3540989451717316,
+        "gradient_norm": 0.00021916051548653948
+      },
+      {
+        "iteration": 23,
+        "objective": 1.3540987407691945,
+        "gradient_norm": 0.000239548598478161
+      },
+      {
+        "iteration": 24,
+        "objective": 1.3540986760826397,
+        "gradient_norm": 0.0003540683869662596
+      },
+      {
+        "iteration": 25,
+        "objective": 1.3540986008808087,
+        "gradient_norm": 0.0001780370708843187
+      },
+      {
+        "iteration": 26,
+        "objective": 1.354098472009683,
+        "gradient_norm": 0.0002350577651255762
+      },
+      {
+        "iteration": 27,
+        "objective": 1.3540983919558038,
+        "gradient_norm": 0.00021573490819076804
+      },
+      {
+        "iteration": 28,
+        "objective": 1.3540983420944914,
+        "gradient_norm": 9.31577901272843e-05
+      },
+      {
+        "iteration": 29,
+        "objective": 1.354098331520012,
+        "gradient_norm": 6.0694042665495755e-05
+      },
+      {
+        "iteration": 30,
+        "objective": 1.354098326783732,
+        "gradient_norm": 3.928600335617572e-05
+      },
+      {
+        "iteration": 31,
+        "objective": 1.3540983227698864,
+        "gradient_norm": 4.320928534488045e-05
+      },
+      {
+        "iteration": 32,
+        "objective": 1.3540983185607751,
+        "gradient_norm": 5.134286083901186e-05
+      },
+      {
+        "iteration": 33,
+        "objective": 1.3540983173085013,
+        "gradient_norm": 4.318287346177585e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "support",
+    "lambda": 0.1,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3648716496209305,
+    "train_regularized_objective": 1.375495861487659,
+    "validation_nll": 1.5465383899291565,
+    "weights_theta": [
+      -0.02602239181627344,
+      0.024983118627296796,
+      -0.030637644297645455,
+      0.0,
+      0.0,
+      0.026022391816273378,
+      -0.020860130860248894,
+      -0.08773729111744087,
+      0.0,
+      0.31505429380978867,
+      0.07109313684437445,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.06693491602761364,
+      -0.027589277791099816,
+      -0.019609217314816508,
+      0.0,
+      0.0,
+      -0.06693491602761367,
+      0.030156091248666472,
+      0.20046193839795343,
+      0.0,
+      0.14812164601676733,
+      0.15485480434130383,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 13,
+      "function_evaluations": 17,
+      "gradient_evaluations": 17,
+      "final_objective": 1.375495861487659,
+      "final_data_nll": 1.3648716496209305,
+      "final_l2_penalty": 0.01062421186672835,
+      "final_gradient_norm": 3.524311148897801e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.393713359540464,
+        "gradient_norm": 0.14876955666927938
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3858727319828332,
+        "gradient_norm": 0.09310890189240083
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3778106163992525,
+        "gradient_norm": 0.027532893832085976
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3763415571493707,
+        "gradient_norm": 0.016421302051757597
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3756615358321642,
+        "gradient_norm": 0.013482915895929369
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3755322272369217,
+        "gradient_norm": 0.00555213849362161
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3755040777425593,
+        "gradient_norm": 0.0019730524170212885
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3754979875426656,
+        "gradient_norm": 0.0008448522546233593
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3754967029246894,
+        "gradient_norm": 0.0006878975189132492
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3754959405243363,
+        "gradient_norm": 0.00016674065341998283
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3754958793812453,
+        "gradient_norm": 7.013825552321154e-05
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3754958620404647,
+        "gradient_norm": 3.1149507731882914e-05
+      },
+      {
+        "iteration": 13,
+        "objective": 1.375495861487659,
+        "gradient_norm": 3.524311148897801e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "support",
+    "lambda": 1.0,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3897274724776196,
+    "train_regularized_objective": 1.3966415476087732,
+    "validation_nll": 1.4948727317887234,
+    "weights_theta": [
+      -0.017398250090483215,
+      0.017750214459154322,
+      -0.014979027429162482,
+      0.0,
+      0.0,
+      0.017398250090483187,
+      -0.01572529536669696,
+      0.002107845018024696,
+      0.0,
+      0.08974437414525457,
+      0.026215817502119106,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.0079551785701518,
+      0.0010591337750981266,
+      -0.009648522153519818,
+      0.0,
+      0.0,
+      -0.007955178570151796,
+      0.0002280362596740145,
+      0.029447043921116065,
+      0.0,
+      0.04294201838094577,
+      0.02753685086704493,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 8,
+      "function_evaluations": 10,
+      "gradient_evaluations": 10,
+      "final_objective": 1.3966415476087732,
+      "final_data_nll": 1.3897274724776196,
+      "final_l2_penalty": 0.0069140751311536075,
+      "final_gradient_norm": 1.4044173287149824e-06
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3988715265661713,
+        "gradient_norm": 0.09465521108992518
+      },
+      {
+        "iteration": 2,
+        "objective": 1.39688994333144,
+        "gradient_norm": 0.028231440612870456
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3966526638097134,
+        "gradient_norm": 0.0049869527856263515
+      },
+      {
+        "iteration": 4,
+        "objective": 1.396642698825439,
+        "gradient_norm": 0.0016537973499362105
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3966415657038649,
+        "gradient_norm": 0.000271527164366936
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3966415517100346,
+        "gradient_norm": 0.00013286482591960344
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3966415476116723,
+        "gradient_norm": 2.891207311969536e-06
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3966415476087732,
+        "gradient_norm": 1.4044173287149824e-06
+      }
+    ],
+    "selected": true
+  },
+  {
+    "condition": "theory",
+    "lambda": 0.0001,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3369327449375963,
+    "train_regularized_objective": 1.3376104458796638,
+    "validation_nll": 1.93289028517858,
+    "weights_theta": [
+      -0.028309188054446387,
+      0.0840536956873835,
+      -0.18291308020725472,
+      0.0,
+      0.0,
+      0.02830918805442623,
+      -0.05954623644434784,
+      -0.14946865327351103,
+      0.0,
+      1.5734624246874984,
+      0.15549006951149866,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.3463790921864329,
+      -0.73759218072411,
+      -0.08776263077395816,
+      0.0,
+      0.0,
+      -0.34637909218642976,
+      0.7480648419170393,
+      1.423510126126983,
+      0.0,
+      0.41318963347949095,
+      2.727203107704015,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 51,
+      "function_evaluations": 59,
+      "gradient_evaluations": 59,
+      "final_objective": 1.3376104458796638,
+      "final_data_nll": 1.3369327449375963,
+      "final_l2_penalty": 0.0006777009420675384,
+      "final_gradient_norm": 2.422412785091979e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3943334916770478,
+        "gradient_norm": 0.15008533752295788
+      },
+      {
+        "iteration": 2,
+        "objective": 1.385408901409202,
+        "gradient_norm": 0.11213792250348112
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3662496020679262,
+        "gradient_norm": 0.04531199516448249
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3561711516989436,
+        "gradient_norm": 0.03444032102533702
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3500636182382115,
+        "gradient_norm": 0.09892364209024036
+      },
+      {
+        "iteration": 6,
+        "objective": 1.343470046164034,
+        "gradient_norm": 0.019220050590556956
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3426781198421256,
+        "gradient_norm": 0.007309322381559732
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3424856784847807,
+        "gradient_norm": 0.00700725150780666
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3421592201240184,
+        "gradient_norm": 0.02017461290908162
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3415400049313995,
+        "gradient_norm": 0.01532787233647075
+      },
+      {
+        "iteration": 11,
+        "objective": 1.339999705242759,
+        "gradient_norm": 0.009658259741269201
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3398982221160745,
+        "gradient_norm": 0.017234854160595264
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3395471789168105,
+        "gradient_norm": 0.009356517767465659
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3392434321654345,
+        "gradient_norm": 0.007217276196719978
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3384621652043822,
+        "gradient_norm": 0.005489644612726955
+      },
+      {
+        "iteration": 16,
+        "objective": 1.3381631492701707,
+        "gradient_norm": 0.002531606222432622
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3380241146771588,
+        "gradient_norm": 0.006984932159693295
+      },
+      {
+        "iteration": 18,
+        "objective": 1.3379731377095538,
+        "gradient_norm": 0.004324938442799937
+      },
+      {
+        "iteration": 19,
+        "objective": 1.3379507487445594,
+        "gradient_norm": 0.002682215525030926
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3379199317980068,
+        "gradient_norm": 0.0019354731818590901
+      },
+      {
+        "iteration": 21,
+        "objective": 1.3378853147398662,
+        "gradient_norm": 0.00261127360413126
+      },
+      {
+        "iteration": 22,
+        "objective": 1.33781005684929,
+        "gradient_norm": 0.0044296756722731305
+      },
+      {
+        "iteration": 23,
+        "objective": 1.3377875903970666,
+        "gradient_norm": 0.003274423323102561
+      },
+      {
+        "iteration": 24,
+        "objective": 1.3377618710384178,
+        "gradient_norm": 0.007944219566879377
+      },
+      {
+        "iteration": 25,
+        "objective": 1.3377377018591683,
+        "gradient_norm": 0.001463386807356479
+      },
+      {
+        "iteration": 26,
+        "objective": 1.337732521946095,
+        "gradient_norm": 0.0007268883754190681
+      },
+      {
+        "iteration": 27,
+        "objective": 1.3377316172086984,
+        "gradient_norm": 0.00034324007311943713
+      },
+      {
+        "iteration": 28,
+        "objective": 1.33773111044952,
+        "gradient_norm": 0.0003670356994601322
+      },
+      {
+        "iteration": 29,
+        "objective": 1.337729390255574,
+        "gradient_norm": 0.0008968447558830664
+      },
+      {
+        "iteration": 30,
+        "objective": 1.3377272824050468,
+        "gradient_norm": 0.0012152892941104164
+      },
+      {
+        "iteration": 31,
+        "objective": 1.3377268504266324,
+        "gradient_norm": 0.0033531247430998953
+      },
+      {
+        "iteration": 32,
+        "objective": 1.3377215426718143,
+        "gradient_norm": 0.0015298058766478391
+      },
+      {
+        "iteration": 33,
+        "objective": 1.3377179425434396,
+        "gradient_norm": 0.0006625977713578033
+      },
+      {
+        "iteration": 34,
+        "objective": 1.337713041770434,
+        "gradient_norm": 0.0015352654823999816
+      },
+      {
+        "iteration": 35,
+        "objective": 1.3377066808259666,
+        "gradient_norm": 0.0024508761192528847
+      },
+      {
+        "iteration": 36,
+        "objective": 1.3376930002829235,
+        "gradient_norm": 0.003918103182524812
+      },
+      {
+        "iteration": 37,
+        "objective": 1.3376831300363972,
+        "gradient_norm": 0.003607119038875285
+      },
+      {
+        "iteration": 38,
+        "objective": 1.337663883262342,
+        "gradient_norm": 0.003082709772017791
+      },
+      {
+        "iteration": 39,
+        "objective": 1.3376472473815997,
+        "gradient_norm": 0.00218614651165366
+      },
+      {
+        "iteration": 40,
+        "objective": 1.3376341668122287,
+        "gradient_norm": 0.0017156629068163151
+      },
+      {
+        "iteration": 41,
+        "objective": 1.3376283462296703,
+        "gradient_norm": 0.003501269205556423
+      },
+      {
+        "iteration": 42,
+        "objective": 1.33762108456882,
+        "gradient_norm": 0.002249700070345915
+      },
+      {
+        "iteration": 43,
+        "objective": 1.3376127386572725,
+        "gradient_norm": 0.0008714907363820303
+      },
+      {
+        "iteration": 44,
+        "objective": 1.337610841726909,
+        "gradient_norm": 0.000659399070096748
+      },
+      {
+        "iteration": 45,
+        "objective": 1.3376107195701579,
+        "gradient_norm": 0.00035362200975121714
+      },
+      {
+        "iteration": 46,
+        "objective": 1.3376105339520246,
+        "gradient_norm": 0.00014599328480590916
+      },
+      {
+        "iteration": 47,
+        "objective": 1.3376104863937603,
+        "gradient_norm": 5.7355673829557624e-05
+      },
+      {
+        "iteration": 48,
+        "objective": 1.3376104715329324,
+        "gradient_norm": 0.00023997314050157174
+      },
+      {
+        "iteration": 49,
+        "objective": 1.3376104521099381,
+        "gradient_norm": 4.732420525916361e-05
+      },
+      {
+        "iteration": 50,
+        "objective": 1.3376104487969211,
+        "gradient_norm": 2.811675472392238e-05
+      },
+      {
+        "iteration": 51,
+        "objective": 1.3376104458796638,
+        "gradient_norm": 2.422412785091979e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "theory",
+    "lambda": 0.001,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3383541116637279,
+    "train_regularized_objective": 1.3408840744593016,
+    "validation_nll": 1.7920883793010653,
+    "weights_theta": [
+      -0.0284166030775488,
+      0.0709496174534998,
+      -0.0329491310593707,
+      0.0,
+      0.0,
+      0.028416603077544265,
+      -0.06644268643261747,
+      -0.1699675277507565,
+      0.0,
+      1.1429574238584395,
+      0.18729437291979892,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.34330426040106415,
+      -0.699960946776365,
+      -0.015469117399789307,
+      0.0,
+      0.0,
+      -0.34330426040106404,
+      0.7008645611012281,
+      0.710110611299532,
+      0.0,
+      0.29469833173228577,
+      1.3672019141456284,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 40,
+      "function_evaluations": 49,
+      "gradient_evaluations": 49,
+      "final_objective": 1.3408840744593016,
+      "final_data_nll": 1.3383541116637279,
+      "final_l2_penalty": 0.0025299627955737147,
+      "final_gradient_norm": 2.456821924765928e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3943415889339446,
+        "gradient_norm": 0.14999543688781344
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3854324136924216,
+        "gradient_norm": 0.11197735686772942
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3664188599740779,
+        "gradient_norm": 0.04503815750194659
+      },
+      {
+        "iteration": 4,
+        "objective": 1.356582378463597,
+        "gradient_norm": 0.034033255991458296
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3509039696952503,
+        "gradient_norm": 0.09663023286245793
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3447946197350116,
+        "gradient_norm": 0.017644572969764825
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3441786127306614,
+        "gradient_norm": 0.006971637701918303
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3440204169925398,
+        "gradient_norm": 0.006609028932241668
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3437112255761592,
+        "gradient_norm": 0.01935212609544114
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3431312470623282,
+        "gradient_norm": 0.014062135664046677
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3419657614182852,
+        "gradient_norm": 0.007050508378396448
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3418799118769038,
+        "gradient_norm": 0.016555341505113137
+      },
+      {
+        "iteration": 13,
+        "objective": 1.341669418247102,
+        "gradient_norm": 0.007942417499731362
+      },
+      {
+        "iteration": 14,
+        "objective": 1.341543225475124,
+        "gradient_norm": 0.0059344779795389
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3412433902090357,
+        "gradient_norm": 0.004414237782455353
+      },
+      {
+        "iteration": 16,
+        "objective": 1.3411320009897971,
+        "gradient_norm": 0.002869616745116886
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3410620831434565,
+        "gradient_norm": 0.0022691540313660007
+      },
+      {
+        "iteration": 18,
+        "objective": 1.3410515060179509,
+        "gradient_norm": 0.003578199602054576
+      },
+      {
+        "iteration": 19,
+        "objective": 1.3410048899786904,
+        "gradient_norm": 0.002811855655878049
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3409352384525477,
+        "gradient_norm": 0.0014497104842018226
+      },
+      {
+        "iteration": 21,
+        "objective": 1.3409188984727092,
+        "gradient_norm": 0.0031711670089285444
+      },
+      {
+        "iteration": 22,
+        "objective": 1.340897094942145,
+        "gradient_norm": 0.0009699639190717557
+      },
+      {
+        "iteration": 23,
+        "objective": 1.3408929709032167,
+        "gradient_norm": 0.0006737121186205577
+      },
+      {
+        "iteration": 24,
+        "objective": 1.3408928603997223,
+        "gradient_norm": 0.0003809315840811933
+      },
+      {
+        "iteration": 25,
+        "objective": 1.3408924441236243,
+        "gradient_norm": 0.00018707350505720296
+      },
+      {
+        "iteration": 26,
+        "objective": 1.3408921582872952,
+        "gradient_norm": 0.00015344719934001365
+      },
+      {
+        "iteration": 27,
+        "objective": 1.3408909954553978,
+        "gradient_norm": 0.0002005277076056038
+      },
+      {
+        "iteration": 28,
+        "objective": 1.340889241000114,
+        "gradient_norm": 0.00036457627681914446
+      },
+      {
+        "iteration": 29,
+        "objective": 1.3408888278438944,
+        "gradient_norm": 0.0008897179283382924
+      },
+      {
+        "iteration": 30,
+        "objective": 1.3408869789015927,
+        "gradient_norm": 0.0005981507686182796
+      },
+      {
+        "iteration": 31,
+        "objective": 1.3408851505613455,
+        "gradient_norm": 0.00028392700887081674
+      },
+      {
+        "iteration": 32,
+        "objective": 1.3408845622866516,
+        "gradient_norm": 0.000143060807790099
+      },
+      {
+        "iteration": 33,
+        "objective": 1.340884513460326,
+        "gradient_norm": 0.0004181127665948627
+      },
+      {
+        "iteration": 34,
+        "objective": 1.340884389381561,
+        "gradient_norm": 0.00012935267427933192
+      },
+      {
+        "iteration": 35,
+        "objective": 1.3408843409174087,
+        "gradient_norm": 8.033874885012334e-05
+      },
+      {
+        "iteration": 36,
+        "objective": 1.3408841753987322,
+        "gradient_norm": 0.00042540867224188955
+      },
+      {
+        "iteration": 37,
+        "objective": 1.3408841196324712,
+        "gradient_norm": 0.00024466470273507815
+      },
+      {
+        "iteration": 38,
+        "objective": 1.3408840878400783,
+        "gradient_norm": 0.0001334991796359506
+      },
+      {
+        "iteration": 39,
+        "objective": 1.340884076436259,
+        "gradient_norm": 3.449659219778285e-05
+      },
+      {
+        "iteration": 40,
+        "objective": 1.3408840744593016,
+        "gradient_norm": 2.456821924765928e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "theory",
+    "lambda": 0.01,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.344148641185959,
+    "train_regularized_objective": 1.3520980461417886,
+    "validation_nll": 1.6563393264142607,
+    "weights_theta": [
+      -0.02849529693960247,
+      0.05569537024370483,
+      -0.031608239697252946,
+      0.0,
+      0.0,
+      0.02849529693960309,
+      -0.051392298674126,
+      -0.17983169762106244,
+      0.0,
+      0.7244752008362175,
+      0.22453531730816867,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.29705180114568097,
+      -0.49497991547760706,
+      -0.014519348889553918,
+      0.0,
+      0.0,
+      -0.2970518011456812,
+      0.49609589395345044,
+      0.24161123562991182,
+      0.0,
+      0.19201508097048156,
+      0.4591759457585576,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 26,
+      "function_evaluations": 31,
+      "gradient_evaluations": 31,
+      "final_objective": 1.3520980461417886,
+      "final_data_nll": 1.344148641185959,
+      "final_l2_penalty": 0.007949404955829742,
+      "final_gradient_norm": 2.2427044238242373e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3944220534990612,
+        "gradient_norm": 0.14910241751756473
+      },
+      {
+        "iteration": 2,
+        "objective": 1.385665224160184,
+        "gradient_norm": 0.11038757732682054
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3680262290050598,
+        "gradient_norm": 0.042441835043143465
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3602373565184698,
+        "gradient_norm": 0.03048432017591014
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3571159152293755,
+        "gradient_norm": 0.0770985874229969
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3537632615885486,
+        "gradient_norm": 0.011542397693043478
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3535761787631873,
+        "gradient_norm": 0.008729505136639174
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3532788586366515,
+        "gradient_norm": 0.0104495617027451
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3527432185911896,
+        "gradient_norm": 0.012182053992296615
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3523241005882818,
+        "gradient_norm": 0.01140092710896352
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3522268587469888,
+        "gradient_norm": 0.005326829537643909
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3521809138502086,
+        "gradient_norm": 0.00220792470818104
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3521584484658171,
+        "gradient_norm": 0.0030743789844822943
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3521378651861922,
+        "gradient_norm": 0.005574912608667184
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3521212261018218,
+        "gradient_norm": 0.005633256542427966
+      },
+      {
+        "iteration": 16,
+        "objective": 1.3521031873724112,
+        "gradient_norm": 0.0015155827387098976
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3521010625426837,
+        "gradient_norm": 0.0006321637021473453
+      },
+      {
+        "iteration": 18,
+        "objective": 1.3521006353747131,
+        "gradient_norm": 0.000334115104754689
+      },
+      {
+        "iteration": 19,
+        "objective": 1.3521002399435962,
+        "gradient_norm": 0.00043484903968243974
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3520994798787072,
+        "gradient_norm": 0.0008392314380387596
+      },
+      {
+        "iteration": 21,
+        "objective": 1.3520988372772171,
+        "gradient_norm": 0.0007286617386182344
+      },
+      {
+        "iteration": 22,
+        "objective": 1.3520983267347422,
+        "gradient_norm": 0.0006916076765918612
+      },
+      {
+        "iteration": 23,
+        "objective": 1.35209811377629,
+        "gradient_norm": 0.00011035353051591494
+      },
+      {
+        "iteration": 24,
+        "objective": 1.3520980620437997,
+        "gradient_norm": 8.137328495945238e-05
+      },
+      {
+        "iteration": 25,
+        "objective": 1.3520980482091693,
+        "gradient_norm": 8.132166206426058e-05
+      },
+      {
+        "iteration": 26,
+        "objective": 1.3520980461417886,
+        "gradient_norm": 2.2427044238242373e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "theory",
+    "lambda": 0.1,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3650047257087934,
+    "train_regularized_objective": 1.3763771453408502,
+    "validation_nll": 1.537477505413481,
+    "weights_theta": [
+      -0.02446028144895169,
+      0.030013696174671724,
+      -0.031869262386695914,
+      0.0,
+      0.0,
+      0.024460281448951904,
+      -0.025718309689318757,
+      -0.05527619178223237,
+      0.0,
+      0.3450354353025058,
+      0.11889885852438328,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.11455462632901832,
+      -0.14761791333509555,
+      -0.01498428911661925,
+      0.0,
+      0.0,
+      -0.11455462632901836,
+      0.14937012916590717,
+      0.04288943104871311,
+      0.0,
+      0.0917189617933752,
+      0.08128728213679473,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 14,
+      "function_evaluations": 17,
+      "gradient_evaluations": 17,
+      "final_objective": 1.3763771453408502,
+      "final_data_nll": 1.3650047257087934,
+      "final_l2_penalty": 0.011372419632056818,
+      "final_gradient_norm": 8.471013734491162e-06
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3951789516878,
+        "gradient_norm": 0.14073245946268823
+      },
+      {
+        "iteration": 2,
+        "objective": 1.387780579863252,
+        "gradient_norm": 0.09595941736134284
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3785471666646854,
+        "gradient_norm": 0.026051982805033774
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3771160405325054,
+        "gradient_norm": 0.015920517901421335
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3766362145262794,
+        "gradient_norm": 0.017684321595573767
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3764200195452985,
+        "gradient_norm": 0.00537930457555178
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3763857556037689,
+        "gradient_norm": 0.002168794081860331
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3763787317744394,
+        "gradient_norm": 0.0008487082468868228
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3763778549405963,
+        "gradient_norm": 0.0007616485354054336
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3763773702339936,
+        "gradient_norm": 0.0003612997842020451
+      },
+      {
+        "iteration": 11,
+        "objective": 1.376377161714945,
+        "gradient_norm": 6.743410831557517e-05
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3763771509800038,
+        "gradient_norm": 4.052477383617355e-05
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3763771462878918,
+        "gradient_norm": 7.508993977447379e-05
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3763771453408502,
+        "gradient_norm": 8.471013734491162e-06
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "theory",
+    "lambda": 1.0,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3911394974865745,
+    "train_regularized_objective": 1.3976565211699863,
+    "validation_nll": 1.492437475160032,
+    "weights_theta": [
+      -0.01756280939010035,
+      0.018984788764093243,
+      -0.015753473292693925,
+      0.0,
+      0.0,
+      0.017562809390100333,
+      -0.01685465342500738,
+      0.005417774924074225,
+      0.0,
+      0.09342967069529295,
+      0.03013333011398473,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.015272902240291177,
+      -0.016512714241938255,
+      -0.007581890408877797,
+      0.0,
+      0.0,
+      -0.015272902240291179,
+      0.017495506764154418,
+      0.005035993426798905,
+      0.0,
+      0.025275626722436974,
+      0.009539756005797297,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 6,
+      "function_evaluations": 8,
+      "gradient_evaluations": 8,
+      "final_objective": 1.3976565211699863,
+      "final_data_nll": 1.3911394974865745,
+      "final_l2_penalty": 0.006517023683411782,
+      "final_gradient_norm": 4.426630511420785e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3998324290072455,
+        "gradient_norm": 0.09034184286455606
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3979357136700092,
+        "gradient_norm": 0.03015772408938907
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3976645361561824,
+        "gradient_norm": 0.004181186505537408
+      },
+      {
+        "iteration": 4,
+        "objective": 1.39765739339304,
+        "gradient_norm": 0.0014317970299531117
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3976565224323712,
+        "gradient_norm": 8.199692068456296e-05
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3976565211699863,
+        "gradient_norm": 4.426630511420785e-05
+      }
+    ],
+    "selected": true
+  },
+  {
+    "condition": "retrained-no-S",
+    "lambda": 0.0001,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3646567087890005,
+    "train_regularized_objective": 1.3647997926396556,
+    "validation_nll": 1.932107867266708,
+    "weights_theta": [
+      -0.021338667826907333,
+      0.013899054685734756,
+      -0.14869203648109483,
+      0.0,
+      0.0,
+      0.02133866782691499,
+      0.005933338023529437,
+      -0.2744066648849978,
+      0.0,
+      1.6229803778852245,
+      0.35925520308424613,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 19,
+      "function_evaluations": 23,
+      "gradient_evaluations": 23,
+      "final_objective": 1.3647997926396556,
+      "final_data_nll": 1.3646567087890005,
+      "final_l2_penalty": 0.00014308385065509022,
+      "final_gradient_norm": 1.5424255551676476e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3957803964354376,
+        "gradient_norm": 0.1352254650180541
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3883581660960733,
+        "gradient_norm": 0.10310704564111461
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3741038486764074,
+        "gradient_norm": 0.03788420966380531
+      },
+      {
+        "iteration": 4,
+        "objective": 1.369748677218468,
+        "gradient_norm": 0.026100045767775998
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3666296809262481,
+        "gradient_norm": 0.012313487376795038
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3653913960593922,
+        "gradient_norm": 0.007754602780640762
+      },
+      {
+        "iteration": 7,
+        "objective": 1.36532434621869,
+        "gradient_norm": 0.022249142612680017
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3649906456364127,
+        "gradient_norm": 0.00206039068852491
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3649790752441482,
+        "gradient_norm": 0.0017466068500236558
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3649585034152558,
+        "gradient_norm": 0.0019896611519371324
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3648974680315242,
+        "gradient_norm": 0.0027078061797573185
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3648302900756193,
+        "gradient_norm": 0.005256946082015283
+      },
+      {
+        "iteration": 13,
+        "objective": 1.364812141540229,
+        "gradient_norm": 0.004077812930145984
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3648008758234205,
+        "gradient_norm": 0.0006110596790858744
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3648000936617601,
+        "gradient_norm": 0.0001315497587679384
+      },
+      {
+        "iteration": 16,
+        "objective": 1.3647998890978739,
+        "gradient_norm": 0.00016682307430583847
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3647998625702367,
+        "gradient_norm": 0.00017027047937557245
+      },
+      {
+        "iteration": 18,
+        "objective": 1.3647997952842303,
+        "gradient_norm": 3.9541107765056935e-05
+      },
+      {
+        "iteration": 19,
+        "objective": 1.3647997926396556,
+        "gradient_norm": 1.5424255551676476e-05
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "retrained-no-S",
+    "lambda": 0.001,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3648946085737517,
+    "train_regularized_objective": 1.3656734020590306,
+    "validation_nll": 1.7817752854314266,
+    "weights_theta": [
+      -0.021284956452522912,
+      0.009931375370050956,
+      -0.08387256278846529,
+      0.0,
+      0.0,
+      0.02128495645252605,
+      0.0012589194576437417,
+      -0.2664716246306504,
+      0.0,
+      1.1642404448761396,
+      0.350832022074908,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 22,
+      "function_evaluations": 26,
+      "gradient_evaluations": 26,
+      "final_objective": 1.3656734020590306,
+      "final_data_nll": 1.3648946085737517,
+      "final_l2_penalty": 0.0007787934852789835,
+      "final_gradient_norm": 0.00010784925393343239
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3957872637118336,
+        "gradient_norm": 0.1351504278238181
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3883772641492642,
+        "gradient_norm": 0.10296889040012498
+      },
+      {
+        "iteration": 3,
+        "objective": 1.374223690818417,
+        "gradient_norm": 0.03763554159094914
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3699740137855358,
+        "gradient_norm": 0.025765980414235955
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3670371203947398,
+        "gradient_norm": 0.012015997438412864
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3659737223381831,
+        "gradient_norm": 0.007280189025789248
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3659366425189827,
+        "gradient_norm": 0.018892379249440403
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3656963116240108,
+        "gradient_norm": 0.0009892659882865616
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3656931832919301,
+        "gradient_norm": 0.0007548002344598182
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3656891635477872,
+        "gradient_norm": 0.0007762737239894512
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3656788978086551,
+        "gradient_norm": 0.0007800118379237975
+      },
+      {
+        "iteration": 12,
+        "objective": 1.3656779523053084,
+        "gradient_norm": 0.0020937871454988592
+      },
+      {
+        "iteration": 13,
+        "objective": 1.365674983776391,
+        "gradient_norm": 0.0006002360225537831
+      },
+      {
+        "iteration": 14,
+        "objective": 1.365674671808906,
+        "gradient_norm": 0.00011829728289429852
+      },
+      {
+        "iteration": 15,
+        "objective": 1.3656746403796403,
+        "gradient_norm": 7.168299393474464e-05
+      },
+      {
+        "iteration": 16,
+        "objective": 1.365674611750321,
+        "gradient_norm": 7.6483353471799e-05
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3656744622857124,
+        "gradient_norm": 0.00022448117255759986
+      },
+      {
+        "iteration": 18,
+        "objective": 1.365674312651908,
+        "gradient_norm": 0.000556680765937256
+      },
+      {
+        "iteration": 19,
+        "objective": 1.3656740014888864,
+        "gradient_norm": 0.0002516581955706398
+      },
+      {
+        "iteration": 20,
+        "objective": 1.3656735011743406,
+        "gradient_norm": 0.00019633730529445642
+      },
+      {
+        "iteration": 21,
+        "objective": 1.3656734046211638,
+        "gradient_norm": 0.00011918356892849153
+      },
+      {
+        "iteration": 22,
+        "objective": 1.3656734020590306,
+        "gradient_norm": 0.00010784925393343239
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "retrained-no-S",
+    "lambda": 0.01,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3665184326042579,
+    "train_regularized_objective": 1.3698557444163773,
+    "validation_nll": 1.6412066706552275,
+    "weights_theta": [
+      -0.021208798504059108,
+      0.010919939057794325,
+      -0.06687687513634034,
+      0.0,
+      0.0,
+      0.02120879850406094,
+      -0.0019922508026566704,
+      -0.20852156845112302,
+      0.0,
+      0.7314083959230558,
+      0.28901127912170377,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 18,
+      "function_evaluations": 21,
+      "gradient_evaluations": 21,
+      "final_objective": 1.3698557444163773,
+      "final_data_nll": 1.3665184326042579,
+      "final_l2_penalty": 0.003337311812119381,
+      "final_gradient_norm": 4.990530414569461e-06
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3958555308402516,
+        "gradient_norm": 0.13440468938797828
+      },
+      {
+        "iteration": 2,
+        "objective": 1.388566470199347,
+        "gradient_norm": 0.10160023144977066
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3753661175042469,
+        "gradient_norm": 0.035267610255054614
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3720148108308161,
+        "gradient_norm": 0.02277351261819714
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3703242698291638,
+        "gradient_norm": 0.00987225340440681
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3699999038767385,
+        "gradient_norm": 0.005166573097141219
+      },
+      {
+        "iteration": 7,
+        "objective": 1.3699516027766117,
+        "gradient_norm": 0.005547897802989644
+      },
+      {
+        "iteration": 8,
+        "objective": 1.3699146365868207,
+        "gradient_norm": 0.0022982476442517316
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3698831097702358,
+        "gradient_norm": 0.002092892322933339
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3698599610071933,
+        "gradient_norm": 0.0015822403344385371
+      },
+      {
+        "iteration": 11,
+        "objective": 1.3698563942282949,
+        "gradient_norm": 0.00022338161414506126
+      },
+      {
+        "iteration": 12,
+        "objective": 1.369856124059834,
+        "gradient_norm": 0.0002416879210072798
+      },
+      {
+        "iteration": 13,
+        "objective": 1.3698559841339177,
+        "gradient_norm": 0.00031175670225254323
+      },
+      {
+        "iteration": 14,
+        "objective": 1.3698559368054288,
+        "gradient_norm": 0.00048348135727455344
+      },
+      {
+        "iteration": 15,
+        "objective": 1.369855780829674,
+        "gradient_norm": 0.00021122248038040722
+      },
+      {
+        "iteration": 16,
+        "objective": 1.3698557478710676,
+        "gradient_norm": 6.544629917038525e-05
+      },
+      {
+        "iteration": 17,
+        "objective": 1.3698557444765742,
+        "gradient_norm": 1.1978860668279475e-05
+      },
+      {
+        "iteration": 18,
+        "objective": 1.3698557444163773,
+        "gradient_norm": 4.990530414569461e-06
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "retrained-no-S",
+    "lambda": 0.1,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3751629087662505,
+    "train_regularized_objective": 1.3823893888334122,
+    "validation_nll": 1.5337817715118023,
+    "weights_theta": [
+      -0.02044542122050802,
+      0.017111717332650316,
+      -0.04504807438629479,
+      0.0,
+      0.0,
+      0.020445421220507853,
+      -0.011081921926539798,
+      -0.05413816252106027,
+      0.0,
+      0.3504133342850367,
+      0.12461210410702557,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 10,
+      "function_evaluations": 12,
+      "gradient_evaluations": 12,
+      "final_objective": 1.3823893888334122,
+      "final_data_nll": 1.3751629087662505,
+      "final_l2_penalty": 0.007226480067161756,
+      "final_gradient_norm": 1.3226031441911487e-06
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.3964999341605706,
+        "gradient_norm": 0.12738293140074508
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3902946195592518,
+        "gradient_norm": 0.08911190108326962
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3830754704139114,
+        "gradient_norm": 0.01987200494936296
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3825373026408185,
+        "gradient_norm": 0.009341850355891019
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3824415325350206,
+        "gradient_norm": 0.00430921350874815
+      },
+      {
+        "iteration": 6,
+        "objective": 1.382409254752664,
+        "gradient_norm": 0.002835889943584206
+      },
+      {
+        "iteration": 7,
+        "objective": 1.382393883237024,
+        "gradient_norm": 0.0026659557102576875
+      },
+      {
+        "iteration": 8,
+        "objective": 1.382392983948155,
+        "gradient_norm": 0.0022118448949939393
+      },
+      {
+        "iteration": 9,
+        "objective": 1.3823893889710013,
+        "gradient_norm": 1.2525873720572456e-05
+      },
+      {
+        "iteration": 10,
+        "objective": 1.3823893888334122,
+        "gradient_norm": 1.3226031441911487e-06
+      }
+    ],
+    "selected": false
+  },
+  {
+    "condition": "retrained-no-S",
+    "lambda": 1.0,
+    "train_rows": 92,
+    "validation_rows": 26,
+    "train_data_nll": 1.3929288381725058,
+    "train_regularized_objective": 1.3986228727142782,
+    "validation_nll": 1.4929970962147947,
+    "weights_theta": [
+      -0.016954271086281184,
+      0.018280683280160137,
+      -0.01745043512058179,
+      0.0,
+      0.0,
+      0.016954271086281163,
+      -0.015925635254049466,
+      0.005516394813008279,
+      0.0,
+      0.09473282808071076,
+      0.030267279596553526,
+      0.0,
+      0.0
+    ],
+    "weights_w": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "optimizer": {
+      "method": "L-BFGS-B",
+      "max_iter": 1000,
+      "gtol": 1e-08,
+      "initialization": "zeros",
+      "deterministic": true,
+      "success": true,
+      "status": 0,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 6,
+      "function_evaluations": 8,
+      "gradient_evaluations": 8,
+      "final_objective": 1.3986228727142782,
+      "final_data_nll": 1.3929288381725058,
+      "final_l2_penalty": 0.005694034541772419,
+      "final_gradient_norm": 4.1470285255736534e-05
+    },
+    "optimization_history": [
+      {
+        "iteration": 1,
+        "objective": 1.400550800865104,
+        "gradient_norm": 0.08385229661273068
+      },
+      {
+        "iteration": 2,
+        "objective": 1.3988767108783353,
+        "gradient_norm": 0.029959998558991032
+      },
+      {
+        "iteration": 3,
+        "objective": 1.3986243277536916,
+        "gradient_norm": 0.001802065083965407
+      },
+      {
+        "iteration": 4,
+        "objective": 1.3986230683498522,
+        "gradient_norm": 0.0006584089690897365
+      },
+      {
+        "iteration": 5,
+        "objective": 1.3986228738204542,
+        "gradient_norm": 7.743135163667499e-05
+      },
+      {
+        "iteration": 6,
+        "objective": 1.3986228727142782,
+        "gradient_norm": 4.1470285255736534e-05
+      }
+    ],
+    "selected": true
+  }
+]

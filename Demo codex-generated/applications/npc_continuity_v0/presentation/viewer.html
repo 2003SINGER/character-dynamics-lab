@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NPC 连续性观察回放</title>
+  <style>
+    :root { color-scheme: dark; font: 15px/1.5 system-ui, sans-serif; background: #111820; color: #e7edf4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { padding: 18px clamp(16px, 4vw, 42px); border-bottom: 1px solid #344150; background: #17212c; }
+    h1 { margin: 0; font-size: 1.3rem; }
+    header p { margin: 4px 0 0; color: #aab8c7; font-size: .9rem; }
+    main { max-width: 1180px; margin: auto; padding: 18px; display: grid; grid-template-columns: minmax(260px, 1fr) minmax(300px, 1fr); gap: 16px; }
+    section { background: #19232e; border: 1px solid #344150; border-radius: 10px; padding: 16px; }
+    h2 { margin: 0 0 12px; font-size: 1rem; }
+    .room { position: relative; min-height: 340px; overflow: hidden; border: 2px solid #8292a3; border-radius: 8px; background: #253342; }
+    .object { position: absolute; padding: 10px 12px; border-radius: 7px; background: #3a5065; color: #edf5ff; font-size: .9rem; }
+    #desk { left: 8%; top: 30%; } #computer { left: 29%; top: 34%; }
+    #bed { right: 8%; top: 16%; } #phone { left: 42%; bottom: 19%; }
+    #door { right: 5%; bottom: 4%; } #light { left: 5%; bottom: 4%; }
+    #alarm { right: 25%; bottom: 20%; } #window { right: 4%; top: 48%; }
+    #npc { position: absolute; left: 50%; top: 54%; width: 28px; height: 43px; transform: translate(-50%, -50%); border-radius: 13px 13px 9px 9px; background: #68d5a1; box-shadow: 0 -13px 0 -4px #f1c6a0, 0 5px 0 2px #1c2730; transition: left .35s ease, top .35s ease, transform .2s ease; }
+    #npc::after { content: ""; position: absolute; left: 7px; right: 7px; bottom: -8px; height: 7px; border-radius: 50%; background: #111820; opacity: .5; }
+    #npc.study { animation: study 1.25s ease-in-out infinite; }
+    #npc.phone-action { animation: phone 1s ease-in-out infinite; }
+    #npc.rest { height: 23px; border-radius: 14px; transform: translate(-50%, -50%) rotate(90deg); }
+    @keyframes study { 50% { margin-top: 2px; } }
+    @keyframes phone { 50% { rotate: -8deg; } }
+    .readout { margin-top: 14px; display: grid; gap: 8px; }
+    .readout-row { display: flex; justify-content: space-between; gap: 12px; color: #b6c4d1; }
+    .readout-row strong { color: #f0f5fa; text-align: right; font-weight: 600; }
+    .meter { height: 8px; margin-top: 7px; border-radius: 6px; background: #344150; overflow: hidden; }
+    .meter > i { display: block; width: 0; height: 100%; background: #68d5a1; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    button, select { border: 1px solid #526579; border-radius: 6px; background: #2a3a4b; color: #f1f5f9; padding: 8px 11px; font: inherit; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid #8bcaff; outline-offset: 2px; }
+    input[type=range] { width: 100%; accent-color: #68d5a1; }
+    .time { margin: 16px 0 4px; font-size: 1.2rem; }
+    .interval { color: #aab8c7; font-size: .88rem; }
+    .cues { min-height: 52px; margin: 12px 0 0; padding-left: 20px; color: #d5e0ea; }
+    .cues li { margin: 4px 0; }
+    .visible-state { margin-top: 14px; padding-top: 12px; border-top: 1px solid #344150; color: #b6c4d1; font-size: .9rem; }
+    .task-progress-box { margin-top: 10px; }
+    .empty { color: #8798a9; }
+    @media (max-width: 760px) { main { grid-template-columns: 1fr; padding: 12px; } .room { min-height: 270px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>NPC 连续性 · 观察回放</h1>
+    <p>匿名、预先记录的单人房间片段；页面展示实际动作与角色可见事件，不提供玩家输入。</p>
+  </header>
+  <main>
+    <section aria-labelledby="room-heading">
+      <h2 id="room-heading">房间</h2>
+      <div class="room" id="room" aria-label="单人房间场景">
+        <div class="object" id="desk">书桌</div><div class="object" id="computer">电脑</div>
+        <div class="object" id="bed">床</div><div class="object" id="phone">手机</div>
+        <div class="object" id="door">门</div><div class="object" id="light">灯</div>
+        <div class="object" id="alarm">闹钟</div><div class="object" id="window">窗户</div>
+        <div id="npc" aria-label="NPC 占位动画"></div>
+      </div>
+      <div class="readout">
+        <div class="readout-row"><span>当前动作</span><strong id="action">—</strong></div>
+        <div class="readout-row"><span>动作对象</span><strong id="target">—</strong></div>
+        <div class="readout-row"><span>动作进度</span><strong id="action-progress">—</strong></div>
+        <div class="meter" aria-label="当前动作进度"><i id="action-meter"></i></div>
+        <div class="visible-state" id="visible-state"></div>
+        <div class="task-progress-box" id="task-progress-box" hidden>
+          <div class="readout-row"><span>课程任务进度</span><strong id="task-progress-label"></strong></div>
+          <div class="meter" aria-label="课程任务公开进度"><i id="task-meter"></i></div>
+        </div>
+      </div>
+    </section>
+    <section aria-labelledby="timeline-heading">
+      <h2 id="timeline-heading">匿名片段</h2>
+      <div class="controls">
+        <label for="clip-select">片段</label><select id="clip-select"></select>
+        <button id="previous" type="button">上一时刻</button>
+        <button id="play" type="button">播放</button>
+        <button id="next" type="button">下一时刻</button>
+        <label for="speed">模拟速度</label>
+        <select id="speed"><option value="1">慢 · 1 分钟/秒</option><option value="5" selected>正常 · 5 分钟/秒</option><option value="15">快 · 15 分钟/秒</option></select>
+      </div>
+      <h3 class="time" id="clock">—</h3>
+      <div class="interval" id="interval"></div>
+      <input id="seek" type="range" min="0" max="0" value="0" step="1" aria-label="回放位置">
+      <h3>此时可见</h3>
+      <ul class="cues" id="cues"></ul>
+    </section>
+  </main>
+  <script type="application/json" id="player-data">__PLAYER_SAFE_JSON__</script>
+  <script>
+    (() => {
+      const data = JSON.parse(document.getElementById('player-data').textContent);
+      let clip = data.clips[0];
+      let frames = clip.frames;
+      const actionNames = {
+        use_phone: '使用手机', shop_on_phone: '手机购物', use_computer: '使用电脑',
+        study_at_computer: '在电脑前学习', study_focused: '专注学习',
+        study_halfhearted: '学习', rest_at_bed: '在床上休息', sleep_at_bed: '睡觉',
+        go_to_bathroom: '去洗手间', get_meal: '取餐', turn_light_on: '开灯',
+        turn_light_off: '关灯', turn_off_alarm: '关闭闹钟', open_curtain: '打开窗帘',
+        close_curtain: '关闭窗帘', idle: '停留'
+      };
+      const targetNames = { desk: '书桌', computer: '电脑', bed: '床', phone: '手机',
+        door: '门', light: '灯', alarm: '闹钟', window: '窗户', '': '—' };
+      const objectPositions = {
+        desk: [18, 38], computer: [37, 42], bed: [82, 24], phone: [51, 76],
+        door: [91, 91], light: [10, 91], alarm: [73, 76], window: [91, 55], '': [50, 54]
+      };
+      const $ = (id) => document.getElementById(id);
+      let index = 0;
+      let timer = null;
+      let cursorMinute = 0;
+      let lastTick = 0;
+      const labelAction = (action) => actionNames[action] || '动作';
+      function clockFor(total) {
+        const day = Math.floor(total / 1440);
+        const minute = total % 1440;
+        const clock = `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
+        return day === 0 ? clock : `第 ${day + 1} 天 ${clock}`;
+      }
+      function setClip(selected) {
+        clip = selected;
+        frames = clip.frames;
+        index = 0;
+        cursorMinute = frames[0].minute;
+        stop();
+        $('seek').max = String(frames.length - 1);
+        show();
+      }
+      function show() {
+        const frame = frames[index];
+        const nextFrame = frames[index + 1] || null;
+        const interval = nextFrame ? nextFrame.interval : null;
+        const inInterval = interval && cursorMinute < interval.to_minute;
+        const liveAction = inInterval ? interval.running_action : frame.running_action;
+        const shownMinute = Math.floor(cursorMinute);
+        $('clock').textContent = clockFor(shownMinute);
+        $('seek').value = String(index);
+        $('seek').max = String(frames.length - 1);
+        if (inInterval) {
+          const simElapsed = Math.max(0, cursorMinute - interval.from_minute);
+          $('interval').textContent = `当前区间 ${clockFor(interval.from_minute)}–${clockFor(interval.to_minute)} · `
+            + `${interval.running_action ? labelAction(interval.running_action.action) : '无动作'} · `
+            + `${Math.floor(simElapsed)} / ${interval.to_minute - interval.from_minute} 模拟分钟`;
+        } else if (frame.interval) {
+          $('interval').textContent = `刚结束区间 ${clockFor(frame.interval.from_minute)}–${clockFor(frame.minute)} · `
+            + `${frame.interval.running_action ? labelAction(frame.interval.running_action.action) : '无动作'}`;
+        } else $('interval').textContent = '片段起点';
+        let action = liveAction;
+        if (action && inInterval) {
+          action = { ...action, elapsed_minutes: Math.max(action.elapsed_minutes,
+            Math.min(action.planned_minutes, Math.floor(cursorMinute - action.started_at_minute))) };
+          action.progress = Math.min(1, action.elapsed_minutes / action.planned_minutes);
+        }
+        $('action').textContent = action ? labelAction(action.action) : '无正在执行的动作';
+        $('target').textContent = action ? (targetNames[action.target] || '房间') : '—';
+        $('action-progress').textContent = action
+          ? `${action.elapsed_minutes} / ${action.planned_minutes} 分钟 · ${clockFor(action.started_at_minute)} 开始`
+          : '—';
+        $('action-meter').style.width = action ? `${Math.round(action.progress * 100)}%` : '0%';
+        const npc = $('npc');
+        const position = objectPositions[action ? action.target : ''] || objectPositions.room;
+        npc.style.left = `${position[0]}%`; npc.style.top = `${position[1]}%`;
+        npc.className = action && action.action.startsWith('study_') ? 'study'
+          : action && ['use_phone', 'shop_on_phone'].includes(action.action) ? 'phone-action'
+          : action && ['rest_at_bed', 'sleep_at_bed'].includes(action.action) ? 'rest' : '';
+        const state = frame.visible_state;
+        const details = [];
+        if (state.alarm) details.push(`闹钟：${state.alarm === 'ringing' ? '响铃' : '静音'}`);
+        if (state.unread_messages !== undefined) details.push(`未读消息：${state.unread_messages}`);
+        if (state.coursework_status) details.push(`课程任务：${state.coursework_status === 'completed' ? 'Completed · 已完成' : 'Active · 进行中'}`);
+        $('visible-state').textContent = details.length ? details.join(' · ') : '没有新的可见状态';
+        const hasTaskProgress = state.coursework_progress !== undefined;
+        const taskComplete = state.coursework_status === 'completed';
+        const taskPercent = taskComplete ? 100
+          : Math.min(99.9, Math.floor(state.coursework_progress * 1000) / 10);
+        $('task-progress-box').hidden = !hasTaskProgress;
+        if (hasTaskProgress) {
+          $('task-progress-label').textContent = `${taskPercent.toFixed(1)}%${taskComplete ? ' · 已完成' : ''}`;
+          $('task-meter').style.width = `${taskPercent}%`;
+        }
+        $('cues').replaceChildren();
+        for (const cue of frame.cues) {
+          if (cue.minute > shownMinute) continue;
+          const item = document.createElement('li'); item.textContent = cue.text; $('cues').appendChild(item);
+        }
+        if (!frame.cues.some((cue) => cue.minute <= shownMinute)) { const item = document.createElement('li'); item.className = 'empty'; item.textContent = '此时没有记录到新的可见事件'; $('cues').appendChild(item); }
+        $('previous').disabled = index === 0;
+        $('next').disabled = index === frames.length - 1;
+      }
+      function stop() { if (timer !== null) { clearInterval(timer); timer = null; } $('play').textContent = '播放'; }
+      function step(delta) {
+        stop();
+        index = Math.max(0, Math.min(frames.length - 1, index + delta));
+        cursorMinute = frames[index].minute;
+        show();
+      }
+      function tick(now) {
+        if (timer === null) return;
+        const elapsedSeconds = Math.max(0, (now - lastTick) / 1000);
+        lastTick = now;
+        const next = frames[index + 1];
+        if (!next) { stop(); return; }
+        cursorMinute = Math.min(next.minute, cursorMinute + elapsedSeconds * Number($('speed').value));
+        if (cursorMinute >= next.minute) {
+          index += 1;
+          cursorMinute = frames[index].minute;
+          if (index === frames.length - 1) stop();
+        }
+        show();
+      }
+      $('previous').onclick = () => step(-1);
+      $('next').onclick = () => step(1);
+      $('seek').oninput = () => { stop(); index = Number($('seek').value); cursorMinute = frames[index].minute; show(); };
+      $('speed').onchange = () => { if (timer !== null) { stop(); $('play').click(); } };
+      $('clip-select').onchange = () => setClip(data.clips[Number($('clip-select').value)]);
+      $('play').onclick = () => {
+        if (timer !== null) { stop(); return; }
+        if (index === frames.length - 1) { index = 0; cursorMinute = frames[0].minute; show(); }
+        $('play').textContent = '暂停';
+        lastTick = performance.now();
+        timer = setInterval(() => tick(performance.now()), 40);
+      };
+      if (!Array.isArray(data.clips) || !data.clips.length || data.clips.some((item) => !item.frames.length))
+        throw new Error('No player clips in this file');
+      data.clips.forEach((item, itemIndex) => {
+        const option = document.createElement('option');
+        option.value = String(itemIndex); option.textContent = item.clip_id;
+        $('clip-select').appendChild(option);
+      });
+      cursorMinute = frames[0].minute;
+      show();
+    })();
+  </script>
+</body>
+</html>

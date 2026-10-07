@@ -1,0 +1,793 @@
+{
+  "purpose": "T0d OPeRA 30-session feasibility audit; not training, a baseline, or Paper-0 evidence",
+  "source": {
+    "dataset": "NEU-HAI/OPeRA",
+    "revision": "6f26a2c5cc69084f1714e39db9776e61791344d6",
+    "license": "CC-BY-4.0"
+  },
+  "sample_method": "lowest SHA-256 rank of filtered session_id across train/test; deterministic, not stratified",
+  "session_table": {
+    "train_sessions": 437,
+    "test_sessions": 90,
+    "train_users": 49,
+    "test_users": 15,
+    "cross_split_user_overlap": 12
+  },
+  "sample_summary": {
+    "session_count": 30,
+    "action_count_min": 3,
+    "action_count_median": 9.0,
+    "action_count_mean": 10.933333333333334,
+    "action_count_max": 56,
+    "session_count_matches": 30,
+    "session_timestamps_non_decreasing": 30,
+    "session_unique_action_ids": 30,
+    "session_complete_html_and_url": 30,
+    "action_type_counts": {
+      "click": 276,
+      "input": 41,
+      "terminate": 11
+    },
+    "click_type_counts": {
+      "cart_side_bar": 6,
+      "filter": 6,
+      "nav_bar": 19,
+      "other": 38,
+      "page_related": 25,
+      "product_link": 32,
+      "product_option": 22,
+      "purchase": 19,
+      "quantity": 10,
+      "review": 26,
+      "search": 59,
+      "suggested_term": 14
+    },
+    "rationale_step_count": 15,
+    "sessions_with_rationale": 10
+  },
+  "interpretation_boundary": {
+    "finite_label_space": "action_type and click_type are finite observed labels; exact target/semantic_id is not a per-step enumerated candidate set.",
+    "rationale_timing": "rationale is action-row-aligned but lacks a separately timestamped pre-action elicitation event; it cannot be an input without a new causal protocol.",
+    "split": "existing train/test has user overlap; formal evaluation must use an explicit user/session grouping policy."
+  },
+  "records": [
+    {
+      "split": "train",
+      "session_sha256_16": "0162834ef6fbb6ce",
+      "user_sha256_16": "bfbb2c9bfc15299d",
+      "declared_action_count": 5,
+      "retrieved_action_count": 5,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 5,
+      "action_type_counts": {
+        "click": 5
+      },
+      "click_type_counts": {
+        "other": 1,
+        "product_link": 1,
+        "purchase": 1,
+        "search": 2
+      },
+      "semantic_id_count": 5,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "020c4defc2e1e6f4",
+      "user_sha256_16": "c56617093c350dad",
+      "declared_action_count": 18,
+      "retrieved_action_count": 18,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 18,
+      "action_type_counts": {
+        "click": 12,
+        "input": 6
+      },
+      "click_type_counts": {
+        "product_link": 2,
+        "purchase": 1,
+        "quantity": 2,
+        "search": 6,
+        "suggested_term": 1
+      },
+      "semantic_id_count": 18,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "024062edcf4d7beb",
+      "user_sha256_16": "bfbb2c9bfc15299d",
+      "declared_action_count": 5,
+      "retrieved_action_count": 5,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 5,
+      "action_type_counts": {
+        "click": 4,
+        "input": 1
+      },
+      "click_type_counts": {
+        "other": 1,
+        "purchase": 1,
+        "review": 1,
+        "suggested_term": 1
+      },
+      "semantic_id_count": 5,
+      "rationale_step_indices": [
+        3
+      ],
+      "rationale_count": 1
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "02653e558ed3e0bf",
+      "user_sha256_16": "33528f9f0ac2c4a2",
+      "declared_action_count": 56,
+      "retrieved_action_count": 56,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 56,
+      "action_type_counts": {
+        "click": 50,
+        "input": 6
+      },
+      "click_type_counts": {
+        "nav_bar": 7,
+        "other": 12,
+        "page_related": 17,
+        "product_link": 5,
+        "product_option": 2,
+        "purchase": 1,
+        "search": 6
+      },
+      "semantic_id_count": 56,
+      "rationale_step_indices": [
+        12,
+        32,
+        52
+      ],
+      "rationale_count": 3
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "02c7488d9033a4ef",
+      "user_sha256_16": "c56617093c350dad",
+      "declared_action_count": 4,
+      "retrieved_action_count": 4,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 4,
+      "action_type_counts": {
+        "click": 3,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "nav_bar": 3
+      },
+      "semantic_id_count": 3,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "030390e8608367db",
+      "user_sha256_16": "1f61566463ce62d6",
+      "declared_action_count": 7,
+      "retrieved_action_count": 7,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 7,
+      "action_type_counts": {
+        "click": 5,
+        "input": 2
+      },
+      "click_type_counts": {
+        "nav_bar": 1,
+        "purchase": 1,
+        "quantity": 1,
+        "search": 2
+      },
+      "semantic_id_count": 7,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "0319403bf704b068",
+      "user_sha256_16": "9094c679d5ae3b08",
+      "declared_action_count": 20,
+      "retrieved_action_count": 20,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 20,
+      "action_type_counts": {
+        "click": 17,
+        "input": 3
+      },
+      "click_type_counts": {
+        "nav_bar": 1,
+        "product_link": 4,
+        "product_option": 6,
+        "purchase": 1,
+        "search": 5
+      },
+      "semantic_id_count": 20,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "test",
+      "session_sha256_16": "03afa9ebb4c78671",
+      "user_sha256_16": "08631a31820daca0",
+      "declared_action_count": 6,
+      "retrieved_action_count": 6,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 6,
+      "action_type_counts": {
+        "click": 6
+      },
+      "click_type_counts": {
+        "product_option": 5,
+        "purchase": 1
+      },
+      "semantic_id_count": 6,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "03b79e91ce5c635c",
+      "user_sha256_16": "71ae53e0172a2eac",
+      "declared_action_count": 5,
+      "retrieved_action_count": 5,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 5,
+      "action_type_counts": {
+        "click": 4,
+        "input": 1
+      },
+      "click_type_counts": {
+        "filter": 1,
+        "product_link": 1,
+        "purchase": 1,
+        "search": 1
+      },
+      "semantic_id_count": 5,
+      "rationale_step_indices": [
+        2
+      ],
+      "rationale_count": 1
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "03bcd76c81cbc1f7",
+      "user_sha256_16": "08631a31820daca0",
+      "declared_action_count": 3,
+      "retrieved_action_count": 3,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 3,
+      "action_type_counts": {
+        "click": 2,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "nav_bar": 2
+      },
+      "semantic_id_count": 2,
+      "rationale_step_indices": [
+        2
+      ],
+      "rationale_count": 1
+    },
+    {
+      "split": "test",
+      "session_sha256_16": "0429d926727fa8ed",
+      "user_sha256_16": "c4ba525ed82ad129",
+      "declared_action_count": 11,
+      "retrieved_action_count": 11,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 11,
+      "action_type_counts": {
+        "click": 7,
+        "input": 3,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "other": 1,
+        "product_link": 1,
+        "quantity": 1,
+        "search": 4
+      },
+      "semantic_id_count": 10,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "test",
+      "session_sha256_16": "04ed2e41acbf9488",
+      "user_sha256_16": "31a7241da3c1ac48",
+      "declared_action_count": 14,
+      "retrieved_action_count": 14,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 14,
+      "action_type_counts": {
+        "click": 12,
+        "input": 1,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "cart_side_bar": 1,
+        "review": 10,
+        "suggested_term": 1
+      },
+      "semantic_id_count": 13,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "04fda65d43018425",
+      "user_sha256_16": "a2a398be0ff7e9bc",
+      "declared_action_count": 12,
+      "retrieved_action_count": 12,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 12,
+      "action_type_counts": {
+        "click": 9,
+        "input": 3
+      },
+      "click_type_counts": {
+        "product_link": 2,
+        "purchase": 1,
+        "review": 3,
+        "search": 3
+      },
+      "semantic_id_count": 12,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "050ea0432026f038",
+      "user_sha256_16": "9094c679d5ae3b08",
+      "declared_action_count": 21,
+      "retrieved_action_count": 21,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 21,
+      "action_type_counts": {
+        "click": 19,
+        "input": 2
+      },
+      "click_type_counts": {
+        "other": 5,
+        "page_related": 4,
+        "product_link": 4,
+        "purchase": 1,
+        "review": 1,
+        "search": 3,
+        "suggested_term": 1
+      },
+      "semantic_id_count": 21,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "050eb2c90c0307ad",
+      "user_sha256_16": "7dc851cc8e301849",
+      "declared_action_count": 4,
+      "retrieved_action_count": 4,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 4,
+      "action_type_counts": {
+        "click": 4
+      },
+      "click_type_counts": {
+        "other": 1,
+        "purchase": 1,
+        "quantity": 2
+      },
+      "semantic_id_count": 4,
+      "rationale_step_indices": [
+        0
+      ],
+      "rationale_count": 1
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "0549ddda32f6bf0d",
+      "user_sha256_16": "05914a6c79825321",
+      "declared_action_count": 9,
+      "retrieved_action_count": 9,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 9,
+      "action_type_counts": {
+        "click": 9
+      },
+      "click_type_counts": {
+        "nav_bar": 1,
+        "product_option": 5,
+        "purchase": 1,
+        "review": 2
+      },
+      "semantic_id_count": 9,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "07187a0bd557bd5d",
+      "user_sha256_16": "c4ba525ed82ad129",
+      "declared_action_count": 3,
+      "retrieved_action_count": 3,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 3,
+      "action_type_counts": {
+        "click": 3
+      },
+      "click_type_counts": {
+        "other": 1,
+        "purchase": 1,
+        "review": 1
+      },
+      "semantic_id_count": 3,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "07ea1eb4a9b260cf",
+      "user_sha256_16": "5847a2c1b95c6d20",
+      "declared_action_count": 15,
+      "retrieved_action_count": 15,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 15,
+      "action_type_counts": {
+        "click": 12,
+        "input": 3
+      },
+      "click_type_counts": {
+        "filter": 5,
+        "nav_bar": 1,
+        "product_link": 2,
+        "purchase": 1,
+        "suggested_term": 3
+      },
+      "semantic_id_count": 15,
+      "rationale_step_indices": [
+        8,
+        9
+      ],
+      "rationale_count": 2
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "086cea014eb462f9",
+      "user_sha256_16": "2ff4c084f73e051f",
+      "declared_action_count": 9,
+      "retrieved_action_count": 9,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 9,
+      "action_type_counts": {
+        "click": 9
+      },
+      "click_type_counts": {
+        "other": 8,
+        "purchase": 1
+      },
+      "semantic_id_count": 9,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "test",
+      "session_sha256_16": "094ba36fb2a5b05c",
+      "user_sha256_16": "31a7241da3c1ac48",
+      "declared_action_count": 8,
+      "retrieved_action_count": 8,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 8,
+      "action_type_counts": {
+        "click": 7,
+        "input": 1
+      },
+      "click_type_counts": {
+        "product_link": 1,
+        "product_option": 1,
+        "purchase": 1,
+        "quantity": 1,
+        "search": 2,
+        "suggested_term": 1
+      },
+      "semantic_id_count": 8,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "09d64f561554874f",
+      "user_sha256_16": "bc40790cc75f1634",
+      "declared_action_count": 10,
+      "retrieved_action_count": 10,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 10,
+      "action_type_counts": {
+        "click": 9,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "nav_bar": 1,
+        "product_link": 1,
+        "search": 7
+      },
+      "semantic_id_count": 9,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "09e8c4ec36cfc862",
+      "user_sha256_16": "1f61566463ce62d6",
+      "declared_action_count": 4,
+      "retrieved_action_count": 4,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 4,
+      "action_type_counts": {
+        "click": 3,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "cart_side_bar": 2,
+        "product_link": 1
+      },
+      "semantic_id_count": 3,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "0a03f3b66f84c796",
+      "user_sha256_16": "2265fa29dfcf6c90",
+      "declared_action_count": 14,
+      "retrieved_action_count": 14,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 14,
+      "action_type_counts": {
+        "click": 12,
+        "input": 2
+      },
+      "click_type_counts": {
+        "other": 1,
+        "product_link": 2,
+        "product_option": 1,
+        "purchase": 1,
+        "review": 2,
+        "search": 3,
+        "suggested_term": 2
+      },
+      "semantic_id_count": 14,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "test",
+      "session_sha256_16": "0c3f7e7317cd68d0",
+      "user_sha256_16": "1acc967c656a89a5",
+      "declared_action_count": 21,
+      "retrieved_action_count": 21,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 21,
+      "action_type_counts": {
+        "click": 20,
+        "input": 1
+      },
+      "click_type_counts": {
+        "page_related": 4,
+        "product_link": 1,
+        "purchase": 1,
+        "quantity": 1,
+        "review": 3,
+        "search": 10
+      },
+      "semantic_id_count": 21,
+      "rationale_step_indices": [
+        16,
+        17
+      ],
+      "rationale_count": 2
+    },
+    {
+      "split": "test",
+      "session_sha256_16": "0c564f7a01b62bd0",
+      "user_sha256_16": "32eb431f925714ac",
+      "declared_action_count": 14,
+      "retrieved_action_count": 14,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 14,
+      "action_type_counts": {
+        "click": 9,
+        "input": 5
+      },
+      "click_type_counts": {
+        "product_link": 2,
+        "product_option": 1,
+        "purchase": 1,
+        "search": 2,
+        "suggested_term": 3
+      },
+      "semantic_id_count": 14,
+      "rationale_step_indices": [
+        3,
+        11
+      ],
+      "rationale_count": 2
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "0c83428d944c3c0b",
+      "user_sha256_16": "4631891cc071502e",
+      "declared_action_count": 3,
+      "retrieved_action_count": 3,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 3,
+      "action_type_counts": {
+        "click": 2,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "product_link": 1,
+        "suggested_term": 1
+      },
+      "semantic_id_count": 2,
+      "rationale_step_indices": [
+        0
+      ],
+      "rationale_count": 1
+    },
+    {
+      "split": "test",
+      "session_sha256_16": "0cbbcb4a2d49932f",
+      "user_sha256_16": "ae02b1cdde20a3c2",
+      "declared_action_count": 5,
+      "retrieved_action_count": 5,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 5,
+      "action_type_counts": {
+        "click": 4,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "cart_side_bar": 1,
+        "nav_bar": 1,
+        "quantity": 1,
+        "review": 1
+      },
+      "semantic_id_count": 4,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "0f4a373896a83bc2",
+      "user_sha256_16": "2ff4c084f73e051f",
+      "declared_action_count": 9,
+      "retrieved_action_count": 9,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 9,
+      "action_type_counts": {
+        "click": 8,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "nav_bar": 1,
+        "other": 7
+      },
+      "semantic_id_count": 8,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "test",
+      "session_sha256_16": "0fd3cd778f667bb5",
+      "user_sha256_16": "31a7241da3c1ac48",
+      "declared_action_count": 10,
+      "retrieved_action_count": 10,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 10,
+      "action_type_counts": {
+        "click": 9,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "cart_side_bar": 2,
+        "product_link": 1,
+        "product_option": 1,
+        "quantity": 1,
+        "review": 2,
+        "search": 2
+      },
+      "semantic_id_count": 9,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    },
+    {
+      "split": "train",
+      "session_sha256_16": "0fef7a5a3cea066a",
+      "user_sha256_16": "8a23f658a7e99797",
+      "declared_action_count": 3,
+      "retrieved_action_count": 3,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 3,
+      "action_type_counts": {
+        "click": 1,
+        "input": 1,
+        "terminate": 1
+      },
+      "click_type_counts": {
+        "search": 1
+      },
+      "semantic_id_count": 2,
+      "rationale_step_indices": [
+        1
+      ],
+      "rationale_count": 1
+    }
+  ]
+}

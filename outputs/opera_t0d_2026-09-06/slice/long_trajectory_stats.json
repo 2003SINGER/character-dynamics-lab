@@ -1,0 +1,88 @@
+{
+  "purpose": "T0d+ full filtered OPeRA trajectory structure statistics; no training or Paper-0 result",
+  "source": {
+    "dataset": "NEU-HAI/OPeRA",
+    "revision": "6f26a2c5cc69084f1714e39db9776e61791344d6",
+    "license": "CC-BY-4.0"
+  },
+  "all_sessions": {
+    "count": 527,
+    "length_min": 3,
+    "p25": 4.0,
+    "median": 7.0,
+    "p75": 12.0,
+    "p90": 22.0,
+    "max": 241,
+    "threshold_counts": {
+      ">=10": 183,
+      ">=20": 69,
+      ">=30": 34,
+      ">=50": 13,
+      ">=100": 1
+    }
+  },
+  "users": {
+    "count": 52,
+    "sessions_per_user_min": 1,
+    "median": 8.0,
+    "p75": 16.0,
+    "p90": 21.799999999999997,
+    "max": 42,
+    "users_with_2plus_sessions": 42,
+    "users_with_5plus_sessions": 35,
+    "users_with_10plus_sessions": 24,
+    "users_with_long_sessions": {
+      "10": 40,
+      "20": 24,
+      "30": 15
+    }
+  },
+  "deterministic_user_disjoint_80_20": {
+    "method": "SHA-256 user-id rank; lowest 20% users test",
+    "train_users": 42,
+    "test_users": 10,
+    "train_sessions": 441,
+    "test_sessions": 86,
+    "thresholds_train": {
+      ">=10": 162,
+      ">=20": 59,
+      ">=30": 28
+    },
+    "thresholds_test": {
+      ">=10": 21,
+      ">=20": 10,
+      ">=30": 6
+    }
+  },
+  "long_session_label_entropy": {
+    "definition": "all actions in sessions with >=20 actions; descriptive only",
+    "action_count": 2562,
+    "action_type_entropy_bits": 0.44199814746320076,
+    "action_type_counts": {
+      "input": 187,
+      "click": 2355,
+      "terminate": 20
+    },
+    "click_type_entropy_bits": 2.9292946400618236,
+    "click_type_counts": {
+      "search": 263,
+      "nav_bar": 49,
+      "quantity": 39,
+      "other": 221,
+      "purchase": 49,
+      "product_link": 187,
+      "review": 826,
+      "cart_side_bar": 57,
+      "product_option": 413,
+      "filter": 38,
+      "suggested_term": 52,
+      "cart_page_select": 36,
+      "page_related": 125
+    }
+  },
+  "interpretation_boundary": {
+    "persistent_state": "length alone does not prove state accumulation; >=20 sessions are a feasibility pool, not evidence of S",
+    "candidate_set": "these are observed labels, not per-step UI candidate sets",
+    "split": "the split is deterministic and user-disjoint but must be frozen in the pilot protocol"
+  }
+}

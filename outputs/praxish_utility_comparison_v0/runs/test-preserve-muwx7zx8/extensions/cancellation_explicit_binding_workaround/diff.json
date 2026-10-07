@@ -1,0 +1,17 @@
+[
+  {
+    "op": "replace",
+    "path": "/praxish_scenario/practices/1/actions/2/conditions/1",
+    "value": "practice.request.Worker.Visitor.status!Status"
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/practices/1/actions/2/conditions/-",
+    "value": "eq Status pending"
+  },
+  {
+    "op": "replace",
+    "path": "/shared_case_schedule/case_id",
+    "value": "cancellation_explicit_binding_workaround"
+  }
+]

@@ -1,0 +1,126 @@
+[
+  {
+    "op": "add",
+    "path": "/utility_baseline/roles/Worker/-",
+    "value": "worker2"
+  },
+  {
+    "op": "add",
+    "path": "/utility_baseline/roles/Visitor/-",
+    "value": "visitor2"
+  },
+  {
+    "op": "replace",
+    "path": "/praxish_scenario/turns",
+    "value": 12
+  },
+  {
+    "op": "replace",
+    "path": "/praxish_scenario/characters/1/name",
+    "value": "worker2"
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/characters/1/goals/-",
+    "value": {
+      "id": "keep_working",
+      "utility": 1,
+      "conditions": [
+        "practice.restock.worker2.phase!working"
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/characters/1/goals/-",
+    "value": {
+      "id": "finish_work",
+      "utility": 5,
+      "conditions": [
+        "practice.restock.worker2.phase!complete"
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/characters/1/goals/-",
+    "value": {
+      "id": "serve_visitor",
+      "utility": 10,
+      "conditions": [
+        "practice.request.worker2.Visitor.status!served"
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/characters/-",
+    "value": {
+      "name": "visitor",
+      "goals": []
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/characters/-",
+    "value": {
+      "name": "visitor2",
+      "goals": []
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/initial_practice_instances/-",
+    "value": "insert practice.restock.worker2"
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/conditions/run/events/-",
+    "value": {
+      "before_turn": 1,
+      "id": "second_visible_request",
+      "outcome": "insert practice.request.worker2.visitor2"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/trace_fact_patterns/-",
+    "value": {
+      "id": "work_phase_2",
+      "pattern": "practice.restock.worker2.phase!Value"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/trace_fact_patterns/-",
+    "value": {
+      "id": "request_status_2",
+      "pattern": "practice.request.worker2.visitor2.status!Value"
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/shared_case_schedule/case_id",
+    "value": "second_worker_visitor_pair"
+  },
+  {
+    "op": "replace",
+    "path": "/shared_case_schedule/turns",
+    "value": 12
+  },
+  {
+    "op": "replace",
+    "path": "/shared_case_schedule/actor_order/1",
+    "value": "worker2"
+  },
+  {
+    "op": "add",
+    "path": "/shared_case_schedule/actor_order/-",
+    "value": "visitor"
+  },
+  {
+    "op": "add",
+    "path": "/shared_case_schedule/actor_order/-",
+    "value": "visitor2"
+  }
+]

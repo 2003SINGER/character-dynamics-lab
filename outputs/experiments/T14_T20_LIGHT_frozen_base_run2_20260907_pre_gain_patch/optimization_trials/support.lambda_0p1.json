@@ -1,0 +1,108 @@
+{
+  "condition": "support",
+  "lambda": 0.1,
+  "train_rows": 17341,
+  "validation_rows": 3886,
+  "train_data_nll": 2.186307412032339,
+  "train_regularized_objective": 2.186449143797719,
+  "validation_nll": 2.194004785866676,
+  "w_norm": 0.053241293256300656,
+  "weights_w": [
+    0.015569082741526224,
+    0.012578730105828984,
+    0.027029400229291733,
+    0.0,
+    0.0,
+    -0.015569082741526212,
+    -0.0180206906981892,
+    -0.009954419912232918,
+    0.0,
+    0.016910197259106308,
+    -0.02669100813310752,
+    0.004518781611565359,
+    -0.004290671528155157
+  ],
+  "optimizer": {
+    "method": "L-BFGS-B",
+    "max_iter": 1000,
+    "gtol": 1e-08,
+    "initialization": "zeros",
+    "deterministic": true,
+    "success": true,
+    "status": 0,
+    "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+    "iterations": 8,
+    "function_evaluations": 10,
+    "gradient_evaluations": 10,
+    "final_objective": 2.186449143797719,
+    "final_data_nll": 2.186307412032339,
+    "final_l2_penalty": 0.0001417317653801703,
+    "final_gradient_norm": 9.677679087078186e-07
+  },
+  "optimization_history": [
+    {
+      "iteration": 1,
+      "objective": 2.1864785925742725,
+      "data_nll": 2.186389935297019,
+      "l2_penalty": 8.865727725347117e-05,
+      "gradient_norm": 0.003266664623679131,
+      "w_norm": 0.04210873478352708
+    },
+    {
+      "iteration": 2,
+      "objective": 2.186451319877615,
+      "data_nll": 2.186321600695363,
+      "l2_penalty": 0.0001297191822517893,
+      "gradient_norm": 0.0009017535525004524,
+      "w_norm": 0.05093509247106346
+    },
+    {
+      "iteration": 3,
+      "objective": 2.1864496620949674,
+      "data_nll": 2.1863065157001844,
+      "l2_penalty": 0.00014314639478300934,
+      "gradient_norm": 0.0006542478730479221,
+      "w_norm": 0.053506335098380514
+    },
+    {
+      "iteration": 4,
+      "objective": 2.18644924744024,
+      "data_nll": 2.1863064874749587,
+      "l2_penalty": 0.00014275996528111972,
+      "gradient_norm": 0.0002651985061573642,
+      "w_norm": 0.053434065029926314
+    },
+    {
+      "iteration": 5,
+      "objective": 2.186449169435044,
+      "data_nll": 2.186307658575289,
+      "l2_penalty": 0.00014151085975454,
+      "gradient_norm": 8.266969258901694e-05,
+      "w_norm": 0.05319978566771486
+    },
+    {
+      "iteration": 6,
+      "objective": 2.1864491533044754,
+      "data_nll": 2.1863076565400896,
+      "l2_penalty": 0.00014149676438581378,
+      "gradient_norm": 4.606606063009718e-05,
+      "w_norm": 0.05319713608566043
+    },
+    {
+      "iteration": 7,
+      "objective": 2.1864491439943246,
+      "data_nll": 2.1863074336326154,
+      "l2_penalty": 0.0001417103617093317,
+      "gradient_norm": 1.078224545830683e-05,
+      "w_norm": 0.0532372729784935
+    },
+    {
+      "iteration": 8,
+      "objective": 2.186449143797719,
+      "data_nll": 2.186307412032339,
+      "l2_penalty": 0.0001417317653801703,
+      "gradient_norm": 9.677679087078186e-07,
+      "w_norm": 0.053241293256300656
+    }
+  ]
+}

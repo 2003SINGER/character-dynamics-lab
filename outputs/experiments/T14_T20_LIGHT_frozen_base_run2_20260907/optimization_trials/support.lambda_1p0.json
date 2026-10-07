@@ -1,0 +1,68 @@
+{
+  "condition": "support",
+  "lambda": 1.0,
+  "train_rows": 17341,
+  "validation_rows": 3886,
+  "train_data_nll": 2.1866312775784102,
+  "train_regularized_objective": 2.1866813295972274,
+  "validation_nll": 2.1952153018297196,
+  "w_norm": 0.01000520052945563,
+  "weights_w": [
+    0.002154467312827176,
+    0.001359312560178558,
+    0.005867748392998,
+    0.0,
+    0.0,
+    -0.002154467312827175,
+    -0.00255496428519333,
+    -0.0033287740653653356,
+    0.0,
+    0.0025339884000615542,
+    -0.0054798561139313764,
+    0.0005428087509020306,
+    -0.00043501279612461515
+  ],
+  "optimizer": {
+    "method": "L-BFGS-B",
+    "max_iter": 1000,
+    "gtol": 1e-08,
+    "initialization": "zeros",
+    "deterministic": true,
+    "success": true,
+    "status": 0,
+    "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+    "iterations": 3,
+    "function_evaluations": 5,
+    "gradient_evaluations": 5,
+    "final_objective": 2.1866813295972274,
+    "final_data_nll": 2.1866312775784102,
+    "final_l2_penalty": 5.00520188173096e-05,
+    "final_gradient_norm": 5.970313710827985e-06
+  },
+  "optimization_history": [
+    {
+      "iteration": 1,
+      "objective": 2.1866815843871534,
+      "data_nll": 2.1866340744918036,
+      "l2_penalty": 4.750989535004307e-05,
+      "gradient_norm": 0.000746008316686223,
+      "w_norm": 0.009747809533432942
+    },
+    {
+      "iteration": 2,
+      "objective": 2.186681330056808,
+      "data_nll": 2.1866312987391647,
+      "l2_penalty": 5.00313176433407e-05,
+      "gradient_norm": 3.3417924880261104e-05,
+      "w_norm": 0.010003131274090199
+    },
+    {
+      "iteration": 3,
+      "objective": 2.1866813295972274,
+      "data_nll": 2.1866312775784102,
+      "l2_penalty": 5.00520188173096e-05,
+      "gradient_norm": 5.970313710827985e-06,
+      "w_norm": 0.01000520052945563
+    }
+  ]
+}

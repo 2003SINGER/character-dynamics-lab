@@ -1,0 +1,18 @@
+Character Dynamics Reference batch experiment
+run_directory=outputs\parameter_sensitivity_v0\task_pressure_coupling_high\batch\run_1788970900412_0
+config_version=task-commitment-v0
+parameter_config={"state_accumulation":1,"state_recovery_strength":1,"state_decay":1,"task_pressure_coupling":1.2,"study_fatigue_penalty":1,"task_drive_coefficient":1,"distraction_weight":1,"commitment_bonus":1,"recovery_drive_coefficient":1}
+parameter_config_hash=304ec0aa0bcc2d40
+git_revision=fix
+personality_generation=deterministic_uniform_[0,1]
+personality_generation_seed=20260904
+personality_count=32
+world_scenario_seed_count=1
+world_scenario_seeds=1101
+steps_per_run=256
+total_decision_points=8192
+task_model=single_world_task_with_continuous_effort
+task_effort_target=seeded_[7.2,9.2]_or_8.0_for_legacy_seed
+task_effort_settlement=base_effort_x_duration_x_interruption_x_seeded_variation_[0.90,1.10]
+world_events=per-day deterministic schedule generated from each scenario seed
+note=This is a synthetic rule-based stress run, not an LLM result or a psychological validation.

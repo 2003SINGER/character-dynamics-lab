@@ -1,0 +1,69 @@
+{
+  "purpose": "T0d OPeRA 30-session data feasibility audit; not a model run or Paper-0 result",
+  "source": {
+    "dataset": "NEU-HAI/OPeRA",
+    "dataset_revision": "6f26a2c5cc69084f1714e39db9776e61791344d6",
+    "license": "CC-BY-4.0",
+    "access_method": "Hugging Face datasets-server API; filtered_session and filtered_action configs"
+  },
+  "sample_method": "lowest SHA-256 rank of session_id across filtered train/test session tables; deterministic, not stratified",
+  "session_table": {
+    "train_sessions": 437,
+    "test_sessions": 90,
+    "train_users": 49,
+    "test_users": 15,
+    "cross_split_user_overlap": 12
+  },
+  "sample_summary": {
+    "session_count": 1,
+    "action_count_min": 5,
+    "action_count_median": 5,
+    "action_count_mean": 5,
+    "action_count_max": 5,
+    "session_count_matches": 1,
+    "session_timestamps_non_decreasing": 1,
+    "session_unique_action_ids": 1,
+    "session_complete_html_and_url": 1,
+    "action_type_counts": {
+      "click": 5
+    },
+    "click_type_counts": {
+      "other": 1,
+      "product_link": 1,
+      "purchase": 1,
+      "search": 2
+    },
+    "rationale_step_count": 0,
+    "sessions_with_rationale": 0
+  },
+  "interpretation_boundary": {
+    "finite_label_space": "action_type and click_type are finite observed label spaces in this slice; exact UI targets are open-world strings/semantic IDs, not a per-step enumerated candidate set.",
+    "rationale_timing": "rationale shares an action row but the release does not expose a separately timestamped pre-action elicitation event; do not feed it into next-action prediction without an explicit causal protocol.",
+    "leakage": "timestamps and train/test session membership can be checked here; user overlap and any within-user split require an explicit split policy before formal evaluation."
+  },
+  "records": [
+    {
+      "split": "train",
+      "session_sha256_16": "0162834ef6fbb6ce",
+      "user_sha256_16": "bfbb2c9bfc15299d",
+      "declared_action_count": 5,
+      "retrieved_action_count": 5,
+      "count_matches_session_table": true,
+      "timestamps_non_decreasing": true,
+      "unique_action_ids": true,
+      "nonempty_html_and_url_count": 5,
+      "action_type_counts": {
+        "click": 5
+      },
+      "click_type_counts": {
+        "other": 1,
+        "product_link": 1,
+        "purchase": 1,
+        "search": 2
+      },
+      "semantic_id_count": 5,
+      "rationale_step_indices": [],
+      "rationale_count": 0
+    }
+  ]
+}

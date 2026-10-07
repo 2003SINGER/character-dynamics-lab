@@ -1,0 +1,90 @@
+{
+  "schema_version": "research_split_audit_v1",
+  "interpretation": "audit, not a model test; old actor-unit overlap is an expected defect reproduction, not a passing split",
+  "input": {
+    "path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/T0c_LIGHT/light_actor_local_full_v0.jsonl",
+    "sha256": "e6f214b91ed644b60543cf442fdae4255ff177d26a25fccd750ab5c7381ba195",
+    "rows_read": 13463,
+    "fields_consumed": [
+      "trajectory_id",
+      "actor"
+    ]
+  },
+  "script": {
+    "path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/audit_research_split_v1.py",
+    "sha256": "0503767add00a4abd046c7dff6fbf7f6a8192cb1434c7b27768c304e2b7f1ee5"
+  },
+  "split_rules": {
+    "historical_actor_unit": "bucket(trajectory_id + '::' + actor); train < 7, validation 7-8, test >= 9",
+    "proposed_episode_grouped": "bucket(trajectory_id); train < 7, validation 7-8, test >= 9",
+    "bucket": "int(sha256(key).hexdigest()[:8], 16) % 10"
+  },
+  "historical_actor_unit_split": {
+    "counts_by_split": {
+      "train": {
+        "rows": 9380,
+        "actor_units": 4823,
+        "episodes": 3902
+      },
+      "validation": {
+        "rows": 2734,
+        "actor_units": 1362,
+        "episodes": 1293
+      },
+      "test": {
+        "rows": 1349,
+        "actor_units": 684,
+        "episodes": 661
+      }
+    },
+    "pairwise_episode_overlap": {
+      "train__validation": {
+        "shared_episode_count": 563
+      },
+      "train__test": {
+        "shared_episode_count": 279
+      },
+      "validation__test": {
+        "shared_episode_count": 70
+      }
+    },
+    "total_pairwise_shared_episode_counts": 912
+  },
+  "proposed_episode_grouped_split": {
+    "counts_by_split": {
+      "train": {
+        "rows": 9530,
+        "actor_units": 4832,
+        "episodes": 3490
+      },
+      "validation": {
+        "rows": 2717,
+        "actor_units": 1397,
+        "episodes": 986
+      },
+      "test": {
+        "rows": 1216,
+        "actor_units": 640,
+        "episodes": 468
+      }
+    },
+    "pairwise_episode_overlap": {
+      "train__validation": {
+        "shared_episode_count": 0
+      },
+      "train__test": {
+        "shared_episode_count": 0
+      },
+      "validation__test": {
+        "shared_episode_count": 0
+      }
+    },
+    "total_pairwise_shared_episode_counts": 0
+  },
+  "exit_code_meaning": {
+    "0": "no pairwise episode overlap in the historical actor-unit split",
+    "2": "historical actor-unit split has episode overlap; expected defect reproduced",
+    "3": "proposed episode-grouped split unexpectedly has episode overlap",
+    "1": "input or audit error"
+  }
+}

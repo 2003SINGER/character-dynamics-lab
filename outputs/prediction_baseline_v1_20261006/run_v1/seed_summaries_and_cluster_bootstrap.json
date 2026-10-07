@@ -1,0 +1,2011 @@
+{
+  "seeds_are_repeated_fits_not_independent_episode_samples": true,
+  "seeds_reported": [
+    7,
+    19,
+    31
+  ],
+  "status": "post_selection_development_only_not_formal_test",
+  "strata": {
+    "all": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2872320152410897,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0037272078381062677,
+          "seed_count": 3
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.279135024886298,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0030922579184409498,
+          "seed_count": 3
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2870063558431877,
+          "reason": null,
+          "sd_across_repeated_fits": 0.004154806023142976,
+          "seed_count": 3
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2865124498075957,
+          "reason": null,
+          "sd_across_repeated_fits": 0.004205847196230872,
+          "seed_count": 3
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2870310015784683,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0012309041824925368,
+          "seed_count": 3
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.277676400405009,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0014848932707052646,
+          "seed_count": 3
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2887457263886586,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0013225076024011612,
+          "seed_count": 3
+        }
+      },
+      "episodes": 985,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.008329269445661501,
+            -0.0004474830023222974
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.004386241569438014,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "fixed_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00659619717841974,
+            0.006494222003165091
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0001500022666763458,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -1.961558032034719e-05,
+            9.044373427630503e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -4.88960659279346e-06,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.023329877689573425,
+            0.0019863971828893478
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.011016202707285365,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed19_permutation_intersection_rows": 2707,
+        "gru_seed19_vs_learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0064208117104839575,
+            0.007042433597313049
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.00036798095544590296,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed19_vs_permuted_state_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.06454408796493805,
+            -0.03086129159088337
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.047892247084810324,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed19_vs_state_zero_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.14314525598006914,
+            -0.08738065818269418
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.11508888892463358,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.02755155157946284,
+            0.004508486608370607
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.011353334901206907,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed31_permutation_intersection_rows": 2707,
+        "gru_seed31_vs_learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.008051577284970045,
+            0.008165498463901603
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 3.514843736577395e-05,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed31_vs_permuted_state_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0739473292262309,
+            -0.03769653619467713
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.055361162842222804,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed31_vs_state_zero_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.137308817079458,
+            -0.08480507675005965
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.11182691570265424,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.021361884021008446,
+            0.008154262000713546
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.006462566898588681,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed7_permutation_intersection_rows": 2707,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0026917910725785784,
+            0.011095597211912153
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.003972744051054654,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.053828612687859156,
+            -0.0233250351109728
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.038718555795560695,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.13758599088062015,
+            -0.08356484742013595
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.10933828205255551,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.009521369983922907,
+            -0.0007305019096976999
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0051036934197323325,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00019153644488127038,
+            5.038342484813803e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -8.986462602590695e-05,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -5.116757171576774e-05,
+            2.6515007901201644e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -2.455359065404976e-05,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "last_action_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.010153636744243315,
+            -0.0012983016017046967
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0056875011425067635,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "last_action_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.009074157925786423,
+            0.007725119900818399
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0008736494990526023,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.007849819725836078,
+            0.00745071086545018
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0001386791016283095,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "learned_last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.010605633011087919,
+            0.007808892883765885
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0017364040969437148,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "learned_last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0071070876052486505,
+            0.0021230719228920833
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0022821774837668636,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.002126681251791917,
+            -0.00012879157877394227
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0011255928498596823,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.024736449530739075,
+            0.001398356436195541
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.011384183662731268,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.02825560341982283,
+            0.005572698144434738
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.011388483338572682,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.025478845574662356,
+            0.004161763001657262
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.010435310949643336,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed19": 2.2829608874299847,
+        "fixed_mean_seed31": 2.289826031635289,
+        "fixed_mean_seed7": 2.288909126657994,
+        "gru_permuted_state_seed19": 2.3242231733769474,
+        "gru_permuted_state_seed19_episodes": 985,
+        "gru_permuted_state_seed19_rows": 2707,
+        "gru_permuted_state_seed31": 2.333983861842982,
+        "gru_permuted_state_seed31_episodes": 985,
+        "gru_permuted_state_seed31_rows": 2707,
+        "gru_permuted_state_seed7": 2.3211700051615587,
+        "gru_permuted_state_seed7_episodes": 985,
+        "gru_permuted_state_seed7_rows": 2707,
+        "gru_seed19": 2.2763309262921374,
+        "gru_seed31": 2.278622699000759,
+        "gru_seed7": 2.282451449365998,
+        "gru_state_zero_seed19": 2.391419815216771,
+        "gru_state_zero_seed19_episodes": 985,
+        "gru_state_zero_seed19_rows": 2707,
+        "gru_state_zero_seed31": 2.390449614703413,
+        "gru_state_zero_seed31_episodes": 985,
+        "gru_state_zero_seed31_rows": 2707,
+        "gru_state_zero_seed7": 2.3917897314185534,
+        "gru_state_zero_seed7_episodes": 985,
+        "gru_state_zero_seed7_rows": 2707,
+        "last2_seed19": 2.2822434355796903,
+        "last2_seed31": 2.2898861692759396,
+        "last2_seed7": 2.2888894626739327,
+        "last_action_seed19": 2.2816596278569157,
+        "last_action_seed31": 2.2891023844029132,
+        "last_action_seed7": 2.2887753371629587,
+        "learned_last2_seed19": 2.285610724902479,
+        "learned_last2_seed31": 2.287693856418199,
+        "learned_last2_seed7": 2.287788423414727,
+        "learned_mean_seed19": 2.2759629453366914,
+        "learned_mean_seed31": 2.278587550563393,
+        "learned_mean_seed7": 2.2784787053149436,
+        "o_only_seed19": 2.2873471289994227,
+        "o_only_seed31": 2.289976033901966,
+        "o_only_seed7": 2.2889140162645867,
+        "uniform": 2.3334929671736995
+      },
+      "rows": 2707
+    },
+    "depth_eq_1": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2234088291638883,
+          "reason": null,
+          "sd_across_repeated_fits": 0.001978923788000322,
+          "seed_count": 3
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.238780844128794,
+          "reason": null,
+          "sd_across_repeated_fits": 0.003187715129703157,
+          "seed_count": 3
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2241869349089733,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0045455448377923376,
+          "seed_count": 3
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2262192455216727,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0007810655856294065,
+          "seed_count": 3
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2234979157132666,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0022708370430632187,
+          "seed_count": 3
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2435098960210653,
+          "reason": null,
+          "sd_across_repeated_fits": 0.005415768588701945,
+          "seed_count": 3
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2231256429862474,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0027085291441027097,
+          "seed_count": 3
+        }
+      },
+      "episodes": 984,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.006478889610511451,
+            0.003019613861990125
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.001538672559391493,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "fixed_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.005687141460785612,
+            0.01020751359553749
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.002398298710755918,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -3.134483124303079e-05,
+            1.0346941619077246e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -1.0067618441307682e-05,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.006123839396053292,
+            0.02407825297029642
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.00930512355019649,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed19_permutation_intersection_rows": 1392,
+        "gru_seed19_vs_learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.014639622922289292,
+            0.0037325640718734315
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.005585712327182978,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed19_vs_permuted_state_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.043935992856067835,
+            -0.0004187026432807838
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.022811126980887747,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed19_vs_state_zero_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0952070997793159,
+            -0.04449575457486137
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.07016460814823706,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            0.0008772296286659926,
+            0.03913271596209114
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.01985720734529454,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed31_permutation_intersection_rows": 1392,
+        "gru_seed31_vs_learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.01984645820746195,
+            0.003527702181872009
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.007826928755846518,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed31_vs_permuted_state_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.05729405572624151,
+            -0.009130128298841371
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.03366211700071206,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed31_vs_state_zero_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.08318191496404931,
+            -0.03930698453085347
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.061521729454398155,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00039686186581155877,
+            0.035512332658269724
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.017803272532149292,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed7_permutation_intersection_rows": 1392,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.011625116339474722,
+            0.009766430324461886
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0007745145937834663,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.03925477712567744,
+            0.0010619051333997087
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.01937593788379568,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.08812860807381473,
+            -0.043316183737560285
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.06512174740348053,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.002090822183799401,
+            0.008689228277315471
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.0032006797819644555,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0001162067307961523,
+            8.490542979123417e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -1.647242013065294e-05,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -3.3685627976699856e-05,
+            3.2203137726158125e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -3.315936559918283e-07,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "last_action_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00565777620089847,
+            0.005939177035647741
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -9.156074160817026e-05,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "last_action_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.004600050701023139,
+            0.014454122108249604
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.005017556057407938,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0053624131961122245,
+            0.013680890926413275
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.004354812290476656,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "learned_last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.01251239746556348,
+            0.00716119794455522
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.002931772613491135,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "learned_last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0022246007633797034,
+            0.009856333862821665
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.003842331618926991,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0013374679863708365,
+            0.0017159727569630624
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.00020625917562123002,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.002283192160884106,
+            0.03221812425736238
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.014890835877379468,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            0.005905872229735094,
+            0.04924482521131348
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.02768413610114106,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            0.0001621765115710587,
+            0.037033221811755876
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.01857778712593276,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed19": 2.224672036031368,
+        "fixed_mean_seed31": 2.2244262771745182,
+        "fixed_mean_seed7": 2.221128174285779,
+        "gru_permuted_state_seed19": 2.258326959121844,
+        "gru_permuted_state_seed19_episodes": 984,
+        "gru_permuted_state_seed19_rows": 1392,
+        "gru_permuted_state_seed31": 2.275547302809769,
+        "gru_permuted_state_seed31_episodes": 984,
+        "gru_permuted_state_seed31_rows": 1392,
+        "gru_permuted_state_seed7": 2.2583174523201652,
+        "gru_permuted_state_seed7_episodes": 984,
+        "gru_permuted_state_seed7_rows": 1392,
+        "gru_seed19": 2.235515832140956,
+        "gru_seed31": 2.2418851858090565,
+        "gru_seed7": 2.2389415144363696,
+        "gru_state_zero_seed19": 2.3056804402891933,
+        "gru_state_zero_seed19_episodes": 984,
+        "gru_state_zero_seed19_rows": 1392,
+        "gru_state_zero_seed31": 2.3034069152634546,
+        "gru_state_zero_seed31_episodes": 984,
+        "gru_state_zero_seed31_rows": 1392,
+        "gru_state_zero_seed7": 2.30406326183985,
+        "gru_state_zero_seed7_episodes": 984,
+        "gru_state_zero_seed7_rows": 1392,
+        "last2_seed19": 2.229411388372724,
+        "last2_seed31": 2.2220115060436316,
+        "last2_seed7": 2.2211379103105644,
+        "last_action_seed19": 2.2261191478491513,
+        "last_action_seed31": 2.22704553452117,
+        "last_action_seed7": 2.225493054194697,
+        "learned_last2_seed19": 2.2232789359772687,
+        "learned_last2_seed31": 2.2258703100826893,
+        "learned_last2_seed7": 2.2213445010798414,
+        "learned_mean_seed19": 2.241101544468139,
+        "learned_mean_seed31": 2.249712114564903,
+        "learned_mean_seed7": 2.239716029030153,
+        "o_only_seed19": 2.2262107085907594,
+        "o_only_seed31": 2.222027978463762,
+        "o_only_seed7": 2.2211382419042205,
+        "uniform": 2.2772936951199196
+      },
+      "rows": 1392
+    },
+    "depth_ge_2": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3547923764726204,
+          "reason": null,
+          "sd_across_repeated_fits": 0.00880899872738001,
+          "seed_count": 3
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.321852150068386,
+          "reason": null,
+          "sd_across_repeated_fits": 0.005853298414521668,
+          "seed_count": 3
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3535041763302034,
+          "reason": null,
+          "sd_across_repeated_fits": 0.013292541284376494,
+          "seed_count": 3
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3503361306942914,
+          "reason": null,
+          "sd_across_repeated_fits": 0.008573392116345363,
+          "seed_count": 3
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3542842757414806,
+          "reason": null,
+          "sd_across_repeated_fits": 0.003413002289900778,
+          "seed_count": 3
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3138435290000285,
+          "reason": null,
+          "sd_across_repeated_fits": 0.005247457742327861,
+          "seed_count": 3
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.358208202507408,
+          "reason": null,
+          "sd_across_repeated_fits": 0.005357804309563969,
+          "seed_count": 3
+        }
+      },
+      "episodes": 586,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.012369347366170774,
+            -0.002603393277334669
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.00740055036182186,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "fixed_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.011755312630665855,
+            0.006656337778600546
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0028475193469696624,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -1.853052334760222e-05,
+            1.9440989485934364e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 5.916044285995426e-07,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.05193039261714972,
+            -0.01200105616016316
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.03252744692813308,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed19_permutation_intersection_rows": 1315,
+        "gru_seed19_vs_learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0039025795485124566,
+            0.0169198323783132
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.006670293540555715,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed19_vs_permuted_state_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.09781424797990353,
+            -0.0511058898493627
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.07444199551420973,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed19_vs_state_zero_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.2089854946426584,
+            -0.11526662318819884
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.1626437169404084,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0688271503319996,
+            -0.01970972838026706
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.044391414602446465,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed31_permutation_intersection_rows": 1315,
+        "gru_seed31_vs_learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0036246547006509155,
+            0.01900612316435579
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.008357590606910648,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed31_vs_permuted_state_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.10739083777217757,
+            -0.05237471446450646
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.07833079920068893,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed31_vs_state_zero_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.20898683335359164,
+            -0.11909016367642147
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.1650777288262835,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.05477664679884931,
+            -0.010067398979617956
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.03214929578648774,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed7_permutation_intersection_rows": 1315,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            0.000339050912809726,
+            0.01780533863554996
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.008997979057605729,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.08256136156027205,
+            -0.03600014883368083
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.05919378327326176,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.20309873857044333,
+            -0.11094156312832044
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.15614392177233677,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.021340601692305665,
+            -0.0065447100783529695
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.013894330299399198,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00033577195357009995,
+            -5.104777987780619e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.00016755432230438117,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -9.313116532908159e-05,
+            -9.46616920779024e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -5.019390990978865e-05,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "last_action_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.018128122135775887,
+            -0.005633444409447837
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.011611112578286871,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "last_action_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.018221191799068868,
+            0.0042641461954020165
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.007109815380872429,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.014865155858912085,
+            0.005330967201689808
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.004895287480191133,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "learned_last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.013805340056228787,
+            0.013287995834340857
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0004710406178303998,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "learned_last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.015872939684056692,
+            -0.0016641065514806988
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.008765308032017697,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.003992052189373079,
+            -0.0012990643710421377
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0025354316479352943,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.05724469600445834,
+            -0.020425943888858468
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.03919774046868879,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0767760143553485,
+            -0.02889412319062152
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.05274900520935711,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.062235689237491065,
+            -0.020095046613498382
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.041147274844093466,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed19": 2.3446628502793185,
+        "fixed_mean_seed31": 2.3590552774219007,
+        "fixed_mean_seed7": 2.360659001716643,
+        "gru_permuted_state_seed19": 2.393977949227217,
+        "gru_permuted_state_seed19_episodes": 586,
+        "gru_permuted_state_seed19_rows": 1315,
+        "gru_permuted_state_seed31": 2.3958421813671125,
+        "gru_permuted_state_seed31_episodes": 586,
+        "gru_permuted_state_seed31_rows": 1315,
+        "gru_permuted_state_seed7": 2.387702897598988,
+        "gru_permuted_state_seed7_episodes": 586,
+        "gru_permuted_state_seed7_rows": 1315,
+        "gru_seed19": 2.3195359537130074,
+        "gru_seed31": 2.317511382166424,
+        "gru_seed7": 2.3285091143257266,
+        "gru_state_zero_seed19": 2.482179670653416,
+        "gru_state_zero_seed19_episodes": 586,
+        "gru_state_zero_seed19_rows": 1315,
+        "gru_state_zero_seed31": 2.4825891109927074,
+        "gru_state_zero_seed31_episodes": 586,
+        "gru_state_zero_seed31_rows": 1315,
+        "gru_state_zero_seed7": 2.4846530360980634,
+        "gru_state_zero_seed7_episodes": 586,
+        "gru_state_zero_seed7_rows": 1315,
+        "last2_seed19": 2.338169070341741,
+        "last2_seed31": 2.361735242446566,
+        "last2_seed7": 2.3606082162023045,
+        "last_action_seed19": 2.3404522880628535,
+        "last_action_seed31": 2.3547929813879978,
+        "last_action_seed7": 2.3557631226320233,
+        "learned_last2_seed19": 2.35159236002331,
+        "learned_last2_seed31": 2.3531374887368526,
+        "learned_last2_seed7": 2.3581229784642788,
+        "learned_mean_seed19": 2.3128656601724518,
+        "learned_mean_seed31": 2.3091537915595133,
+        "learned_mean_seed7": 2.3195111352681206,
+        "o_only_seed19": 2.3520634006411405,
+        "o_only_seed31": 2.36190279676887,
+        "o_only_seed7": 2.3606584101122143,
+        "uniform": 2.3929829950815797
+      },
+      "rows": 1315
+    },
+    "depth_ge_4": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.5695906578591377,
+          "reason": null,
+          "sd_across_repeated_fits": 0.02457810807974457,
+          "seed_count": 3
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.490528203501846,
+          "reason": null,
+          "sd_across_repeated_fits": 0.003360502092223881,
+          "seed_count": 3
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.57280724671754,
+          "reason": null,
+          "sd_across_repeated_fits": 0.031256172961859195,
+          "seed_count": 3
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.5611147966348766,
+          "reason": null,
+          "sd_across_repeated_fits": 0.019224934302021615,
+          "seed_count": 3
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.5715171801321435,
+          "reason": null,
+          "sd_across_repeated_fits": 0.010411628669118605,
+          "seed_count": 3
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.48185187198899,
+          "reason": null,
+          "sd_across_repeated_fits": 0.009982993104962933,
+          "seed_count": 3
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.5793815516161196,
+          "reason": null,
+          "sd_across_repeated_fits": 0.02043692174720315,
+          "seed_count": 3
+        }
+      },
+      "episodes": 149,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.026033042473256166,
+            -0.0021763904292407756
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.013828835162249479,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "fixed_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.037743091664272845,
+            0.006010083442951078
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.015542959625070745,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -4.277065609928604e-05,
+            4.176360076096012e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -8.864836259321733e-07,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.10992526748587392,
+            -0.012931019183974976
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.06295484710823405,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed19_permutation_intersection_rows": 220,
+        "gru_seed19_vs_learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.012655918394031103,
+            0.037543402383661655
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.011953222751617431,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed19_vs_permuted_state_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.12408507343665388,
+            -0.0035101085233016156
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.061165837266228415,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed19_vs_state_zero_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.41499198413167904,
+            -0.16408965741134632
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.2868960814042525,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.17271159394066124,
+            -0.04381397156881905
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.10628369613127275,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed31_permutation_intersection_rows": 220,
+        "gru_seed31_vs_learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.016164600251441556,
+            0.04276760278015613
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.014347988096150484,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed31_vs_permuted_state_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.17001000892789492,
+            -0.03380346557513596
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.10139565657485615,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed31_vs_state_zero_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.4277324065739232,
+            -0.17885357777694882
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.29855949770320545,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.1530908371972145,
+            -0.0417500379944527
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.09732150110331449,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed7_permutation_intersection_rows": 220,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.019086852421885382,
+            0.019653857671172746
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.00027221630920063367,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.1255915255047192,
+            -0.014428831857900325
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.06834342073310505,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.4193882410458259,
+            -0.17829205537991685
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.29557906741445716,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.03466936488965561,
+            -0.0035419707496961027
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.019111305475234985,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0008769399094675713,
+            -9.577586284542508e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0004730192097750577,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00023713241028382832,
+            -4.42612943345765e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.00013859001072970303,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "last_action_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.033271571936949164,
+            0.00013044778406941972
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.01677672266960144,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "last_action_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.054096718883007065,
+            0.00743752034698572
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.02333346198905598,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.03979307601941648,
+            0.011498113788289882
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.014690080285072326,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "learned_last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.024073430026352365,
+            0.039700255623061974
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.006457505442879417,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "learned_last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.04191034464948567,
+            -0.004994404342918915
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.023584559017961675,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.010743061057661556,
+            -0.0028960493615903075
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0064660608768463135,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.1126312710739898,
+            -0.03879336292770778
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.07490806985985149,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.18549160002984297,
+            -0.05670381971457966
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.12063168422742324,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.14663152171995533,
+            -0.045080144040634484
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.09704928479411386,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed19": 2.542049762606621,
+        "fixed_mean_seed31": 2.577427496693351,
+        "fixed_mean_seed7": 2.589294714277441,
+        "gru_permuted_state_seed19": 2.554089587926865,
+        "gru_permuted_state_seed19_episodes": 149,
+        "gru_permuted_state_seed19_rows": 220,
+        "gru_permuted_state_seed31": 2.5880824167620053,
+        "gru_permuted_state_seed31_episodes": 149,
+        "gru_permuted_state_seed31_rows": 220,
+        "gru_permuted_state_seed7": 2.5603175203908575,
+        "gru_permuted_state_seed7_episodes": 149,
+        "gru_permuted_state_seed7_rows": 220,
+        "gru_seed19": 2.492923750660636,
+        "gru_seed31": 2.486686760187149,
+        "gru_seed7": 2.491974099657752,
+        "gru_state_zero_seed19": 2.779819832064889,
+        "gru_state_zero_seed19_episodes": 149,
+        "gru_state_zero_seed19_rows": 220,
+        "gru_state_zero_seed31": 2.7852462578903543,
+        "gru_state_zero_seed31_episodes": 149,
+        "gru_state_zero_seed31_rows": 220,
+        "gru_state_zero_seed7": 2.7875531670722093,
+        "gru_state_zero_seed7_episodes": 149,
+        "gru_state_zero_seed7_rows": 220,
+        "last2_seed19": 2.5367672922936353,
+        "last2_seed31": 2.592497437108647,
+        "last2_seed7": 2.589157010750337,
+        "last_action_seed19": 2.5391018750992687,
+        "last_action_seed31": 2.569636994329366,
+        "last_action_seed7": 2.5746055204759943,
+        "learned_last2_seed19": 2.5623361032117495,
+        "learned_last2_seed31": 2.56938589730046,
+        "learned_last2_seed7": 2.5828295398842203,
+        "learned_mean_seed19": 2.480970527909019,
+        "learned_mean_seed31": 2.4723387720909984,
+        "learned_mean_seed7": 2.492246315966953,
+        "o_only_seed19": 2.5558785977688703,
+        "o_only_seed31": 2.592970456318422,
+        "o_only_seed7": 2.5892956007610666,
+        "uniform": 2.563198066132357
+      },
+      "rows": 220
+    },
+    "nontrivial_not_exact_previous_pair": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3081055563605783,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0013483238250975374,
+          "seed_count": 3
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.311071528766322,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0015189955428163346,
+          "seed_count": 3
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3067226142458335,
+          "reason": null,
+          "sd_across_repeated_fits": 0.001802723377220765,
+          "seed_count": 3
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3085750175846944,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0019128433506445954,
+          "seed_count": 3
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3063507752760217,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0006276545825422732,
+          "seed_count": 3
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3101504862215982,
+          "reason": null,
+          "sd_across_repeated_fits": 0.002573903923616425,
+          "seed_count": 3
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3083141942279273,
+          "reason": null,
+          "sd_across_repeated_fits": 0.0009297065392256883,
+          "seed_count": 3
+        }
+      },
+      "episodes": 958,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.005849154131075767,
+            0.0014878822305710406
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0021104414910829757,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "fixed_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.004640885239126049,
+            0.007975604792193183
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.0014885683068018992,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -1.8703697140418168e-05,
+            1.0511950900602869e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -4.040417765571852e-06,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.011960662293214581,
+            0.012041607032776014
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 9.295010131877386e-05,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed19_permutation_intersection_rows": 2577,
+        "gru_seed19_vs_learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.006181380182697508,
+            0.007555868820960106
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.0007146403546198237,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed19_vs_permuted_state_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.05231126655555556,
+            -0.019172504689833864
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0363033572497366,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed19_vs_state_zero_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.10850430220579399,
+            -0.05883185714744693
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.08310841233821908,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.011432089007967041,
+            0.017925070527974762
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.0032745482133347994,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed31_permutation_intersection_rows": 2577,
+        "gru_seed31_vs_learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00989982767641122,
+            0.006021552354912137
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0016815303299007928,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed31_vs_permuted_state_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0568972445940871,
+            -0.02016734426263079
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.039296995682174214,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed31_vs_state_zero_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.10349971363980044,
+            -0.05890612984560361
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.08116816939496235,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.008830938825685678,
+            0.01856774842801725
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.004904505300531103,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed7_permutation_intersection_rows": 2577,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0033783348897340835,
+            0.010437506768074515
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.0037300176094519247,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.043031295989036086,
+            -0.013005331270136774
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.02816245756641487,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.10404585393779124,
+            -0.057474304944223197
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.08063851258738076,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.009269298958054456,
+            -0.00033753515521229525
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0046369442770450575,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0002153493470400194,
+            -1.4435915560157485e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.00010850436936342582,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -5.670893704052185e-05,
+            -1.1139160857861442e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -2.9291299872496444e-05,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "last_action_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0070102006177141,
+            0.0015106787212140255
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.002864435771939178,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "last_action_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.006129928359176688,
+            0.009654241039564304
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.001978561924000697,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00571956963057546,
+            0.008862761497029695
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.0016683439182411759,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "learned_last2_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.012037528296645169,
+            0.005248841032669514
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0035500051695846243,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "learned_last2_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.005845433484888324,
+            0.0034113686716885526
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0011573987595554836,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0021562107150395926,
+            -0.00016501120500648004
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0011828529265762347,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "learned_mean_seed19": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.01282617118684075,
+            0.012115859613249897
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0006216902533010499,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "learned_mean_seed31": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.011027677233143475,
+            0.02092802076768035
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.004956078543235592,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.01249270312587704,
+            0.015271181268770593
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.001174487691079178,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed19": 2.307198511453206,
+        "fixed_mean_seed31": 2.309654948007797,
+        "fixed_mean_seed7": 2.307463209620732,
+        "gru_permuted_state_seed19": 2.345705260295344,
+        "gru_permuted_state_seed19_episodes": 958,
+        "gru_permuted_state_seed19_rows": 2577,
+        "gru_permuted_state_seed31": 2.350737923596504,
+        "gru_permuted_state_seed31_episodes": 958,
+        "gru_permuted_state_seed31_rows": 2577,
+        "gru_permuted_state_seed7": 2.340534212905444,
+        "gru_permuted_state_seed7_episodes": 958,
+        "gru_permuted_state_seed7_rows": 2577,
+        "gru_seed19": 2.309401903045608,
+        "gru_seed31": 2.3114409279143295,
+        "gru_seed7": 2.312371755339029,
+        "gru_state_zero_seed19": 2.3925103153838267,
+        "gru_state_zero_seed19_episodes": 958,
+        "gru_state_zero_seed19_rows": 2577,
+        "gru_state_zero_seed31": 2.392609097309292,
+        "gru_state_zero_seed31_episodes": 958,
+        "gru_state_zero_seed31_rows": 2577,
+        "gru_state_zero_seed7": 2.39301026792641,
+        "gru_state_zero_seed7_episodes": 958,
+        "gru_state_zero_seed7_rows": 2577,
+        "last2_seed19": 2.304672008667244,
+        "last2_seed31": 2.3080578753316314,
+        "last2_seed7": 2.307437958738625,
+        "last_action_seed19": 2.3064445171723498,
+        "last_action_seed31": 2.3101449416249955,
+        "last_action_seed7": 2.309135593956739,
+        "learned_last2_seed19": 2.3057589477747045,
+        "learned_last2_seed31": 2.3070089809414394,
+        "learned_last2_seed7": 2.3062843971119213,
+        "learned_mean_seed19": 2.308687262690988,
+        "learned_mean_seed31": 2.3131224582442305,
+        "learned_mean_seed7": 2.308641737729577,
+        "o_only_seed19": 2.309308952944289,
+        "o_only_seed31": 2.308166379700995,
+        "o_only_seed7": 2.307467250038498,
+        "uniform": 2.3562250401047864
+      },
+      "rows": 2577
+    }
+  }
+}

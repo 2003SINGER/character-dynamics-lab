@@ -1,0 +1,52 @@
+[
+  {
+    "op": "add",
+    "path": "/praxish_scenario/initial_practice_instances/-",
+    "value": "insert world.workspace.state!open"
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/conditions/run/events/-",
+    "value": {
+      "before_turn": 1,
+      "id": "workspace_closed",
+      "outcome": "delete world.workspace.state"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/conditions/run/events/-",
+    "value": {
+      "before_turn": 5,
+      "id": "workspace_reopened",
+      "outcome": "insert world.workspace.state!open"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/trace_fact_patterns/-",
+    "value": {
+      "id": "workspace",
+      "pattern": "world.workspace.state!Value"
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/shared_case_schedule/case_id",
+    "value": "workspace_closure_unadapted"
+  },
+  {
+    "op": "add",
+    "path": "/shared_case_schedule/events/close",
+    "value": {
+      "before_turn": 1
+    }
+  },
+  {
+    "op": "add",
+    "path": "/shared_case_schedule/events/reopen",
+    "value": {
+      "before_turn": 5
+    }
+  }
+]

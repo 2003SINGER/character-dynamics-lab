@@ -1,0 +1,89 @@
+{
+  "condition": "theory",
+  "lambda": 1.0,
+  "train_rows": 92,
+  "validation_rows": 26,
+  "train_data_nll": 1.3911394974865745,
+  "train_regularized_objective": 1.3976565211699863,
+  "validation_nll": 1.492437475160032,
+  "weights_theta": [
+    -0.01756280939010035,
+    0.018984788764093243,
+    -0.015753473292693925,
+    0.0,
+    0.0,
+    0.017562809390100333,
+    -0.01685465342500738,
+    0.005417774924074225,
+    0.0,
+    0.09342967069529295,
+    0.03013333011398473,
+    0.0,
+    0.0
+  ],
+  "weights_w": [
+    0.015272902240291177,
+    -0.016512714241938255,
+    -0.007581890408877797,
+    0.0,
+    0.0,
+    -0.015272902240291179,
+    0.017495506764154418,
+    0.005035993426798905,
+    0.0,
+    0.025275626722436974,
+    0.009539756005797297,
+    0.0,
+    0.0
+  ],
+  "optimizer": {
+    "method": "L-BFGS-B",
+    "max_iter": 1000,
+    "gtol": 1e-08,
+    "initialization": "zeros",
+    "deterministic": true,
+    "success": true,
+    "status": 0,
+    "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+    "iterations": 6,
+    "function_evaluations": 8,
+    "gradient_evaluations": 8,
+    "final_objective": 1.3976565211699863,
+    "final_data_nll": 1.3911394974865745,
+    "final_l2_penalty": 0.006517023683411782,
+    "final_gradient_norm": 4.426630511420785e-05
+  },
+  "optimization_history": [
+    {
+      "iteration": 1,
+      "objective": 1.3998324290072455,
+      "gradient_norm": 0.09034184286455606
+    },
+    {
+      "iteration": 2,
+      "objective": 1.3979357136700092,
+      "gradient_norm": 0.03015772408938907
+    },
+    {
+      "iteration": 3,
+      "objective": 1.3976645361561824,
+      "gradient_norm": 0.004181186505537408
+    },
+    {
+      "iteration": 4,
+      "objective": 1.39765739339304,
+      "gradient_norm": 0.0014317970299531117
+    },
+    {
+      "iteration": 5,
+      "objective": 1.3976565224323712,
+      "gradient_norm": 8.199692068456296e-05
+    },
+    {
+      "iteration": 6,
+      "objective": 1.3976565211699863,
+      "gradient_norm": 4.426630511420785e-05
+    }
+  ],
+  "selected": true
+}

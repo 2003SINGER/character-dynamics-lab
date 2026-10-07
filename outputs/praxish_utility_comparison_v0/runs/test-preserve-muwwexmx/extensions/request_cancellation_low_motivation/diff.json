@@ -1,0 +1,437 @@
+[
+  {
+    "op": "replace",
+    "path": "/utility_baseline",
+    "value": {
+      "schema_version": 1,
+      "authorship": "independently authored flat utility configuration; not translated from Praxish practice definitions",
+      "roles": {
+        "Worker": [
+          "worker"
+        ],
+        "Visitor": [
+          "visitor"
+        ]
+      },
+      "action_templates": [
+        {
+          "id": "start_restocking",
+          "actor_role": "Worker",
+          "roles": {
+            "Worker": "actor"
+          },
+          "preconditions": [
+            {
+              "fact": [
+                "work_phase",
+                "{Worker}",
+                "waiting"
+              ]
+            }
+          ],
+          "delete": [
+            [
+              "work_phase",
+              "{Worker}",
+              "waiting"
+            ]
+          ],
+          "insert": [
+            [
+              "work_phase",
+              "{Worker}",
+              "working"
+            ]
+          ]
+        },
+        {
+          "id": "finish_restocking",
+          "actor_role": "Worker",
+          "roles": {
+            "Worker": "actor"
+          },
+          "preconditions": [
+            {
+              "fact": [
+                "work_phase",
+                "{Worker}",
+                "working"
+              ]
+            }
+          ],
+          "delete": [
+            [
+              "work_phase",
+              "{Worker}",
+              "working"
+            ]
+          ],
+          "insert": [
+            [
+              "work_phase",
+              "{Worker}",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "id": "answer_request",
+          "actor_role": "Worker",
+          "roles": {
+            "Worker": "actor",
+            "Visitor": "any"
+          },
+          "preconditions": [
+            {
+              "fact": [
+                "request_status",
+                "{Worker}",
+                "{Visitor}",
+                "pending"
+              ]
+            }
+          ],
+          "delete": [
+            [
+              "request_status",
+              "{Worker}",
+              "{Visitor}",
+              "pending"
+            ]
+          ],
+          "insert": [
+            [
+              "request_status",
+              "{Worker}",
+              "{Visitor}",
+              "served"
+            ]
+          ]
+        },
+        {
+          "id": "wait_for_answer",
+          "actor_role": "Visitor",
+          "roles": {
+            "Visitor": "actor",
+            "Worker": "any"
+          },
+          "preconditions": [
+            {
+              "fact": [
+                "request_status",
+                "{Worker}",
+                "{Visitor}",
+                "pending"
+              ]
+            }
+          ],
+          "delete": [],
+          "insert": []
+        },
+        {
+          "id": "cancel_request",
+          "actor_role": "Visitor",
+          "roles": {
+            "Visitor": "actor",
+            "Worker": "any"
+          },
+          "preconditions": [
+            {
+              "fact": [
+                "request_status",
+                "{Worker}",
+                "{Visitor}",
+                "pending"
+              ]
+            }
+          ],
+          "delete": [
+            [
+              "request_status",
+              "{Worker}",
+              "{Visitor}",
+              "pending"
+            ]
+          ],
+          "insert": [
+            [
+              "request_status",
+              "{Worker}",
+              "{Visitor}",
+              "cancelled"
+            ]
+          ]
+        }
+      ],
+      "goal_factors": [
+        {
+          "id": "keep_working",
+          "actor_role": "Worker",
+          "weight": 1,
+          "match": [
+            "work_phase",
+            "{actor}",
+            "working"
+          ]
+        },
+        {
+          "id": "finish_work",
+          "actor_role": "Worker",
+          "weight": 5,
+          "match": [
+            "work_phase",
+            "{actor}",
+            "complete"
+          ]
+        },
+        {
+          "id": "serve_visitor",
+          "actor_role": "Worker",
+          "weight": 10,
+          "match": [
+            "request_status",
+            "{actor}",
+            "{Visitor}",
+            "served"
+          ],
+          "count_bindings": true
+        },
+        {
+          "id": "cancel_request",
+          "actor_role": "Visitor",
+          "weight": -1,
+          "match": [
+            "request_status",
+            "{Worker}",
+            "{actor}",
+            "cancelled"
+          ],
+          "count_bindings": true
+        }
+      ],
+      "extensions": {
+        "cancel_request": {
+          "action_templates": [
+            {
+              "id": "cancel_request",
+              "actor_role": "Visitor",
+              "roles": {
+                "Visitor": "actor",
+                "Worker": "any"
+              },
+              "preconditions": [
+                {
+                  "fact": [
+                    "request_status",
+                    "{Worker}",
+                    "{Visitor}",
+                    "pending"
+                  ]
+                }
+              ],
+              "delete": [
+                [
+                  "request_status",
+                  "{Worker}",
+                  "{Visitor}",
+                  "pending"
+                ]
+              ],
+              "insert": [
+                [
+                  "request_status",
+                  "{Worker}",
+                  "{Visitor}",
+                  "cancelled"
+                ]
+              ]
+            }
+          ],
+          "goal_factors": [
+            {
+              "id": "cancel_request",
+              "actor_role": "Visitor",
+              "weight": -1,
+              "match": [
+                "request_status",
+                "{Worker}",
+                "{actor}",
+                "cancelled"
+              ],
+              "count_bindings": true
+            }
+          ]
+        },
+        "workspace_filter": {
+          "precondition": {
+            "fact": [
+              "workspace_open",
+              "true"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/praxish_scenario",
+    "value": {
+      "schema_version": 1,
+      "scenario_id": "worker_request_activity_v0",
+      "description": "A worker balances a finite restocking task with a visitor request. The paired conditions differ only by a visible request event.",
+      "seed": "0x5eed1234",
+      "turns": 8,
+      "characters": [
+        {
+          "name": "worker",
+          "goals": [
+            {
+              "id": "keep_working",
+              "utility": 1,
+              "conditions": [
+                "practice.restock.worker.phase!working"
+              ]
+            },
+            {
+              "id": "finish_work",
+              "utility": 5,
+              "conditions": [
+                "practice.restock.worker.phase!complete"
+              ]
+            },
+            {
+              "id": "serve_visitor",
+              "utility": 10,
+              "conditions": [
+                "practice.request.worker.Visitor.status!served"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "visitor",
+          "goals": [
+            {
+              "id": "cancel_request",
+              "utility": -1,
+              "conditions": [
+                "practice.request.worker.visitor.status!cancelled"
+              ]
+            }
+          ]
+        }
+      ],
+      "practices": [
+        {
+          "id": "restock",
+          "name": "[Worker] is restocking",
+          "roles": [
+            "Worker"
+          ],
+          "init": [
+            "insert practice.restock.Worker.phase!waiting"
+          ],
+          "actions": [
+            {
+              "name": "[Actor]: Start restocking",
+              "conditions": [
+                "eq Actor Worker",
+                "practice.restock.Worker.phase!waiting"
+              ],
+              "outcomes": [
+                "delete practice.restock.Worker.phase",
+                "insert practice.restock.Worker.phase!working"
+              ]
+            },
+            {
+              "name": "[Actor]: Finish restocking",
+              "conditions": [
+                "eq Actor Worker",
+                "practice.restock.Worker.phase!working"
+              ],
+              "outcomes": [
+                "delete practice.restock.Worker.phase",
+                "insert practice.restock.Worker.phase!complete"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "request",
+          "name": "[Visitor] has asked [Worker] for help",
+          "roles": [
+            "Worker",
+            "Visitor"
+          ],
+          "init": [
+            "insert practice.request.Worker.Visitor.status!pending"
+          ],
+          "actions": [
+            {
+              "name": "[Actor]: Answer [Visitor]'s request",
+              "conditions": [
+                "eq Actor Worker",
+                "practice.request.Worker.Visitor.status!pending"
+              ],
+              "outcomes": [
+                "delete practice.request.Worker.Visitor.status",
+                "insert practice.request.Worker.Visitor.status!served"
+              ]
+            },
+            {
+              "name": "[Actor]: Wait for [Worker] to answer",
+              "conditions": [
+                "eq Actor Visitor",
+                "practice.request.Worker.Visitor.status!pending"
+              ],
+              "outcomes": []
+            },
+            {
+              "name": "[Actor]: Cancel [Worker]'s request",
+              "conditions": [
+                "eq Actor Visitor",
+                "practice.request.Worker.Visitor.status!pending"
+              ],
+              "outcomes": [
+                "delete practice.request.Worker.Visitor.status",
+                "insert practice.request.Worker.Visitor.status!cancelled"
+              ]
+            }
+          ]
+        }
+      ],
+      "initial_practice_instances": [
+        "insert practice.restock.worker"
+      ],
+      "conditions": {
+        "run": {
+          "events": [
+            {
+              "before_turn": 1,
+              "id": "visible_request",
+              "outcome": "insert practice.request.worker.visitor"
+            }
+          ]
+        }
+      },
+      "trace_fact_patterns": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value"
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value"
+        }
+      ],
+      "authored_preference_variants": {
+        "low_request_priority": {
+          "worker_goal_utility_overrides": {
+            "serve_visitor": 1
+          }
+        }
+      }
+    }
+  }
+]

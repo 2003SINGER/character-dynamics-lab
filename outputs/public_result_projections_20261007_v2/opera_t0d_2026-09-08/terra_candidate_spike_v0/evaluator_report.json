@@ -1,0 +1,321 @@
+{
+  "artifacts": {
+    "candidate_sha256": "2D6388D9D45DB391B35711F3B627D959437FD06E11530DAF5EE71CC7ADB313DD",
+    "gold_sha256": "69FEA4721B6087ED322579BA48D5C840AF4CF18734611D94B2E10041BBB154F1"
+  },
+  "gold_blind_invariants": {
+    "candidate_input_field_allowlist": {
+      "declared_fields": [],
+      "status": "PASS"
+    },
+    "prohibited_gold_keys_absent_from_candidate": {
+      "keys_checked": [],
+      "status": "PASS"
+    },
+    "reveal_order_from_filesystem_mtime": {
+      "status": "INDETERMINATE"
+    }
+  },
+  "matching_rule": {
+    "candidate_inputs": [],
+    "excluded_from_matching": [],
+    "gold_inputs": [],
+    "outcomes": {}
+  },
+  "metrics": {
+    "ambiguous_gold_match_rate": {
+      "denominator": 30,
+      "numerator": 17
+    },
+    "candidate_ambiguity_rate": {
+      "all_candidates": 157,
+      "ambiguous_candidates": 114
+    },
+    "candidate_count": {
+      "mean": 5.2333333333,
+      "median": 5.0,
+      "quantiles_linear_interpolation": {
+        "p25": 5.0,
+        "p50": 5.0,
+        "p75": 5.75,
+        "p90": 6.1
+      },
+      "total": 157
+    },
+    "candidate_records": 30,
+    "duplicate_rate": {
+      "candidate_records": 30,
+      "duplicate_candidate_ids": 0
+    },
+    "gold_records": 30,
+    "no_candidate_rate": {
+      "denominator": 30,
+      "records_with_zero_candidates": 0
+    },
+    "outcome_counts": {
+      "ambiguous": 17,
+      "exact": 0,
+      "miss": 6,
+      "semantic": 7
+    },
+    "records_with_any_ambiguous_candidate": {
+      "denominator": 30,
+      "numerator": 30
+    },
+    "support_recall_including_ambiguous": {
+      "denominator": 30,
+      "numerator": 24
+    },
+    "support_recall_strict": {
+      "denominator": 30,
+      "numerator": 7
+    }
+  },
+  "per_record": [
+    {
+      "fixture_id": "02653e558ed3e0bf:0",
+      "matched_candidate_ids": [
+        "terra.home.resume_or_reorder"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "pick_up_where_you_left_off.luxogear_emergency_whistles_with_lanyard_safety_whistle_survival_shrill_loud_blast_for_kayak_life_vest_jacket_boating"
+    },
+    {
+      "fixture_id": "02653e558ed3e0bf:28",
+      "matched_candidate_ids": [
+        "terra.search.catalog"
+      ],
+      "outcome": "semantic",
+      "semantic_id": "nav_bar.search_input"
+    },
+    {
+      "fixture_id": "02653e558ed3e0bf:54",
+      "matched_candidate_ids": [],
+      "outcome": "miss",
+      "semantic_id": "coupon.checkbox"
+    },
+    {
+      "fixture_id": "0319403bf704b068:0",
+      "matched_candidate_ids": [
+        "terra.nav.account_or_cart"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "nav_bar.order_button"
+    },
+    {
+      "fixture_id": "0319403bf704b068:10",
+      "matched_candidate_ids": [],
+      "outcome": "miss",
+      "semantic_id": "customers_mention.superjare_long_sofa_console_table_with_charging_station_for_narrow_entryway_hallway_behind_couch_plant_for_entrance_living_room_vintage_brown_70_8_inch.product_title"
+    },
+    {
+      "fixture_id": "0319403bf704b068:18",
+      "matched_candidate_ids": [],
+      "outcome": "miss",
+      "semantic_id": "search_results.94_4_extra_long_console_table_with_charging_station_metal_frame_sofa_table_with_2_power_outlets_2_usb_ports_with_extension_cord_behind_couch_table_for_living_room_rustic_brown.product_name"
+    },
+    {
+      "fixture_id": "050ea0432026f038:0",
+      "matched_candidate_ids": [
+        "terra.search.catalog"
+      ],
+      "outcome": "semantic",
+      "semantic_id": "nav_bar.search_input"
+    },
+    {
+      "fixture_id": "050ea0432026f038:10",
+      "matched_candidate_ids": [
+        "terra.product.rating_details"
+      ],
+      "outcome": "semantic",
+      "semantic_id": "reviews.ratings.1_star_4"
+    },
+    {
+      "fixture_id": "050ea0432026f038:19",
+      "matched_candidate_ids": [
+        "terra.product.bundles",
+        "terra.product.related_or_media"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "aplus_premium_module_13_carousel.next_page"
+    },
+    {
+      "fixture_id": "0c3f7e7317cd68d0:0",
+      "matched_candidate_ids": [
+        "terra.home.resume_or_deal"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "frequently_repurchased_supplies.carousel_next_slide"
+    },
+    {
+      "fixture_id": "0c3f7e7317cd68d0:10",
+      "matched_candidate_ids": [
+        "terra.search.catalog"
+      ],
+      "outcome": "semantic",
+      "semantic_id": "nav_bar.search_button"
+    },
+    {
+      "fixture_id": "0c3f7e7317cd68d0:19",
+      "matched_candidate_ids": [
+        "terra.product.related_or_media"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "reviews"
+    },
+    {
+      "fixture_id": "110a946e15da0654:0",
+      "matched_candidate_ids": [
+        "terra.product.related_or_compare"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "reviews.reviews_with_images.see_all_photos"
+    },
+    {
+      "fixture_id": "110a946e15da0654:38",
+      "matched_candidate_ids": [
+        "terra.search.catalog"
+      ],
+      "outcome": "semantic",
+      "semantic_id": "nav_bar.search_input"
+    },
+    {
+      "fixture_id": "110a946e15da0654:74",
+      "matched_candidate_ids": [
+        "terra.search.result"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "search_results.hosa_cpr_202_dual_1_4_ts_to_dual_rca_stereo_interconnect_cable_2_meters_6_6_feet_black.product_name"
+    },
+    {
+      "fixture_id": "12bca9c89447afc9:0",
+      "matched_candidate_ids": [],
+      "outcome": "miss",
+      "semantic_id": "nav_bar.homepage"
+    },
+    {
+      "fixture_id": "12bca9c89447afc9:29",
+      "matched_candidate_ids": [
+        "terra.product.related_or_review"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "reviews.popover.review_images.next"
+    },
+    {
+      "fixture_id": "12bca9c89447afc9:56",
+      "matched_candidate_ids": [
+        "terra.product.related_or_review"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "reviews.popover.review_images.next"
+    },
+    {
+      "fixture_id": "16e0747ef0f662b7:0",
+      "matched_candidate_ids": [
+        "terra.search.catalog"
+      ],
+      "outcome": "semantic",
+      "semantic_id": "nav_bar.search_input"
+    },
+    {
+      "fixture_id": "16e0747ef0f662b7:11",
+      "matched_candidate_ids": [
+        "terra.cart.subscription"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "subscribe_n_save_popover.drop_down_list.open_drop_down_list"
+    },
+    {
+      "fixture_id": "16e0747ef0f662b7:21",
+      "matched_candidate_ids": [
+        "terra.cart.subscription"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "subscribe_n_save_popover.subscribe"
+    },
+    {
+      "fixture_id": "1701ac6e72a1b764:0",
+      "matched_candidate_ids": [],
+      "outcome": "miss",
+      "semantic_id": "return_policy"
+    },
+    {
+      "fixture_id": "1701ac6e72a1b764:11",
+      "matched_candidate_ids": [
+        "terra.search.catalog"
+      ],
+      "outcome": "semantic",
+      "semantic_id": "nav_bar.search_input"
+    },
+    {
+      "fixture_id": "1701ac6e72a1b764:20",
+      "matched_candidate_ids": [
+        "terra.cart.navigate",
+        "terra.cart.items"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "nav_bar.cart_button"
+    },
+    {
+      "fixture_id": "17c4612897afd059:0",
+      "matched_candidate_ids": [
+        "terra.home.resume_or_deal",
+        "terra.home.recommended_product"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "4_star_items.carousel_next_slide"
+    },
+    {
+      "fixture_id": "17c4612897afd059:14",
+      "matched_candidate_ids": [
+        "terra.search.result"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "search_results.womens_denim_baseball_cap_with_metal_rings_mens_trendy_ripped_trucker_hats_adjustable_low_profile_dad_hats.product_name"
+    },
+    {
+      "fixture_id": "17c4612897afd059:27",
+      "matched_candidate_ids": [
+        "terra.product.purchase",
+        "terra.product.related_or_review"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "product_options.color.button_list.6_49_with_50_percent_savings_6_49_12_99_12_99_free_delivery_tomorrow_dachshund_black"
+    },
+    {
+      "fixture_id": "24e50a4ba65940bd:0",
+      "matched_candidate_ids": [],
+      "outcome": "miss",
+      "semantic_id": "nav_bar.homepage"
+    },
+    {
+      "fixture_id": "24e50a4ba65940bd:17",
+      "matched_candidate_ids": [
+        "terra.search.pagination"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "pagination.3"
+    },
+    {
+      "fixture_id": "24e50a4ba65940bd:33",
+      "matched_candidate_ids": [
+        "terra.product.purchase",
+        "terra.product.related_or_review"
+      ],
+      "outcome": "ambiguous",
+      "semantic_id": "product_options.scent.button_list.15_97_15_97_0_50_per_ounce_0_50_0_50_ounce_free_delivery_thursday_lavender"
+    }
+  ],
+  "report_version": "terra-evaluator-v0.1",
+  "reproducibility": {
+    "check": "read/hash stability check on frozen artifact",
+    "generator_metadata": {
+      "gold_access": false,
+      "protocol_version": "T0d-terra-candidate-v0",
+      "temperature": 0.2
+    },
+    "hash_stable": true,
+    "rerun_performed": false
+  },
+  "verdict": "strict support recall is 7/30 (0.2333); 17/30 gold targets have only ambiguous family support and 6/30 are misses. This is an evaluator-only negative/diagnostic result; no generator, protocol, Theory-S, or training artifact was modified."
+}

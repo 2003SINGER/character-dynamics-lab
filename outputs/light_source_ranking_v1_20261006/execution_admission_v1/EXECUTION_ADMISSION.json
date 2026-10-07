@@ -1,0 +1,83 @@
+{
+  "actor_forecast": false,
+  "authorization_basis": "Parent implementation review under the user-authorized DEVELOPMENT goal; this does not admit actor-visible or psychological validity.",
+  "formal_test": false,
+  "parent_implementation_review": true,
+  "pins": {
+    "builder_sha256": "9c1850e38320ef459b38cc2740cbec6ff948036f8f564c9567f18aebbedc42d4",
+    "cohort_key_digest": "3a059162d09e2a8b126c468d9d73d6fa60d582e88d52475350e49b88a20ac1bd",
+    "conditions": [
+      "context_only",
+      "last2_core",
+      "pooled_core",
+      "gru_core",
+      "gru_no_context",
+      "gru_no_dialogue",
+      "gru_no_persona",
+      "gru_plus_partner_raw_commands",
+      "uniform"
+    ],
+    "config": {
+      "batch_size": 32,
+      "bootstrap_replicates": 2000,
+      "bootstrap_seed": 104729,
+      "deterministic_algorithms": true,
+      "device": "cpu",
+      "dropout": 0,
+      "learning_rate": 0.001,
+      "max_epochs": 15,
+      "optimizer": "Adam",
+      "scheduler": null,
+      "torch_threads": 1,
+      "weight_decay": 0
+    },
+    "dimensions": {
+      "action": 128,
+      "candidate": 256,
+      "context": 256,
+      "emote": 64,
+      "history_turn": 453,
+      "persona": 256,
+      "presence": 3,
+      "role": 2,
+      "speech": 256,
+      "state": 16
+    },
+    "input_sha256": "b414f176bf7c6d0e1f47536bab8c251ae7d39ead5b40550310127294f74e5646",
+    "projected_sha256": "2d839c62ddf2194b1968fe5b22913db9950aa10bd3647fe2179745b6b4efcef5",
+    "protocol_sha256": "5318bffe1f417e6ceb5dc5284fbcbb011808117f775d1225f66d61195528e3cf",
+    "row_count": 13463,
+    "seeds": [
+      7,
+      19,
+      31
+    ],
+    "source_key_digest": "905653a6b3125d3136e47aec8eb21125ca4beab0a19c5d11e159d70b1c3827f7",
+    "source_sha256": {
+      "fit_source.py": "a9170d56d62779a9aeb7d2b52fa99c0ed3477d551b57a99f638044a46f58eee7",
+      "test_execution_admission.py": "49cc8c1f372bfe70ad6a580479f1aa7b7959ad6d8d2153bee732663e2d529cf3",
+      "test_train.py": "2684094f830a84caf9313db4b2c7e3ff056cdecad3c3d344c591ed7535f3ca46",
+      "train.py": "0a2afeaf824bf20ae6fa1067818306617d2e3cf752df1c1c91bf9aefe67eb0e3"
+    },
+    "split_counts": {
+      "excluded_bucket9": {
+        "episodes": 468,
+        "rows": 1216
+      },
+      "train": {
+        "episodes": 3490,
+        "rows": 9530
+      },
+      "validation": {
+        "episodes": 986,
+        "rows": 2717
+      }
+    },
+    "split_rule": "bucket=int(SHA256(trajectory_id UTF-8).hexdigest()[:8],16)%10; 0-6=train; 7-8=validation; 9=excluded"
+  },
+  "psychological_validity": false,
+  "runtime_policy": false,
+  "schema": "light_source_ranking_execution_admission_v1",
+  "scope": "SOURCE_CONDITIONAL_DEVELOPMENT",
+  "training_authorized": true
+}

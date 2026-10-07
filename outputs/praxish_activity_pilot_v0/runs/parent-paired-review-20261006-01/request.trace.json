@@ -1,0 +1,614 @@
+{
+  "trace_schema_version": 1,
+  "evidence_kind": "pilot_generated_typed_trace",
+  "source": {
+    "release_tag": "aiide-23",
+    "commit": "4729b0c469a7ecb423622f543ca116315616a76b",
+    "archive_sha256": "a5418432db8f2af8387a8eead2e4ad1392465833d862eda9273c614b883a8c77",
+    "upstream_files": {
+      "db.js": "acb98656dcc0fe461ba7d6b2875bd3429ae4068735b1795297a5722d0469c46c",
+      "praxish.js": "ef2f77999b08dd24c9893a531ae2096ef33189a9cf46bf342d024ffa44e1c088",
+      "tests.js": "7b9a41281ec8620d43bcf0062b39cbcbaad22349483fe9cae55b3ef823486947"
+    },
+    "upstream_source_modified": false,
+    "license_status": "no license file found in the downloaded release artifact or the pinned tag; local inspection only"
+  },
+  "scenario_id": "worker_request_activity_v0",
+  "condition": "request",
+  "preference_variant": "default",
+  "seed": "0x5eed1234",
+  "scoring_semantics": "absolute satisfied-goal value: utility multiplied by post-action match count, summed across goals",
+  "turns": [
+    {
+      "turn": 0,
+      "event": [],
+      "actor": "worker",
+      "pre_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "waiting"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": []
+        }
+      ],
+      "candidates": [
+        {
+          "action_id": "[Actor]: Start restocking",
+          "practice_id": "restock",
+          "instance_id": "practice.restock.worker",
+          "name": "worker: Start restocking",
+          "bindings": {
+            "Actor": "worker",
+            "Worker": "worker"
+          },
+          "goal_scores": [
+            {
+              "goal_id": "keep_working",
+              "utility": 1,
+              "matches": 1,
+              "absolute_score_contribution": 1
+            },
+            {
+              "goal_id": "finish_work",
+              "utility": 5,
+              "matches": 0,
+              "absolute_score_contribution": 0
+            },
+            {
+              "goal_id": "serve_visitor",
+              "utility": 10,
+              "matches": 0,
+              "absolute_score_contribution": 0
+            }
+          ],
+          "score": 1
+        }
+      ],
+      "selected": {
+        "action_id": "[Actor]: Start restocking",
+        "practice_id": "restock",
+        "instance_id": "practice.restock.worker",
+        "name": "worker: Start restocking",
+        "bindings": {
+          "Actor": "worker",
+          "Worker": "worker"
+        },
+        "score_reported_by_original_tick": 1
+      },
+      "post_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "working"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": []
+        }
+      ],
+      "runtime_messages": [
+        {
+          "level": "log",
+          "values": [
+            "Performing action ::",
+            "worker: Start restocking",
+            {
+              "Actor": "worker",
+              "Worker": "worker",
+              "practiceID": "restock",
+              "instanceID": "practice.restock.worker",
+              "actionID": "[Actor]: Start restocking",
+              "name": "worker: Start restocking",
+              "score": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "turn": 1,
+      "event": [
+        {
+          "id": "visitor_arrives_with_request",
+          "outcome": "insert practice.request.worker.visitor",
+          "facts_before": [
+            {
+              "id": "work_phase",
+              "pattern": "practice.restock.worker.phase!Value",
+              "matches": [
+                {
+                  "Value": "working"
+                }
+              ]
+            },
+            {
+              "id": "request_status",
+              "pattern": "practice.request.worker.visitor.status!Value",
+              "matches": []
+            }
+          ],
+          "facts_after": [
+            {
+              "id": "work_phase",
+              "pattern": "practice.restock.worker.phase!Value",
+              "matches": [
+                {
+                  "Value": "working"
+                }
+              ]
+            },
+            {
+              "id": "request_status",
+              "pattern": "practice.request.worker.visitor.status!Value",
+              "matches": [
+                {
+                  "Value": "pending"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "actor": "visitor",
+      "pre_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "working"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "pending"
+            }
+          ]
+        }
+      ],
+      "candidates": [
+        {
+          "action_id": "[Actor]: Wait for [Worker] to answer",
+          "practice_id": "request",
+          "instance_id": "practice.request.worker.visitor",
+          "name": "visitor: Wait for worker to answer",
+          "bindings": {
+            "Actor": "visitor",
+            "Worker": "worker",
+            "Visitor": "visitor"
+          },
+          "goal_scores": [],
+          "score": 0
+        }
+      ],
+      "selected": {
+        "action_id": "[Actor]: Wait for [Worker] to answer",
+        "practice_id": "request",
+        "instance_id": "practice.request.worker.visitor",
+        "name": "visitor: Wait for worker to answer",
+        "bindings": {
+          "Actor": "visitor",
+          "Worker": "worker",
+          "Visitor": "visitor"
+        },
+        "score_reported_by_original_tick": 0
+      },
+      "post_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "working"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "pending"
+            }
+          ]
+        }
+      ],
+      "runtime_messages": [
+        {
+          "level": "log",
+          "values": [
+            "Performing action ::",
+            "visitor: Wait for worker to answer",
+            {
+              "Actor": "visitor",
+              "Worker": "worker",
+              "Visitor": "visitor",
+              "practiceID": "request",
+              "instanceID": "practice.request.worker.visitor",
+              "actionID": "[Actor]: Wait for [Worker] to answer",
+              "name": "visitor: Wait for worker to answer",
+              "score": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "event": [],
+      "actor": "worker",
+      "pre_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "working"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "pending"
+            }
+          ]
+        }
+      ],
+      "candidates": [
+        {
+          "action_id": "[Actor]: Finish restocking",
+          "practice_id": "restock",
+          "instance_id": "practice.restock.worker",
+          "name": "worker: Finish restocking",
+          "bindings": {
+            "Actor": "worker",
+            "Worker": "worker"
+          },
+          "goal_scores": [
+            {
+              "goal_id": "keep_working",
+              "utility": 1,
+              "matches": 0,
+              "absolute_score_contribution": 0
+            },
+            {
+              "goal_id": "finish_work",
+              "utility": 5,
+              "matches": 1,
+              "absolute_score_contribution": 5
+            },
+            {
+              "goal_id": "serve_visitor",
+              "utility": 10,
+              "matches": 0,
+              "absolute_score_contribution": 0
+            }
+          ],
+          "score": 5
+        },
+        {
+          "action_id": "[Actor]: Answer [Visitor]'s request",
+          "practice_id": "request",
+          "instance_id": "practice.request.worker.visitor",
+          "name": "worker: Answer visitor's request",
+          "bindings": {
+            "Actor": "worker",
+            "Worker": "worker",
+            "Visitor": "visitor"
+          },
+          "goal_scores": [
+            {
+              "goal_id": "keep_working",
+              "utility": 1,
+              "matches": 1,
+              "absolute_score_contribution": 1
+            },
+            {
+              "goal_id": "finish_work",
+              "utility": 5,
+              "matches": 0,
+              "absolute_score_contribution": 0
+            },
+            {
+              "goal_id": "serve_visitor",
+              "utility": 10,
+              "matches": 1,
+              "absolute_score_contribution": 10
+            }
+          ],
+          "score": 11
+        }
+      ],
+      "selected": {
+        "action_id": "[Actor]: Answer [Visitor]'s request",
+        "practice_id": "request",
+        "instance_id": "practice.request.worker.visitor",
+        "name": "worker: Answer visitor's request",
+        "bindings": {
+          "Actor": "worker",
+          "Worker": "worker",
+          "Visitor": "visitor"
+        },
+        "score_reported_by_original_tick": 11
+      },
+      "post_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "working"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "served"
+            }
+          ]
+        }
+      ],
+      "runtime_messages": [
+        {
+          "level": "log",
+          "values": [
+            "Performing action ::",
+            "worker: Answer visitor's request",
+            {
+              "Actor": "worker",
+              "Worker": "worker",
+              "Visitor": "visitor",
+              "practiceID": "request",
+              "instanceID": "practice.request.worker.visitor",
+              "actionID": "[Actor]: Answer [Visitor]'s request",
+              "name": "worker: Answer visitor's request",
+              "score": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "event": [],
+      "actor": "visitor",
+      "pre_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "working"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "served"
+            }
+          ]
+        }
+      ],
+      "candidates": [],
+      "selected": null,
+      "post_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "working"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "served"
+            }
+          ]
+        }
+      ],
+      "runtime_messages": [
+        {
+          "level": "warn",
+          "values": [
+            "No actions to perform",
+            "visitor"
+          ]
+        }
+      ]
+    },
+    {
+      "turn": 4,
+      "event": [],
+      "actor": "worker",
+      "pre_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "working"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "served"
+            }
+          ]
+        }
+      ],
+      "candidates": [
+        {
+          "action_id": "[Actor]: Finish restocking",
+          "practice_id": "restock",
+          "instance_id": "practice.restock.worker",
+          "name": "worker: Finish restocking",
+          "bindings": {
+            "Actor": "worker",
+            "Worker": "worker"
+          },
+          "goal_scores": [
+            {
+              "goal_id": "keep_working",
+              "utility": 1,
+              "matches": 0,
+              "absolute_score_contribution": 0
+            },
+            {
+              "goal_id": "finish_work",
+              "utility": 5,
+              "matches": 1,
+              "absolute_score_contribution": 5
+            },
+            {
+              "goal_id": "serve_visitor",
+              "utility": 10,
+              "matches": 1,
+              "absolute_score_contribution": 10
+            }
+          ],
+          "score": 15
+        }
+      ],
+      "selected": {
+        "action_id": "[Actor]: Finish restocking",
+        "practice_id": "restock",
+        "instance_id": "practice.restock.worker",
+        "name": "worker: Finish restocking",
+        "bindings": {
+          "Actor": "worker",
+          "Worker": "worker"
+        },
+        "score_reported_by_original_tick": 15
+      },
+      "post_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "complete"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "served"
+            }
+          ]
+        }
+      ],
+      "runtime_messages": [
+        {
+          "level": "log",
+          "values": [
+            "Performing action ::",
+            "worker: Finish restocking",
+            {
+              "Actor": "worker",
+              "Worker": "worker",
+              "practiceID": "restock",
+              "instanceID": "practice.restock.worker",
+              "actionID": "[Actor]: Finish restocking",
+              "name": "worker: Finish restocking",
+              "score": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "turn": 5,
+      "event": [],
+      "actor": "visitor",
+      "pre_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "complete"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "served"
+            }
+          ]
+        }
+      ],
+      "candidates": [],
+      "selected": null,
+      "post_facts": [
+        {
+          "id": "work_phase",
+          "pattern": "practice.restock.worker.phase!Value",
+          "matches": [
+            {
+              "Value": "complete"
+            }
+          ]
+        },
+        {
+          "id": "request_status",
+          "pattern": "practice.request.worker.visitor.status!Value",
+          "matches": [
+            {
+              "Value": "served"
+            }
+          ]
+        }
+      ],
+      "runtime_messages": [
+        {
+          "level": "warn",
+          "values": [
+            "No actions to perform",
+            "visitor"
+          ]
+        }
+      ]
+    }
+  ]
+}

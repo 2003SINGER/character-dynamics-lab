@@ -1,0 +1,351 @@
+{
+  "experiment": "DEMO_CORE_BEHAVIOR_EVAL_V0",
+  "days": 7,
+  "policy_id": "rule-policy-v0",
+  "git_revision": "95824156636cbe7f58f5575fec414cecda6362fc",
+  "executable_sha256": "423bf371302968e40bce70cf2c897ac35988f5df3779314d42d40f0aa6f8a8f7",
+  "cases": 1,
+  "same_world_within_case": true,
+  "deterministic_rerun_count": 8,
+  "scenario_seed_formula": "1000 + 17*case",
+  "policy_seed_formula": "5000 + 31*case",
+  "life_tape_cycle_days": 3,
+  "runs": [
+    {
+      "case": 0,
+      "profile": "balanced",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.5,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.5
+      },
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "behavior": {
+        "mean_action_bout_minutes": 34.166101694915255,
+        "median_action_bout_minutes": 25.0,
+        "p90_action_bout_minutes": 60.0,
+        "commitment_active_minutes_per_day": 447.14285714285717,
+        "commitment_suspended_minutes_per_day": 141.0,
+        "action_entropy_bits": 3.1538765974888276,
+        "switches_per_day": 32.285714285714285,
+        "max_same_action_streak": 6,
+        "repeat_transition_fraction": 0.23129251700680273,
+        "selected_action_count": 295,
+        "action_bout_count": 295
+      },
+      "sha256": "f6f993ef74293f554d6808a1bd7957362b5892ce82169e1575c1069c63f9f5db",
+      "trace": "runs/case_00_balanced.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "disciplined",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.2,
+        "self_control": 0.8,
+        "rest_preference": 0.4,
+        "stimulation_seeking": 0.35,
+        "task_anxiety_sensitivity": 0.4,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.6,
+        "action_noise": 0.25
+      },
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "behavior": {
+        "mean_action_bout_minutes": 34.28231292517007,
+        "median_action_bout_minutes": 25.0,
+        "p90_action_bout_minutes": 60.0,
+        "commitment_active_minutes_per_day": 381.7142857142857,
+        "commitment_suspended_minutes_per_day": 186.14285714285714,
+        "action_entropy_bits": 3.2054263125203186,
+        "switches_per_day": 33.57142857142857,
+        "max_same_action_streak": 8,
+        "repeat_transition_fraction": 0.19795221843003413,
+        "selected_action_count": 294,
+        "action_bout_count": 294
+      },
+      "sha256": "5952cd852916715065ab5eece75592c41bdfc8af8b2fc36b4e6fe5cd24d12ec7",
+      "trace": "runs/case_00_disciplined.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "procrastinating",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.8,
+        "self_control": 0.3,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.7,
+        "task_anxiety_sensitivity": 0.65,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.55
+      },
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "behavior": {
+        "mean_action_bout_minutes": 33.1546052631579,
+        "median_action_bout_minutes": 25.0,
+        "p90_action_bout_minutes": 60.0,
+        "commitment_active_minutes_per_day": 457.85714285714283,
+        "commitment_suspended_minutes_per_day": 359.7142857142857,
+        "action_entropy_bits": 3.189911151143655,
+        "switches_per_day": 34.0,
+        "max_same_action_streak": 5,
+        "repeat_transition_fraction": 0.2145214521452145,
+        "selected_action_count": 304,
+        "action_bout_count": 304
+      },
+      "sha256": "a2001244d27e7f5c61c6203efab1be71088751f0726885740a2a85411634ac53",
+      "trace": "runs/case_00_procrastinating.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "rest_seeking",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.8,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.65,
+        "action_noise": 0.35
+      },
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "behavior": {
+        "mean_action_bout_minutes": 32.93790849673203,
+        "median_action_bout_minutes": 25.0,
+        "p90_action_bout_minutes": 60.0,
+        "commitment_active_minutes_per_day": 299.0,
+        "commitment_suspended_minutes_per_day": 212.14285714285714,
+        "action_entropy_bits": 3.1943178187704673,
+        "switches_per_day": 34.285714285714285,
+        "max_same_action_streak": 5,
+        "repeat_transition_fraction": 0.21311475409836064,
+        "selected_action_count": 306,
+        "action_bout_count": 306
+      },
+      "sha256": "fc4b1d0d1c2b0f7ca2d318ebccad627339d6ce77581843761166c34814749ccb",
+      "trace": "runs/case_00_rest_seeking.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "stimulation_seeking",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.65,
+        "self_control": 0.4,
+        "rest_preference": 0.35,
+        "stimulation_seeking": 0.85,
+        "task_anxiety_sensitivity": 0.45,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.45,
+        "action_noise": 0.65
+      },
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "behavior": {
+        "mean_action_bout_minutes": 33.37417218543046,
+        "median_action_bout_minutes": 25.0,
+        "p90_action_bout_minutes": 60.0,
+        "commitment_active_minutes_per_day": 429.2857142857143,
+        "commitment_suspended_minutes_per_day": 221.42857142857142,
+        "action_entropy_bits": 3.128701996603462,
+        "switches_per_day": 33.57142857142857,
+        "max_same_action_streak": 8,
+        "repeat_transition_fraction": 0.22442244224422442,
+        "selected_action_count": 304,
+        "action_bout_count": 302
+      },
+      "sha256": "5319722040357b99e58689c4af9aed354c8304c9e9644f6af2e77c4238023ff0",
+      "trace": "runs/case_00_stimulation_seeking.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "anxious",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.55,
+        "self_control": 0.5,
+        "rest_preference": 0.55,
+        "stimulation_seeking": 0.5,
+        "task_anxiety_sensitivity": 0.85,
+        "screen_strain_sensitivity": 0.55,
+        "need_response": 0.65,
+        "action_noise": 0.4
+      },
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "behavior": {
+        "mean_action_bout_minutes": 32.40836012861736,
+        "median_action_bout_minutes": 25.0,
+        "p90_action_bout_minutes": 60.0,
+        "commitment_active_minutes_per_day": 383.2857142857143,
+        "commitment_suspended_minutes_per_day": 207.57142857142858,
+        "action_entropy_bits": 3.2253139547643332,
+        "switches_per_day": 33.57142857142857,
+        "max_same_action_streak": 7,
+        "repeat_transition_fraction": 0.24437299035369775,
+        "selected_action_count": 312,
+        "action_bout_count": 311
+      },
+      "sha256": "386ab1c6f612dbdc2f4e8c7f034d7c4302ff67087d7d26de5652ab61fd51753d",
+      "trace": "runs/case_00_anxious.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "body_sensitive",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.45,
+        "self_control": 0.55,
+        "rest_preference": 0.6,
+        "stimulation_seeking": 0.4,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.65,
+        "need_response": 0.9,
+        "action_noise": 0.35
+      },
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "behavior": {
+        "mean_action_bout_minutes": 34.28231292517007,
+        "median_action_bout_minutes": 25.0,
+        "p90_action_bout_minutes": 60.0,
+        "commitment_active_minutes_per_day": 384.57142857142856,
+        "commitment_suspended_minutes_per_day": 373.14285714285717,
+        "action_entropy_bits": 3.32545160430458,
+        "switches_per_day": 34.857142857142854,
+        "max_same_action_streak": 7,
+        "repeat_transition_fraction": 0.17006802721088435,
+        "selected_action_count": 295,
+        "action_bout_count": 294
+      },
+      "sha256": "46e52c8dac75e4bcf1ff223da533cf79880df10ae32c4bb105cd30f3708e349b",
+      "trace": "runs/case_00_body_sensitive.jsonl.gz"
+    },
+    {
+      "case": 0,
+      "profile": "spontaneous",
+      "scenario_seed": 1000,
+      "policy_seed": 5000,
+      "personality": {
+        "procrastination": 0.5,
+        "self_control": 0.45,
+        "rest_preference": 0.5,
+        "stimulation_seeking": 0.65,
+        "task_anxiety_sensitivity": 0.5,
+        "screen_strain_sensitivity": 0.5,
+        "need_response": 0.5,
+        "action_noise": 0.9
+      },
+      "initial_state": {
+        "boredom": 0.55,
+        "fatigue": 0.15,
+        "task_pressure": 0.55,
+        "satisfaction": 0.45,
+        "hunger": 0.25,
+        "bathroom_urge": 0.15,
+        "anxiety": 0.2,
+        "screen_strain": 0.05,
+        "commitment": "none"
+      },
+      "behavior": {
+        "mean_action_bout_minutes": 35.61484098939929,
+        "median_action_bout_minutes": 30.0,
+        "p90_action_bout_minutes": 60.0,
+        "commitment_active_minutes_per_day": 359.0,
+        "commitment_suspended_minutes_per_day": 329.0,
+        "action_entropy_bits": 3.319203160823403,
+        "switches_per_day": 31.857142857142858,
+        "max_same_action_streak": 8,
+        "repeat_transition_fraction": 0.20921985815602837,
+        "selected_action_count": 283,
+        "action_bout_count": 283
+      },
+      "sha256": "a5385b465b546556634055a34cb8fc9eabe5f08029a6bf4d455e5189a08c4371",
+      "trace": "runs/case_00_spontaneous.jsonl.gz"
+    }
+  ]
+}

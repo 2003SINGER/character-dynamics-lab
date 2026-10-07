@@ -1,0 +1,495 @@
+{
+  "disclaimer": "Lossy result projection only; not rawtrace, dataset, or input reconstruction.",
+  "excluded_inputs": [
+    {
+      "reason": "source-bearing scene snapshot excluded as input, not projected",
+      "source_sha256": "c10b6d6ca3af6b670a4b1ef5f5135153b1e313d421de06245d71836631cfb84e",
+      "sourcepath": "outputs/experiments/LIGHT_compiled_semantics_v0/LIGHT_scene_snapshot_v0.jsonl"
+    }
+  ],
+  "losses_nats_key_policy": "only explicit non-source condition labels are retained as keys; unknown labels become ordinal/value entries",
+  "mixed_object_policy": "known schema keys are retained; every unknown child key is omitted and represented by its original ordinal and projected value",
+  "ordered_map_policy": "dynamic maps and objects with only unrecognized keys are represented as insertion-ordered ordinal/value arrays; original keys are omitted and order is not sorted",
+  "preserved_value_policy": "numbers, booleans, nulls, selected IDs/hashes, and allowlisted categorical labels",
+  "projection_version": 1,
+  "removedkey_count_policy": "unrecognized removed field names are represented by truncated SHA-256 labels in the count map",
+  "schema": "SOURCE_STRIPPED_RESULT_PROJECTION",
+  "sources": [
+    {
+      "output_sha256": "049e05637fcee0e352f97e07e8275987bdd635580526f789dbac082a1d47a167",
+      "outputpath": "outputs/public_result_projections_20261007_v2/T0c_LIGHT_batch4/LIGHT_compiled_semantics_v0.trace.jsonl",
+      "removedkey_counts": {
+        "candidate_set_factual": 140,
+        "source_O": 140,
+        "source_action_A_star": 140
+      },
+      "rows": 140,
+      "source_sha256": "d399462a91f26ac292288920803862637f7a40bb9fa46f47144fd9554a86fcc1",
+      "sourcepath": "outputs/T0c_LIGHT_batch4/LIGHT_compiled_semantics_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "1b31d53776bd142e0cebc08e2a9cd2f7d81aee309675d542034996762497756a",
+      "outputpath": "outputs/public_result_projections_20261007_v2/T0c_LIGHT_batch4/LIGHT_counterfactual_remove_v0.trace.jsonl",
+      "removedkey_counts": {
+        "intervention": 52,
+        "removed_action": 52,
+        "target_A_star": 52
+      },
+      "rows": 52,
+      "source_sha256": "5215156df32cdd441a95001a48d8689e6b4f8b66e20471b5d1c6e27f43969c57",
+      "sourcepath": "outputs/T0c_LIGHT_batch4/LIGHT_counterfactual_remove_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "75bcff3b643f2c7da732377f4f41fed0bc6fa1b29d136bf75ea560eea08c888b",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_compiled_semantics_v0/LIGHT_compiled_semantics_v0.trace.jsonl",
+      "removedkey_counts": {
+        "candidate_scene_bindings": 140,
+        "candidate_set_factual": 140,
+        "source_O": 140,
+        "source_action_A_star": 140
+      },
+      "rows": 140,
+      "source_sha256": "85934b8851bfc76236cb3666854e62fd0e8d695a8011f3a2e63b5eafe044e8bf",
+      "sourcepath": "outputs/experiments/LIGHT_compiled_semantics_v0/LIGHT_compiled_semantics_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "6c699113e7ed711f8f066af58b7ffe8666be787044b530916534bfbe681899ac",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_compiled_semantics_v0/LIGHT_semantic_update_remove_diagnostic_v0.trace.jsonl",
+      "removedkey_counts": {
+        "intervention": 52,
+        "removed_action": 52,
+        "target_A_star": 52
+      },
+      "rows": 52,
+      "source_sha256": "78c8244b07db4dfdb6c31fae248f29ab4343dd00c24e4af86b6bff4c1170c1c9",
+      "sourcepath": "outputs/experiments/LIGHT_compiled_semantics_v0/LIGHT_semantic_update_remove_diagnostic_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "1e4b0d1c41750914cf46d6035fdb9c87df9af090984bb2bb56e4e2ab50de9d02",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_goldless_protocol_v0/LIGHT_compiled_semantics_v0.trace.jsonl",
+      "removedkey_counts": {
+        "candidate_scene_bindings": 140,
+        "candidate_set_factual": 140,
+        "source_O": 140,
+        "source_action_A_star": 140
+      },
+      "rows": 140,
+      "source_sha256": "ef9aee2f4a2012a60c0e66e659e1a2e3ac00f6c3ae17c86729a0c49acdcf0f63",
+      "sourcepath": "outputs/experiments/LIGHT_goldless_protocol_v0/LIGHT_compiled_semantics_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "6c699113e7ed711f8f066af58b7ffe8666be787044b530916534bfbe681899ac",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_goldless_protocol_v0/LIGHT_semantic_update_remove_diagnostic_v0.trace.jsonl",
+      "removedkey_counts": {
+        "intervention": 52,
+        "removed_action": 52,
+        "target_A_star": 52
+      },
+      "rows": 52,
+      "source_sha256": "31c4a0a33596d84c7c90efba888f8872b27468e8511e819cabb714ca77e93857",
+      "sourcepath": "outputs/experiments/LIGHT_goldless_protocol_v0/LIGHT_semantic_update_remove_diagnostic_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "5fca15b1707cd308f8bab1bc4493840030be23b1cf0dd346d7503771aa84bd4f",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_neutral_v0/LIGHT_compiled_semantics_v0.trace.jsonl",
+      "removedkey_counts": {
+        "candidate_scene_bindings": 140,
+        "candidate_set_factual": 140,
+        "source_O": 140,
+        "source_action_A_star": 140
+      },
+      "rows": 140,
+      "source_sha256": "ea4b5ce05c50207f30bcd2eec438a404453c4d7d3946f1f21c2762f2de501520",
+      "sourcepath": "outputs/experiments/LIGHT_neutral_v0/LIGHT_compiled_semantics_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "75bcff3b643f2c7da732377f4f41fed0bc6fa1b29d136bf75ea560eea08c888b",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_neutral_v1/LIGHT_compiled_semantics_v0.trace.jsonl",
+      "removedkey_counts": {
+        "candidate_scene_bindings": 140,
+        "candidate_set_factual": 140,
+        "source_O": 140,
+        "source_action_A_star": 140
+      },
+      "rows": 140,
+      "source_sha256": "85934b8851bfc76236cb3666854e62fd0e8d695a8011f3a2e63b5eafe044e8bf",
+      "sourcepath": "outputs/experiments/LIGHT_neutral_v1/LIGHT_compiled_semantics_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "477e1899d33c1ce66bcd1eab3f5498ba3d6e21136aef377b4d34158d0754c34c",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_scene_aware_v1/LIGHT_compiled_semantics_v0.trace.jsonl",
+      "removedkey_counts": {
+        "candidate_set_factual": 140,
+        "source_O": 140,
+        "source_action_A_star": 140
+      },
+      "rows": 140,
+      "source_sha256": "351144ea4b738bf80283d87c1eba395de9a4bdc98a6ed41ad684ec3983e7baaf",
+      "sourcepath": "outputs/experiments/LIGHT_scene_aware_v1/LIGHT_compiled_semantics_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "6dc5e43b0eef49dd0bdaea4a162c3991710ca3d0ff81148e53cebd0a8ef06a9f",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_scene_snapshot_v1/LIGHT_compiled_semantics_v0.trace.jsonl",
+      "removedkey_counts": {
+        "candidate_scene_bindings": 140,
+        "candidate_set_factual": 140,
+        "source_O": 140,
+        "source_action_A_star": 140
+      },
+      "rows": 140,
+      "source_sha256": "8e07347e6cdf7595279f4a79e19fa641472e1a8e1fe66b11867e4ab78f393b22",
+      "sourcepath": "outputs/experiments/LIGHT_scene_snapshot_v1/LIGHT_compiled_semantics_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "ed86315d7554f432e35c7f3e52074d7c7adad4c2f83ecff4926e118a49b8a616",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_transition_theory_s_replay_neutral_v0/LIGHT_permuted_S.trace.jsonl",
+      "removedkey_counts": {
+        "after": 4,
+        "before": 54,
+        "behavior": 82,
+        "candidate_scene_bindings": 140,
+        "effect_kind": 82,
+        "entity_id": 444,
+        "evidence": 140,
+        "kind": 444,
+        "negative_conduciveness_trace": 280,
+        "positive_conduciveness_trace": 280,
+        "previous_action": 140,
+        "relation": 204,
+        "relevance_trace": 280,
+        "source": 526,
+        "target_entity": 82,
+        "unknown_key_sha256_e3b0c44298fc1c14": 140
+      },
+      "rows": 140,
+      "source_sha256": "42fa97e05c7067ab7b32877e2ad367a30bfbb98559a043d9ae3124b70c75069b",
+      "sourcepath": "outputs/experiments/LIGHT_transition_theory_s_replay_neutral_v0/LIGHT_permuted_S.trace.jsonl"
+    },
+    {
+      "output_sha256": "36c7356b1ce17c9233eacb387bbdcdfe280edc43ace548dfc4fe6c67056e7d13",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_transition_theory_s_replay_neutral_v0/LIGHT_theory_S.trace.jsonl",
+      "removedkey_counts": {
+        "after": 4,
+        "before": 54,
+        "behavior": 82,
+        "candidate_scene_bindings": 140,
+        "effect_kind": 82,
+        "entity_id": 444,
+        "evidence": 140,
+        "kind": 444,
+        "negative_conduciveness_trace": 280,
+        "positive_conduciveness_trace": 280,
+        "previous_action": 140,
+        "relation": 204,
+        "relevance_trace": 280,
+        "source": 526,
+        "target_entity": 82,
+        "unknown_key_sha256_e3b0c44298fc1c14": 140
+      },
+      "rows": 140,
+      "source_sha256": "54e28f8591ba02d018dc052d9ac121c7b2393f2e90e9084134b4ff8da9e73158",
+      "sourcepath": "outputs/experiments/LIGHT_transition_theory_s_replay_neutral_v0/LIGHT_theory_S.trace.jsonl"
+    },
+    {
+      "output_sha256": "b8c19552bd1eacc3ea1bfe7f2e8607b90f3d4e3fa06dd95c5577719ef2c85d83",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_transition_theory_s_replay_neutral_v0/LIGHT_zero_S.trace.jsonl",
+      "removedkey_counts": {
+        "after": 4,
+        "before": 54,
+        "behavior": 82,
+        "candidate_scene_bindings": 140,
+        "effect_kind": 82,
+        "entity_id": 444,
+        "evidence": 140,
+        "kind": 444,
+        "negative_conduciveness_trace": 280,
+        "positive_conduciveness_trace": 280,
+        "previous_action": 140,
+        "relation": 204,
+        "relevance_trace": 280,
+        "source": 526,
+        "target_entity": 82,
+        "unknown_key_sha256_e3b0c44298fc1c14": 140
+      },
+      "rows": 140,
+      "source_sha256": "1fc6de083ea1ebb1c9fb7d9207d639ddf89b742e756840c194a59852f2449525",
+      "sourcepath": "outputs/experiments/LIGHT_transition_theory_s_replay_neutral_v0/LIGHT_zero_S.trace.jsonl"
+    },
+    {
+      "output_sha256": "ed86315d7554f432e35c7f3e52074d7c7adad4c2f83ecff4926e118a49b8a616",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_transition_theory_s_v0/LIGHT_permuted_S.trace.jsonl",
+      "removedkey_counts": {
+        "after": 4,
+        "before": 54,
+        "behavior": 82,
+        "candidate_scene_bindings": 140,
+        "effect_kind": 82,
+        "entity_id": 444,
+        "evidence": 140,
+        "kind": 444,
+        "negative_conduciveness_trace": 280,
+        "positive_conduciveness_trace": 280,
+        "previous_action": 140,
+        "relation": 204,
+        "relevance_trace": 280,
+        "source": 526,
+        "target_entity": 82,
+        "unknown_key_sha256_e3b0c44298fc1c14": 140
+      },
+      "rows": 140,
+      "source_sha256": "42fa97e05c7067ab7b32877e2ad367a30bfbb98559a043d9ae3124b70c75069b",
+      "sourcepath": "outputs/experiments/LIGHT_transition_theory_s_v0/LIGHT_permuted_S.trace.jsonl"
+    },
+    {
+      "output_sha256": "36c7356b1ce17c9233eacb387bbdcdfe280edc43ace548dfc4fe6c67056e7d13",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_transition_theory_s_v0/LIGHT_theory_S.trace.jsonl",
+      "removedkey_counts": {
+        "after": 4,
+        "before": 54,
+        "behavior": 82,
+        "candidate_scene_bindings": 140,
+        "effect_kind": 82,
+        "entity_id": 444,
+        "evidence": 140,
+        "kind": 444,
+        "negative_conduciveness_trace": 280,
+        "positive_conduciveness_trace": 280,
+        "previous_action": 140,
+        "relation": 204,
+        "relevance_trace": 280,
+        "source": 526,
+        "target_entity": 82,
+        "unknown_key_sha256_e3b0c44298fc1c14": 140
+      },
+      "rows": 140,
+      "source_sha256": "54e28f8591ba02d018dc052d9ac121c7b2393f2e90e9084134b4ff8da9e73158",
+      "sourcepath": "outputs/experiments/LIGHT_transition_theory_s_v0/LIGHT_theory_S.trace.jsonl"
+    },
+    {
+      "output_sha256": "b8c19552bd1eacc3ea1bfe7f2e8607b90f3d4e3fa06dd95c5577719ef2c85d83",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_transition_theory_s_v0/LIGHT_zero_S.trace.jsonl",
+      "removedkey_counts": {
+        "after": 4,
+        "before": 54,
+        "behavior": 82,
+        "candidate_scene_bindings": 140,
+        "effect_kind": 82,
+        "entity_id": 444,
+        "evidence": 140,
+        "kind": 444,
+        "negative_conduciveness_trace": 280,
+        "positive_conduciveness_trace": 280,
+        "previous_action": 140,
+        "relation": 204,
+        "relevance_trace": 280,
+        "source": 526,
+        "target_entity": 82,
+        "unknown_key_sha256_e3b0c44298fc1c14": 140
+      },
+      "rows": 140,
+      "source_sha256": "1fc6de083ea1ebb1c9fb7d9207d639ddf89b742e756840c194a59852f2449525",
+      "sourcepath": "outputs/experiments/LIGHT_transition_theory_s_v0/LIGHT_zero_S.trace.jsonl"
+    },
+    {
+      "output_sha256": "1e4b0d1c41750914cf46d6035fdb9c87df9af090984bb2bb56e4e2ab50de9d02",
+      "outputpath": "outputs/public_result_projections_20261007_v2/experiments/LIGHT_verb_only_v0/LIGHT_compiled_semantics_v0.trace.jsonl",
+      "removedkey_counts": {
+        "candidate_set_factual": 140,
+        "source_O": 140,
+        "source_action_A_star": 140
+      },
+      "rows": 140,
+      "source_sha256": "bec1650c25d69d5e77cc19b7e83062a418fed37adaeaaaea99046a88501744d5",
+      "sourcepath": "outputs/experiments/LIGHT_verb_only_v0/LIGHT_compiled_semantics_v0.trace.jsonl"
+    },
+    {
+      "output_sha256": "cdb955693c5ab2fa58d62b858e88c7cc8fc4c31db3cd6ba475151c6fa1f46416",
+      "outputpath": "outputs/public_result_projections_20261007_v2/light_prediction_admission_20261006/run_v1/review_24.jsonl",
+      "removedkey_counts": {
+        "candidate_set_factual": 24,
+        "model_output": 24,
+        "previous2_source_O": 24,
+        "previous2_source_action_A_star": 24,
+        "previous_source_O": 24,
+        "previous_source_action_A_star": 24,
+        "reviewer_notes": 24,
+        "source_O": 24,
+        "source_action_A_star": 24
+      },
+      "rows": 24,
+      "source_sha256": "a464e85b4e01e4c78c4f6f2714a628ad67234d6b8c0040c793c9a47e1fd47f65",
+      "sourcepath": "outputs/light_prediction_admission_20261006/run_v1/review_24.jsonl"
+    },
+    {
+      "output_sha256": "5b0013eaba088e18f4eae5ccc958c71d9d335abde19c3b24a8fadb8662abef0b",
+      "outputpath": "outputs/public_result_projections_20261007_v2/light_prediction_admission_20261006/run_v2/review_24.jsonl",
+      "removedkey_counts": {
+        "actor": 24,
+        "candidate_set_factual": 24,
+        "model_output": 24,
+        "previous2_source_O": 24,
+        "previous2_source_action_A_star": 24,
+        "previous_source_O": 24,
+        "previous_source_action_A_star": 24,
+        "reviewer_notes": 24,
+        "source_O": 24,
+        "source_action_A_star": 24
+      },
+      "rows": 24,
+      "source_sha256": "0e2af5e159c4eb0db1ca9311b53bd5c17048ff8a6a94209ccdeab0da107cec1d",
+      "sourcepath": "outputs/light_prediction_admission_20261006/run_v2/review_24.jsonl"
+    },
+    {
+      "output_sha256": "cba7f9e4a5509dd455da50093f0e37db8b240c8baff72a9bdbb573e4f8bccca8",
+      "outputpath": "outputs/public_result_projections_20261007_v2/light_prediction_admission_20261006/run_v3/review_24.jsonl",
+      "removedkey_counts": {
+        "actor": 24,
+        "candidate_set_factual": 24,
+        "model_output": 24,
+        "previous2_source_O": 24,
+        "previous2_source_action_A_star": 24,
+        "previous_source_O": 24,
+        "previous_source_action_A_star": 24,
+        "reviewer_notes": 24,
+        "source_O": 24,
+        "source_action_A_star": 24
+      },
+      "rows": 24,
+      "source_sha256": "86b0f26a6fc9691c179a65b9d58ec32aabcb2dfce03509e2d5fc983aa1a70e4b",
+      "sourcepath": "outputs/light_prediction_admission_20261006/run_v3/review_24.jsonl"
+    },
+    {
+      "output_sha256": "923eb98953c937097febd028072d2766674b9b98af7cb6ace57edd576424c7d4",
+      "outputpath": "outputs/public_result_projections_20261007_v2/opera_t0d_2026-09-08/terra_candidate_spike_v0/candidate_artifact.json",
+      "removedkey_counts": {
+        "frozen_at": 1,
+        "input": 1,
+        "model": 1,
+        "provenance_encoding": 1,
+        "reasoning_mode": 1,
+        "target_description": 157,
+        "verb": 157
+      },
+      "rows": 30,
+      "source_sha256": "2d6388d9d45db391b35711f3b627d959437fd06e11530daf5ee71cc7adb313dd",
+      "sourcepath": "outputs/opera_t0d_2026-09-08/terra_candidate_spike_v0/candidate_artifact.json"
+    },
+    {
+      "output_sha256": "0583cc55fa461dca169dafa79356be48dd6b215516f4933c21a40821430ad0e1",
+      "outputpath": "outputs/public_result_projections_20261007_v2/opera_t0d_2026-09-08/terra_candidate_spike_v0/evaluator_report.json",
+      "removedkey_counts": {
+        "ambiguous": 1,
+        "candidate_artifact_hash_stable": 1,
+        "candidate_generator_gold_access_false": 1,
+        "candidate_inputs": 3,
+        "candidate_path": 1,
+        "candidate_provenance_present": 1,
+        "candidate_sha256_read_1": 1,
+        "candidate_sha256_read_2": 1,
+        "declared_fields": 3,
+        "definition": 1,
+        "evaluation": 1,
+        "exact": 1,
+        "excluded_from_matching": 3,
+        "fixture_ids_unique": 1,
+        "gold_class": 30,
+        "gold_inputs": 2,
+        "gold_path": 1,
+        "interpretation": 1,
+        "keys_checked": 7,
+        "miss": 1,
+        "model": 1,
+        "normalization": 1,
+        "note": 2,
+        "reason": 30,
+        "record_count_matches_gold": 1,
+        "semantic": 1,
+        "support_recall": 1,
+        "value": 7
+      },
+      "rows": 1,
+      "source_sha256": "00a3918fb04d18c3fb75e2e64dfb380cf6c26a5e134522810b138a56fe528039",
+      "sourcepath": "outputs/opera_t0d_2026-09-08/terra_candidate_spike_v0/evaluator_report.json"
+    },
+    {
+      "output_sha256": "38ffd542293d3035bd742fb308f6653e39d844646b1da52c01fee00791f91bb4",
+      "outputpath": "outputs/public_result_projections_20261007_v2/opera_t0d_2026-09-08/terra_candidate_spike_v1/candidate_artifact.json",
+      "removedkey_counts": {
+        "action": 30,
+        "input_path": 1,
+        "model": 1,
+        "protocol_path": 1,
+        "reason": 30,
+        "semantic_method": 1,
+        "session_sha256_16": 30,
+        "target_attrs": 30,
+        "target_text": 30
+      },
+      "rows": 30,
+      "source_sha256": "e9590343a95b3d79043d4afa6da7eb5b031d5dd8d93af0b464c2940dcced0cd4",
+      "sourcepath": "outputs/opera_t0d_2026-09-08/terra_candidate_spike_v1/candidate_artifact.json"
+    },
+    {
+      "output_sha256": "a3795ae90dd71cfc6c13a35275894cbd430be3f4f2d8489d40b70579afff8d64",
+      "outputpath": "outputs/public_result_projections_20261007_v2/opera_t0d_2026-09-08/terra_candidate_spike_v1/evaluator_report.json",
+      "removedkey_counts": {
+        "ambiguous": 1,
+        "blind_input_path": 1,
+        "candidate_artifact_hash_stable": 1,
+        "candidate_generator_gold_access_false": 1,
+        "candidate_path": 1,
+        "candidate_provenance_present": 1,
+        "candidate_raw_binding_valid": 1,
+        "candidate_sha256_read_1": 1,
+        "candidate_sha256_read_2": 1,
+        "declared_fields": 3,
+        "definition": 2,
+        "duplicate_identity_check": 1,
+        "evaluation": 1,
+        "fixture_ids_unique": 1,
+        "gold_path": 1,
+        "gold_semantic_id": 30,
+        "interpretation": 1,
+        "keys_checked": 7,
+        "miss": 1,
+        "model": 1,
+        "no_candidate_check": 1,
+        "note": 1,
+        "numerator_definition": 1,
+        "prohibited_shortcut": 1,
+        "reason": 30,
+        "record_count_matches_gold": 1,
+        "strict_support": 1,
+        "value": 6
+      },
+      "rows": 1,
+      "source_sha256": "86e4c3ce0ffb7f5dc8287c075460e58c5cf66d6b0b5bcee887cedcdedd34c3dd",
+      "sourcepath": "outputs/opera_t0d_2026-09-08/terra_candidate_spike_v1/evaluator_report.json"
+    },
+    {
+      "output_sha256": "6fd9f090515fd6ce7bddf49122b7c0a0ca27245093f8141f357cf276975be56e",
+      "outputpath": "outputs/public_result_projections_20261007_v2/prediction_baseline_v1_20261006/reproduction_seed7_v1/validation_row_losses.jsonl",
+      "removedkey_counts": {
+        "actor": 2707,
+        "source_action_A_star": 2707,
+        "unknown_key_sha256_e3b0c44298fc1c14": 5414
+      },
+      "rows": 2707,
+      "source_sha256": "b095989c2d98b3dad6183c8a4548c9870c6c649fc250dd6e000bd1d1be3a7d25",
+      "sourcepath": "outputs/prediction_baseline_v1_20261006/reproduction_seed7_v1/validation_row_losses.jsonl"
+    },
+    {
+      "output_sha256": "5af5084cca2dceb398df95a7b057981f25b351b4f49b5cbf8274a20585c0fe2e",
+      "outputpath": "outputs/public_result_projections_20261007_v2/prediction_baseline_v1_20261006/run_v1/validation_row_losses.jsonl",
+      "removedkey_counts": {
+        "actor": 2707,
+        "source_action_A_star": 2707,
+        "unknown_key_sha256_e3b0c44298fc1c14": 5414
+      },
+      "rows": 2707,
+      "source_sha256": "c605e939258d4116efc64daf01b9f54d980c471de5da900c7aa8c236d33dfa75",
+      "sourcepath": "outputs/prediction_baseline_v1_20261006/run_v1/validation_row_losses.jsonl"
+    }
+  ],
+  "superseded_unpublished_projection": "outputs/public_result_projections_20261007/ (development v1; use this v2 root only)"
+}

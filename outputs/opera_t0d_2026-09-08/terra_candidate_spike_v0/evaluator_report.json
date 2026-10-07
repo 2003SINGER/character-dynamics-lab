@@ -1,0 +1,93 @@
+{
+  "report_version": "terra-evaluator-v0.1",
+  "evaluation": "gold-blind candidate support audit",
+  "artifacts": {
+    "candidate_path": "D:\\desk\\科研\\character-dynamics\\outputs\\opera_t0d_2026-09-08\\terra_candidate_spike_v0\\candidate_artifact.json",
+    "gold_path": "D:\\desk\\科研\\character-dynamics\\outputs\\opera_t0d_2026-09-06\\terra_candidate_spike_v0\\gold_evaluator_only.json",
+    "candidate_sha256": "2D6388D9D45DB391B35711F3B627D959437FD06E11530DAF5EE71CC7ADB313DD",
+    "gold_sha256": "69FEA4721B6087ED322579BA48D5C840AF4CF18734611D94B2E10041BBB154F1"
+  },
+  "matching_rule": {
+    "gold_inputs": ["semantic_id", "element_meta"],
+    "candidate_inputs": ["candidate_id", "verb", "ambiguity"],
+    "excluded_from_matching": ["target_description lexical overlap", "fixture-id suffix", "raw_element_source_index_ranges"],
+    "normalization": "Map semantic_id prefixes and structured element_meta.name/data keys to a fixed intent family (search_control, orders, cart, homepage, product_result, rating, carousel, review, subscription, return_policy, coupon, product_option, pagination, home_resume). Map Terra candidate IDs to the same fixed families. No token-overlap score is used.",
+    "outcomes": {
+      "exact": "A non-ambiguous one-to-one canonical candidate preserves the gold target identity; none of these 30 candidates met this stricter condition.",
+      "semantic": "A non-ambiguous candidate matches the gold intent family but abstracts away the gold target identity.",
+      "ambiguous": "At least one candidate matches the gold intent family, but every such candidate is flagged ambiguity=true; it is not counted as strict support.",
+      "miss": "No candidate matches the gold intent family under the controlled mapping."
+    },
+    "support_recall": "strict_support_recall = (exact + semantic) / gold_records; ambiguous is reported separately and excluded from strict recall."
+  },
+  "metrics": {
+    "gold_records": 30,
+    "candidate_records": 30,
+    "candidate_count": {
+      "total": 157,
+      "mean": 5.2333333333,
+      "median": 5.0,
+      "quantiles_linear_interpolation": {"p25": 5.0, "p50": 5.0, "p75": 5.75, "p90": 6.1}
+    },
+    "outcome_counts": {"exact": 0, "semantic": 7, "ambiguous": 17, "miss": 6},
+    "support_recall_strict": {"numerator": 7, "denominator": 30, "value": 0.2333333333},
+    "support_recall_including_ambiguous": {"numerator": 24, "denominator": 30, "value": 0.8, "note": "diagnostic only; not strict support recall"},
+    "ambiguous_gold_match_rate": {"numerator": 17, "denominator": 30, "value": 0.5666666667},
+    "candidate_ambiguity_rate": {"ambiguous_candidates": 114, "all_candidates": 157, "value": 0.7261146497},
+    "records_with_any_ambiguous_candidate": {"numerator": 30, "denominator": 30, "value": 1.0},
+    "duplicate_rate": {"duplicate_candidate_ids": 0, "candidate_records": 30, "value": 0.0, "definition": "within-record repeated candidate_id entries; deliberate provenance-range overlap is not counted as duplication"},
+    "no_candidate_rate": {"records_with_zero_candidates": 0, "denominator": 30, "value": 0.0}
+  },
+  "reproducibility": {
+    "rerun_performed": false,
+    "check": "read/hash stability check on frozen artifact",
+    "candidate_sha256_read_1": "2D6388D9D45DB391B35711F3B627D959437FD06E11530DAF5EE71CC7ADB313DD",
+    "candidate_sha256_read_2": "2D6388D9D45DB391B35711F3B627D959437FD06E11530DAF5EE71CC7ADB313DD",
+    "hash_stable": true,
+    "generator_metadata": {"model": "gpt-5.6-terra", "temperature": 0.2, "protocol_version": "T0d-terra-candidate-v0", "gold_access": false},
+    "interpretation": "No generator rerun or regeneration was performed; the report verifies the immutable artifact hash and records the frozen generator metadata."
+  },
+  "gold_blind_invariants": {
+    "candidate_generator_gold_access_false": "PASS",
+    "prohibited_gold_keys_absent_from_candidate": {"status": "PASS", "keys_checked": ["action_type", "click_type", "semantic_id", "element_meta", "input_text", "rationale", "products"]},
+    "candidate_input_field_allowlist": {"status": "PASS", "declared_fields": ["url", "history", "raw_elements"]},
+    "record_count_matches_gold": "PASS",
+    "fixture_ids_unique": "PASS",
+    "candidate_provenance_present": "PASS",
+    "candidate_artifact_hash_stable": "PASS",
+    "reveal_order_from_filesystem_mtime": {"status": "INDETERMINATE", "note": "Filesystem mtime does not prove when evaluator read/revealed gold; no claim is made from mtime ordering."}
+  },
+  "per_record": [
+    {"fixture_id":"02653e558ed3e0bf:0","semantic_id":"pick_up_where_you_left_off.luxogear_emergency_whistles_with_lanyard_safety_whistle_survival_shrill_loud_blast_for_kayak_life_vest_jacket_boating","gold_class":"home_resume","outcome":"ambiguous","matched_candidate_ids":["terra.home.resume_or_reorder"],"reason":"home resume/reorder family is present but ambiguity=true"},
+    {"fixture_id":"02653e558ed3e0bf:28","semantic_id":"nav_bar.search_input","gold_class":"search_control","outcome":"semantic","matched_candidate_ids":["terra.search.catalog"],"reason":"non-ambiguous search family; candidate abstracts input target"},
+    {"fixture_id":"02653e558ed3e0bf:54","semantic_id":"coupon.checkbox","gold_class":"coupon","outcome":"miss","matched_candidate_ids":[],"reason":"no coupon family candidate"},
+    {"fixture_id":"0319403bf704b068:0","semantic_id":"nav_bar.order_button","gold_class":"orders","outcome":"ambiguous","matched_candidate_ids":["terra.nav.account_or_cart"],"reason":"orders is included only in an ambiguous mixed navigation candidate"},
+    {"fixture_id":"0319403bf704b068:10","semantic_id":"customers_mention.superjare_long_sofa_console_table_with_charging_station_for_narrow_entryway_hallway_behind_couch_plant_for_entrance_living_room_vintage_brown_70_8_inch.product_title","gold_class":"product_result","outcome":"miss","matched_candidate_ids":[],"reason":"cart-sidebar item/control is not accepted as a product-result family match"},
+    {"fixture_id":"0319403bf704b068:18","semantic_id":"search_results.94_4_extra_long_console_table_with_charging_station_metal_frame_sofa_table_with_2_power_outlets_2_usb_ports_with_extension_cord_behind_couch_table_for_living_room_rustic_brown.product_name","gold_class":"product_result","outcome":"miss","matched_candidate_ids":[],"reason":"cart-sidebar item/control is not accepted as a product-result family match"},
+    {"fixture_id":"050ea0432026f038:0","semantic_id":"nav_bar.search_input","gold_class":"search_control","outcome":"semantic","matched_candidate_ids":["terra.search.catalog"],"reason":"non-ambiguous search family; candidate abstracts input target"},
+    {"fixture_id":"050ea0432026f038:10","semantic_id":"reviews.ratings.1_star_4","gold_class":"rating","outcome":"semantic","matched_candidate_ids":["terra.product.rating_details"],"reason":"non-ambiguous rating family but not the exact one-star control"},
+    {"fixture_id":"050ea0432026f038:19","semantic_id":"aplus_premium_module_13_carousel.next_page","gold_class":"carousel","outcome":"ambiguous","matched_candidate_ids":["terra.product.bundles","terra.product.related_or_media"],"reason":"page-related carousel family is only grouped ambiguously"},
+    {"fixture_id":"0c3f7e7317cd68d0:0","semantic_id":"frequently_repurchased_supplies.carousel_next_slide","gold_class":"carousel","outcome":"ambiguous","matched_candidate_ids":["terra.home.resume_or_deal"],"reason":"repurchase/carousel family is only grouped ambiguously"},
+    {"fixture_id":"0c3f7e7317cd68d0:10","semantic_id":"nav_bar.search_button","gold_class":"search_control","outcome":"semantic","matched_candidate_ids":["terra.search.catalog"],"reason":"non-ambiguous search family; candidate abstracts button target"},
+    {"fixture_id":"0c3f7e7317cd68d0:19","semantic_id":"reviews","gold_class":"review","outcome":"ambiguous","matched_candidate_ids":["terra.product.related_or_media"],"reason":"review control is grouped with unrelated media/related items"},
+    {"fixture_id":"110a946e15da0654:0","semantic_id":"reviews.reviews_with_images.see_all_photos","gold_class":"review","outcome":"ambiguous","matched_candidate_ids":["terra.product.related_or_compare"],"reason":"review/media family is only grouped ambiguously"},
+    {"fixture_id":"110a946e15da0654:38","semantic_id":"nav_bar.search_input","gold_class":"search_control","outcome":"semantic","matched_candidate_ids":["terra.search.catalog"],"reason":"non-ambiguous search family; candidate abstracts input target"},
+    {"fixture_id":"110a946e15da0654:74","semantic_id":"search_results.hosa_cpr_202_dual_1_4_ts_to_dual_rca_stereo_interconnect_cable_2_meters_6_6_feet_black.product_name","gold_class":"product_result","outcome":"ambiguous","matched_candidate_ids":["terra.search.result"],"reason":"search-result family is present but candidate is ambiguity=true"},
+    {"fixture_id":"12bca9c89447afc9:0","semantic_id":"nav_bar.homepage","gold_class":"homepage","outcome":"miss","matched_candidate_ids":[],"reason":"no homepage candidate"},
+    {"fixture_id":"12bca9c89447afc9:29","semantic_id":"reviews.popover.review_images.next","gold_class":"review","outcome":"ambiguous","matched_candidate_ids":["terra.product.related_or_review"],"reason":"review-image navigation is grouped ambiguously"},
+    {"fixture_id":"12bca9c89447afc9:56","semantic_id":"reviews.popover.review_images.next","gold_class":"review","outcome":"ambiguous","matched_candidate_ids":["terra.product.related_or_review"],"reason":"review-image navigation is grouped ambiguously"},
+    {"fixture_id":"16e0747ef0f662b7:0","semantic_id":"nav_bar.search_input","gold_class":"search_control","outcome":"semantic","matched_candidate_ids":["terra.search.catalog"],"reason":"non-ambiguous search family; candidate abstracts input target"},
+    {"fixture_id":"16e0747ef0f662b7:11","semantic_id":"subscribe_n_save_popover.drop_down_list.open_drop_down_list","gold_class":"subscription","outcome":"ambiguous","matched_candidate_ids":["terra.cart.subscription"],"reason":"subscription family is present but ambiguity=true"},
+    {"fixture_id":"16e0747ef0f662b7:21","semantic_id":"subscribe_n_save_popover.subscribe","gold_class":"subscription","outcome":"ambiguous","matched_candidate_ids":["terra.cart.subscription"],"reason":"subscription family is present but ambiguity=true"},
+    {"fixture_id":"1701ac6e72a1b764:0","semantic_id":"return_policy","gold_class":"return_policy","outcome":"miss","matched_candidate_ids":[],"reason":"no return-policy candidate"},
+    {"fixture_id":"1701ac6e72a1b764:11","semantic_id":"nav_bar.search_input","gold_class":"search_control","outcome":"semantic","matched_candidate_ids":["terra.search.catalog"],"reason":"non-ambiguous search family; candidate abstracts input target"},
+    {"fixture_id":"1701ac6e72a1b764:20","semantic_id":"nav_bar.cart_button","gold_class":"cart","outcome":"ambiguous","matched_candidate_ids":["terra.cart.navigate","terra.cart.items"],"reason":"cart family is present only through ambiguous navigation/item groupings"},
+    {"fixture_id":"17c4612897afd059:0","semantic_id":"4_star_items.carousel_next_slide","gold_class":"carousel","outcome":"ambiguous","matched_candidate_ids":["terra.home.resume_or_deal","terra.home.recommended_product"],"reason":"home carousel family is only grouped ambiguously"},
+    {"fixture_id":"17c4612897afd059:14","semantic_id":"search_results.womens_denim_baseball_cap_with_metal_rings_mens_trendy_ripped_trucker_hats_adjustable_low_profile_dad_hats.product_name","gold_class":"product_result","outcome":"ambiguous","matched_candidate_ids":["terra.search.result"],"reason":"search-result family is present but candidate is ambiguity=true"},
+    {"fixture_id":"17c4612897afd059:27","semantic_id":"product_options.color.button_list.6_49_with_50_percent_savings_6_49_12_99_12_99_free_delivery_tomorrow_dachshund_black","gold_class":"product_option","outcome":"ambiguous","matched_candidate_ids":["terra.product.purchase","terra.product.related_or_review"],"reason":"option/purchase family is present only in ambiguous candidates"},
+    {"fixture_id":"24e50a4ba65940bd:0","semantic_id":"nav_bar.homepage","gold_class":"homepage","outcome":"miss","matched_candidate_ids":[],"reason":"no homepage candidate"},
+    {"fixture_id":"24e50a4ba65940bd:17","semantic_id":"pagination.3","gold_class":"pagination","outcome":"ambiguous","matched_candidate_ids":["terra.search.pagination"],"reason":"pagination family is present but candidate is ambiguity=true"},
+    {"fixture_id":"24e50a4ba65940bd:33","semantic_id":"product_options.scent.button_list.15_97_15_97_0_50_per_ounce_0_50_0_50_ounce_free_delivery_thursday_lavender","gold_class":"product_option","outcome":"ambiguous","matched_candidate_ids":["terra.product.purchase","terra.product.related_or_review"],"reason":"option/purchase family is present only in ambiguous candidates"}
+  ],
+  "verdict": "strict support recall is 7/30 (0.2333); 17/30 gold targets have only ambiguous family support and 6/30 are misses. This is an evaluator-only negative/diagnostic result; no generator, protocol, Theory-S, or training artifact was modified."
+}

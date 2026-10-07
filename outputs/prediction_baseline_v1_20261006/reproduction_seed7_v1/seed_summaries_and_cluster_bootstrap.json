@@ -1,0 +1,879 @@
+{
+  "seeds_are_repeated_fits_not_independent_episode_samples": true,
+  "seeds_reported": [
+    7
+  ],
+  "status": "post_selection_development_only_not_formal_test",
+  "strata": {
+    "all": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.288909126657994,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.282451449365998,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2888894626739327,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2887753371629587,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.287788423414727,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2784787053149436,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2889140162645867,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        }
+      },
+      "episodes": 985,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -1.961558032034719e-05,
+            9.044373427630503e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -4.88960659279346e-06,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.021361884021008446,
+            0.008154262000713546
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.006462566898588681,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed7_permutation_intersection_rows": 2707,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0026917910725785784,
+            0.011095597211912153
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.003972744051054654,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.053828612687859156,
+            -0.0233250351109728
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.038718555795560695,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.13758599088062015,
+            -0.08356484742013595
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.10933828205255551,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -5.116757171576774e-05,
+            2.6515007901201644e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -2.455359065404976e-05,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.007849819725836078,
+            0.00745071086545018
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0001386791016283095,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.002126681251791917,
+            -0.00012879157877394227
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0011255928498596823,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.025478845574662356,
+            0.004161763001657262
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.010435310949643336,
+          "episodes": 985,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2707
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed7": 2.288909126657994,
+        "gru_permuted_state_seed7": 2.3211700051615587,
+        "gru_permuted_state_seed7_episodes": 985,
+        "gru_permuted_state_seed7_rows": 2707,
+        "gru_seed7": 2.282451449365998,
+        "gru_state_zero_seed7": 2.3917897314185534,
+        "gru_state_zero_seed7_episodes": 985,
+        "gru_state_zero_seed7_rows": 2707,
+        "last2_seed7": 2.2888894626739327,
+        "last_action_seed7": 2.2887753371629587,
+        "learned_last2_seed7": 2.287788423414727,
+        "learned_mean_seed7": 2.2784787053149436,
+        "o_only_seed7": 2.2889140162645867,
+        "uniform": 2.3334929671736995
+      },
+      "rows": 2707
+    },
+    "depth_eq_1": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.221128174285779,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2389415144363696,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2211379103105644,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.225493054194697,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2213445010798414,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.239716029030153,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.2211382419042205,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        }
+      },
+      "episodes": 984,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -3.134483124303079e-05,
+            1.0346941619077246e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -1.0067618441307682e-05,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00039686186581155877,
+            0.035512332658269724
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.017803272532149292,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed7_permutation_intersection_rows": 1392,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.011625116339474722,
+            0.009766430324461886
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0007745145937834663,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.03925477712567744,
+            0.0010619051333997087
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.01937593788379568,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.08812860807381473,
+            -0.043316183737560285
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.06512174740348053,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -3.3685627976699856e-05,
+            3.2203137726158125e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -3.315936559918283e-07,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0053624131961122245,
+            0.013680890926413275
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.004354812290476656,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0013374679863708365,
+            0.0017159727569630624
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.00020625917562123002,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            0.0001621765115710587,
+            0.037033221811755876
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.01857778712593276,
+          "episodes": 984,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1392
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed7": 2.221128174285779,
+        "gru_permuted_state_seed7": 2.2583174523201652,
+        "gru_permuted_state_seed7_episodes": 984,
+        "gru_permuted_state_seed7_rows": 1392,
+        "gru_seed7": 2.2389415144363696,
+        "gru_state_zero_seed7": 2.30406326183985,
+        "gru_state_zero_seed7_episodes": 984,
+        "gru_state_zero_seed7_rows": 1392,
+        "last2_seed7": 2.2211379103105644,
+        "last_action_seed7": 2.225493054194697,
+        "learned_last2_seed7": 2.2213445010798414,
+        "learned_mean_seed7": 2.239716029030153,
+        "o_only_seed7": 2.2211382419042205,
+        "uniform": 2.2772936951199196
+      },
+      "rows": 1392
+    },
+    "depth_ge_2": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.360659001716643,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3285091143257266,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3606082162023045,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3557631226320233,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3581229784642788,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3195111352681206,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3606584101122143,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        }
+      },
+      "episodes": 586,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -1.853052334760222e-05,
+            1.9440989485934364e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 5.916044285995426e-07,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.05477664679884931,
+            -0.010067398979617956
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.03214929578648774,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed7_permutation_intersection_rows": 1315,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            0.000339050912809726,
+            0.01780533863554996
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.008997979057605729,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.08256136156027205,
+            -0.03600014883368083
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.05919378327326176,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.20309873857044333,
+            -0.11094156312832044
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.15614392177233677,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -9.313116532908159e-05,
+            -9.46616920779024e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -5.019390990978865e-05,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.014865155858912085,
+            0.005330967201689808
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.004895287480191133,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.003992052189373079,
+            -0.0012990643710421377
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0025354316479352943,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.062235689237491065,
+            -0.020095046613498382
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.041147274844093466,
+          "episodes": 586,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 1315
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed7": 2.360659001716643,
+        "gru_permuted_state_seed7": 2.387702897598988,
+        "gru_permuted_state_seed7_episodes": 586,
+        "gru_permuted_state_seed7_rows": 1315,
+        "gru_seed7": 2.3285091143257266,
+        "gru_state_zero_seed7": 2.4846530360980634,
+        "gru_state_zero_seed7_episodes": 586,
+        "gru_state_zero_seed7_rows": 1315,
+        "last2_seed7": 2.3606082162023045,
+        "last_action_seed7": 2.3557631226320233,
+        "learned_last2_seed7": 2.3581229784642788,
+        "learned_mean_seed7": 2.3195111352681206,
+        "o_only_seed7": 2.3606584101122143,
+        "uniform": 2.3929829950815797
+      },
+      "rows": 1315
+    },
+    "depth_ge_4": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.589294714277441,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.491974099657752,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.589157010750337,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.5746055204759943,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.5828295398842203,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.492246315966953,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.5892956007610666,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        }
+      },
+      "episodes": 149,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -4.277065609928604e-05,
+            4.176360076096012e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -8.864836259321733e-07,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.1530908371972145,
+            -0.0417500379944527
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.09732150110331449,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed7_permutation_intersection_rows": 220,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.019086852421885382,
+            0.019653857671172746
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.00027221630920063367,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.1255915255047192,
+            -0.014428831857900325
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.06834342073310505,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.4193882410458259,
+            -0.17829205537991685
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.29557906741445716,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00023713241028382832,
+            -4.42612943345765e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.00013859001072970303,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.03979307601941648,
+            0.011498113788289882
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.014690080285072326,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.010743061057661556,
+            -0.0028960493615903075
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0064660608768463135,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.14663152171995533,
+            -0.045080144040634484
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.09704928479411386,
+          "episodes": 149,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 220
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed7": 2.589294714277441,
+        "gru_permuted_state_seed7": 2.5603175203908575,
+        "gru_permuted_state_seed7_episodes": 149,
+        "gru_permuted_state_seed7_rows": 220,
+        "gru_seed7": 2.491974099657752,
+        "gru_state_zero_seed7": 2.7875531670722093,
+        "gru_state_zero_seed7_episodes": 149,
+        "gru_state_zero_seed7_rows": 220,
+        "last2_seed7": 2.589157010750337,
+        "last_action_seed7": 2.5746055204759943,
+        "learned_last2_seed7": 2.5828295398842203,
+        "learned_mean_seed7": 2.492246315966953,
+        "o_only_seed7": 2.5892956007610666,
+        "uniform": 2.563198066132357
+      },
+      "rows": 220
+    },
+    "nontrivial_not_exact_previous_pair": {
+      "descriptive_seed_spread": {
+        "fixed_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.307463209620732,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "gru": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.312371755339029,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.307437958738625,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "last_action": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.309135593956739,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_last2": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.3062843971119213,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "learned_mean": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.308641737729577,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        },
+        "o_only": {
+          "interpretation": "descriptive repeated-fit spread; not a population CI",
+          "mean_across_repeated_fits": 2.307467250038498,
+          "reason": null,
+          "sd_across_repeated_fits": null,
+          "seed_count": 1
+        }
+      },
+      "episodes": 958,
+      "interpretation": "post-selection development description only",
+      "paired_episode_cluster_deltas_vs_o_only": {
+        "fixed_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -1.8703697140418168e-05,
+            1.0511950900602869e-05
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -4.040417765571852e-06,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.008830938825685678,
+            0.01856774842801725
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.004904505300531103,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed7_permutation_intersection_rows": 2577,
+        "gru_seed7_vs_learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0033783348897340835,
+            0.010437506768074515
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.0037300176094519247,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed7_vs_permuted_state_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.043031295989036086,
+            -0.013005331270136774
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.02816245756641487,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "gru_seed7_vs_state_zero_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.10404585393779124,
+            -0.057474304944223197
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.08063851258738076,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -5.670893704052185e-05,
+            -1.1139160857861442e-06
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -2.9291299872496444e-05,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "last_action_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.00571956963057546,
+            0.008862761497029695
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.0016683439182411759,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "learned_last2_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.0021562107150395926,
+            -0.00016501120500648004
+          ],
+          "delta_nll_nats_lhs_minus_rhs": -0.0011828529265762347,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        },
+        "learned_mean_seed7": {
+          "ci95_episode_cluster_bootstrap": [
+            -0.01249270312587704,
+            0.015271181268770593
+          ],
+          "delta_nll_nats_lhs_minus_rhs": 0.001174487691079178,
+          "episodes": 958,
+          "estimand": "row-weighted mean; episode-cluster resampling",
+          "reason": null,
+          "rows": 2577
+        }
+      },
+      "post_selection_dev_nll_nats_by_seed": {
+        "fixed_mean_seed7": 2.307463209620732,
+        "gru_permuted_state_seed7": 2.340534212905444,
+        "gru_permuted_state_seed7_episodes": 958,
+        "gru_permuted_state_seed7_rows": 2577,
+        "gru_seed7": 2.312371755339029,
+        "gru_state_zero_seed7": 2.39301026792641,
+        "gru_state_zero_seed7_episodes": 958,
+        "gru_state_zero_seed7_rows": 2577,
+        "last2_seed7": 2.307437958738625,
+        "last_action_seed7": 2.309135593956739,
+        "learned_last2_seed7": 2.3062843971119213,
+        "learned_mean_seed7": 2.308641737729577,
+        "o_only_seed7": 2.307467250038498,
+        "uniform": 2.3562250401047864
+      },
+      "rows": 2577
+    }
+  }
+}

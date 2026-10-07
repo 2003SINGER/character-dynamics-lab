@@ -1,0 +1,87 @@
+[
+  {
+    "op": "add",
+    "path": "/utility_baseline/action_templates/-",
+    "value": {
+      "id": "cancel_request",
+      "actor_role": "Visitor",
+      "roles": {
+        "Visitor": "actor",
+        "Worker": "any"
+      },
+      "preconditions": [
+        {
+          "fact": [
+            "request_status",
+            "{Worker}",
+            "{Visitor}",
+            "pending"
+          ]
+        }
+      ],
+      "delete": [
+        [
+          "request_status",
+          "{Worker}",
+          "{Visitor}",
+          "pending"
+        ]
+      ],
+      "insert": [
+        [
+          "request_status",
+          "{Worker}",
+          "{Visitor}",
+          "cancelled"
+        ]
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/utility_baseline/goal_factors/-",
+    "value": {
+      "id": "cancel_request",
+      "actor_role": "Visitor",
+      "weight": 1,
+      "match": [
+        "request_status",
+        "{Worker}",
+        "{actor}",
+        "cancelled"
+      ],
+      "count_bindings": true
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/characters/1/goals/-",
+    "value": {
+      "id": "cancel_request",
+      "utility": 1,
+      "conditions": [
+        "practice.request.worker.visitor.status!cancelled"
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/practices/1/actions/-",
+    "value": {
+      "name": "[Actor]: Cancel [Worker]'s request",
+      "conditions": [
+        "eq Actor Visitor",
+        "practice.request.Worker.Visitor.status!pending"
+      ],
+      "outcomes": [
+        "delete practice.request.Worker.Visitor.status",
+        "insert practice.request.Worker.Visitor.status!cancelled"
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/shared_case_schedule/case_id",
+    "value": "request_cancellation"
+  }
+]

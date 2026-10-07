@@ -1,0 +1,109 @@
+{
+  "condition": "retrained-no-S",
+  "lambda": 0.1,
+  "train_rows": 92,
+  "validation_rows": 26,
+  "train_data_nll": 1.3751629087662505,
+  "train_regularized_objective": 1.3823893888334122,
+  "validation_nll": 1.5337817715118023,
+  "weights_theta": [
+    -0.02044542122050802,
+    0.017111717332650316,
+    -0.04504807438629479,
+    0.0,
+    0.0,
+    0.020445421220507853,
+    -0.011081921926539798,
+    -0.05413816252106027,
+    0.0,
+    0.3504133342850367,
+    0.12461210410702557,
+    0.0,
+    0.0
+  ],
+  "weights_w": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "optimizer": {
+    "method": "L-BFGS-B",
+    "max_iter": 1000,
+    "gtol": 1e-08,
+    "initialization": "zeros",
+    "deterministic": true,
+    "success": true,
+    "status": 0,
+    "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+    "iterations": 10,
+    "function_evaluations": 12,
+    "gradient_evaluations": 12,
+    "final_objective": 1.3823893888334122,
+    "final_data_nll": 1.3751629087662505,
+    "final_l2_penalty": 0.007226480067161756,
+    "final_gradient_norm": 1.3226031441911487e-06
+  },
+  "optimization_history": [
+    {
+      "iteration": 1,
+      "objective": 1.3964999341605706,
+      "gradient_norm": 0.12738293140074508
+    },
+    {
+      "iteration": 2,
+      "objective": 1.3902946195592518,
+      "gradient_norm": 0.08911190108326962
+    },
+    {
+      "iteration": 3,
+      "objective": 1.3830754704139114,
+      "gradient_norm": 0.01987200494936296
+    },
+    {
+      "iteration": 4,
+      "objective": 1.3825373026408185,
+      "gradient_norm": 0.009341850355891019
+    },
+    {
+      "iteration": 5,
+      "objective": 1.3824415325350206,
+      "gradient_norm": 0.00430921350874815
+    },
+    {
+      "iteration": 6,
+      "objective": 1.382409254752664,
+      "gradient_norm": 0.002835889943584206
+    },
+    {
+      "iteration": 7,
+      "objective": 1.382393883237024,
+      "gradient_norm": 0.0026659557102576875
+    },
+    {
+      "iteration": 8,
+      "objective": 1.382392983948155,
+      "gradient_norm": 0.0022118448949939393
+    },
+    {
+      "iteration": 9,
+      "objective": 1.3823893889710013,
+      "gradient_norm": 1.2525873720572456e-05
+    },
+    {
+      "iteration": 10,
+      "objective": 1.3823893888334122,
+      "gradient_norm": 1.3226031441911487e-06
+    }
+  ],
+  "selected": false
+}

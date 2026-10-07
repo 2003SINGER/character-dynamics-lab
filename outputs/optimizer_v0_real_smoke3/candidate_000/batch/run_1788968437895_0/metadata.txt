@@ -1,0 +1,18 @@
+Character Dynamics Reference batch experiment
+run_directory=outputs\optimizer_v0_real_smoke3\candidate_000\batch\run_1788968437895_0
+config_version=task-commitment-v0
+parameter_config={"state_accumulation":1,"state_recovery_strength":1,"state_decay":1,"task_pressure_coupling":1,"study_fatigue_penalty":1,"task_drive_coefficient":1,"distraction_weight":1,"commitment_bonus":1,"recovery_drive_coefficient":1}
+parameter_config_hash=dd345a816f0ed29c
+git_revision=dev
+personality_generation=deterministic_uniform_[0,1]
+personality_generation_seed=20260904
+personality_count=32
+world_scenario_seed_count=28
+world_scenario_seeds=1101,1102,1103,1104,1105,1106,1107,1108,1109,1110,1111,1112,1113,1114,1115,1116,1117,1118,1119,1120,1121,1122,1123,1124,1125,1126,1127,1128
+steps_per_run=256
+total_decision_points=229376
+task_model=single_world_task_with_continuous_effort
+task_effort_target=seeded_[7.2,9.2]_or_8.0_for_legacy_seed
+task_effort_settlement=base_effort_x_duration_x_interruption_x_seeded_variation_[0.90,1.10]
+world_events=per-day deterministic schedule generated from each scenario seed
+note=This is a synthetic rule-based stress run, not an LLM result or a psychological validation.

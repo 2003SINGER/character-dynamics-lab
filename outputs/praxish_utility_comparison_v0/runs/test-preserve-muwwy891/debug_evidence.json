@@ -1,0 +1,2495 @@
+{
+  "closure_constraint_violation": {
+    "turn": 2,
+    "actor": "worker",
+    "applied_events": [],
+    "pre_facts": [
+      [
+        "work_phase",
+        "worker",
+        "working"
+      ]
+    ],
+    "candidates": [
+      {
+        "template_id": "finish_restocking",
+        "practice_instance": "practice.restock.worker",
+        "roles": {
+          "Worker": "worker"
+        },
+        "binding": {
+          "Worker": "worker"
+        },
+        "score": 5,
+        "goal_scores": [
+          {
+            "goal_id": "keep_working",
+            "utility": 1,
+            "matches": 0,
+            "absolute_score_contribution": 0
+          },
+          {
+            "goal_id": "finish_work",
+            "utility": 5,
+            "matches": 1,
+            "absolute_score_contribution": 5
+          },
+          {
+            "goal_id": "serve_visitor",
+            "utility": 10,
+            "matches": 0,
+            "absolute_score_contribution": 0
+          }
+        ]
+      }
+    ],
+    "selected": {
+      "template_id": "finish_restocking",
+      "practice_instance": "practice.restock.worker",
+      "roles": {
+        "Worker": "worker"
+      },
+      "binding": {
+        "Worker": "worker"
+      },
+      "score": 5,
+      "goal_scores": [
+        {
+          "goal_id": "keep_working",
+          "utility": 1,
+          "matches": 0,
+          "absolute_score_contribution": 0
+        },
+        {
+          "goal_id": "finish_work",
+          "utility": 5,
+          "matches": 1,
+          "absolute_score_contribution": 5
+        },
+        {
+          "goal_id": "serve_visitor",
+          "utility": 10,
+          "matches": 0,
+          "absolute_score_contribution": 0
+        }
+      ]
+    },
+    "post_facts": [
+      [
+        "work_phase",
+        "worker",
+        "complete"
+      ]
+    ],
+    "constraint_violation": "finish while workspace is closed",
+    "changed_facts": {
+      "before": [
+        [
+          "work_phase",
+          "worker",
+          "working"
+        ]
+      ],
+      "after": [
+        [
+          "work_phase",
+          "worker",
+          "complete"
+        ]
+      ]
+    }
+  },
+  "praxish_constraint_audit": [
+    {
+      "case_id": "workspace_closure_unadapted",
+      "turns": [
+        {
+          "turn": 0,
+          "action": "start_restocking",
+          "violations": []
+        },
+        {
+          "turn": 1,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 2,
+          "action": "finish_restocking",
+          "violations": [
+            {
+              "rule_id": "closed_workspace_blocks_finish",
+              "message": "finish while workspace is closed"
+            }
+          ]
+        },
+        {
+          "turn": 3,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 4,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 5,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 6,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 7,
+          "action": null,
+          "violations": []
+        }
+      ]
+    },
+    {
+      "case_id": "workspace_closure_adapted",
+      "turns": [
+        {
+          "turn": 0,
+          "action": "start_restocking",
+          "violations": []
+        },
+        {
+          "turn": 1,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 2,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 3,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 4,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 5,
+          "action": null,
+          "violations": []
+        },
+        {
+          "turn": 6,
+          "action": "finish_restocking",
+          "violations": []
+        },
+        {
+          "turn": 7,
+          "action": null,
+          "violations": []
+        }
+      ]
+    }
+  ],
+  "upstream_cancellation_alias": {
+    "candidate_count": 2,
+    "same_object_identity": true,
+    "action_ids": [
+      "[Actor]: Cancel [Worker]'s request",
+      "[Actor]: Cancel [Worker]'s request"
+    ],
+    "names": [
+      "visitor: Cancel worker's request",
+      "visitor: Cancel worker's request"
+    ]
+  },
+  "explicit_binding_workaround_alias": {
+    "candidate_count": 2,
+    "same_object_identity": false,
+    "action_ids": [
+      "[Actor]: Wait for [Worker] to answer",
+      "[Actor]: Cancel [Worker]'s request"
+    ],
+    "names": [
+      "visitor: Wait for worker to answer",
+      "visitor: Cancel worker's request"
+    ]
+  },
+  "low_motivation_workaround_alias": {
+    "candidate_count": 2,
+    "same_object_identity": false,
+    "action_ids": [
+      "[Actor]: Wait for [Worker] to answer",
+      "[Actor]: Cancel [Worker]'s request"
+    ],
+    "names": [
+      "visitor: Wait for worker to answer",
+      "visitor: Cancel worker's request"
+    ]
+  },
+  "cancellation_low_motivation_behavior": {
+    "baseline_candidates": [
+      {
+        "id": "wait_for_answer",
+        "score": 0
+      },
+      {
+        "id": "cancel_request",
+        "score": -1
+      }
+    ],
+    "praxish_candidates": [
+      {
+        "id": "[Actor]: Cancel [Worker]'s request",
+        "name": "visitor: Cancel worker's request",
+        "score": -1
+      },
+      {
+        "id": "[Actor]: Cancel [Worker]'s request",
+        "name": "visitor: Cancel worker's request",
+        "score": -1
+      }
+    ],
+    "baseline_selected": "wait_for_answer",
+    "praxish_selected": "visitor: Cancel worker's request",
+    "parity": {
+      "case_id": "request_cancellation_low_motivation",
+      "passed": false,
+      "issues": [
+        {
+          "turn": 1,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "wait_for_answer",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Visitor": "visitor",
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "cancel_request",
+                  "utility": -1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            },
+            {
+              "id": "cancel_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": -1,
+              "roles": {
+                "Visitor": "visitor",
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "cancel_request",
+                  "utility": -1,
+                  "matches": 1,
+                  "absolute_score_contribution": -1
+                }
+              ]
+            }
+          ],
+          "praxish": [
+            {
+              "id": "cancel_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": -1,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "cancel_request",
+                  "utility": -1,
+                  "matches": 1,
+                  "absolute_score_contribution": -1
+                }
+              ]
+            },
+            {
+              "id": "cancel_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": -1,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "cancel_request",
+                  "utility": -1,
+                  "matches": 1,
+                  "absolute_score_contribution": -1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 1,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "wait_for_answer",
+            "instance_id": "practice.request.worker.visitor",
+            "score": 0,
+            "roles": {
+              "Visitor": "visitor",
+              "Worker": "worker"
+            }
+          },
+          "praxish": {
+            "id": "cancel_request",
+            "instance_id": "practice.request.worker.visitor",
+            "score": -1,
+            "roles": {
+              "Worker": "worker",
+              "Visitor": "visitor"
+            }
+          }
+        },
+        {
+          "turn": 1,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 2,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 5,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            },
+            {
+              "id": "answer_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 11,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 1,
+                  "absolute_score_contribution": 1
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 1,
+                  "absolute_score_contribution": 10
+                }
+              ]
+            }
+          ],
+          "praxish": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 5,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "answer_request",
+            "instance_id": "practice.request.worker.visitor",
+            "score": 11,
+            "roles": {
+              "Worker": "worker",
+              "Visitor": "visitor"
+            }
+          },
+          "praxish": {
+            "id": "finish_restocking",
+            "instance_id": "practice.restock.worker",
+            "score": 5,
+            "roles": {
+              "Worker": "worker"
+            }
+          }
+        },
+        {
+          "turn": 2,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 2,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 3,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 3,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 15,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 1,
+                  "absolute_score_contribution": 10
+                }
+              ]
+            }
+          ],
+          "praxish": []
+        },
+        {
+          "turn": 4,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "finish_restocking",
+            "instance_id": "practice.restock.worker",
+            "score": 15,
+            "roles": {
+              "Worker": "worker"
+            }
+          },
+          "praxish": null
+        },
+        {
+          "turn": 4,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 5,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 5,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 6,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 6,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "negative_controls": [
+    {
+      "id": "bad_effect",
+      "detected": true,
+      "issues": [
+        {
+          "turn": 2,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 5,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            },
+            {
+              "id": "answer_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 1,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 1,
+                  "absolute_score_contribution": 1
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            }
+          ],
+          "praxish": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 5,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            },
+            {
+              "id": "answer_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 11,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 1,
+                  "absolute_score_contribution": 1
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 1,
+                  "absolute_score_contribution": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "finish_restocking",
+            "instance_id": "practice.restock.worker",
+            "score": 5,
+            "roles": {
+              "Worker": "worker"
+            }
+          },
+          "praxish": {
+            "id": "answer_request",
+            "instance_id": "practice.request.worker.visitor",
+            "score": 11,
+            "roles": {
+              "Worker": "worker",
+              "Visitor": "visitor"
+            }
+          }
+        },
+        {
+          "turn": 2,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 3,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "wait_for_answer",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Visitor": "visitor",
+                "Worker": "worker"
+              },
+              "goal_scores": []
+            }
+          ],
+          "praxish": []
+        },
+        {
+          "turn": 3,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "wait_for_answer",
+            "instance_id": "practice.request.worker.visitor",
+            "score": 0,
+            "roles": {
+              "Visitor": "visitor",
+              "Worker": "worker"
+            }
+          },
+          "praxish": null
+        },
+        {
+          "turn": 3,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 3,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "answer_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 5,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            }
+          ],
+          "praxish": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 15,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 1,
+                  "absolute_score_contribution": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "answer_request",
+            "instance_id": "practice.request.worker.visitor",
+            "score": 5,
+            "roles": {
+              "Worker": "worker",
+              "Visitor": "visitor"
+            }
+          },
+          "praxish": {
+            "id": "finish_restocking",
+            "instance_id": "practice.restock.worker",
+            "score": 15,
+            "roles": {
+              "Worker": "worker"
+            }
+          }
+        },
+        {
+          "turn": 4,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 5,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 5,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 6,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 6,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "cancelled"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bad_role",
+      "detected": true,
+      "issues": [
+        {
+          "turn": 1,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "answer_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": []
+            },
+            {
+              "id": "wait_for_answer",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Visitor": "visitor",
+                "Worker": "worker"
+              },
+              "goal_scores": []
+            }
+          ],
+          "praxish": [
+            {
+              "id": "wait_for_answer",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": []
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 5,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            }
+          ],
+          "praxish": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 5,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            },
+            {
+              "id": "answer_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 11,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 1,
+                  "absolute_score_contribution": 1
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 1,
+                  "absolute_score_contribution": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "finish_restocking",
+            "instance_id": "practice.restock.worker",
+            "score": 5,
+            "roles": {
+              "Worker": "worker"
+            }
+          },
+          "praxish": {
+            "id": "answer_request",
+            "instance_id": "practice.request.worker.visitor",
+            "score": 11,
+            "roles": {
+              "Worker": "worker",
+              "Visitor": "visitor"
+            }
+          }
+        },
+        {
+          "turn": 2,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 3,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "answer_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": []
+            },
+            {
+              "id": "wait_for_answer",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Visitor": "visitor",
+                "Worker": "worker"
+              },
+              "goal_scores": []
+            }
+          ],
+          "praxish": []
+        },
+        {
+          "turn": 3,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "wait_for_answer",
+            "instance_id": "practice.request.worker.visitor",
+            "score": 0,
+            "roles": {
+              "Visitor": "visitor",
+              "Worker": "worker"
+            }
+          },
+          "praxish": null
+        },
+        {
+          "turn": 3,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 3,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "candidate_score_role_parity",
+          "baseline": [],
+          "praxish": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 15,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 1,
+                  "absolute_score_contribution": 10
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "selected_action_parity",
+          "baseline": null,
+          "praxish": {
+            "id": "finish_restocking",
+            "instance_id": "practice.restock.worker",
+            "score": 15,
+            "roles": {
+              "Worker": "worker"
+            }
+          }
+        },
+        {
+          "turn": 4,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 5,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "answer_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": []
+            },
+            {
+              "id": "wait_for_answer",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Visitor": "visitor",
+                "Worker": "worker"
+              },
+              "goal_scores": []
+            }
+          ],
+          "praxish": []
+        },
+        {
+          "turn": 5,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "wait_for_answer",
+            "instance_id": "practice.request.worker.visitor",
+            "score": 0,
+            "roles": {
+              "Visitor": "visitor",
+              "Worker": "worker"
+            }
+          },
+          "praxish": null
+        },
+        {
+          "turn": 5,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 5,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 6,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 6,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "answer_request",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Worker": "worker",
+                "Visitor": "visitor"
+              },
+              "goal_scores": []
+            },
+            {
+              "id": "wait_for_answer",
+              "instance_id": "practice.request.worker.visitor",
+              "score": 0,
+              "roles": {
+                "Visitor": "visitor",
+                "Worker": "worker"
+              },
+              "goal_scores": []
+            }
+          ],
+          "praxish": []
+        },
+        {
+          "turn": 7,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "wait_for_answer",
+            "instance_id": "practice.request.worker.visitor",
+            "score": 0,
+            "roles": {
+              "Visitor": "visitor",
+              "Worker": "worker"
+            }
+          },
+          "praxish": null
+        },
+        {
+          "turn": 7,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 7,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "pending"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ],
+          "praxish": [
+            [
+              "request_status",
+              "worker",
+              "visitor",
+              "served"
+            ],
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bad_filter",
+      "detected": true,
+      "issues": [
+        {
+          "turn": 2,
+          "kind": "candidate_score_role_parity",
+          "baseline": [],
+          "praxish": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 5,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 2,
+          "kind": "selected_action_parity",
+          "baseline": null,
+          "praxish": {
+            "id": "finish_restocking",
+            "instance_id": "practice.restock.worker",
+            "score": 5,
+            "roles": {
+              "Worker": "worker"
+            }
+          }
+        },
+        {
+          "turn": 2,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 3,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 3,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 4,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ]
+          ],
+          "praxish": [
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ]
+          ]
+        },
+        {
+          "turn": 5,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ],
+            [
+              "workspace_open",
+              "true"
+            ]
+          ],
+          "praxish": [
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ],
+            [
+              "workspace_open",
+              "true"
+            ]
+          ]
+        },
+        {
+          "turn": 5,
+          "kind": "post_state_parity",
+          "baseline": [
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ],
+            [
+              "workspace_open",
+              "true"
+            ]
+          ],
+          "praxish": [
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ],
+            [
+              "workspace_open",
+              "true"
+            ]
+          ]
+        },
+        {
+          "turn": 5,
+          "kind": "event_parity",
+          "baseline": [
+            {
+              "id": "workspace_reopened",
+              "facts_before": [
+                [
+                  "work_phase",
+                  "worker",
+                  "working"
+                ]
+              ],
+              "facts_after": [
+                [
+                  "work_phase",
+                  "worker",
+                  "working"
+                ],
+                [
+                  "workspace_open",
+                  "true"
+                ]
+              ]
+            }
+          ],
+          "praxish": [
+            {
+              "id": "workspace_reopened",
+              "facts_before": [
+                [
+                  "work_phase",
+                  "worker",
+                  "complete"
+                ]
+              ],
+              "facts_after": [
+                [
+                  "work_phase",
+                  "worker",
+                  "complete"
+                ],
+                [
+                  "workspace_open",
+                  "true"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "turn": 6,
+          "kind": "candidate_score_role_parity",
+          "baseline": [
+            {
+              "id": "finish_restocking",
+              "instance_id": "practice.restock.worker",
+              "score": 5,
+              "roles": {
+                "Worker": "worker"
+              },
+              "goal_scores": [
+                {
+                  "goal_id": "keep_working",
+                  "utility": 1,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                },
+                {
+                  "goal_id": "finish_work",
+                  "utility": 5,
+                  "matches": 1,
+                  "absolute_score_contribution": 5
+                },
+                {
+                  "goal_id": "serve_visitor",
+                  "utility": 10,
+                  "matches": 0,
+                  "absolute_score_contribution": 0
+                }
+              ]
+            }
+          ],
+          "praxish": []
+        },
+        {
+          "turn": 6,
+          "kind": "selected_action_parity",
+          "baseline": {
+            "id": "finish_restocking",
+            "instance_id": "practice.restock.worker",
+            "score": 5,
+            "roles": {
+              "Worker": "worker"
+            }
+          },
+          "praxish": null
+        },
+        {
+          "turn": 6,
+          "kind": "pre_state_parity",
+          "baseline": [
+            [
+              "work_phase",
+              "worker",
+              "working"
+            ],
+            [
+              "workspace_open",
+              "true"
+            ]
+          ],
+          "praxish": [
+            [
+              "work_phase",
+              "worker",
+              "complete"
+            ],
+            [
+              "workspace_open",
+              "true"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "development_failures": "See tracked DEVELOPMENT_LOG.md; no human debugging time/count captured"
+}

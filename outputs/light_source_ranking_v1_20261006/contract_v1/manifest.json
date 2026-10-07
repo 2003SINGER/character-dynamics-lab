@@ -1,0 +1,306 @@
+{
+  "actor_forecast_admitted": false,
+  "code_sha256": "9c1850e38320ef459b38cc2740cbec6ff948036f8f564c9567f18aebbedc42d4",
+  "cohort_key_digest": "3a059162d09e2a8b126c468d9d73d6fa60d582e88d52475350e49b88a20ac1bd",
+  "contract": {
+    "actor_forecast_admitted": false,
+    "input_features": [
+      "self_persona",
+      "recorded_environment_snapshot",
+      "history_views.core",
+      "history_views.diagnostic_plus_partner_raw_commands",
+      "recorded_support"
+    ],
+    "no_current_context": "source covariate ablation only; not a temporal permission proof",
+    "paper0_admission": false,
+    "schema": "light_source_ranking_input_contract_v1",
+    "supervision_only": [
+      "recorded_action"
+    ],
+    "task": "DEVELOPMENT_SOURCE_CONDITIONAL_COMMAND_RANKING",
+    "training_authorized": false
+  },
+  "contract_sha256": "142927fb6365f4a7cb637cfb7d3cfc50d1e475bd0f97367bfa1702ed082cac41",
+  "input_sha256": "b414f176bf7c6d0e1f47536bab8c251ae7d39ead5b40550310127294f74e5646",
+  "output_files_sha256": {
+    "project_inputs_snapshot.py": "9c1850e38320ef459b38cc2740cbec6ff948036f8f564c9567f18aebbedc42d4",
+    "projected_inputs.jsonl": "2d839c62ddf2194b1968fe5b22913db9950aa10bd3647fe2179745b6b4efcef5",
+    "protocol_snapshot.md": "5318bffe1f417e6ceb5dc5284fbcbb011808117f775d1225f66d61195528e3cf",
+    "test_project_inputs_snapshot.py": "748504e2167aa09c9b972cf1d8cc0d30b4abc01ad767ce814aaa318c63edc966"
+  },
+  "output_sha256": "2d839c62ddf2194b1968fe5b22913db9950aa10bd3647fe2179745b6b4efcef5",
+  "protocol_sha256": "5318bffe1f417e6ceb5dc5284fbcbb011808117f775d1225f66d61195528e3cf",
+  "rows": 13463,
+  "schema": "light_source_ranking_manifest_v1",
+  "source_key_digest": "905653a6b3125d3136e47aec8eb21125ca4beab0a19c5d11e159d70b1c3827f7",
+  "splits": {
+    "excluded_bucket9": {
+      "actor_trajectories": 640,
+      "channel_items": {
+        "core": {
+          "partner": {
+            "action": {
+              "null": 5570,
+              "present": 0
+            },
+            "emote": {
+              "null": 4654,
+              "present": 916
+            },
+            "speech": {
+              "null": 2,
+              "present": 5568
+            }
+          },
+          "self": {
+            "action": {
+              "null": 2744,
+              "present": 2173
+            },
+            "emote": {
+              "null": 4025,
+              "present": 892
+            },
+            "speech": {
+              "null": 1,
+              "present": 4916
+            }
+          }
+        },
+        "diagnostic_plus_partner_raw_commands": {
+          "partner": {
+            "action": {
+              "null": 3937,
+              "present": 1633
+            },
+            "emote": {
+              "null": 4654,
+              "present": 916
+            },
+            "speech": {
+              "null": 2,
+              "present": 5568
+            }
+          },
+          "self": {
+            "action": {
+              "null": 2744,
+              "present": 2173
+            },
+            "emote": {
+              "null": 4025,
+              "present": 892
+            },
+            "speech": {
+              "null": 1,
+              "present": 4916
+            }
+          }
+        }
+      },
+      "episodes": 468,
+      "groups": 10487,
+      "history_depth_distribution": {
+        "10": 133,
+        "11": 147,
+        "12": 123,
+        "13": 129,
+        "2": 27,
+        "3": 44,
+        "4": 65,
+        "5": 84,
+        "6": 94,
+        "7": 126,
+        "8": 121,
+        "9": 123
+      },
+      "rows": 1216
+    },
+    "train": {
+      "actor_trajectories": 4832,
+      "channel_items": {
+        "core": {
+          "partner": {
+            "action": {
+              "null": 43963,
+              "present": 0
+            },
+            "emote": {
+              "null": 36719,
+              "present": 7244
+            },
+            "speech": {
+              "null": 8,
+              "present": 43955
+            }
+          },
+          "self": {
+            "action": {
+              "null": 21603,
+              "present": 17262
+            },
+            "emote": {
+              "null": 32268,
+              "present": 6597
+            },
+            "speech": {
+              "null": 11,
+              "present": 38854
+            }
+          }
+        },
+        "diagnostic_plus_partner_raw_commands": {
+          "partner": {
+            "action": {
+              "null": 30622,
+              "present": 13341
+            },
+            "emote": {
+              "null": 36719,
+              "present": 7244
+            },
+            "speech": {
+              "null": 8,
+              "present": 43955
+            }
+          },
+          "self": {
+            "action": {
+              "null": 21603,
+              "present": 17262
+            },
+            "emote": {
+              "null": 32268,
+              "present": 6597
+            },
+            "speech": {
+              "null": 11,
+              "present": 38854
+            }
+          }
+        }
+      },
+      "episodes": 3490,
+      "groups": 82828,
+      "history_depth_distribution": {
+        "10": 978,
+        "11": 1097,
+        "12": 1049,
+        "13": 1121,
+        "2": 230,
+        "3": 350,
+        "4": 518,
+        "5": 629,
+        "6": 748,
+        "7": 888,
+        "8": 909,
+        "9": 1013
+      },
+      "rows": 9530
+    },
+    "validation": {
+      "actor_trajectories": 1397,
+      "channel_items": {
+        "core": {
+          "partner": {
+            "action": {
+              "null": 12541,
+              "present": 0
+            },
+            "emote": {
+              "null": 10402,
+              "present": 2139
+            },
+            "speech": {
+              "null": 0,
+              "present": 12541
+            }
+          },
+          "self": {
+            "action": {
+              "null": 6213,
+              "present": 4892
+            },
+            "emote": {
+              "null": 9153,
+              "present": 1952
+            },
+            "speech": {
+              "null": 10,
+              "present": 11095
+            }
+          }
+        },
+        "diagnostic_plus_partner_raw_commands": {
+          "partner": {
+            "action": {
+              "null": 8607,
+              "present": 3934
+            },
+            "emote": {
+              "null": 10402,
+              "present": 2139
+            },
+            "speech": {
+              "null": 0,
+              "present": 12541
+            }
+          },
+          "self": {
+            "action": {
+              "null": 6213,
+              "present": 4892
+            },
+            "emote": {
+              "null": 9153,
+              "present": 1952
+            },
+            "speech": {
+              "null": 10,
+              "present": 11095
+            }
+          }
+        }
+      },
+      "episodes": 986,
+      "groups": 23646,
+      "history_depth_distribution": {
+        "10": 282,
+        "11": 307,
+        "12": 303,
+        "13": 317,
+        "2": 70,
+        "3": 91,
+        "4": 145,
+        "5": 168,
+        "6": 222,
+        "7": 261,
+        "8": 259,
+        "9": 292
+      },
+      "rows": 2717
+    }
+  },
+  "supervision_eligibility": {
+    "excluded_bucket9": {
+      "absent": 0,
+      "ambiguous": 5,
+      "missing_or_invalid": 0,
+      "unique": 1211
+    },
+    "train": {
+      "absent": 0,
+      "ambiguous": 42,
+      "missing_or_invalid": 0,
+      "unique": 9488
+    },
+    "validation": {
+      "absent": 0,
+      "ambiguous": 10,
+      "missing_or_invalid": 0,
+      "unique": 2707
+    }
+  },
+  "test_sha256": "748504e2167aa09c9b972cf1d8cc0d30b4abc01ad767ce814aaa318c63edc966",
+  "training_authorized": false
+}

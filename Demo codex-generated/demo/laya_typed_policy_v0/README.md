@@ -245,6 +245,11 @@ policy comparator. Full typed X/I modes alter Dynamics and are a separate
 supplementary track; they cannot be interpreted as changing only π or compared
 under the `only_policy_changed` claim. Soft-gate mode is likewise a separate
 factor. Raw historical artifacts are under the project-local
-`../../../outputs/laya_runs/` directory and are intentionally not committed.
+`../../../outputs/laya_runs/` directory. Public-safe experiment traces and
+cassettes are now explicitly tracked; dataset inputs, build products, large
+files and sensitive logs are excluded according to the
+[public review inventory](../../../02_实验/PUBLIC_REVIEW_INDEX_2026-10-07.md).
+Publishing invalid/partial runs preserves negative evidence; it does not make
+the old v1/v2 comparisons valid.
 Archived `COMMANDS.md` files preserve their original execution paths; replace
 their former Research-root run directory with `outputs/laya_runs/` when rerunning.

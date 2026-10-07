@@ -1,0 +1,20 @@
+{
+  "evidence_kind": "parent_direct_vm_execution_transcribed_from_tool_output",
+  "date_local": "2026-10-07",
+  "observer_installed": false,
+  "upstream_modified": false,
+  "source_tag": "aiide-23",
+  "source_commit": "4729b0c469a7ecb423622f543ca116315616a76b",
+  "db_js_sha256": "acb98656dcc0fe461ba7d6b2875bd3429ae4068735b1795297a5722d0469c46c",
+  "praxish_js_sha256": "ef2f77999b08dd24c9893a531ae2096ef33189a9cf46bf342d024ffa44e1c088",
+  "raw": {
+    "candidate_count": 2,
+    "same_object_identity": true,
+    "candidate_names": ["visitor: Cancel worker's request", "visitor: Cancel worker's request"]
+  },
+  "equivalent_condition_workaround": {
+    "cancel_conditions": ["eq Actor Visitor", "practice.request.Worker.Visitor.status!Status", "eq Status pending"],
+    "same_object_identity": false,
+    "candidate_names": ["visitor: Wait for worker to answer", "visitor: Cancel worker's request"]
+  }
+}

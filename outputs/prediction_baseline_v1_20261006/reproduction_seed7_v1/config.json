@@ -1,0 +1,181 @@
+{
+  "canonical_expected_rows": 13463,
+  "code_sha256": "b06e5192e72dc50c4da7a34c6664a77537830ac9f92cc75f6355c0ff92fde854",
+  "conditions": [
+    "o_only",
+    "last_action",
+    "last2",
+    "fixed_mean",
+    "learned_mean",
+    "learned_last2",
+    "gru",
+    "uniform"
+  ],
+  "counts": {
+    "excluded_bucket9": {
+      "actor_trajectory_units": 640,
+      "empty_candidate_rows": 0,
+      "episodes": 468,
+      "normalized_gold_ambiguity_rows": 5,
+      "rows": 1216,
+      "scored_rows": 1211,
+      "support_miss_rows_target_absent": 0
+    },
+    "train": {
+      "actor_trajectory_units": 4832,
+      "empty_candidate_rows": 0,
+      "episodes": 3490,
+      "normalized_gold_ambiguity_rows": 42,
+      "rows": 9530,
+      "scored_rows": 9488,
+      "support_miss_rows_target_absent": 0
+    },
+    "validation": {
+      "actor_trajectory_units": 1397,
+      "empty_candidate_rows": 0,
+      "episodes": 986,
+      "normalized_gold_ambiguity_rows": 10,
+      "rows": 2717,
+      "scored_rows": 2707,
+      "support_miss_rows_target_absent": 0
+    }
+  },
+  "features": {
+    "candidate_dim": 256,
+    "current_O_dim": 256,
+    "hidden_dim": 16,
+    "history_pair": "concat hash(O,256), hash(A,256)",
+    "history_pair_dim": 512,
+    "metadata_features": false,
+    "no_fitted_vocabulary": true,
+    "readout_hidden": 32,
+    "signed_hash": "BLAKE2b deterministic signed counts, L2-normalized",
+    "tokenizer": "Unicode word tokens, casefolded, unigrams+adjacent bigrams"
+  },
+  "input_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/T0c_LIGHT/light_actor_local_full_v0.jsonl",
+  "input_rows": 13463,
+  "input_sha256": "e6f214b91ed644b60543cf442fdae4255ff177d26a25fccd750ab5c7381ba195",
+  "protocol_readme_sha256": "a7acbb81f543790cddb1e821ab8009656ddfb41dd1f98a81e94b32035f08259e",
+  "reporting": {
+    "bootstrap_replicates": 2000,
+    "bootstrap_seed": 20261006,
+    "bootstrap_unit": "episode",
+    "estimand": "row-weighted mean paired delta",
+    "strata": [
+      "depth==1",
+      "depth>=2",
+      "depth>=4",
+      "not exact_previous_pair"
+    ],
+    "three_seeds_are_not_population_samples": true,
+    "validation_role": "post-selection development description only"
+  },
+  "source_snapshots_sha256": {
+    "protocol_snapshot.md": "a7acbb81f543790cddb1e821ab8009656ddfb41dd1f98a81e94b32035f08259e",
+    "tests_source_snapshot.py": "ca3bd753226f2153a8030197954e7d1f148218b50d5d4873f0adb78c5dc16fa1",
+    "train_source_snapshot.py": "b06e5192e72dc50c4da7a34c6664a77537830ac9f92cc75f6355c0ff92fde854"
+  },
+  "split": {
+    "bucket9": "excluded from training and scoring; not untouched test",
+    "episode_hash": "int(SHA256(trajectory_id UTF-8).hexdigest()[:8], 16) modulo 10",
+    "train_buckets": "0-6",
+    "validation_buckets": "7-8"
+  },
+  "split_buckets": {
+    "0": {
+      "actor_trajectory_units": 691,
+      "episode_ids_sha256": "a0d805485115e96a04a0bacff06ec41260b52f63e3ed6c04928fb8f37bb2a127",
+      "episodes": 500,
+      "rows": 1324,
+      "split": "train"
+    },
+    "1": {
+      "actor_trajectory_units": 764,
+      "episode_ids_sha256": "5a7e9f58185e0418dcb2b4c4eb7d4e4a993f01e765da1e338bba600a015a3325",
+      "episodes": 535,
+      "rows": 1528,
+      "split": "train"
+    },
+    "2": {
+      "actor_trajectory_units": 693,
+      "episode_ids_sha256": "83b9cd9daf6b47ee7b7f02c2b6395e1f09c1f5dcf1642a09aa0226d0486efea1",
+      "episodes": 513,
+      "rows": 1330,
+      "split": "train"
+    },
+    "3": {
+      "actor_trajectory_units": 662,
+      "episode_ids_sha256": "9f596bcaa11b3056484581922b0a087825c4b63d3e2a8ca1d3b3cdb036d36331",
+      "episodes": 484,
+      "rows": 1329,
+      "split": "train"
+    },
+    "4": {
+      "actor_trajectory_units": 652,
+      "episode_ids_sha256": "fc1a4a8820f76a078f975d8842ff26962350ce0137295733b2bf5c0b6777097f",
+      "episodes": 470,
+      "rows": 1268,
+      "split": "train"
+    },
+    "5": {
+      "actor_trajectory_units": 710,
+      "episode_ids_sha256": "768d483fb0d0abd6418e1b9f7940d6a697b0361b782e19f8190bf6dcbe9505d3",
+      "episodes": 511,
+      "rows": 1417,
+      "split": "train"
+    },
+    "6": {
+      "actor_trajectory_units": 660,
+      "episode_ids_sha256": "441e2b7c31fa753e6ab8164d879f0598d83137c0d5fa35510a671b1394f6f64b",
+      "episodes": 477,
+      "rows": 1334,
+      "split": "train"
+    },
+    "7": {
+      "actor_trajectory_units": 695,
+      "episode_ids_sha256": "980c986942dfa04471c9f93d5f96b5d3f359e2a1371f6ed5c141f20979077fbb",
+      "episodes": 490,
+      "rows": 1313,
+      "split": "validation"
+    },
+    "8": {
+      "actor_trajectory_units": 702,
+      "episode_ids_sha256": "0f0725f162347b815d567dba7ae1e7f8b2328c33a31147d75cb24b18f66fd863",
+      "episodes": 496,
+      "rows": 1404,
+      "split": "validation"
+    },
+    "9": {
+      "actor_trajectory_units": 640,
+      "episode_ids_sha256": "6285d0daf70a56a4d96fc2b0531a3b2cdf61d1abcdb3e3f8181616e452d8b97a",
+      "episodes": 468,
+      "rows": 1216,
+      "split": "excluded_bucket9"
+    }
+  },
+  "status": "all_development_not_untouched_formal_test",
+  "test_code_sha256": "ca3bd753226f2153a8030197954e7d1f148218b50d5d4873f0adb78c5dc16fa1",
+  "training": {
+    "batch_size": 32,
+    "checkpoint_selection": "lowest validation mean NLL, earliest tie",
+    "cpu": true,
+    "deterministic_algorithms": true,
+    "learning_rate": 0.001,
+    "max_epochs": 15,
+    "optimizer": "Adam",
+    "seeds": [
+      7
+    ],
+    "torch_threads": 1,
+    "weight_decay": 0
+  },
+  "upstream_gate_audit_sha256": "470cfbb01b2973e0ee3c9737af1d54738c1d79afad6c51d751fda8768265caa4",
+  "upstream_raw_replay_sha256": "1b0ac05678333be8733c384e1785091825d662b54f26842d3736e65fbede2825",
+  "validation_metrics_are": "post-selection descriptive development metrics, not independent generalization estimates",
+  "versions": {
+    "numpy": "2.5.3",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.1.1.101)]",
+    "torch": "2.14.0"
+  }
+}

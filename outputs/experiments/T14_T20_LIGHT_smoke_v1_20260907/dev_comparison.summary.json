@@ -1,0 +1,281 @@
+{
+  "activity-S": {
+    "train_rows": 115,
+    "validation_rows": 26,
+    "dev_holdout_rows": 26,
+    "lambda": 0.0001,
+    "validation_nll": 1.3850709148062572,
+    "dev_holdout_nll": 1.5484867881007471,
+    "metrics": {
+      "nll": 1.5484867881007471,
+      "bits_per_action": 2.233994210075027,
+      "top1": 0.38461538461538464,
+      "mrr": 0.5935897435897436,
+      "mean_rank": 2.4615384615384617,
+      "rows": 26
+    },
+    "candidate_count_stratified": {
+      "2": {
+        "nll": 0.5748660162540786,
+        "bits_per_action": 0.8293563508253535,
+        "top1": 1.0,
+        "mrr": 1.0,
+        "mean_rank": 1.0,
+        "rows": 6
+      },
+      "3": {
+        "nll": 1.1871984876204766,
+        "bits_per_action": 1.7127653706409391,
+        "top1": 0.0,
+        "mrr": 0.5,
+        "mean_rank": 2.0,
+        "rows": 1
+      },
+      "4": {
+        "nll": 1.666516781537793,
+        "bits_per_action": 2.40427549628281,
+        "top1": 0.2222222222222222,
+        "mrr": 0.5092592592592592,
+        "mean_rank": 2.5555555555555554,
+        "rows": 9
+      },
+      "5+": {
+        "nll": 2.0625610871634334,
+        "bits_per_action": 2.9756466519812346,
+        "top1": 0.2,
+        "mrr": 0.43499999999999994,
+        "mean_rank": 3.3,
+        "rows": 10
+      }
+    }
+  },
+  "support-S": {
+    "train_rows": 115,
+    "validation_rows": 26,
+    "dev_holdout_rows": 26,
+    "lambda": 0.01,
+    "validation_nll": 1.4399698362109647,
+    "dev_holdout_nll": 1.4406984416572046,
+    "metrics": {
+      "nll": 1.4406984416572046,
+      "bits_per_action": 2.078488497195307,
+      "top1": 0.4230769230769231,
+      "mrr": 0.6096153846153847,
+      "mean_rank": 2.423076923076923,
+      "rows": 26
+    },
+    "candidate_count_stratified": {
+      "2": {
+        "nll": 0.5634506041156531,
+        "bits_per_action": 0.8128873923435432,
+        "top1": 1.0,
+        "mrr": 1.0,
+        "mean_rank": 1.0,
+        "rows": 6
+      },
+      "3": {
+        "nll": 1.0573198578973306,
+        "bits_per_action": 1.5253901156219025,
+        "top1": 0.0,
+        "mrr": 0.5,
+        "mean_rank": 2.0,
+        "rows": 1
+      },
+      "4": {
+        "nll": 1.4027883518261421,
+        "bits_per_action": 2.0237957985963777,
+        "top1": 0.3333333333333333,
+        "mrr": 0.5555555555555555,
+        "mean_rank": 2.4444444444444446,
+        "rows": 9
+      },
+      "5+": {
+        "nll": 2.0395040834060794,
+        "bits_per_action": 2.9423824270027414,
+        "top1": 0.2,
+        "mrr": 0.43499999999999994,
+        "mean_rank": 3.3,
+        "rows": 10
+      }
+    }
+  },
+  "theory-S": {
+    "train_rows": 115,
+    "validation_rows": 26,
+    "dev_holdout_rows": 26,
+    "lambda": 0.1,
+    "validation_nll": 1.4425825474703076,
+    "dev_holdout_nll": 1.4226975301629448,
+    "metrics": {
+      "nll": 1.4226975301629448,
+      "bits_per_action": 2.052518671451057,
+      "top1": 0.38461538461538464,
+      "mrr": 0.5967948717948718,
+      "mean_rank": 2.423076923076923,
+      "rows": 26
+    },
+    "candidate_count_stratified": {
+      "2": {
+        "nll": 0.5775279359536779,
+        "bits_per_action": 0.8331966891752101,
+        "top1": 1.0,
+        "mrr": 1.0,
+        "mean_rank": 1.0,
+        "rows": 6
+      },
+      "3": {
+        "nll": 1.0695025562552471,
+        "bits_per_action": 1.5429660341275147,
+        "top1": 0.0,
+        "mrr": 0.5,
+        "mean_rank": 2.0,
+        "rows": 1
+      },
+      "4": {
+        "nll": 1.3748951562953011,
+        "bits_per_action": 1.9835544237294873,
+        "top1": 0.3333333333333333,
+        "mrr": 0.574074074074074,
+        "mean_rank": 2.3333333333333335,
+        "rows": 9
+      },
+      "5+": {
+        "nll": 2.008140920560154,
+        "bits_per_action": 2.897134947498332,
+        "top1": 0.1,
+        "mrr": 0.385,
+        "mean_rank": 3.4,
+        "rows": 10
+      }
+    }
+  },
+  "retrained-no-S": {
+    "lambda": 0.0001,
+    "validation_nll": 1.415355723797466,
+    "dev_holdout_nll": 1.4513909826087443,
+    "metrics": {
+      "nll": 1.4513909826087443,
+      "bits_per_action": 2.0939145730005952,
+      "top1": 0.5,
+      "mrr": 0.6487179487179487,
+      "mean_rank": 2.3461538461538463,
+      "rows": 26
+    },
+    "candidate_count_stratified": {
+      "2": {
+        "nll": 0.5718049722972266,
+        "bits_per_action": 0.82494019788886,
+        "top1": 1.0,
+        "mrr": 1.0,
+        "mean_rank": 1.0,
+        "rows": 6
+      },
+      "3": {
+        "nll": 1.0087887212044717,
+        "bits_per_action": 1.4553744853864106,
+        "top1": 1.0,
+        "mrr": 1.0,
+        "mean_rank": 1.0,
+        "rows": 1
+      },
+      "4": {
+        "nll": 1.4206517983894467,
+        "bits_per_action": 2.0495673043664424,
+        "top1": 0.3333333333333333,
+        "mrr": 0.5462962962962963,
+        "mean_rank": 2.5555555555555554,
+        "rows": 9
+      },
+      "5+": {
+        "nll": 2.051068080733451,
+        "bits_per_action": 2.959065748599794,
+        "top1": 0.3,
+        "mrr": 0.49499999999999994,
+        "mean_rank": 3.1,
+        "rows": 10
+      }
+    }
+  },
+  "Theory zeroed-S": {
+    "dev_holdout_nll": 1.4381649687366094,
+    "metrics": {
+      "nll": 1.4381649687366094,
+      "bits_per_action": 2.0748334683765375,
+      "top1": 0.2692307692307692,
+      "mrr": 0.5198717948717949,
+      "mean_rank": 2.769230769230769,
+      "rows": 26
+    }
+  },
+  "Theory permuted-S": {
+    "dev_holdout_nll": 1.4203441817697873,
+    "permutation_seed": 20260907,
+    "eligible_paired_rows": 26,
+    "status": "available",
+    "metrics": {
+      "nll": 1.4203441817697873,
+      "bits_per_action": 2.0491235073947647,
+      "top1": 0.38461538461538464,
+      "mrr": 0.6000000000000001,
+      "mean_rank": 2.4615384615384617,
+      "rows": 26
+    }
+  },
+  "paired_interventions": {
+    "eligible_rows": 26,
+    "status": "available",
+    "correct_nll": 1.4226975301629448,
+    "zeroed_nll": 1.4381649687366094,
+    "permuted_nll": 1.4203441817697873,
+    "zeroed_minus_correct_nll": 0.015467438573664616,
+    "permuted_minus_correct_nll": -0.002353348393157484,
+    "zeroed_minus_correct_bits": 0.022314796925480603,
+    "permuted_minus_correct_bits": -0.003395164056292313
+  },
+  "uniform": {
+    "dev_holdout_nll": 1.420205775678479
+  },
+  "diagnostics": {
+    "Activity-S": {
+      "nll": 1.5484867881007471,
+      "bits_per_action": 2.233994210075027,
+      "top1": 0.38461538461538464,
+      "mrr": 0.5935897435897436,
+      "mean_rank": 2.4615384615384617,
+      "rows": 26
+    },
+    "ActionSupport-S": {
+      "nll": 1.4406984416572046,
+      "bits_per_action": 2.078488497195307,
+      "top1": 0.4230769230769231,
+      "mrr": 0.6096153846153847,
+      "mean_rank": 2.423076923076923,
+      "rows": 26
+    },
+    "Theory-S": {
+      "nll": 1.4226975301629448,
+      "bits_per_action": 2.052518671451057,
+      "top1": 0.38461538461538464,
+      "mrr": 0.5967948717948718,
+      "mean_rank": 2.423076923076923,
+      "rows": 26
+    },
+    "Theory zeroed-S": {
+      "nll": 1.4381649687366094,
+      "bits_per_action": 2.0748334683765375,
+      "top1": 0.2692307692307692,
+      "mrr": 0.5198717948717949,
+      "mean_rank": 2.769230769230769,
+      "rows": 26
+    },
+    "Theory permuted-S": {
+      "nll": 1.4203441817697873,
+      "bits_per_action": 2.0491235073947647,
+      "top1": 0.38461538461538464,
+      "mrr": 0.6000000000000001,
+      "mean_rank": 2.4615384615384617,
+      "rows": 26
+    },
+    "paired_intervention_rows": 26
+  }
+}

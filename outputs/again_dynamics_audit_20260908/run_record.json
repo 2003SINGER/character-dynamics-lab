@@ -1,0 +1,72 @@
+{
+  "protocol": "02_实验/T0h_AGAIN/dynamics_protocol_v0.md",
+  "protocol_status": "frozen development-only",
+  "run_id": "again_dynamics_audit_v0_2026-09-08",
+  "created_at_utc": "2026-09-08T11:37:34.296236+00:00",
+  "input_replay": "_local_data/AGAIN/again_dev_20_v4/AGAIN_dev.replay.jsonl",
+  "input_manifest": "02_实验/T0h_AGAIN/again_dev_20_v4/AGAIN_dev.manifest.json",
+  "input_qa": "02_实验/T0h_AGAIN/again_dev_20_v4/AGAIN_dev.qa.json",
+  "input_replay_sha256": "bb2707c1fac1a6f8b5c265953ccf49147d7bfda9c6c237a2a29a0fd6aaef870c",
+  "manifest_replay_sha256": "bb2707c1fac1a6f8b5c265953ccf49147d7bfda9c6c237a2a29a0fd6aaef870c",
+  "software_script_sha256": "76a15a2d617875abf2dc2aab67ec95b21fb8d987a64f6702ccfa051f487aadb9",
+  "event_envelope_preregistered_before_metrics": true,
+  "event_channels": [
+    "player_respawn",
+    "player_death",
+    "player_damaged",
+    "player_healing",
+    "player_shooting",
+    "player_reloading",
+    "player_is_crashing",
+    "player_is_looping",
+    "player_is_falling",
+    "player_is_jumping",
+    "player_has_collisions",
+    "player_point_pickup",
+    "player_power_pickup",
+    "player_boost_pickup"
+  ],
+  "event_definition": "per-channel binary onset: current numeric value > 0 and immediately prior numeric value is missing or <= 0; first row is not an event",
+  "tau_grid_seconds": [
+    0.5,
+    1.0,
+    2.0,
+    5.0
+  ],
+  "phi_grid_per_second": [
+    0.0,
+    0.5,
+    0.8,
+    0.95
+  ],
+  "persistence_lags_seconds": [
+    0.25,
+    0.5,
+    1.0,
+    2.0,
+    4.0
+  ],
+  "event_offsets_seconds": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    2.0,
+    3.0,
+    5.0
+  ],
+  "event_pre_window_seconds": 1.0,
+  "event_post_window_seconds": 5.0,
+  "match_tolerance_seconds": 0.15,
+  "recovery_tolerance": {
+    "fraction_of_initial_absolute_deviation": 0.1,
+    "floor_proxy_units": 1.0
+  },
+  "folds": {
+    "participant_held_out": "one fold per player_id; all sessions for player held out",
+    "game_held_out": "one fold per game; all sessions for game held out"
+  },
+  "future_input_policy": "current and past telemetry; current/past proxy only for AR; held-out future proxy used only as outcome",
+  "training_policy": "training-part median only; no fitted dynamics parameters; no alpha/beta/b/W",
+  "provenance_problems": []
+}

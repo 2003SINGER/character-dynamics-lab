@@ -1,0 +1,73 @@
+{
+  "artifact_root": "/Users/2003singer/Workspace/Research/_character_dynamics_laya_runs/laya_v43_66ebfe7_20260925",
+  "created_local_date": "2026-09-25",
+  "repository": "/Users/2003singer/Workspace/Research/character-dynamics-laya-work",
+  "branch": "webgpt-sync",
+  "source_revision": "66ebfe72dc3fd5987a040adb61bec5b5a9a1b646",
+  "worktree_clean_before_and_after": true,
+  "independent_ci": "runtime-regression #36132250319 success (reported by parent agent)",
+  "build": {
+    "configuration": "Release",
+    "target": "character_dynamics_long_horizon",
+    "source_dir": "Demo codex-generated",
+    "executable": "build/character_dynamics_long_horizon",
+    "executable_sha256": "8971ef07d6d6787bf4f0199553929d7de408710ec482d6ecaa0446f13b440d27",
+    "revision_define": "CHARACTER_DYNAMICS_GIT_REVISION=66ebfe72dc3fd5987a040adb61bec5b5a9a1b646"
+  },
+  "scenario": {
+    "scenario_seed": 1000,
+    "policy_seed": 5000,
+    "profile": "balanced",
+    "days": 1,
+    "boundaries": true,
+    "world_start_total_minutes": 480,
+    "world_end_total_minutes": 1920,
+    "policy_only": true,
+    "soft_gate": false,
+    "typed_appraisal": false,
+    "typed_commitment": false
+  },
+  "model": {
+    "id": "convaiinnovations/laya-typed-decisions",
+    "revision": "f9ab0b228f0fc0f14d873dbc99038f135c2da1b2",
+    "laya_version": "0.3.7",
+    "protocol": "laya-typed-v4",
+    "prompt": "character-dynamics-laya-typed-v4.3",
+    "proxy_source": "Demo codex-generated/tools/laya_typed_proxy.py",
+    "proxy_source_sha256": "0b6c9b8c4e05119d13b0544be9890580eff7aba1d621387a08a72916f8fab74e",
+    "weights_sha256": "4fa56de72383a9d3efa9cfa78955733c81b9fc8067a587ca4beb82c78107a24e",
+    "tokenizer_sha256": "6c8aaa9a542084f2457eab775d4eeb51f92a70c0fd9de28d5edb0ddec3c08d30",
+    "tokenizer_config_sha256": "08d4cf3ac4dca381759441b85b91a6d40e688471dcd33d15d6649eb0a9a854d1",
+    "requested_device": "mps",
+    "actual_device": "cpu",
+    "mps_available": false,
+    "temperature_warning": "choice:11+ temperature outside [0.5, 5], clipped to 0.5; affected confidence is uncalibrated"
+  },
+  "gate": {
+    "engineering": "pass",
+    "behavioral_scale_up": "not passed; stop after one-day smoke",
+    "raw_request_count": 52,
+    "request_audit_file": "REQUEST_AUDIT.tsv",
+    "request_audit_pass": true,
+    "violations": [],
+    "strict_replay_byte_identical": {
+      "no_history": true,
+      "history": true
+    },
+    "no_64_actor_or_7_day_run": true,
+    "repository_code_changed": false
+  },
+  "outputs": {
+    "rule_trace": "rule/trace.jsonl",
+    "no_history_trace": "no_history/live-trace.jsonl",
+    "no_history_replay": "no_history/replay-trace.jsonl",
+    "no_history_cassette": "no_history/live-cassette.jsonl",
+    "history_trace": "history/live-trace.jsonl",
+    "history_replay": "history/replay-trace.jsonl",
+    "history_cassette": "history/live-cassette.jsonl",
+    "analysis": "audit.json",
+    "results": "RESULTS.md",
+    "commands": "COMMANDS.md",
+    "checksums": "SHA256SUMS"
+  }
+}

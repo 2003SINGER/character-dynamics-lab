@@ -1,0 +1,701 @@
+{
+  "schema_version": "character_dynamics_parameter_sensitivity_v0",
+  "source_revision": "f6d30f1",
+  "probe_seed": 1101,
+  "personality_count": 32,
+  "cases": [
+    {
+      "case": "default",
+      "parameter": null,
+      "value": 1.0,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "dd345a816f0ed29c",
+      "summary": {
+        "mean_fatigue": 0.2675113448486328,
+        "mean_task_pressure": 0.18646721435546876,
+        "mean_study_probability": 0.0642848720703125,
+        "mean_recovery_probability": 0.19828276245117188,
+        "mean_distraction_probability": 0.37774134228515627,
+        "mean_effort": 7.661074420898437
+      }
+    },
+    {
+      "case": "state_accumulation_low",
+      "parameter": "state_accumulation",
+      "value": 0.8,
+      "config": {
+        "state_accumulation": 0.8,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "e8175b784199c35",
+      "summary": {
+        "mean_fatigue": 0.2638325948486328,
+        "mean_task_pressure": 0.1879414755859375,
+        "mean_study_probability": 0.06549312976074219,
+        "mean_recovery_probability": 0.1972734680175781,
+        "mean_distraction_probability": 0.3746696456298828,
+        "mean_effort": 7.627927645019531
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.0036787500000000084,
+        "mean_task_pressure": 0.001474261230468732,
+        "mean_study_probability": 0.0012082576904296899,
+        "mean_recovery_probability": -0.001009294433593766,
+        "mean_distraction_probability": -0.0030716966552734593,
+        "mean_effort": -0.033146775878906354
+      },
+      "chosen_action_difference_count": 1684,
+      "intended_estimand": "mean_task_pressure",
+      "expected_direction": "increase",
+      "direction_pass": true
+    },
+    {
+      "case": "state_accumulation_high",
+      "parameter": "state_accumulation",
+      "value": 1.2,
+      "config": {
+        "state_accumulation": 1.2,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "8821f57b2847f29c",
+      "summary": {
+        "mean_fatigue": 0.26899283361816406,
+        "mean_task_pressure": 0.1950712121582031,
+        "mean_study_probability": 0.06430732556152344,
+        "mean_recovery_probability": 0.19879119274902343,
+        "mean_distraction_probability": 0.37785992504882815,
+        "mean_effort": 7.680672986572265
+      },
+      "delta_vs_default": {
+        "mean_fatigue": 0.0014814887695312473,
+        "mean_task_pressure": 0.008603997802734353,
+        "mean_study_probability": 2.2453491210938648e-05,
+        "mean_recovery_probability": 0.0005084302978515531,
+        "mean_distraction_probability": 0.0001185827636718817,
+        "mean_effort": 0.019598565673828006
+      },
+      "chosen_action_difference_count": 1405,
+      "intended_estimand": "mean_task_pressure",
+      "expected_direction": "increase",
+      "direction_pass": true
+    },
+    {
+      "case": "state_recovery_strength_low",
+      "parameter": "state_recovery_strength",
+      "value": 0.8,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 0.8,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "482edfca2aa7765",
+      "summary": {
+        "mean_fatigue": 0.3260924638671875,
+        "mean_task_pressure": 0.22971417700195312,
+        "mean_study_probability": 0.064838626953125,
+        "mean_recovery_probability": 0.2166656427001953,
+        "mean_distraction_probability": 0.35045051696777346,
+        "mean_effort": 7.56683567602539
+      },
+      "delta_vs_default": {
+        "mean_fatigue": 0.05858111901855467,
+        "mean_task_pressure": 0.043246962646484366,
+        "mean_study_probability": 0.0005537548828125072,
+        "mean_recovery_probability": 0.01838288024902343,
+        "mean_distraction_probability": -0.027290825317382805,
+        "mean_effort": -0.09423874487304751
+      },
+      "chosen_action_difference_count": 3757,
+      "intended_estimand": "mean_fatigue",
+      "expected_direction": "decrease",
+      "direction_pass": false
+    },
+    {
+      "case": "state_recovery_strength_high",
+      "parameter": "state_recovery_strength",
+      "value": 1.2,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.2,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "e7a8ee50f29dc294",
+      "summary": {
+        "mean_fatigue": 0.228748759765625,
+        "mean_task_pressure": 0.17697081872558593,
+        "mean_study_probability": 0.06310428857421875,
+        "mean_recovery_probability": 0.1859762587890625,
+        "mean_distraction_probability": 0.3976177899169922,
+        "mean_effort": 7.697025507568359
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.03876258508300781,
+        "mean_task_pressure": -0.009496395629882831,
+        "mean_study_probability": -0.0011805834960937484,
+        "mean_recovery_probability": -0.012306503662109392,
+        "mean_distraction_probability": 0.019876447631835936,
+        "mean_effort": 0.03595108666992175
+      },
+      "chosen_action_difference_count": 3608,
+      "intended_estimand": "mean_fatigue",
+      "expected_direction": "decrease",
+      "direction_pass": true
+    },
+    {
+      "case": "state_decay_low",
+      "parameter": "state_decay",
+      "value": 0.8,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 0.8,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "60fa0836182be6fd",
+      "summary": {
+        "mean_fatigue": 0.26949273266601564,
+        "mean_task_pressure": 0.2727369180908203,
+        "mean_study_probability": 0.06311078991699219,
+        "mean_recovery_probability": 0.19448031701660157,
+        "mean_distraction_probability": 0.3835145810546875,
+        "mean_effort": 7.722110206909179
+      },
+      "delta_vs_default": {
+        "mean_fatigue": 0.001981387817382829,
+        "mean_task_pressure": 0.08626970373535153,
+        "mean_study_probability": -0.0011740821533203077,
+        "mean_recovery_probability": -0.003802445434570312,
+        "mean_distraction_probability": 0.00577323876953123,
+        "mean_effort": 0.06103578601074222
+      },
+      "chosen_action_difference_count": 3208,
+      "intended_estimand": "mean_task_pressure",
+      "expected_direction": "decrease",
+      "direction_pass": false
+    },
+    {
+      "case": "state_decay_high",
+      "parameter": "state_decay",
+      "value": 1.2,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.2,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "b39aab6aef7ee898",
+      "summary": {
+        "mean_fatigue": 0.2625681077880859,
+        "mean_task_pressure": 0.14797922790527343,
+        "mean_study_probability": 0.06432987670898438,
+        "mean_recovery_probability": 0.19476555334472656,
+        "mean_distraction_probability": 0.3850455654296875,
+        "mean_effort": 7.611388732055664
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.00494323706054689,
+        "mean_task_pressure": -0.03848798645019533,
+        "mean_study_probability": 4.500463867188054e-05,
+        "mean_recovery_probability": -0.003517209106445318,
+        "mean_distraction_probability": 0.007304223144531219,
+        "mean_effort": -0.049685688842773246
+      },
+      "chosen_action_difference_count": 3089,
+      "intended_estimand": "mean_task_pressure",
+      "expected_direction": "decrease",
+      "direction_pass": true
+    },
+    {
+      "case": "task_pressure_coupling_low",
+      "parameter": "task_pressure_coupling",
+      "value": 0.8,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 0.8,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "2d5166e9a3b0acb3",
+      "summary": {
+        "mean_fatigue": 0.2738204610595703,
+        "mean_task_pressure": 0.2796307570800781,
+        "mean_study_probability": 0.06410739831542969,
+        "mean_recovery_probability": 0.19647366174316405,
+        "mean_distraction_probability": 0.37487817919921873,
+        "mean_effort": 7.694019253417968
+      },
+      "delta_vs_default": {
+        "mean_fatigue": 0.006309116210937493,
+        "mean_task_pressure": 0.09316354272460936,
+        "mean_study_probability": -0.00017747375488280648,
+        "mean_recovery_probability": -0.001809100708007827,
+        "mean_distraction_probability": -0.0028631630859375368,
+        "mean_effort": 0.032944832519531175
+      },
+      "chosen_action_difference_count": 2896,
+      "intended_estimand": "mean_task_pressure",
+      "expected_direction": "increase",
+      "direction_pass": true
+    },
+    {
+      "case": "task_pressure_coupling_high",
+      "parameter": "task_pressure_coupling",
+      "value": 1.2,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.2,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "304ec0aa0bcc2d40",
+      "summary": {
+        "mean_fatigue": 0.2579051169433594,
+        "mean_task_pressure": 0.15866797143554687,
+        "mean_study_probability": 0.0656825126953125,
+        "mean_recovery_probability": 0.19302972106933594,
+        "mean_distraction_probability": 0.3810148986816406,
+        "mean_effort": 7.641625697631835
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.009606227905273435,
+        "mean_task_pressure": -0.02779924291992189,
+        "mean_study_probability": 0.0013976406250000017,
+        "mean_recovery_probability": -0.005253041381835938,
+        "mean_distraction_probability": 0.003273556396484356,
+        "mean_effort": -0.019448723266601853
+      },
+      "chosen_action_difference_count": 2737,
+      "intended_estimand": "mean_task_pressure",
+      "expected_direction": "increase",
+      "direction_pass": false
+    },
+    {
+      "case": "study_fatigue_penalty_low",
+      "parameter": "study_fatigue_penalty",
+      "value": 0.8,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 0.8,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "5c3e184f827e765f",
+      "summary": {
+        "mean_fatigue": 0.2707898029785156,
+        "mean_task_pressure": 0.18407706188964842,
+        "mean_study_probability": 0.06374252282714844,
+        "mean_recovery_probability": 0.1965181219482422,
+        "mean_distraction_probability": 0.38187614453125,
+        "mean_effort": 7.68655786328125
+      },
+      "delta_vs_default": {
+        "mean_fatigue": 0.003278458129882811,
+        "mean_task_pressure": -0.0023901524658203332,
+        "mean_study_probability": -0.0005423492431640559,
+        "mean_recovery_probability": -0.0017646405029296819,
+        "mean_distraction_probability": 0.0041348022460937495,
+        "mean_effort": 0.025483442382812527
+      },
+      "chosen_action_difference_count": 2030,
+      "intended_estimand": "mean_study_probability",
+      "expected_direction": "decrease",
+      "direction_pass": true
+    },
+    {
+      "case": "study_fatigue_penalty_high",
+      "parameter": "study_fatigue_penalty",
+      "value": 1.2,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.2,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "5a2684a7cdd891e8",
+      "summary": {
+        "mean_fatigue": 0.2649941232910156,
+        "mean_task_pressure": 0.20024619812011718,
+        "mean_study_probability": 0.06590568237304688,
+        "mean_recovery_probability": 0.1984940622558594,
+        "mean_distraction_probability": 0.37642070776367187,
+        "mean_effort": 7.637608779296874
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.0025172215576171886,
+        "mean_task_pressure": 0.013778983764648423,
+        "mean_study_probability": 0.0016208103027343795,
+        "mean_recovery_probability": 0.0002112998046875092,
+        "mean_distraction_probability": -0.0013206345214843984,
+        "mean_effort": -0.023465641601562837
+      },
+      "chosen_action_difference_count": 1575,
+      "intended_estimand": "mean_study_probability",
+      "expected_direction": "decrease",
+      "direction_pass": false
+    },
+    {
+      "case": "task_drive_coefficient_low",
+      "parameter": "task_drive_coefficient",
+      "value": 0.8,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 0.8,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "a9355178d9692ccd",
+      "summary": {
+        "mean_fatigue": 0.26377239208984377,
+        "mean_task_pressure": 0.22028617224121094,
+        "mean_study_probability": 0.06500743591308594,
+        "mean_recovery_probability": 0.19299009838867187,
+        "mean_distraction_probability": 0.37903804028320315,
+        "mean_effort": 7.59740966430664
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.003738952758789049,
+        "mean_task_pressure": 0.033818957885742185,
+        "mean_study_probability": 0.0007225638427734438,
+        "mean_recovery_probability": -0.005292664062500008,
+        "mean_distraction_probability": 0.0012966979980468807,
+        "mean_effort": -0.06366475659179738
+      },
+      "chosen_action_difference_count": 3586,
+      "intended_estimand": "mean_study_probability",
+      "expected_direction": "increase",
+      "direction_pass": true
+    },
+    {
+      "case": "task_drive_coefficient_high",
+      "parameter": "task_drive_coefficient",
+      "value": 1.2,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.2,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "7f5298ff336f4a74",
+      "summary": {
+        "mean_fatigue": 0.26711924377441404,
+        "mean_task_pressure": 0.16901615881347656,
+        "mean_study_probability": 0.0633900673828125,
+        "mean_recovery_probability": 0.19814187756347656,
+        "mean_distraction_probability": 0.38516239306640626,
+        "mean_effort": 7.787347960449218
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.0003921010742187758,
+        "mean_task_pressure": -0.017451055541992194,
+        "mean_study_probability": -0.0008948046875000004,
+        "mean_recovery_probability": -0.00014088488769531393,
+        "mean_distraction_probability": 0.007421050781249994,
+        "mean_effort": 0.12627353955078124
+      },
+      "chosen_action_difference_count": 3627,
+      "intended_estimand": "mean_study_probability",
+      "expected_direction": "increase",
+      "direction_pass": false
+    },
+    {
+      "case": "distraction_weight_low",
+      "parameter": "distraction_weight",
+      "value": 0.8,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 0.8,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "66f4ba54cd21ba03",
+      "summary": {
+        "mean_fatigue": 0.25057134216308596,
+        "mean_task_pressure": 0.17796562719726564,
+        "mean_study_probability": 0.06404441381835937,
+        "mean_recovery_probability": 0.2004342052001953,
+        "mean_distraction_probability": 0.37195744616699217,
+        "mean_effort": 7.674474352905273
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.01694000268554685,
+        "mean_task_pressure": -0.008501587158203122,
+        "mean_study_probability": -0.00024045825195312398,
+        "mean_recovery_probability": 0.00215144274902343,
+        "mean_distraction_probability": -0.0057838961181641,
+        "mean_effort": 0.013399932006835868
+      },
+      "chosen_action_difference_count": 3710,
+      "intended_estimand": "mean_distraction_probability",
+      "expected_direction": "increase",
+      "direction_pass": false
+    },
+    {
+      "case": "distraction_weight_high",
+      "parameter": "distraction_weight",
+      "value": 1.2,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.2,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "43aa5f50c14dbbb4",
+      "summary": {
+        "mean_fatigue": 0.2869358341064453,
+        "mean_task_pressure": 0.18642402941894531,
+        "mean_study_probability": 0.06132569494628906,
+        "mean_recovery_probability": 0.19750083203125,
+        "mean_distraction_probability": 0.39039968676757814,
+        "mean_effort": 7.701541329101562
+      },
+      "delta_vs_default": {
+        "mean_fatigue": 0.019424489257812483,
+        "mean_task_pressure": -4.3184936523443795e-05,
+        "mean_study_probability": -0.0029591771240234377,
+        "mean_recovery_probability": -0.000781930419921889,
+        "mean_distraction_probability": 0.012658344482421868,
+        "mean_effort": 0.040466908203124596
+      },
+      "chosen_action_difference_count": 3522,
+      "intended_estimand": "mean_distraction_probability",
+      "expected_direction": "increase",
+      "direction_pass": true
+    },
+    {
+      "case": "commitment_bonus_low",
+      "parameter": "commitment_bonus",
+      "value": 0.8,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 0.8,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "5594d690c49b15fd",
+      "summary": {
+        "mean_fatigue": 0.26471729638671876,
+        "mean_task_pressure": 0.19595813598632814,
+        "mean_study_probability": 0.06452001330566406,
+        "mean_recovery_probability": 0.19798642895507812,
+        "mean_distraction_probability": 0.3773320787353516,
+        "mean_effort": 7.649480471313476
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.002794048461914056,
+        "mean_task_pressure": 0.009490921630859378,
+        "mean_study_probability": 0.00023514123535156584,
+        "mean_recovery_probability": -0.00029633349609375914,
+        "mean_distraction_probability": -0.0004092635498046948,
+        "mean_effort": -0.011593949584961294
+      },
+      "chosen_action_difference_count": 1514,
+      "intended_estimand": "mean_study_probability",
+      "expected_direction": "increase",
+      "direction_pass": true
+    },
+    {
+      "case": "commitment_bonus_high",
+      "parameter": "commitment_bonus",
+      "value": 1.2,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.2,
+        "recovery_drive_coefficient": 1.0
+      },
+      "engine_config_hash": "7511c529db8e224",
+      "summary": {
+        "mean_fatigue": 0.2696270888671875,
+        "mean_task_pressure": 0.18256074450683593,
+        "mean_study_probability": 0.06488510034179687,
+        "mean_recovery_probability": 0.19774159069824218,
+        "mean_distraction_probability": 0.38028126586914063,
+        "mean_effort": 7.693843080688476
+      },
+      "delta_vs_default": {
+        "mean_fatigue": 0.0021157440185546883,
+        "mean_task_pressure": -0.003906469848632826,
+        "mean_study_probability": 0.000600228271484371,
+        "mean_recovery_probability": -0.0005411717529296978,
+        "mean_distraction_probability": 0.0025399235839843604,
+        "mean_effort": 0.03276865979003851
+      },
+      "chosen_action_difference_count": 1613,
+      "intended_estimand": "mean_study_probability",
+      "expected_direction": "increase",
+      "direction_pass": true
+    },
+    {
+      "case": "recovery_drive_coefficient_low",
+      "parameter": "recovery_drive_coefficient",
+      "value": 0.8,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 0.8
+      },
+      "engine_config_hash": "1981ef1c0da67bf3",
+      "summary": {
+        "mean_fatigue": 0.3133673218994141,
+        "mean_task_pressure": 0.16910556359863282,
+        "mean_study_probability": 0.06252363952636719,
+        "mean_recovery_probability": 0.18642902014160156,
+        "mean_distraction_probability": 0.3989085556640625,
+        "mean_effort": 7.676898851196288
+      },
+      "delta_vs_default": {
+        "mean_fatigue": 0.04585597705078126,
+        "mean_task_pressure": -0.017361650756835934,
+        "mean_study_probability": -0.001761232543945307,
+        "mean_recovery_probability": -0.011853742309570314,
+        "mean_distraction_probability": 0.021167213378906258,
+        "mean_effort": 0.015824430297850967
+      },
+      "chosen_action_difference_count": 3983,
+      "intended_estimand": "mean_recovery_probability",
+      "expected_direction": "increase",
+      "direction_pass": false
+    },
+    {
+      "case": "recovery_drive_coefficient_high",
+      "parameter": "recovery_drive_coefficient",
+      "value": 1.2,
+      "config": {
+        "state_accumulation": 1.0,
+        "state_recovery_strength": 1.0,
+        "state_decay": 1.0,
+        "task_pressure_coupling": 1.0,
+        "study_fatigue_penalty": 1.0,
+        "task_drive_coefficient": 1.0,
+        "distraction_weight": 1.0,
+        "commitment_bonus": 1.0,
+        "recovery_drive_coefficient": 1.2
+      },
+      "engine_config_hash": "54144a511a20f3d8",
+      "summary": {
+        "mean_fatigue": 0.22914981188964845,
+        "mean_task_pressure": 0.22934124963378907,
+        "mean_study_probability": 0.06645174169921875,
+        "mean_recovery_probability": 0.20318576745605468,
+        "mean_distraction_probability": 0.3707427303466797,
+        "mean_effort": 7.640016862548827
+      },
+      "delta_vs_default": {
+        "mean_fatigue": -0.03836153295898437,
+        "mean_task_pressure": 0.042874035278320316,
+        "mean_study_probability": 0.0021668696289062483,
+        "mean_recovery_probability": 0.0049030050048828044,
+        "mean_distraction_probability": -0.006998611938476562,
+        "mean_effort": -0.021057558349609984
+      },
+      "chosen_action_difference_count": 3827,
+      "intended_estimand": "mean_recovery_probability",
+      "expected_direction": "increase",
+      "direction_pass": true
+    }
+  ],
+  "status": "PASS",
+  "holdout_read": false
+}

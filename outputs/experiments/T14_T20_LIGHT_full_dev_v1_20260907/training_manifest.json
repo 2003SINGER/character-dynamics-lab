@@ -1,0 +1,64 @@
+{
+  "schema_version": "character_dynamics_rank_matched_probe_manifest_v1",
+  "probe_version": "replay-linear-probe-v1",
+  "feature_version": "replay-raw-features-v1",
+  "git_revision": "693939219cbb14126900e5c7f09a760f0b64a1d6",
+  "source_replay_sha256": "375b43ca4b39beb6161c6595800b20b693278ddd60b62e262b7387e243eb04a5",
+  "semantic_rules_sha256": "8218b6c0d1b6d701f96e02d9234cf433839f23e8f3f1c5a394ae165813cf9bf9",
+  "eta": 0.35,
+  "seed": 20260907,
+  "dev_smoke": false,
+  "frozen_boundaries": [
+    "ReplayRecord",
+    "SceneSnapshot",
+    "transition compiler",
+    "expected-effect",
+    "appraisal X",
+    "candidate support",
+    "gold boundary"
+  ],
+  "learnable_parameters": [
+    "theta",
+    "w"
+  ],
+  "temperature": 1.0,
+  "evaluation_status": "development_only",
+  "formal_test": false,
+  "split_seed": 20260907,
+  "permutation_seed": 20260907,
+  "optimizer_seed": null,
+  "optimizer_deterministic": true,
+  "lambda_grid": [
+    0.0001,
+    0.001,
+    0.01,
+    0.1,
+    1.0
+  ],
+  "selection_rule": "minimum validation NLL; ties choose larger lambda",
+  "initialization": "zeros",
+  "started_at_utc": "2026-09-07T06:46:50.388674+00:00",
+  "finished_at_utc": "2026-09-07T06:51:50.497040+00:00",
+  "duration_seconds": 300.10838198661804,
+  "python_version": "3.14.3",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "numpy_version": "2.3.5",
+  "scipy_version": "1.17.1",
+  "runner_sha256": "9e178704381e602360a8cad0d38c5fd9bd02353da72cd1f0200d3a7c0646f3d5",
+  "probe_module_sha256": "cbd0e5d34828d987a953f1bc292271d0f257d4709eeeab7a99f49122a678aeba",
+  "feature_module_sha256": "02032571bb84b9556b7efff64c9c68f740dea818d4d256e6300687c27cd5cfe2",
+  "scene_snapshot_module_sha256": "2f05df3158badbc334f2a5bd3f39b11495355dd7a267f9884f76fa4940b729a8",
+  "transition_appraisal_module_sha256": "d51d6b193c8457a3abcfc5eb9282a2d59e1b6bcfe295d5b3e692f1f07e069e75",
+  "trajectory_counts": {
+    "total": 7256,
+    "train": 5079,
+    "validation": 1088,
+    "dev_holdout": 1089
+  },
+  "row_counts": {
+    "activity": 24999,
+    "support": 24999,
+    "theory": 24999
+  },
+  "git_worktree_dirty": false
+}

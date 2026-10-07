@@ -1,0 +1,22 @@
+[
+  {
+    "op": "add",
+    "path": "/utility_baseline/action_templates/1/preconditions/-",
+    "value": {
+      "fact": [
+        "workspace_open",
+        "true"
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/praxish_scenario/practices/0/actions/1/conditions/-",
+    "value": "world.workspace.state!open"
+  },
+  {
+    "op": "replace",
+    "path": "/shared_case_schedule/case_id",
+    "value": "workspace_closure_adapted"
+  }
+]

@@ -1,0 +1,113 @@
+{
+  "condition": "retrained-no-S",
+  "lambda": 1.0,
+  "train_rows": 92,
+  "validation_rows": 26,
+  "train_data_nll": 1.3929288381725058,
+  "train_regularized_objective": 1.3986228727142782,
+  "validation_nll": 1.4929970962147947,
+  "weights_theta": [
+    -0.016954271086281184,
+    0.018280683280160137,
+    -0.01745043512058179,
+    0.0,
+    0.0,
+    0.016954271086281163,
+    -0.015925635254049466,
+    0.005516394813008279,
+    0.0,
+    0.09473282808071076,
+    0.030267279596553526,
+    0.0,
+    0.0
+  ],
+  "weights_w": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "optimizer": {
+    "method": "L-BFGS-B",
+    "max_iter": 1000,
+    "gtol": 1e-08,
+    "initialization": "zeros",
+    "deterministic": true,
+    "success": true,
+    "status": 0,
+    "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+    "iterations": 6,
+    "function_evaluations": 8,
+    "gradient_evaluations": 8,
+    "final_objective": 1.3986228727142782,
+    "final_data_nll": 1.3929288381725058,
+    "final_l2_penalty": 0.005694034541772419,
+    "final_gradient_norm": 4.1470285255736534e-05
+  },
+  "optimization_history": [
+    {
+      "iteration": 1,
+      "objective": 1.400550800865104,
+      "data_nll": 1.3978595841308847,
+      "l2_penalty": 0.0026912167342192225,
+      "gradient_norm": 0.08385229661273068,
+      "theta_norm": 0.07336506981144668,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 2,
+      "objective": 1.3988767108783353,
+      "data_nll": 1.394472337665065,
+      "l2_penalty": 0.004404373213270366,
+      "gradient_norm": 0.029959998558991032,
+      "theta_norm": 0.09385492222862225,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 3,
+      "objective": 1.3986243277536916,
+      "data_nll": 1.3929580006164073,
+      "l2_penalty": 0.005666327137284424,
+      "gradient_norm": 0.001802065083965407,
+      "theta_norm": 0.10645494011349989,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 4,
+      "objective": 1.3986230683498522,
+      "data_nll": 1.392927926476577,
+      "l2_penalty": 0.005695141873275043,
+      "gradient_norm": 0.0006584089690897365,
+      "theta_norm": 0.10672527229550688,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 5,
+      "objective": 1.3986228738204542,
+      "data_nll": 1.392928425042995,
+      "l2_penalty": 0.005694448777459234,
+      "gradient_norm": 7.743135163667499e-05,
+      "theta_norm": 0.10671877789273296,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 6,
+      "objective": 1.3986228727142782,
+      "data_nll": 1.3929288381725058,
+      "l2_penalty": 0.005694034541772417,
+      "gradient_norm": 4.1470285255736534e-05,
+      "theta_norm": 0.10671489625888615,
+      "w_norm": 0.0
+    }
+  ],
+  "selected": true
+}

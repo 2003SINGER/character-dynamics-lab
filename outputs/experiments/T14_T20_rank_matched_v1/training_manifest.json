@@ -1,0 +1,25 @@
+{
+  "schema_version": "character_dynamics_rank_matched_probe_manifest_v1",
+  "probe_version": "replay-linear-probe-v1",
+  "feature_version": "replay-raw-features-v1",
+  "git_revision": "2ad015897b1d4c28fe64679b0abf7a24cba6e37b",
+  "source_replay_sha256": "594155f5c070b4cecde0224df612fd155872cff5e116c90fc95c164d051844a3",
+  "semantic_rules_sha256": "8218b6c0d1b6d701f96e02d9234cf433839f23e8f3f1c5a394ae165813cf9bf9",
+  "eta": 0.35,
+  "seed": 20260907,
+  "dev_smoke": true,
+  "frozen_boundaries": [
+    "ReplayRecord",
+    "SceneSnapshot",
+    "transition compiler",
+    "expected-effect",
+    "appraisal X",
+    "candidate support",
+    "gold boundary"
+  ],
+  "learnable_parameters": [
+    "theta",
+    "w"
+  ],
+  "temperature": 1.0
+}

@@ -1,0 +1,147 @@
+{
+  "report_version": "terra-evaluator-v1.0",
+  "evaluation": "frozen v1 identity-bound candidate support audit",
+  "artifacts": {
+    "candidate_path": "D:\\desk\\科研\\character-dynamics\\outputs\\opera_t0d_2026-09-08\\terra_candidate_spike_v1\\candidate_artifact.json",
+    "gold_path": "D:\\desk\\科研\\character-dynamics\\outputs\\opera_t0d_2026-09-08\\terra_candidate_spike_v1\\gold_evaluator_only.json",
+    "blind_input_path": "D:\\desk\\科研\\character-dynamics\\outputs\\opera_t0d_2026-09-08\\terra_candidate_spike_v1\\blind_input.json",
+    "candidate_sha256": "E9590343A95B3D79043D4AFA6DA7EB5B031D5DD8D93AF0B464C2940DCCED0CD4",
+    "gold_sha256": "D3F2824BF8C7294843C6DF0441E8E297331DE63B04656969087F82457B446AAB",
+    "blind_input_sha256": "5B333E5843BEE64516D7A8E60F1CDF06AE4A5454DBE1375AA96D2DF7F8047E2E"
+  },
+  "matching_rule": {
+    "gold_identity_source": ["semantic_id", "element_meta", "raw element attrs/text"],
+    "candidate_identity_source": ["target_source_index", "target_attrs", "target_text"],
+    "strict_support": "candidate target_source_index resolves to the same controlled raw-element identity as the gold semantic_id/element_meta mapping and ambiguity=false",
+    "identity_mismatch_semantic": "candidate is non-ambiguous and matches the controlled intent family, but its bound raw-element identity differs; family-only support is not strict",
+    "ambiguous": "candidate ambiguity=true; excluded from strict support",
+    "miss": "no accepted controlled intent-family match",
+    "prohibited_shortcut": "family-only match without raw-element identity is not strict"
+  },
+  "metrics": {
+    "gold_records": 30,
+    "candidate_records": 30,
+    "candidate_count": {
+      "total": 30,
+      "mean": 1.0,
+      "median": 1.0,
+      "min": 1,
+      "max": 1
+    },
+    "outcome_counts": {
+      "exact": 10,
+      "identity_mismatch_semantic": 11,
+      "ambiguous": 0,
+      "miss": 9
+    },
+    "strict_support_recall": {
+      "numerator": 10,
+      "denominator": 30,
+      "value": 0.3333333333,
+      "numerator_definition": "exact only under v1 identity rule"
+    },
+    "family_support_diagnostic_only": {
+      "numerator": 21,
+      "denominator": 30,
+      "value": 0.7,
+      "definition": "exact + identity_mismatch_semantic; not strict support"
+    },
+    "ambiguous_gold_match_rate": {
+      "numerator": 0,
+      "denominator": 30,
+      "value": 0.0
+    },
+    "candidate_ambiguity_rate": {
+      "ambiguous_candidates": 0,
+      "all_candidates": 30,
+      "value": 0.0
+    },
+    "duplicate_identity": {
+      "duplicate_target_source_indices_within_record": 0,
+      "candidate_records": 30,
+      "value": 0.0,
+      "definition": "repeated bound raw-element identity within one record"
+    },
+    "no_candidate": {
+      "records_with_zero_candidates": 0,
+      "denominator": 30,
+      "value": 0.0
+    }
+  },
+  "stopping_rule": {
+    "strict_support_threshold": 0.7,
+    "ambiguous_threshold": 0.25,
+    "strict_support_passes": false,
+    "ambiguous_passes": true,
+    "verdict": "FAIL/CLOSE ROUTE",
+    "decision": "strict support is 10/30 (0.3333), below 70%; the route is closed under the frozen v1 rule. No action-readout compatibility discussion, v2/v3 prompt repair, or Theory-S training is authorized by this route."
+  },
+  "reproducibility": {
+    "rerun_performed": false,
+    "check": "read/hash stability check on frozen artifact",
+    "candidate_sha256_read_1": "E9590343A95B3D79043D4AFA6DA7EB5B031D5DD8D93AF0B464C2940DCCED0CD4",
+    "candidate_sha256_read_2": "E9590343A95B3D79043D4AFA6DA7EB5B031D5DD8D93AF0B464C2940DCCED0CD4",
+    "hash_stable": true,
+    "generator_metadata": {
+      "model": "gpt-5.6-terra",
+      "temperature": 0,
+      "protocol_version": "T0d-terra-candidate-v1",
+      "gold_access": false
+    },
+    "interpretation": "No generator rerun or regeneration was performed; only frozen-artifact hash stability was checked."
+  },
+  "gold_blind_invariants": {
+    "candidate_generator_gold_access_false": "PASS",
+    "prohibited_gold_keys_absent_from_candidate": {
+      "status": "PASS",
+      "keys_checked": ["action_type", "click_type", "semantic_id", "element_meta", "input_text", "rationale", "products"]
+    },
+    "candidate_input_field_allowlist": {
+      "status": "PASS",
+      "declared_fields": ["url", "history", "raw_elements"]
+    },
+    "record_count_matches_gold": "PASS",
+    "fixture_ids_unique": "PASS",
+    "candidate_provenance_present": "PASS",
+    "candidate_raw_binding_valid": "PASS",
+    "candidate_artifact_hash_stable": "PASS",
+    "duplicate_identity_check": "PASS",
+    "no_candidate_check": "PASS",
+    "reveal_order_from_filesystem_mtime": {
+      "status": "INDETERMINATE",
+      "note": "Filesystem mtime does not prove evaluator reveal/read order; no claim is made from mtime ordering."
+    }
+  },
+  "per_record": [
+    {"fixture_id":"265f4810e9b46837:0","gold_semantic_id":"cart_side_bar.product_list.amazon_basics_standard_pillow_cases_set_of_2_lightweight_super_soft_easy_care_microfiber_bright_white_30_l_x_20_w_pillows_not_included.product_image","candidate_source_index":4,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"cart family is present, but candidate is nav_bar.cart_button rather than the controlled cart product-image identity"},
+    {"fixture_id":"265f4810e9b46837:32","gold_semantic_id":"product_options.color.button_list.navy_blue","candidate_source_index":104,"outcome":"miss","identity_match":false,"ambiguity":false,"reason":"candidate is an unrelated recommendation product image, not the controlled color option"},
+    {"fixture_id":"265f4810e9b46837:62","gold_semantic_id":"product_options.color.button_list.navy_blue","candidate_source_index":501,"outcome":"miss","identity_match":false,"ambiguity":false,"reason":"review-image Next control does not match the controlled color option"},
+    {"fixture_id":"2a83eb7c87fadecd:0","gold_semantic_id":"product_options.size.button_list.small_18_86_18_86","candidate_source_index":9,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"product purchase/control family is present, but add_to_cart is not the controlled Small size identity"},
+    {"fixture_id":"2a83eb7c87fadecd:28","gold_semantic_id":"reviews.popover.review_images.next","candidate_source_index":77,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches reviews.popover.review_images.next"},
+    {"fixture_id":"2a83eb7c87fadecd:54","gold_semantic_id":"product_options.color.button_list.black","candidate_source_index":9,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"product purchase/control family is present, but add_to_cart is not the controlled Black color identity"},
+    {"fixture_id":"32c85a6beaec57ac:0","gold_semantic_id":"nav_bar.search_input","candidate_source_index":1,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches nav_bar.search_input"},
+    {"fixture_id":"32c85a6beaec57ac:10","gold_semantic_id":"nav_bar.cart_button","candidate_source_index":5,"outcome":"miss","identity_match":false,"ambiguity":false,"reason":"nav_bar.menu is not the controlled cart identity"},
+    {"fixture_id":"32c85a6beaec57ac:18","gold_semantic_id":"coupon.checkbox","candidate_source_index":8,"outcome":"miss","identity_match":false,"ambiguity":false,"reason":"add_to_cart does not match the controlled coupon checkbox"},
+    {"fixture_id":"34543282baa363f2:0","gold_semantic_id":"nav_bar.cart_button","candidate_source_index":4,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches nav_bar.cart_button"},
+    {"fixture_id":"34543282baa363f2:12","gold_semantic_id":"reviews.popover.review_images.next","candidate_source_index":82,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches reviews.popover.review_images.next"},
+    {"fixture_id":"34543282baa363f2:22","gold_semantic_id":"cart_side_bar.product_list.fizik_terra_bondcush_tacky_gravel_and_road_cycling_bar_tape_green_3mm.product_image","candidate_source_index":212,"outcome":"miss","identity_match":false,"ambiguity":false,"reason":"review-image Next control is not the controlled cart product-image identity"},
+    {"fixture_id":"3923e39eed3ae2ee:0","gold_semantic_id":"frequently_bought_together.camelbak_podium_chill_insulated_bike_water_bottle_easy_squeeze_bottle_fits_most_bike_cages_21oz_stone_blue.product_title","candidate_source_index":15,"outcome":"miss","identity_match":false,"ambiguity":false,"reason":"go_to_cart is not the controlled frequently-bought-together product title"},
+    {"fixture_id":"3923e39eed3ae2ee:22","gold_semantic_id":"reviews.popover.review_images.next","candidate_source_index":115,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches reviews.popover.review_images.next"},
+    {"fixture_id":"3923e39eed3ae2ee:43","gold_semantic_id":"cart_side_bar.go_to_cart","candidate_source_index":15,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"cart family is present, but buybox.add_to_cart is not the controlled go_to_cart identity"},
+    {"fixture_id":"3abfd2b7fddaf961:0","gold_semantic_id":"cart_side_bar.product_list.south_shore_myro_kitchen_island_faux_black_stone_and_white.product_image","candidate_source_index":4,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"cart family is present, but nav_bar.cart_button is not the controlled product-image identity"},
+    {"fixture_id":"3abfd2b7fddaf961:22","gold_semantic_id":"reviews.reviews_with_images.images.0","candidate_source_index":100,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"review family is present, but reviews_with_images.next_page is not the controlled image-0 identity"},
+    {"fixture_id":"3abfd2b7fddaf961:42","gold_semantic_id":"product_options.color.button_list.14_99_14_99_white_granite","candidate_source_index":18,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"product purchase/control family is present, but add_to_cart is not the controlled color identity"},
+    {"fixture_id":"40d12b55ee2c42fe:0","gold_semantic_id":"nav_bar.search_input","candidate_source_index":1,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches nav_bar.search_input"},
+    {"fixture_id":"40d12b55ee2c42fe:10","gold_semantic_id":"reviews.popover.review_images.next","candidate_source_index":67,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches reviews.popover.review_images.next"},
+    {"fixture_id":"40d12b55ee2c42fe:19","gold_semantic_id":"reviews.popover.close","candidate_source_index":10,"outcome":"miss","identity_match":false,"ambiguity":false,"reason":"add_to_cart does not match the controlled review close control"},
+    {"fixture_id":"42181500cab4c2b0:0","gold_semantic_id":"nav_bar.search_input","candidate_source_index":1,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches nav_bar.search_input"},
+    {"fixture_id":"42181500cab4c2b0:20","gold_semantic_id":"nav_bar.search_input","candidate_source_index":1,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches nav_bar.search_input"},
+    {"fixture_id":"42181500cab4c2b0:38","gold_semantic_id":"nav_bar.search_button","candidate_source_index":1,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"search family is present, but candidate binds the search input rather than the controlled search button"},
+    {"fixture_id":"465e43a76347dc49:0","gold_semantic_id":"product_options.color.drop_down_list.Suede Scarab White","candidate_source_index":8,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"product-option family is present, but candidate binds the size dropdown rather than the controlled color choice"},
+    {"fixture_id":"465e43a76347dc49:120","gold_semantic_id":"product_options.size.drop_down_list.open_drop_down_list","candidate_source_index":8,"outcome":"exact","identity_match":true,"ambiguity":false,"reason":"bound raw identity matches the controlled size dropdown"},
+    {"fixture_id":"465e43a76347dc49:239","gold_semantic_id":"reviews.popover.close","candidate_source_index":10,"outcome":"miss","identity_match":false,"ambiguity":false,"reason":"size-list Select is not a review close control"},
+    {"fixture_id":"4d54aec7db559236:0","gold_semantic_id":"nav_bar.search_input","candidate_source_index":2,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"search family is present, but candidate binds the submit button rather than the controlled input"},
+    {"fixture_id":"4d54aec7db559236:12","gold_semantic_id":"product_videos.active_video.progress_control","candidate_source_index":52,"outcome":"miss","identity_match":false,"ambiguity":false,"reason":"frequently-bought-together product image does not match the controlled video progress control"},
+    {"fixture_id":"4d54aec7db559236:22","gold_semantic_id":"search_results.bedroom_bathroom_door_emergency_keys_compatible_with_kwikset_interior_levers_and_knobs_5.product_name","candidate_source_index":322,"outcome":"identity_mismatch_semantic","identity_match":false,"ambiguity":false,"reason":"search-result product family is present, but candidate binds a different product result identity"}
+  ]
+}

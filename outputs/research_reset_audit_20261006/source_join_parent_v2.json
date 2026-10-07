@@ -1,0 +1,18 @@
+{
+  "schema": "light_source_lineage_join_v1",
+  "source_pickle": "outputs/external_assets_2026-09-06/LIGHT/light_data.pkl",
+  "source_pickle_sha256": "7c83cf49818586db9999ea67a4a6ad087afbd91c26ed629a9f00e21d0b84058f",
+  "actor_local_view": "02_实验/T0c_LIGHT/light_actor_local_full_v0.jsonl",
+  "actor_local_view_sha256": "e6f214b91ed644b60543cf442fdae4255ff177d26a25fccd750ab5c7381ba195",
+  "code_sha256": {
+    "tools/audit_light_source_lineage_v1.py": "0eb167f75adaad73419f4b1636117c482f0340db2f985ad7a5514184439a6ce0",
+    "02_实验/T0c_LIGHT/export_replay.py": "5937b8bb8b4799d343b26e9920a978e0e3cc6d2d44426b48133c358cc8efc41e",
+    "02_实验/T0c_LIGHT/run_actor_local_history_gate_v0.py": "ded4c0b34008b7d617264c390dfc0609d1732b1fd17c31924b99069c2eabb052"
+  },
+  "episode_count": 10268,
+  "joined": 13463,
+  "same_turn_speech_nonempty": 13456,
+  "raw_turn_differs_from_physical_index": 13152,
+  "all_rows_field_join_assertions_passed": true,
+  "synthetic_self_test": "passed: correct mapping, wrong raw index rejected, field mismatch rejected, existing output rejected"
+}

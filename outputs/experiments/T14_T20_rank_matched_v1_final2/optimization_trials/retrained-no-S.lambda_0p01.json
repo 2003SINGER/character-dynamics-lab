@@ -1,0 +1,221 @@
+{
+  "condition": "retrained-no-S",
+  "lambda": 0.01,
+  "train_rows": 92,
+  "validation_rows": 26,
+  "train_data_nll": 1.3665184326042579,
+  "train_regularized_objective": 1.3698557444163773,
+  "validation_nll": 1.6412066706552275,
+  "weights_theta": [
+    -0.021208798504059108,
+    0.010919939057794325,
+    -0.06687687513634034,
+    0.0,
+    0.0,
+    0.02120879850406094,
+    -0.0019922508026566704,
+    -0.20852156845112302,
+    0.0,
+    0.7314083959230558,
+    0.28901127912170377,
+    0.0,
+    0.0
+  ],
+  "weights_w": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "optimizer": {
+    "method": "L-BFGS-B",
+    "max_iter": 1000,
+    "gtol": 1e-08,
+    "initialization": "zeros",
+    "deterministic": true,
+    "success": true,
+    "status": 0,
+    "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+    "iterations": 18,
+    "function_evaluations": 21,
+    "gradient_evaluations": 21,
+    "final_objective": 1.3698557444163773,
+    "final_data_nll": 1.3665184326042579,
+    "final_l2_penalty": 0.003337311812119381,
+    "final_gradient_norm": 4.990530414569461e-06
+  },
+  "optimization_history": [
+    {
+      "iteration": 1,
+      "objective": 1.3958555308402516,
+      "data_nll": 1.3957896997681087,
+      "l2_penalty": 6.583107214292755e-05,
+      "gradient_norm": 0.13440468938797828,
+      "theta_norm": 0.11474412590013272,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 2,
+      "objective": 1.388566470199347,
+      "data_nll": 1.3884143805798563,
+      "l2_penalty": 0.0001520896194906473,
+      "gradient_norm": 0.10160023144977066,
+      "theta_norm": 0.17440735047047032,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 3,
+      "objective": 1.3753661175042469,
+      "data_nll": 1.3745141207401896,
+      "l2_penalty": 0.0008519967640571425,
+      "gradient_norm": 0.035267610255054614,
+      "theta_norm": 0.41279456490054284,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 4,
+      "objective": 1.3720148108308161,
+      "data_nll": 1.3704399264858707,
+      "l2_penalty": 0.0015748843449455044,
+      "gradient_norm": 0.02277351261819714,
+      "theta_norm": 0.5612280008954479,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 5,
+      "objective": 1.3703242698291638,
+      "data_nll": 1.3676606015532535,
+      "l2_penalty": 0.002663668275910192,
+      "gradient_norm": 0.00987225340440681,
+      "theta_norm": 0.7298860563005971,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 6,
+      "objective": 1.3699999038767385,
+      "data_nll": 1.366714591292267,
+      "l2_penalty": 0.0032853125844715374,
+      "gradient_norm": 0.005166573097141219,
+      "theta_norm": 0.8105939284834963,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 7,
+      "objective": 1.3699516027766117,
+      "data_nll": 1.3664143482631483,
+      "l2_penalty": 0.003537254513463388,
+      "gradient_norm": 0.005547897802989644,
+      "theta_norm": 0.8411010062368713,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 8,
+      "objective": 1.3699146365868207,
+      "data_nll": 1.3663440202746053,
+      "l2_penalty": 0.003570616312215343,
+      "gradient_norm": 0.0022982476442517316,
+      "theta_norm": 0.8450581414571832,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 9,
+      "objective": 1.3698831097702358,
+      "data_nll": 1.3663732008805198,
+      "l2_penalty": 0.00350990888971589,
+      "gradient_norm": 0.002092892322933339,
+      "theta_norm": 0.8378435283172974,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 10,
+      "objective": 1.3698599610071933,
+      "data_nll": 1.3664842768274315,
+      "l2_penalty": 0.0033756841797617887,
+      "gradient_norm": 0.0015822403344385371,
+      "theta_norm": 0.8216671077464144,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 11,
+      "objective": 1.3698563942282949,
+      "data_nll": 1.3665185734130725,
+      "l2_penalty": 0.003337820815222305,
+      "gradient_norm": 0.00022338161414506126,
+      "theta_norm": 0.817045998120339,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 12,
+      "objective": 1.369856124059834,
+      "data_nll": 1.3665251048939562,
+      "l2_penalty": 0.0033310191658778333,
+      "gradient_norm": 0.0002416879210072798,
+      "theta_norm": 0.8162131052461524,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 13,
+      "objective": 1.3698559841339177,
+      "data_nll": 1.3665258850710666,
+      "l2_penalty": 0.0033300990628510906,
+      "gradient_norm": 0.00031175670225254323,
+      "theta_norm": 0.8161003691766217,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 14,
+      "objective": 1.3698559368054288,
+      "data_nll": 1.3665256703588233,
+      "l2_penalty": 0.0033302664466056085,
+      "gradient_norm": 0.00048348135727455344,
+      "theta_norm": 0.8161208791111288,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 15,
+      "objective": 1.369855780829674,
+      "data_nll": 1.3665225589451482,
+      "l2_penalty": 0.003333221884525857,
+      "gradient_norm": 0.00021122248038040722,
+      "theta_norm": 0.8164829311780936,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 16,
+      "objective": 1.3698557478710676,
+      "data_nll": 1.366519498724849,
+      "l2_penalty": 0.003336249146218512,
+      "gradient_norm": 6.544629917038525e-05,
+      "theta_norm": 0.8168536155540369,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 17,
+      "objective": 1.3698557444765742,
+      "data_nll": 1.3665184796811247,
+      "l2_penalty": 0.003337264795449419,
+      "gradient_norm": 1.1978860668279475e-05,
+      "theta_norm": 0.816977942841717,
+      "w_norm": 0.0
+    },
+    {
+      "iteration": 18,
+      "objective": 1.3698557444163773,
+      "data_nll": 1.3665184326042579,
+      "l2_penalty": 0.003337311812119387,
+      "gradient_norm": 4.990530414569461e-06,
+      "theta_norm": 0.8169836977711841,
+      "w_norm": 0.0
+    }
+  ],
+  "selected": false
+}

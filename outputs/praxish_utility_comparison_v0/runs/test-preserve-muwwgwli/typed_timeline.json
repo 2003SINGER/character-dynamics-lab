@@ -1,0 +1,1106 @@
+[
+  {
+    "baseline": {
+      "case": "no_request",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "no_request",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "request",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "request",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "lowpriority",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "lowpriority",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "request_cancellation",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "cancel_request"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "request_cancellation",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "cancel_request"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "request_cancellation_low_motivation",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "request_cancellation_low_motivation",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "cancel_request"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "cancellation_explicit_binding_workaround",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "cancel_request"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "cancellation_explicit_binding_workaround",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "cancel_request"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "cancellation_explicit_binding_workaround_low_motivation",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "cancellation_explicit_binding_workaround_low_motivation",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "second_worker_visitor_pair",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "worker2",
+          "action": "answer_request"
+        },
+        {
+          "turn": 2,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor2",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 5,
+          "actor": "worker2",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 6,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor2",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "second_worker_visitor_pair",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "worker2",
+          "action": "answer_request"
+        },
+        {
+          "turn": 2,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor2",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 5,
+          "actor": "worker2",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 6,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor2",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "multiple_requests_one_worker",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "visitor2",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 3,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 4,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor2",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "multiple_requests_one_worker",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "visitor2",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 3,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 4,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor2",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "workspace_closure_unadapted",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "workspace_closure_unadapted",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "workspace_closure_adapted",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "workspace_closure_adapted",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  },
+  {
+    "baseline": {
+      "case": "equal_score_tie",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    },
+    "praxish": {
+      "case": "equal_score_tie",
+      "turns": [
+        {
+          "turn": 0,
+          "actor": "worker",
+          "action": "start_restocking"
+        },
+        {
+          "turn": 1,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 2,
+          "actor": "worker",
+          "action": "finish_restocking"
+        },
+        {
+          "turn": 3,
+          "actor": "visitor",
+          "action": "wait_for_answer"
+        },
+        {
+          "turn": 4,
+          "actor": "worker",
+          "action": "answer_request"
+        },
+        {
+          "turn": 5,
+          "actor": "visitor",
+          "action": null
+        },
+        {
+          "turn": 6,
+          "actor": "worker",
+          "action": null
+        },
+        {
+          "turn": 7,
+          "actor": "visitor",
+          "action": null
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,76 @@
+{
+  "condition": "activity",
+  "lambda": 1.0,
+  "train_rows": 17341,
+  "validation_rows": 3886,
+  "train_data_nll": 2.185693142908133,
+  "train_regularized_objective": 2.186119924743115,
+  "validation_nll": 2.1939040682704363,
+  "w_norm": 0.029215811985367553,
+  "weights_w": [
+    -0.0019393274015551583,
+    0.018043712791812817,
+    0.0013437417925939335,
+    0.0,
+    0.0,
+    0.0019393274015551615,
+    -0.018133013411267215,
+    -0.005626120932600358,
+    0.0,
+    0.00995904941733526,
+    -0.007636698341180464,
+    0.000176826999367741,
+    -0.0008172933039292644
+  ],
+  "optimizer": {
+    "method": "L-BFGS-B",
+    "max_iter": 1000,
+    "gtol": 1e-08,
+    "initialization": "zeros",
+    "deterministic": true,
+    "success": true,
+    "status": 0,
+    "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+    "iterations": 4,
+    "function_evaluations": 6,
+    "gradient_evaluations": 6,
+    "final_objective": 2.186119924743115,
+    "final_data_nll": 2.185693142908133,
+    "final_l2_penalty": 0.00042678183498217313,
+    "final_gradient_norm": 4.096373400581054e-06
+  },
+  "optimization_history": [
+    {
+      "iteration": 1,
+      "objective": 2.1861520381055164,
+      "data_nll": 2.185831519748606,
+      "l2_penalty": 0.0003205183569105886,
+      "gradient_norm": 0.009223311837735578,
+      "w_norm": 0.025318702846338262
+    },
+    {
+      "iteration": 2,
+      "objective": 2.186120563765894,
+      "data_nll": 2.185702264585097,
+      "l2_penalty": 0.00041829918079679275,
+      "gradient_norm": 0.0012610887708874698,
+      "w_norm": 0.02892401012296852
+    },
+    {
+      "iteration": 3,
+      "objective": 2.1861199258640243,
+      "data_nll": 2.1856926797419063,
+      "l2_penalty": 0.00042724612211786426,
+      "gradient_norm": 5.6079365545637443e-05,
+      "w_norm": 0.02923169930462012
+    },
+    {
+      "iteration": 4,
+      "objective": 2.186119924743115,
+      "data_nll": 2.185693142908133,
+      "l2_penalty": 0.00042678183498217313,
+      "gradient_norm": 4.096373400581054e-06,
+      "w_norm": 0.029215811985367553
+    }
+  ]
+}

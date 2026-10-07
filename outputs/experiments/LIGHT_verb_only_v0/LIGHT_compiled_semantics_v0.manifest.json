@@ -1,0 +1,24 @@
+{
+  "schema_version": "character_dynamics_experiment_manifest_v0",
+  "purpose": "LIGHT dev diagnostic: ReplayRecord -> fixed semantics -> X -> U -> S -> source candidate scorer -> A* NLL",
+  "research_status": "dev_diagnostic_only_not_semantic_admission",
+  "git_revision": "6fac70ab4cf33048a6dee33593b34959e8c4094b",
+  "git_worktree_dirty": true,
+  "source_replay": "outputs\\external_assets_2026-09-06\\LIGHT\\light_dev_50.replay.json",
+  "source_replay_sha256": "594155f5c070b4cecde0224df612fd155872cff5e116c90fc95c164d051844a3",
+  "semantic_rules": "D:\\desk\\科研\\character-dynamics\\02_实验\\T0c_LIGHT\\compiled_semantics_v0.json",
+  "semantic_rules_sha256": "4d651f2915c3c4b2a1f4e31441b4bcdfc9d3ea045d962dba1d4f9fbc4c6f3137",
+  "semantic_rules_version": "light-compiled-semantics-v0",
+  "semantic_frontend": "verb-only-v0",
+  "replay_core_version": "replay-core-v0|drive-linear-v0",
+  "selected_trajectory_count": 41,
+  "max_trajectories": 50,
+  "trace_sha256": "bec1650c25d69d5e77cc19b7e83062a418fed37adaeaaaea99046a88501744d5",
+  "information_rule": "At prediction t, state may use human actions only through t-1; A*_t is held out until scoring.",
+  "candidate_rule": "Every current candidate is featurized without reference to which candidate is A*; source candidate_set_factual is not relabelled A^O.",
+  "conditions": [
+    "stateful",
+    "no_history",
+    "uniform"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "checkpoint_bytes": {
+    "checkpoints/fixed_mean_seed19.pt": 70593,
+    "checkpoints/fixed_mean_seed31.pt": 70593,
+    "checkpoints/fixed_mean_seed7.pt": 70583,
+    "checkpoints/gru_seed19.pt": 173367,
+    "checkpoints/gru_seed31.pt": 173367,
+    "checkpoints/gru_seed7.pt": 173353,
+    "checkpoints/last2_seed19.pt": 70543,
+    "checkpoints/last2_seed31.pt": 70543,
+    "checkpoints/last2_seed7.pt": 70533,
+    "checkpoints/last_action_seed19.pt": 70603,
+    "checkpoints/last_action_seed31.pt": 70603,
+    "checkpoints/last_action_seed7.pt": 70593,
+    "checkpoints/learned_last2_seed19.pt": 136817,
+    "checkpoints/learned_last2_seed31.pt": 136817,
+    "checkpoints/learned_last2_seed7.pt": 136805,
+    "checkpoints/learned_mean_seed19.pt": 104037,
+    "checkpoints/learned_mean_seed31.pt": 104037,
+    "checkpoints/learned_mean_seed7.pt": 104025,
+    "checkpoints/o_only_seed19.pt": 70553,
+    "checkpoints/o_only_seed31.pt": 70553,
+    "checkpoints/o_only_seed7.pt": 70543
+  },
+  "elapsed_seconds": 177.70263008301845,
+  "inference_prefix_reencoded_per_prediction": true,
+  "online_runtime_memory_or_latency_measured": false,
+  "parameter_counts": {
+    "fixed_mean": {
+      "readout_parameters": 16961,
+      "state_encoder_parameters": 0,
+      "trainable_parameters": 16961
+    },
+    "gru": {
+      "readout_parameters": 16961,
+      "state_encoder_parameters": 25440,
+      "trainable_parameters": 42401
+    },
+    "last2": {
+      "readout_parameters": 16961,
+      "state_encoder_parameters": 0,
+      "trainable_parameters": 16961
+    },
+    "last_action": {
+      "readout_parameters": 16961,
+      "state_encoder_parameters": 0,
+      "trainable_parameters": 16961
+    },
+    "learned_last2": {
+      "readout_parameters": 16961,
+      "state_encoder_parameters": 16400,
+      "trainable_parameters": 33361
+    },
+    "learned_mean": {
+      "readout_parameters": 16961,
+      "state_encoder_parameters": 8208,
+      "trainable_parameters": 25169
+    },
+    "o_only": {
+      "readout_parameters": 16961,
+      "state_encoder_parameters": 0,
+      "trainable_parameters": 16961
+    }
+  },
+  "peak_rss_platform_units": 588513280,
+  "peak_rss_units_note": "OS/platform-specific resource.getrusage units; no conversion assumed",
+  "theoretical_retained_16_float_state_bytes": 64
+}

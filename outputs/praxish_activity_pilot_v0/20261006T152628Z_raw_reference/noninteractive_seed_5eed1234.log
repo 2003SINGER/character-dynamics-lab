@@ -1,0 +1,83 @@
+["foo","foo.bar","foo.bar.baz","foo.bar.woof","foo.meow","foo.meow.woof","fizz","fizz.buzz","fizz.buzz.foo","some","some.other","some.other.woof"]
+[{"X":"foo","Y":"bar"},{"X":"foo","Y":"meow"}]
+["foo","foo.meow","foo.meow.woof","fizz","fizz.buzz","fizz.buzz.foo","some","some.other","some.other.woof"]
+PRACTICE TEST: greet
+Performing action :: erika: Greet george {"Actor":"erika","Greeter":"erika","Greeted":"george","Other":"george","practiceID":"greet","instanceID":"practice.greet.erika.george","actionID":"[Actor]: Greet [Other]","name":"erika: Greet george","score":0}
+Performing action :: beatrice: Greet erika {"Actor":"beatrice","Greeter":"beatrice","Greeted":"erika","Other":"erika","practiceID":"greet","instanceID":"practice.greet.beatrice.erika","actionID":"[Actor]: Greet [Other]","name":"beatrice: Greet erika","score":0}
+WARN No actions to perform george
+WARN No actions to perform jukebox
+PRACTICE TEST: tendBar
+Performing action :: erika: Walk up to bar {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Walk up to bar","name":"erika: Walk up to bar","score":0}
+Performing action :: beatrice: Walk up to bar {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Walk up to bar","name":"beatrice: Walk up to bar","score":0}
+WARN No actions to perform george
+WARN No actions to perform jukebox
+Performing action :: erika: Order cider {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"erika: Order cider","Beverage":"cider","score":5}
+Performing action :: beatrice: Order beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"beatrice: Order beer","Beverage":"beer","score":5}
+Performing action :: george: Fulfill beatrice's order {"Actor":"george","Bartender":"george","Customer":"beatrice","Beverage":"beer","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill beatrice's order","score":5}
+WARN No actions to perform jukebox
+Performing action :: erika: Order soda {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"erika: Order soda","Beverage":"soda","score":5}
+Performing action :: beatrice: Spill beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Spill [Beverage]","name":"beatrice: Spill beer","Beverage":"beer","score":0}
+Performing action :: george: Fulfill erika's order {"Actor":"george","Bartender":"george","Customer":"erika","Beverage":"soda","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill erika's order","score":5}
+WARN No actions to perform jukebox
+Performing action :: erika: Clean up spill near beatrice {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Clean up spill near [Customer]","name":"erika: Clean up spill near beatrice","Customer":"beatrice","score":0}
+Performing action :: beatrice: Order beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"beatrice: Order beer","Beverage":"beer","score":5}
+Performing action :: george: Fulfill beatrice's order {"Actor":"george","Bartender":"george","Customer":"beatrice","Beverage":"beer","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill beatrice's order","score":5}
+WARN No actions to perform jukebox
+PRACTICE TEST: ticTacToe
+Performing action :: erika: Play o at bottom left {"Actor":"erika","Player1":"erika","Player2":"beatrice","Other":"beatrice","Piece":"o","Row":"bottom","Col":"left","practiceID":"ticTacToe","instanceID":"practice.ticTacToe.erika.beatrice","actionID":"[Actor]: Play [Piece] at [Row] [Col]","name":"erika: Play o at bottom left","score":0}
+Performing action :: beatrice: Spill beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Spill [Beverage]","name":"beatrice: Spill beer","Beverage":"beer","score":0}
+Performing action :: george: Clean up spill near beatrice {"Actor":"george","Bartender":"george","Customer":"beatrice","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Clean up spill near [Customer]","name":"george: Clean up spill near beatrice","score":5}
+WARN No actions to perform jukebox
+Performing action :: erika: Walk away from bar {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Walk away from bar","name":"erika: Walk away from bar","score":0}
+Performing action :: beatrice: Order beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"beatrice: Order beer","Beverage":"beer","score":5}
+Performing action :: george: Fulfill beatrice's order {"Actor":"george","Bartender":"george","Customer":"beatrice","Beverage":"beer","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill beatrice's order","score":5}
+WARN No actions to perform jukebox
+Performing action :: erika: Walk up to bar {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Walk up to bar","name":"erika: Walk up to bar","score":0}
+Performing action :: beatrice: Play x at middle right {"Actor":"beatrice","Player1":"erika","Player2":"beatrice","Other":"erika","Piece":"x","Row":"middle","Col":"right","practiceID":"ticTacToe","instanceID":"practice.ticTacToe.erika.beatrice","actionID":"[Actor]: Play [Piece] at [Row] [Col]","name":"beatrice: Play x at middle right","score":0}
+WARN No actions to perform george
+WARN No actions to perform jukebox
+Performing action :: erika: Order soda {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"erika: Order soda","Beverage":"soda","score":5}
+Performing action :: beatrice: Walk away from bar {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Walk away from bar","name":"beatrice: Walk away from bar","score":0}
+Performing action :: george: Fulfill erika's order {"Actor":"george","Bartender":"george","Customer":"erika","Beverage":"soda","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill erika's order","score":5}
+WARN No actions to perform jukebox
+Performing action :: erika: Walk away from bar {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Walk away from bar","name":"erika: Walk away from bar","score":0}
+Performing action :: beatrice: Walk up to bar {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Walk up to bar","name":"beatrice: Walk up to bar","score":0}
+WARN No actions to perform george
+WARN No actions to perform jukebox
+Performing action :: erika: Play o at top center {"Actor":"erika","Player1":"erika","Player2":"beatrice","Other":"beatrice","Piece":"o","Row":"top","Col":"center","practiceID":"ticTacToe","instanceID":"practice.ticTacToe.erika.beatrice","actionID":"[Actor]: Play [Piece] at [Row] [Col]","name":"erika: Play o at top center","score":0}
+Performing action :: beatrice: Order beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"beatrice: Order beer","Beverage":"beer","score":5}
+Performing action :: george: Fulfill beatrice's order {"Actor":"george","Bartender":"george","Customer":"beatrice","Beverage":"beer","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill beatrice's order","score":5}
+WARN No actions to perform jukebox
+Performing action :: erika: Walk up to bar {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Walk up to bar","name":"erika: Walk up to bar","score":0}
+Performing action :: beatrice: Play x at bottom center {"Actor":"beatrice","Player1":"erika","Player2":"beatrice","Other":"erika","Piece":"x","Row":"bottom","Col":"center","practiceID":"ticTacToe","instanceID":"practice.ticTacToe.erika.beatrice","actionID":"[Actor]: Play [Piece] at [Row] [Col]","name":"beatrice: Play x at bottom center","score":0}
+WARN No actions to perform george
+WARN No actions to perform jukebox
+Performing action :: erika: Order soda {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"erika: Order soda","Beverage":"soda","score":5}
+Performing action :: beatrice: Spill beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Spill [Beverage]","name":"beatrice: Spill beer","Beverage":"beer","score":0}
+Performing action :: george: Clean up spill near beatrice {"Actor":"george","Bartender":"george","Customer":"beatrice","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Clean up spill near [Customer]","name":"george: Clean up spill near beatrice","score":5}
+WARN No actions to perform jukebox
+PRACTICE TEST: jukebox
+Performing action :: erika: Play o at top right {"Actor":"erika","Player1":"erika","Player2":"beatrice","Other":"beatrice","Piece":"o","Row":"top","Col":"right","practiceID":"ticTacToe","instanceID":"practice.ticTacToe.erika.beatrice","actionID":"[Actor]: Play [Piece] at [Row] [Col]","name":"erika: Play o at top right","score":5}
+Performing action :: beatrice: Order beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"beatrice: Order beer","Beverage":"beer","score":5}
+Performing action :: george: Fulfill beatrice's order {"Actor":"george","Bartender":"george","Customer":"beatrice","Beverage":"beer","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill beatrice's order","score":5}
+WARN No actions to perform jukebox
+Performing action :: erika: Queue up eyesOfTheWorld on the jukebox {"Actor":"erika","JukeboxGhost":"jukebox","Song":"eyesOfTheWorld","practiceID":"jukebox","instanceID":"practice.jukebox.jukebox","actionID":"[Actor]: Queue up [Song] on the jukebox","name":"erika: Queue up eyesOfTheWorld on the jukebox","score":5}
+Performing action :: beatrice: Play x at middle left {"Actor":"beatrice","Player1":"erika","Player2":"beatrice","Other":"erika","Piece":"x","Row":"middle","Col":"left","practiceID":"ticTacToe","instanceID":"practice.ticTacToe.erika.beatrice","actionID":"[Actor]: Play [Piece] at [Row] [Col]","name":"beatrice: Play x at middle left","score":0}
+Performing action :: george: Fulfill erika's order {"Actor":"george","Bartender":"george","Customer":"erika","Beverage":"soda","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill erika's order","score":5}
+Performing action :: jukebox: Play beginning of eyesOfTheWorld {"Actor":"jukebox","JukeboxGhost":"jukebox","Song":"eyesOfTheWorld","PrevPart":"prebeginning","Part":"beginning","practiceID":"jukebox","instanceID":"practice.jukebox.jukebox","actionID":"[Actor]: Play [Part] of [Song]","name":"jukebox: Play beginning of eyesOfTheWorld"}
+Performing action :: erika: Play o at middle center {"Actor":"erika","Player1":"erika","Player2":"beatrice","Other":"beatrice","Piece":"o","Row":"middle","Col":"center","practiceID":"ticTacToe","instanceID":"practice.ticTacToe.erika.beatrice","actionID":"[Actor]: Play [Piece] at [Row] [Col]","name":"erika: Play o at middle center","score":10}
+Performing action :: beatrice: Drink beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Drink [Beverage]","name":"beatrice: Drink beer","Beverage":"beer","score":0}
+WARN No actions to perform george
+Performing action :: jukebox: Play middle of eyesOfTheWorld {"Actor":"jukebox","JukeboxGhost":"jukebox","Song":"eyesOfTheWorld","PrevPart":"beginning","Part":"middle","practiceID":"jukebox","instanceID":"practice.jukebox.jukebox","actionID":"[Actor]: Play [Part] of [Song]","name":"jukebox: Play middle of eyesOfTheWorld"}
+Performing action :: erika: Drink soda {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Drink [Beverage]","name":"erika: Drink soda","Beverage":"soda","score":10}
+Performing action :: beatrice: Order beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"beatrice: Order beer","Beverage":"beer","score":5}
+Performing action :: george: Fulfill beatrice's order {"Actor":"george","Bartender":"george","Customer":"beatrice","Beverage":"beer","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill beatrice's order","score":5}
+Performing action :: jukebox: Play end of eyesOfTheWorld {"Actor":"jukebox","JukeboxGhost":"jukebox","Song":"eyesOfTheWorld","PrevPart":"middle","Part":"end","practiceID":"jukebox","instanceID":"practice.jukebox.jukebox","actionID":"[Actor]: Play [Part] of [Song]","name":"jukebox: Play end of eyesOfTheWorld"}
+Performing action :: erika: Order cider {"Actor":"erika","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"erika: Order cider","Beverage":"cider","score":15}
+Performing action :: beatrice: Spill beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Spill [Beverage]","name":"beatrice: Spill beer","Beverage":"beer","score":0}
+Performing action :: george: Clean up spill near beatrice {"Actor":"george","Bartender":"george","Customer":"beatrice","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Clean up spill near [Customer]","name":"george: Clean up spill near beatrice","score":5}
+Performing action :: jukebox: Finish playing eyesOfTheWorld {"Actor":"jukebox","JukeboxGhost":"jukebox","Song":"eyesOfTheWorld","practiceID":"jukebox","instanceID":"practice.jukebox.jukebox","actionID":"[Actor]: Finish playing [Song]","name":"jukebox: Finish playing eyesOfTheWorld"}
+Performing action :: erika: Queue up paranoidAndroid on the jukebox {"Actor":"erika","JukeboxGhost":"jukebox","Song":"paranoidAndroid","practiceID":"jukebox","instanceID":"practice.jukebox.jukebox","actionID":"[Actor]: Queue up [Song] on the jukebox","name":"erika: Queue up paranoidAndroid on the jukebox","score":15}
+Performing action :: beatrice: Order beer {"Actor":"beatrice","Bartender":"george","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Order [Beverage]","name":"beatrice: Order beer","Beverage":"beer","score":5}
+Performing action :: george: Fulfill beatrice's order {"Actor":"george","Bartender":"george","Customer":"beatrice","Beverage":"beer","practiceID":"tendBar","instanceID":"practice.tendBar.george","actionID":"[Actor]: Fulfill [Customer]'s order","name":"george: Fulfill beatrice's order","score":5}
+Performing action :: jukebox: Play beginning of paranoidAndroid {"Actor":"jukebox","JukeboxGhost":"jukebox","Song":"paranoidAndroid","PrevPart":"prebeginning","Part":"beginning","practiceID":"jukebox","instanceID":"practice.jukebox.jukebox","actionID":"[Actor]: Play [Part] of [Song]","name":"jukebox: Play beginning of paranoidAndroid"}

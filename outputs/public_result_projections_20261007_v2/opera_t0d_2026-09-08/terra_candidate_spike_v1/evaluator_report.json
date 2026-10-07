@@ -1,0 +1,305 @@
+{
+  "artifacts": {
+    "blind_input_sha256": "5B333E5843BEE64516D7A8E60F1CDF06AE4A5454DBE1375AA96D2DF7F8047E2E",
+    "candidate_sha256": "E9590343A95B3D79043D4AFA6DA7EB5B031D5DD8D93AF0B464C2940DCCED0CD4",
+    "gold_sha256": "D3F2824BF8C7294843C6DF0441E8E297331DE63B04656969087F82457B446AAB"
+  },
+  "gold_blind_invariants": {
+    "candidate_input_field_allowlist": {
+      "declared_fields": [],
+      "status": "PASS"
+    },
+    "prohibited_gold_keys_absent_from_candidate": {
+      "keys_checked": [],
+      "status": "PASS"
+    },
+    "reveal_order_from_filesystem_mtime": {
+      "status": "INDETERMINATE"
+    }
+  },
+  "matching_rule": {
+    "candidate_identity_source": [
+      "target_source_index",
+      "target_attrs",
+      "target_text"
+    ],
+    "gold_identity_source": [
+      "semantic_id",
+      "element_meta",
+      "raw element attrs/text"
+    ],
+    "identity_mismatch_semantic": "candidate is non-ambiguous and matches the controlled intent family, but its bound raw-element identity differs; family-only support is not strict"
+  },
+  "metrics": {
+    "ambiguous_gold_match_rate": {
+      "denominator": 30,
+      "numerator": 0
+    },
+    "candidate_ambiguity_rate": {
+      "all_candidates": 30,
+      "ambiguous_candidates": 0
+    },
+    "candidate_count": {
+      "max": 1,
+      "mean": 1.0,
+      "median": 1.0,
+      "min": 1,
+      "total": 30
+    },
+    "candidate_records": 30,
+    "duplicate_identity": {
+      "candidate_records": 30,
+      "duplicate_target_source_indices_within_record": 0
+    },
+    "family_support_diagnostic_only": {
+      "denominator": 30,
+      "numerator": 21
+    },
+    "gold_records": 30,
+    "no_candidate": {
+      "denominator": 30,
+      "records_with_zero_candidates": 0
+    },
+    "outcome_counts": {
+      "ambiguous": 0,
+      "exact": 10,
+      "identity_mismatch_semantic": 11,
+      "miss": 9
+    },
+    "strict_support_recall": {
+      "denominator": 30,
+      "numerator": 10
+    }
+  },
+  "per_record": [
+    {
+      "ambiguity": false,
+      "candidate_source_index": 4,
+      "fixture_id": "265f4810e9b46837:0",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 104,
+      "fixture_id": "265f4810e9b46837:32",
+      "identity_match": false,
+      "outcome": "miss"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 501,
+      "fixture_id": "265f4810e9b46837:62",
+      "identity_match": false,
+      "outcome": "miss"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 9,
+      "fixture_id": "2a83eb7c87fadecd:0",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 77,
+      "fixture_id": "2a83eb7c87fadecd:28",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 9,
+      "fixture_id": "2a83eb7c87fadecd:54",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 1,
+      "fixture_id": "32c85a6beaec57ac:0",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 5,
+      "fixture_id": "32c85a6beaec57ac:10",
+      "identity_match": false,
+      "outcome": "miss"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 8,
+      "fixture_id": "32c85a6beaec57ac:18",
+      "identity_match": false,
+      "outcome": "miss"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 4,
+      "fixture_id": "34543282baa363f2:0",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 82,
+      "fixture_id": "34543282baa363f2:12",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 212,
+      "fixture_id": "34543282baa363f2:22",
+      "identity_match": false,
+      "outcome": "miss"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 15,
+      "fixture_id": "3923e39eed3ae2ee:0",
+      "identity_match": false,
+      "outcome": "miss"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 115,
+      "fixture_id": "3923e39eed3ae2ee:22",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 15,
+      "fixture_id": "3923e39eed3ae2ee:43",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 4,
+      "fixture_id": "3abfd2b7fddaf961:0",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 100,
+      "fixture_id": "3abfd2b7fddaf961:22",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 18,
+      "fixture_id": "3abfd2b7fddaf961:42",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 1,
+      "fixture_id": "40d12b55ee2c42fe:0",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 67,
+      "fixture_id": "40d12b55ee2c42fe:10",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 10,
+      "fixture_id": "40d12b55ee2c42fe:19",
+      "identity_match": false,
+      "outcome": "miss"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 1,
+      "fixture_id": "42181500cab4c2b0:0",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 1,
+      "fixture_id": "42181500cab4c2b0:20",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 1,
+      "fixture_id": "42181500cab4c2b0:38",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 8,
+      "fixture_id": "465e43a76347dc49:0",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 8,
+      "fixture_id": "465e43a76347dc49:120",
+      "identity_match": true,
+      "outcome": "exact"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 10,
+      "fixture_id": "465e43a76347dc49:239",
+      "identity_match": false,
+      "outcome": "miss"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 2,
+      "fixture_id": "4d54aec7db559236:0",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 52,
+      "fixture_id": "4d54aec7db559236:12",
+      "identity_match": false,
+      "outcome": "miss"
+    },
+    {
+      "ambiguity": false,
+      "candidate_source_index": 322,
+      "fixture_id": "4d54aec7db559236:22",
+      "identity_match": false,
+      "outcome": "identity_mismatch_semantic"
+    }
+  ],
+  "report_version": "terra-evaluator-v1.0",
+  "reproducibility": {
+    "check": "read/hash stability check on frozen artifact",
+    "generator_metadata": {
+      "gold_access": false,
+      "protocol_version": "T0d-terra-candidate-v1",
+      "temperature": 0
+    },
+    "hash_stable": true,
+    "rerun_performed": false
+  },
+  "stopping_rule": {
+    "ambiguous_passes": true,
+    "ambiguous_threshold": 0.25,
+    "decision": "strict support is 10/30 (0.3333), below 70%; the route is closed under the frozen v1 rule. No action-readout compatibility discussion, v2/v3 prompt repair, or Theory-S training is authorized by this route.",
+    "strict_support_passes": false,
+    "strict_support_threshold": 0.7,
+    "verdict": "FAIL/CLOSE ROUTE"
+  }
+}
