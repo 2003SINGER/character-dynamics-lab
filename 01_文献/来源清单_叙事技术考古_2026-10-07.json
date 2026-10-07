@@ -1,0 +1,199 @@
+{
+  "schema_version": "narrative_archaeology_sources_v1",
+  "audit_date": "2026-10-07",
+  "project_branch": "webgpt-sync",
+  "scope": "Algorithm reading and protocol audit only; no model runs, implementation, or replicated results",
+  "reading_labels": "delegated_full means Luna read body/method/results/limitations, not all cited works; parent_selected is independent targeted verification, not parent full reading",
+  "private_sources": "Three supplied dialogue exports are local-only and excluded by 90_原始材料/_private/; contents are not included here",
+  "sources": [
+    {
+      "id": "mediation_2003",
+      "title": "Managing Interaction Between Users and Agents in a Multi-Agent Storytelling Environment",
+      "authors": ["Mark O. Riedl", "C. J. Saretto", "R. Michael Young"],
+      "version": "AAMAS 2003 author PDF, 9 pages",
+      "url": "https://sites.cc.gatech.edu/fac/riedl/pubs/riedl-young-aamas03.pdf",
+      "reading": {"luna": "selected_methods: sections 3.3-4.2, architecture/examples/conclusions", "parent": "selected threat/accommodation/intervention/policy passages and rendered PDF page 4"},
+      "local_artifact": "outputs/literature_sources/narrative_planning_20261007/Mediation_AAMAS_2003.pdf",
+      "sha256": "85ad393a66064814e358400724929b5df3c917b2d26d597fed4a98491b1d1de9",
+      "pages_verified": 9,
+      "software_reproduced": false
+    },
+    {
+      "id": "branching_2005",
+      "title": "From Linear Story Generation to Branching Story Graphs",
+      "authors": ["Mark O. Riedl", "R. Michael Young"],
+      "version": "AIIDE 2005, 6 pages; not the later journal version",
+      "url": "https://ojs.aaai.org/index.php/AIIDE/article/download/18725/18502/22367",
+      "reading": {"luna": "delegated_full", "parent": "delegated findings checked against causal-plan distinction; not full text"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "knowledge_mediation_2013",
+      "title": "Modelling Character Knowledge in Plan-Based Interactive Narrative to Extend Accomodative Mediation",
+      "authors": ["Justus Robertson", "R. Michael Young"],
+      "version": "AIIDE workshop 2013, pages 93-96",
+      "url": "https://ojs.aaai.org/index.php/AIIDE/article/download/12624/12472",
+      "reading": {"luna": "delegated_full", "parent": "Algorithm / Knowledge Annotation / Policy Generation / Bidirectional Accommodation selected"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "probabilistic_mediation_2017",
+      "title": "Narrative Mediation as Probabilistic Planning",
+      "authors": ["Justus Robertson", "R. Michael Young"],
+      "version": "AIIDE workshop 2017, 4 pages",
+      "url": "https://ojs.aaai.org/index.php/AIIDE/article/download/12992/12840/16509",
+      "reading": {"luna": "delegated_full", "parent": "delegated algorithm/probability assumptions audit; not full text"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "dodm_rl_2006",
+      "title": "Reinforcement Learning for Declarative Optimization-Based Drama Management",
+      "authors": ["Mark J. Nelson", "David L. Roberts", "Charles L. Isbell Jr.", "Michael Mateas"],
+      "version": "AAMAS 2006, pages 775-782",
+      "url": "https://www.kmjn.org/publications/DODM_AAMAS06.pdf",
+      "reading": {"luna": "body full: formalism, SAS+, TD, SASCE, results, limitations; references identification only", "parent": "sections 1/3 and precedence matrix selected"},
+      "local_artifact": null,
+      "download_status": "Two attempts incomplete; .partial files are not validated PDFs",
+      "software_reproduced": false
+    },
+    {
+      "id": "dodm_authoring_2006",
+      "title": "Authoring an Interactive Narrative with Declarative Optimization-Based Drama Management",
+      "authors": ["Mark J. Nelson", "Calvin Ashmore", "Michael Mateas"],
+      "version": "AIIDE 2006 poster, pages 127-129",
+      "url": "https://ojs.aaai.org/index.php/AIIDE/article/download/18761/18537/22440",
+      "metadata_url": "https://ojs.aaai.org/index.php/AIIDE/article/view/18761",
+      "reading": {"luna": "delegated_full", "parent": "bibliography/title/authors checked on official page; authoring findings delegated"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "ida_2004",
+      "title": "Mediating the Tension between Plot and Interaction",
+      "authors": ["Brian Magerko", "John E. Laird"],
+      "version": "AAAI workshop 2004, pages 108-112; not unacquired IDA 2003 paper",
+      "url": "https://cdn.aaai.org/Workshops/2004/WS-04-04/WS04-04-022.pdf",
+      "reading": {"luna": "delegated_full", "parent": "source-year distinction and mechanism acceptance audit; not full text"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "thespian_pop_2008",
+      "title": "Integrating Story-Centric and Character-Centric Processes for Authoring Interactive Drama",
+      "authors": ["Mei Si", "Stacy C. Marsella", "Mark O. Riedl"],
+      "version": "AIIDE 2008, pages 203-208",
+      "url": "https://cdn.aaai.org/ojs/18698/18698-52-22313-1-10-20210927.pdf",
+      "reading": {"luna": "delegated_full including Algorithms 1-5 and examples", "parent": "overview, Algorithm 5, examples 1/2 and author obligation selected"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "idg_2017",
+      "title": "Planning Graphs for Efficient Generation of Desirable Narrative Trajectories",
+      "authors": ["Adam Amos-Binks", "Colin Potts", "R. Michael Young"],
+      "version": "AIIDE-17 workshop, pages 146-153",
+      "url": "https://cdn.aaai.org/ojs/12989/12989-52-16506-1-2-20201228.pdf",
+      "reading": {"luna": "delegated_full", "parent": "Jaccard objects/formula/example and SPG mutex/minimal-length limitations selected"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "disney_two_level_2018",
+      "title": "A Two-Level Planning Framework for Mixed Reality Interactive Narratives with User Engagement",
+      "version": "AIVR 2018, pages 100-107, DOI 10.1109/AIVR.2018.00021",
+      "url": "https://studios.disneyresearch.com/app/uploads/2019/03/A-Two-Level-Planning-Framework-for-Mixed-Reality-Interactive-Narratives-with-User-Engagement.pdf",
+      "metadata_url": "https://la.disneyresearch.com/publication/a-two-level-planning-framework-for-mixed-reality-interactive-narratives-with-user-engagement/",
+      "reading": {"luna": "sections III-VIII selected; not all references", "parent": "story invariants, trajectory and MCTS selected; no temporal aspect confirmed by delegated limitations review"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "ipocl_inherited",
+      "title": "IPOCL 2004 and 2010 reading inherited, not newly re-read in full",
+      "url": "https://faculty.cc.gatech.edu/~riedl/pubs/aamas04.pdf",
+      "local_audit": "01_文献/调研子审计_AuthorGoals与叙事规划_2026-10-07.md",
+      "local_algorithm_audit": "01_文献/算法拆解_NPC方法与生产系统_2026-10-07.md",
+      "reading": {"parent": "previous audited reading reused; no new full reading claimed"},
+      "software_reproduced": false
+    },
+    {
+      "id": "social_storyverse_inherited",
+      "title": "CiF, Versu/Praxish and StoryVerse earlier audits retained",
+      "local_audit": "01_文献/算法拆解_NPC方法与生产系统_2026-10-07.md",
+      "local_storyverse_audit": "01_文献/调研子审计_StoryVerse与Shepherd_2026-10-07.md",
+      "reading": {"parent": "earlier source readings reused; Versu unverified choice code remains unverified"},
+      "software_reproduced": false,
+      "note": "Praxish has an earlier separate local run; this turn performed none and does not overwrite its evidence"
+    },
+    {
+      "id": "whatelse_2025",
+      "title": "WhatELSE: Shaping Narrative Spaces at Configurable Level of Abstraction for AI-bridged Interactive Storytelling",
+      "authors": ["Zhuoran Lu", "Qian Zhou", "Yi Wang"],
+      "version": "CHI 2025 author PDF, 18 pages",
+      "url": "https://www.research.autodesk.com/app/uploads/2025/02/WhatELSE.pdf",
+      "reading": {"luna": "pages 1-2,5-7,8-11,14-15 selected", "parent": "abstraction/compiler/game-environment and user-study/results selected; not full references/appendix"},
+      "local_artifact": null,
+      "download_status": "Incomplete .partial cache, not an acquired original PDF",
+      "software_reproduced": false,
+      "note": "Different paper from Elsewise 2026"
+    },
+    {
+      "id": "drama_llama_2025",
+      "title": "Drama Llama: An LLM-Powered Storylets Framework for Authorable Responsiveness in Interactive Narrative",
+      "version": "arXiv:2501.09099v1, 2025-01-15, 10 pages",
+      "url": "https://arxiv.org/pdf/2501.09099v1",
+      "reading": {"luna": "body pages 1-6 and Appendix A trigger example; not all prompt appendices", "parent": "system/trigger timing/state consumption and action-text distinction selected"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "narrative_studio_2025",
+      "title": "Narrative Studio: Visual narrative exploration using LLMs and Monte Carlo Tree Search",
+      "authors": ["Parsa Ghaffari", "Chris Hokamp"],
+      "version": "WNU 2025, pages 83-96; parent full text reading used arXiv:2504.02426v1, 14 pages",
+      "url": "https://aclanthology.org/2025.wnu-1.16/",
+      "reading_url": "https://arxiv.org/pdf/2504.02426v1",
+      "reading": {"parent": "full text including method/results/all prompts/references/examples; PDF screenshot request failed, no visual-layout claim", "luna": "official bibliography and targeted method/evaluation verification"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "llm_modulo_2024",
+      "title": "Position: LLMs Can't Plan, But Can Help Planning in LLM-Modulo Frameworks",
+      "version": "ICML 2024 position paper; arXiv:2402.01817v3, 2024-06-12, 13 pages",
+      "url": "https://arxiv.org/pdf/2402.01817v3",
+      "reading": {"parent": "sections 3-4 including critics, backprompt, model/specification acquisition and budget limitations selected"},
+      "local_artifact": null,
+      "download_status": "Incomplete .partial cache; OpenReview retrieval met browser challenge, arXiv text available",
+      "software_reproduced": false
+    },
+    {
+      "id": "ncp_bench_2026",
+      "title": "Can LLM Agents Stick to the Script? A Benchmark for Long-Horizon Consistency in Interactive Narratives",
+      "version": "ICML 2026 / PMLR 306 pages 85171-85192; method read arXiv:2608.08160v1",
+      "url": "https://proceedings.mlr.press/v306/ma26ap.html",
+      "reading_url": "https://arxiv.org/pdf/2608.08160v1",
+      "reading": {"luna": "body pages 1-9 and relevant prompts pages 19-20; not all appendices", "parent": "Table 3 and source runner initialization/projection/check/commit/terminal selected; local PDF page 8 rendered and visually checked"},
+      "local_artifact": "01_文献/PDF/2026_NCP_Bench.pdf",
+      "sha256": "b41fe0fcefedb5ec827c24541c8ac0ff5709e68883061f394acfa9f8e7805bc1",
+      "pages_verified": 22,
+      "local_version_verified": "PDF page 1 arXiv:2608.08160v1 plus /arXivID metadata",
+      "software_reproduced": false
+    },
+    {
+      "id": "ncp_bench_code",
+      "url": "https://github.com/NLP2CT/NCP-Bench",
+      "commit": "780aeb559ce216a57cbd934b5a20bfd35018c4f6",
+      "license": "MIT",
+      "license_url": "https://github.com/NLP2CT/NCP-Bench/blob/780aeb559ce216a57cbd934b5a20bfd35018c4f6/LICENSE",
+      "reading": {"luna": "README/schema/runner and reference BaselineNarrator/HiAgentNarrator/HiAgentCore/prompts/TrajectorySummarizer selected; parsing.py boundary not fully audited", "parent": "fixed runner.py state transitions/failure independently read; HiAgent core selected"},
+      "executed": false,
+      "benchmark_data_downloaded": false
+    }
+  ],
+  "local_source_policy": "PDF originals are local source artifacts, not public report payload. Failed download fragments are explicitly unverified. No new experiments or results.",
+  "reused_code_policy": "No third-party implementation copied or executed. Historical paper availability is not a software license. Future reuse must inspect relevant code licenses independently."
+}

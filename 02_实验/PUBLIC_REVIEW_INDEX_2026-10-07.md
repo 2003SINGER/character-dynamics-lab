@@ -8,6 +8,7 @@
 |---|---|---|
 | 当前研究方向、有哪些事还没证明 | [研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)、[TODO](../00_研究设计/TODO.md) | 不以工程闭环或自有评分器替代方法 / 玩家证据 |
 | 世界中心 NPC、作者成本、已有方法的算法层 | [文献总入口](../01_文献/README.md)、[算法拆解](../01_文献/算法拆解_NPC方法与生产系统_2026-10-07.md)、[外围调研](../01_文献/专题调研_世界中心NPC的制作障碍与活人感_2026-10-07.md) | 文献审计正文已跟踪；论文原件不是本次结果上传对象 |
+| 多粒度作者约束、旧规划算法与 NCP-Bench | [技术考古总报告](../01_文献/专题调研_多粒度剧情连接与LLM重组_2026-10-07.md)、[NCP 协议卡](../01_文献/精读_NCPBench_协议与接入边界_2026-10-07.md)、[来源清单](../01_文献/来源清单_叙事技术考古_2026-10-07.json) | 新增的是原件/源码审计与纸面例，不是实验；完整新对话私有、不上传；本地论文/失败缓存不混为公开结果 |
 | Praxish 原件及共同小场景 | [Activity Pilot](Praxish_Activity_Pilot_v0/README.md) | `outputs/praxish_activity_pilot_v0/` 的自有运行记录；下载的作者原代码包不上传 |
 | Praxish / utility 匹配比较与真实失败 | [RESULTS](Praxish_Utility_Comparison_v0/RESULTS.md) | `outputs/praxish_utility_comparison_v0/`：case results、typed timeline、debug / failure evidence、manifest、匿名 viewer；test-only 子目录不冒充真实比较 |
 | 已训练开发预测基线与复现 | [PredictionBaseline RESULTS](PredictionBaselineV1/RESULTS.md) | `outputs/prediction_baseline_v1_20261006/`：逐行 loss、epochs、split / config / manifests、代码快照、小型训练 checkpoint |
