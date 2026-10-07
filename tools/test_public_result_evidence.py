@@ -79,6 +79,8 @@ class PublicResultProjectionTests(unittest.TestCase):
             self.assertNotIn("SOURCE ACTION TEXT", encoded)
             self.assertNotIn("source_actor_name", encoded)
             self.assertEqual(result["trajectory_id"], "trajectory-opaque")
+            self.assertFalse(result["normalized_gold_ambiguity"])
+            self.assertFalse(result["target_absent_from_normalized_support"])
             self.assertEqual(result["losses_nats"]["fixed_mean_seed19"], 0.43)
             self.assertEqual(result["losses_nats"]["gru_seed19"], 0.78)
             self.assertEqual(result["losses_nats"]["unknown_map_entries"], [

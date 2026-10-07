@@ -123,6 +123,7 @@ support_recall_strict t target_A_star target_attrs target_description target_ent
 target_entity_id target_in_inventory target_in_scene target_source_index target_step_index
 target_text target_t target_visible_in_O task_pressure temperature temperature_sha256 title
 total trajectory_id transition_events uniform_nll value verb verdict losses_nats
+normalized_gold_ambiguity target_absent_from_normalized_support
 """.lower().split())
 
 
