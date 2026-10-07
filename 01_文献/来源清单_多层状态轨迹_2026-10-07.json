@@ -1,0 +1,121 @@
+{
+  "schema_version": "state_trajectory_sources_v1",
+  "audit_date": "2026-10-07",
+  "branch": "webgpt-sync",
+  "base_commit": "d78c442db98c9f48562dc8bcedea616463b0b5b3",
+  "scope": "Literature methods audit and original paper examples only; no implementation, training or experiments",
+  "reading_note": "Delegated reading and independent parent verification are distinct; no claim that the parent read all papers in full",
+  "private_inputs": "Two supplied dialogue exports archived under ignored 90_原始材料/_private/; full text excluded from publication",
+  "download_note": "Attempted local retrieval of PDDL3, Porteous 2010 and Raman 2017 failed with TLS/connection timeouts. Online primary text was accessible. No valid PDF was stored in this round's output directory; local_artifact=null is not a downloaded original.",
+  "sources": [
+    {
+      "id": "pddl3_2005",
+      "title": "Plan Constraints and Preferences in PDDL3: The Language of the Fifth International Planning Competition",
+      "authors": ["Alfonso Gerevini", "Derek Long"],
+      "version": "Technical report, August 2005, 12 pages",
+      "url": "https://ipc08.icaps-conference.org/deterministic/data/gerevini-long-tr-2005.pdf",
+      "accessed_text_url": "https://planning.wiki/_citedpapers/pddl32005.pdf",
+      "reading": {"luna": "Sections 1-7 targeted semantics and language restrictions", "parent": "Sections 1-3, especially trajectory quantifiers, ordering and temporal windows"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "porteous_2010",
+      "title": "Applying Planning to Interactive Storytelling: Narrative Control Using State Constraints",
+      "authors": ["Julie Porteous", "Marc Cavazza", "Fred Charles"],
+      "version": "ACM TIST 1(2), Article 10, 2010, 21 pages",
+      "url": "https://doi.org/10.1145/1869397.1869399",
+      "author_pdf_url": "https://research.tees.ac.uk/ws/files/5954785/118625.pdf",
+      "accessed_text_url": "https://cs.uky.edu/~sgware/reading/papers/porteous2010applying.pdf",
+      "reading": {"luna": "Sections 1-7 targeted, including Algorithm 1 and evaluation", "parent": "Sections 2.4-4.2 algorithm and selected results/limitations; figure screenshot unavailable"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "stl_mpc_2017",
+      "title": "Model Predictive Control for Signal Temporal Logic Specification",
+      "authors": ["Vasumathi Raman", "Alexandre Donzé", "Mehdi Maasoumy", "Richard M. Murray", "Alberto Sangiovanni-Vincentelli", "Sanjit A. Seshia"],
+      "version": "arXiv:1703.09563v1, extended manuscript, 2017; distinct from CDC 2014 version",
+      "url": "https://arxiv.org/html/1703.09563v1",
+      "reading": {"parent": "Sections II-V targeted: signal robustness, system assumptions, MPC history and horizon"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "graft_2025",
+      "title": "Grammar-Forced Translation of Natural Language to Temporal Logic using LLMs",
+      "authors": ["William H. English", "Dominic Simon", "Sumit Kumar Jha", "Rickard Ewetz"],
+      "version": "ICML 2025, PMLR 267:15370-15383; later arXiv deposit is not its first publication",
+      "url": "https://proceedings.mlr.press/v267/english25a.html",
+      "pdf_url": "https://raw.githubusercontent.com/mlresearch/v267/main/assets/english25a/english25a.pdf",
+      "reading": {"luna": "Methods pages 0-5, AP lifting and grammar-guided learning/decoding; repository README", "parent": "Official publication metadata and repository README; method audit delegated, not full parent paper reading"},
+      "repository": {"url": "https://github.com/Dubascudes/GraFT", "status": "Self-described reproduction; author affiliation and official-paper linkage unverified; not treated as official source", "pinned_sha": null},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "nl2ltl_2023",
+      "title": "NL2LTL -- a Python Package for Converting Natural Language to Temporal Logics",
+      "version": "AAAI 2023 system demonstration, 3 pages",
+      "url": "https://ojs.aaai.org/index.php/AAAI/article/view/27068",
+      "author_pdf_url": "https://francescofuggitti.github.io/papers/2023/aaai2023fc.pdf",
+      "reading": {"luna": "Three-page system paper and filter source", "parent": "IBM README and BasicFilter/GreedyFilter source; paper interpretation delegated"},
+      "repository": {"url": "https://github.com/IBM/nl2ltl", "license": "MIT", "pinned_sha": null, "status": "Online source snapshot, not a pinned replication"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "t3_planner_2025",
+      "title": "T3 Planner: A Self-Correcting LLM Framework for Robotic Motion Planning with Temporal Logic",
+      "version": "arXiv:2510.16767v1, 2025; conference acceptance not verified",
+      "url": "https://arxiv.org/html/2510.16767v1",
+      "reading": {"luna": "Eight-page paper and README/stl_checker.py targeted; not executed", "parent": "Sections II-C and IV: human formula review, cascaded loops, explicit kinematic model and verification"},
+      "repository": {"url": "https://github.com/leeejia/T3_Planner", "pinned_sha": null, "status": "Paper-linked repository; implementation details not fully independently audited"},
+      "implementation_difference": "Paper states PSY-TaLiRo, delegated repository inspection reports rtamt-based checker; do not assume bit-identical implementation",
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "story2game_2025",
+      "title": "STORY2GAME: Generating (Almost) Everything in an Interactive Fiction Game",
+      "authors": ["Eric Zhou", "Shreyas Basavatia", "Moontashir Siam", "Zexin Chen", "Mark O. Riedl"],
+      "version": "arXiv:2505.03547v1, 2025",
+      "url": "https://arxiv.org/html/2505.03547v1",
+      "reading": {"luna": "Eight-page paper", "parent": "Sections III-V executable graph, dynamic action generation, dependency revision and evaluation setup"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "wse_bench_2026",
+      "title": "When Stories Evolve: Benchmarking LLM Storytelling Across Agent Architectures in Open-Ended World Simulations",
+      "authors": ["Yuqi Chen", "Sixuan Li", "Yunfeng Cai", "Xueai Li", "Ka Man Yan", "Ying Li"],
+      "version": "arXiv:2608.15654v1, 2026",
+      "url": "https://arxiv.org/html/2608.15654v1",
+      "reading": {"luna": "Paper and appendices, 20 pages", "parent": "Sections 3-5 and Appendix B targeted: narrative canon, reducer, uncertain and blinded human reference"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "anansi_2024_2025",
+      "title": "Building Visual Novels with Social Simulation and Storylets",
+      "version": "ICIDS 2024 proceedings published 2025, LNCS 15468:145-161",
+      "url": "https://doi.org/10.1007/978-3-031-78450-7_9",
+      "author_copy_url": "https://escholarship.org/uc/item/21r7h0fq",
+      "reading": {"luna": "Section 5 pages 7-13 and conclusions, README and tag metadata", "parent": "Delegated architecture/version/license acceptance audit; not full paper or source reading"},
+      "repository": {"url": "https://github.com/ShiJbey/Anansi", "tag": "v0.5.1", "pinned_sha": "1f69f67fc5ac93c69c9eb64cf19612053e9e775c", "license": "MIT", "status": "README/tag checked; individual source retrieval incomplete; rollback and fallback unverified"},
+      "local_artifact": null,
+      "software_reproduced": false
+    },
+    {
+      "id": "sabre_2021",
+      "title": "Sabre: A Narrative Planner Supporting Intention and Deep Theory of Mind",
+      "version": "AAMAS 2021 extended abstract, 3 pages; not full AIIDE paper or source replication",
+      "url": "https://cs.uky.edu/~sgware/reading/papers/ware2021sabreposter.pdf",
+      "author_project_url": "https://cs.uky.edu/~sgware/projects/sabre/",
+      "reading": {"parent": "Author project page and extended abstract method passages, pages 0-1"},
+      "repository": {"url": "https://github.com/sgware/sabre", "license": "CC BY-NC 4.0", "pinned_sha": null, "status": "License and project boundary checked; not executed"},
+      "local_artifact": null,
+      "software_reproduced": false
+    }
+  ]
+}
