@@ -35,8 +35,12 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
           PYTHONPATH: tools
-        run: python -B -m unittest discover -s tools/e0_keyledger_v0/tests -v
+        run: |
+          set -o pipefail
+          mkdir -p runs/e0_keyledger_v0/ci
+          python -B -m unittest discover -s tools/e0_keyledger_v0/tests -v 2>&1 | tee runs/e0_keyledger_v0/ci/unit-tests.log
       - name: Run all frozen E0 fixtures under protocol budgets
+        if: always()
         env:
           PYTHONDONTWRITEBYTECODE: "1"
           PYTHONPATH: tools
