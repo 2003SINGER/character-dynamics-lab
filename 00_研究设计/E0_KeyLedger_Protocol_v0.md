@@ -1,8 +1,8 @@
 # E0 Key Ledger Protocol v0
 
-日期：2026-10-08。状态：**PROTOCOL_DRAFT / READY_FOR_INDEPENDENT_REVIEW**。
+日期：2026-10-08。状态：**PROTOCOL_FROZEN / E0-KeyLedger-v0**。
 
-本文是本有限钥匙账本 E0 域的唯一执行协议 owner；它把 [04 §2 统一实例](../01_文献/算法积木/04_统一问题与成熟基线准入.md#2-统一实例域约定与判定层)具体化为可手算、可由独立有限执行器复核的协议，不重写 F0/F1 总定义，也不改 Pilot 的 Monitor/reference 语义。下列域选择、oracle、预算与 fixture 是本协议拟议选择，不是旧有实现、实验观测或论文事实。本轮只写协议，不实现、不运行实验。用户外审前不得称为已冻结、可开工或已通过。
+本文是本有限钥匙账本 E0 域的唯一执行协议 owner；它把 [04 §2 统一实例](../01_文献/算法积木/04_统一问题与成熟基线准入.md#2-统一实例域约定与判定层)具体化为可手算、可由独立有限执行器复核的协议，不重写 F0/F1 总定义，也不改 Pilot 的 Monitor/reference 语义。本文冻结 E0-KeyLedger-v0 的域、oracle、预算与 fixtures，并授权按本协议实现和运行 E0；这些选择不是旧有实现、实验观测或论文事实。冻结与实现授权不表示实验已通过，也不扩展 §1/§9 的证据边界。
 
 ## 1. 目标与边界
 
@@ -98,7 +98,7 @@ planner/oracle 可读完整 W 做存在性搜索。A 的候选与答复前 bindi
 
 ## 5. 唯一执行定义与独立 oracle
 
-本协议 §2.2 的 hand-coded transition table 是此有限域唯一执行定义；后续拟实现最小独立 finite executor，现尚未实现。planner 提交 grounded proposal，每步由 executor 重新校验、结算；Monitor 只读真实 settlement。E0 不调用或修改冻结 Runtime。
+本协议 §2.2 的 hand-coded transition table 是此有限域唯一执行定义。E0 planner 提交 grounded proposal，每步由独立 finite executor 重新校验、结算；Monitor 只读真实 settlement。E0 不调用或修改冻结 Runtime。
 
 X01 的 prediction check 是 executor 外的审计步骤。输入为预测记录：grounded `ActionIntent`、预测前置事实、预期 post facts、effects/events、checkpoint/frontier 标识，以及 operator/duration/deadline/reply pins；另输入独立 executor receipt（accepted/rejected、settlement outcome/ID/sequence）与实际 `ΔW`、合法投影后的 `ΔO`。operator version 定义 mandatory prediction coverage 与 effect/event 签名，须覆盖应发生与应不变/不发生项；字段缺失、coverage 不全或版本不匹配均为 `PREDICTION_CONTRACT_ERROR`，不得静默忽略。executor 只接收并校验 `ActionIntent`，不得接收预测 effects/events 作为执行指令，也不得把角色不可见的 W 提供给角色；中央审计器可读 W 核对实际 delta。预测后置事实须分别标明角色已知 O 与审计用 W，不能把后者冒充 actor input。
 
@@ -114,7 +114,7 @@ fork contract：从同一个完整 checkpoint 建立两个独立 mutable copies�
 
 ## 6. 共同预算与判定标签
 
-拟议工程保护上限：每 case、每搜索实现最多 10,000 首次扩展状态、墙钟 2 秒；同机单线程，记录硬件、解释器/编译器与优化配置，不预定实现语言。一次 expansion 定义为某状态首次从 frontier 取出并枚举其合法 action；重复 closed-state 不重复计数，起始状态计一次。以单调时钟计时，含初始化、搜索与终止判定。9 个时钟边界本身不能证明该 cap 足以穷尽。纸面保守 boundary-prefix/history-tree 上界为 `U=2·Σ(ℓ=0..8)Σ(k=0..min(6,ℓ)) C(ℓ,k)·6!/(6−k)!=299,250`：6 类非 idle 成功动作（offer、reply、exchange、return_tool、unlock、take）各至多一次，reply 的 accept/decline 两个 grounding 由系数 2 保守计入；ℓ 选分钟位置，k 选非 idle 位置并排列动作类。目标 case pins 固定，invalid requests 不是合法边且不分支时间；因果前提、固定 reply 与长 unlock 的 forced no_control continuation 只会减少可行前缀。该数是边界前缀的粗上界，不是 exact reachable-state count；保留完整追加式 raw ledger 时，不得据此把历史折叠成未经证明的 canonical state。未来若报告 exact reachable count，须在获准实现后逐项计数并说明去重 key 保留了所有影响授权、同意、资源、未来 effect 与 witness 的字段。10,000/2秒是否足够仍未知；独立 oracle 受同一预算，耗尽预算时记 `solve_status=BUDGET`、`complete=false`、`exhausted=false` 并注明终止原因，不声称完整。planner/oracle 分别报告 expansions、墙钟、frontier/visited 和终止原因。
+冻结的工程保护上限：每 case、每搜索实现最多 10,000 首次扩展状态、墙钟 2 秒；同机单线程，记录硬件、解释器/编译器与优化配置，不预定实现语言。一次 expansion 定义为某状态首次从 frontier 取出并枚举其合法 action；重复 closed-state 不重复计数，起始状态计一次。以单调时钟计时，含初始化、搜索与终止判定。9 个时钟边界本身不能证明该 cap 足以穷尽。纸面保守 boundary-prefix/history-tree 上界为 `U=2·Σ(ℓ=0..8)Σ(k=0..min(6,ℓ)) C(ℓ,k)·6!/(6−k)!=299,250`：6 类非 idle 成功动作（offer、reply、exchange、return_tool、unlock、take）各至多一次，reply 的 accept/decline 两个 grounding 由系数 2 保守计入；ℓ 选分钟位置，k 选非 idle 位置并排列动作类。目标 case pins 固定，invalid requests 不是合法边且不分支时间；因果前提、固定 reply 与长 unlock 的 forced no_control continuation 只会减少可行前缀。该数是边界前缀的粗上界，不是 exact reachable-state count；保留完整追加式 raw ledger 时，不得据此把历史折叠成未经证明的 canonical state。实现若报告 exact reachable count，须逐项计数并说明去重 key 保留了所有影响授权、同意、资源、未来 effect 与 witness 的字段。10,000/2秒是否足够仍未知；独立 oracle 受同一预算，耗尽预算时记 `solve_status=BUDGET`、`complete=false`、`exhausted=false` 并注明终止原因，不声称完整。planner/oracle 分别报告 expansions、墙钟、frontier/visited 和终止原因。
 
 结果 schema 必须分开求解状态与 fixture 测试判定：`search_result` / `oracle_result` 至少含 `solve_status`、`termination_reason`、`complete`、`exhausted`、expansions 与预算；`fixture_test_result` 仅为 `PASS`/`FAIL`，并记录被检查的预期标签。C01 起点扩展后按 cap 停止，应为 oracle `solve_status=BUDGET`、`complete=false`、`exhausted=false`，planner 也报告 `BUDGET`，不是 `UNREACHABLE`；正确报告预算耗尽可使该诊断 fixture 的 test result 为 `PASS`，不表示搜索求解成功或正式正确性通过。`UNSOLVED` 是求解状态，不是 fixture failure 的同义词；正式正确性仍要求完整 oracle。
 
@@ -143,17 +143,17 @@ fork contract：从同一个完整 checkpoint 建立两个独立 mutable copies�
 
 E0-P02 保持同一闭域，仅把本 fixture 的 unlock duration pin 从基准 1 改为 3 分钟；这是显式执行参数变化，不是新 operator。t5 启动的 running_action 在 t6 boundary 后保留同 ID、reservation 与 elapsed=1，继续到 t8 完成，随后 take 在 t9 产生 witness。duration pin 属于 checkpoint/state key；不得通过重开 action 或重占资源伪造 progress。
 
-## 8. 固定答复测试与待独审项
+## 8. 固定答复测试与冻结选择
 
-固定答复只有 BReplyPin∈{ACCEPT,DECLINE}。同 checkpoint/pin 重复必须得到相同答复、合法轨迹、event 顺序语义与 Monitor verdict；两个 pin 应可区分。不采样、不统计概率、不调策略参数、不声称自主性。pin 不能绕过 offer、B 的明确接受或 executor 校验。
+固定答复测试使用两个独立条件：`BReplyPin=ACCEPT` 与 `BReplyPin=DECLINE`。同 checkpoint/pin 重复必须得到相同答复、合法轨迹、event 顺序语义与 Monitor verdict；两个 pin 应可区分。不采样、不统计概率、不调策略参数、不声称自主性。pin 不能绕过 offer、B 的明确接受或 executor 校验。
 
-独审选择：固定 B reply pin 是否足够明确；return_tool 是否保留在该有限动作域；10,000 expansions/2秒上限是否合适；fork 是否满足完整 checkpoint 独立性。它们分别决定允许响应/动作范围、工程保护 cap 与隔离验收边界，当前材料不足以替用户选择，故保留独审。未决时协议保持 DRAFT，不授权实现或运行。
+冻结决定来自 2026-10-08 用户本轮阶段式授权（协议验收→冻结→E0 实现运行）及明确给出的四项默认选择：保留 ACCEPT/DECLINE 两种固定 reply pin、保留 `return_tool`、维持每 case 每搜索实现 10,000 expansions/2 秒上限、使用 §5 所列完整 checkpoint/fork 并验证独立恢复及无污染。两种 pin 是不同确定性条件，不合并为策略或概率结论。
 
-未来获准实现时，每次运行的只读输入清单和输出记录至少包括 protocol/domain revision、代码 revision、fixture ID 与初态 hash、deadline/reply/duration pins、planner/oracle/executor 标识、共同预算及 expansions/墙钟/visited、终止标签、action/outcome trace、settlement event IDs/sequences、coverage seals、Monitor verdict/witness/reason、错误和完整日志。拟用唯一目录 runs/e0_keyledger_v0/<UTC>_<case>_<run-id>/；创建前检查不存在，禁止覆盖旧运行。此为协议要求，本轮不创建目录或运行产物。
+每次运行的只读输入清单和输出记录至少包括 protocol/domain revision、代码 revision、fixture ID 与初态 hash、deadline/reply/duration pins、planner/oracle/executor 标识、共同预算及 expansions/墙钟/visited、终止标签、action/outcome trace、settlement event IDs/sequences、coverage seals、Monitor verdict/witness/reason、错误和完整日志。唯一运行目录为 `runs/e0_keyledger_v0/<UTC>_<case>_<run-id>/`；创建前检查不存在，禁止覆盖旧运行。
 
 ## 9. 通过、停止与外推边界
 
-协议独审通过只说明定义清晰，可由用户另行决定是否授权实现。获授权后的 E0 请求独立执行复核，须同时满足：各 fixture 与表列预期一致；X01 prediction check 能检出注入错误；未变异、完整求解的搜索 fixture 中 planner 与 oracle 的 verdict/最早完成时间/最短模拟时长一致；成功轨迹可重放且逐项匹配 executor events；Monitor 端点/seal/unknown 反例正确；预算标签正确；P02 保持 ID/reservation/elapsed；完整 fork isolation 通过；无未解释 mismatch。C01 的 fixture test 因正确报告未求解而 PASS，但搜索求解状态仍为 BUDGET，正式搜索正确性仍 NOT_PASS；正式搜索 fixture 若 oracle 未完整求解，仍不得通过其可达性验收。
+本协议冻结并授权实现、运行 E0。实验通过仍须满足：各 fixture 与表列预期一致；X01 prediction check 能检出注入错误；未变异、完整求解的搜索 fixture 中 planner 与 oracle 的 verdict/最早完成时间/最短模拟时长一致；成功轨迹可重放且逐项匹配 executor events；Monitor 端点/seal/unknown 反例正确；预算标签正确；P02 保持 ID/reservation/elapsed；完整 fork isolation 通过；无未解释 mismatch。C01 的 fixture test 因正确报告未求解而 PASS，但搜索求解状态仍为 BUDGET，正式搜索正确性仍 NOT_PASS；正式搜索 fixture 若 oracle 未完整求解，仍不得通过其可达性验收。
 
 任一 planner-oracle 差异、表外 effect、答复前 A 获知 key1、把 B 同意塞进 offer effect、非原子交易、历史/tombstone 回滚、state 冒充 event、未封口即报 VIOLATED、预算耗尽报无解、progress/reservation 重置、或 event/witness 不一致，立即停止该例并保留证据。不得改目标、加算子、放宽权限或抬预算把失败改成成功；需新版本独审。
 
