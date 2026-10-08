@@ -2,7 +2,7 @@
 
 ## Formal run
 
-- macOS formal run outcome: **14/14 fixture tests PASS**. Cross-platform CI is currently **NOT_PASS_BUDGET** (Ubuntu H02 planner hits the fixed 2-second cap while the independent Oracle exhausts); do not describe overall E0 as passed. This is finite-software evidence, not NPC/player validity or a claim about psychological mechanisms.
+- macOS formal run outcome: **14/14 fixture tests PASS**. Cross-platform CI is currently **NOT_PASS_BUDGET**: Ubuntu H02 Planner hits the fixed 2-second cap; the cloud Oracle outcome awaits raw-artifact verification. Do not describe overall E0 as passed. This is finite-software evidence, not NPC/player validity or a claim about psychological mechanisms.
 - Run: [`result.json`](../../runs/e0_keyledger_v0/formal/20261008T123731Z_all_formal-4caa088-20261008/result.json), created `2026-10-08T12:37:31Z`; SHA-256 `e66d29315a59917f75e700d13b7d7b7f7e22c54a39481f742306e7db113ba64c`.
 - Code: `4caa0885f4b27f07e0695ddb2f530ae9656e4baa`; E0-scoped tree clean. Protocol freeze: `e411ff45f67855e58d047fd37332b6896db5b8fe`; protocol SHA-256 `0837eaa2e7b53e5aa00578534b714f38b055cc6389191ca7c5687eb5f3b1c7f9`. The run JSON records per-source hashes.
 - Environment/config: Python 3.12.14; macOS 27.0.1 arm64, Apple Silicon, 8 CPUs, 16 GiB; one process/thread; fixed 10,000-expansion / 2.0-second budgets.
@@ -32,7 +32,7 @@ N01's fixture is the pinned DECLINE case above. Its separately pinned JOINT coun
 
 ### Audit note
 
-The parent audit checked the run's exact input/source hashes, code revision, clean E0 scope, and unchanged per-search budget. A same-run-id CLI retry exited 2 at preflight (“refusing before running”); the original JSON SHA remained unchanged and no second formal run was created. Raw traces, branch checkpoints, errors, and provenance are in the linked run JSON. Development evidence remains separate below. Ubuntu CI run `37778341351` failed: the E0 unit job reports H02 planner `BUDGET` rather than expected `UNREACHABLE`, although its independent Oracle completed. The all-fixture step was skipped after that unit failure, so this CI run supplies no per-fixture batch result. A narrowly scoped workflow evidence fix now always runs the fixture batch and preserves unit output; new complete CI evidence is pending on the next head. The budget and acceptance gate are unchanged.
+The parent audit checked the run's exact input/source hashes, code revision, clean E0 scope, and unchanged per-search budget. A same-run-id CLI retry exited 2 at preflight (“refusing before running”); the original JSON SHA remained unchanged and no second formal run was created. Raw traces, branch checkpoints, errors, and provenance are in the linked run JSON. Development evidence remains separate below. The earlier Ubuntu run `37778341351` failed in unit tests and skipped its all-fixture step. On exact head `392f11c`, [CI run 37779450179](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37779450179) completed with failure: 32/33 E0 unit tests passed; H02 expected `UNREACHABLE` but Planner returned `BUDGET`. The full fixture batch then ran: 13/14 passed, with E0-H02 the sole failure; the other five CI jobs succeeded. The [captured failed-job log](../../runs/e0_keyledger_v0/ci_capture/37779450179_log_capture/failed-job.log) and [run status](../../runs/e0_keyledger_v0/ci_capture/37779450179_log_capture/run-status.json) are locally available. The cloud raw artifact remains on GitHub: two download attempts ended in network resets, so its JSON and full search details (including Oracle exhaustion, timing, and expansions) remain unverified. The Mac formal runs and first CI logs are committed. The 10,000 / 2-second budget and gate are unchanged; the cross-platform wall-time limit remains for review, with no automatic rerun.
 
 ## Development diagnostics (separate from formal)
 
@@ -41,4 +41,4 @@ The parent audit checked the run's exact input/source hashes, code revision, cle
 
 ## State
 
-**E0_LOCAL_ACCEPTANCE_PASS / CI_NOT_PASS_BUDGET / READY_FOR_REVIEW.** The Mac formal run passed its 14 fixture assertions; the Ubuntu fixed-budget gate did not. Review portability/performance under the unchanged wall-time budget. This does not close the broader research task or authorize E1.
+**E0_LOCAL_ACCEPTANCE_PASS / CI_NOT_PASS_BUDGET / READY_FOR_REVIEW.** The Mac formal run passed its 14 fixture assertions; the latest Ubuntu run passed 13/14, with H02 Planner reporting `BUDGET` instead of `UNREACHABLE`. Full cloud search details await raw-artifact verification. The fixed-budget cross-platform wall-time limit remains for review; no automatic rerun. This does not close the broader research task or authorize E1.
