@@ -20,6 +20,35 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
           PYTHONPATH: tools
         run: python -B -m unittest discover -s tools/trajectory_constraints_v0/tests -v
+  e0-keyledger-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: E0 unit contracts
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: tools
+        run: python -B -m unittest discover -s tools/e0_keyledger_v0/tests -v
+      - name: Run all frozen E0 fixtures under protocol budgets
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: tools
+        run: python -B -m tools.e0_keyledger_v0.runner --case all --run-id ci-${{ github.run_id }}-${{ github.run_attempt }} --output-root runs/e0_keyledger_v0/ci
+      - name: Preserve E0 inputs, traces, search results, and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e0-keyledger-${{ github.run_id }}-${{ github.run_attempt }}
+          path: runs/e0_keyledger_v0/ci/
+          if-no-files-found: ignore
+          retention-days: 30
   public-evidence-integrity:
     runs-on: ubuntu-latest
     permissions:

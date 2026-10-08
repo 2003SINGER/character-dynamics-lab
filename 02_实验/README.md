@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-截至 2026-10-08，本轮是既有科研结果的整理与 F0/F1 语义草案路由：**没有新增 NPC 实验、训练、玩家招募或 Runtime 修改，也没有因此批准下一项实验。**各结果的成熟度、已回答问题、可复用边界、未补证据和唯一 owner 统一见[研究重建审计的结果复用账本](../00_研究设计/研究重建审计_2026-10-06.md#现有结果的成熟度与复用账本截至-2026-10-08)。作者约束系统的当前设计入口是 [F0/F1 草案](../00_研究设计/CharacterDynamics_FormalProblem_v0.md)（DRAFT / READY_FOR_INDEPENDENT_REVIEW）；AuthorialTrajectoryPilotV0 是候选 F2 / TypedIR 与预实验下层 owner，不是全系统定义。
+截至 2026-10-08，NPC 玩家实验、训练、玩家招募和冻结 Runtime 修改均未新增/授权。**独立的小型有限域软件验收例外是已获用户授权并冻结的 E0-KeyLedger-v0**；其实现、逐 fixture 验收、开发失败与正式运行状态只维护在 [E0 Key Ledger 实验入口](E0_KeyLedger_v0/README.md)，不扩展为 NPC 效度或心理机制证据。各既有科研结果的成熟度、已回答问题、可复用边界、未补证据和唯一 owner 统一见[研究重建审计的结果复用账本](../00_研究设计/研究重建审计_2026-10-06.md#现有结果的成熟度与复用账本截至-2026-10-08)。作者约束系统的当前设计入口是 [F0/F1 草案](../00_研究设计/CharacterDynamics_FormalProblem_v0.md)（DRAFT / READY_FOR_INDEPENDENT_REVIEW）；AuthorialTrajectoryPilotV0 是候选 F2 / TypedIR 与预实验下层 owner，不是全系统定义。
 
 本机工作区、历史 checkout 与运行产物的路径边界见[本地工作区布局](Local_Workspace_Layout.md)。迁移不改变实验条件或 run ID，也不授权启动新实验。
 
