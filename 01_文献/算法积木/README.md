@@ -1,6 +1,6 @@
 # 第一阶段：把 NPC / 作者控制研究拆到算法层
 
-更新：2026-10-08。**文档交付：READY_FOR_INDEPENDENT_REVIEW；未选新方法、未实现导演、未运行新实验。**本页是本轮算法积木、组合前提与下一动作的唯一维护入口；逐篇计算只在三份卡片维护，不再追加一份并列系统总纲。
+更新：2026-10-08。**文档交付：READY_FOR_INDEPENDENT_REVIEW；未选新方法、未实现导演、未运行新实验。**本页是算法积木的唯一维护入口；逐篇计算只在三份卡片维护。后续[04 统一问题与成熟基线准入](04_统一问题与成熟基线准入.md)只将已有机制映射到 F0/F1、审查强基线与候选问题，不是并列系统总纲。
 
 ## 0. 本阶段要得到什么
 
@@ -15,6 +15,7 @@
 | [01 叙事修复与导演](01_叙事修复与导演.md) | Mimesis 因果威胁及版本权限；DODM 的 SAS+ / TD / SASCE；玩家动作的 PDDL→PPDDL 转换 |
 | [02 人物意图与约束规划](02_人物意图与约束规划.md) | IPOCL intent frames；Thespian fit / gap / belief suggestion；PDDL3 轨迹语义与 Porteous 地标规划；IDG 图扩展 / Jaccard；Sabre 辅助基线 |
 | [03 内容绑定与 LLM 桥接](03_内容绑定与LLM桥接.md) | Anansi query binding / dispatch；WhatELSE 固定动作编译；Drama Llama 有序触发；DiriGent tension / enforcement；NCP 外部核验与提交 |
+| [04 统一问题与成熟基线准入](04_统一问题与成熟基线准入.md) | 同一钥匙—账本实例下的能力/权限边界、最小成熟基线、可反证的研究候选；综合审查，不新增原算法卡 |
 
 12 张主卡均使用 17 个字段：Problem、State、Author input、Character input、World model、Control authority、Planner/search、Trigger、Repair、Can change、Cannot change、Handwrite、Old cost、LLM replace、LLM must not replace、Evaluation、Failure。PDDL3 与 Porteous 在同卡中分清规格/算法；Sabre 为辅助简卡。旧报告、原件、固定源码版本和阅读覆盖保留在每卡来源栏；**17 字段填齐不等于源码都已核、全部论文都已复现。**
 
@@ -195,4 +196,4 @@
 
 **尚未收口的知识项：**Mimesis 2003 replanner 内部细节；Thespian 跨序列联合拟合/2008 完整实现与 belief-side Suggest_Pick 求解程序（2004 奖励权重不等式及单/双坐标基础已核）；Porteous planner失败时完整恢复逻辑；Anansi事务/失败fallback；WhatELSE trial/commit细节；DiriGent scoring符号；各系统总作者成本与玩家长期效度。未知项不以空泛句补齐，也不阻止已有明确算法先被理解。
 
-**当前下一动作已由后续授权转到[设计owner](../../00_研究设计/AuthorialTrajectoryPilotV0.md#13-交付-traceability-与下一实施边界)：复核四份语义契约与reference反例，再决定E0。**本人手推/新理解仍可在各卡补充；不自动运行NPC实验、开发Director或声明创新。
+**当前下一动作：复核[04 的成熟基线与研究准入判断](04_统一问题与成熟基线准入.md)，再由用户决定是否冻结一个有限实例及预算。**四份契约与候选 E0–E5 仍由[设计 owner](../../00_研究设计/AuthorialTrajectoryPilotV0.md#13-交付-traceability-与下一实施边界)维护；04 不授权执行。本人手推/新理解仍可在各卡补充；不自动运行 NPC 实验、开发 Director 或声明创新。
