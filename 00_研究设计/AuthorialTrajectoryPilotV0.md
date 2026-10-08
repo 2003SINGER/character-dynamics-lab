@@ -1,8 +1,10 @@
-# AuthorialTrajectoryPilotV0｜系统设计与预实验协议
+# AuthorialTrajectoryPilotV0｜作者控制候选 F2 与预实验协议
 
 日期：2026-10-08。状态：**系统设计与独立参考契约交付；READY_FOR_INDEPENDENT_REVIEW，不是 Pilot 已运行、方法有效或 milestone CLOSED。**
 
 本页是作者轨迹分支的设计 owner；[算法积木](../01_文献/算法积木/README.md)维护原算法及来源，不在这里重写论文。输入为本地私有完整讨论两部分：持续人物与作者控制的接口，以及 Typed Trajectory Constraint IR 四份契约。原文 SHA256 为 `65d9142d1b09526fb3d678fd335837d40f04cc923beda5f5c03767d6cea20c94`。自然语言例子不是自动获得执行资格的世界能力。
+
+**职责边界补充：**全系统算法无关的 F0/F1 语义定义由唯一 owner [CharacterDynamics_FormalProblem_v0](CharacterDynamics_FormalProblem_v0.md) 维护；该 owner 当前为 DRAFT、未实现。本页只维护作者控制方向的候选 F2、Typed Trajectory Constraint IR 与预实验设计，不能作为完整 Character Dynamics 系统定义。作者意图如何绑定角色/命题、由何 recognizer 或具体事件证据支撑、再映射为可执行约束，属于 F0/F1 的上层语义链；本 Pilot 的 typed IR 只是候选下游接口，不预设作者直接填写底层变量。
 
 ## 0. 要交付什么，不能声称什么
 
@@ -15,6 +17,8 @@
 | 研究假设 | 信息机会是否更好、局部修复是否保护生活、不可达诊断是否有用 | E0–E5 才产生实验结果；本轮没有结果 |
 
 本轮实现范围仅为 `tools/trajectory_constraints_v0/` 的独立 reference evaluator：人造状态/事件/区间证据 → 类型检查 → 确定判定。它不是新 NPC、Director、城市经济模型、信任模型或游戏 fork。不改 C++ Runtime、Dynamics、参数、S/P/action schema，不覆盖旧实验。
+
+PlotPoint、Arc、锁定片段等是作者表达的候选形式，不是要求作者必须填入的 IR 类别；底层约束也不得强迫作者提供粮食、心情等浮点曲线。Node/Maze/递归图只可作为规划器内部候选，尚未冻结为架构。LLM、HTN、搜索及其他规划器是可替换实现候选，不由本页预定。规范的未来、对未来的预测、当前控制提案与已提交历史必须分开；预测/rollout 不能作为已发生证据。任何方法产出的作者约束若要声称已落实，必须有真实构造、授权、校验与执行/提交 provenance；method label 本身不构成证据。长程 Monte Carlo 仅是讨论中的候选门控例子，不是已实现部件。
 
 ### 0.1 既有系统必须保留，不能冒充现成的新模块
 

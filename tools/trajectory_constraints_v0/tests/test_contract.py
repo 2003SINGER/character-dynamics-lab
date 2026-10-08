@@ -224,6 +224,82 @@ class ContractTests(unittest.TestCase):
         t2=self.trace(1); t2.add_segment(Segment(ref,0,1,"BOUNDS",lower=0,upper=1,certificate_id="loose"))
         self.assertEqual(evaluate(c,t2,self.registry)[0].verdict,Verdict.INDETERMINATE)
 
+    def test_continuous_witnesses_survive_later_segments(self):
+        ref=self.anxiety
+        segments=(
+            Segment(ref,0,1,"POLYNOMIAL",(0,4,-4),certificate_id="rise-and-fall"),
+            Segment(ref,1,2,"POLYNOMIAL",(0,),certificate_id="safe-tail"),
+            Segment(ref,2,3,"POLYNOMIAL",(0,),certificate_id="later-safe-tail"),
+        )
+
+        always=TemporalConstraint("early-violation",TemporalOp.ALWAYS,
+            CompareValue(ref,Compare.LE,NumericLiteral(F(4,5),"control_unit")),Window(0,3))
+
+        eventually=TemporalConstraint("early-witness",TemporalOp.EVENTUALLY,
+            CompareValue(ref,Compare.GE,NumericLiteral(F(4,5),"control_unit")),Window(0,3))
+
+        for ordered_segments in (segments, tuple(reversed(segments))):
+            with self.subTest(order=ordered_segments):
+                trace=self.trace(3)
+                for segment in ordered_segments: trace.add_segment(segment)
+                result=evaluate(always,trace,self.registry)[0]
+                self.assertEqual(result.verdict,Verdict.VIOLATED)
+                self.assertEqual(result.witness,F(1,2))
+                result=evaluate(eventually,trace,self.registry)[0]
+                self.assertEqual(result.verdict,Verdict.SATISFIED)
+                self.assertEqual(result.witness,F(1,2))
+
+    def test_adjacent_segment_endpoints_are_compatible_order_independent(self):
+        ref=self.anxiety
+
+        compatible_pairs=(
+            (Segment(ref,0,1,"POLYNOMIAL",(F(1,4),)), Segment(ref,1,2,"POLYNOMIAL",(F(1,4),))),
+            (Segment(ref,0,1,"POLYNOMIAL",(F(1,4),)), Segment(ref,1,2,"BOUNDS",lower=0,upper=F(1,2))),
+            (Segment(ref,0,1,"BOUNDS",lower=0,upper=F(1,2)), Segment(ref,1,2,"BOUNDS",lower=F(1,2),upper=F(3,4))),
+        )
+        incompatible_pairs=(
+            (Segment(ref,0,1,"POLYNOMIAL",(F(1,4),)), Segment(ref,1,2,"POLYNOMIAL",(F(1,2),))),
+            (Segment(ref,0,1,"POLYNOMIAL",(F(3,4),)), Segment(ref,1,2,"BOUNDS",lower=0,upper=F(1,2))),
+            (Segment(ref,0,1,"BOUNDS",lower=0,upper=F(1,4)), Segment(ref,1,2,"BOUNDS",lower=F(1,2),upper=F(3,4))),
+        )
+        for pair in compatible_pairs:
+            for order in (pair, tuple(reversed(pair))):
+                with self.subTest(order=order):
+                    trace=self.trace(2)
+                    for segment in order: trace.add_segment(segment)
+                    self.assertEqual(len(trace.segments),2)
+        for pair in incompatible_pairs:
+            for order in (pair, tuple(reversed(pair))):
+                with self.subTest(order=order):
+                    trace=self.trace(2)
+                    trace.add_segment(order[0])
+                    with self.assertRaisesRegex(ValueError,"shared endpoint"):
+                        trace.add_segment(order[1])
+
+    def test_adjacent_bounds_evidence_strength_is_order_safe(self):
+        ref=self.anxiety
+        weak=Segment(ref,0,1,"BOUNDS",lower=0,upper=F(4,5),certificate_id="weak")
+        strong=Segment(ref,1,2,"BOUNDS",lower=0,upper=F(2,5),certificate_id="strong")
+        always=TemporalConstraint("bounds-always",TemporalOp.ALWAYS,
+            CompareValue(ref,Compare.LE,NumericLiteral(F(1,2),"control_unit")),Window(0,2))
+        for ordered in ((weak,strong),(strong,weak)):
+            with self.subTest(order=ordered):
+                trace=self.trace(2)
+                for segment in ordered: trace.add_segment(segment)
+                # The weak certificate leaves a relevant interval unresolved;
+                # a stronger neighbor must not promote ALWAYS to SATISFIED.
+                self.assertEqual(evaluate(always,trace,self.registry)[0].verdict,Verdict.INDETERMINATE)
+
+        eventual_strong=Segment(ref,0,1,"BOUNDS",lower=F(3,5),upper=F(4,5),certificate_id="eventual-witness")
+        eventual_weak=Segment(ref,1,2,"BOUNDS",lower=F(2,5),upper=F(7,10),certificate_id="eventual-weak")
+        eventually=TemporalConstraint("bounds-eventually",TemporalOp.EVENTUALLY,
+            CompareValue(ref,Compare.GE,NumericLiteral(F(1,2),"control_unit")),Window(0,2))
+        for ordered in ((eventual_strong,eventual_weak),(eventual_weak,eventual_strong)):
+            with self.subTest(order=ordered):
+                trace=self.trace(2)
+                for segment in ordered: trace.add_segment(segment)
+                self.assertEqual(evaluate(eventually,trace,self.registry)[0].verdict,Verdict.SATISFIED)
+
     def test_continuous_future_gap_open_root_and_degree_zero(self):
         ref=self.anxiety
         c=TemporalConstraint("future",TemporalOp.EVENTUALLY,CompareValue(ref,Compare.GE,NumericLiteral(F(1,2),"control_unit")),Window(5,10))
@@ -243,14 +319,14 @@ class ContractTests(unittest.TestCase):
         b=NumericBand("band",ref,Window(0,1),0,F(4,5),unit="control_unit")
         t=self.trace(1); t.add_segment(Segment(ref,0,1,"POLYNOMIAL",(0,4,-4)))
         self.assertEqual(evaluate(b,t,self.registry)[0].verdict,Verdict.VIOLATED)
-        # Duration weighted: first window mean 0, second mean 1, unequal durations.
+        # Duration weighted: first window mean 0, second mean 1/2, unequal durations.
         t2=self.trace(5)
         t2.add_segment(Segment(ref,0,1,"POLYNOMIAL",(0,)))
-        t2.add_segment(Segment(ref,1,5,"POLYNOMIAL",(1,)))
+        t2.add_segment(Segment(ref,1,5,"POLYNOMIAL",(0,F(1,4))))
         mean=TimeWeightedMeanDifference("means",ref,Window(0,1),Window(1,5),-1,"control_unit")
         r=evaluate(mean,t2,self.registry)[0]
         self.assertEqual(r.verdict,Verdict.SATISFIED)
-        self.assertEqual(r.witness,(F(0),F(1)))
+        self.assertEqual(r.witness,(F(0),F(1,2)))
         with self.assertRaises(ValueError): TimeWeightedMeanDifference("overlap",ref,Window(0,2),Window(1,3),0,"control_unit")
 
     def test_conflict_proof_is_narrow_and_eventuals_are_not_mistaken_for_always(self):

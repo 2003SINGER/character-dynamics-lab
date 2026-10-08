@@ -17,7 +17,8 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [完整机制说明 v0](完整机制说明_v0.md) | 已确认的 W/O/X/S/P/D/A 工程语义、任务承诺、场景/动作、时间、低耦合及消融约束 | 心理规律已验证的声明；未采纳公式、代码完成清单 |
 | [前台问题与候选创新](前台问题与候选创新.md) | 课题锚、Forward/Inverse、研究候选、评价、近邻边界及后续分支 | 再写一套机制总说明 |
 | [未决问题与机制候选](未决问题与机制候选.md) | 具体缺口、备选计算、用户原意、决策条件 | 把提案写成已实现或已验证 |
-| **[AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md)** | 作者轨迹分支的系统设计、四份语义契约、六机制与E0–E5预实验协议 | 原论文机制卡；将reference测试冒充Director/多NPC方法结果 |
+| **[Character Dynamics｜系统问题与执行语义 v0](CharacterDynamics_FormalProblem_v0.md)** | **唯一 F0/F1 owner**：算法无关的问题定义与执行语义；状态对象/权限、时间、转移、作者意图/绑定、规划器/导演、性质/反例、A/B研究任务与成熟度；状态 DRAFT / READY_FOR_INDEPENDENT_REVIEW | 算法选型、实现完成或研究有效性主张 |
+| [AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md) | 候选 F2 与 TypedIR / 预实验的较低层 owner；保留已有语义契约和 reference 证据 | 整个系统的正式定义；把候选写成获批路线或将 reference 测试冒充 Director/多 NPC 方法结果 |
 | **[整合系统视角复核](审核_整合系统视角复核_2026-09-05.md)** | **判断复核**：回到实现核对旧判断的前提是否成立 | 文献层面的重新论证 |
 | **[文献比较方法与阶段缺口复核](审核_文献比较方法与阶段缺口_2026-09-05.md)** | **方法纪律**：13 维机制比较模板、冻结母问题、科研流程阶段缺口。含**我自己的认错清单** | 具体论文的逐篇内容 |
 | **[对外表述（中英对照）](对外表述.md)** | **论文表达锚点**：abstract/intro 原料、定位三层拆分、术语表与禁用表述 | 技术细节与实验结论 |
@@ -52,7 +53,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 
-当前作者约束线已由方法地基进入用户授权的**设计与reference语义**阶段：[AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md)维护新设计与预实验协议；[算法积木总表](../01_文献/算法积木/README.md)仍是原算法/权限/组合接缝与本人新理解入口。不开发Director，不运行新NPC实验，不改冻结Runtime。
+当前作者约束线先整理算法无关的 F0/F1 问题定义：[Character Dynamics｜系统问题与执行语义 v0](CharacterDynamics_FormalProblem_v0.md)是唯一 owner，状态为 DRAFT / READY_FOR_INDEPENDENT_REVIEW；[AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md)降为候选 F2 与 TypedIR / 预实验下层 owner，不是全系统定义。[算法积木总表](../01_文献/算法积木/README.md)继续维护原算法/权限/组合接缝与本人新理解。A（规划/执行能力）与 B（低作者成本控制）只是待选研究问题，指标、算法与取舍尚未确定；Node/Maze 与 LLM/HTN 是替换候选，MC“地狱门”是思想例子，TypedIR 不是作者 UI。“walking skeleton”小闭环是 GPT 建议，待用户决定，不构成实现授权。本阶段不开发 Director、不启动 NPC 实验、不改冻结 Runtime。
 
 例如本次三项想法分别落位：分段逆映射保留原话于问题 Q01；低耦合的确定边界在完整机制 §8，未落实方案在 Q03；Object/Scene/W 动作职责在完整机制 §4，具体实现缺口在 Q05。TODO 只链接并安排验证，不再复制三遍原理。
 

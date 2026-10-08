@@ -2,6 +2,8 @@
 
 更新时间：2026-10-08（作者控制需求；冻结执行边界不重开）
 
+**正式问题语义 owner：**全系统算法无关的 F0/F1 定义唯一维护于 [CharacterDynamics_FormalProblem_v0](CharacterDynamics_FormalProblem_v0.md)（当前 DRAFT，未实现）。本页只维护架构/运行时层级视图；作者控制的候选 F2、Typed Trajectory IR 与预实验由 [AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md) 维护。若本页的高层描述与 F0/F1 定义冲突，以 F0/F1 owner 为准。
+
 ## 系统定位
 
 Character Dynamics 的主产品是一个可持续运行的 NPC 角色动力学框架，而不是某一篇 Paper-0 的实验脚本集合。
@@ -12,7 +14,7 @@ Character Dynamics 的主产品是一个可持续运行的 NPC 角色动力学�
 2. 常规决策不必每一步重新调用大模型，从而降低模型调用次数、token、延迟和运行成本。
 3. 世界中心的作者控制：作者可混用稀疏世界/人物节点、趋势包络、锁定段落与允许分支，不逐情境枚举全部反应；NPC仍有自身任务和信息，玩家成功改变条件后只调整未提交未来。
 
-这是创作/体验需求，不是已证实低成本或活人感的算法成果。自然世界机会、显式作者覆写与锁定内容分三条权限通道；作者覆写如获授权必须留下authored_override，不假装人物自然得出。点/线引用有定义的typed量，不能自动造trust/chaos浮点。具体规格由[AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md)维护，本文不复制契约或实验状态。
+这是创作/体验需求，不是已证实低成本或活人感的算法成果。自然世界机会、显式作者覆写与锁定内容分三条权限通道；作者覆写如获授权必须留下authored_override，不假装人物自然得出。点/线引用有定义的typed量，不能自动造trust/chaos浮点。具体候选规格由[AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md)维护，本文不复制契约或实验状态。
 
 Continuous Runtime v1 的正式计算范式是：**an event-driven incremental
 stateful dataflow runtime over one authoritative simulation timeline**。W/O/S/P

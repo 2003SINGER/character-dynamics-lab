@@ -4,7 +4,7 @@
 
 ## 0. 本阶段要得到什么
 
-用户本轮确认：先把方向吃透，未来可以从不同工作搬用算法与思路；必须具体到详细机制，不用 introduction 概括替代。长期目标仍是世界中心、可持续运行、由作者控制但不逐情境枚举反应的 NPC；不是现在就挑一个 gap 写论文。原构想见[原始阅读判断](../../90_原始材料/2026-09-01_动态人物世界模拟探索/阅读判断.md)，现行工程语义见[完整机制](../../00_研究设计/完整机制说明_v0.md)。
+用户本轮确认：先把方向吃透，未来可以从不同工作搬用算法与思路；必须具体到详细机制，不用 introduction 概括替代。长期目标仍是世界中心、可持续运行、由作者控制但不逐情境枚举反应的 NPC；不是现在就挑一个 gap 写论文。全系统算法无关 F0/F1 语义由[唯一 formal problem owner](../../00_研究设计/CharacterDynamics_FormalProblem_v0.md)维护；本页只拆文献算法与候选接缝。原构想见[原始阅读判断](../../90_原始材料/2026-09-01_动态人物世界模拟探索/阅读判断.md)，现行工程语义见[完整机制](../../00_研究设计/完整机制说明_v0.md)。
 
 两份新讨论分别提供九阶段路线与旧仓库 `4a44ee2` 的复核；其中的模型提案不是已实现事实。原文完整私有归档、清理可恢复，见[原始材料索引](../../90_原始材料/README.md)。本页按当前 checkout 核对接缝，不以旧 snapshot 宣布新能力。
 
@@ -34,7 +34,7 @@
 | C2 Thespian prefix fit / reward fitting | 固定模型推演 `b_obs,b_alt` → `θ·(b_obs−b_alt)≥0`；违例逐坐标求 Δ、保留符号、取最小单权重变化，无解再试双权重；外层逐角色/前缀 fit → 首失败 gap | 诊断作者示例是否能由人物偏好解释，定位桥接缺口 | 缺特征奖励、期望推演和联合 fit solver；已有 policy 不等于该拟合器 | 2004 基础原式及数字手算已核；2008 完整实现未知；改 weights ≠只改环境；[卡02](02_人物意图与约束规划.md#卡-2thespian--pop2008fitgapbelief-suggestion-与作者造桥) |
 | C3 islands bounded bridge search | gap 两侧锚点 + 分级动作集 + 长度上限 → 按顺序约束递归 append、complete 后 fit → bridge 或失败 | 优先复用现有域动作，失败才请求作者补内容 | 当前动作库不是通用 narrative operator 集；缺岛序、搜索状态及 fit | action-set 扩展和长度都须记账；不能把新 operator 混入原库搜索成功 |
 | C4 Suggest_Pick → 作者造桥 | gap 状态 + 指定下一 action → belief-change suggestion；一层他人回应 lookahead → 他人的 suggestion | 将“应获得什么信息/动机”转成**事件候选的需求** | 有 O 的事实来源；缺反求算法、信念效应模型和多角色 lookahead | suggestion 不直接写 O/S；事件主体、知情与效果另验证 |
-| P1 PDDL3 trajectory monitor | 时间戳 states + 公式；`sometime-before φ ψ` 对每次 φ 找更早 ψ，`within d φ` 找 d 内见证 → 满足/违反/偏好成本 | 分别约束世界、知识、承诺、剧情的持续轨迹 | 有统一 clock、trace；缺语义绑定/monitor/约束 schema | 公式监测不负责让目标可达；绝对期限不可重规划时重置；[卡02](02_人物意图与约束规划.md#卡-3pddl3-轨迹约束规格--porteous-2010-地标-ff-重规划) |
+| P1 PDDL3 trajectory monitor | 时间戳 states + 公式；`sometime-before φ ψ` 对每次 φ 找更早 ψ，`within d φ` 找 d 内见证 → 满足/违反/偏好成本 | 分别约束世界、知识、承诺、剧情的持续轨迹 | 当前已有独立 typed reference evaluator/monitor；尚缺与生产轨迹/作者输入的生产绑定，不能声称已在生产 W/O 上监控 | 公式监测不负责让目标可达；绝对期限不可重规划时重置；逐论文未知仍按来源卡记，不以本项目 reference 倒推论文算法；[卡02](02_人物意图与约束规划.md#卡-3pddl3-轨迹约束规格--porteous-2010-地标-ff-重规划) |
 | P2 地标 DAG + FF 子目标 | 当前符号 state + landmark order → 选当前适用节点，FF 求当前段；状态变后重查/重规划 → 下一步计划 | 把长程作者要求拆成当前段的强传统基线 | 有实际 W；缺符号域、节点适用/访问与 FF 接口 | “不适用”与“不可达”不能随意等同；局部求解不保证全局最小 repair |
 | G1 SPG / PH → IDG | literals/action layers + goal graphs；precondition 的 possible-history 组合传播，合并角色目标 label → goal dependency exemplars | 显式说明新未来依赖哪些人物目标 | trace 不是 PH/IDG；缺 goal graphs 与构图器 | SPG 无 mutex，有潜在不可执行 exemplar；下游要验证；[卡02](02_人物意图与约束规划.md#卡-4idgaiide-17-workshop-2017spg-层扩展与-goal-set-jaccard) |
 | G2 目标集合 Jaccard | 两组 `〈actor,goal〉` → `1−intersection/union` → 排序值 | 在**已合法候选**中比较改变了多少目标标签 | 当前 commitment 只跟踪有限 task；不是完整 goal set | 不衡量心理距离、时序或可达性；不能代替人物连续性评测 |

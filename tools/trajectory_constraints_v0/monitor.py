@@ -98,6 +98,12 @@ def _window_abs(window, base):
     return (base + window.start, base + window.end)
 
 
+def _earlier_witness(current: Fraction | None, candidate: Fraction | None) -> Fraction | None:
+    if candidate is None:
+        return current
+    return candidate if current is None else min(current, candidate)
+
+
 def _temporal_one(c: TemporalConstraint, trace: Trace, registry: Registry, base: Fraction,
                   activation: str | None) -> MonitorResult:
     left, right = _window_abs(c.window, base)
@@ -133,22 +139,26 @@ def _temporal_one(c: TemporalConstraint, trace: Trace, registry: Registry, base:
                 if a < candidate < b: vertex = candidate
             if atom.op is Compare.LE:
                 if seg.kind == "BOUNDS":
-                    if hi <= threshold: continuous_witness = a
-                    if lo > threshold: continuous_counterexample = a
+                    if hi <= threshold: continuous_witness = _earlier_witness(continuous_witness, a)
+                    if lo > threshold: continuous_counterexample = _earlier_witness(continuous_counterexample, a)
                     if lo <= threshold < hi: continuous_unknown = True
                 else:
                     candidates=[a,b,(a+b)/2]+([vertex] if vertex is not None else [])
-                    continuous_witness=next((t for t in candidates if c.window.contains(t-base) and seg.value(t)<=threshold),None)
-                    continuous_counterexample=next((t for t in candidates if c.window.contains(t-base) and seg.value(t)>threshold),None)
+                    witness=next((t for t in candidates if c.window.contains(t-base) and seg.value(t)<=threshold),None)
+                    counterexample=next((t for t in candidates if c.window.contains(t-base) and seg.value(t)>threshold),None)
+                    continuous_witness = _earlier_witness(continuous_witness, witness)
+                    continuous_counterexample = _earlier_witness(continuous_counterexample, counterexample)
             else:
                 if seg.kind == "BOUNDS":
-                    if lo >= threshold: continuous_witness = a
-                    if hi < threshold: continuous_counterexample = a
+                    if lo >= threshold: continuous_witness = _earlier_witness(continuous_witness, a)
+                    if hi < threshold: continuous_counterexample = _earlier_witness(continuous_counterexample, a)
                     if lo < threshold <= hi: continuous_unknown = True
                 else:
                     candidates=[a,b,(a+b)/2]+([vertex] if vertex is not None else [])
-                    continuous_witness=next((t for t in candidates if c.window.contains(t-base) and seg.value(t)>=threshold),None)
-                    continuous_counterexample=next((t for t in candidates if c.window.contains(t-base) and seg.value(t)<threshold),None)
+                    witness=next((t for t in candidates if c.window.contains(t-base) and seg.value(t)>=threshold),None)
+                    counterexample=next((t for t in candidates if c.window.contains(t-base) and seg.value(t)<threshold),None)
+                    continuous_witness = _earlier_witness(continuous_witness, witness)
+                    continuous_counterexample = _earlier_witness(continuous_counterexample, counterexample)
     if c.op is TemporalOp.AT:
         at = left
         val = _tri(c.formula, at, trace, registry) if at <= trace.now else None

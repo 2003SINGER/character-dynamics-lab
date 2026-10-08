@@ -2,11 +2,17 @@
 
 面向 WebGPT 的报告、原始结果/逐条预测、历史失败、文献审计和精确上传/排除清单统一见[公开审阅索引](PUBLIC_REVIEW_INDEX_2026-10-07.md)。`outputs/` 仍默认忽略；清单中批准的结果按原路径显式跟踪，不因此公开数据集输入或构建缓存。
 
+## 当前状态与结果复用
+
+截至 2026-10-08，本轮是既有科研结果的整理与 F0/F1 语义草案路由：**没有新增 NPC 实验、训练、玩家招募或 Runtime 修改，也没有因此批准下一项实验。**各结果的成熟度、已回答问题、可复用边界、未补证据和唯一 owner 统一见[研究重建审计的结果复用账本](../00_研究设计/研究重建审计_2026-10-06.md#现有结果的成熟度与复用账本截至-2026-10-08)。作者约束系统的当前设计入口是 [F0/F1 草案](../00_研究设计/CharacterDynamics_FormalProblem_v0.md)（DRAFT / READY_FOR_INDEPENDENT_REVIEW）；AuthorialTrajectoryPilotV0 是候选 F2 / TypedIR 与预实验下层 owner，不是全系统定义。
+
 本机工作区、历史 checkout 与运行产物的路径边界见[本地工作区布局](Local_Workspace_Layout.md)。迁移不改变实验条件或 run ID，也不授权启动新实验。
 
-当前玩家 NPC 路线的新开发入口：[Praxish 与参数化 utility 的匹配比较](Praxish_Utility_Comparison_v0/README.md)（2026-10-07 授权第 3 步）。前两步原件运行/机制解释与“自有工作＋外来请求”场景由[Praxish Activity Pilot v0](Praxish_Activity_Pilot_v0/README.md)保留。比较采用原件离散 turn 和全共享知识，不接 ContinuousRuntime，不训练，也不把条件演示当作方法胜出；共同事件、能力与目标匹配，记录新增条件的配置修改、失败与修正，玩家意义仍未验证。既有 coursework/历史 LLM 探针保留但不混入本实验。
+已有玩家 NPC 小场景比较的结果入口：[Praxish 与参数化 utility 的匹配比较](Praxish_Utility_Comparison_v0/RESULTS.md)记录了有界 **DEVELOPMENT / NO_GO**：不支持以活动组织本身改善该共同场景行为为理由立项，不是否定整个方向。前两步原件运行/机制解释与“自有工作＋外来请求”场景由[Praxish Activity Pilot v0](Praxish_Activity_Pilot_v0/README.md)保留。比较采用原件离散 turn 和全共享知识，不接 ContinuousRuntime、不训练，也不把条件演示当作方法胜出；作者成本和玩家意义仍未验证。既有 coursework/历史 LLM 探针保留但不混入该比较。
 
-当前方法开发入口：[PredictionBaselineV1](PredictionBaselineV1/README.md) development fit 与独立 seed 复现已完成，待外审；唯一数值结果见[RESULTS](PredictionBaselineV1/RESULTS.md)。它是 DEVELOPMENT 条件预测基座，不是已学习的心理 `S` 或 Runtime policy；研究重建顺序与证据边界见[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)。`ResearchDynamicsV1` 是手写固定-law fixture，当前机制验收不足，未作为 admitted science model。旧 `Theory_S_v2` 是 `ExpectedEffectEMAProxyV0` 历史诊断 proxy；不得把它写成已验证角色动力学。
+旧 continuity pilot 的[阶段 1—3 DEVELOPMENT 检查点](../Demo%20codex-generated/applications/npc_continuity_v0/STAGE3_CHECKPOINT.md)已交付并保留：utility 与历史 LLM 的小窗条件、短轨迹和匿名回放不归零；该任务在阶段 3 检查后停止，未进入阶段 4。它不是玩家效度结论，也不代表本轮启动或批准了新实验。后续若讨论是否推进，先按结果复用账本补齐基线、呈现和准入问题。
+
+已有方法开发结果入口：[PredictionBaselineV1](PredictionBaselineV1/README.md) 的 DEVELOPMENT fit 与独立 seed 复现已完成，待外审；唯一数值结果见[RESULTS](PredictionBaselineV1/RESULTS.md)。这不是本轮新拟合授权。它是 DEVELOPMENT 条件预测基座，不是已学习的心理 `S` 或 Runtime policy；研究重建顺序与证据边界见[研究重建审计](../00_研究设计/研究重建审计_2026-10-06.md)。`ResearchDynamicsV1` 是手写固定-law fixture，当前机制验收不足，未作为 admitted science model。旧 `Theory_S_v2` 是 `ExpectedEffectEMAProxyV0` 历史诊断 proxy；不得把它写成已验证角色动力学。
 
 本目录是实验路由索引，不宣布全项目当前阶段。Canonical layers are: `Replay/` for source-neutral records/features, `PredictionBaselineV1` for the fitted and reproducible development prediction method base awaiting independent review, `ExpectedEffectEMAProxyV0` for historical Theory-S diagnostics, and `T14_T20/` for the frozen 1D development harness. Source action labels and source candidate lists retain dataset provenance; source candidates are not character `A^O`. New method work must use episode-grouped train/validation. All previously exposed datasets are development data, not untouched formal test.
 

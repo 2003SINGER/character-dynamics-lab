@@ -97,6 +97,20 @@ class Event:
             raise ValueError("event provenance is not an admitted committed source")
 
 
+def _require_compatible_segment_endpoint(left: Segment, right: Segment, time: Fraction) -> None:
+    """Require closed certificate enclosures to agree at their shared endpoint."""
+    if left.kind == "POLYNOMIAL":
+        left_lower = left_upper = left.value(time)
+    else:
+        left_lower, left_upper = left.lower, left.upper
+    if right.kind == "POLYNOMIAL":
+        right_lower = right_upper = right.value(time)
+    else:
+        right_lower, right_upper = right.lower, right.upper
+    if max(left_lower, right_lower) > min(left_upper, right_upper):
+        raise ValueError("adjacent certificates for the same reference disagree at shared endpoint")
+
+
 class Trace:
     def __init__(self, *, scenario_start: Fraction = Fraction(0), now: Fraction = Fraction(0)):
         self.scenario_start = exact_time(scenario_start)
@@ -142,8 +156,15 @@ class Trace:
         seal=self.values_sealed_through(segment.ref)
         if seal is not None and segment.start<=seal:
             raise ValueError("cannot append a segment behind the sealed value frontier")
-        if any(s.ref==segment.ref and s.start<segment.end and segment.start<s.end for s in self.segments):
-            raise ValueError("overlapping certificates for the same reference are rejected")
+        for existing in self.segments:
+            if existing.ref != segment.ref:
+                continue
+            if existing.start < segment.end and segment.start < existing.end:
+                raise ValueError("overlapping certificates for the same reference are rejected")
+            if existing.end == segment.start:
+                _require_compatible_segment_endpoint(existing, segment, segment.start)
+            elif segment.end == existing.start:
+                _require_compatible_segment_endpoint(segment, existing, existing.start)
         for point in self.points:
             if point.ref!=segment.ref or not segment.start<=point.time<=segment.end: continue
             value=Fraction(str(point.value))
