@@ -10,6 +10,8 @@ E0 只检验：此有限域中是否存在合法 joint action script；独立执
 
 E0 不比较角色在线策略、独立策略能力、信息不对称行为效果、玩家在线扰动、GOAP/HTN/repair 效果，不做玩家概率评估。存在性脚本里的角色动作是枚举 joint controls，不表示角色会选择或自主执行。
 
+E1/E2 若另获授权，只另行审计其与 frozen Runtime Kernel 的 adapter/replay 接缝；本协议不预写其 protocol。
+
 不得由 E0 推出 ∃d ∀responses、作者鲁棒保证、真实 NPC/玩家概率、心理规律、玩家体验、研究缺口、新颖性、开放域可达性或方法优势。E1/E2 才讨论策略、扰动与修复；需另行授权。
 
 ## 2. Closed finite domain
@@ -98,19 +100,25 @@ planner/oracle 可读完整 W 做存在性搜索。A 的候选与答复前 bindi
 
 本协议 §2.2 的 hand-coded transition table 是此有限域唯一执行定义；后续拟实现最小独立 finite executor，现尚未实现。planner 提交 grounded proposal，每步由 executor 重新校验、结算；Monitor 只读真实 settlement。E0 不调用或修改冻结 Runtime。
 
+X01 的 prediction check 是 executor 外的审计步骤。输入为预测记录：grounded `ActionIntent`、预测前置事实、预期 post facts、effects/events、checkpoint/frontier 标识，以及 operator/duration/deadline/reply pins；另输入独立 executor receipt（accepted/rejected、settlement outcome/ID/sequence）与实际 `ΔW`、合法投影后的 `ΔO`。operator version 定义 mandatory prediction coverage 与 effect/event 签名，须覆盖应发生与应不变/不发生项；字段缺失、coverage 不全或版本不匹配均为 `PREDICTION_CONTRACT_ERROR`，不得静默忽略。executor 只接收并校验 `ActionIntent`，不得接收预测 effects/events 作为执行指令，也不得把角色不可见的 W 提供给角色；中央审计器可读 W 核对实际 delta。预测后置事实须分别标明角色已知 O 与审计用 W，不能把后者冒充 actor input。
+
+合法动作一旦真实 settlement，先提交实际 W/event 与合法 O 投影，再比较预测；差异记 `PREDICTION_MISMATCH` 并保留已提交事实，禁止 rollback。非法 typed binding（如通用 offer 尚未接受时就把 `key1` 写入其 ActionIntent）在 dispatch 前产出 `INVALID_BINDING` 诊断，不调用 executor，也不产生结算。另一个独立变异是合法的通用 offer ActionIntent 不含 key ID，但预测声称该 offer 会让 `O_A` 获知 `key1`：先按正常规则提交 offer settlement，再以实际 `ΔO_A`（没有 key1 披露）对账并报 `PREDICTION_MISMATCH`，保留已结算 offer，不能把预测披露写成角色实际知识。unlock 若合法启动/完成但预测声称直接产生 ledger/acquired event，也先提交 unlock 的真实结算，再以实际 `ΔW`/receipt（只开 archive，无 ledger event）对账并报 mismatch；检查不能相信或仅转发预测 effect 字段，即使 executor 忽略该字段，独立预测比较仍须检出差异。
+
 oracle 必须独立于 planner：枚举全部 grounded choices 的有限状态遍历；其 precondition/effect 由独立手写 predicate/effect 表或逐步人工 goldens 表达，不能调用 planner 的 operator/effect 函数、共享转移代码或抽象状态更新。双方只共享本协议的常量/ID 和 fixture。只把 DFS 换 A*、仍共用 transition effect，不算独立 oracle。
 
 oracle 去重 key 包含所有影响未来合法性/effect/目标的状态、绝对时间、O 可见性、有效 offer/reply 记录、目标相关 ledger 摘要和 Monitor 状态。只有证明对未来授权、同意、资源与 witness 无影响的历史字段才可规范化掉。Horizon 至 t10 含；仅展开能在 t≤10 完成的 action。穷尽完整有限状态空间且无 witness 才是 PROVEN_UNREACHABLE_IN_FINITE_DOMAIN。
 
-planner 用 h=0 uniform-cost search（即按累计模拟分钟排序，不按动作个数）；独立 oracle 完整枚举可达状态并独立记录最早完成时间。对每个未变异 fixture 比对可达 verdict、最早完成时间及最短总模拟时长；动作数只作辅助报告。对 D_joint，至少有一条 ACCEPT path；对 D_pin(DECLINE)，完整穷尽后应为有限域不可达。成功路径逐步回放独立 executor，并核对真实 events 与 Monitor witness。最短性只针对本冻结域和相同 duration pins。差异记 PLANNER_EXECUTOR_MISMATCH 并停止该 case，不能改 oracle/fixture 抹差异。变异 fixture X01 单独检查 proposal validation 是否检出错误，不要求 mutant planner 的搜索 verdict 与 oracle 相同。
+planner 用 h=0 uniform-cost search（即按累计模拟分钟排序，不按动作个数）；独立 oracle 完整枚举可达状态并独立记录最早完成时间。对每个未变异 fixture 比对可达 verdict、最早完成时间及最短总模拟时长；动作数只作辅助报告。对 D_joint，至少有一条 ACCEPT path；对 D_pin(DECLINE)，完整穷尽后应为有限域不可达。成功路径逐步回放独立 executor，并核对真实 events 与 Monitor witness。最短性只针对本冻结域和相同 duration pins。差异记 PLANNER_EXECUTOR_MISMATCH 并停止该 case，不能改 oracle/fixture 抹差异。变异 fixture X01 单独检查 binding validation 与 prediction check，不要求 mutant planner 的搜索 verdict 与 oracle 相同。
 
 fork contract：从同一个完整 checkpoint 建立两个独立 mutable copies。checkpoint 至少含 W、O_A/O_B、clock、running action ID/duration/elapsed/progress、reservation、offer/reply session、action/outcome history、next_action_id/next_event_id/next_sequence、ledger frontier与 seals、Monitor summary 与 domain/deadline/duration/reply pins。本域无随机流或在线模型调用。相同 checkpoint 与相同剩余输入分别恢复后，执行轨迹及 settlement ledger hash 必须相同；修改一个 fork 的 W、O、进度或 ledger 不得污染另一个 fork 或真实输入 ledger。两 fork 都不能把 proposal/预演 event 写入真实账本。
 
 ## 6. 共同预算与判定标签
 
-拟议工程保护上限：每 case、每搜索实现最多 10,000 首次扩展状态、墙钟 2 秒；同机单线程，记录硬件、解释器/编译器与优化配置，不预定实现语言。一次 expansion 定义为某状态首次从 frontier 取出并枚举其合法 action；重复 closed-state 不重复计数，起始状态计一次。以单调时钟计时，含初始化、搜索与终止判定。域含 t2…t10 共 9 个时钟边界、至多 8 个分钟转移及有限实体/操作；10,000 是防止意外组合膨胀的宽松计数保护，2 秒是单例失控保护，不是成本测定或性能主张。planner/oracle 使用同一上限，分别报告 expansions、墙钟、frontier/visited 和终止原因。
+拟议工程保护上限：每 case、每搜索实现最多 10,000 首次扩展状态、墙钟 2 秒；同机单线程，记录硬件、解释器/编译器与优化配置，不预定实现语言。一次 expansion 定义为某状态首次从 frontier 取出并枚举其合法 action；重复 closed-state 不重复计数，起始状态计一次。以单调时钟计时，含初始化、搜索与终止判定。9 个时钟边界本身不能证明该 cap 足以穷尽。纸面保守 boundary-prefix/history-tree 上界为 `U=2·Σ(ℓ=0..8)Σ(k=0..min(6,ℓ)) C(ℓ,k)·6!/(6−k)!=299,250`：6 类非 idle 成功动作（offer、reply、exchange、return_tool、unlock、take）各至多一次，reply 的 accept/decline 两个 grounding 由系数 2 保守计入；ℓ 选分钟位置，k 选非 idle 位置并排列动作类。目标 case pins 固定，invalid requests 不是合法边且不分支时间；因果前提、固定 reply 与长 unlock 的 forced no_control continuation 只会减少可行前缀。该数是边界前缀的粗上界，不是 exact reachable-state count；保留完整追加式 raw ledger 时，不得据此把历史折叠成未经证明的 canonical state。未来若报告 exact reachable count，须在获准实现后逐项计数并说明去重 key 保留了所有影响授权、同意、资源、未来 effect 与 witness 的字段。10,000/2秒是否足够仍未知；独立 oracle 受同一预算，耗尽预算时记 `solve_status=BUDGET`、`complete=false`、`exhausted=false` 并注明终止原因，不声称完整。planner/oracle 分别报告 expansions、墙钟、frontier/visited 和终止原因。
 
-触发任一上限但未穷尽：planner=NO_PLAN_WITHIN_BUDGET，oracle=ORACLE_INCOMPLETE，case gate=NOT_PASS；都不是不可达。不得加预算重跑直到成功；预算改动需新协议版本与独审。deadline fixture pin T 会把目标窗口改成 [2,T]，仍右闭；reply/duration/deadline pins 均进入 checkpoint 与搜索配置。成功合法路径可报告 POSSIBLE_IN_WORLD。固定 B pin 仅报告该脚本的 TRACE_SATISFIED/TRACE_VIOLATED/TRACE_INDETERMINATE。只有完整穷尽无 witness 才能报有限域不可达。结论限于本协议域。
+结果 schema 必须分开求解状态与 fixture 测试判定：`search_result` / `oracle_result` 至少含 `solve_status`、`termination_reason`、`complete`、`exhausted`、expansions 与预算；`fixture_test_result` 仅为 `PASS`/`FAIL`，并记录被检查的预期标签。C01 起点扩展后按 cap 停止，应为 oracle `solve_status=BUDGET`、`complete=false`、`exhausted=false`，planner 也报告 `BUDGET`，不是 `UNREACHABLE`；正确报告预算耗尽可使该诊断 fixture 的 test result 为 `PASS`，不表示搜索求解成功或正式正确性通过。`UNSOLVED` 是求解状态，不是 fixture failure 的同义词；正式正确性仍要求完整 oracle。
+
+触发任一上限但未穷尽：planner 与 oracle 的 `solve_status=BUDGET`、`complete=false`、`exhausted=false`，`termination_reason` 标明 `STATE_CAP` 或 `WALL_TIMEOUT`；不是不可达。不得加预算重跑直到成功；预算改动需新协议版本与独审。除诊断 fixture 明确检查“正确报告预算耗尽”外，未穷尽搜索的 fixture test 为 FAIL / gate NOT_PASS。deadline fixture pin T 会把目标窗口改成 [2,T]，仍右闭；reply/duration/deadline pins 均进入 checkpoint 与搜索配置。成功合法路径可报告 POSSIBLE_IN_WORLD。固定 B pin 仅报告该脚本的 TRACE_SATISFIED/TRACE_VIOLATED/TRACE_INDETERMINATE。只有完整穷尽无 witness 才能报有限域不可达。结论限于本协议域。
 
 ## 7. Fixture / acceptance matrix
 
@@ -126,11 +134,11 @@ fork contract：从同一个完整 checkpoint 建立两个独立 mutable copies�
 | E0-H01 历史不可逆 | 保留 destroy/tombstone；尝试 key0 unlock/清除 | key0 路径不可达；无清除 action | 请求拒绝，无复活 | destroy 仍在；目标独立按 event/deadline 判 |
 | E0-N02 key1 tombstone | 保留 key0 前缀，追加 key1 tombstone：holder=none、intact=false、destroyed=true；B 的初始 O 获知该自有物品失效，A 仍未知备用；B pin=DECLINE | D_joint 与 D_pin(DECLINE) 穷尽后均不可达；不存在替代钥匙 | ACCEPT 不满足“持有完整可用钥匙”的 reply precondition | 截止前 PENDING；完整 seal@10 无 witness→VIOLATED；ACCEPT pin 在此 fixture 不适用，不伪造披露 |
 | E0-H02 state/event | ledger 初始 holder=A、O_A/O_B 同场合法获知该持有状态、无 acquired event；无动作可放回 ARCHIVE | 完整穷尽后不可达 event goal | 不存在合法 take settlement | t10 状态对照 AT(holds(A,ledger),10)=SATISFIED；事件目标在完整封口后 VIOLATED |
-| E0-X01 mismatch | 注入 planner mutation：offer 泄露 key1 或 unlock 直接产生 ledger | validation gate 检出 mutant 输出；不要求其 search verdict 匹配 oracle | executor 拒绝非法 binding/effect，报 PLANNER_EXECUTOR_MISMATCH | 不出现伪造 acquire witness；变异被检出则该防护测试通过 |
+| E0-X01 mismatch | 注入 planner mutation：非法 offer ActionIntent 显式绑定 key1；或合法通用 offer 预测提前披露 key1；或 unlock 预测直接产生 ledger | binding validation 与 prediction check 分别检查；不要求 mutant search verdict 匹配 oracle | 非法 binding dispatch 前诊断；合法 offer 与 unlock 先真实结算，再比对实际 ΔO/ΔW 并报告相应 mismatch | 不出现伪造 acquire witness；逐项检出变异则 fixture test PASS |
 | E0-X02 原子失败 | 由 t4、offer 已 ACCEPTED 的合法 checkpoint fork；仅在测试 fork 注入 A payment absent，再 submit exchange | 不把注入当搜索分支/玩家扰动 | 交易校验拒绝；B 保持 key1，无半交换或扣款 | 无 loan_exchanged；真实输入 checkpoint/ledger 不受污染 |
 | E0-P02 长动作进度 | domain pin: unlock duration=3；t5 start，t6 boundary elapsed=1 | 扩展状态包含同一 running action 与 reservation | 同 running_id、key1/archive reservation 延续 t6→t8，elapsed 1→2→3；take t8→t9 | event@t9 SATISFIED；没有 restart/start 伪 event |
 | E0-U01 unknown | 无目标 witness 的 prefix；仅在测试 evidence copy 移除相关 past coverage seal，原始真实 ledger 不变 | search 不填补证据 | 已执行事实不改 | 有未来时段但相关 past gap→INDETERMINATE；伪造 event/version mismatch→contract error |
-| E0-C01 budget | 从无目标 witness 的初态，测试专用扩展 cap=1；起始状态不是 goal | 首次扩展起点后 frontier 未穷尽→oracle INCOMPLETE；planner NO_PLAN_WITHIN_BUDGET；gate NOT_PASS | 不执行不完整 proposal | Monitor 仍只按真实 trace 判 |
+| E0-C01 budget | 从无目标 witness 的初态，测试专用扩展 cap=1；起始状态不是 goal | 首次扩展起点后 frontier 未穷尽→oracle solve_status=BUDGET、complete=false；planner solve_status=BUDGET；两者均非不可达 | 不执行不完整 proposal | 正确报告预算耗尽使 fixture_test_result=PASS；正式搜索正确性仍 NOT_PASS，Monitor 只按真实 trace 判 |
 | E0-F01 fork isolation | 从同一完整 checkpoint 还原两个独立 fork，分别续跑相同剩余输入，再只改 fork-1 的 W/O/progress/ledger | 两 fork 的未改运行应同 verdict/trace hash | 变化只在 fork-1；fork-2 与真实输入 ledger 不污染 | 两份 settled projection 独立；proposal/预演事件不得写真实 ledger |
 
 E0-P02 保持同一闭域，仅把本 fixture 的 unlock duration pin 从基准 1 改为 3 分钟；这是显式执行参数变化，不是新 operator。t5 启动的 running_action 在 t6 boundary 后保留同 ID、reservation 与 elapsed=1，继续到 t8 完成，随后 take 在 t9 产生 witness。duration pin 属于 checkpoint/state key；不得通过重开 action 或重占资源伪造 progress。
@@ -145,7 +153,7 @@ E0-P02 保持同一闭域，仅把本 fixture 的 unlock duration pin 从基准 
 
 ## 9. 通过、停止与外推边界
 
-协议独审通过只说明定义清晰，可由用户另行决定是否授权实现。获授权后的 E0 请求独立执行复核，须同时满足：各 fixture 与表列预期一致；X01 mutation guard 能检出注入错误；未变异、完整求解的搜索 fixture 中 planner 与 oracle 的 verdict/最早完成时间/最短模拟时长一致；成功轨迹可重放且逐项匹配 executor events；Monitor 端点/seal/unknown 反例正确；预算标签正确；P02 保持 ID/reservation/elapsed；完整 fork isolation 通过；无未解释 mismatch。C01 故意耗尽预算，正确报告未求解即该诊断测试 PASS，不要求任务成功；正式搜索 fixture 若 oracle 未完整求解，仍不得通过其可达性验收。
+协议独审通过只说明定义清晰，可由用户另行决定是否授权实现。获授权后的 E0 请求独立执行复核，须同时满足：各 fixture 与表列预期一致；X01 prediction check 能检出注入错误；未变异、完整求解的搜索 fixture 中 planner 与 oracle 的 verdict/最早完成时间/最短模拟时长一致；成功轨迹可重放且逐项匹配 executor events；Monitor 端点/seal/unknown 反例正确；预算标签正确；P02 保持 ID/reservation/elapsed；完整 fork isolation 通过；无未解释 mismatch。C01 的 fixture test 因正确报告未求解而 PASS，但搜索求解状态仍为 BUDGET，正式搜索正确性仍 NOT_PASS；正式搜索 fixture 若 oracle 未完整求解，仍不得通过其可达性验收。
 
 任一 planner-oracle 差异、表外 effect、答复前 A 获知 key1、把 B 同意塞进 offer effect、非原子交易、历史/tombstone 回滚、state 冒充 event、未封口即报 VIOLATED、预算耗尽报无解、progress/reservation 重置、或 event/witness 不一致，立即停止该例并保留证据。不得改目标、加算子、放宽权限或抬预算把失败改成成功；需新版本独审。
 
