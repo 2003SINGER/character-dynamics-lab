@@ -1,0 +1,57 @@
+{
+  "format": "trajectory-constraints-v0-golden-1",
+  "cases": [
+    {
+      "case_id": "quadratic-interior-violation",
+      "constraint": {
+        "$type": "TemporalConstraint",
+        "constraint_id": "x-at-most-four-fifths",
+        "op": {"$enum": ["TemporalOp", "ALWAYS"]},
+        "formula": {
+          "$type": "CompareValue",
+          "ref": {
+            "$type": "ValueRef",
+            "observable_id": "actor.anxiety",
+            "version": "model-A",
+            "expected_owner": "ACTOR_S",
+            "args": {"actor": {"$entity": ["Actor", "actor-1", "A", false]}}
+          },
+          "op": {"$enum": ["Compare", "le"]},
+          "value": {"$type": "NumericLiteral", "value": {"$fraction": [4, 5]}, "unit": "control_unit"}
+        },
+        "window": {"$type": "Window", "start": {"$fraction": [0, 1]}, "end": {"$fraction": [1, 1]}, "left_closed": true, "right_closed": true},
+        "anchor": {"$type": "Anchor", "kind": {"$enum": ["AnchorKind", "SCENARIO_START"]}, "absolute_time": null, "event_type": null, "event_version": "1", "event_filter": null},
+        "trigger": null,
+        "hard": true,
+        "annotation": ""
+      },
+      "trace": {
+        "now": "1",
+        "points": [],
+        "segments": [{"start": "0", "end": "1", "kind": "POLYNOMIAL", "coefficients": ["0", "4", "-4"], "certificate_id": "x=4t(1-t)"}]
+      },
+      "expected": {"verdict": "VIOLATED", "witness": "1/2"}
+    },
+    {
+      "case_id": "generic-bound-is-not-a-witness",
+      "constraint": {
+        "$type": "TemporalConstraint",
+        "constraint_id": "x-at-most-four-fifths",
+        "op": {"$enum": ["TemporalOp", "ALWAYS"]},
+        "formula": {
+          "$type": "CompareValue",
+          "ref": {"$type": "ValueRef", "observable_id": "actor.anxiety", "version": "model-A", "expected_owner": "ACTOR_S", "args": {"actor": {"$entity": ["Actor", "actor-1", "A", false]}}},
+          "op": {"$enum": ["Compare", "le"]},
+          "value": {"$type": "NumericLiteral", "value": {"$fraction": [4, 5]}, "unit": "control_unit"}
+        },
+        "window": {"$type": "Window", "start": {"$fraction": [0, 1]}, "end": {"$fraction": [1, 1]}, "left_closed": true, "right_closed": true},
+        "anchor": {"$type": "Anchor", "kind": {"$enum": ["AnchorKind", "SCENARIO_START"]}, "absolute_time": null, "event_type": null, "event_version": "1", "event_filter": null},
+        "trigger": null,
+        "hard": true,
+        "annotation": ""
+      },
+      "trace": {"now": "1", "points": [], "segments": [{"start": "0", "end": "1", "kind": "BOUNDS", "lower": "0", "upper": "1", "certificate_id": "loose-enclosure"}]},
+      "expected": {"verdict": "INDETERMINATE", "witness": null}
+    }
+  ]
+}

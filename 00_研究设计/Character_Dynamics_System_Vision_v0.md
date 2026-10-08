@@ -1,15 +1,18 @@
 # Character Dynamics：系统主线与研究支线 v0
 
-更新时间：2026-09-16
+更新时间：2026-10-08（作者控制需求；冻结执行边界不重开）
 
 ## 系统定位
 
 Character Dynamics 的主产品是一个可持续运行的 NPC 角色动力学框架，而不是某一篇 Paper-0 的实验脚本集合。
 
-目标同时包含两项：
+目标包含：
 
 1. NPC 在可结算世界中表现出更连贯、可响应、可恢复、彼此有差异的长期行为；
 2. 常规决策不必每一步重新调用大模型，从而降低模型调用次数、token、延迟和运行成本。
+3. 世界中心的作者控制：作者可混用稀疏世界/人物节点、趋势包络、锁定段落与允许分支，不逐情境枚举全部反应；NPC仍有自身任务和信息，玩家成功改变条件后只调整未提交未来。
+
+这是创作/体验需求，不是已证实低成本或活人感的算法成果。自然世界机会、显式作者覆写与锁定内容分三条权限通道；作者覆写如获授权必须留下authored_override，不假装人物自然得出。点/线引用有定义的typed量，不能自动造trust/chaos浮点。具体规格由[AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md)维护，本文不复制契约或实验状态。
 
 Continuous Runtime v1 的正式计算范式是：**an event-driven incremental
 stateful dataflow runtime over one authoritative simulation timeline**。W/O/S/P
@@ -67,7 +70,7 @@ LLM 不是整个 NPC。它最多在开放语义确实需要解释时充当受限
 
 ### Applications
 
-Room Demo、free-run、可视化与未来产品层只消费 Runtime trace 和显式模型输出。它们可以选择 Demo 模型，但不得把 Demo 行为或视觉表现写回 Reference、Evaluator 或研究结论。
+现有Room Demo、free-run与可视化消费Runtime trace和显式模型输出。未来作者控制应用通过注册执行adapter提出合法世界操作或明确授权的创作操作，不能直接改Kernel时钟/真实历史，也不能把NPC未来计划当必执行命令。应用可以选择Demo模型，但不得把Demo行为或视觉表现写回Reference、Evaluator或研究结论。
 
 ## 评价边界
 

@@ -1,0 +1,27 @@
+{
+  "format": "trajectory-constraints-v0-acceptance-1",
+  "status": "READY_FOR_INDEPENDENT_REVIEW",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tools python3 -B -m unittest discover -s tools/trajectory_constraints_v0/tests -v",
+  "scope": "standalone Python reference contracts only; no Runtime, C++, Director, planner, game execution, or production dynamics adapter",
+  "admissions": [
+    {"id": "registry-types-pins-owner-units-domains", "tests": ["test_registry_pins_allowlist_ranges_and_json_roundtrip", "test_admission_rejections_unknown_owner_types_units_enum_pin_time_interpolation", "test_registry_ast_and_event_payload_mappings_are_defensively_frozen"]},
+    {"id": "trusted-synthetic-projector-dispatch", "tests": ["test_projectors_are_pure_and_fact_bound", "test_dispatch_runs_only_typed_pure_projector_and_monitor_stays_separate_from_reachability"]},
+    {"id": "typed-temporal-ast-and-editor-compilation", "tests": ["test_registry_pins_allowlist_ranges_and_json_roundtrip", "test_linear_envelope_gaps_dag_and_state_point_clock", "test_golden_json_cases_load_and_replay"]},
+    {"id": "activation-first-each-no-retrigger-and-no-activation", "tests": ["test_trigger_first_each_freezes_distinct_occurrences_and_never_retriggers", "test_event_missing_coverage_not_activated_vs_indeterminate_and_dedup"]},
+    {"id": "typed-ledger-order-count-payload-seals-and-exactly-once", "tests": ["test_event_missing_coverage_not_activated_vs_indeterminate_and_dedup", "test_event_order_requires_distinct_instances_and_complete_ledger", "test_event_payloads_are_checked_against_pinned_registry", "test_registry_ast_and_event_payload_mappings_are_defensively_frozen"]},
+    {"id": "piecewise-certificate-polynomial-bounds-and-closure", "tests": ["test_polynomial_interior_extremum_and_generic_bounds_uncertainty", "test_continuous_future_gap_open_root_and_degree_zero", "test_golden_json_cases_load_and_replay"]},
+    {"id": "numeric-bands-and-duration-weighted-mean", "tests": ["test_bands_weighted_means_and_invalid_overlap", "test_mean_invariant_under_certificate_splitting", "test_linear_envelope_gaps_dag_and_state_point_clock"]},
+    {"id": "pointwise-kleene-unknown-masking-and-step-completeness", "tests": ["test_pointwise_boolean_temporal_semantics_unknown_masking", "test_exhaustive_kleene_not_and_or_tables", "test_piecewise_hold_and_conclusions_require_completeness_seals"]},
+    {"id": "narrow-conflict-proof-and-explicit-migration", "tests": ["test_conflict_proof_is_narrow_and_eventuals_are_not_mistaken_for_always", "test_explicit_migration_replay_gate"]},
+    {"id": "stable-identity-tombstone-time-and-exists-false", "tests": ["test_stable_deleted_identity_is_indeterminate_unless_exists_false_registered"]},
+    {"id": "reachability-evidence-is-not-temporal-truth", "tests": ["test_dispatch_runs_only_typed_pure_projector_and_monitor_stays_separate_from_reachability"]},
+    {"id": "time-shift-and-monitor-checkpoint-isolation", "tests": ["test_time_shift_invariance_for_at_eventually_and_always", "test_checkpoint_fork_is_monitor_bookkeeping_only"]}
+  ],
+  "golden_fixture": "tests/data/golden_cases.json",
+  "deliberate_nonclaims": [
+    "No planner or world-search feasibility result is produced; a destroy event cannot directly turn an unresolved temporal goal into VIOLATED.",
+    "No production binding to current C++ dynamics or persistent runtime trace is implemented.",
+    "No global satisfiability solver is implemented; unproved nonempty compatibility remains COMPATIBILITY_UNKNOWN.",
+    "No full PDDL3 or Signal Temporal Logic conformance is claimed."
+  ]
+}

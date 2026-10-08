@@ -24,7 +24,7 @@
 | 实验导出器、切片与可复现记录 | [实验总路由](02_实验/README.md)；[跨数据集 Replay 接口草案](02_实验/跨数据集Replay接口_v0.md)；[机制识别循环与反事实诊断](02_实验/机制识别循环与反事实诊断_v0.md) |
 | WebGPT 审阅：实验报告、逐条结果、失败记录、文献审计及上传排除清单 | [公开审阅索引（2026-10-07）](02_实验/PUBLIC_REVIEW_INDEX_2026-10-07.md) |
 | 文献 PDF、职责级阅读与证据 | [文献库](01_文献/README.md) |
-| 当前作者约束线：第一阶段算法地基与组合接缝 | [算法积木总表与唯一下一动作](01_文献/算法积木/README.md)；含12张主卡、权限/现行接口对照、手推及本人新理解栏；[前轮轨迹/执行世界续审](01_文献/专题调研_多层状态轨迹约束与可执行世界_2026-10-07.md)保留为依据；非新方法或已运行 benchmark |
+| 当前作者约束线：系统设计与参考语义 | [AuthorialTrajectoryPilotV0](00_研究设计/AuthorialTrajectoryPilotV0.md)：四份可执行语义契约、六机制接口、E0–E5预实验准入；[算法积木](01_文献/算法积木/README.md)保留具体原算法；[独立reference](tools/trajectory_constraints_v0/README.md)不等于Director或NPC实验 |
 | 用户原话、模型提案、对话与来源 | [原始材料](90_原始材料/README.md) |
 
 仓库治理护栏：[ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md)；廉价健康检查可运行 `python tools/repo_health_check.py`，ReplayRecord 样例可用 `python tools/validate_replay_record.py <record.json>` 校验。护栏只预警文件膨胀/重复归档，明确的 schema、CTest 和 provenance 错误才阻断对应检查。
