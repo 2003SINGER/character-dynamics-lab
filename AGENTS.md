@@ -2,20 +2,20 @@
 
 ## Scope
 
-- `D:\desk\科研\character-dynamics` owns exploration of dynamic character behavior consistency and conditional behavior prediction in constrained worlds.
-- The single canonical macOS checkout is `/Users/2003singer/Workspace/Research/character-dynamics-lab`; do not create a parallel `character-dynamics-laya-work` project root.
+- The current project owner and single canonical checkout is `/Users/2003singer/Workspace/Research/character-dynamics-lab`. `D:\desk\科研\character-dynamics` is a historical source/work path, not the current owner; do not create a parallel `character-dynamics-laya-work` project root.
 - It is independent of the paused `D:\desk\科研\characters` state-stream coupling project. Do not silently merge their questions, sources, or claims.
 
 ## First Read
 
 - Read `README.md` first.
-- Then read `00_研究设计\README.md` and follow its ownership routing: full mechanism, research questions, open questions, TODO, and implementation status each have one owner.
-- For related work, read `01_文献\README.md` before making novelty or gap claims.
-- For origin and evidence boundaries, read `90_原始材料\2026-09-01_动态人物世界模拟探索\阅读判断.md`.
+- Then read [00_研究设计/README.md](00_研究设计/README.md) and follow its ownership routing: full mechanism, research questions, open questions, TODO, and implementation status each have one owner.
+- For related work, read [01_文献/README.md](01_文献/README.md) before making novelty or gap claims.
+- For origin and evidence boundaries, read [90_原始材料/2026-09-01_动态人物世界模拟探索/阅读判断.md](90_原始材料/2026-09-01_动态人物世界模拟探索/阅读判断.md).
+- For claim-specific evidence owners, follow [ARCHITECTURE_RULES.md — Evidence ownership](ARCHITECTURE_RULES.md#evidence-ownership); do not duplicate that routing table here.
 
 ## Boundaries
 
-- The executable reference demo is an interface/stress-test artifact, not evidence that the full mechanism or a research hypothesis is validated. Check `00_研究设计\当前实现进度.md` for the code baseline and limitations.
+- The executable reference demo is an interface/stress-test artifact, not evidence that the full mechanism or a research hypothesis is validated. Check [00_研究设计/当前实现进度.md](00_研究设计/当前实现进度.md) for the code baseline and limitations.
 - Do not claim a psychological mechanism, literature gap, benchmark, novelty, training result or publication potential without fresh verification.
 - Keep research question, validation engineering and optional game implementation distinct.
 - Preserve raw dialogue and do not overwrite it. **Collaboration protocol (user-confirmed 2026-09-05):** long pasted review blocks are presumed to be WebGPT's repository review unless the user labels them otherwise; for project decisions and code/document changes, WebGPT review has the same working authority as the user's direct messages. Short, direct messages from the user are presumed to be the user's own instruction. When ambiguity remains, preserve the uncertainty rather than inventing attribution.

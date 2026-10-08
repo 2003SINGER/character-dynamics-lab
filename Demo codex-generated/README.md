@@ -2,7 +2,9 @@
 
 这是一个**只供阅读、运行和拆解**的 C++17 控制台参考系统。它和用户亲自编写的 `E:\Character Dynamics Demo` 完全分离：不读取、复制、修改或替代后者。
 
-本目录同时承载两条明确分开的 model track：Shared Runtime Kernel + `ReferenceRuleDynamicsV0` 用于机制/reference fixtures；Shared Runtime Kernel + `DemoLivingDynamicsV0` 用于 living sandbox/free-run。它们共享 World、O、Scheduler、RunningAction 与 trace，但可以产生不同的角色行为；Demo tuning 不改变科研/reference 语义。详见 [架构边界](../00_研究设计/Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)。
+本目录承载冻结 Reference 与 Demo 两条明确分开的 model track，共用 Shared Runtime Kernel。`ReferenceRuleDynamicsV0` 用于机制/reference fixtures；living 应用显式选择 Demo model（已有 V0 与 V1，按运行 manifest pin，不混用结果）。它们共享 World、O、Scheduler、RunningAction 与 trace，但可以产生不同的角色行为；Demo tuning 不改变科研/reference 语义。详见 [架构边界](../00_研究设计/Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)。
+
+**阅读范围**：下面“它会做什么 / 阅读顺序 / 当前代码的边界”描述旧 `character_dynamics_reference` action-step 入口，不是整个目录的能力上限。当前持续执行从 `ContinuousRuntime::execute_next_boundary` 进入；可替换 Laya policy、应用 viewer 与额外模型另由各应用 README 维护。确切已实现能力与证据统一查[实现进度](../00_研究设计/当前实现进度.md)。
 
 它不证明任何研究结论。这里的状态、分数、规则和人格参数只是为了让你看见一条完整、可追踪的计算链：
 
@@ -49,7 +51,20 @@ Model 入口：`Inc/character_dynamics_model.h`；`ReferenceRuleDynamicsV0` 与 
 - `TaskCommitment` 只从 O 中 typed self-action feedback 写回 S；W 接受动作后，场景的感知规则才决定结果是否进入 O。默认情况下，自己刚完成任务是立即可知的完成反馈；测试也支持抑制该反馈，此时 W 已完成但 commitment 不得自动关闭。学习 session 建立或恢复对未完成 task 的承诺，吃饭、如厕和恢复动作使其暂停。暂停中的承诺只有在任务状态和学习 affordance 仍被 O 已知、且疲劳/饥饿/如厕需求低于 v0 门槛时，才会重新提高学习动作 activation；这不是规划器。被拒绝或未来因异步失效的计划不应被错误记成角色已承诺的行为。睡眠提前醒来是当前明确的已结算中断语义，其实际时间 primitive 会被记录；
 - `Simulation` 仍故意保留为可读的编排层。不要把 W 结算、X 解释、S 更新和 D 选择硬塞进一个万能规则表：它们正是后续替换机制时需要各自独立的边界。
 
-## 构建与运行（本机 MinGW）
+## 构建与运行（当前 macOS）
+
+从本项目根目录运行，与 CI 相同的 CMake / Ninja 入口如下。不要将历史 Windows junction 当成本机路径。若有未提交代码，构建结果只描述该工作区；exact-head 验收以对应提交的 CI 为准。
+
+```sh
+cmake -S "Demo codex-generated" -B build -G Ninja
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+./build/character_dynamics_reference --verify
+```
+
+## 构建与运行（历史 Windows / MinGW）
+
+以下保留旧环境复现路径，不是当前本机配置。
 
 本项目源码仍在本目录；但 MinGW `mingw32-make` 不能可靠处理其中的中文上级路径。因此本机创建了一个不复制文件的 ASCII junction：`D:\Tools\cpp-src\character-dynamics-reference`。从该 junction 配置，build 输出也位于 ASCII 路径：
 

@@ -17,13 +17,16 @@ endpoint or fallback to RulePolicy.
 The public checkpoint is specialised to four synthetic workflows, not human
 character behavior; its reported probability calibration is weak. Thus
 these runs are engineering comparisons, not psychological validation. Model
-weights/cassettes stay out of Git.
+weights stay out of Git. Selected synthetic run traces/cassettes and reports
+are published under the [public review allowlist](../../../02_实验/PUBLIC_REVIEW_INDEX_2026-10-07.md);
+private inputs and unlisted run artifacts remain local.
 
 ## Local run
 
 Install `laya` in the Mac user Python environment and download the checkpoint
 through Hugging Face. Start a bridge on loopback, retaining the cassette in a
-non-repository data directory:
+new, non-overwriting directory under this project's `outputs/laya_runs/`.
+Only explicitly allowlisted evidence is published:
 
 ```sh
 python3 tools/laya_typed_proxy.py \

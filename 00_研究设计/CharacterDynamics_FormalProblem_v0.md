@@ -133,6 +133,20 @@ PlotPointSpec / Occurrence、Arc、Recognizer 等是可选表示，尚非现行�
 
 世界路径存在 ≠ 角色知道路径 ≠ 角色愿意执行 ≠ 玩家不会破坏 ≠ 系统保证完成。超出搜索预算只报 `NO_PLAN_WITHIN_BUDGET`；完整有限域穷尽才可给不可达证明；在线 monitor 的 PENDING 可与规划器不可达结论同时成立。
 
+### 现行接口映射与未接入接缝
+
+以下只核对已有头文件与本 reference，不新增接口要求，也不授权改动冻结 Kernel：
+
+| 草案对象 / 边界 | 现行映射 | 尚未接入 / 不应误读 |
+|---|---|---|
+| K / W / O 与模型更新 | [ContinuousRuntime](../Demo%20codex-generated/Inc/continuous_runtime.h)引用 Scheduler、World adapter、O 与注入的 model；S/P 由调用方传入 | `𝒳` 是系统配置记号，不声称 Runtime 类拥有所有字段或多 NPC 调度 |
+| X / S / commitment 与 reconsideration | [CharacterDynamicsModel](../Demo%20codex-generated/Inc/character_dynamics_model.h)的 continuous/appraise/impulse/intention/reconsider hooks | 草案不指定具体 state law；执行顺序仍服从 Runtime contract |
+| ActorPlanner / Q / C | [CharacterPolicy](../Demo%20codex-generated/Inc/character_policy.h)选择当前动作，history/RunningAction 可通过扩展 hook 输入 | 这是单动作 policy，不是持久多步计划器；通用计划缓存、低层控制片段 adapter 未实现 |
+| H / L / checkpoint | Runtime 已有 ActorHistory、typed trace 与 RNG/history 恢复接口 | 合法近期历史不等于永久不可变 L；部分恢复接口不等于全世界 checkpoint / 可独立 fork |
+| Director / Monitor 与世界证据 | [独立 Python reference](../tools/trajectory_constraints_v0/README.md)在合成快照/证书上检查 TypedIR | 无生产 C++ projector/证书桥、Director 或多角色端到端闭环；测试不能填补该接缝 |
+
+这些是应用接入与证据缺口，不是已发现的 Kernel defect；如选择实现，先定义适配器输入与可复核输出，不预先重构 Runtime。
+
 ## 7. 性质、假设与最小反例（不是都已测试）
 
 | 性质 | 必须挑战的反例 | 当前证据 / 未闭部分 |

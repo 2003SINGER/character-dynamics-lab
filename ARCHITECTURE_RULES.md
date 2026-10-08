@@ -5,7 +5,7 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 ## Runtime and experiment boundaries
 
 1. Scheduler-native runtime uses one authoritative simulation clock and incremental dataflow: persistent `W/O/S/P/RunningAction` nodes receive `Delta-t`, WorldEvent/Outcome, Delta-O, X, and DecisionGate deltas. Reference v0 is explicitly exempt. In scheduler-native code, actions never advance the clock; W mirrors it only through `WorldRuntimeAdapter`; no hidden W event may open a character gate; and fixtures must call the canonical bridge rather than hand-writing timestamps or duplicating dataflow.
-2. Replay and experiments should call the runtime path or explicitly document every intentional difference and its semantic risk.
+2. Experiments that execute the shared runtime should call its canonical path. Offline replay/analysis of externally observed datasets may use their source records directly; document intentional differences, information availability, and semantic risks rather than treating recorded actions as runtime executions.
 3. `Simulation::verify()` is for invariants and regression checks. `Simulation::run_e0()` is for the fixed E0 control fixtures. Do not put cross-dataset experiments, adapters, or baselines there.
 4. Do not change runtime behavior under the pretext of repository cleanup.
 5. Keep `prepare_decision` and `settle_action` local until a real replay use case requires a cross-file API.
@@ -37,15 +37,15 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 25. During mechanism identification, dev data may guide changes to fields, updaters, utility, timing, or ontology. After freeze, test data must not guide those changes.
 26. Generalization evaluations must separate frozen mechanism + fixed semantics, frozen mechanism + live LLM semantics, and LLM-direct/no-dynamics baselines.
 27. If a semantic LLM replaces a hand-written rule, remove the redundant rule only after dev ablation/sensitivity evidence; do not retain duplicate mechanisms indefinitely for compatibility.
-28. Stage 0/1 may use hand-written, AI-assisted semantic rules compiled into a versioned deterministic rule table; runtime experiments must not call an LLM in this stage.
-29. Semantic rules may be revised from dev failures, but must be reusable causal/contextual hypotheses—not per-trajectory patches keyed to `A*` or future events.
-30. Freeze the semantic rule table together with `X`, `S`, `U`, utility, parameters, and timing before testing generalization.
-31. Only after freeze may a live LLM replace the fixed semantic frontend; keep dynamics identical so the semantic substitution is the tested variable.
-32. The future minimum comparison is `fixed semantics + frozen dynamics` vs `LLM semantics + same frozen dynamics`, plus `LLM-direct/no-dynamics` and literature baselines.
+28. The Stage 0–3 fixed-semantics replacement sequence below is scoped to Paper-0/external-Replay mechanism-identification comparisons that vary the semantic frontend; it is not a general restriction on research runtime. In that protocol's Stage 0/1 conditions, use versioned deterministic semantic rules at runtime; an LLM may assist offline rule drafting/review, but is not the runtime semantic frontend. This does not prohibit an explicitly scoped Demo/Application from using Laya as a policy or typed semantic component.
+29. Within that protocol, revise semantic rules from dev failures only as reusable causal/contextual hypotheses—not per-trajectory patches keyed to `A*` or future events.
+30. For that protocol, freeze the semantic schema/rules together with `X`, `S`, `U`, utility, parameters, and timing before testing generalization.
+31. Only after that freeze may a live LLM replace the fixed semantic frontend in the protocol comparison; keep dynamics identical so semantic substitution is the tested variable. This rule does not redefine a Laya policy as a semantic frontend.
+32. If that protocol is pursued, its minimum comparison is `fixed semantics + frozen dynamics` vs `LLM semantics + same frozen dynamics`, plus `LLM-direct/no-dynamics` and relevant literature baselines; it is not a universal gate for other research, application, or Demo work.
 
 ## Scope control
 
-33. Define one small public ReplayRecord contract; do not build `IAdapter`, factories, registries, plugin managers, or dependency injection.
+33. Define one small public ReplayRecord contract for external dataset adapters; do not build adapter factories, registries, plugin managers, or a general dependency-injection framework without a demonstrated need. This does not prohibit the Runtime's explicit `CharacterDynamicsModel` slot, which the canonical runtime requires callers to select.
 34. Do not create one independent experiment universe per dataset.
 35. Apply the Rule of Three: only extract a shared helper after the same logic appears three times.
 36. Do not add a field because it sounds psychological. Add it only with a stated input, updater, consumer, ablation, and evidence need.
@@ -55,41 +55,52 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 
 ### Research semantic ownership (2026-09-07)
 
-40. `02_实验/Theory_S_v2/` is the canonical Python research dynamics candidate; `Replay/` owns source-neutral records, canonical action features, and baseline probes. Dataset adapters may emit ReplayRecord/SceneSnapshot/X-compatible inputs, but must not copy or specialize Theory-S as `LIGHTTheoryS`, `OperaTheoryS`, or similar.
-41. `Mechanism_Sanity_v1` and `v1_2` are frozen historical engineering fixtures. New development training composes the canonical operator and feature layer; it does not create another X→S→π implementation.
+40. `02_实验/Theory_S_v2/` is the historical `ExpectedEffectEMAProxyV0` diagnostic proxy, not the canonical current research candidate. `Replay/` owns source-neutral records, canonical action features, and baseline probes. Dataset adapters may emit ReplayRecord/SceneSnapshot/X-compatible inputs, but must not copy or specialize the old proxy as `LIGHTTheoryS`, `OperaTheoryS`, or similar.
+41. This rule is limited to the frozen `Mechanism_Sanity_v1`/`v1_2` fixtures and the historical `ExpectedEffectEMAProxyV0` fixed-protocol line: those artifacts do not authorize another copy of that line's X→S→π implementation. Other research candidates, including A/B branches, must be versioned and judged under their own branch protocol; this rule does not prescribe their operator or feature design.
 42. Every character ActionIntent, including threshold or commitment replacements, must pass `World::validate_runtime_start` before a new RunningAction is created. RuntimeScheduler is a temporal primitive and must not become world-aware.
 
 ## Tests and guards
 
-42. CTest and `--verify` remain regression gates for the existing reference runtime.
-43. Schema/provenance validators may fail on invalid records; size, duplication, and complexity checks warn only.
-44. A warning is not evidence that a mechanism is wrong; it is a prompt for review.
-45. Every new adapter needs a small schema-validating dev slice before larger downloads or model comparisons.
-46. Preserve negative results, raw outputs, configuration, and errors.
-47. Adapter acceptance is two-stage: schema validation is necessary but not sufficient; a semantic audit must check W/O/X/S ownership, causal availability, action meaning, and provenance.
-48. First adapter slices (roughly 20–50 trajectories) receive near-complete semantic review before scaling. Later batches use stratified sampling plus mandatory review of anomalies, new ontology values, low-confidence/unknown-heavy records, and validator edge cases.
-49. The extraction script may be deterministic while semantic annotations are human/AI-assisted; after review, annotations are saved as versioned frozen data and runtime experiments do not call the reviewing model.
-50. Semantic QA must record what the source says, what the transformation adds or loses, which fields are inferred, and whether any future information was used.
+43. CTest and `--verify` remain regression gates for the existing reference runtime.
+44. Schema/provenance validators may fail on invalid records; size, duplication, and complexity checks warn only.
+45. A warning is not evidence that a mechanism is wrong; it is a prompt for review.
+46. Every new adapter needs a small schema-validating dev slice before larger downloads or model comparisons.
+47. Preserve negative results, raw outputs, configuration, and errors.
+48. Adapter acceptance is two-stage: schema validation is necessary but not sufficient; a semantic audit must check W/O/X/S ownership, causal availability, action meaning, and provenance.
+49. First adapter slices (roughly 20–50 trajectories) receive near-complete semantic review before scaling. Later batches use stratified sampling plus mandatory review of anomalies, new ontology values, low-confidence/unknown-heavy records, and validator edge cases.
+50. The extraction script may be deterministic while semantic annotations are human/AI-assisted; where the scoped fixed-semantics Paper-0 comparison applies, annotations are reviewed and saved as versioned frozen data before its runtime comparison.
+51. Semantic QA must record what the source says, what the transformation adds or loses, which fields are inferred, and whether any future information was used.
 
 ## Documentation and review
 
-51. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
-52. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
-53. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
-54. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
+52. TODO contains IDs, status, next action, completion condition, and links—not full literature arguments.
+53. Raw dialogue is archived when it contains user decisions, original reasoning, or provenance-critical review; routine bug reviews need only commit/issue/decision/follow-up.
+54. Record architecture audits at milestone triggers in `00_研究设计/architecture_audit_policy.md`.
+55. Before a milestone handoff, independently reread the actual diff for duplicated pipelines, hidden side channels, schema drift, provenance loss, dev/test contamination, dead helpers, and document duplication.
 
-## Current known baseline
+### Evidence ownership
 
-- Anti-patch-debt baseline: `webgpt-sync@685c319`.
-- `Demo codex-generated/Src/simulation.cpp` is about 58 KB and currently owns runtime orchestration, batch, CSV, verify, E0, and profile runs. This is known debt; this rule does not authorize a large refactor now.
-- Typed `FactKey` coverage is partial. New adapters must not inject dataset-specific string keys into runtime `Observation`.
+Route each claim to the source that owns that kind of evidence; no single document is a universal precedence list:
+
+| Question | Evidence owner |
+|---|---|
+| What code currently does | Current implementation and its relevant regression coverage; `00_研究设计/当前实现进度.md` summarizes the verified baseline. |
+| What a frozen runtime or experiment protocol requires | The corresponding versioned contract/specification. |
+| What a run showed | That run's `RESULTS`, `INPUT_REVIEW`, or audit artifact, with its stated split and evidence limits. |
+| What the user decided or originally meant | The attributed source dialogue; check current owner documents for whether that historical decision remains active. |
+
+## Historical checkpoint (not a description of current HEAD)
+
+- The anti-patch-debt audit used `webgpt-sync@685c319` as its baseline.
+- At that checkpoint, `Demo codex-generated/Src/simulation.cpp` was about 58 KB and owned runtime orchestration, batch, CSV, verify, E0, and profile runs. These are historical observations, not claims about current HEAD, current file size, or present ownership; they do not authorize a large refactor.
+- That audit also noted partial typed `FactKey` coverage. New adapters must not inject dataset-specific string keys into runtime `Observation`.
 # Runtime kernel / dynamics model / demo boundary
 
 - `ContinuousRuntime` orchestrates an explicitly selected `CharacterDynamicsModel`; it must not silently construct a default behavior model.
 - Shared Kernel patches require an execution invariant, ownership, information-boundary, scheduler, or settlement defect. Demo naturalness never qualifies.
 - State-update laws, appraisal semantics, commitment rules, utility coefficients, and candidate weights belong to a versioned Dynamics Model.
 - Runtime sources must not import Demo models. Reference models must not import Demo models. Demo artifacts are not research evidence.
-- Every Runtime caller names its model (`ReferenceRuleDynamicsV0` or `DemoLivingDynamicsV0`). Shared S schema is a data contract, not validated psychology.
+- Every Runtime caller explicitly selects the Dynamics Model version it uses. Shared S schema is a data contract, not validated psychology.
 - Research dynamics changes require a frozen development protocol and a new candidate/version; do not overwrite Reference V0.
 
 See [Runtime / Dynamics / Demo boundary](00_研究设计/Architecture_Boundary_Runtime_Dynamics_Demo_v1.md).
