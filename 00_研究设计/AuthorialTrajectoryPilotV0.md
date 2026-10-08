@@ -397,6 +397,8 @@ spec含sequence ID、内容hash、进入guard、角色/道具/位置前提、核
 
 ### 12.2 预算与停止
 
+钥匙—账本 E0 的有限状态、算子、预算与逐 case 预期统一维护于[E0 有限实验协议](E0_KeyLedger_Protocol_v0.md)。该协议仍待独立审阅，不代表 E1–E5 已冻结或允许实施；本页保留阶段契约，不另维护一份 E0 执行实例。
+
 编码E0前必须把有限domain规模、search expansion/walltime、候选上限、rollout N/H和误差/置信报告规则填入独立execution protocol；不能边看结果边加预算。本文不发明一组未经成本测定的实验参数。首次最小cost probe只能确定计算预算，不用于H1/H2效果结论。
 
 停止条件：W/O泄漏、非法effects、账本回滚、fork共享、参考语义不一致立即STOP；预算不足只改变diagnosis，不能修改作者目标凑成功。behavior collapse先审真实trace，不因统计“完成”扩大运行。每阶段结束留待独立复核，不自行闭关制造总PASS。
@@ -424,7 +426,7 @@ spec含sequence ID、内容hash、进入guard、角色/道具/位置前提、核
 
 ### 13.2 钥匙场景的完整失败/修复推导（不是新模拟）
 
-该实例的唯一场景数据定义见[统一问题与成熟基线准入 §2](../01_文献/算法积木/04_统一问题与成熟基线准入.md#2-统一实例域约定与判定层)，本节只对齐推导：t=2时玩家已提交destroy key0；作者要求不晚于t=10出现真实 `ledger_acquired(actor=A,item=ledger)` 事件。B取回自己的tool与获得payment是分立目标；`return_tool(A,B)`只满足前者，不构成借钥匙动机。教学成功正例是 `offer_loan → B独立选择接受 → 双方确认后的原子交易 → unlock → take_ledger`；只有真实结算的take事件满足目标。此t2→t7手推轨迹用于说明语义，不是benchmark或实验结果。
+该实例的纸面来源见[统一问题与成熟基线准入 §2](../01_文献/算法积木/04_统一问题与成熟基线准入.md#2-统一实例域约定与判定层)，具体 E0 执行定义由[E0 有限实验协议](E0_KeyLedger_Protocol_v0.md)维护；本节只对齐原推导：t=2时玩家已提交destroy key0；作者要求不晚于t=10出现真实 `ledger_acquired(actor=A,item=ledger)` 事件。B取回自己的tool与获得payment是分立目标；`return_tool(A,B)`只满足前者，不构成借钥匙动机。教学成功正例是 `offer_loan → B独立选择接受 → 双方确认后的原子交易 → unlock → take_ledger`；只有真实结算的take事件满足目标。此t2→t7手推轨迹用于说明语义，不是benchmark或实验结果。
 
 1. Monitor检查已提交事件账本：截至t=2，coverage完整且尚无 `ledger_acquired(actor=A,item=ledger)` 事件；deadline未到，所以仍是PENDING，不是VIOLATED。初始持有状态本身不能替代本例要求的取得事件。
 2. committed destroy使 `key0_intact` false，旧unlock(key0)的support失效；primary-key引用不能改绑spare。
