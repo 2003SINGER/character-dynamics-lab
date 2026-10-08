@@ -331,20 +331,24 @@ schema→类型/权限→W合法性→反例/rollout依次验证。未实现能�
 
 每次估计记录 author约束达成次数/总数及区间、actual policy failure、需要覆写/剥夺选择次数、actor连续性破坏、runtime/LLM成本、世界资源消耗。先排除真实hard权限/合法性违背，再使用作者事先冻结的lexicographic priorities或同单位代价，不拍一个混合总分。
 
-`Pr(C_author | do(d))`在此仅是**给定模拟模型的候选干预达成率**；不是从观察数据识别的真实因果效应，也不是玩家自由下的保证。选择出的d提交前必须在当前W重新validate，过期候选不执行。
+`Pr(C_author | do(u_D))`在此仅是**给定模拟模型的单次候选干预 `u_D` 达成率**；不是从观察数据识别的真实因果效应，也不是玩家自由下的保证。候选评分/选择及其rollout本身不证明闭环Director策略存在 `∃d ∀responses` 的鲁棒保证。选择出的 `u_D` 提交前必须在当前W重新validate，过期候选不执行。
+
+本节估计属于“固定策略下的成功概率”对象：策略、随机模型、初态和绝对 deadline 必须固定；单次确定性 trace 是单次 verdict，有限 rollout 只能在明确采样假设下给估计/置信区间，不能给无条件或确定性下界。汇总得分不能代替合法路径见证；经逐步验证的成功 rollout 可以给出同一冻结模型中的存在性见证，但不证明真实世界已完成，也不证明作者策略对所有允许响应都有保证。后者需要显式冻结响应策略类并完成有限博弈/模型检查证明，不能由全成功样本替代。Director 策略只读其授权历史，不能控制 B 的自主选择。
 
 ### 9.3 六个标签是正交证据，不是一种万能status
 
 | 标签 | 足够证据 | 不能替代 |
 |---|---|---|
 | SATISFIED | 真实trace的Monitor已满足 | 不从rollout预期写成已经发生 |
-| POSSIBLE_IN_WORLD | 有合法world path及执行条件 | 不保证NPC/玩家选择 |
-| PLAUSIBLE_UNDER_ACTOR_POLICIES | 给定pin模型/样本预算的rollout估计 | 不保证达成、非心理有效性 |
+| POSSIBLE_IN_WORLD | 冻结模型中存在合法joint control与executor转移，可达目标witness | 不保证NPC/玩家实际选择；不等于固定策略成功概率或作者鲁棒保证 |
+| PLAUSIBLE_UNDER_ACTOR_POLICIES | 给定固定策略π、响应/随机模型M、deadline及样本预算的rollout估计 | 单trace不是概率；有限样本只在明确采样假设下给估计/置信区间，不能给无条件或确定性下界或全响应鲁棒保证，亦非心理有效性 |
 | NO_PLAN_WITHIN_BUDGET | 有完整预算/timeout日志但无解 | 不证明不可达 |
 | PROVEN_UNREACHABLE_IN_FINITE_DOMAIN | 已穷尽完整有限domain或有效形式证明 | 不升级成开放游戏绝对不可能 |
 | CONFLICTS_WITH_AUTHOR_CONSTRAINT | 两约束冲突proof或可验证unsat core | 不自动降低hard权重 |
 
 例如deadline未到且唯一key被毁：Monitor可以PENDING，planner在确证无spare/domain完整时可PROVEN_UNREACHABLE；两者同时成立。不存在“搜索失败所以过去时序已违反”。
+
+上述标签不新增“鲁棒成功”万能status。鲁棒保证作为单独的策略量词问题记录：需给出合法Director策略、授权历史边界、完整允许响应集合与有限博弈证明。一次B拒绝只说明当前交易分支未成；任务trace仍可包含之后的合法机会，最终由截止时刻及以前的真实witness判定。若固定B策略在整个窗口始终拒绝，且已证明所有合法Director策略均无替代路径或许可干预，则该条件下失败；若此拒绝策略属于允许响应集合，它也构成该冻结域鲁棒保证的反例。这不证明W中任意角色选择下都无路径，也不外推到其他响应集合或授权版本。
 
 作者修订接口只提供：放弃目标、选择已许可分支、补真实operator/资源、显式限制玩家行动、请求override；保留原goal/失败证据及修改版本。不能LLM造未登记的备用key逃避冲突。
 
@@ -361,10 +365,10 @@ spec含sequence ID、内容hash、进入guard、角色/道具/位置前提、核
 | 假设 | 实验操作 | 反证或无增益分支 |
 |---|---|---|
 | H1 信息/机会比直接命令更能保留人物连续性 | 同world目标比较null、等资源世界机会、明确命令/override；policy/model固定 | 机会命中不稳定、代价更高或实质选择同样被剥夺，则不宣称更好 |
-| H2 跨层依赖修复比全量重规划更保留持续活动 | 同玩家perturbation与资源预算，比较全量planner vs causal-only vs跨层repair | 依赖漏建/非法保留/额外维护成本超过收益即失败 |
+| H2 跨层依赖修复是否能降低未来 suffix 修复成本并保留合法持续活动 | 同玩家perturbation与资源预算，比较 causal-only / 跨层 repair 与进度保持的 full replan；核对依赖合法性、资源重新获取/活动切换、计算量及 repair 总维护成本 | 依赖漏建、非法保留，或总修复与维护成本未改善即失败；不把 full replan 的 reset 当收益 |
 | H3 不可达/权限诊断帮助作者处理自由与控制冲突 | 可达、预算不足、有限域不可达、constraint conflict四类已知case | 把timeout当不可达、偷偷补资源、伪装覆写即失败 |
 
-传统基线必须有相同域、信息/任务、资源和预算能力。E0用正确的full replanning；人物侧采用同场景的认真utility/GOAP，而不是把RulePolicy采样器叫独立GOAP；LLM基线共享operator权限与grounding，不故意让其全知/空壳。禁止用明显弱baseline为复杂设计制造优势。
+传统基线必须有相同域、信息/任务、资源和预算能力。所有基线（包括 full replan）都必须保留仍合法的 `RunningAction`、reservation 与 progress；需要 adapter 时单列其成本，并报告基线原生行为。E0用正确的、进度保持的 full replanning；人物侧采用同场景的认真utility/GOAP，而不是把RulePolicy采样器叫独立GOAP；LLM基线共享operator权限与grounding，不故意让其全知/空壳。禁止用明显弱baseline为复杂设计制造优势。
 
 ## 12. E0–E5 预实验准入、操作和停止条件
 
@@ -376,7 +380,7 @@ spec含sequence ID、内容hash、进入guard、角色/道具/位置前提、核
 |---|---|---|---|
 | E0 | 有限inventory/location/key域、真实executor、完整fork、账本截止节点、monitor与fullplanner | reachable path/执行trace；对照exhaustive/h=0与拟用A* | 唯一key不可用且无备用；同时间窗冲突；planner/real effect不一致。未有正确强基线不得进E1 |
 | E1 | A/B独立O、B自身任务与自主policy、ActorFeasibility | world path vs eligible/policy/真实行为；故意knowledge/motivation/resource gap分类 | planner知道spare但A不可知；B可拒绝借出；非法O泄漏停止。不得把成功命令录像当自主 |
-| E2 | ledger causal links、player destroy perturbation、局部未来repair | 同prefix配对full replan/causal-only/cross-layer；活动progress保留率、validity、repair预算 | 不相关动作reset、回滚过去、shared resource冲突遗漏。依赖漏建必须保守扩大 |
+| E2 | ledger causal links、player destroy perturbation、局部未来repair | 同prefix配对进度保持的full replan/causal-only/cross-layer；比较合法活动与reservation保留、suffix重算、资源重新获取、活动切换、validity及repair总成本 | 任一基线reset仍合法动作、回滚过去或漏掉shared resource冲突即不公平/失败；依赖漏建必须保守扩大 |
 | E3 | 有行为语义的关系模型及相对事件窗软轨迹 | 在model specification审计后比较opportunity/override；关系真实transition、policy consumer与差异 | trust未注册拒绝；无触发NOT_ACTIVATED；LLM仅嘴上说信任下降无state effect。未定义关系机制不运行 |
 | E4 | 亲写账本揭露片段与guards/abort规则 | 内容hash保持、合法进入/不能进入/中途干扰三类trace；null代价 | 人不在/道具毁坏不偷补；无abort规则请求作者；不得自动改锁台词 |
 | E5 | 不相关NPC持续任务、shared resources及第二条world线 | 严格同扰动paired run；未受影响合法生活保留、资源/时间一致、作者劳动分项 | 保留非法计划不能算收益；预算增加/特殊分支劳动必须计入 |
@@ -420,16 +424,16 @@ spec含sequence ID、内容hash、进入guard、角色/道具/位置前提、核
 
 ### 13.2 钥匙场景的完整失败/修复推导（不是新模拟）
 
-设t=2玩家已毁key0，A正想取得ledger，B有key1、A不知，B还想归还自己的tool；作者要求t≤10曾持有ledger。一个纸面世界路径为 `return_tool(A,B) → lend_spare(B,A) → unlock(A,key1) → take_ledger(A)`，每步1分钟只是本手推domain的明确设置。
+该实例的唯一场景数据定义见[统一问题与成熟基线准入 §2](../01_文献/算法积木/04_统一问题与成熟基线准入.md#2-统一实例域约定与判定层)，本节只对齐推导：t=2时玩家已提交destroy key0；作者要求不晚于t=10出现真实 `ledger_acquired(actor=A,item=ledger)` 事件。B取回自己的tool与获得payment是分立目标；`return_tool(A,B)`只满足前者，不构成借钥匙动机。教学成功正例是 `offer_loan → B独立选择接受 → 双方确认后的原子交易 → unlock → take_ledger`；只有真实结算的take事件满足目标。此t2→t7手推轨迹用于说明语义，不是benchmark或实验结果。
 
-1. Monitor看到holds(A,ledger)=false、now2<deadline10，过去coverage完整：PENDING，不是VIOLATED。
+1. Monitor检查已提交事件账本：截至t=2，coverage完整且尚无 `ledger_acquired(actor=A,item=ledger)` 事件；deadline未到，所以仍是PENDING，不是VIOLATED。初始持有状态本身不能替代本例要求的取得事件。
 2. committed destroy使 `key0_intact` false，旧unlock(key0)的support失效；primary-key引用不能改绑spare。
-3. full world planner找到t=6路径：POSSIBLE_IN_WORLD；这一步只是假定各动作被执行。
-4. ActorCheck指出A不知key1、B借出会改变自身任务资源；返回information/motivation gap，不能直接submit lend_spare。
+3. 在04 §2冻结的纸面域中，假设B选择接受且各动作合法结算，t2→t7存在取得witness的路径：POSSIBLE_IN_WORLD；这一步不保证B实际接受。`acquired_by_10` 是该事件在时间约束下的witness/派生记号，不是holds状态或另一种事件类型。
+4. ActorCheck指出A不知key1；在合法询问前不把key1喂给A。B是否接受由B自己的policy决定；B取回tool本身不能替代独立payment目标或借出决定。
 5. Director候选包括null、已授权合法hint delivery、明确许可override；若domain没有delivery算子则requires_domain_extension，不补一个“说句话即可”的effect。
-6. sandbox中按真实policy运行，B可能仍拒绝；记录有限达成率，不改写其TaskCommitment来增加成功率。真实执行只有当前precondition通过的可控候选。
+6. sandbox中按固定policy与模型运行，B可能拒绝；记录单次trace或有限样本估计，不改写其TaskCommitment来增加成功率。真实执行只有当前precondition通过的可控候选；一条拒绝trace本身不构成世界不可达证明。
 7. 若t=4玩家又毁key1且有限域确无别的途径：planner可给有限域不可达proof；Monitor在t4仍PENDING。作者选择放弃目标/允许branch/授权新真实资源，不能生成“其实还有key2”消除失败。
-8. deadline10到了且完整holding history无真见证：VIOLATED。若history缺段则INDETERMINATE，不能用planner说无解替代过去事实检查。
+8. deadline10到达后，若覆盖至deadline且含端点的完整事件账本内没有真实 `ledger_acquired(actor=A,item=ledger)` witness，则VIOLATED；若coverage缺段则INDETERMINATE，不能用planner说无解替代事件证据检查。
 
 同样的trace可以同时支持不同层的结论；这种分离正是现有持续人物设施与新作者控制接口的价值。无需现在发明信任系数或训练policy来让这个机制推导成立。
 

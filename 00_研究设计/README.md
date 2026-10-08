@@ -17,15 +17,16 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [完整机制说明 v0](完整机制说明_v0.md) | 已确认的 W/O/X/S/P/D/A 工程语义、任务承诺、场景/动作、时间、低耦合及消融约束 | 心理规律已验证的声明；未采纳公式、代码完成清单 |
 | [前台问题与候选创新](前台问题与候选创新.md) | 旧行为预测 / Paper-0 分支的课题锚、Forward/Inverse、研究候选与评价边界 | 全系统当前研究问题；再写一套机制总说明 |
 | [未决问题与机制候选](未决问题与机制候选.md) | 具体缺口、备选计算、用户原意、决策条件 | 把提案写成已实现或已验证 |
-| **[Character Dynamics｜系统问题与执行语义 v0](CharacterDynamics_FormalProblem_v0.md)** | **唯一 F0/F1 owner**：算法无关的问题定义与执行语义；状态对象/权限、时间、转移、作者意图/绑定、规划器/导演、性质/反例、A/B研究任务与成熟度；状态 DRAFT / READY_FOR_INDEPENDENT_REVIEW | 算法选型、实现完成或研究有效性主张 |
+| **[Character Dynamics｜系统问题与执行语义 v0](CharacterDynamics_FormalProblem_v0.md)** | **唯一 F0/F1 owner**：算法无关的问题定义与执行语义；状态对象/权限、时间、转移、作者意图/绑定、规划器/导演、性质/反例及近期 A/B 研究组合；状态 DRAFT / READY_FOR_INDEPENDENT_REVIEW | 长期研究版图、算法选型、实现完成或研究有效性主张 |
 | [AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md) | 候选 F2 与 TypedIR / 预实验的较低层 owner；保留已有语义契约和 reference 证据 | 整个系统的正式定义；把候选写成获批路线或将 reference 测试冒充 Director/多 NPC 方法结果 |
+| [04 统一问题与成熟基线准入](../01_文献/算法积木/04_统一问题与成熟基线准入.md) | 有限统一实例下的成熟方法综合、候选问题与方法准入判断 | 全部长期研究方向、已确认研究缺口或实验通过结论 |
 | **[整合系统视角复核](审核_整合系统视角复核_2026-09-05.md)** | **判断复核**：回到实现核对旧判断的前提是否成立 | 文献层面的重新论证 |
 | **[文献比较方法与阶段缺口复核](审核_文献比较方法与阶段缺口_2026-09-05.md)** | **方法纪律**：13 维机制比较模板、冻结母问题、科研流程阶段缺口。含**我自己的认错清单** | 具体论文的逐篇内容 |
 | **[对外表述（中英对照）](对外表述.md)** | **旧行为预测 / Paper-0 分支表达材料**：abstract/intro 原料、术语与禁用表述 | 新作者约束路线的论文定位；技术细节与实验结论 |
 | [TODO](TODO.md) | 下一动作、依赖、验收、完成状态 | 长篇机制论证 |
 | [后置机制候选｜AU 考古](后置机制候选_AU考古.md) | 保存暂不进入主线的 AU 候选及升格条件 | 当前 runtime、Paper-0 主张与主线 TODO |
 | [当前实现进度](当前实现进度.md) | 代码版本、实际能力、未实现项、验证证据 | 从目标设计推断完成 |
-| **[System Vision v0](Character_Dynamics_System_Vision_v0.md)** | Runtime Kernel / Dynamics Model / Evaluator / Optimizer / Applications 的边界与 runtime 三流模型 | 把 Kernel 冻结误写为全系统完成 |
+| **[System Vision v0](Character_Dynamics_System_Vision_v0.md)** | Runtime Kernel / Dynamics Model / Evaluator / Optimizer / Applications 的边界、runtime 三流模型与长期研究版图 | 把 Kernel 冻结误写为全系统完成；把候选方向误写为已承诺任务或研究缺口 |
 | **[Runtime Scheduler v1](Runtime_Scheduler_v1.md)** | 已冻结的统一时间、RunningAction、DecisionGate 与 outcome contract | 新研究目标或 batch/evaluator 迁移授权 |
 | **[Runtime Closure Matrix](Runtime_Closure_Acceptance_Matrix.md)** | Runtime / Engine v1 closure 的 gate 与可执行证据 | 心理机制或科研有效性结论 |
 | [Runtime Semantic Audit Matrix](Runtime_Semantic_Audit_Matrix.md) | runtime channel 的 W/O/X/S 消费边界 | 增加新 runtime 功能 |
@@ -51,7 +52,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 | 问题 | 从哪里取答案 |
 |---|---|
-| 系统目标与候选研究问题是什么？ | [现状速览](项目现状速览_通俗版.md) → [F0/F1 §1、§8](CharacterDynamics_FormalProblem_v0.md#8-研究问题细分阶段与当前成熟度) |
+| 系统长期研究方向、当前候选问题分别是什么？ | [System Vision 长期研究版图](Character_Dynamics_System_Vision_v0.md#长期研究版图) → [现状速览](项目现状速览_通俗版.md) → [F0/F1 §1、§8](CharacterDynamics_FormalProblem_v0.md#8-研究问题细分阶段与当前成熟度)；近期 A/B 组合和有限实例 Q1–Q3 另见 [04 综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md) |
 | 已实现什么，哪些只是设计？ | [实现进度的当前事实](当前实现进度.md#2-当前实际执行链) + 对应源码/测试；[F0/F1 接口核对](CharacterDynamics_FormalProblem_v0.md#现行接口映射与未接入接缝) |
 | 得到过什么正面或负面证据？ | [结果成熟度账本](研究重建审计_2026-10-06.md#现有结果的成熟度与复用账本截至-2026-10-08) → 各实验 RESULTS / 原始产物 |
 | 修改模块服从哪份规格、不能破坏什么？ | [项目规则](../AGENTS.md)的权威边界 → [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)、[Runtime contract](Runtime_Scheduler_v1.md)或对应分支 owner |
@@ -62,7 +63,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 
-当前作者约束线先整理算法无关的 F0/F1 问题定义：[Character Dynamics｜系统问题与执行语义 v0](CharacterDynamics_FormalProblem_v0.md)是唯一 owner，状态为 DRAFT / READY_FOR_INDEPENDENT_REVIEW；[AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md)降为候选 F2 与 TypedIR / 预实验下层 owner，不是全系统定义。[算法积木总表](../01_文献/算法积木/README.md)继续维护原算法/权限/组合接缝与本人新理解。A（规划/执行能力）与 B（低作者成本控制）只是待选研究问题，指标、算法与取舍尚未确定；Node/Maze 与 LLM/HTN 是替换候选，MC“地狱门”是思想例子，TypedIR 不是作者 UI。“walking skeleton”小闭环是 GPT 建议，待用户决定，不构成实现授权。本阶段不开发 Director、不启动 NPC 实验、不改冻结 Runtime。
+当前作者约束线的问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)，候选 F2 / TypedIR / 预实验由 [Pilot](AuthorialTrajectoryPilotV0.md)维护；完整研究方向见 [System Vision 长期研究版图](Character_Dynamics_System_Vision_v0.md#长期研究版图)。A（规划/执行能力）与 B（稀疏作者控制）是近期选基线时抽取的研究组合；[04 综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md)的 Q1–Q3 是有限实例下的候选问题，不代表完整研究版图，也未决定研究缺口、方法或开工路线。Node/Maze 与 LLM/HTN 是替换候选，MC“地狱门”是思想例子，TypedIR 不是作者 UI。本轮有限语义返修已完成，待独立复核；当前下一动作及状态见 [TODO](TODO.md)，不自动授权编码或实验。本阶段不开发 Director、不改冻结 Runtime。
 
 例如本次三项想法分别落位：分段逆映射保留原话于问题 Q01；低耦合的确定边界在完整机制 §8，未落实方案在 Q03；Object/Scene/W 动作职责在完整机制 §4，具体实现缺口在 Q05。TODO 只链接并安排验证，不再复制三遍原理。
 
