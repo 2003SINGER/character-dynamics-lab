@@ -1,6 +1,6 @@
 # TODO｜active research queue
 
-更新时间：2026-10-09。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
+更新时间：2026-10-10。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
 ## SYSTEM / APPLICATION TRACK
 
@@ -10,7 +10,9 @@
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
 | DEMO-LIVING | **ACTIVE / DEMO ONLY** | 保留历史批次为实现诊断。Laya v4.3 一日工程 gate 通过、行为 scale gate 未通过：no-history 单 seed 睡眠 1,149 分钟且历史输入使首请求分布大幅变化；停止扩成 64 actors / 7 days | [core behavior eval](../Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；[Laya typed policy](../Demo%20codex-generated/demo/laya_typed_policy_v0/README.md)；[v4.3 audit](../outputs/laya_runs/laya_v43_66ebfe7_20260925/RESULTS.md) |
 | RESEARCH-DYNAMICS | **TOY_NOT_ADMITTED / 未训练** | 不把四字段手写 law、相对分数 policy 或当前不足的干预测试称作机制通过；不运行会覆盖 artifacts 的生成器 | [研究重建审计](研究重建审计_2026-10-06.md)；[ResearchDynamicsV1 source](../02_实验/ResearchDynamicsV1/README.md) |
-| NPC-SYSTEM-INTEGRATION-V0 | **DEVELOPMENT_VERIFIED / READY_FOR_INDEPENDENT_REVIEW** | 2026-10-09 用户新授权已将外围维护切换为 TXT 目标的有限整合实现；首个 vertical slice 已交付，下一步独立审阅实际链与未实现项，不自行 CLOSED | [唯一结果/需求映射](../02_实验/NPC_System_Integration_v0/RESULTS.md)；[可运行入口](../tools/npc_system_v0/README.md)。不等于正式 E1-2、LLM 接入或完整系统 |
+| NPC-SYSTEM-INTEGRATION-V0 | **DEVELOPMENT_VERIFIED / READY_FOR_INDEPENDENT_REVIEW** | 首个 vertical slice 已交付，保留独立审阅实际链与未实现项；后续动作不自动设为 C++ 桥或独立 Python CLI | [唯一结果/需求映射](../02_实验/NPC_System_Integration_v0/RESULTS.md)；[可运行入口](../tools/npc_system_v0/README.md)。不等于正式 E1-2、LLM 接入或完整系统 |
+| MC-EXECUTION-ROUTE | **方向恢复 / 接入候选，未集成** | 确认 §07 的最小观察/动作/时间契约与技术探针实施授权。Mineflayer/Java/结构化观察及煤炭任务均为候选，不视作已拍板 | [候选步骤与缺口](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md)；[方法与证据边界](研究重建审计_2026-10-06.md) |
+| DIRECTOR-BUDGET-QUESTION | **待源码复现** | 若重新处理，先按来源审计/复现预算疑点；该恢复摘要不构成本轮新确认 | [NPC System Integration v0 结果](../02_实验/NPC_System_Integration_v0/RESULTS.md) |
 
 ## ACTIVE
 

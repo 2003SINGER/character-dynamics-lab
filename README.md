@@ -6,6 +6,8 @@
 
 当前已有规则化 C++ 参考模拟与批量日志；**Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**：统一时钟、RunningAction、事件/信息边界、DecisionGate、typed rejection、scheduler-native fixtures、trace、case-isolated CTest 与 CI 已闭环。Evaluator、Objective、Optimizer 与 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
 
+2026-10-10 路线恢复：下一载体方向为真实 Minecraft，尚未集成；不继续将 KeyLedger 或独立 Python CLI 游戏当主要交付。科研推进原则见[研究重建审计](00_研究设计/研究重建审计_2026-10-06.md)，接入候选见[IntegrationBlueprint v0 §07](00_研究设计/草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md)，实施边界见[TODO](00_研究设计/TODO.md)。
+
 ## 从这里进入
 
 2026-10-09 新授权已撤销“仅外围维护”：按用户目标 TXT 开发的 [NPC System Integration v0](tools/npc_system_v0/README.md) 已贯通有限作者点/线、受限世界规划、独立演员状态/承诺、GOAP/HTN 与真实执行/监测。它是 E1 之上的 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 应用样机，不改冻结 C++ Kernel，也不是完整系统、LLM 高层规划或研究收益。具体能力与限制见[唯一结果](02_实验/NPC_System_Integration_v0/RESULTS.md)；旧语义草案中的未开工叙述按其记录日期理解，当前授权看 [TODO](00_研究设计/TODO.md)。
