@@ -200,7 +200,7 @@ PlotPointSpec / Occurrence、Arc、Recognizer 等是可选表示，尚非现行�
 
 不报主观“完成百分比”，也不把已有工程与负结果归零。形式化有助于暴露语义缺口；写成公式本身不构成证明、方法或科学贡献。
 
-末段 GPT 推荐的路线是：保留大愿景，用成熟组件先做小的端到端 walking skeleton，再对暴露的一个瓶颈研究；而非把每块都独立造出新算法后才集成。历史上 2026-10-08 的首轮授权仅为 E0 协议，随后已另获实现授权并完成有界验收，实际证据以[E0 结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)为准。2026-10-09 新审阅授权的是[E1-0 协议设计](E1_KeyLedger_LocalAgency_Protocol_v0.md)，不是 E1 代码、完整 Director 或整套 walking skeleton。S0–S4 是讨论中的建议增量，不能与 Pilot 的 E0–E5 混称同一冻结 protocol；也不要求先做原创 A 才能研究 B。易变状态和下一动作只维护在 [TODO](TODO.md)。
+末段 GPT 推荐的路线是：保留大愿景，用成熟组件先做小的端到端 walking skeleton，再对暴露的一个瓶颈研究；而非把每块都独立造出新算法后才集成。历史上 2026-10-08 的首轮授权仅为 E0 协议，随后已另获实现授权并完成有界验收，实际证据以[E0 结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)为准。2026-10-09 用户已授权[E1-0 协议](E1_KeyLedger_LocalAgency_Protocol_v0.md)下的 E1-1 最小实现与开发验证；独立开发包已交付，实际状态与证据只查唯一[结果 owner](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)，代码入口为[runner](../tools/e1_keyledger_v0/runner.py)。正式实验与 E1-2 未授权。此授权不含完整 Director 或整套 walking skeleton。S0–S4 是讨论中的建议增量，不能与 Pilot 的 E0–E5 混称同一冻结 protocol；也不要求先做原创 A 才能研究 B。易变状态和下一动作只维护在 [TODO](TODO.md)。
 
 当前可确认的推进：问题与执行语义被集中维护、候选方法与事实分开、两个 reference 多段缺陷进入可复核修补。当前不能确认：通用 MC/NPC planner、Director、完整多角色可执行世界、低作者成本收益或玩家活人感。路线选择和实际编码/实验准入由 [TODO](TODO.md)维护；本轮不自动启动。
 

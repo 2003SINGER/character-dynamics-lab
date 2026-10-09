@@ -152,7 +152,7 @@ Strong AND/OR 的每个 belief successor 按 A 实际能区分的合法 observat
 
 每 solver/episode 的开发配置 expansion cap 为 10,000，作为跨 replans 的算法总上限；一个 case 内所有 A replan 共用同一预算 ledger，不可每轮重置。belief/状态 successor 原语生成量另计，防止一个 belief expansion 隐去大量枚举成本。2 秒只是可显式配置的候选 watchdog 值；触发时记录 `termination_reason=WALL_TIMEOUT`、`solve_status=BUDGET`、`complete=false`。无论 expansion 或 watchdog 停止，未完成的开发 case 不计正确性 PASS。runner 必须区分 `EXPECTED_VERDICT_CHECK`（预算内完成并与 hand-derived verdict 对照）与 `INCOMPLETE_BUDGET`（未完成，不能计 PASS）；禁止隐式提高 cap、失败后关闭 watchdog 或靠删改 case 掩盖停止。此配置不修改 E0 cap，也不宣称已适合正式实验。
 
-E1 实现前置开发验证须运行固定开发配置，保留环境信息和所有结果，包括 budget miss；不得据此改写预期 verdict。正式实验前才冻结 formal budget 与 environment 一次，并记录版本/hash。本协议当前不执行前置验证、不选定更大预算，也不授权正式实验。正确性问题（权限/信息泄漏、schema 或 settlement 不一致、事件错误）始终是硬失败，与墙钟预算无关。E1-1 的校准对象是成熟方法在该有限契约下的正确性和可报告性，不是 NPC 科学瓶颈或已训练的动力学。
+E1 实现前置开发验证须运行固定开发配置，保留环境信息和所有结果，包括 budget miss；不得据此改写预期 verdict。正式实验前才冻结 formal budget 与 environment 一次，并记录版本/hash。已授权的前置开发验证与结果由独立实现/结果 owner 维护；本协议不选择更大预算或授权正式实验。正确性问题（权限/信息泄漏、schema 或 settlement 不一致、事件错误）始终是硬失败，与墙钟预算无关。E1-1 的校准对象是成熟方法在该有限契约下的正确性和可报告性，不是 NPC 科学瓶颈或已训练的动力学。
 
 逐例记录 domain/protocol revision、源码 revision、condition/hash、K/policy/T、actor input O 与授权目录 hash、planner/oracle/policy 版本、扩展/生成数、耗时、终止原因、每步 ActionIntent/start/outcome/settlement、A/B O 投影、tool/payment/ledger goal 状态、event IDs/seals、Monitor verdict 与实际 witness。Known/Unknown 成对报告首动作和轨迹差异。
 

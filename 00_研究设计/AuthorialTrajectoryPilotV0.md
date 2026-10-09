@@ -2,7 +2,7 @@
 
 日期：2026-10-08。状态：**系统设计与独立参考契约交付；READY_FOR_INDEPENDENT_REVIEW，不是 Pilot 已运行、方法有效或 milestone CLOSED。**
 
-阶段说明：下文 E0–E5 是当时的整体候选计划，不是当前执行授权。E0 的实际有界验收只查[结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)；2026-10-09 新授权限于[E1-0 有限协议设计](E1_KeyLedger_LocalAgency_Protocol_v0.md)，不运行 E1 或开发 Director。文中的“E0 待审/待编码”保留为历史阶段描述，不再代表当前事实。
+阶段说明：下文 E0–E5 是整体候选计划，不能据此推断整套阶段已获授权。E0 的实际有界验收只查[结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)。用户已授权[E1-0 有限协议](E1_KeyLedger_LocalAgency_Protocol_v0.md)下的 E1-1 最小实现与开发验证，独立开发包已交付；实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)。正式实验、E1-2 与 Director 开发未授权。E1 代码入口见[runner](../tools/e1_keyledger_v0/runner.py)。文中的“E0 待审/待编码”保留为历史阶段描述，不再代表当前事实。
 
 本页是作者轨迹分支的设计 owner；[算法积木](../01_文献/算法积木/README.md)维护原算法及来源，不在这里重写论文。输入为本地私有完整讨论两部分：持续人物与作者控制的接口，以及 Typed Trajectory Constraint IR 四份契约。原文 SHA256 为 `65d9142d1b09526fb3d678fd335837d40f04cc923beda5f5c03767d6cea20c94`。自然语言例子不是自动获得执行资格的世界能力。
 
@@ -399,7 +399,7 @@ spec含sequence ID、内容hash、进入guard、角色/道具/位置前提、核
 
 ### 12.2 预算与停止
 
-钥匙—账本 E0 的有限状态、算子、预算与逐 case 预期统一维护于[E0 有限实验协议](E0_KeyLedger_Protocol_v0.md)。该协议仍待独立审阅，不代表 E1–E5 已冻结或允许实施；本页保留阶段契约，不另维护一份 E0 执行实例。
+钥匙—账本 E0 的有限状态、算子、预算与逐 case 预期统一维护于[E0 有限实验协议](E0_KeyLedger_Protocol_v0.md)，其结果由 E0 结果 owner 维护。本页保留较高层阶段契约，不另维护 E0/E1 执行实例。当前 E1-1 授权边界、开发预算和停止条件以[E1 协议 v0.r1](E1_KeyLedger_LocalAgency_Protocol_v0.md)为准；正式实验和 E1-2 尚未授权。
 
 编码E0前必须把有限domain规模、search expansion/walltime、候选上限、rollout N/H和误差/置信报告规则填入独立execution protocol；不能边看结果边加预算。本文不发明一组未经成本测定的实验参数。首次最小cost probe只能确定计算预算，不用于H1/H2效果结论。
 
@@ -452,7 +452,7 @@ spec含sequence ID、内容hash、进入guard、角色/道具/位置前提、核
 | unknown/连续内部越界/版本/硬冲突/删除 | §2–4 | 黄金反例与边界测试 |
 | 作者本人新理解 | 本节下方 | 留空由本人写；不以模型解释替代 |
 
-下一步先人工审设计与reference反例是否确为想要的作者语义；通过后才给E0编码授权与budget protocol。已有Runtime不是空壳，但也不是现成多角色规划游戏。设计准入与方法有效分两次验收。
+本段保留的是该 Pilot 设计当时的实施边界；当前 E1-1 最小实现与开发验证已另获授权，具体范围见 E1 协议及其结果 owner。已有 Runtime 不是空壳，但也不是现成多角色规划游戏。设计准入与方法有效分两次验收。
 
 ### 本人新的理解（本人编辑区）
 

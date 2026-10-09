@@ -1,0 +1,1865 @@
+{
+  "audit_version": "parent-e1-audit-v1",
+  "primary_run": "parent-f637743-20261009",
+  "rerun": "parent-f637743-20261009-rerun",
+  "expected_git_revision": "f637743a8af9faacbb908e8b4bae4b8f4661b193",
+  "checks": {
+    "head_is_frozen_revision": true,
+    "primary_revision_matches_real_head": true,
+    "all_29_primary_source_hashes_current": true,
+    "all_29_rerun_source_hashes_current": true,
+    "24_oracle_verdicts_expected": true,
+    "12_actual_event_checks_expected": true,
+    "primary_no_budgets_or_errors": true,
+    "all_step_after_hashes_recompute": true,
+    "primary_rerun_semantically_identical": true,
+    "hidden_world_request_noninterference_and_validation": true,
+    "cap1_wall_three_objects_incomplete_budget": true
+  },
+  "case_summaries": [
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-known-KEEP-10",
+      "condition": {
+        "knowledge": "known",
+        "policy": "KEEP",
+        "deadline": 10
+      },
+      "actual_event_time": null,
+      "actual_witness_event_id": null,
+      "a_total_expansions": 99,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 197,
+        "elapsed_seconds": 0.004140791992540471,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 139,
+        "generated": 178,
+        "elapsed_seconds": 0.003403042006539181,
+        "earliest_completion_time": null
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": false,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-known-KEEP-8",
+      "condition": {
+        "knowledge": "known",
+        "policy": "KEEP",
+        "deadline": 8
+      },
+      "actual_event_time": null,
+      "actual_witness_event_id": null,
+      "a_total_expansions": 51,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 178,
+        "elapsed_seconds": 0.0034850829979404807,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 79,
+        "generated": 96,
+        "elapsed_seconds": 0.001891624997369945,
+        "earliest_completion_time": null
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": false,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-known-PAY-10",
+      "condition": {
+        "knowledge": "known",
+        "policy": "PAY",
+        "deadline": 10
+      },
+      "actual_event_time": 8,
+      "actual_witness_event_id": "event-000005",
+      "a_total_expansions": 29,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 197,
+        "elapsed_seconds": 0.004113292001420632,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 72,
+        "generated": 145,
+        "elapsed_seconds": 0.0030913329974282533,
+        "earliest_completion_time": 8
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": true,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "offer_loan",
+        "choose_accept",
+        "accept_loan",
+        "unlock",
+        "take_ledger",
+        "idle",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-known-PAY-8",
+      "condition": {
+        "knowledge": "known",
+        "policy": "PAY",
+        "deadline": 8
+      },
+      "actual_event_time": 8,
+      "actual_witness_event_id": "event-000005",
+      "a_total_expansions": 27,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 178,
+        "elapsed_seconds": 0.0038666659966111183,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 72,
+        "generated": 130,
+        "elapsed_seconds": 0.002618624988826923,
+        "earliest_completion_time": 8
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": true,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "offer_loan",
+        "choose_accept",
+        "accept_loan",
+        "unlock",
+        "take_ledger"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-known-TOOL-10",
+      "condition": {
+        "knowledge": "known",
+        "policy": "TOOL",
+        "deadline": 10
+      },
+      "actual_event_time": 9,
+      "actual_witness_event_id": "event-000006",
+      "a_total_expansions": 38,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 197,
+        "elapsed_seconds": 0.004159874995821156,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 94,
+        "generated": 168,
+        "elapsed_seconds": 0.0031934579892549664,
+        "earliest_completion_time": 9
+      },
+      "b_goals": {
+        "toolB_returned": true,
+        "payment_received": true,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "return_tool",
+        "offer_loan",
+        "choose_accept",
+        "accept_loan",
+        "unlock",
+        "take_ledger",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-known-TOOL-8",
+      "condition": {
+        "knowledge": "known",
+        "policy": "TOOL",
+        "deadline": 8
+      },
+      "actual_event_time": null,
+      "actual_witness_event_id": null,
+      "a_total_expansions": 55,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 178,
+        "elapsed_seconds": 0.0036055410018889233,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 93,
+        "generated": 108,
+        "elapsed_seconds": 0.0023541670088889077,
+        "earliest_completion_time": null
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": false,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-unknown-KEEP-10",
+      "condition": {
+        "knowledge": "unknown",
+        "policy": "KEEP",
+        "deadline": 10
+      },
+      "actual_event_time": null,
+      "actual_witness_event_id": null,
+      "a_total_expansions": 99,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 197,
+        "elapsed_seconds": 0.004145334009081125,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 139,
+        "generated": 178,
+        "elapsed_seconds": 0.0034275000070920214,
+        "earliest_completion_time": null
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": false,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-unknown-KEEP-8",
+      "condition": {
+        "knowledge": "unknown",
+        "policy": "KEEP",
+        "deadline": 8
+      },
+      "actual_event_time": null,
+      "actual_witness_event_id": null,
+      "a_total_expansions": 51,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 178,
+        "elapsed_seconds": 0.003743375011254102,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 79,
+        "generated": 96,
+        "elapsed_seconds": 0.0017307499947492033,
+        "earliest_completion_time": null
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": false,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-unknown-PAY-10",
+      "condition": {
+        "knowledge": "unknown",
+        "policy": "PAY",
+        "deadline": 10
+      },
+      "actual_event_time": 8,
+      "actual_witness_event_id": "event-000005",
+      "a_total_expansions": 29,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 197,
+        "elapsed_seconds": 0.004181666998192668,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 72,
+        "generated": 145,
+        "elapsed_seconds": 0.0031468329980270937,
+        "earliest_completion_time": 8
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": true,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "offer_loan",
+        "choose_accept",
+        "accept_loan",
+        "unlock",
+        "take_ledger",
+        "idle",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-unknown-PAY-8",
+      "condition": {
+        "knowledge": "unknown",
+        "policy": "PAY",
+        "deadline": 8
+      },
+      "actual_event_time": 8,
+      "actual_witness_event_id": "event-000005",
+      "a_total_expansions": 27,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 178,
+        "elapsed_seconds": 0.003586457998608239,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 72,
+        "generated": 130,
+        "elapsed_seconds": 0.002766749996226281,
+        "earliest_completion_time": 8
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": true,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "offer_loan",
+        "choose_accept",
+        "accept_loan",
+        "unlock",
+        "take_ledger"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-unknown-TOOL-10",
+      "condition": {
+        "knowledge": "unknown",
+        "policy": "TOOL",
+        "deadline": 10
+      },
+      "actual_event_time": 9,
+      "actual_witness_event_id": "event-000006",
+      "a_total_expansions": 38,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 197,
+        "elapsed_seconds": 0.004355666998890229,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 94,
+        "generated": 168,
+        "elapsed_seconds": 0.003406707997783087,
+        "earliest_completion_time": 9
+      },
+      "b_goals": {
+        "toolB_returned": true,
+        "payment_received": true,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "return_tool",
+        "offer_loan",
+        "choose_accept",
+        "accept_loan",
+        "unlock",
+        "take_ledger",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    },
+    {
+      "run_id": "parent-f637743-20261009",
+      "fixture_id": "E1-unknown-TOOL-8",
+      "condition": {
+        "knowledge": "unknown",
+        "policy": "TOOL",
+        "deadline": 8
+      },
+      "actual_event_time": null,
+      "actual_witness_event_id": null,
+      "a_total_expansions": 55,
+      "world_oracle": {
+        "solve_status": "SOLVED",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 97,
+        "generated": 178,
+        "elapsed_seconds": 0.0039998330030357465,
+        "earliest_completion_time": 8
+      },
+      "fixed_b_oracle": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 93,
+        "generated": 108,
+        "elapsed_seconds": 0.0021676250034943223,
+        "earliest_completion_time": null
+      },
+      "b_goals": {
+        "toolB_returned": false,
+        "payment_received": false,
+        "key1_beneficial_owner_B": true
+      },
+      "actual_actions": [
+        "request_tool",
+        "idle",
+        "idle",
+        "idle",
+        "idle",
+        "idle"
+      ],
+      "request_bits": {
+        "W.request_used": true,
+        "O_B.request_sent": true
+      },
+      "actual_check": "EXPECTED"
+    }
+  ],
+  "historical": {
+    "dev-20261009-e1-1": {
+      "case_count": 12,
+      "source_hash_count": 9,
+      "current_hash_diff_count": 7,
+      "current_hash_diff_paths": [
+        "tools/e1_keyledger_v0/executor.py",
+        "tools/e1_keyledger_v0/fixtures.py",
+        "tools/e1_keyledger_v0/monitor_bridge.py",
+        "tools/e1_keyledger_v0/oracle.py",
+        "tools/e1_keyledger_v0/planner.py",
+        "tools/e1_keyledger_v0/policy.py",
+        "tools/e1_keyledger_v0/runner.py"
+      ],
+      "status_counts": {
+        "DEVELOPMENT_RECORDED": 12
+      },
+      "historical_fail_cases": [],
+      "historical_failure_payloads_preserved": true,
+      "note": "Historical source differences are reported and are not required to match."
+    },
+    "dev-20261009-e1-1-r2": {
+      "case_count": 12,
+      "source_hash_count": 9,
+      "current_hash_diff_count": 7,
+      "current_hash_diff_paths": [
+        "tools/e1_keyledger_v0/executor.py",
+        "tools/e1_keyledger_v0/fixtures.py",
+        "tools/e1_keyledger_v0/monitor_bridge.py",
+        "tools/e1_keyledger_v0/oracle.py",
+        "tools/e1_keyledger_v0/planner.py",
+        "tools/e1_keyledger_v0/policy.py",
+        "tools/e1_keyledger_v0/runner.py"
+      ],
+      "status_counts": {
+        "DEVELOPMENT_RECORDED": 12
+      },
+      "historical_fail_cases": [],
+      "historical_failure_payloads_preserved": true,
+      "note": "Historical source differences are reported and are not required to match."
+    },
+    "dev-20261009-e1-1-r3": {
+      "case_count": 12,
+      "source_hash_count": 29,
+      "current_hash_diff_count": 1,
+      "current_hash_diff_paths": [
+        "tools/e1_keyledger_v0/tests/test_oracle.py"
+      ],
+      "status_counts": {
+        "DEVELOPMENT_RECORDED": 12
+      },
+      "historical_fail_cases": [],
+      "historical_failure_payloads_preserved": true,
+      "note": "Historical source differences are reported and are not required to match."
+    }
+  },
+  "actual_head": "f637743a8af9faacbb908e8b4bae4b8f4661b193",
+  "primary_manifest": {
+    "run_id": "parent-f637743-20261009",
+    "git_revision": "f637743a8af9faacbb908e8b4bae4b8f4661b193",
+    "status": "DEV_ONLY",
+    "formal_experiment": false,
+    "case_count": 12,
+    "limits": {
+      "max_expansions": 10000,
+      "wall_seconds": 2.0
+    }
+  },
+  "source_hash_audit": {
+    "count": 29,
+    "matches": 29,
+    "all_match": true,
+    "mismatches": [],
+    "rows": [
+      {
+        "path": "00_研究设计/E1_KeyLedger_LocalAgency_Protocol_v0.md",
+        "manifest_sha256": "255a9418a72f5996d5cb57b141a8a88acbe1c0e4e58d49c98098feadce2b1d76",
+        "current_sha256": "255a9418a72f5996d5cb57b141a8a88acbe1c0e4e58d49c98098feadce2b1d76",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/__init__.py",
+        "manifest_sha256": "4aa861bd0899a08b3b3b47dac7336eef0e6ac29cf531f211ec512d865435579a",
+        "current_sha256": "4aa861bd0899a08b3b3b47dac7336eef0e6ac29cf531f211ec512d865435579a",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/executor.py",
+        "manifest_sha256": "9bd6782070ce3802e24597d1c32a4aac6f5ac52b4a03bb85874e2cf9a46b52aa",
+        "current_sha256": "9bd6782070ce3802e24597d1c32a4aac6f5ac52b4a03bb85874e2cf9a46b52aa",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/fixtures.py",
+        "manifest_sha256": "547851a8f77272be910c3c6a372b216d8e262ebf464b10e0f62e6c40a8855b6a",
+        "current_sha256": "547851a8f77272be910c3c6a372b216d8e262ebf464b10e0f62e6c40a8855b6a",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/monitor_bridge.py",
+        "manifest_sha256": "116d9613c5374790874003dab1c76e6231ebf1c979401734e5d2b3cc6ce4162b",
+        "current_sha256": "116d9613c5374790874003dab1c76e6231ebf1c979401734e5d2b3cc6ce4162b",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/oracle.py",
+        "manifest_sha256": "12601b5b1009561f5cb41766016142222253b1f3391b0b16ac22ca8db3d0a412",
+        "current_sha256": "12601b5b1009561f5cb41766016142222253b1f3391b0b16ac22ca8db3d0a412",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/planner.py",
+        "manifest_sha256": "d93b0b920724a4d83d0a99075eb7595bee2e2f74d9108477afb93724b4c1ec21",
+        "current_sha256": "d93b0b920724a4d83d0a99075eb7595bee2e2f74d9108477afb93724b4c1ec21",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/prediction.py",
+        "manifest_sha256": "d971d72635552a1fdab4deef045700413772696afd1669f9ea8fa5aa2868d8a4",
+        "current_sha256": "d971d72635552a1fdab4deef045700413772696afd1669f9ea8fa5aa2868d8a4",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/runner.py",
+        "manifest_sha256": "781ab42002e75928a80a952c1aad993e2acd25b969475d9e41d4bdf7c6faacb3",
+        "current_sha256": "781ab42002e75928a80a952c1aad993e2acd25b969475d9e41d4bdf7c6faacb3",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/README.md",
+        "manifest_sha256": "6d746123fe9d2f14e3db4fdc67bf4070fa44432b93e4f2e59bbb3de3127776de",
+        "current_sha256": "6d746123fe9d2f14e3db4fdc67bf4070fa44432b93e4f2e59bbb3de3127776de",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/__init__.py",
+        "manifest_sha256": "782f87eb72597e605102deaec9cbc0751b6d3e29b6df10240d26806344984b27",
+        "current_sha256": "782f87eb72597e605102deaec9cbc0751b6d3e29b6df10240d26806344984b27",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/executor.py",
+        "manifest_sha256": "39d05171f5d81103733b35268b1df657e871420353d880c91acc3ba522d3e12c",
+        "current_sha256": "39d05171f5d81103733b35268b1df657e871420353d880c91acc3ba522d3e12c",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/fixtures.py",
+        "manifest_sha256": "d813670fc662c154a7a8a04804d8ff1c214978597119989fe5d5aa88de4d9f1b",
+        "current_sha256": "d813670fc662c154a7a8a04804d8ff1c214978597119989fe5d5aa88de4d9f1b",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/monitor_bridge.py",
+        "manifest_sha256": "8ce5e04edee98444dda6f63cc6876887ceb28ab4c5a6ddd448e81819df77e091",
+        "current_sha256": "8ce5e04edee98444dda6f63cc6876887ceb28ab4c5a6ddd448e81819df77e091",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/oracle.py",
+        "manifest_sha256": "b8b189d77bc364565a9e01090a67361ce7a7dba96c1d768b41477b525f780e42",
+        "current_sha256": "b8b189d77bc364565a9e01090a67361ce7a7dba96c1d768b41477b525f780e42",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/planner.py",
+        "manifest_sha256": "85237e26f39a6ca75db4d9a8cbebafa5804004d6e03073a0241b73a3865fe6a1",
+        "current_sha256": "85237e26f39a6ca75db4d9a8cbebafa5804004d6e03073a0241b73a3865fe6a1",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/policy.py",
+        "manifest_sha256": "85376f2c344e565b759ba835a1c6276983e2cd6f6c735be0672d68d5507a36d1",
+        "current_sha256": "85376f2c344e565b759ba835a1c6276983e2cd6f6c735be0672d68d5507a36d1",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/runner.py",
+        "manifest_sha256": "a544b25018dc5ee926326228cd2091eee8c63503a47c07326a75be1d15919520",
+        "current_sha256": "a544b25018dc5ee926326228cd2091eee8c63503a47c07326a75be1d15919520",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/tests/test_contract.py",
+        "manifest_sha256": "0bf12d91fa3c8701f983e6494f2d2a2de765c78861ccc003999552b99fbfb69c",
+        "current_sha256": "0bf12d91fa3c8701f983e6494f2d2a2de765c78861ccc003999552b99fbfb69c",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/tests/test_oracle.py",
+        "manifest_sha256": "cdf8cf8e1b3051bd0858ec7527125f45d34bbc2eb3d88b6c27d95b04d963f5fc",
+        "current_sha256": "cdf8cf8e1b3051bd0858ec7527125f45d34bbc2eb3d88b6c27d95b04d963f5fc",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/__init__.py",
+        "manifest_sha256": "cdbd76ba00ecf22c5ed01f1c146d29be32961e96c21cf789794bf0a807e4a1d1",
+        "current_sha256": "cdbd76ba00ecf22c5ed01f1c146d29be32961e96c21cf789794bf0a807e4a1d1",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/ast.py",
+        "manifest_sha256": "dc2b74ee9eda7c5780b1e96666cb056a000d8d43279a455b830888954e570970",
+        "current_sha256": "dc2b74ee9eda7c5780b1e96666cb056a000d8d43279a455b830888954e570970",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/compiler.py",
+        "manifest_sha256": "b6ac5b038dcb5c2399d97ca136d4e0a49307facf40b5e054db0521b43143988d",
+        "current_sha256": "b6ac5b038dcb5c2399d97ca136d4e0a49307facf40b5e054db0521b43143988d",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/editor.py",
+        "manifest_sha256": "543a501fe6f0ee1845c96460a91a3a454e67d84672906dfd1bd7fa2c179d8aab",
+        "current_sha256": "543a501fe6f0ee1845c96460a91a3a454e67d84672906dfd1bd7fa2c179d8aab",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/evaluation.py",
+        "manifest_sha256": "2f23c30aa7c7bd30c9ee71331bb680468012f2e5a8ea708bd81411638252603c",
+        "current_sha256": "2f23c30aa7c7bd30c9ee71331bb680468012f2e5a8ea708bd81411638252603c",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/monitor.py",
+        "manifest_sha256": "ec13bca31a4e064343365beda5542abb3aa063d7ee44a78f0c637c7883494703",
+        "current_sha256": "ec13bca31a4e064343365beda5542abb3aa063d7ee44a78f0c637c7883494703",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/projectors.py",
+        "manifest_sha256": "88639d5d603f089491faafffa069dfd2f592f16f0f6aaa7614f5660d68f768dc",
+        "current_sha256": "88639d5d603f089491faafffa069dfd2f592f16f0f6aaa7614f5660d68f768dc",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/trace.py",
+        "manifest_sha256": "c504e380cef744000f0f2074e03a55a5e9f9a0ef397acaa149fc84f52c63c0a3",
+        "current_sha256": "c504e380cef744000f0f2074e03a55a5e9f9a0ef397acaa149fc84f52c63c0a3",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/types.py",
+        "manifest_sha256": "8e8f3b5804b0800699cc508b4967cefef720d5990e8df9d7f49b434a050a0e9d",
+        "current_sha256": "8e8f3b5804b0800699cc508b4967cefef720d5990e8df9d7f49b434a050a0e9d",
+        "match": true
+      }
+    ]
+  },
+  "rerun_source_hash_audit": {
+    "count": 29,
+    "matches": 29,
+    "all_match": true,
+    "mismatches": [],
+    "rows": [
+      {
+        "path": "00_研究设计/E1_KeyLedger_LocalAgency_Protocol_v0.md",
+        "manifest_sha256": "255a9418a72f5996d5cb57b141a8a88acbe1c0e4e58d49c98098feadce2b1d76",
+        "current_sha256": "255a9418a72f5996d5cb57b141a8a88acbe1c0e4e58d49c98098feadce2b1d76",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/__init__.py",
+        "manifest_sha256": "4aa861bd0899a08b3b3b47dac7336eef0e6ac29cf531f211ec512d865435579a",
+        "current_sha256": "4aa861bd0899a08b3b3b47dac7336eef0e6ac29cf531f211ec512d865435579a",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/executor.py",
+        "manifest_sha256": "9bd6782070ce3802e24597d1c32a4aac6f5ac52b4a03bb85874e2cf9a46b52aa",
+        "current_sha256": "9bd6782070ce3802e24597d1c32a4aac6f5ac52b4a03bb85874e2cf9a46b52aa",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/fixtures.py",
+        "manifest_sha256": "547851a8f77272be910c3c6a372b216d8e262ebf464b10e0f62e6c40a8855b6a",
+        "current_sha256": "547851a8f77272be910c3c6a372b216d8e262ebf464b10e0f62e6c40a8855b6a",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/monitor_bridge.py",
+        "manifest_sha256": "116d9613c5374790874003dab1c76e6231ebf1c979401734e5d2b3cc6ce4162b",
+        "current_sha256": "116d9613c5374790874003dab1c76e6231ebf1c979401734e5d2b3cc6ce4162b",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/oracle.py",
+        "manifest_sha256": "12601b5b1009561f5cb41766016142222253b1f3391b0b16ac22ca8db3d0a412",
+        "current_sha256": "12601b5b1009561f5cb41766016142222253b1f3391b0b16ac22ca8db3d0a412",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/planner.py",
+        "manifest_sha256": "d93b0b920724a4d83d0a99075eb7595bee2e2f74d9108477afb93724b4c1ec21",
+        "current_sha256": "d93b0b920724a4d83d0a99075eb7595bee2e2f74d9108477afb93724b4c1ec21",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/prediction.py",
+        "manifest_sha256": "d971d72635552a1fdab4deef045700413772696afd1669f9ea8fa5aa2868d8a4",
+        "current_sha256": "d971d72635552a1fdab4deef045700413772696afd1669f9ea8fa5aa2868d8a4",
+        "match": true
+      },
+      {
+        "path": "tools/e0_keyledger_v0/runner.py",
+        "manifest_sha256": "781ab42002e75928a80a952c1aad993e2acd25b969475d9e41d4bdf7c6faacb3",
+        "current_sha256": "781ab42002e75928a80a952c1aad993e2acd25b969475d9e41d4bdf7c6faacb3",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/README.md",
+        "manifest_sha256": "6d746123fe9d2f14e3db4fdc67bf4070fa44432b93e4f2e59bbb3de3127776de",
+        "current_sha256": "6d746123fe9d2f14e3db4fdc67bf4070fa44432b93e4f2e59bbb3de3127776de",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/__init__.py",
+        "manifest_sha256": "782f87eb72597e605102deaec9cbc0751b6d3e29b6df10240d26806344984b27",
+        "current_sha256": "782f87eb72597e605102deaec9cbc0751b6d3e29b6df10240d26806344984b27",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/executor.py",
+        "manifest_sha256": "39d05171f5d81103733b35268b1df657e871420353d880c91acc3ba522d3e12c",
+        "current_sha256": "39d05171f5d81103733b35268b1df657e871420353d880c91acc3ba522d3e12c",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/fixtures.py",
+        "manifest_sha256": "d813670fc662c154a7a8a04804d8ff1c214978597119989fe5d5aa88de4d9f1b",
+        "current_sha256": "d813670fc662c154a7a8a04804d8ff1c214978597119989fe5d5aa88de4d9f1b",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/monitor_bridge.py",
+        "manifest_sha256": "8ce5e04edee98444dda6f63cc6876887ceb28ab4c5a6ddd448e81819df77e091",
+        "current_sha256": "8ce5e04edee98444dda6f63cc6876887ceb28ab4c5a6ddd448e81819df77e091",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/oracle.py",
+        "manifest_sha256": "b8b189d77bc364565a9e01090a67361ce7a7dba96c1d768b41477b525f780e42",
+        "current_sha256": "b8b189d77bc364565a9e01090a67361ce7a7dba96c1d768b41477b525f780e42",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/planner.py",
+        "manifest_sha256": "85237e26f39a6ca75db4d9a8cbebafa5804004d6e03073a0241b73a3865fe6a1",
+        "current_sha256": "85237e26f39a6ca75db4d9a8cbebafa5804004d6e03073a0241b73a3865fe6a1",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/policy.py",
+        "manifest_sha256": "85376f2c344e565b759ba835a1c6276983e2cd6f6c735be0672d68d5507a36d1",
+        "current_sha256": "85376f2c344e565b759ba835a1c6276983e2cd6f6c735be0672d68d5507a36d1",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/runner.py",
+        "manifest_sha256": "a544b25018dc5ee926326228cd2091eee8c63503a47c07326a75be1d15919520",
+        "current_sha256": "a544b25018dc5ee926326228cd2091eee8c63503a47c07326a75be1d15919520",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/tests/test_contract.py",
+        "manifest_sha256": "0bf12d91fa3c8701f983e6494f2d2a2de765c78861ccc003999552b99fbfb69c",
+        "current_sha256": "0bf12d91fa3c8701f983e6494f2d2a2de765c78861ccc003999552b99fbfb69c",
+        "match": true
+      },
+      {
+        "path": "tools/e1_keyledger_v0/tests/test_oracle.py",
+        "manifest_sha256": "cdf8cf8e1b3051bd0858ec7527125f45d34bbc2eb3d88b6c27d95b04d963f5fc",
+        "current_sha256": "cdf8cf8e1b3051bd0858ec7527125f45d34bbc2eb3d88b6c27d95b04d963f5fc",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/__init__.py",
+        "manifest_sha256": "cdbd76ba00ecf22c5ed01f1c146d29be32961e96c21cf789794bf0a807e4a1d1",
+        "current_sha256": "cdbd76ba00ecf22c5ed01f1c146d29be32961e96c21cf789794bf0a807e4a1d1",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/ast.py",
+        "manifest_sha256": "dc2b74ee9eda7c5780b1e96666cb056a000d8d43279a455b830888954e570970",
+        "current_sha256": "dc2b74ee9eda7c5780b1e96666cb056a000d8d43279a455b830888954e570970",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/compiler.py",
+        "manifest_sha256": "b6ac5b038dcb5c2399d97ca136d4e0a49307facf40b5e054db0521b43143988d",
+        "current_sha256": "b6ac5b038dcb5c2399d97ca136d4e0a49307facf40b5e054db0521b43143988d",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/editor.py",
+        "manifest_sha256": "543a501fe6f0ee1845c96460a91a3a454e67d84672906dfd1bd7fa2c179d8aab",
+        "current_sha256": "543a501fe6f0ee1845c96460a91a3a454e67d84672906dfd1bd7fa2c179d8aab",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/evaluation.py",
+        "manifest_sha256": "2f23c30aa7c7bd30c9ee71331bb680468012f2e5a8ea708bd81411638252603c",
+        "current_sha256": "2f23c30aa7c7bd30c9ee71331bb680468012f2e5a8ea708bd81411638252603c",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/monitor.py",
+        "manifest_sha256": "ec13bca31a4e064343365beda5542abb3aa063d7ee44a78f0c637c7883494703",
+        "current_sha256": "ec13bca31a4e064343365beda5542abb3aa063d7ee44a78f0c637c7883494703",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/projectors.py",
+        "manifest_sha256": "88639d5d603f089491faafffa069dfd2f592f16f0f6aaa7614f5660d68f768dc",
+        "current_sha256": "88639d5d603f089491faafffa069dfd2f592f16f0f6aaa7614f5660d68f768dc",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/trace.py",
+        "manifest_sha256": "c504e380cef744000f0f2074e03a55a5e9f9a0ef397acaa149fc84f52c63c0a3",
+        "current_sha256": "c504e380cef744000f0f2074e03a55a5e9f9a0ef397acaa149fc84f52c63c0a3",
+        "match": true
+      },
+      {
+        "path": "tools/trajectory_constraints_v0/types.py",
+        "manifest_sha256": "8e8f3b5804b0800699cc508b4967cefef720d5990e8df9d7f49b434a050a0e9d",
+        "current_sha256": "8e8f3b5804b0800699cc508b4967cefef720d5990e8df9d7f49b434a050a0e9d",
+        "match": true
+      }
+    ]
+  },
+  "oracle_checks": {
+    "count": 24,
+    "expected": 24,
+    "rows": [
+      {
+        "fixture_id": "E1-known-KEEP-10",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-known-KEEP-10",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN"
+      },
+      {
+        "fixture_id": "E1-known-KEEP-8",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-known-KEEP-8",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN"
+      },
+      {
+        "fixture_id": "E1-known-PAY-10",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-known-PAY-10",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-known-PAY-8",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-known-PAY-8",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-known-TOOL-10",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-known-TOOL-10",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-known-TOOL-8",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-known-TOOL-8",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN"
+      },
+      {
+        "fixture_id": "E1-unknown-KEEP-10",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-unknown-KEEP-10",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN"
+      },
+      {
+        "fixture_id": "E1-unknown-KEEP-8",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-unknown-KEEP-8",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN"
+      },
+      {
+        "fixture_id": "E1-unknown-PAY-10",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-unknown-PAY-10",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-unknown-PAY-8",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-unknown-PAY-8",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-unknown-TOOL-10",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-unknown-TOOL-10",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-unknown-TOOL-8",
+        "oracle": "world",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "SOLVED"
+      },
+      {
+        "fixture_id": "E1-unknown-TOOL-8",
+        "oracle": "fixed_b",
+        "check": "EXPECTED_VERDICT_CHECK",
+        "complete": true,
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN"
+      }
+    ]
+  },
+  "actual_checks": {
+    "count": 12,
+    "expected": 12,
+    "rows": [
+      {
+        "fixture_id": "E1-known-KEEP-10",
+        "expected_monitor": "VIOLATED",
+        "expected_witness_time": null,
+        "observed_monitor": "VIOLATED",
+        "observed_witness": null,
+        "trace_status": "TRACE_VIOLATED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-known-KEEP-8",
+        "expected_monitor": "VIOLATED",
+        "expected_witness_time": null,
+        "observed_monitor": "VIOLATED",
+        "observed_witness": null,
+        "trace_status": "TRACE_VIOLATED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-known-PAY-10",
+        "expected_monitor": "SATISFIED",
+        "expected_witness_time": 8,
+        "observed_monitor": "SATISFIED",
+        "observed_witness": {
+          "event_id": "event-000005",
+          "time": 8,
+          "sequence": 5,
+          "receipt_id": "receipt-000006",
+          "seal_covered": true
+        },
+        "trace_status": "TRACE_SATISFIED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-known-PAY-8",
+        "expected_monitor": "SATISFIED",
+        "expected_witness_time": 8,
+        "observed_monitor": "SATISFIED",
+        "observed_witness": {
+          "event_id": "event-000005",
+          "time": 8,
+          "sequence": 5,
+          "receipt_id": "receipt-000006",
+          "seal_covered": true
+        },
+        "trace_status": "TRACE_SATISFIED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-known-TOOL-10",
+        "expected_monitor": "SATISFIED",
+        "expected_witness_time": 9,
+        "observed_monitor": "SATISFIED",
+        "observed_witness": {
+          "event_id": "event-000006",
+          "time": 9,
+          "sequence": 6,
+          "receipt_id": "receipt-000007",
+          "seal_covered": true
+        },
+        "trace_status": "TRACE_SATISFIED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-known-TOOL-8",
+        "expected_monitor": "VIOLATED",
+        "expected_witness_time": null,
+        "observed_monitor": "VIOLATED",
+        "observed_witness": null,
+        "trace_status": "TRACE_VIOLATED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-unknown-KEEP-10",
+        "expected_monitor": "VIOLATED",
+        "expected_witness_time": null,
+        "observed_monitor": "VIOLATED",
+        "observed_witness": null,
+        "trace_status": "TRACE_VIOLATED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-unknown-KEEP-8",
+        "expected_monitor": "VIOLATED",
+        "expected_witness_time": null,
+        "observed_monitor": "VIOLATED",
+        "observed_witness": null,
+        "trace_status": "TRACE_VIOLATED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-unknown-PAY-10",
+        "expected_monitor": "SATISFIED",
+        "expected_witness_time": 8,
+        "observed_monitor": "SATISFIED",
+        "observed_witness": {
+          "event_id": "event-000005",
+          "time": 8,
+          "sequence": 5,
+          "receipt_id": "receipt-000006",
+          "seal_covered": true
+        },
+        "trace_status": "TRACE_SATISFIED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-unknown-PAY-8",
+        "expected_monitor": "SATISFIED",
+        "expected_witness_time": 8,
+        "observed_monitor": "SATISFIED",
+        "observed_witness": {
+          "event_id": "event-000005",
+          "time": 8,
+          "sequence": 5,
+          "receipt_id": "receipt-000006",
+          "seal_covered": true
+        },
+        "trace_status": "TRACE_SATISFIED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-unknown-TOOL-10",
+        "expected_monitor": "SATISFIED",
+        "expected_witness_time": 9,
+        "observed_monitor": "SATISFIED",
+        "observed_witness": {
+          "event_id": "event-000006",
+          "time": 9,
+          "sequence": 6,
+          "receipt_id": "receipt-000007",
+          "seal_covered": true
+        },
+        "trace_status": "TRACE_SATISFIED",
+        "errors": [],
+        "check": "EXPECTED"
+      },
+      {
+        "fixture_id": "E1-unknown-TOOL-8",
+        "expected_monitor": "VIOLATED",
+        "expected_witness_time": null,
+        "observed_monitor": "VIOLATED",
+        "observed_witness": null,
+        "trace_status": "TRACE_VIOLATED",
+        "errors": [],
+        "check": "EXPECTED"
+      }
+    ]
+  },
+  "step_after_hash_checks": {
+    "count": 84,
+    "mismatches": 0,
+    "rows": [
+      {
+        "fixture_id": "E1-known-KEEP-10",
+        "checked": 8,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-known-KEEP-8",
+        "checked": 6,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-known-PAY-10",
+        "checked": 8,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-known-PAY-8",
+        "checked": 6,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-known-TOOL-10",
+        "checked": 8,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-known-TOOL-8",
+        "checked": 6,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-unknown-KEEP-10",
+        "checked": 8,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-unknown-KEEP-8",
+        "checked": 6,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-unknown-PAY-10",
+        "checked": 8,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-unknown-PAY-8",
+        "checked": 6,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-unknown-TOOL-10",
+        "checked": 8,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      },
+      {
+        "fixture_id": "E1-unknown-TOOL-8",
+        "checked": 6,
+        "mismatches": 0,
+        "all_match": true,
+        "examples": []
+      }
+    ]
+  },
+  "primary_rerun_comparison": {
+    "excluded_keys": [
+      "after_hash",
+      "before_hash",
+      "created_utc",
+      "elapsed_seconds",
+      "run_id"
+    ],
+    "manifest": {
+      "equal": true,
+      "first_differing_path": null,
+      "exclusion_counts": {
+        "left": {
+          "after_hash": 84,
+          "before_hash": 84,
+          "created_utc": 1,
+          "elapsed_seconds": 216,
+          "run_id": 1
+        },
+        "right": {
+          "after_hash": 84,
+          "before_hash": 84,
+          "created_utc": 1,
+          "elapsed_seconds": 216,
+          "run_id": 1
+        },
+        "combined": {
+          "after_hash": 168,
+          "before_hash": 168,
+          "created_utc": 2,
+          "elapsed_seconds": 432,
+          "run_id": 2
+        }
+      }
+    },
+    "cases": {
+      "E1-known-KEEP-10": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 21
+          },
+          "right": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 21
+          },
+          "combined": {
+            "after_hash": 16,
+            "before_hash": 16,
+            "elapsed_seconds": 42
+          }
+        }
+      },
+      "E1-known-KEEP-8": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 17
+          },
+          "right": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 17
+          },
+          "combined": {
+            "after_hash": 12,
+            "before_hash": 12,
+            "elapsed_seconds": 34
+          }
+        }
+      },
+      "E1-known-PAY-10": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 19
+          },
+          "right": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 19
+          },
+          "combined": {
+            "after_hash": 16,
+            "before_hash": 16,
+            "elapsed_seconds": 38
+          }
+        }
+      },
+      "E1-known-PAY-8": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 15
+          },
+          "right": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 15
+          },
+          "combined": {
+            "after_hash": 12,
+            "before_hash": 12,
+            "elapsed_seconds": 30
+          }
+        }
+      },
+      "E1-known-TOOL-10": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 19
+          },
+          "right": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 19
+          },
+          "combined": {
+            "after_hash": 16,
+            "before_hash": 16,
+            "elapsed_seconds": 38
+          }
+        }
+      },
+      "E1-known-TOOL-8": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 17
+          },
+          "right": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 17
+          },
+          "combined": {
+            "after_hash": 12,
+            "before_hash": 12,
+            "elapsed_seconds": 34
+          }
+        }
+      },
+      "E1-unknown-KEEP-10": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 21
+          },
+          "right": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 21
+          },
+          "combined": {
+            "after_hash": 16,
+            "before_hash": 16,
+            "elapsed_seconds": 42
+          }
+        }
+      },
+      "E1-unknown-KEEP-8": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 17
+          },
+          "right": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 17
+          },
+          "combined": {
+            "after_hash": 12,
+            "before_hash": 12,
+            "elapsed_seconds": 34
+          }
+        }
+      },
+      "E1-unknown-PAY-10": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 19
+          },
+          "right": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 19
+          },
+          "combined": {
+            "after_hash": 16,
+            "before_hash": 16,
+            "elapsed_seconds": 38
+          }
+        }
+      },
+      "E1-unknown-PAY-8": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 15
+          },
+          "right": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 15
+          },
+          "combined": {
+            "after_hash": 12,
+            "before_hash": 12,
+            "elapsed_seconds": 30
+          }
+        }
+      },
+      "E1-unknown-TOOL-10": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 19
+          },
+          "right": {
+            "after_hash": 8,
+            "before_hash": 8,
+            "elapsed_seconds": 19
+          },
+          "combined": {
+            "after_hash": 16,
+            "before_hash": 16,
+            "elapsed_seconds": 38
+          }
+        }
+      },
+      "E1-unknown-TOOL-8": {
+        "equal": true,
+        "first_differing_path": null,
+        "exclusion_counts": {
+          "left": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 17
+          },
+          "right": {
+            "after_hash": 6,
+            "before_hash": 6,
+            "elapsed_seconds": 17
+          },
+          "combined": {
+            "after_hash": 12,
+            "before_hash": 12,
+            "elapsed_seconds": 34
+          }
+        }
+      }
+    },
+    "all_semantic_fields_equal": true,
+    "exclusion_counts": {
+      "manifest": {
+        "left": {
+          "after_hash": 84,
+          "before_hash": 84,
+          "created_utc": 1,
+          "elapsed_seconds": 216,
+          "run_id": 1
+        },
+        "right": {
+          "after_hash": 84,
+          "before_hash": 84,
+          "created_utc": 1,
+          "elapsed_seconds": 216,
+          "run_id": 1
+        },
+        "combined": {
+          "after_hash": 168,
+          "before_hash": 168,
+          "created_utc": 2,
+          "elapsed_seconds": 432,
+          "run_id": 2
+        }
+      },
+      "case_documents_combined": {
+        "after_hash": 168,
+        "before_hash": 168,
+        "created_utc": 0,
+        "elapsed_seconds": 432,
+        "run_id": 0
+      }
+    }
+  },
+  "negative_control": {
+    "same_actor_view": true,
+    "same_b_proposal": true,
+    "proposal": {
+      "operator": "request_tool",
+      "actor": "B",
+      "args": {
+        "target": "A",
+        "item": "toolB"
+      }
+    },
+    "start_world_request_false": {
+      "accepted": true,
+      "status": "RUNNING",
+      "outcome": null
+    },
+    "start_world_request_true": {
+      "accepted": false,
+      "status": "REJECTED",
+      "outcome": "PRECONDITION_FAILED"
+    },
+    "O_B_request_sent_remains_false": true,
+    "check": "EXPECTED"
+  },
+  "budget_diagnostics": [
+    {
+      "run_id": "parent-f637743-20261009-cap1",
+      "fixture_id": "E1-unknown-PAY-10",
+      "objects": {
+        "world_oracle": {
+          "solve_status": "BUDGET",
+          "complete": false,
+          "termination_reason": "EXPANSION_CAP",
+          "check": "EXPECTED"
+        },
+        "fixed_b_oracle": {
+          "solve_status": "BUDGET",
+          "complete": false,
+          "termination_reason": "EXPANSION_CAP",
+          "check": "EXPECTED"
+        },
+        "planner": {
+          "solve_status": "BUDGET",
+          "complete": false,
+          "termination_reason": "EXPANSION_CAP",
+          "check": "EXPECTED"
+        }
+      }
+    },
+    {
+      "run_id": "parent-f637743-20261009-wall",
+      "fixture_id": "E1-unknown-PAY-10",
+      "objects": {
+        "world_oracle": {
+          "solve_status": "BUDGET",
+          "complete": false,
+          "termination_reason": "WALL_TIMEOUT",
+          "check": "EXPECTED"
+        },
+        "fixed_b_oracle": {
+          "solve_status": "BUDGET",
+          "complete": false,
+          "termination_reason": "WALL_TIMEOUT",
+          "check": "EXPECTED"
+        },
+        "planner": {
+          "solve_status": "BUDGET",
+          "complete": false,
+          "termination_reason": "WALL_TIMEOUT",
+          "check": "EXPECTED"
+        }
+      }
+    }
+  ],
+  "overall": "PASS"
+}

@@ -1,0 +1,751 @@
+{
+  "schema": "e1-development-evidence-bundle-v1",
+  "source_audit": {
+    "run_id": "parent-f637743-20261009",
+    "audit_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/audit.json",
+    "frozen_git_revision": "f637743a8af9faacbb908e8b4bae4b8f4661b193",
+    "audit_checks": {
+      "head_is_frozen_revision": true,
+      "primary_revision_matches_real_head": true,
+      "all_29_primary_source_hashes_current": true,
+      "all_29_rerun_source_hashes_current": true,
+      "24_oracle_verdicts_expected": true,
+      "12_actual_event_checks_expected": true,
+      "primary_no_budgets_or_errors": true,
+      "all_step_after_hashes_recompute": true,
+      "primary_rerun_semantically_identical": true,
+      "hidden_world_request_noninterference_and_validation": true,
+      "cap1_wall_three_objects_incomplete_budget": true
+    },
+    "formal_experiment": false,
+    "solver_rerun_for_bundling": false
+  },
+  "post_audit_clarification": {
+    "authorization_change": "docs-only clarification of user-authorized E1-1 development scope",
+    "code_or_parameter_change": false,
+    "protocol_hash_changed": true,
+    "protocol_sha256_at_audit": "255a9418a72f5996d5cb57b141a8a88acbe1c0e4e58d49c98098feadce2b1d76",
+    "protocol_sha256_current": "dd2a017a35d6def5ac47c38eef635086ead1fd2446ec2c37522a56dc357b7042"
+  },
+  "source_directories": [
+    {
+      "archive_prefix": "sources/dev-20261009-e1-1/",
+      "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1"
+    },
+    {
+      "archive_prefix": "sources/dev-20261009-e1-1-r2/",
+      "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2"
+    },
+    {
+      "archive_prefix": "sources/dev-20261009-e1-1-r3/",
+      "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3"
+    },
+    {
+      "archive_prefix": "sources/parent-f637743-20261009/",
+      "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009"
+    },
+    {
+      "archive_prefix": "sources/parent-f637743-20261009-rerun/",
+      "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun"
+    },
+    {
+      "archive_prefix": "sources/parent-f637743-20261009-cap1/",
+      "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-cap1"
+    },
+    {
+      "archive_prefix": "sources/parent-f637743-20261009-wall/",
+      "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-wall"
+    },
+    {
+      "archive_prefix": "sources/parent-f637743-20261009-audit/",
+      "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit"
+    }
+  ],
+  "private_material_exclusion": "Any source path component containing '_private' is excluded.",
+  "archive": {
+    "output_path": "02_实验/E1_KeyLedger_LocalAgency_v0/evidence/E1_dev_f637743_20261009.zip",
+    "size_bytes": 3800918,
+    "sha256": "bbf09a913483ac89ad62a4f7281345e9c32c05ef8fea323256770e725d010ac4",
+    "member_count": 93,
+    "members": [
+      {
+        "member": "sources/dev-20261009-e1-1/E1-known-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-known-KEEP-10.json",
+        "size_bytes": 228620,
+        "sha256": "96d83f9853d4551ce208c01f052da918ee34fad2d7ed7ef2284910abeb757e50"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-known-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-known-KEEP-8.json",
+        "size_bytes": 163201,
+        "sha256": "08d3f9de46e3bb7cb7809521ab9c6507be977f880440030d5ea8bc6cca820370"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-known-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-known-PAY-10.json",
+        "size_bytes": 324755,
+        "sha256": "6baf064804d92cd18ddcc5e5d803aa4b04dbe7140ebca565185edde18ff021d4"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-known-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-known-PAY-8.json",
+        "size_bytes": 230970,
+        "sha256": "cb65113d39c5fed5408dbe2afa3bfff2b35cd7d19af69267db1b820e6d73f99c"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-known-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-known-TOOL-10.json",
+        "size_bytes": 335822,
+        "sha256": "edaab039d3a9c033685420f6c906fc9ca897669408036cfdac04beb1c388e3d2"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-known-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-known-TOOL-8.json",
+        "size_bytes": 163202,
+        "sha256": "b2f055de76d4f0d8ad5cb24bf443c7c342f6d6b028463de1e4f1d0b47e90df8d"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-unknown-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-unknown-KEEP-10.json",
+        "size_bytes": 227721,
+        "sha256": "d2befd43da29cf3082af942b28ecc671b5b673a876727ddd1871a9b1e7d512bd"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-unknown-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-unknown-KEEP-8.json",
+        "size_bytes": 162522,
+        "sha256": "d58c25e5921e1aabe5b56123d6134b0f3052ae62c8398fd886800a021e49feff"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-unknown-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-unknown-PAY-10.json",
+        "size_bytes": 325625,
+        "sha256": "6611d1dc8703beaee228ced2e8950d3b5837a676dfef53eb677198a126818db7"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-unknown-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-unknown-PAY-8.json",
+        "size_bytes": 231568,
+        "sha256": "3313840a5acc0d03ccb93bda1ef261ffb6eae537ecc5ddc6d48ce5f1d51f5ab1"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-unknown-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-unknown-TOOL-10.json",
+        "size_bytes": 336644,
+        "sha256": "f10c41772475e109cc2adb913ce80d21e432752b1de3cac9ab33477610806c75"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/E1-unknown-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/E1-unknown-TOOL-8.json",
+        "size_bytes": 162526,
+        "sha256": "2c72a24dc94a3abb1e7c6e838c93ba130274cd8203971803ecc7dd820f00b609"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1/manifest.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1/manifest.json",
+        "size_bytes": 3299275,
+        "sha256": "b033c59abddf769ebdd0e2f8fa3ff76d6b4e692724eb6134160ef0425cb3d996"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-known-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-known-KEEP-10.json",
+        "size_bytes": 228621,
+        "sha256": "69393d7939821ad7a67214fa9c689438351d7821d59129859cc458d8c5cdb20e"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-known-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-known-KEEP-8.json",
+        "size_bytes": 163201,
+        "sha256": "7778e01bad24ea9982c70ea839de08b77039a28c122040382ebc7d369bc6d134"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-known-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-known-PAY-10.json",
+        "size_bytes": 324757,
+        "sha256": "b57803ab6e53b1a5e1f4124016054e3fe1bedeb8585e80fd2ce666544b337296"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-known-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-known-PAY-8.json",
+        "size_bytes": 230972,
+        "sha256": "73c404448b59779f593c1067487203b27799d74cc6ff8d61a6ea21b54c3e5bf9"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-known-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-known-TOOL-10.json",
+        "size_bytes": 335819,
+        "sha256": "94c50890c97b995f3866bf22c3fcaa181244608e10dcdcb642c29757aa3655a3"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-known-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-known-TOOL-8.json",
+        "size_bytes": 163201,
+        "sha256": "24f861b599b4f01a679c702da5baedb01721abcf4206fb29c9645231fcf11ced"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-unknown-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-unknown-KEEP-10.json",
+        "size_bytes": 227724,
+        "sha256": "b188dd9ac9bf949fb48e8368aaefc416da1d3c02bed4bee90db0b00d9a847f23"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-unknown-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-unknown-KEEP-8.json",
+        "size_bytes": 162522,
+        "sha256": "bc79b593086f97bde43ac9d86260a4dbe213162bd7b009bbb42f0db1b58bc788"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-unknown-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-unknown-PAY-10.json",
+        "size_bytes": 325625,
+        "sha256": "9593e7d83debe71f922cd7b62e5fc2a9172d7c3f3bb381522f3a7bc26da43de0"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-unknown-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-unknown-PAY-8.json",
+        "size_bytes": 231570,
+        "sha256": "b05a437271ac9fc33aba112b303ab571b4b15d38bafeb55d91a995fc59fa4ec9"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-unknown-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-unknown-TOOL-10.json",
+        "size_bytes": 336643,
+        "sha256": "9813c60d9d11c0ddf5c194eac2230906f369fd44be823869e1e428f89e32909e"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/E1-unknown-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/E1-unknown-TOOL-8.json",
+        "size_bytes": 162526,
+        "sha256": "110a1fd08f9de8e3b91fcd201bcb65362773d11a973533ea6c1c77408ae74a13"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r2/manifest.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r2/manifest.json",
+        "size_bytes": 3299283,
+        "sha256": "ca98e7992a4111eeff11a1c988525b91b58b7e27d7da57ed0c84d9ddd431a198"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-known-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-known-KEEP-10.json",
+        "size_bytes": 255697,
+        "sha256": "5249eb4f592aa99c7461da56cbcde6899b79721472824be8792f6d9c7a73fed9"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-known-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-known-KEEP-8.json",
+        "size_bytes": 182007,
+        "sha256": "a814a4c9050c654f1b1224c8ce7b28616b9842a5461a5c3a026e93373bbd4ff4"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-known-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-known-PAY-10.json",
+        "size_bytes": 375600,
+        "sha256": "681fad6e47978eef3338e14c1bf6a6e1f89b0bd1198f6928e1160aeffc468ccc"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-known-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-known-PAY-8.json",
+        "size_bytes": 263449,
+        "sha256": "60cfcf1c7cb3a3f17c11cd7bd0753ca61c73a4a32bfa8f91ee762cc8a07720fb"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-known-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-known-TOOL-10.json",
+        "size_bytes": 390833,
+        "sha256": "673fc502b52a645c2b4db521389f408651bdf44449bf2a9b0969531afb878d46"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-known-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-known-TOOL-8.json",
+        "size_bytes": 182010,
+        "sha256": "c193adb74f702d8ed3c34bd15664596371037b10e85eac9203bec7a4dd7f4f5f"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-unknown-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-unknown-KEEP-10.json",
+        "size_bytes": 254799,
+        "sha256": "26dd0765fabe28f07a83b328db1a6775b58cab5cda5c3644f1efecb472ad9cfe"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-unknown-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-unknown-KEEP-8.json",
+        "size_bytes": 181329,
+        "sha256": "5fb059d64be63f5a05c18f5568909ee2b26173589dcf222588331250056909cb"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-unknown-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-unknown-PAY-10.json",
+        "size_bytes": 376755,
+        "sha256": "519411df54f3d0be5c0646089615f8ba8981b691005663a146b3e4635ab4dbd6"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-unknown-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-unknown-PAY-8.json",
+        "size_bytes": 264212,
+        "sha256": "ba431d00dcf301ef70520ee46d3126d64d0393a9fa75e4532b11b0e9684f6966"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-unknown-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-unknown-TOOL-10.json",
+        "size_bytes": 391881,
+        "sha256": "84c7c5891c98b87c157672def5e9a9bc926d19f26ddf5b852670ce4f817a5c80"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/E1-unknown-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/E1-unknown-TOOL-8.json",
+        "size_bytes": 181328,
+        "sha256": "7fd006912e4a84abe8bcf7cfbb8f3b2ca63b6e5c2a3a532b30ccd1f1c1e32fe6"
+      },
+      {
+        "member": "sources/dev-20261009-e1-1-r3/manifest.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3",
+        "source_path": "runs/e1_keyledger_v0/dev/dev-20261009-e1-1-r3/manifest.json",
+        "size_bytes": 3755817,
+        "sha256": "c73f5fcee55099c449f11c8238a60da5c558550d0a0dad64ac28ca9c79b83e42"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-known-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-known-KEEP-10.json",
+        "size_bytes": 255697,
+        "sha256": "ee425d9449745af813389b7dd3f4fe3fdd61f92987324a5be88cea79b9a6cf57"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-known-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-known-KEEP-8.json",
+        "size_bytes": 182004,
+        "sha256": "3cbc578a7ff8e8c49530b49c36f973f2ac5b890135fda52d0d6c8c300897aa7b"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-known-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-known-PAY-10.json",
+        "size_bytes": 375599,
+        "sha256": "531e573b4701a02388c0e82f8adf3d44a8a39c94165cedc95c4d30b2b1e65046"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-known-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-known-PAY-8.json",
+        "size_bytes": 263441,
+        "sha256": "baf075f934e10cea9e4a7696f03fb3d3cff834c30f945661aa269ce5a00ceca7"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-known-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-known-TOOL-10.json",
+        "size_bytes": 390834,
+        "sha256": "29ccf03064ef56f1e54ace16ed4e28dbe551ec4ea6a31b869fc2be4f93cf42f6"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-known-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-known-TOOL-8.json",
+        "size_bytes": 182009,
+        "sha256": "64e9f547cbf69cd92918f2250de8c8c2f9ff06e76ebea9fe3e4cd0da2e6bb2d6"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-unknown-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-unknown-KEEP-10.json",
+        "size_bytes": 254798,
+        "sha256": "8462900b6652f81486792f125022a86a5a0483dda34d1225b531d909ee691be2"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-unknown-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-unknown-KEEP-8.json",
+        "size_bytes": 181325,
+        "sha256": "04d472b59149a742bc29fe2905ed5acbcccbda3696f1c9999812cdf0e965b1ff"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-unknown-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-unknown-PAY-10.json",
+        "size_bytes": 376756,
+        "sha256": "25520f669707fa2c5ac500f835cce35e5c68c0ad42788381a029851ab051cb8f"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-unknown-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-unknown-PAY-8.json",
+        "size_bytes": 264212,
+        "sha256": "b2a9f7e47c7190bf9cfd0dac16519751f749a97df83f373fabb485bacfda6e19"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-unknown-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-unknown-TOOL-10.json",
+        "size_bytes": 391885,
+        "sha256": "a32443ec6d6a3a6dfa4e8e50c08ac203273063ba83bcefa995067c1f86104539"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/E1-unknown-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/E1-unknown-TOOL-8.json",
+        "size_bytes": 181327,
+        "sha256": "8b6b4e8a48b11c53165e352bb5fd327c935fa47ef01b960e33edbfec5af01cf5"
+      },
+      {
+        "member": "sources/parent-f637743-20261009/manifest.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009/manifest.json",
+        "size_bytes": 3755806,
+        "sha256": "72873a47f57f8a92e053b8c9910da74a41895ba1e37566041c1b7e4d715cd3a8"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-known-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-known-KEEP-10.json",
+        "size_bytes": 255693,
+        "sha256": "148865b37dad675d863ff426160a9d93736fa44348e3349abfb2c31125c1d6a6"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-known-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-known-KEEP-8.json",
+        "size_bytes": 182008,
+        "sha256": "b4f0e6daec978559b8c30369e0b6086215f2156075c06071abc597e8f91b85a4"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-known-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-known-PAY-10.json",
+        "size_bytes": 375596,
+        "sha256": "8f8ca795a5353cc2429bbd040f27a96331163af29ce492fa9923597f82eea19b"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-known-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-known-PAY-8.json",
+        "size_bytes": 263444,
+        "sha256": "c9f51978b08a243228d28203422e697671f09d950ef8e7a9f11f15c5a6d632d5"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-known-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-known-TOOL-10.json",
+        "size_bytes": 390829,
+        "sha256": "7f45f9bc083ea01051fef1e5d00cd5040b7b99e867c69b536673026dfb238d45"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-known-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-known-TOOL-8.json",
+        "size_bytes": 182006,
+        "sha256": "71e9da063a0622fc4463de3367efa55321ed9a7d07d4f0ad14c05a4169d46a07"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-unknown-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-unknown-KEEP-10.json",
+        "size_bytes": 254798,
+        "sha256": "0ed9d5b0b82eba7013952b400ec9689a24ec9e4163b195ff4cfae267f10b4838"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-unknown-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-unknown-KEEP-8.json",
+        "size_bytes": 181325,
+        "sha256": "dd5e9b5731859589e7959fd5d58cc9e842c7dc01639788b350df223064096758"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-unknown-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-unknown-PAY-10.json",
+        "size_bytes": 376754,
+        "sha256": "d37af9078c413fcb318fe0c2db9065dd246dacd246fa489dcc12d4213c26ca5e"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-unknown-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-unknown-PAY-8.json",
+        "size_bytes": 264214,
+        "sha256": "6dc8425f64c2111fca2595d5106c6104d85242d2095fa81c547975b3b9d54b72"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-unknown-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-unknown-TOOL-10.json",
+        "size_bytes": 391883,
+        "sha256": "f5410bf297e9f02d37d4bb0baf7aff79e46632364b1cd2b9205e53edd0682692"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/E1-unknown-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/E1-unknown-TOOL-8.json",
+        "size_bytes": 181330,
+        "sha256": "40d20a78ba090080a00b5e587e50b31f04bc601a7d650ee4ac8a202b410de6f9"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-rerun/manifest.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-rerun/manifest.json",
+        "size_bytes": 3755805,
+        "sha256": "ce559387f4bb73d7f098a7a2f14df58c559f2581a528ae42604f60e8dada4575"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-cap1/E1-unknown-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-cap1",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-cap1/E1-unknown-PAY-10.json",
+        "size_bytes": 252956,
+        "sha256": "d773819c256b20004a451cbda8f51a29197bef7cfc0ff4dee1dd2d25cb1cfff5"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-cap1/manifest.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-cap1",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-cap1/manifest.json",
+        "size_bytes": 292080,
+        "sha256": "b98bbf63ac2b26d5e5aeac82accc1bc8ba5cba150b8b7336b556fe8c0e209e65"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-wall/E1-unknown-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-wall",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-wall/E1-unknown-PAY-10.json",
+        "size_bytes": 253064,
+        "sha256": "72fd551364f0823daa81509dd5ed5711f1ece9e0317d0e1fa0996ef42b41f758"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-wall/manifest.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-wall",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-wall/manifest.json",
+        "size_bytes": 292194,
+        "sha256": "7dc3e7e37547c3fec05860c9986b522d39d827b981b83bcfc020c452dc17c0f7"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/audit.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/audit.json",
+        "size_bytes": 56644,
+        "sha256": "7262f8e44d5454298d5bd38e0f410152060940895a739dfa26ff1cb9afbb413d"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/audit.log",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/audit.log",
+        "size_bytes": 14865,
+        "sha256": "ad93fa33ce3b5560eccf0fca7732c787f803e94042024fb02059392d583a49b9"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/audit_parent.py",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/audit_parent.py",
+        "size_bytes": 22664,
+        "sha256": "e2c3e46cd924a106dc6f4789f7ed14f96e61189c52dcb676c089911d75ed9840"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/bundle_evidence.py",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/bundle_evidence.py",
+        "size_bytes": 8932,
+        "sha256": "7981f92506533ecdb695baac99e15ee64fd76d212dc5ad1bcad02664bf9e16b2"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e0-artifact.zip",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e0-artifact.zip",
+        "size_bytes": 1628310,
+        "sha256": "3093ef768578f59593a28e3c5df3c9c24d2d441b4eb221acbbd3b2dc0126e8fd"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e0.log",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e0.log",
+        "size_bytes": 46830,
+        "sha256": "82eaf62298d6dfb7ba9e572c4f6889fe62cca59be35cc1c44af23e9ec176d64b"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-KEEP-10.json",
+        "size_bytes": 255685,
+        "sha256": "b229aee2587bed4d982fe85481e3ffc439440b9286399ad60a196331339419de"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-KEEP-8.json",
+        "size_bytes": 181996,
+        "sha256": "3f6e92414fa9322ff8fcc58770f1147ebebdf0def4ee7e1e54d85095f14cb92e"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-PAY-10.json",
+        "size_bytes": 375590,
+        "sha256": "d803f2e569103c162ed3a58a6fe2d61939fbb8680fa3cf42362c5710556d99ad"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-PAY-8.json",
+        "size_bytes": 263442,
+        "sha256": "c3eb5ce31268764c2eb538ea5db7e3ae32eca50edc8e9076060f176d5e9539e7"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-TOOL-10.json",
+        "size_bytes": 390827,
+        "sha256": "730bdc404525ec7390c1792fd0a96c64a57913a7fbf878403821d512af5c7acb"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-known-TOOL-8.json",
+        "size_bytes": 182000,
+        "sha256": "53ec44c7e5c505a6fcedbda90627fb4167f6eb6cad1acb96ee243b312a3a53df"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-KEEP-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-KEEP-10.json",
+        "size_bytes": 254789,
+        "sha256": "6b4c49165f6541527d6402d4c7eaa2d4e0b86e37652228595db89fda541280f9"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-KEEP-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-KEEP-8.json",
+        "size_bytes": 181324,
+        "sha256": "c21a08de20edd43d60a2df460c66b1a4a5bfc5a2e5d0985d4cc2c0e4375cc943"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-PAY-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-PAY-10.json",
+        "size_bytes": 376747,
+        "sha256": "0205caac5ef0b95b14f617a5dc3acb66d584e22cf0f90fb5b71cfb75a762f261"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-PAY-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-PAY-8.json",
+        "size_bytes": 264200,
+        "sha256": "e38d9a25f04add191e84c64d46ef63f747e61c20bc33bf2663feb8b3ccf63068"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-TOOL-10.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-TOOL-10.json",
+        "size_bytes": 391879,
+        "sha256": "b9b277948d56ce8992de7a0df47efe2ab3571dada48b72fabb052ab170233fc1"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-TOOL-8.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/E1-unknown-TOOL-8.json",
+        "size_bytes": 181324,
+        "sha256": "61eb5ea430b84334e95daa959801463b1b4c3047de26d715ba372634828bad03"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/manifest.json",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/ci-37898921437-1/manifest.json",
+        "size_bytes": 3755705,
+        "sha256": "f8efae4068ddd6e07c4eae63b8234baf6efb4c6f7b88cf864859e9a06aee0b08"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1-artifact/unit-tests.log",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1-artifact/unit-tests.log",
+        "size_bytes": 4267,
+        "sha256": "4d68b284041f8541b499233369b0b6bdc9aff39c0033958db2fc0febd59a9278"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/ci-e1.log",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e1.log",
+        "size_bytes": 42787,
+        "sha256": "4b152819428e92dee6d1f5a590384f4a70b73ecea6102b4336ec22fc8e9476b5"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/repo-health.log",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/repo-health.log",
+        "size_bytes": 667,
+        "sha256": "dd9d02b51d729106b466517b9de9b422c65d64163d80ebed2224ade35e9c8d85"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/typed-ir-tests.log",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/typed-ir-tests.log",
+        "size_bytes": 4675,
+        "sha256": "460ca8117402dbfa6030672de08ba4a661d4c4b646332d657912f8ebf042dacb"
+      },
+      {
+        "member": "sources/parent-f637743-20261009-audit/unit-tests.log",
+        "source_directory": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit",
+        "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/unit-tests.log",
+        "size_bytes": 4267,
+        "sha256": "f22ad9e8fe9ade276cff9c2c51886aefe84b3aebf043bea22c0e6f190807da62"
+      }
+    ],
+    "readback_verified": true
+  },
+  "compact_evidence_copies": [
+    {
+      "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/audit.json",
+      "output_path": "02_实验/E1_KeyLedger_LocalAgency_v0/evidence/audit.json",
+      "size_bytes": 56644,
+      "sha256": "7262f8e44d5454298d5bd38e0f410152060940895a739dfa26ff1cb9afbb413d"
+    },
+    {
+      "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/unit-tests.log",
+      "output_path": "02_实验/E1_KeyLedger_LocalAgency_v0/evidence/unit-tests.log",
+      "size_bytes": 4267,
+      "sha256": "f22ad9e8fe9ade276cff9c2c51886aefe84b3aebf043bea22c0e6f190807da62"
+    },
+    {
+      "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/typed-ir-tests.log",
+      "output_path": "02_实验/E1_KeyLedger_LocalAgency_v0/evidence/typed-ir-tests.log",
+      "size_bytes": 4675,
+      "sha256": "460ca8117402dbfa6030672de08ba4a661d4c4b646332d657912f8ebf042dacb"
+    },
+    {
+      "source_path": "runs/e1_keyledger_v0/dev/parent-f637743-20261009-audit/ci-e0.log",
+      "output_path": "02_实验/E1_KeyLedger_LocalAgency_v0/evidence/ci-e0.log",
+      "size_bytes": 46830,
+      "sha256": "82eaf62298d6dfb7ba9e572c4f6889fe62cca59be35cc1c44af23e9ec176d64b"
+    }
+  ]
+}
