@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-2026-10-10 路线恢复：科研推进原则与恢复摘要的证据边界由[研究重建审计](研究重建审计_2026-10-06.md)维护。Minecraft 已成为下一执行载体方向而非仅思想例，尚未集成；候选步骤归[IntegrationBlueprint v0 §07](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md)，具体下一动作见 [TODO](TODO.md)。
+2026-10-10 当前路线：先在合适的文字冒险平台复现成熟传统方案，尽量覆盖 W/O/H、评价、人物动机/规划/执行反馈、作者约束与 Director 全链，再检查传统机制的真实缺口。LIGHT 原无模型入口优先准入，Evennia 为备选，TextWorld 作专项对照；均未在本机安装或运行，平台选型未冻结。准入证据见[技术准入报告](../01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)，行动状态见 [TODO](TODO.md)。Minecraft/MC 挖煤降为延期候选，不是默认下一步。
 
 2026-10-09 用户在新目标讨论后明确从外围维护切换为实现：[NPC System Integration v0](../tools/npc_system_v0/README.md)是获授权的有限应用整合，不是 E1-2 或重开冻结 C++ Runtime。授权/下一动作见 [TODO](TODO.md)，能力/验收只看[唯一结果](../02_实验/NPC_System_Integration_v0/RESULTS.md)。下方旧草案的“未开发 Director”不能再作为禁止本应用实现的当前规则。
 
@@ -26,7 +26,8 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [E0 Key Ledger Protocol v0](E0_KeyLedger_Protocol_v0.md) | 唯一有限钥匙账本 E0 执行定义与 fixture/search/monitor acceptance protocol；PROTOCOL_FROZEN / E0-KeyLedger-v0；实现与逐例验收状态见 [E0 实验入口](../02_实验/E0_KeyLedger_v0/README.md) | F0/F1 总设计、Pilot Monitor/reference 契约、未验收的实现能力或实验结果 |
 | [E1 局部信息与独立角色协议 v0](E1_KeyLedger_LocalAgency_Protocol_v0.md) | E1-0 有限域与协议；E1-1 独立开发包已交付。实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)；代码入口：[runner](../tools/e1_keyledger_v0/runner.py) | E0 冻结规则；将开发验证写成正式实验、新颖性声明；自动授权正式实验/E1-2 |
 | [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md) | 新授权应用 vertical slice 的唯一开发结果；实现与协议见[代码 README](../tools/npc_system_v0/README.md) | 全系统正式语义、冻结 E1 结果、心理验证或玩家评价 |
-| [IntegrationBlueprint v0 §07](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md) | Minecraft 候选执行载体的接入缺口与候选步骤 | 已集成能力、实施授权或研究结论 |
+| [IntegrationBlueprint v0 §07](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md) | 当前传统基线接线边界；历史 MC 候选与 C++ 证据桥分区保留 | 原件复现结果、已集成能力或实施授权 |
+| [传统全链基线与文字平台技术准入](../01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md) | 当前平台与原引擎入口的只读准入事实、未知项及复现候选 | 已安装/运行、最终选型或研究结论 |
 | [04 统一问题与成熟基线准入](../01_文献/算法积木/04_统一问题与成熟基线准入.md) | 有限统一实例下的成熟方法综合、候选问题与方法准入判断 | 全部长期研究方向、已确认研究缺口或实验通过结论 |
 | **[整合系统视角复核](审核_整合系统视角复核_2026-09-05.md)** | **判断复核**：回到实现核对旧判断的前提是否成立 | 文献层面的重新论证 |
 | **[文献比较方法与阶段缺口复核](审核_文献比较方法与阶段缺口_2026-09-05.md)** | **方法纪律**：13 维机制比较模板、冻结母问题、科研流程阶段缺口。含**我自己的认错清单** | 具体论文的逐篇内容 |

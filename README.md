@@ -6,7 +6,7 @@
 
 当前已有规则化 C++ 参考模拟与批量日志；**Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**：统一时钟、RunningAction、事件/信息边界、DecisionGate、typed rejection、scheduler-native fixtures、trace、case-isolated CTest 与 CI 已闭环。Evaluator、Objective、Optimizer 与 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
 
-2026-10-10 路线恢复：下一载体方向为真实 Minecraft，尚未集成；不继续将 KeyLedger 或独立 Python CLI 游戏当主要交付。科研推进原则见[研究重建审计](00_研究设计/研究重建审计_2026-10-06.md)，接入候选见[IntegrationBlueprint v0 §07](00_研究设计/草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md)，实施边界见[TODO](00_研究设计/TODO.md)。
+2026-10-10 当前路线：先在合适的文字冒险平台复现成熟传统方案，尽量覆盖世界/观察/角色状态/评价、人物动机与规划、执行反馈、作者约束及 Director 的完整链路，再依据运行证据判断缺口。LIGHT 原引擎无模型入口是优先技术准入候选；Evennia 是备选，TextWorld 作专项对照。LIGHT/Evennia 均未在本机安装或运行，最终平台尚未冻结。详见[技术准入报告](01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)、[研究重建审计](00_研究设计/研究重建审计_2026-10-06.md)与[TODO](00_研究设计/TODO.md)。Minecraft/MC 挖煤仍是延期候选，不是当前启动步骤或前置条件。
 
 ## 从这里进入
 

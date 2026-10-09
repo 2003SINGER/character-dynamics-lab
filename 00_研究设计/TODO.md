@@ -11,7 +11,8 @@
 | DEMO-LIVING | **ACTIVE / DEMO ONLY** | 保留历史批次为实现诊断。Laya v4.3 一日工程 gate 通过、行为 scale gate 未通过：no-history 单 seed 睡眠 1,149 分钟且历史输入使首请求分布大幅变化；停止扩成 64 actors / 7 days | [core behavior eval](../Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；[Laya typed policy](../Demo%20codex-generated/demo/laya_typed_policy_v0/README.md)；[v4.3 audit](../outputs/laya_runs/laya_v43_66ebfe7_20260925/RESULTS.md) |
 | RESEARCH-DYNAMICS | **TOY_NOT_ADMITTED / 未训练** | 不把四字段手写 law、相对分数 policy 或当前不足的干预测试称作机制通过；不运行会覆盖 artifacts 的生成器 | [研究重建审计](研究重建审计_2026-10-06.md)；[ResearchDynamicsV1 source](../02_实验/ResearchDynamicsV1/README.md) |
 | NPC-SYSTEM-INTEGRATION-V0 | **DEVELOPMENT_VERIFIED / READY_FOR_INDEPENDENT_REVIEW** | 首个 vertical slice 已交付，保留独立审阅实际链与未实现项；后续动作不自动设为 C++ 桥或独立 Python CLI | [唯一结果/需求映射](../02_实验/NPC_System_Integration_v0/RESULTS.md)；[可运行入口](../tools/npc_system_v0/README.md)。不等于正式 E1-2、LLM 接入或完整系统 |
-| MC-EXECUTION-ROUTE | **方向恢复 / 接入候选，未集成** | 确认 §07 的最小观察/动作/时间契约与技术探针实施授权。Mineflayer/Java/结构化观察及煤炭任务均为候选，不视作已拍板 | [候选步骤与缺口](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md)；[方法与证据边界](研究重建审计_2026-10-06.md) |
+| TRADITIONAL-CHAIN-BASELINE | **SOURCE_ADMISSION_REVIEWED / NATIVE_REPRODUCTION_PENDING** | 确认实施范围后，先做 LIGHT 原引擎无模型入口与选定人物原例的原生复现准入；记录真实运行/失败与待适配层，不把地图能跑当全链已完成，也不扩写自制模拟器 | [技术准入报告](../01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)；[§07 路线与入口](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md) |
+| MC-EXECUTION-ROUTE | **DEFERRED_CANDIDATE** | 暂不启动。保留 Minecraft/Mineflayer/煤炭任务作为后续执行载体候选；它不是传统全链原生复现的前置条件 | [历史候选与边界](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md#历史延期候选-minecraft-执行) |
 | DIRECTOR-BUDGET-QUESTION | **待源码复现** | 若重新处理，先按来源审计/复现预算疑点；该恢复摘要不构成本轮新确认 | [NPC System Integration v0 结果](../02_实验/NPC_System_Integration_v0/RESULTS.md) |
 
 ## ACTIVE
