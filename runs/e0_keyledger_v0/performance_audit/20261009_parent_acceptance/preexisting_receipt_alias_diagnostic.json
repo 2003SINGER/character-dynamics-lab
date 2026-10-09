@@ -1,0 +1,86 @@
+{
+  "scope": "read-only diagnostic, not one of frozen 14 fixtures; no fix implemented",
+  "finding": "completed receipt delta shares mutable W container in original and optimized Executor; not introduced by performance changes",
+  "results": {
+    "885dc78": {
+      "completed_receipt_id": "receipt-000001",
+      "returned_delta": [
+        {
+          "status": "NONE",
+          "offer_id": null,
+          "terms": null,
+          "reply_time": null
+        },
+        {
+          "status": "OFFERED",
+          "offer_id": "offer-000001",
+          "terms": {
+            "payment": "payment",
+            "amount": 1,
+            "item": "any disclosed lendable key"
+          },
+          "reply_time": null
+        }
+      ],
+      "later_checkpoint_delta": [
+        {
+          "status": "NONE",
+          "offer_id": null,
+          "terms": null,
+          "reply_time": null
+        },
+        {
+          "status": "ACCEPTED",
+          "offer_id": "offer-000001",
+          "terms": {
+            "payment": "payment",
+            "amount": 1,
+            "item": "any disclosed lendable key"
+          },
+          "reply_time": 4
+        }
+      ],
+      "equal": false
+    },
+    "optimized": {
+      "completed_receipt_id": "receipt-000001",
+      "returned_delta": [
+        {
+          "status": "NONE",
+          "offer_id": null,
+          "terms": null,
+          "reply_time": null
+        },
+        {
+          "status": "OFFERED",
+          "offer_id": "offer-000001",
+          "terms": {
+            "payment": "payment",
+            "amount": 1,
+            "item": "any disclosed lendable key"
+          },
+          "reply_time": null
+        }
+      ],
+      "later_checkpoint_delta": [
+        {
+          "status": "NONE",
+          "offer_id": null,
+          "terms": null,
+          "reply_time": null
+        },
+        {
+          "status": "ACCEPTED",
+          "offer_id": "offer-000001",
+          "terms": {
+            "payment": "payment",
+            "amount": 1,
+            "item": "any disclosed lendable key"
+          },
+          "reply_time": 4
+        }
+      ],
+      "equal": false
+    }
+  }
+}

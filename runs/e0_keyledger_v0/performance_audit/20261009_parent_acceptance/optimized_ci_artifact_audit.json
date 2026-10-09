@@ -1,0 +1,59 @@
+{
+  "created_utc": "2026-10-09T01:08:43.802311+00:00",
+  "scope": "read-only artifact and exact source hash audit, no rerun",
+  "code_revision": "ebe3cbb09df913c7b319791256fbc0f215c25b4f",
+  "result_path": "runs/e0_keyledger_v0/ci_capture/37867775555_artifact/20261009T010303Z_all_ci-37867775555-1/result.json",
+  "result_sha256": "a4c5171ae9fa68f879df56588d2c3bc323015a71c876a366127134bd4d48c3ab",
+  "source_hashes_verified": [
+    "tools/e0_keyledger_v0/executor.py",
+    "tools/e0_keyledger_v0/planner.py",
+    "tools/e0_keyledger_v0/oracle.py",
+    "tools/e0_keyledger_v0/prediction.py",
+    "tools/e0_keyledger_v0/monitor_bridge.py",
+    "tools/e0_keyledger_v0/runner.py",
+    "tools/e0_keyledger_v0/fixtures.py",
+    "tools/e0_keyledger_v0/tests/test_executor.py",
+    "tools/e0_keyledger_v0/tests/test_oracle.py",
+    "tools/e0_keyledger_v0/tests/test_monitor_bridge.py",
+    "tools/e0_keyledger_v0/tests/test_runner.py"
+  ],
+  "protocol_hash_verified": "0837eaa2e7b53e5aa00578534b714f38b055cc6389191ca7c5687eb5f3b1c7f9",
+  "input_hashes_and_combined_case_equality_verified": 14,
+  "budget": {
+    "max_expansions": 10000,
+    "wall_seconds": 2.0
+  },
+  "fixture_result": "13/14 PASS; E0-H02 FAIL",
+  "jobs": [
+    {
+      "name": "praxish-contract",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "e0-keyledger-contract",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "name": "public-evidence-integrity",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "source-ranking-contract",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "trajectory-constraint-contract",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "regression",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}
