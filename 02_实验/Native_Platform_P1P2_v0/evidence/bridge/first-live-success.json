@@ -1,0 +1,588 @@
+{
+  "status": "PASS",
+  "execution": "called from in-game @py on the running nativep1 server",
+  "fixtureTypeclasses": [
+    "typeclasses.rooms.Room",
+    "typeclasses.characters.Character"
+  ],
+  "officialAiFsmCalled": false,
+  "fixture": {
+    "room": "#38",
+    "awayRoom": "#39",
+    "actor": "#40",
+    "target": "#41"
+  },
+  "commands": [
+    {
+      "case": "stale-location-world-rejection",
+      "proposal": {
+        "command": "ensemble-propose #41",
+        "result": {
+          "ok": true,
+          "proposalId": "p1:evennia%3A40%3A41%3AKQf9frwIzYhBpHqX",
+          "eventId": "evennia:40:41:KQf9frwIzYhBpHqX",
+          "recordRevision": 1,
+          "actor": "hero",
+          "responder": "love",
+          "volitions": [
+            {
+              "category": "feeling",
+              "type": "closeness",
+              "first": "hero",
+              "second": "love",
+              "intentType": true,
+              "weight": 20,
+              "englishInfluences": [
+                []
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "name": "writeLoveNoteReject",
+              "displayName": "Write Love Note <REJECT>",
+              "failMessage": "Your love note was poorly received",
+              "conditions": [],
+              "influenceRules": [],
+              "isAccept": false,
+              "effects": [
+                {
+                  "category": "feeling",
+                  "type": "closeness",
+                  "first": "hero",
+                  "second": "love",
+                  "operator": "+",
+                  "value": 10
+                },
+                {
+                  "category": "socialRecordLabel",
+                  "type": "romantic-failure",
+                  "first": "hero",
+                  "second": "love",
+                  "value": true
+                }
+              ],
+              "fileName": "actions.json",
+              "id": 17,
+              "goodBindings": [
+                {
+                  "initiator": "hero",
+                  "responder": "love",
+                  "weight$$": 20
+                }
+              ],
+              "lineage": "RAISECLOSENESS-WRITELOVENOTE",
+              "weight": 20,
+              "salience": 20
+            },
+            {
+              "name": "kissFail",
+              "displayName": "Kiss <REJECT>",
+              "failMessage": "Oof, your kiss attempt did not go well",
+              "isAccept": false,
+              "conditions": [],
+              "influenceRules": [],
+              "effects": [
+                {
+                  "category": "feeling",
+                  "type": "closeness",
+                  "first": "hero",
+                  "second": "love",
+                  "operator": "-",
+                  "value": 100
+                },
+                {
+                  "category": "feeling",
+                  "type": "closeness",
+                  "first": "love",
+                  "second": "hero",
+                  "operator": "-",
+                  "value": 100
+                }
+              ],
+              "fileName": "actions.json",
+              "id": 15,
+              "goodBindings": [
+                {
+                  "initiator": "hero",
+                  "responder": "love",
+                  "weight$$": 20
+                }
+              ],
+              "lineage": "RAISECLOSENESS-KISS",
+              "weight": 20,
+              "salience": 20
+            }
+          ],
+          "socialRecordUnchanged": true,
+          "trace": {
+            "stage": "proposal",
+            "calls": [
+              "calculateVolition",
+              "getActions"
+            ],
+            "doActionCalled": false,
+            "triggerCalled": false,
+            "nextStepCalled": false
+          }
+        }
+      },
+      "targetMovedTo": "#39",
+      "settlement": {
+        "command": "ensemble-settle p1:evennia%3A40%3A41%3AKQf9frwIzYhBpHqX",
+        "result": {
+          "ok": false,
+          "error": "world validation rejected settlement: actor or target left the proposal room",
+          "proposalId": "p1:evennia%3A40%3A41%3AKQf9frwIzYhBpHqX",
+          "receiptCreated": false,
+          "ensembleCommitCalled": false
+        }
+      },
+      "noteCountBeforeAfter": [
+        0,
+        0
+      ]
+    },
+    {
+      "case": "real-note-delivery-then-Ensemble-commit",
+      "proposal": {
+        "command": "ensemble-propose #41",
+        "result": {
+          "ok": true,
+          "proposalId": "p2:evennia%3A40%3A41%3A9JDpzisozih7a50G",
+          "eventId": "evennia:40:41:9JDpzisozih7a50G",
+          "recordRevision": 2,
+          "actor": "hero",
+          "responder": "love",
+          "volitions": [
+            {
+              "category": "feeling",
+              "type": "closeness",
+              "first": "hero",
+              "second": "love",
+              "intentType": true,
+              "weight": 20,
+              "englishInfluences": [
+                []
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "name": "writeLoveNoteReject",
+              "displayName": "Write Love Note <REJECT>",
+              "failMessage": "Your love note was poorly received",
+              "conditions": [],
+              "influenceRules": [],
+              "isAccept": false,
+              "effects": [
+                {
+                  "category": "feeling",
+                  "type": "closeness",
+                  "first": "hero",
+                  "second": "love",
+                  "operator": "+",
+                  "value": 10
+                },
+                {
+                  "category": "socialRecordLabel",
+                  "type": "romantic-failure",
+                  "first": "hero",
+                  "second": "love",
+                  "value": true
+                }
+              ],
+              "fileName": "actions.json",
+              "id": 17,
+              "goodBindings": [
+                {
+                  "initiator": "hero",
+                  "responder": "love",
+                  "weight$$": 20
+                }
+              ],
+              "lineage": "RAISECLOSENESS-WRITELOVENOTE",
+              "weight": 20,
+              "salience": 20
+            },
+            {
+              "name": "kissFail",
+              "displayName": "Kiss <REJECT>",
+              "failMessage": "Oof, your kiss attempt did not go well",
+              "isAccept": false,
+              "conditions": [],
+              "influenceRules": [],
+              "effects": [
+                {
+                  "category": "feeling",
+                  "type": "closeness",
+                  "first": "hero",
+                  "second": "love",
+                  "operator": "-",
+                  "value": 100
+                },
+                {
+                  "category": "feeling",
+                  "type": "closeness",
+                  "first": "love",
+                  "second": "hero",
+                  "operator": "-",
+                  "value": 100
+                }
+              ],
+              "fileName": "actions.json",
+              "id": 15,
+              "goodBindings": [
+                {
+                  "initiator": "hero",
+                  "responder": "love",
+                  "weight$$": 20
+                }
+              ],
+              "lineage": "RAISECLOSENESS-KISS",
+              "weight": 20,
+              "salience": 20
+            }
+          ],
+          "socialRecordUnchanged": true,
+          "trace": {
+            "stage": "proposal",
+            "calls": [
+              "calculateVolition",
+              "getActions"
+            ],
+            "doActionCalled": false,
+            "triggerCalled": false,
+            "nextStepCalled": false
+          }
+        }
+      },
+      "settlement": {
+        "command": "ensemble-settle p2:evennia%3A40%3A41%3A9JDpzisozih7a50G",
+        "result": {
+          "ok": true,
+          "proposalId": "p2:evennia%3A40%3A41%3A9JDpzisozih7a50G",
+          "eventId": "evennia:40:41:9JDpzisozih7a50G",
+          "actorId": 40,
+          "settlementReceiptId": "#42",
+          "noteDbref": "#42",
+          "socialOutcome": "writeLoveNoteReject",
+          "worldEffect": "note moved into target inventory",
+          "ensemble": {
+            "ok": true,
+            "proposalId": "p2:evennia%3A40%3A41%3A9JDpzisozih7a50G",
+            "eventId": "evennia:40:41:9JDpzisozih7a50G",
+            "recordRevision": 3,
+            "actionName": "writeLoveNoteReject",
+            "socialRecord": [
+              {
+                "category": "trait",
+                "type": "named hero",
+                "first": "hero",
+                "value": true,
+                "id": 13,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "named love",
+                "first": "love",
+                "value": true,
+                "id": 15,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "named rival",
+                "first": "rival",
+                "value": true,
+                "id": 3,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "anyone",
+                "first": "hero",
+                "value": true,
+                "id": 14,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "anyone",
+                "first": "rival",
+                "value": true,
+                "id": 5,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "anyone",
+                "first": "love",
+                "value": true,
+                "id": 16,
+                "timeHappened": 0
+              },
+              {
+                "category": "attribute",
+                "type": "strength",
+                "first": "hero",
+                "value": 0,
+                "id": 7,
+                "timeHappened": 0
+              },
+              {
+                "category": "attribute",
+                "type": "intelligence",
+                "first": "hero",
+                "value": 5,
+                "id": 8,
+                "timeHappened": 0
+              },
+              {
+                "category": "feeling",
+                "type": "closeness",
+                "first": "hero",
+                "second": "love",
+                "value": 10,
+                "id": 17,
+                "timeHappened": 0
+              },
+              {
+                "category": "socialRecordLabel",
+                "type": "romantic-failure",
+                "first": "hero",
+                "second": "love",
+                "value": true,
+                "id": 18,
+                "timeHappened": 0,
+                "duration": 0
+              },
+              {
+                "category": "mood",
+                "type": "confident",
+                "first": "rival",
+                "value": true,
+                "id": 19,
+                "timeHappened": 0,
+                "duration": 3
+              },
+              {
+                "category": "feeling",
+                "type": "closeness",
+                "first": "love",
+                "second": "rival",
+                "value": 10,
+                "id": 20,
+                "timeHappened": 0
+              }
+            ],
+            "trace": {
+              "stage": "commit",
+              "calls": [
+                "doAction",
+                "runTriggerRules",
+                "setupNextTimeStep"
+              ],
+              "doActionCalled": true,
+              "triggerCalled": true,
+              "nextStepCalled": true
+            }
+          }
+        }
+      },
+      "actor": {
+        "dbref": "#40",
+        "roleAttribute": "hero",
+        "location": "#38"
+      },
+      "target": {
+        "dbref": "#41",
+        "roleAttribute": "love",
+        "location": "#38"
+      },
+      "receipt": {
+        "dbref": "#42",
+        "location": "#41",
+        "key": "Love note for Bridge Love d7968bdfae"
+      },
+      "sourceEventLedger": [
+        {
+          "eventId": "evennia:40:41:KQf9frwIzYhBpHqX",
+          "kind": "ensemble-propose-command",
+          "actorDbref": "#40",
+          "targetDbref": "#41",
+          "actorLocationDbref": "#38",
+          "targetLocationDbref": "#38",
+          "projectedRoles": [
+            "hero",
+            "love"
+          ],
+          "projectionBoundary": "command plus stored object role metadata only; location does not imply emotion"
+        },
+        {
+          "eventId": "evennia:40:41:9JDpzisozih7a50G",
+          "kind": "ensemble-propose-command",
+          "actorDbref": "#40",
+          "targetDbref": "#41",
+          "actorLocationDbref": "#38",
+          "targetLocationDbref": "#38",
+          "projectedRoles": [
+            "hero",
+            "love"
+          ],
+          "projectionBoundary": "command plus stored object role metadata only; location does not imply emotion"
+        }
+      ]
+    },
+    {
+      "case": "duplicate-feedback-deduped",
+      "settlement": {
+        "command": "ensemble-settle p2:evennia%3A40%3A41%3A9JDpzisozih7a50G",
+        "result": {
+          "ok": true,
+          "duplicate": true,
+          "proposalId": "p2:evennia%3A40%3A41%3A9JDpzisozih7a50G",
+          "eventId": "evennia:40:41:9JDpzisozih7a50G",
+          "actorId": 40,
+          "settlementReceiptId": "#42",
+          "noteDbref": "#42",
+          "socialOutcome": "writeLoveNoteReject",
+          "worldEffect": "note moved into target inventory",
+          "ensemble": {
+            "ok": true,
+            "proposalId": "p2:evennia%3A40%3A41%3A9JDpzisozih7a50G",
+            "eventId": "evennia:40:41:9JDpzisozih7a50G",
+            "recordRevision": 3,
+            "actionName": "writeLoveNoteReject",
+            "socialRecord": [
+              {
+                "category": "trait",
+                "type": "named hero",
+                "first": "hero",
+                "value": true,
+                "id": 13,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "named love",
+                "first": "love",
+                "value": true,
+                "id": 15,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "named rival",
+                "first": "rival",
+                "value": true,
+                "id": 3,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "anyone",
+                "first": "hero",
+                "value": true,
+                "id": 14,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "anyone",
+                "first": "rival",
+                "value": true,
+                "id": 5,
+                "timeHappened": 0
+              },
+              {
+                "category": "trait",
+                "type": "anyone",
+                "first": "love",
+                "value": true,
+                "id": 16,
+                "timeHappened": 0
+              },
+              {
+                "category": "attribute",
+                "type": "strength",
+                "first": "hero",
+                "value": 0,
+                "id": 7,
+                "timeHappened": 0
+              },
+              {
+                "category": "attribute",
+                "type": "intelligence",
+                "first": "hero",
+                "value": 5,
+                "id": 8,
+                "timeHappened": 0
+              },
+              {
+                "category": "feeling",
+                "type": "closeness",
+                "first": "hero",
+                "second": "love",
+                "value": 10,
+                "id": 17,
+                "timeHappened": 0
+              },
+              {
+                "category": "socialRecordLabel",
+                "type": "romantic-failure",
+                "first": "hero",
+                "second": "love",
+                "value": true,
+                "id": 18,
+                "timeHappened": 0,
+                "duration": 0
+              },
+              {
+                "category": "mood",
+                "type": "confident",
+                "first": "rival",
+                "value": true,
+                "id": 19,
+                "timeHappened": 0,
+                "duration": 3
+              },
+              {
+                "category": "feeling",
+                "type": "closeness",
+                "first": "love",
+                "second": "rival",
+                "value": 10,
+                "id": 20,
+                "timeHappened": 0
+              }
+            ],
+            "trace": {
+              "stage": "commit",
+              "calls": [
+                "doAction",
+                "runTriggerRules",
+                "setupNextTimeStep"
+              ],
+              "doActionCalled": true,
+              "triggerCalled": true,
+              "nextStepCalled": true
+            }
+          }
+        }
+      },
+      "noteCountBeforeAfter": [
+        1,
+        1
+      ]
+    }
+  ],
+  "meaning": {
+    "sourceEvent": "the actual ensemble-propose Evennia command request is appended to an Evennia Attribute ledger",
+    "projection": "only stored hero/love role metadata is projected; room location is used for validation and does not imply emotion",
+    "worldValidation": "same-room validation gates physical note delivery; stale location yields no receipt and no Ensemble commit",
+    "socialResponse": "writeLoveNoteReject is the example narrative rejection after valid note delivery, distinct from world validation rejection",
+    "ownership": "Evennia owns room membership and the delivered note object; Ensemble owns only social-record effects"
+  }
+}

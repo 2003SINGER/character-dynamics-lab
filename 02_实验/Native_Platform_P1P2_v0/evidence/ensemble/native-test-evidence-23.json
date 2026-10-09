@@ -1,0 +1,29 @@
+{
+  "runtime": "v26.8.2",
+  "commands": [
+    {
+      "command": "node tools/native_platform_v0/ensemble/reproduce.mjs",
+      "cwd": "/Users/2003singer/Workspace/Research/character-dynamics-lab",
+      "exitStatus": 0,
+      "signal": null,
+      "stdout": "{\n  \"source\": \"official browser example data and bundled engine\",\n  \"actionsChosen\": \"writeLoveNoteReject\",\n  \"steps\": [\n    {\n      \"step\": \"calculateVolition\",\n      \"target\": [\n        \"hero\",\n        \"love\"\n      ],\n      \"result\": {\n        \"category\": \"feeling\",\n        \"type\": \"closeness\",\n        \"first\": \"hero\",\n        \"second\": \"love\",\n        \"intentType\": true,\n        \"weight\": 20,\n        \"englishInfluences\": [\n          []\n        ]\n      }\n    },\n    {\n      \"step\": \"getActions\",\n      \"candidates\": [\n        {\n          \"name\": \"writeLoveNoteReject\",\n          \"weight\": 20,\n          \"lineage\": \"RAISECLOSENESS-WRITELOVENOTE\"\n        },\n        {\n          \"name\": \"kissFail\",\n          \"weight\": 20,\n          \"lineage\": \"RAISECLOSENESS-KISS\"\n        }\n      ],\n      \"chosen\": \"writeLoveNoteReject\"\n    },\n    {\n      \"step\": \"doAction\",\n      \"effectsObserved\": [\n        {\n          \"category\": \"feeling\",\n          \"type\": \"closeness\",\n          \"first\": \"hero\",\n          \"second\": \"love\",\n          \"value\": 10\n        },\n        {\n          \"category\": \"socialRecordLabel\",\n          \"type\": \"romantic-failure\",\n          \"first\": \"hero\",\n          \"second\": \"love\",\n          \"value\": true\n        }\n      ]\n    },\n    {\n      \"step\": \"explicitTrigger\",\n      \"effectsObserved\": [\n        {\n          \"category\": \"mood\",\n          \"type\": \"confident\",\n          \"first\": \"rival\",\n          \"value\": true\n        },\n        {\n          \"category\": \"feeling\",\n          \"type\": \"closeness\",\n          \"first\": \"love\",\n          \"second\": \"rival\",\n          \"value\": 10\n        }\n      ]\n    },\n    {\n      \"step\": \"setupNextTimeStep\",\n      \"currentTimeStep\": 1,\n      \"record\": [\n        {\n          \"category\": \"trait\",\n          \"type\": \"named hero\",\n          \"first\": \"hero\",\n          \"value\": true,\n          \"id\": 1,\n          \"timeHappened\": 0\n        },\n        {\n          \"category\": \"trait\",\n          \"type\": \"named love\",\n          \"first\": \"love\",\n          \"value\": true,\n          \"id\": 2,\n          \"timeHappened\": 0\n        },\n        {\n          \"category\": \"trait\",\n          \"type\": \"named rival\",\n          \"first\": \"rival\",\n          \"value\": true,\n          \"id\": 3,\n          \"timeHappened\": 0\n        },\n        {\n          \"category\": \"trait\",\n          \"type\": \"anyone\",\n          \"first\": \"hero\",\n          \"value\": true,\n          \"id\": 4,\n          \"timeHappened\": 0\n        },\n        {\n          \"category\": \"trait\",\n          \"type\": \"anyone\",\n          \"first\": \"rival\",\n          \"value\": true,\n          \"id\": 5,\n          \"timeHappened\": 0\n        },\n        {\n          \"category\": \"trait\",\n          \"type\": \"anyone\",\n          \"first\": \"love\",\n          \"value\": true,\n          \"id\": 6,\n          \"timeHappened\": 0\n        },\n        {\n          \"category\": \"attribute\",\n          \"type\": \"strength\",\n          \"first\": \"hero\",\n          \"value\": 0,\n          \"id\": 7,\n          \"timeHappened\": 0\n        },\n        {\n          \"category\": \"attribute\",\n          \"type\": \"intelligence\",\n          \"first\": \"hero\",\n          \"value\": 5,\n          \"id\": 8,\n          \"timeHappened\": 0\n        },\n        {\n          \"category\": \"feeling\",\n          \"type\": \"closeness\",\n          \"first\": \"hero\",\n          \"second\": \"love\",\n          \"value\": 10,\n          \"id\": 9,\n          \"timeHappened\": 0\n        },\n        {\n          \"category\": \"mood\",\n          \"type\": \"confident\",\n          \"first\": \"rival\",\n          \"value\": true,\n          \"id\": 11,\n          \"timeHappened\": 0,\n          \"duration\": 2\n        },\n        {\n          \"category\": \"feeling\",\n          \"type\": \"closeness\",\n          \"first\": \"love\",\n          \"second\": \"rival\",\n          \"value\": 10,\n          \"id\": 12,\n          \"timeHappened\": 0\n        }\n      ]\n    }\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "node tools/native_platform_v0/ensemble/run-upstream-tests.mjs",
+      "cwd": "/Users/2003singer/Workspace/Research/character-dynamics-lab",
+      "exitStatus": 0,
+      "signal": null,
+      "stdout": "{\n  \"suite\": \"official upstream core JS unit tests\",\n  \"groups\": 45,\n  \"passed\": 45,\n  \"failed\": 0,\n  \"omitted\": \"ExternalApplicationTest requires browser document events; not executed in Node VM\",\n  \"harness\": \"Node VM; upstream original core test source and generated test bundle; minimal DOM append shim\",\n  \"doActionTest\": \"disabled upstream at ActionLibraryUnitTests.js:23 (legacy API incompatibility comment at line 102)\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "node tools/native_platform_v0/ensemble/interface-selftest.mjs",
+      "cwd": "/Users/2003singer/Workspace/Research/character-dynamics-lab",
+      "exitStatus": 0,
+      "signal": null,
+      "stdout": "{\n  \"suite\": \"wrapper interface self-tests (not official upstream tests)\",\n  \"assertions\": 23,\n  \"status\": \"PASS\"\n}\n",
+      "stderr": ""
+    }
+  ]
+}

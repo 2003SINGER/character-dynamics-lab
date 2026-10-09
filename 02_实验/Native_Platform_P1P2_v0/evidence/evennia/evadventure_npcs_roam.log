@@ -1,0 +1,8 @@
+            self.ai.set_state("combat")
+            self.execute_cmd(f"attack {random.choice(targets).key}")
+        else:
+            exits = self.ai.get_traversable_exits()
+            if exits:
+                exi = random.choice(exits)
+                self.execute_cmd(f"{exi.key}")
+

@@ -2,11 +2,11 @@
 
 > 目标愿景：面向可持续运行、世界中心的 NPC，用可审计的观察、状态与执行机制支持可信行为和作者控制。局部策略、规划与开放语义模型的组合仍是候选路线，不是已经证明的低成本方法。
 
-本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`，当前活动分支为 `webgpt-sync`。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
+本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`；`webgpt-sync` 是项目 review branch owner。本地本轮开发 checkout 位于 `codex/native-platform-p1p2-20261010`，不应将其描述成 `webgpt-sync` checkout。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
 
 当前已有规则化 C++ 参考模拟与批量日志；**Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**：统一时钟、RunningAction、事件/信息边界、DecisionGate、typed rejection、scheduler-native fixtures、trace、case-isolated CTest 与 CI 已闭环。Evaluator、Objective、Optimizer 与 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
 
-2026-10-10 当前路线：先在合适的文字冒险平台复现成熟传统方案，尽量覆盖世界/观察/角色状态/评价、人物动机与规划、执行反馈、作者约束及 Director 的完整链路，再依据运行证据判断缺口。LIGHT 原引擎无模型入口是优先技术准入候选；Evennia 是备选，TextWorld 作专项对照。LIGHT/Evennia 均未在本机安装或运行，最终平台尚未冻结。详见[技术准入报告](01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)、[研究重建审计](00_研究设计/研究重建审计_2026-10-06.md)与[TODO](00_研究设计/TODO.md)。Minecraft/MC 挖煤仍是延期候选，不是当前启动步骤或前置条件。
+2026-10-10 当前已授权路线：以 **Evennia 为主平台、Ensemble 为首个原生人物机制参照**，完成有限的 P1/P2 原生复现与最小互通探针后停止；LIGHT 独立无模型限时探针不阻塞主线。实际环境、运行状态与准入结论只维护于 [Native Platform P1/P2](02_实验/Native_Platform_P1P2_v0/README.md)。旧[技术准入报告](01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)记录的是此前只读候选审查，不代表当前选型或运行状态；历史判断见[研究重建审计](00_研究设计/研究重建审计_2026-10-06.md)。Minecraft/MC 挖煤仍是延期候选，不是当前启动步骤或前置条件。
 
 ## 从这里进入
 
