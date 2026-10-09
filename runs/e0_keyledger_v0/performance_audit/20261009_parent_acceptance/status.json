@@ -1,0 +1,39 @@
+{
+  "e0": {
+    "returncode": 0,
+    "command": [
+      "/opt/homebrew/opt/python@3.12/bin/python3.12",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/e0_keyledger_v0/tests",
+      "-v"
+    ]
+  },
+  "typed_ir": {
+    "returncode": 0,
+    "command": [
+      "/opt/homebrew/opt/python@3.12/bin/python3.12",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/trajectory_constraints_v0/tests",
+      "-v"
+    ]
+  },
+  "source_sha256": {
+    "tools/e0_keyledger_v0/planner.py": "d93b0b920724a4d83d0a99075eb7595bee2e2f74d9108477afb93724b4c1ec21",
+    "tools/e0_keyledger_v0/executor.py": "9f8e17e3e28fb50ca0be542b35184d5903bc70b68e88509ee4510004373a4af8",
+    "tools/e0_keyledger_v0/tests/test_executor.py": "acbf61db0898a1a675a7de8537b5c7f96e17ee505ab084c42d3e3f406edaec7d",
+    "tools/e0_keyledger_v0/oracle.py": "12601b5b1009561f5cb41766016142222253b1f3391b0b16ac22ca8db3d0a412"
+  },
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "python": "3.12.14 (main, Aug 12 2026, 13:57:54) [Clang 21.0.0 (clang-2100.1.1.101)]",
+  "created_utc": "2026-10-09T00:57:34.165957+00:00",
+  "scope": "parent-development-validation-before-commit",
+  "concurrency": "sequential subprocesses"
+}

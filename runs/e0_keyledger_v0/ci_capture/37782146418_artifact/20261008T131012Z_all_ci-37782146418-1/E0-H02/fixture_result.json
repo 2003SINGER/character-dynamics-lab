@@ -1,0 +1,58 @@
+{
+  "fixture_id": "E0-H02",
+  "input_hash": "02e5e5df85f51422479e277dc32a82a51450271e6c724cdb30b9c0859fd919d1",
+  "config_pins": {
+    "deadline": 10,
+    "reply": "ACCEPT",
+    "unlock_duration": 1
+  },
+  "search_result": {
+    "solve_status": "BUDGET",
+    "termination_reason": "WALL_TIMEOUT",
+    "complete": false,
+    "exhausted": false,
+    "expansions": 534,
+    "elapsed_seconds": 2.001705385000008,
+    "earliest_completion_time": null,
+    "shortest_simulated_duration": null,
+    "path": [],
+    "frontier_count": 562,
+    "visited_count": 534,
+    "budget": {
+      "max_expansions": 10000,
+      "wall_seconds": 2.0
+    }
+  },
+  "oracle_result": {
+    "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+    "termination_reason": "FRONTIER_EMPTY",
+    "complete": true,
+    "exhausted": true,
+    "goal_found": false,
+    "expansions": 1887,
+    "budget": {
+      "max_expansions": 10000,
+      "timeout_seconds": 2.0
+    },
+    "wall_seconds": 1.210995832000009,
+    "frontier": 0,
+    "visited": 1887,
+    "earliest_completion_time": null,
+    "shortest_duration_minutes": null,
+    "goal_path": [],
+    "goal_event_witness": null
+  },
+  "fixture_test_result": "FAIL",
+  "expected_label": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+  "evidence": {},
+  "boundary_snapshots": {},
+  "search_replay_snapshots": {},
+  "errors": [
+    {
+      "type": "AssertionError",
+      "message": "planner status BUDGET != UNREACHABLE",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/runner.py\", line 683, in run_case\n    _check_search(case_id, planner, oracle, expected)\n  File \"/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/runner.py\", line 320, in _check_search\n    raise AssertionError(f\"planner status {planner.get('solve_status')} != {expected_planner}\")\nAssertionError: planner status BUDGET != UNREACHABLE\n"
+    }
+  ],
+  "elapsed_seconds": 3.239002775000003
+}

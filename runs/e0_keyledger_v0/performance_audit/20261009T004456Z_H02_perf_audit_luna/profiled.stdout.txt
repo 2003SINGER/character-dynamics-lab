@@ -1,0 +1,50 @@
+RESULT_JSON={"budget":{"max_expansions":10000,"wall_seconds":2.0},"complete":false,"earliest_completion_time":null,"elapsed_seconds":2.002251375000924,"exhausted":false,"expansions":286,"frontier_count":331,"path":[],"shortest_simulated_duration":null,"solve_status":"BUDGET","termination_reason":"WALL_TIMEOUT","visited_count":286}
+\nPROFILE_TOP_CUMULATIVE (cProfile overhead; diagnostic only)
+         14232875 function calls (11477941 primitive calls) in 2.002 seconds
+
+   Ordered by: cumulative time
+   List reduced from 52 to 40 due to restriction <40>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.009    0.009    2.002    2.002 planner.py:43(uniform_cost_search)
+2326895/7354    0.912    0.000    1.917    0.000 copy.py:118(deepcopy)
+295953/7333    0.323    0.000    1.909    0.000 copy.py:217(_deepcopy_dict)
+171601/24828    0.075    0.000    1.614    0.000 copy.py:191(_deepcopy_list)
+     1232    0.002    0.000    1.268    0.001 executor.py:95(checkpoint)
+      616    0.002    0.000    0.741    0.001 executor.py:307(advance_minute)
+      616    0.001    0.000    0.565    0.001 executor.py:92(__init__)
+  4700826    0.273    0.000    0.273    0.000 {method 'get' of 'dict' objects}
+   467554    0.089    0.000    0.138    0.000 copy.py:231(_keep_alive)
+  3269357    0.126    0.000    0.126    0.000 {built-in method builtins.id}
+  1838942    0.059    0.000    0.059    0.000 copy.py:172(_deepcopy_atomic)
+      330    0.004    0.000    0.054    0.000 executor.py:200(_finish)
+   721030    0.043    0.000    0.043    0.000 {method 'append' of 'list' objects}
+      616    0.001    0.000    0.031    0.000 executor.py:380(_evaluate_monitor)
+      616    0.014    0.000    0.030    0.000 executor.py:415(_validate_ledger_and_seals)
+      286    0.000    0.000    0.025    0.000 planner.py:14(_key)
+      286    0.000    0.000    0.025    0.000 __init__.py:183(dumps)
+      286    0.000    0.000    0.024    0.000 encoder.py:183(encode)
+      286    0.024    0.000    0.024    0.000 encoder.py:205(iterencode)
+   295953    0.021    0.000    0.021    0.000 {method 'items' of 'dict' objects}
+      330    0.001    0.000    0.021    0.000 executor.py:116(start)
+      616    0.001    0.000    0.011    0.000 executor.py:103(_receipt)
+      286    0.000    0.000    0.010    0.000 executor.py:68(legal_intents)
+     1368    0.001    0.000    0.009    0.000 executor.py:73(add)
+    11630    0.005    0.000    0.009    0.000 {built-in method builtins.any}
+     1654    0.001    0.000    0.007    0.000 executor.py:10(intent)
+     1698    0.002    0.000    0.003    0.000 executor.py:24(_valid)
+    52781    0.003    0.000    0.003    0.000 {built-in method builtins.isinstance}
+      309    0.000    0.000    0.002    0.000 executor.py:156(_event)
+    21080    0.001    0.000    0.001    0.000 executor.py:485(<genexpr>)
+     9429    0.001    0.000    0.001    0.000 executor.py:463(<genexpr>)
+    21080    0.001    0.000    0.001    0.000 executor.py:487(<genexpr>)
+     3352    0.001    0.000    0.001    0.000 executor.py:15(_actor)
+      330    0.001    0.000    0.001    0.000 executor.py:164(_project_visible)
+     1541    0.001    0.000    0.001    0.000 executor.py:98(_id)
+     4358    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}
+      676    0.000    0.000    0.000    0.000 executor.py:166(replace_fact)
+      286    0.000    0.000    0.000    0.000 planner.py:18(_goal_event)
+      330    0.000    0.000    0.000    0.000 executor.py:277(_settlement_preconditions)
+      286    0.000    0.000    0.000    0.000 {built-in method _heapq.heappop}
+
+

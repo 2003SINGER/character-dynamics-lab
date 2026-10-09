@@ -5,6 +5,39 @@ from copy import deepcopy
 from .fixtures import PRODUCER_VERSION
 
 OPERATORS = ("offer_loan", "choose_accept", "choose_decline", "accept_loan", "return_tool", "unlock", "take_ledger", "idle")
+_CHECKPOINT_ATOMIC_TYPES = (str, int, float, bool, type(None))
+
+
+def _checkpoint_copy(value, memo=None):
+    """Copy JSON-shaped checkpoint containers while preserving deepcopy memo semantics."""
+    if memo is None:
+        memo = {}
+    value_type = type(value)
+    if value_type in _CHECKPOINT_ATOMIC_TYPES:
+        return value
+    if value_type is dict:
+        identity = id(value)
+        if identity in memo:
+            return memo[identity]
+        copied = {}
+        memo[identity] = copied
+        for key, item in value.items():
+            copied_key = key if type(key) in _CHECKPOINT_ATOMIC_TYPES else _checkpoint_copy(key, memo)
+            copied_value = item if type(item) in _CHECKPOINT_ATOMIC_TYPES else _checkpoint_copy(item, memo)
+            copied[copied_key] = copied_value
+        return copied
+    if value_type is list:
+        identity = id(value)
+        if identity in memo:
+            return memo[identity]
+        copied = []
+        memo[identity] = copied
+        copied.extend(item if type(item) in _CHECKPOINT_ATOMIC_TYPES else _checkpoint_copy(item, memo)
+                      for item in value)
+        return copied
+    # Keep stdlib behavior for tuples, subclasses, and any future non-JSON values;
+    # sharing the memo preserves aliases between fallback objects and copied containers.
+    return deepcopy(value, memo)
 
 
 def intent(operator, **typed_args):
@@ -90,10 +123,10 @@ def legal_intents(checkpoint):
 
 class Executor:
     def __init__(self, checkpoint):
-        self._c = deepcopy(checkpoint)
+        self._c = _checkpoint_copy(checkpoint)
 
     def checkpoint(self):
-        return deepcopy(self._c)
+        return _checkpoint_copy(self._c)
 
     def _id(self, kind):
         value = self._c["next_ids"][kind]

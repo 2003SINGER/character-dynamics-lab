@@ -75,9 +75,9 @@ def uniform_cost_search(checkpoint, max_expansions=10000, wall_seconds=2.0):
             branch = Executor(state)
             running = state["W"]["running_action"]
             if running is not None:
-                branch.advance_minute()
+                next_state = branch.advance_minute()
             elif action["operator"] == "idle":
-                branch.advance_minute()
+                next_state = branch.advance_minute()
             else:
                 duration = state["config_pins"]["unlock_duration"] if action["operator"] == "unlock" else 1
                 if state["clock"]["now"] + duration > state["config_pins"]["deadline"]:
@@ -85,8 +85,7 @@ def uniform_cost_search(checkpoint, max_expansions=10000, wall_seconds=2.0):
                 receipt = branch.start(action)
                 if not receipt["accepted"]:
                     continue
-                branch.advance_minute(started_action_id=receipt["action_id"])
-            next_state = branch.checkpoint()
+                next_state = branch.advance_minute(started_action_id=receipt["action_id"])
             delta = next_state["clock"]["now"] - state["clock"]["now"]
             if delta <= 0 or next_state["clock"]["now"] > state["config_pins"]["deadline"]:
                 continue
