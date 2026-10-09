@@ -1,0 +1,45 @@
+{
+  "created_utc": "2026-10-09T01:58:02.329380+00:00",
+  "scope": "bounded parent read-only comparison of old and fixed executor; only corrected receipt delta differs",
+  "baseline": "904cc6a",
+  "old_executor_sha256": "9f8e17e3e28fb50ca0be542b35184d5903bc70b68e88509ee4510004373a4af8",
+  "new_executor_sha256": "9bd6782070ce3802e24597d1c32a4aac6f5ac52b4a03bb85874e2cf9a46b52aa",
+  "cases": [
+    {
+      "fixture": "E0-P01",
+      "boundary_and_start_comparisons": 11,
+      "all_checkpoint_fields_except_receipt_delta_w_equal": true,
+      "receipt_non_delta_fields_equal": true,
+      "all_completed_receipts_unchanged_at_later_boundary": true,
+      "terminal_time": 8,
+      "monitor": {
+        "status": "SATISFIED",
+        "witness_event_id": "event-000005",
+        "witness_time": 8,
+        "witness_sequence": 5,
+        "coverage_complete_through": 8,
+        "reason": "SETTLEMENT_WITNESS"
+      },
+      "fixed_offer_post_status": "OFFERED",
+      "old_offer_post_status": "SETTLED"
+    },
+    {
+      "fixture": "E0-P02",
+      "boundary_and_start_comparisons": 13,
+      "all_checkpoint_fields_except_receipt_delta_w_equal": true,
+      "receipt_non_delta_fields_equal": true,
+      "all_completed_receipts_unchanged_at_later_boundary": true,
+      "terminal_time": 10,
+      "monitor": {
+        "status": "SATISFIED",
+        "witness_event_id": "event-000005",
+        "witness_time": 10,
+        "witness_sequence": 5,
+        "coverage_complete_through": 10,
+        "reason": "SETTLEMENT_WITNESS"
+      },
+      "fixed_offer_post_status": "OFFERED",
+      "old_offer_post_status": "SETTLED"
+    }
+  ]
+}

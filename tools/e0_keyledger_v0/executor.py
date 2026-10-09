@@ -294,7 +294,8 @@ class Executor:
         receipt["end_time"] = self._c["clock"]["now"]
         receipt["event_ids"] = [e["event_id"] for e in events]
         receipt["event_payloads"] = deepcopy(events)
-        receipt["delta_w"] = {k: [before_w[k], w[k]] for k in w if before_w[k] != w[k] and k not in ("running_action", "reservations")}
+        receipt["delta_w"] = {k: deepcopy([before_w[k], w[k]]) for k in w
+                               if before_w[k] != w[k] and k not in ("running_action", "reservations")}
         receipt["delta_o"] = {who: {field: {
                                         "added": [x for x in self._c["O"][who][field] if x not in before_o[who][field]],
                                         "removed": [x for x in before_o[who][field] if x not in self._c["O"][who][field]],

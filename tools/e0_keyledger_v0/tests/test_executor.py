@@ -142,15 +142,74 @@ class ExecutorBoundaryTests(unittest.TestCase):
         successful = _successful_checkpoint()
         exchange = next(row for row in successful["receipts"]
                         if row["intent"]["operator"] == "accept_loan")
-        self.assertIs(exchange["delta_w"]["holders"][1], successful["W"]["holders"])
+        self.assertEqual(exchange["delta_w"]["holders"][1]["ledger"], "ARCHIVE")
+        self.assertEqual(exchange["delta_w"]["holders"][1]["key1"], "A")
+        self.assertIsNot(exchange["delta_w"]["holders"][1], successful["W"]["holders"])
         final_receipt = successful["receipts"][-1]
         self.assertIs(successful["outcome_history"][-1]["event_ids"], final_receipt["event_ids"])
         copied_success = _checkpoint_copy(successful)
         copied_exchange = next(row for row in copied_success["receipts"]
                                if row["intent"]["operator"] == "accept_loan")
-        self.assertIs(copied_exchange["delta_w"]["holders"][1], copied_success["W"]["holders"])
+        self.assertEqual(copied_exchange["delta_w"]["holders"][1], exchange["delta_w"]["holders"][1])
+        self.assertIsNot(copied_exchange["delta_w"]["holders"][1], copied_success["W"]["holders"])
         self.assertIs(copied_success["outcome_history"][-1]["event_ids"],
                       copied_success["receipts"][-1]["event_ids"])
+
+    def test_terminal_receipt_deltas_are_frozen_across_later_actions_and_restore(self):
+        executor = Executor(initial_checkpoint("E0-P01"))
+        executor.execute(intent("offer_loan", target="B", payment="payment"))
+        fork_checkpoint = executor.checkpoint()
+        offer_id = fork_checkpoint["W"]["offer_session"]["offer_id"]
+        restored = Executor(fork_checkpoint)
+        offer = next(row for row in fork_checkpoint["receipts"]
+                     if row["intent"]["operator"] == "offer_loan")
+
+        actions = (
+            intent("choose_accept", offer_id=offer_id),
+            intent("accept_loan", actor="A", item="key1", payment="payment", offer_id=offer_id),
+            intent("return_tool", target="B", item="toolB"),
+            intent("unlock", item="key1"),
+            intent("take_ledger", item="ledger"),
+        )
+        terminal_snapshots = {row["receipt_id"]: deepcopy(row)
+                              for row in fork_checkpoint["receipts"]
+                              if row["status"] != "RUNNING"}
+        prior_events = deepcopy(fork_checkpoint["events"])
+        prior_seals = deepcopy(fork_checkpoint["seals"])
+        for index, action in enumerate(actions):
+            receipt = restored.execute(action)
+            self.assertTrue(receipt["accepted"], receipt)
+            self.assertEqual(receipt["status"], "SUCCESS", receipt)
+            checkpoint = restored.checkpoint()
+            stored_receipt = next(row for row in checkpoint["receipts"]
+                                  if row["receipt_id"] == receipt["receipt_id"])
+            self.assertEqual(stored_receipt, receipt)
+            for row in checkpoint["receipts"]:
+                if row["receipt_id"] in terminal_snapshots:
+                    self.assertEqual(row, terminal_snapshots[row["receipt_id"]], row["intent"])
+
+            if index == 0:
+                stored_offer = next(row for row in checkpoint["receipts"]
+                                    if row["receipt_id"] == offer["receipt_id"])
+                self.assertEqual(stored_offer["delta_w"]["offer_session"][1]["status"], "OFFERED")
+                self.assertIsNot(stored_offer["delta_w"]["offer_session"][1],
+                                 checkpoint["W"]["offer_session"])
+            if index == 1:
+                for field in ("holders", "beneficial_owners", "action_used_bits"):
+                    self.assertIn(field, stored_receipt["delta_w"])
+                    self.assertEqual(stored_receipt["delta_w"][field][1], checkpoint["W"][field])
+                    self.assertIsNot(stored_receipt["delta_w"][field][1], checkpoint["W"][field])
+            if index == 2:
+                self.assertIn("holders", stored_receipt["delta_w"])
+                self.assertEqual(stored_receipt["delta_w"]["holders"][1], checkpoint["W"]["holders"])
+                self.assertIsNot(stored_receipt["delta_w"]["holders"][1], checkpoint["W"]["holders"])
+
+            terminal_snapshots[receipt["receipt_id"]] = deepcopy(stored_receipt)
+            current_events = checkpoint["events"]
+            current_seals = checkpoint["seals"]
+            self.assertEqual(current_events[:len(prior_events)], prior_events)
+            self.assertEqual(current_seals[:len(prior_seals)], prior_seals)
+            prior_events, prior_seals = deepcopy(current_events), deepcopy(current_seals)
 
     def test_checkpoint_copier_preserves_container_aliases_and_cycles(self):
         shared = []

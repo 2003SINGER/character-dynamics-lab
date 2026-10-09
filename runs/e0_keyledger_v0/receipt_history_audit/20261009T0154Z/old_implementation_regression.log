@@ -1,0 +1,15 @@
+test_terminal_receipt_deltas_are_frozen_across_later_actions_and_restore (tools.e0_keyledger_v0.tests.test_executor.ExecutorBoundaryTests.test_terminal_receipt_deltas_are_frozen_across_later_actions_and_restore) ... FAIL
+
+======================================================================
+FAIL: test_terminal_receipt_deltas_are_frozen_across_later_actions_and_restore (tools.e0_keyledger_v0.tests.test_executor.ExecutorBoundaryTests.test_terminal_receipt_deltas_are_frozen_across_later_actions_and_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/e0_keyledger_v0/tests/test_executor.py", line 179, in test_terminal_receipt_deltas_are_frozen_across_later_actions_and_restore
+    self.assertEqual(row, terminal_snapshots[row["receipt_id"]], row["intent"])
+AssertionError: {'rec[449 chars]s': 'ACCEPTED', 'offer_id': 'offer-000001', 't[642 chars]]}}}} != {'rec[449 chars]s': 'OFFERED', 'offer_id': 'offer-000001', 'te[645 chars]]}}}}
+Diff is 2532 characters long. Set self.maxDiff to None to see it. : {'operator': 'offer_loan', 'actor': 'A', 'args': {'target': 'B', 'payment': 'payment'}}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+FAILED (failures=1)
