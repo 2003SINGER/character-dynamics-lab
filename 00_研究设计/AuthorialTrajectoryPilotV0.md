@@ -2,7 +2,7 @@
 
 日期：2026-10-08。状态：**系统设计与独立参考契约交付；READY_FOR_INDEPENDENT_REVIEW，不是 Pilot 已运行、方法有效或 milestone CLOSED。**
 
-阶段说明：下文 E0–E5 是整体候选计划，不能据此推断整套阶段已获授权。E0 的实际有界验收只查[结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)。用户已授权[E1-0 有限协议](E1_KeyLedger_LocalAgency_Protocol_v0.md)下的 E1-1 最小实现与开发验证，独立开发包已交付；实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)。正式实验、E1-2 与 Director 开发未授权。E1 代码入口见[runner](../tools/e1_keyledger_v0/runner.py)。文中的“E0 待审/待编码”保留为历史阶段描述，不再代表当前事实。
+阶段说明：下文 E0–E5 是整体候选计划，不能据此推断整套阶段已获授权。E0 的实际有界验收只查[结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)。用户已授权[E1-0 有限协议](E1_KeyLedger_LocalAgency_Protocol_v0.md)下的 E1-1 最小实现与开发验证，独立开发包已交付；实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)。正式实验与 E1-2 未授权；2026-10-09 用户另行授权的有限世界 Director/角色整合由 [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md)维护，不覆盖本页整套阶段。E1 代码入口见[runner](../tools/e1_keyledger_v0/runner.py)。文中的“E0 待审/待编码”及 reference-only 实施边界保留为其历史阶段描述，不再代表全项目当前授权。
 
 本页是作者轨迹分支的设计 owner；[算法积木](../01_文献/算法积木/README.md)维护原算法及来源，不在这里重写论文。输入为本地私有完整讨论两部分：持续人物与作者控制的接口，以及 Typed Trajectory Constraint IR 四份契约。原文 SHA256 为 `65d9142d1b09526fb3d678fd335837d40f04cc923beda5f5c03767d6cea20c94`。自然语言例子不是自动获得执行资格的世界能力。
 

@@ -4,6 +4,8 @@
 
 ## 当前状态与结果复用
 
+2026-10-09 用户另行明确授权按目标 TXT 改系统：[NPC System Integration v0](NPC_System_Integration_v0/RESULTS.md) 已形成有限 DEVELOPMENT 应用闭环，含合法世界干预、演员状态/承诺、GOAP/HTN、director-off 和玩家扰动。它是新的有限软件开发验收，不是 NPC 玩家实验、E1-2 formal、心理训练或冻结 Runtime 改动；下方 E1-1 交付时的范围不禁止该新应用。
+
 截至 2026-10-09，NPC 玩家实验、训练、玩家招募和冻结 Runtime 修改均未新增/授权。**独立的小型有限域软件验收例外**包括已冻结的 E0-KeyLedger-v0，以及已获用户授权并已交付独立开发包的 E1-1；E1 正式实验和 E1-2 未授权。E0 的实现与结果只维护在 [E0 实验入口](E0_KeyLedger_v0/README.md)。E1 协议见[有限协议](../00_研究设计/E1_KeyLedger_LocalAgency_Protocol_v0.md)，代码入口见[开发 runner](../tools/e1_keyledger_v0/runner.py)，实际状态与证据只查唯一结果 owner：[E1 RESULTS](E1_KeyLedger_LocalAgency_v0/RESULTS.md)。不将其扩展为 NPC 效度或心理机制证据。各既有科研结果的成熟度、已回答问题、可复用边界、未补证据和唯一 owner 统一见[研究重建审计的结果复用账本](../00_研究设计/研究重建审计_2026-10-06.md#现有结果的成熟度与复用账本截至-2026-10-08)。作者约束系统的当前设计入口是 [F0/F1 草案](../00_研究设计/CharacterDynamics_FormalProblem_v0.md)（DRAFT / READY_FOR_INDEPENDENT_REVIEW）；AuthorialTrajectoryPilotV0 是候选 F2 / TypedIR 与预实验下层 owner，不是全系统定义。
 
 本机工作区、历史 checkout 与运行产物的路径边界见[本地工作区布局](Local_Workspace_Layout.md)。迁移不改变实验条件或 run ID，也不授权启动新实验。

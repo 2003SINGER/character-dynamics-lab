@@ -10,6 +10,7 @@
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
 | DEMO-LIVING | **ACTIVE / DEMO ONLY** | 保留历史批次为实现诊断。Laya v4.3 一日工程 gate 通过、行为 scale gate 未通过：no-history 单 seed 睡眠 1,149 分钟且历史输入使首请求分布大幅变化；停止扩成 64 actors / 7 days | [core behavior eval](../Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；[Laya typed policy](../Demo%20codex-generated/demo/laya_typed_policy_v0/README.md)；[v4.3 audit](../outputs/laya_runs/laya_v43_66ebfe7_20260925/RESULTS.md) |
 | RESEARCH-DYNAMICS | **TOY_NOT_ADMITTED / 未训练** | 不把四字段手写 law、相对分数 policy 或当前不足的干预测试称作机制通过；不运行会覆盖 artifacts 的生成器 | [研究重建审计](研究重建审计_2026-10-06.md)；[ResearchDynamicsV1 source](../02_实验/ResearchDynamicsV1/README.md) |
+| NPC-SYSTEM-INTEGRATION-V0 | **DEVELOPMENT_VERIFIED / READY_FOR_INDEPENDENT_REVIEW** | 2026-10-09 用户新授权已将外围维护切换为 TXT 目标的有限整合实现；首个 vertical slice 已交付，下一步独立审阅实际链与未实现项，不自行 CLOSED | [唯一结果/需求映射](../02_实验/NPC_System_Integration_v0/RESULTS.md)；[可运行入口](../tools/npc_system_v0/README.md)。不等于正式 E1-2、LLM 接入或完整系统 |
 
 ## ACTIVE
 
@@ -38,7 +39,9 @@
 
 ## 研究重建顺序与范围护栏
 
-- **当前检查点**：完整研究方向由[系统愿景版图](Character_Dynamics_System_Vision_v0.md#长期研究版图)维护；F0/F1 定系统语义，Pilot 定候选 F2 / TypedIR，04 定原方法综合。A/B 与 Q1–Q3 都不是完整研究目录。E0 已达到有界验收停止条件且收到外部收口建议，数值/成功/失败仅由[结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)维护；不继续完善 E0。2026-10-09 用户明确授权[E1-1 最小实现与开发验证](E1_KeyLedger_LocalAgency_Protocol_v0.md)，完成后停止；正式实验、E1-2、Director、训练或全面方法比较未授权，正式 milestone CLOSED 仍需用户明确确认。非阻断存储/稳定性增强进入 backlog；外围待核算法不扩成综述。Praxish 否定分支与 SourceRanking 开发结果仍由各自 owner 维护，不追分救假设、不否定整个 NPC 方向。Runtime 继续 frozen。
+- **新授权覆盖范围（2026-10-09）**：用户明确“现在不只是外围维护了，可以改了！按照目标文本贴出的txt来”。本次允许 E1 之上的应用整合、有限 Director 与应用版本的 response/commitment；此前下文“Director 未授权”仅描述 E1-1 交付时的状态，已被本条覆盖。E1-2 formal、心理训练、参数优化与冻结 C++ Kernel 仍不重开。新应用数据保持 DEVELOPMENT。
+
+- **E1-1 交付时的检查点（新授权覆盖范围见上方）**：完整研究方向由[系统愿景版图](Character_Dynamics_System_Vision_v0.md#长期研究版图)维护；F0/F1 定系统语义，Pilot 定候选 F2 / TypedIR，04 定原方法综合。A/B 与 Q1–Q3 都不是完整研究目录。E0 已达到有界验收停止条件且收到外部收口建议，数值/成功/失败仅由[结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)维护；不继续完善 E0。2026-10-09 用户明确授权[E1-1 最小实现与开发验证](E1_KeyLedger_LocalAgency_Protocol_v0.md)，完成后停止；正式实验、E1-2、Director、训练或全面方法比较未授权，正式 milestone CLOSED 仍需用户明确确认。非阻断存储/稳定性增强进入 backlog；外围待核算法不扩成综述。Praxish 否定分支与 SourceRanking 开发结果仍由各自 owner 维护，不追分救假设、不否定整个 NPC 方向。Runtime 继续 frozen。
 - **Paper-0 formal gates**：persistent `S`、legal actor-local `O`、independent `A*`、可复核有限 `A^O`、episode/user-disjoint split 和预注册指标；M2 是 candidate-set formal admission 工作，不阻塞开发方法基座。
 - **PAUSED**：Objective readiness、Evaluator ranking、Optimizer、旧 proxy training、外部数据集扩展；ResearchDynamicsV1 不作为已训练模型，仅记录为尚未准入的 toy/fixture。
 - **DEFERRED SYSTEM/RESEARCH BRANCH**：ToM、multi-agent、Inverse、P drift、Q01 advanced response curves、Scene Manager 与 live LLM semantics。
@@ -56,7 +59,7 @@
 ## BLOCKED / NO-GO
 
 - 候选集不能冻结、角色 O 无法重建、split 有未来/身份泄漏、或外部 A* 不独立：停止 formal baseline。
-- 本阶段不新增 S 字段、另造 X schema、设计 hard topology benchmark、改变 P、做 P drift、启动 multi-agent/ToM 或重构 `simulation.cpp`。
+- 对冻结 Runtime、旧心理/Paper-0 分支仍不新增 S/X schema、改变 P、做 P drift、启动 ToM 或重构 `simulation.cpp`；本次有限应用有自己版本化的状态/语义，与这些冻结 owner 隔离。
 - `ResearchDynamicsV1` 是 `TOY_NOT_ADMITTED` 的手写 fixture；`Theory_S_v2` 是 `ExpectedEffectEMAProxyV0` 历史 proxy；Replay 是 canonical feature layer；PredictionBaselineV1 是已拟合并复现、待独立外审的 DEVELOPMENT 预测方法基座，不代表已学到心理 `S` 或 Runtime policy；dataset adapter 只做 raw → ReplayRecord/SceneSnapshot/X-compatible input，不复制 proxy。
 
 ## DEFERRED

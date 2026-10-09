@@ -1,0 +1,356 @@
+{
+  "custom": {
+    "author_verdicts": [
+      {
+        "id": "world-resource-line",
+        "hard": true,
+        "status": "SATISFIED",
+        "reason": "complete discrete window certified",
+        "witness": [
+          {
+            "$fraction": [
+              2,
+              1
+            ]
+          },
+          {
+            "$fraction": [
+              10,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ledger-event",
+        "hard": true,
+        "status": "SATISFIED",
+        "reason": "event count within bounds",
+        "witness": [
+          "event-000006"
+        ]
+      },
+      {
+        "id": "consent-before-acquisition",
+        "hard": true,
+        "status": "SATISFIED",
+        "reason": "ordered event witness",
+        "witness": [
+          "event-000003",
+          "event-000006"
+        ]
+      },
+      {
+        "id": "final-holding-point",
+        "hard": true,
+        "status": "SATISFIED",
+        "reason": "predicate true at anchored time",
+        "witness": {
+          "$fraction": [
+            10,
+            1
+          ]
+        }
+      }
+    ],
+    "actions": [
+      [
+        2,
+        3,
+        "DIRECTOR",
+        "publish_incentive",
+        "SUCCESS"
+      ],
+      [
+        3,
+        4,
+        "B",
+        "request_tool",
+        "SUCCESS"
+      ],
+      [
+        4,
+        5,
+        "A",
+        "offer_loan",
+        "SUCCESS"
+      ],
+      [
+        5,
+        6,
+        "B",
+        "choose_accept",
+        "SUCCESS"
+      ],
+      [
+        6,
+        7,
+        "B",
+        "accept_loan",
+        "SUCCESS"
+      ],
+      [
+        7,
+        8,
+        "A",
+        "unlock",
+        "SUCCESS"
+      ],
+      [
+        8,
+        9,
+        "A",
+        "take_ledger",
+        "SUCCESS"
+      ],
+      [
+        9,
+        10,
+        "B",
+        "work",
+        "SUCCESS"
+      ]
+    ],
+    "final_characters": {
+      "A": {
+        "S": {
+          "stress": 0.68,
+          "fatigue": 0.63
+        },
+        "P": {
+          "task_value": 0.6,
+          "rest_threshold": 0.8
+        },
+        "commitment": {
+          "goal": "acquire_ledger",
+          "status": "COMPLETED",
+          "started_at": 2,
+          "transitions": [
+            {
+              "from": "ACTIVE",
+              "to": "COMPLETED",
+              "time": 9,
+              "reason": "own delivered settlement evidence"
+            }
+          ]
+        },
+        "processed_events": [
+          "event-000001",
+          "event-000002",
+          "event-000003",
+          "event-000004",
+          "event-000005",
+          "event-000006"
+        ],
+        "X_history": [
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 3,
+            "evidence_ids": [
+              "event-000001"
+            ],
+            "deadline_pressure": 0.125,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 4,
+            "evidence_ids": [
+              "event-000002"
+            ],
+            "deadline_pressure": 0.25,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 5,
+            "evidence_ids": [],
+            "deadline_pressure": 0.375,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 6,
+            "evidence_ids": [
+              "event-000003"
+            ],
+            "deadline_pressure": 0.5,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 7,
+            "evidence_ids": [
+              "event-000004"
+            ],
+            "deadline_pressure": 0.625,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 8,
+            "evidence_ids": [
+              "event-000005"
+            ],
+            "deadline_pressure": 0.75,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 9,
+            "evidence_ids": [
+              "event-000006"
+            ],
+            "deadline_pressure": 0.875,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 10,
+            "evidence_ids": [],
+            "deadline_pressure": 1.0,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          }
+        ],
+        "work_units": 0
+      },
+      "B": {
+        "S": {
+          "stress": 0.68,
+          "fatigue": 0.63
+        },
+        "P": {
+          "task_value": 0.6,
+          "rest_threshold": 0.8
+        },
+        "commitment": {
+          "goal": "recover_tool",
+          "status": "ACTIVE",
+          "started_at": 2,
+          "transitions": []
+        },
+        "processed_events": [
+          "event-000001",
+          "event-000002",
+          "event-000003",
+          "event-000004",
+          "event-000005",
+          "event-000006",
+          "event-000007"
+        ],
+        "X_history": [
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 3,
+            "evidence_ids": [
+              "event-000001"
+            ],
+            "deadline_pressure": 0.125,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 4,
+            "evidence_ids": [
+              "event-000002"
+            ],
+            "deadline_pressure": 0.25,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 5,
+            "evidence_ids": [],
+            "deadline_pressure": 0.375,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 6,
+            "evidence_ids": [
+              "event-000003"
+            ],
+            "deadline_pressure": 0.5,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 7,
+            "evidence_ids": [
+              "event-000004"
+            ],
+            "deadline_pressure": 0.625,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 8,
+            "evidence_ids": [
+              "event-000005"
+            ],
+            "deadline_pressure": 0.75,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 9,
+            "evidence_ids": [
+              "event-000006"
+            ],
+            "deadline_pressure": 0.875,
+            "obstruction": false,
+            "recovery": false,
+            "worked": false
+          },
+          {
+            "version": "synthetic-context-drive-v0",
+            "time": 10,
+            "evidence_ids": [
+              "event-000007"
+            ],
+            "deadline_pressure": 1.0,
+            "obstruction": false,
+            "recovery": false,
+            "worked": true
+          }
+        ],
+        "work_units": 1
+      }
+    },
+    "world_tasks": {
+      "ledger": {
+        "progress": 1,
+        "deadline": 10
+      }
+    },
+    "director_resources": 0
+  }
+}

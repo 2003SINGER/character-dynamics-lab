@@ -8,6 +8,8 @@
 
 ## 从这里进入
 
+2026-10-09 新授权已撤销“仅外围维护”：按用户目标 TXT 开发的 [NPC System Integration v0](tools/npc_system_v0/README.md) 已贯通有限作者点/线、受限世界规划、独立演员状态/承诺、GOAP/HTN 与真实执行/监测。它是 E1 之上的 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 应用样机，不改冻结 C++ Kernel，也不是完整系统、LLM 高层规划或研究收益。具体能力与限制见[唯一结果](02_实验/NPC_System_Integration_v0/RESULTS.md)；旧语义草案中的未开工叙述按其记录日期理解，当前授权看 [TODO](00_研究设计/TODO.md)。
+
 先看[五分钟现状](00_研究设计/项目现状速览_通俗版.md)，再查[已有结果与复用边界](00_研究设计/研究重建审计_2026-10-06.md#现有结果的成熟度与复用账本截至-2026-10-08)。研究问题与执行语义读[F0/F1草案](00_研究设计/CharacterDynamics_FormalProblem_v0.md)，原算法读[算法积木](01_文献/算法积木/README.md)；不要把候选设计、工程通过和实验结论混成一种进度。
 
 | 要找什么 | 唯一维护位置 |
@@ -26,6 +28,7 @@
 | 实验导出器、切片与可复现记录 | [实验总路由](02_实验/README.md)；[跨数据集 Replay 接口草案](02_实验/跨数据集Replay接口_v0.md)；[机制识别循环与反事实诊断](02_实验/机制识别循环与反事实诊断_v0.md) |
 | E0 钥匙—账本有限基线的固定协议、代码和实际证据 | [冻结协议](00_研究设计/E0_KeyLedger_Protocol_v0.md)；[代码与复现](tools/e0_keyledger_v0/README.md)；[实验入口](02_实验/E0_KeyLedger_v0/README.md)。独立有限 Executor，不等于 C++ Runtime 集成、NPC 自主性或新方法效果 |
 | E1 局部信息与独立 B 策略 | [E1-0 有限协议](00_研究设计/E1_KeyLedger_LocalAgency_Protocol_v0.md)；[E1-1 代码入口](tools/e1_keyledger_v0/runner.py)；[唯一结果 owner](02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)。E1-1 独立开发包已交付；实际状态与证据只查唯一结果 owner。正式实验与 E1-2 未授权 |
+| 可运行的有限整合开发样机 | [NPC System Integration v0](tools/npc_system_v0/README.md)；[开发结果与 TXT 映射](02_实验/NPC_System_Integration_v0/RESULTS.md)。实际世界干预、模型/规划替换、director-off 与玩家扰动；不是完整通用系统 |
 | WebGPT 审阅：实验报告、逐条结果、失败记录、文献审计及上传排除清单 | [公开审阅索引（2026-10-07）](02_实验/PUBLIC_REVIEW_INDEX_2026-10-07.md) |
 | 文献 PDF、职责级阅读与证据 | [文献库](01_文献/README.md) |
 | 作者约束系统的问题定义与执行语义（F0/F1） | [Character Dynamics｜系统问题与执行语义 v0](00_研究设计/CharacterDynamics_FormalProblem_v0.md)：DRAFT / READY_FOR_INDEPENDENT_REVIEW，算法无关的唯一问题定义 owner；[System Vision 长期研究版图](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图)保留完整研究方向；[04 综合](01_文献/算法积木/04_统一问题与成熟基线准入.md)维护有限实例的问题与基线准入判断；[AuthorialTrajectoryPilotV0](00_研究设计/AuthorialTrajectoryPilotV0.md)仅为候选 F2 及 TypedIR / 预实验下层 owner，不定义全系统；[算法积木](01_文献/算法积木/README.md)保留具体原算法；[独立reference](tools/trajectory_constraints_v0/README.md)不等于Director或NPC实验 |
@@ -33,7 +36,7 @@
 
 仓库治理护栏：[ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md)；廉价健康检查可运行 `python tools/repo_health_check.py`，ReplayRecord 样例可用 `python tools/validate_replay_record.py <record.json>` 校验。健康脚本只提供文件大小、重复材料及部分 manifest 告警，不验证文档链接、术语或现状声明；CI 通过也不等于文档语义一致。实现、规格、结果与历史的权威范围见[项目规则](AGENTS.md)。
 
-当前应用目标由用户确认是“NPC 在玩家眼中在游戏里面活起来”，不要求先拟合真实人物心理。[既有近邻与共同小场景检查点](00_研究设计/研究重建审计_2026-10-06.md#已完成执行检查点近邻原件与共同小场景)的 Praxish 原件解释与[共同小场景](02_实验/Praxish_Activity_Pilot_v0/README.md)已有执行证据；2026-10-07 授权的第 3 步已形成[活动组织与独立参数化 utility 的匹配比较结果](02_实验/Praxish_Utility_Comparison_v0/RESULTS.md)，保留真实失败与修改账本，待外审。当前小场景未显示活动组织行为优势；原件 bug 不作为方法收益，不据此开发新心理机制，尚无玩家比较结果。既有 coursework/历史 LLM 探针保留，PredictionBaselineV1 / SourceRankingV1 只作有限来源预测开发证据，不是 NPC 可置信性、心理状态 `S` 或 Runtime policy 训练证据；Paper-0 的独立 `A*` 准入只约束该冻结分支。不能用便宜、能跑或自有评分器的分数替代独立研究证明。作者约束系统的算法无关 F0/F1 定义仍为草案；A（规划/执行能力）与 B（稀疏作者控制）只是近期为基线讨论抽取的研究组合，04 的 Q1–Q3 是有限实例下的候选问题，不代表完整研究任务；长期方向见[System Vision 研究版图](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图)。它们都不是已批准的新颖性或开工承诺。
+当前应用目标由用户确认是“NPC 在玩家眼中在游戏里面活起来”，不要求先拟合真实人物心理。[既有近邻与共同小场景检查点](00_研究设计/研究重建审计_2026-10-06.md#已完成执行检查点近邻原件与共同小场景)的 Praxish 原件解释与[共同小场景](02_实验/Praxish_Activity_Pilot_v0/README.md)已有执行证据；2026-10-07 授权的第 3 步已形成[活动组织与独立参数化 utility 的匹配比较结果](02_实验/Praxish_Utility_Comparison_v0/RESULTS.md)，保留真实失败与修改账本，待外审。当前小场景未显示活动组织行为优势；原件 bug 不作为方法收益，不据此开发新心理机制，尚无玩家比较结果。既有 coursework/历史 LLM 探针保留，PredictionBaselineV1 / SourceRankingV1 只作有限来源预测开发证据，不是 NPC 可置信性、心理状态 `S` 或 Runtime policy 训练证据；Paper-0 的独立 `A*` 准入只约束该冻结分支。不能用便宜、能跑或自有评分器的分数替代独立研究证明。作者约束系统的算法无关 F0/F1 定义仍为草案；A（规划/执行能力）与 B（稀疏作者控制）只是近期为基线讨论抽取的研究组合，04 的 Q1–Q3 是有限实例下的候选问题，不代表完整研究任务；长期方向见[System Vision 研究版图](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图)。这些候选分类本身不是新颖性或自动开工承诺；2026-10-09 用户已另行明确授权本页上方的有限应用集成。
 
 ## 代码与材料的归属
 

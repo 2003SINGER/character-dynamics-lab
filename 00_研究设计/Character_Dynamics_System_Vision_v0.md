@@ -6,6 +6,8 @@
 
 ## 系统定位
 
+2026-10-09 用户再次确认系统集成优先：成熟算法可替换，高层/低层规划并存，角色动力仍居于人物因果链中；世界控制者是有自己权限与动作的规划参与者，不等于 W 本身。用户已从外围维护切换为有限实现授权。现有 [NPC System Integration v0](../tools/npc_system_v0/README.md)仅是 E1 之上的应用接缝实例，实际证据和缺项见其 [RESULTS](../02_实验/NPC_System_Integration_v0/RESULTS.md)，不替代长期版图、不改冻结 C++ Kernel。
+
 Character Dynamics 的主产品是一个可持续运行的 NPC 角色动力学框架，而不是某一篇 Paper-0 的实验脚本集合。
 
 目标包含：

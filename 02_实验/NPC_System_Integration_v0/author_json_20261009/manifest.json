@@ -1,0 +1,288 @@
+{
+  "version": "npc-system-v0",
+  "source_git_revision": "8f4fb7b0946f8be50294f1782e389f344f22c628",
+  "source_sha256": {
+    "tools/npc_system_v0/author.py": "e5ad45f20c7605f60c0ed2fabae56c45aaa30c82d07be111f0bd4e2fe10b5462",
+    "tools/npc_system_v0/executor.py": "6232a5a7fe77f56a82161f31ff1210d359b91815278b22aecaa3840a6c13bba0",
+    "tools/npc_system_v0/model.py": "714f0bc5d7eb339489a8510ad82351cdfa815e06b94bbd06d9d38f75b02ef0e0",
+    "tools/npc_system_v0/planners.py": "a3952399d55023efa2463c4cf1ac2bd59c27f333f84103151e7f4723560c0e9b",
+    "tools/npc_system_v0/runner.py": "03ac4ec00916bd6e37eb6b60f8afdf32cac7c1248db042b07970e03f43d2dff6",
+    "tools/npc_system_v0/system.py": "34749ef0eeddeb0f7c7725c101addef814b43e58ae4ac10680dbf57c11c453be",
+    "tools/npc_system_v0/__init__.py": "170efd9752ed7555f08d7ec61776f758acbfeeeb729049fdcc6becd47c47dd3c",
+    "tools/npc_system_v0/tests/test_system.py": "5f70b7f4bec1c7bd0740848e259c0042b948b025efefa45e85a8dd4bc91b2def"
+  },
+  "conditions": {
+    "custom": {
+      "planner": "htn",
+      "model": "context",
+      "policy": "KEEP",
+      "director": true,
+      "player_at": null
+    }
+  },
+  "development_only": true,
+  "source_git_dirty": true,
+  "dependencies": {
+    "gtpyhop-core": "2.0.2",
+    "psutil": "7.2.2"
+  },
+  "e1_finite_executor_not_cpp_native": true,
+  "python": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+  "author_requirements": [
+    {
+      "$type": "TemporalConstraint",
+      "constraint_id": "world-resource-line",
+      "op": {
+        "$enum": [
+          "TemporalOp",
+          "ALWAYS"
+        ]
+      },
+      "formula": {
+        "$type": "CompareValue",
+        "ref": {
+          "$type": "ValueRef",
+          "observable_id": "resources",
+          "version": "npc-world-v0",
+          "args": {},
+          "expected_owner": "WORLD"
+        },
+        "op": {
+          "$enum": [
+            "Compare",
+            "ge"
+          ]
+        },
+        "value": {
+          "$type": "NumericLiteral",
+          "value": {
+            "$fraction": [
+              0,
+              1
+            ]
+          },
+          "unit": "credits"
+        }
+      },
+      "window": {
+        "$type": "Window",
+        "start": {
+          "$fraction": [
+            2,
+            1
+          ]
+        },
+        "end": {
+          "$fraction": [
+            10,
+            1
+          ]
+        },
+        "left_closed": true,
+        "right_closed": true
+      },
+      "anchor": {
+        "$type": "Anchor",
+        "kind": {
+          "$enum": [
+            "AnchorKind",
+            "FIXED_ABSOLUTE"
+          ]
+        },
+        "absolute_time": {
+          "$fraction": [
+            0,
+            1
+          ]
+        },
+        "event_type": null,
+        "event_version": "1",
+        "event_filter": null
+      },
+      "trigger": null,
+      "hard": true,
+      "annotation": ""
+    },
+    {
+      "$type": "EventCount",
+      "constraint_id": "ledger-event",
+      "event_type": "ledger_acquired",
+      "event_version": "e0-keyledger-executor-v0",
+      "window": {
+        "$type": "Window",
+        "start": {
+          "$fraction": [
+            2,
+            1
+          ]
+        },
+        "end": {
+          "$fraction": [
+            10,
+            1
+          ]
+        },
+        "left_closed": true,
+        "right_closed": true
+      },
+      "minimum": 1,
+      "maximum": null,
+      "event_filter": {
+        "actor": {
+          "$entity": [
+            "Actor",
+            "A",
+            "",
+            false
+          ]
+        },
+        "item": {
+          "$entity": [
+            "Item",
+            "ledger",
+            "",
+            false
+          ]
+        }
+      },
+      "anchor": {
+        "$type": "Anchor",
+        "kind": {
+          "$enum": [
+            "AnchorKind",
+            "FIXED_ABSOLUTE"
+          ]
+        },
+        "absolute_time": {
+          "$fraction": [
+            0,
+            1
+          ]
+        },
+        "event_type": null,
+        "event_version": "1",
+        "event_filter": null
+      },
+      "trigger": null,
+      "hard": true
+    },
+    {
+      "$type": "EventOrder",
+      "constraint_id": "consent-before-acquisition",
+      "before_type": "loan_reply_accepted",
+      "before_version": "e0-keyledger-executor-v0",
+      "after_type": "ledger_acquired",
+      "after_version": "e0-keyledger-executor-v0",
+      "order": {
+        "$enum": [
+          "StrictOrder",
+          "PHYSICAL_TIME"
+        ]
+      },
+      "window": {
+        "$type": "Window",
+        "start": {
+          "$fraction": [
+            2,
+            1
+          ]
+        },
+        "end": {
+          "$fraction": [
+            10,
+            1
+          ]
+        },
+        "left_closed": true,
+        "right_closed": true
+      },
+      "anchor": {
+        "$type": "Anchor",
+        "kind": {
+          "$enum": [
+            "AnchorKind",
+            "FIXED_ABSOLUTE"
+          ]
+        },
+        "absolute_time": {
+          "$fraction": [
+            0,
+            1
+          ]
+        },
+        "event_type": null,
+        "event_version": "1",
+        "event_filter": null
+      },
+      "before_filter": null,
+      "after_filter": null,
+      "hard": true
+    },
+    {
+      "$type": "TemporalConstraint",
+      "constraint_id": "final-holding-point",
+      "op": {
+        "$enum": [
+          "TemporalOp",
+          "AT"
+        ]
+      },
+      "formula": {
+        "$type": "CompareValue",
+        "ref": {
+          "$type": "ValueRef",
+          "observable_id": "holding",
+          "version": "npc-world-v0",
+          "args": {},
+          "expected_owner": "WORLD"
+        },
+        "op": {
+          "$enum": [
+            "Compare",
+            "eq"
+          ]
+        },
+        "value": true
+      },
+      "window": {
+        "$type": "Window",
+        "start": {
+          "$fraction": [
+            10,
+            1
+          ]
+        },
+        "end": {
+          "$fraction": [
+            10,
+            1
+          ]
+        },
+        "left_closed": true,
+        "right_closed": true
+      },
+      "anchor": {
+        "$type": "Anchor",
+        "kind": {
+          "$enum": [
+            "AnchorKind",
+            "FIXED_ABSOLUTE"
+          ]
+        },
+        "absolute_time": {
+          "$fraction": [
+            0,
+            1
+          ]
+        },
+        "event_type": null,
+        "event_version": "1",
+        "event_filter": null
+      },
+      "trigger": null,
+      "hard": true,
+      "annotation": ""
+    }
+  ],
+  "formal_test_or_psychological_validation": false
+}

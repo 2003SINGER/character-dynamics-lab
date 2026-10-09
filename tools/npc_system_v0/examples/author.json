@@ -1,0 +1,33 @@
+{
+  "version": "npc-author-example-v0",
+  "description": "Global resource line + scene event/order + beat holding point; levels are author grouping, not actor scripts.",
+  "levels": [
+    {"id": "global", "constraints": [
+      {"$type": "TemporalConstraint", "constraint_id": "world-resource-line",
+       "op": {"$enum": ["TemporalOp", "ALWAYS"]},
+       "formula": {"$type": "CompareValue", "ref": {"$type": "ValueRef", "observable_id": "resources",
+          "version": "npc-world-v0", "args": {}, "expected_owner": "WORLD"},
+          "op": {"$enum": ["Compare", "ge"]}, "value": {"$type": "NumericLiteral", "value": 0, "unit": "credits"}},
+       "window": {"$type": "Window", "start": 2, "end": 10},
+       "anchor": {"$type": "Anchor", "kind": {"$enum": ["AnchorKind", "FIXED_ABSOLUTE"]}, "absolute_time": 0}}
+    ]},
+    {"id": "scene-key-ledger", "constraints": [
+      {"$type": "EventCount", "constraint_id": "ledger-event", "event_type": "ledger_acquired",
+       "event_version": "e0-keyledger-executor-v0", "window": {"$type": "Window", "start": 2, "end": 10},
+       "event_filter": {"actor": {"$entity": ["Actor", "A", "", false]}, "item": {"$entity": ["Item", "ledger", "", false]}},
+       "anchor": {"$type": "Anchor", "kind": {"$enum": ["AnchorKind", "FIXED_ABSOLUTE"]}, "absolute_time": 0}},
+      {"$type": "EventOrder", "constraint_id": "consent-before-acquisition",
+       "before_type": "loan_reply_accepted", "before_version": "e0-keyledger-executor-v0",
+       "after_type": "ledger_acquired", "after_version": "e0-keyledger-executor-v0",
+       "order": {"$enum": ["StrictOrder", "PHYSICAL_TIME"]}, "window": {"$type": "Window", "start": 2, "end": 10},
+       "anchor": {"$type": "Anchor", "kind": {"$enum": ["AnchorKind", "FIXED_ABSOLUTE"]}, "absolute_time": 0}}
+    ]},
+    {"id": "beat-ending", "constraints": [
+      {"$type": "TemporalConstraint", "constraint_id": "final-holding-point", "op": {"$enum": ["TemporalOp", "AT"]},
+       "formula": {"$type": "CompareValue", "ref": {"$type": "ValueRef", "observable_id": "holding", "version": "npc-world-v0",
+          "args": {}, "expected_owner": "WORLD"}, "op": {"$enum": ["Compare", "eq"]}, "value": true},
+       "window": {"$type": "Window", "start": 10, "end": 10},
+       "anchor": {"$type": "Anchor", "kind": {"$enum": ["AnchorKind", "FIXED_ABSOLUTE"]}, "absolute_time": 0}}
+    ]}
+  ]
+}

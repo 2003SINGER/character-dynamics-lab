@@ -4,6 +4,8 @@
 
 ## 项目架构定位
 
+2026-10-09 用户在新目标讨论后明确从外围维护切换为实现：[NPC System Integration v0](../tools/npc_system_v0/README.md)是获授权的有限应用整合，不是 E1-2 或重开冻结 C++ Runtime。授权/下一动作见 [TODO](TODO.md)，能力/验收只看[唯一结果](../02_实验/NPC_System_Integration_v0/RESULTS.md)。下方旧草案的“未开发 Director”不能再作为禁止本应用实现的当前规则。
+
 `PredictionBaselineV1` 的 development fit 与独立 seed 复现已完成，当前为 `DEVELOPMENT_TRAINED_REPRODUCIBLE / READY_FOR_INDEPENDENT_REVIEW`；数值与训练细节只维护在[RESULTS](../02_实验/PredictionBaselineV1/RESULTS.md)。`SourceRankingV1` 的九条件来源条件比较也已完成，结果与下一动作只维护在[INPUT_REVIEW](../02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)；它不是 actor forecast、心理状态 `S` 或 Runtime policy 的训练证据。完整心理 dynamics / Paper-0 分支仍受 LIGHT 行动前 `O`、候选与独立标签的准入限制，但用户确认的玩家可置信 NPC 目标不以此为必经前提。`ResearchDynamicsV1` 是手写数值 fixture/candidate，不是已训练科学模型；旧 C++ `ReferenceRuleDynamicsV0` 统一称 `LegacyReferenceRuleDynamicsV0`，旧 Python `Theory-S_v2` 统一称 `ExpectedEffectEMAProxyV0` 历史诊断 proxy。失败证据和当前推进边界以[研究重建审计](研究重建审计_2026-10-06.md)为准；[Pre-V1 validity audit](PRE_V1_EXPERIMENT_VALIDITY_AUDIT.md)记录的是 2026-09 阶段状态，冲突时服从本次审计。
 
 Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。完整机制说明中已确认的内容是工程语义与模块契约，不是已验证心理规律。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
@@ -21,6 +23,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md) | 候选 F2 与 TypedIR / 预实验的较低层 owner；保留已有语义契约和 reference 证据 | 整个系统的正式定义；把候选写成获批路线或将 reference 测试冒充 Director/多 NPC 方法结果 |
 | [E0 Key Ledger Protocol v0](E0_KeyLedger_Protocol_v0.md) | 唯一有限钥匙账本 E0 执行定义与 fixture/search/monitor acceptance protocol；PROTOCOL_FROZEN / E0-KeyLedger-v0；实现与逐例验收状态见 [E0 实验入口](../02_实验/E0_KeyLedger_v0/README.md) | F0/F1 总设计、Pilot Monitor/reference 契约、未验收的实现能力或实验结果 |
 | [E1 局部信息与独立角色协议 v0](E1_KeyLedger_LocalAgency_Protocol_v0.md) | E1-0 有限域与协议；E1-1 独立开发包已交付。实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)；代码入口：[runner](../tools/e1_keyledger_v0/runner.py) | E0 冻结规则；将开发验证写成正式实验、新颖性声明；自动授权正式实验/E1-2 |
+| [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md) | 新授权应用 vertical slice 的唯一开发结果；实现与协议见[代码 README](../tools/npc_system_v0/README.md) | 全系统正式语义、冻结 E1 结果、心理验证或玩家评价 |
 | [04 统一问题与成熟基线准入](../01_文献/算法积木/04_统一问题与成熟基线准入.md) | 有限统一实例下的成熟方法综合、候选问题与方法准入判断 | 全部长期研究方向、已确认研究缺口或实验通过结论 |
 | **[整合系统视角复核](审核_整合系统视角复核_2026-09-05.md)** | **判断复核**：回到实现核对旧判断的前提是否成立 | 文献层面的重新论证 |
 | **[文献比较方法与阶段缺口复核](审核_文献比较方法与阶段缺口_2026-09-05.md)** | **方法纪律**：13 维机制比较模板、冻结母问题、科研流程阶段缺口。含**我自己的认错清单** | 具体论文的逐篇内容 |
@@ -65,7 +68,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 
-当前作者约束线的问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)，候选 F2 / TypedIR / 预实验由 [Pilot](AuthorialTrajectoryPilotV0.md)维护；完整研究方向见 [System Vision 长期研究版图](Character_Dynamics_System_Vision_v0.md#长期研究版图)。A（规划/执行能力）与 B（稀疏作者控制）是近期选基线时抽取的研究组合；[04 综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md)的 Q1–Q3 是有限实例下的候选问题，不代表完整研究版图，也未决定研究缺口、方法或开工路线。Node/Maze 与 LLM/HTN 是替换候选，MC“地狱门”是思想例子，TypedIR 不是作者 UI。本轮有限语义返修已完成，待独立复核；当前下一动作及状态见 [TODO](TODO.md)，不自动授权编码或实验。本阶段不开发 Director、不改冻结 Runtime。
+当前作者约束线的问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)，候选 F2 / TypedIR / 预实验由 [Pilot](AuthorialTrajectoryPilotV0.md)维护；完整研究方向见 [System Vision 长期研究版图](Character_Dynamics_System_Vision_v0.md#长期研究版图)。A（规划/执行能力）与 B（稀疏作者控制）是近期选基线时抽取的研究组合；[04 综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md)的 Q1–Q3 是有限实例下的候选问题，不代表完整研究版图，也未决定研究缺口、方法或开工路线。Node/Maze 与 LLM/HTN 是替换候选，MC“地狱门”是思想例子，TypedIR 不是作者 UI。本轮有限语义返修已完成，待独立复核；当前下一动作及状态见 [TODO](TODO.md)，不自动授权编码或实验。现有有限 Director 仅在新授权 NPC System Integration v0 应用中开发；冻结 C++ Runtime 不改。
 
 例如本次三项想法分别落位：分段逆映射保留原话于问题 Q01；低耦合的确定边界在完整机制 §8，未落实方案在 Q03；Object/Scene/W 动作职责在完整机制 §4，具体实现缺口在 Q05。TODO 只链接并安排验证，不再复制三遍原理。
 
@@ -81,4 +84,4 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 原 13 份工作稿均保留在[整合前快照与逐项去向](归档/README.md)。旧稿只作为历史推理/证据，不继续维护现行结论；旧路径引用按“当前入口”或“历史证据”分别处理。
 
-用户亲写的 `E:\Character Dynamics Demo` 不在本轮范围；本次仅整理研究文档，未修改参考 C++。历史记录：此前曾采用“本地提交，不自动推送”的阶段性约定；当前版本控制操作遵循项目 `AGENTS.md`，已验证项目改动应提交并推送至 `webgpt-sync`，不得直接推送 `main`。
+用户亲写的 `E:\Character Dynamics Demo` 不在本轮范围；本次修改应用 Python 与 owner 文档，未修改参考 C++。历史记录：此前曾采用“本地提交，不自动推送”的阶段性约定；当前版本控制操作遵循项目 `AGENTS.md`，已验证项目改动应提交并推送至 `webgpt-sync`，不得直接推送 `main`。
