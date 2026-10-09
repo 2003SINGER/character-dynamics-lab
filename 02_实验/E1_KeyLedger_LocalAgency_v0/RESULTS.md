@@ -4,7 +4,7 @@
 
 ## 交付与版本
 
-用户明确授权“E1-1 最小实现与开发验证；暂不正式实验”。完成了独立 E1 adapter、真实 B chooser、A-local `h=0` UCS、两种独立手写 oracle、Monitor、完整 checkpoint 与开发运行器。**没有训练 policy**：B 的 utility/优先级是公开手写契约；A 使用成熟搜索算法，不读取 W 或真实 O_B。E0 源码/冻结协议与 C++ Runtime 未修改。
+用户明确授权“E1-1 最小实现与开发验证；暂不正式实验”。完成了独立 E1 adapter、真实 B chooser、A-local `h=0` UCS、独立手写 oracle 模块（world / fixed-B 两种搜索模式，共享模块内转移）、Monitor、完整 checkpoint 与开发运行器。**没有训练 policy**：B 的 utility/优先级是公开手写契约；A 使用成熟搜索算法，不读取 W 或真实 O_B。E0 源码/冻结协议与 C++ Runtime 未修改。
 
 源码提交：[`f637743a8af9faacbb908e8b4bae4b8f4661b193`](https://github.com/2003SINGER/character-dynamics-lab/commit/f637743a8af9faacbb908e8b4bae4b8f4661b193)。父级精确源码运行 `parent-f637743-20261009`；重复运行后缀 `-rerun`。环境 Python 3.12.14 / macOS 27.0.1 arm64，`PYTHONHASHSEED=0`。每 solver/episode 开发 cap=10,000；候选 watchdog=2.0s，A 的所有 replan 共用一个 budget ledger；**正式实验预算未冻结**。后续交付提交仅含证据/外围文档，以及协议 §8 一句开发授权澄清；v0.r1 行为、时间、预算规则和包源码均不变，原运行的 protocol hash 保留，不能伪称其为后来文档 hash。
 
@@ -49,14 +49,16 @@ Known/Unknown 对照的首个 A 动作、真实动作序列和最早结果相同
 - cap=1 与显式极短 watchdog=1e-9 的独立诊断中，世界 oracle、fixed-B oracle、A planner 均为 `BUDGET/complete=false`，case 标 `INCOMPLETE_BUDGET`；没有变成不可达或 PASS。正常开发配置仍是 10k/2s，没有失败后加预算。
 - 三次未提交阶段开发运行原件也保留。其 manifest 标旧 HEAD+各自源码 hash，不能冒充精确源码提交运行；早期“recorded”不构成当前版本验收。父级正式交付使用 f637743 的开发运行和上述独立检查。
 
-## CI：E1 通过，不声称全仓库全绿
+## CI：f637743 版本快照与后续运行
 
 精确源码 E1 [run 37898921437](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37898921437) **SUCCESS**：30 项单测和 12 格开发回放均通过；原始 Ubuntu artifact 已下载并随 ZIP 保留。Python 3.12.15 / Linux x86_64，同 10k/2s、同源码 revision/hash。
 
-同 HEAD 的总体 [runtime-regression run 37898921385](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37898921385) **FAILURE**，唯一失败作业为既有 E0；其他五项（含 C++ Configure/Build/CTest/Reference verification）成功。E0 单测 38/38，但固定 fixture H02 触发墙钟上限，具体记录由[E0 结果 owner](../E0_KeyLedger_v0/RESULTS.md)维护；失败日志与原始压缩 artifact 同样保留。本轮没有更改或重跑 E0 来刷绿。
+该版本快照的总体 [runtime-regression run 37898921385](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37898921385) **FAILURE**，唯一失败作业为既有 E0；其他五项（含 C++ Configure/Build/CTest/Reference verification）成功。E0 单测 38/38，但固定 fixture H02 触发墙钟上限，具体记录由[E0 结果 owner](../E0_KeyLedger_v0/RESULTS.md)维护；失败日志与原始压缩 artifact 同样保留。该历史失败不代表最新运行状态。
+
+后续交付 [`48412e4`](https://github.com/2003SINGER/character-dynamics-lab/commit/48412e4) 的 E1 development [run 37901728095](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37901728095) 与总体 runtime-regression [run 37901728081](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37901728081) 均 **SUCCESS**。
 
 ## 停止与下一步
 
-本轮最小实现和开发验证已完成，**到此停止**，等待用户/GPT 独立审阅。正式 E1 实验、formal budget/environment 冻结、E1-2 AND/OR、Director、训练或更大世界均未启动。
+本轮最小实现和开发验证已完成，**到此停止**。外部定向审阅已收到：未发现 E1-1 开发阻断，建议停止扩修；成熟 GOAP 已能解公开 deterministic B 合作域，Known/Unknown 零差异是该有限实例的负控，不证明一般认知能力。此为外部 AI 审阅，不是独立人工验证，也不自动将状态改为 `CLOSED`；状态仍为 `DEVELOPMENT_VERIFIED / READY_FOR_INDEPENDENT_REVIEW`。正式 E1 实验、formal budget/environment 冻结、E1-2 AND/OR、Director、训练或更大世界均未启动。
 
-本次说明成熟 GOAP 能正确解该有限、公开 deterministic B contract 的合作域，且装置能分开世界上界、固定策略上界、实际行为与预算不足。它**没有暴露一个需要原创方法的性能瓶颈**，不证明 NPC 自主性、一般认知能力、作者成本、心理规律或玩家生命感。下一步是否研究更强的信息/策略不确定性，应先由独立审阅决定，不靠继续完善 E1-1 自动推进。
+本次说明成熟 GOAP 能正确解该有限、公开 deterministic B contract 的合作域，且装置能分开世界上界、固定策略上界、实际行为与预算不足。它**没有暴露一个需要原创方法的性能瓶颈**，不证明 NPC 自主性、一般认知能力、作者成本、心理规律或玩家生命感。下一步是否研究更强的信息/策略不确定性，应由后续明确问题与授权决定，不靠继续完善 E1-1 自动推进。
