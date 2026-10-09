@@ -1,6 +1,6 @@
 # 研究设计：唯一维护入口
 
-整理日期：2026-10-08
+整理日期：2026-10-09
 
 ## 项目架构定位
 
@@ -20,6 +20,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | **[Character Dynamics｜系统问题与执行语义 v0](CharacterDynamics_FormalProblem_v0.md)** | **唯一 F0/F1 owner**：算法无关的问题定义与执行语义；状态对象/权限、时间、转移、作者意图/绑定、规划器/导演、性质/反例及近期 A/B 研究组合；状态 DRAFT / READY_FOR_INDEPENDENT_REVIEW | 长期研究版图、算法选型、实现完成或研究有效性主张 |
 | [AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md) | 候选 F2 与 TypedIR / 预实验的较低层 owner；保留已有语义契约和 reference 证据 | 整个系统的正式定义；把候选写成获批路线或将 reference 测试冒充 Director/多 NPC 方法结果 |
 | [E0 Key Ledger Protocol v0](E0_KeyLedger_Protocol_v0.md) | 唯一有限钥匙账本 E0 执行定义与 fixture/search/monitor acceptance protocol；PROTOCOL_FROZEN / E0-KeyLedger-v0；实现与逐例验收状态见 [E0 实验入口](../02_实验/E0_KeyLedger_v0/README.md) | F0/F1 总设计、Pilot Monitor/reference 契约、未验收的实现能力或实验结果 |
+| [E1 局部信息与独立角色协议 v0](E1_KeyLedger_LocalAgency_Protocol_v0.md) | E1-0 有限新域、角色权限、B 自主策略、12 条主条件、成熟基线与 oracle 量词及实施准入 | E0 的冻结规则；E1 已实现/运行或新颖性声明；自动授权 E1-1/E1-2 |
 | [04 统一问题与成熟基线准入](../01_文献/算法积木/04_统一问题与成熟基线准入.md) | 有限统一实例下的成熟方法综合、候选问题与方法准入判断 | 全部长期研究方向、已确认研究缺口或实验通过结论 |
 | **[整合系统视角复核](审核_整合系统视角复核_2026-09-05.md)** | **判断复核**：回到实现核对旧判断的前提是否成立 | 文献层面的重新论证 |
 | **[文献比较方法与阶段缺口复核](审核_文献比较方法与阶段缺口_2026-09-05.md)** | **方法纪律**：13 维机制比较模板、冻结母问题、科研流程阶段缺口。含**我自己的认错清单** | 具体论文的逐篇内容 |

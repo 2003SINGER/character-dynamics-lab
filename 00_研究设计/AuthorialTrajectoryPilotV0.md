@@ -2,6 +2,8 @@
 
 日期：2026-10-08。状态：**系统设计与独立参考契约交付；READY_FOR_INDEPENDENT_REVIEW，不是 Pilot 已运行、方法有效或 milestone CLOSED。**
 
+阶段说明：下文 E0–E5 是当时的整体候选计划，不是当前执行授权。E0 的实际有界验收只查[结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)；2026-10-09 新授权限于[E1-0 有限协议设计](E1_KeyLedger_LocalAgency_Protocol_v0.md)，不运行 E1 或开发 Director。文中的“E0 待审/待编码”保留为历史阶段描述，不再代表当前事实。
+
 本页是作者轨迹分支的设计 owner；[算法积木](../01_文献/算法积木/README.md)维护原算法及来源，不在这里重写论文。输入为本地私有完整讨论两部分：持续人物与作者控制的接口，以及 Typed Trajectory Constraint IR 四份契约。原文 SHA256 为 `65d9142d1b09526fb3d678fd335837d40f04cc923beda5f5c03767d6cea20c94`。自然语言例子不是自动获得执行资格的世界能力。
 
 **职责边界补充：**全系统算法无关的 F0/F1 语义定义由唯一 owner [CharacterDynamics_FormalProblem_v0](CharacterDynamics_FormalProblem_v0.md) 维护；该 owner 当前为 DRAFT、未实现。本页只维护作者控制方向的候选 F2、Typed Trajectory Constraint IR 与预实验设计，不能作为完整 Character Dynamics 系统定义。作者意图如何绑定角色/命题、由何 recognizer 或具体事件证据支撑、再映射为可执行约束，属于 F0/F1 的上层语义链；本 Pilot 的 typed IR 只是候选下游接口，不预设作者直接填写底层变量。

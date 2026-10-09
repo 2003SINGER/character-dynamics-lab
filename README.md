@@ -25,6 +25,7 @@
 | Self-Play / Self-Evaluation v0 | [评测协议](02_实验/Self_Evaluation_v0.md)；[scorecard runner](tools/self_evaluation_v0.py)；[scenario manifest](tools/self_evaluation_scenarios_v0.json) |
 | 实验导出器、切片与可复现记录 | [实验总路由](02_实验/README.md)；[跨数据集 Replay 接口草案](02_实验/跨数据集Replay接口_v0.md)；[机制识别循环与反事实诊断](02_实验/机制识别循环与反事实诊断_v0.md) |
 | E0 钥匙—账本有限基线的固定协议、代码和实际证据 | [冻结协议](00_研究设计/E0_KeyLedger_Protocol_v0.md)；[代码与复现](tools/e0_keyledger_v0/README.md)；[实验入口](02_实验/E0_KeyLedger_v0/README.md)。独立有限 Executor，不等于 C++ Runtime 集成、NPC 自主性或新方法效果 |
+| E1-0：局部信息与独立 B 策略的下一阶段设计 | [有限协议](00_研究设计/E1_KeyLedger_LocalAgency_Protocol_v0.md)。仅协议交付与审阅；尚无 E1 实现或运行，不自动进入 E1-1/E1-2 |
 | WebGPT 审阅：实验报告、逐条结果、失败记录、文献审计及上传排除清单 | [公开审阅索引（2026-10-07）](02_实验/PUBLIC_REVIEW_INDEX_2026-10-07.md) |
 | 文献 PDF、职责级阅读与证据 | [文献库](01_文献/README.md) |
 | 作者约束系统的问题定义与执行语义（F0/F1） | [Character Dynamics｜系统问题与执行语义 v0](00_研究设计/CharacterDynamics_FormalProblem_v0.md)：DRAFT / READY_FOR_INDEPENDENT_REVIEW，算法无关的唯一问题定义 owner；[System Vision 长期研究版图](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图)保留完整研究方向；[04 综合](01_文献/算法积木/04_统一问题与成熟基线准入.md)维护有限实例的问题与基线准入判断；[AuthorialTrajectoryPilotV0](00_研究设计/AuthorialTrajectoryPilotV0.md)仅为候选 F2 及 TypedIR / 预实验下层 owner，不定义全系统；[算法积木](01_文献/算法积木/README.md)保留具体原算法；[独立reference](tools/trajectory_constraints_v0/README.md)不等于Director或NPC实验 |
