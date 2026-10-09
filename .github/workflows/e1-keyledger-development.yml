@@ -1,0 +1,45 @@
+name: e1-keyledger-development
+
+on:
+  push:
+    branches: [webgpt-sync]
+    paths:
+      - 'tools/e1_keyledger_v0/**'
+      - 'tools/e0_keyledger_v0/**'
+      - 'tools/trajectory_constraints_v0/**'
+      - '00_研究设计/E1_KeyLedger_LocalAgency_Protocol_v0.md'
+      - '.github/workflows/e1-keyledger-development.yml'
+  pull_request:
+
+jobs:
+  e1-development-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: E1 development unit contracts
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHONPATH: tools
+        run: |
+          set -o pipefail
+          mkdir -p runs/e1_keyledger_v0/ci
+          python -B -m unittest discover -s tools/e1_keyledger_v0/tests -v 2>&1 | tee runs/e1_keyledger_v0/ci/unit-tests.log
+      - name: Twelve development conditions under recorded candidate watchdog
+        if: always()
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHONPATH: tools
+        run: python -B -m tools.e1_keyledger_v0.runner --case all --run-id ci-${{ github.run_id }}-${{ github.run_attempt }} --output-root runs/e1_keyledger_v0/ci --max-expansions 10000 --wall-seconds 2.0
+      - name: Preserve complete development evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1-keyledger-${{ github.run_id }}-${{ github.run_attempt }}
+          path: runs/e1_keyledger_v0/ci/
+          if-no-files-found: ignore
+          retention-days: 30

@@ -1,8 +1,8 @@
 # E1 Key Ledger Local Agency Protocol v0
 
-日期：2026-10-09。状态：**SPECIFIED / READY_FOR_INDEPENDENT_REVIEW**。版本：`E1-KeyLedger-LocalAgency-v0`。
+日期：2026-10-09。状态：**CONDITIONALLY_REVIEWED / CLARIFIED**。版本：`E1-KeyLedger-LocalAgency-v0.r1`（仅澄清，不改 E0 冻结内容）。
 
-本文是 E1-0 的单一有限实验协议：把 E0 的权威世界、结算与证据边界扩展为 A/B 局部信息和 B 自己选择行动的场景。本文只授权协议设计；E1-1 实现、E1-2 条件规划实现或运行均需另行授权。E0 代码、协议、结果和冻结 Runtime 不由本文修改，也不在此宣布 E0 `CLOSED`。来源为用户授权的 2026-10-09 私有原文（SHA-256 `5157c55186976448da407c07faeb540f451a742ff974747951fde184d093fc6a`）；此处不公开原文全文。
+本文是 E1-0 的单一有限实验协议：把 E0 的权威世界、结算与证据边界扩展为 A/B 局部信息和 B 自己选择行动的场景。用户已授权 E1-1 最小实现及开发验证；正式实验与 E1-2 实现/运行仍未授权。E0 代码、协议、结果和冻结 Runtime 不由本文修改，也不在此宣布 E0 `CLOSED`。来源为用户授权的 2026-10-09 私有原文（SHA-256 `5157c55186976448da407c07faeb540f451a742ff974747951fde184d093fc6a`）；本次独立 WebGPT review 来源 SHA-256 `6fc133ece2205cb7133f3961f1efffc206a6a770570d61244e3629ddaff5bbfc`；此处不公开原文全文。
 
 所有 fixture 路径、预期 verdict、效率/预算上限均为 **HAND_DERIVED**，不是运行结果、算法表现或新研究结论。
 
@@ -25,7 +25,7 @@
 
 E1 保留 E0-KeyLedger-v0 的实体 registry、初始已提交 `destroy_key(PLAYER,key0)` 历史、资源与 holder/beneficial owner 语义、原有 operator 前提和结算效果、单 offer session、ledger witness、追加式事件、coverage seal、deadline 右闭和 Monitor 语义。基准物理初态仍为 A/B 同在 ENTRANCE、key1 完整且由 B 持有、ledger 在关闭的 ARCHIVE、payment 与 toolB 由 A 持有（toolB 的 beneficial owner 为 B）。
 
-E1 搜索配置另含 `O_A,O_B,goal_A,goals_B,policy_pin_B,T,request_used`。状态中不得将 actor 预测写入 W/O 或事件账本。A 的目标仅为目标 witness；B 的目标分别为取回 toolB、获得 payment、保留 key1 beneficial ownership。借出只转 holder，不转 beneficial owner。
+E1 搜索配置另含 `O_A,O_B,goal_A,goals_B,policy_pin_B,T`；`request_used` 是仅供 World dispatcher exactly-once 校验的世界位，不能作为 B chooser 的输入。B 的 actor-local observation 使用独立的 `O_B.request_sent` 及其来源历史：初始值为 `false`，并带明确的初始自身历史 provenance；只有成功的 `tool_return_requested` settlement/自方回执（含 event ID、时间、actor）才将其置为 `true`。意图、启动尝试、拒绝或 pre-start rejection 均不得设置该 observation 字段。状态中不得将 actor 预测写入 W/O 或事件账本。A 的目标仅为目标 witness；B 的目标分别为取回 toolB、获得 payment、保留 key1 beneficial ownership。借出只转 holder，不转 beneficial owner。
 
 `K=known` 与 `K=unknown` 只改变 A 的合法初始 observation：
 
@@ -44,7 +44,7 @@ Known/Unknown 是权限与零效果负对照。E0 通用 offer 不要求 A 先�
 
 | Operator | Owner / typed arguments | Preconditions | Duration 与 effect / observation |
 |---|---|---|---|
-| `request_tool(B,A,toolB)` | B；固定角色/物件 ID | B 的 O 确认 `beneficial_owner(toolB)=B`、当前 holder=A；同场；`request_used=false` | 1 min。仅成功 settlement 时置 `request_used=true` 并追加 `tool_return_requested(B,A,toolB)`；只投影给 A/B，不转移工具、不改变交易状态。pre-start rejection 不写 W；runner 可用本地 `lastreject` 抑制同请求重试，并按 no_control 规则推进时间。 |
+| `request_tool(B,A,toolB)` | B；固定角色/物件 ID | B 的 O 确认 `beneficial_owner(toolB)=B`、当前 holder=A；同场；`O_B.request_sent=false` | 1 min。仅成功 settlement 时 World dispatcher 设置 `W.request_used=true` 并追加 `tool_return_requested(B,A,toolB)`；合法投影含 event ID、时间、actor，B 据此置 `O_B.request_sent=true`，A 仅在合法 observer 时收到回执。只投影给合法观察者，不转移工具、不改变交易状态。pre-start rejection 不写 W/O；runner 可用本地 `lastreject` 抑制同请求重试，并按 no_control 规则推进时间。 |
 | `return_tool(A,B,toolB)` | A；E0 typed grounding | E0 前提：A 持 toolB，双方同场 | 1 min。仅按 E0 真实结算转 holder、追加 `tool_returned`；事件及状态只投影给合法同场角色。请求不强制此动作。 |
 | `offer_loan(A,B,payment)` | A；不含 key ID | E0 前提，且本 fixture 尚无 offer | 1 min。按 E0 记录唯一通用报价；A/B 可见条款，不披露 key ID。 |
 | `choose_accept/decline(B,offer_id)` | B；固定 offer ID | B 可见唯一 pending offer；E0 的物理/交易合法性前提见 E0；§4 policy 仅决定真实 B chooser 选择哪个合法 reply，不是 World precondition | 1 min。按 E0 记录 reply；ACCEPT 才披露其可借 key1 的 ID 给 A。 |
@@ -61,7 +61,7 @@ A 在 Unknown 条件下可以提出不含 ID 的 offer。GOAP 内部可用 `Loan
 
 B chooser 只读 `O_B`、自己的三个目标、公开 schemas 与公开的 policy contract。下面三组参数随运行配置公开声明，并以合法来源记录投影给 A 的 `O_A`；不允许通过隐藏 B weight 或 oracle 推断作为 actor input。它们是有限策略条件，不是心理模型或真实人物动机。
 
-**动作优先级**（逐次 B 槽）：(1) 若 offer 已 ACCEPTED 且未 SETTLED，依物理合法性与 §4.2 policy 选择合法 exchange 或 idle；(2) 若有 pending offer，按 §4.2 选择 ACCEPT/DECLINE；(3) 若 `request_used=false` 且 `O_B` 知 toolB 仍由 A 持有，选择一次 `request_tool`；(4) 否则选择 `idle`。本优先级仅用于后续 B 槽；t2 初始无 session，故 B 自主发出一次 request（或 idle）。该顺序不读取 deadline、fixture ID 或实验分组；调度器只识别公开 session/R 状态并开放 B 槽，不替 B 选择动作。
+**动作优先级**（逐次 B 槽）：(1) 若 offer 已 ACCEPTED 且未 SETTLED，依物理合法性与 §4.2 policy 选择合法 exchange 或 idle；(2) 若有 pending offer，按 §4.2 选择 ACCEPT/DECLINE；(3) 若 `O_B.request_sent=false` 且 `O_B` 知 toolB 仍由 A 持有，选择一次 `request_tool`；(4) 否则选择 `idle`。World dispatcher 另以 `W.request_used` 作 exactly-once 校验。两位必须在 checkpoint、fork、restore、搜索 key 与 replay 中独立保存，replay 不得重置任一位。本优先级仅用于后续 B 槽；t2 初始无 session，故 B 自主发出一次 request（或 idle）。该顺序不读取 deadline、fixture ID 或实验分组；调度器只识别公开 session/R 状态并开放 B 槽，不替 B 选择动作。
 
 **交易评价。**令 `I=1` 当 `O_B` 认为自身工具目标未满足，否则为 0；`c` 为借出机会成本，`p` 为 penalty。对 ACCEPT 预评估：`V=2×1 payment−c−p×I`；DECLINE 的基准值为 0。`V>0` 才 ACCEPT；`V≤0` 时 DECLINE（tie-break 固定保钥匙/拒绝）。如 O_B 不支持有完整可借钥匙或有效 1-payment 报价，B 选择 DECLINE，reason=`NO_LOANABLE_KEY`。明确意图理由分别记 `TOOL_REQUIRED`、`KEEP_KEY` 或 `NET_GAIN`。此值是预测条件条款的策略评价；接受不提前产生 payment 或 transfer。
 
@@ -89,9 +89,9 @@ B chooser 只读 `O_B`、自己的三个目标、公开 schemas 与公开的 pol
 
 完成的 offer/reply/交易改变公开 session 后，下一空槽按同一规则计算。request 只有成功 settlement 才设置 world `request_used`；pre-start rejection 不写 W。runner 可保留本地 `lastreject` 抑制无效请求重试；这不是 world bit，按共同 no_control 规则前进。忽略已成功 request 不重置该 bit，不产生反复占令牌。拒绝不能冻结时钟；同一拒绝前提不可零时重试。串行顺序不代表 B 服从 A，也不授予 A 控制 B。
 
-A policy 权限：目标只有 acquisition witness；输入为 `O_A`、已合法披露的信息、公开 schemas、授权目录、deadline、合法历史/回执及公开 B policy contract。它可预测环境响应，但 B 的动作不是 A 可控 operator。每个 A 动作前后读真实 feedback 并重规划；不得把预测计划写成 settled history。request_tool 不产生 A 的自动归还目标。
+A policy 权限：目标只有 acquisition witness；输入为 `O_A`、已合法披露的信息、公开 schemas、授权目录、deadline、合法历史/回执及公开 B policy contract。A 可按公开 contract 预测 B 的响应，但不得读取真实 `O_B`、B 私有目标/历史或 `W` 来做预测；任何额外假设必须逐项标记为 hypothetical assumption，不能伪装成观察事实。A 对自己动作所致物理持有者变化的预测，只能从自己的已授权动作、公开 operator effects 与自身合法反馈推演；不得用隐藏 W 或 B 私有信息校正预测。若假设与真实反馈不符，须据合法反馈修订。B 的动作不是 A 可控 operator。每个 A 动作前后读真实 feedback 并重规划；不得把预测计划写成 settled history。request_tool 不产生 A 的自动归还目标。B 自己判断是否请求工具只基于自身 O_B 和自身回执；归还动作仍由 A 自己选择。A 只有在合法观察到 request receipt 后才将其作为输入。
 
-Checkpoint 沿用 [E0 §5 fork contract](E0_KeyLedger_Protocol_v0.md#5-唯一执行定义与独立-oracle) 的完整字段与隔离要求。E1 在其上另存 `goals_A,goals_B,policy_pin_B,request_used`、scheduler queue/current actor slot、A 的 actor-budget ledger、显式 assumptions、late-binding map/action binding 状态。搜索去重 key 必须保留影响未来的 O、绝对时间、工具请求位、offer/reply/settlement 状态、reservations、holder/owner、goal witness 摘要。不得只按物理 W 合并两个不同 actor knowledge state。此为协议字段，不表示实现已存在。
+Checkpoint 沿用 [E0 §5 fork contract](E0_KeyLedger_Protocol_v0.md#5-唯一执行定义与独立-oracle) 的完整字段与隔离要求。E1 在其上另存 `goals_A,goals_B,policy_pin_B,W.request_used,O_B.request_sent`（含 request receipt/provenance）、scheduler queue/current actor slot、A 的 actor-budget ledger、显式 assumptions、late-binding map/action binding 状态。搜索去重 key 必须分别保留 W request bit 与 O_B request history/provenance，以及影响未来的 O、绝对时间、offer/reply/settlement 状态、reservations、holder/owner、goal witness 摘要。不得只按物理 W 合并两个不同 actor knowledge state；也不得用 W bit 覆盖/重建 O_B history。
 
 一条实际可复算输入包含初态 hash、K observation provenance、公开 policy contract hash、T、domain/operator revision 和 scheduler revision。重复运行相同输入须得到相同 policy action、trace 与 event ID 顺序语义；如实现使用随机 tie-break，协议条件不再是本版本，须另行冻结随机源与预算。
 
@@ -150,7 +150,9 @@ Strong AND/OR 的每个 belief successor 按 A 实际能区分的合法 observat
 
 ## 8. 预算、指标与失败分类
 
-每 case、每 planner/oracle 的总 episode cap：10,000 扩展、2 秒墙钟；同机单线程。一个 case 内所有 A replan 共用该总预算 ledger，不可每轮重置。belief/状态 successor 原语生成量另计，防止一个 belief expansion 隐去大量枚举成本。此为拟定 E1 上限，未经运行验证其足以求解；不修改 E0 cap。达到 cap 未穷尽一律 `BUDGET / complete=false`，绝不可写 unreachable。
+每 solver/episode 的开发配置 expansion cap 为 10,000，作为跨 replans 的算法总上限；一个 case 内所有 A replan 共用同一预算 ledger，不可每轮重置。belief/状态 successor 原语生成量另计，防止一个 belief expansion 隐去大量枚举成本。2 秒只是可显式配置的候选 watchdog 值；触发时记录 `termination_reason=WALL_TIMEOUT`、`solve_status=BUDGET`、`complete=false`。无论 expansion 或 watchdog 停止，未完成的开发 case 不计正确性 PASS。runner 必须区分 `EXPECTED_VERDICT_CHECK`（预算内完成并与 hand-derived verdict 对照）与 `INCOMPLETE_BUDGET`（未完成，不能计 PASS）；禁止隐式提高 cap、失败后关闭 watchdog 或靠删改 case 掩盖停止。此配置不修改 E0 cap，也不宣称已适合正式实验。
+
+E1 实现前置开发验证须运行固定开发配置，保留环境信息和所有结果，包括 budget miss；不得据此改写预期 verdict。正式实验前才冻结 formal budget 与 environment 一次，并记录版本/hash。本协议当前不执行前置验证、不选定更大预算，也不授权正式实验。正确性问题（权限/信息泄漏、schema 或 settlement 不一致、事件错误）始终是硬失败，与墙钟预算无关。E1-1 的校准对象是成熟方法在该有限契约下的正确性和可报告性，不是 NPC 科学瓶颈或已训练的动力学。
 
 逐例记录 domain/protocol revision、源码 revision、condition/hash、K/policy/T、actor input O 与授权目录 hash、planner/oracle/policy 版本、扩展/生成数、耗时、终止原因、每步 ActionIntent/start/outcome/settlement、A/B O 投影、tool/payment/ledger goal 状态、event IDs/seals、Monitor verdict 与实际 witness。Known/Unknown 成对报告首动作和轨迹差异。
 
@@ -165,19 +167,19 @@ Strong AND/OR 的每个 belief successor 按 A 实际能区分的合法 observat
 1. **key1 tombstone：**继承 E0 N02 状态，key1 holder=none、intact=false、tombstone 保留，B 的合法 O 知自有钥匙已失效。无其它替代钥匙；穷尽后两个 oracle 均无目标路径。仅有限域不可达。
 2. **错误 key binding：**Unknown A 将 key1 加入 generic offer 参数或直接提交 `unlock(A,key1)`。前者违反 schema、后者违反 actor knowledge/authority；dispatch 前拒绝，0 分钟、无 W/O/event effect。generic offer 本身仍合法。
 3. **强制同意/拒绝后交易与独立回复：**A 提交未经 B ACCEPT 的 `accept_loan`，或 DECLINE 后交易。拒绝在 start、无 holder/payment 部分变化、无 `loan_exchanged`。另从合法 OFFERED checkpoint 调用实际 B chooser，分别检验 PAY 接受、TOOL 缺工具拒绝/归还后接受、KEEP 拒绝及真实 reply settlement。此是 consumer-level 负控，不强迫知道公开契约的 GOAP 为演示拒绝而报价；KEEP 主轨迹可以 `no_plan→no_control`。
-4. **同 O 不同隐藏 W：**构造两个 actor input hash 相同而 key1 hidden truth 不同的 checkpoint；A 首个动作分布/grounded proposal 必须一致，禁止利用 W 差异挑出 key1。此检查不要求未来轨迹相同。
+4. **同 O 不同隐藏 W：**构造两个 checkpoint，B 的 `O_B`、B goals、公开 contract 与候选目录相同，仅隐藏 `W.request_used` 不同；B chooser proposal 必须一致，虽然 World dispatcher 的验证结果可以不同。拒绝或 pre-start rejection 不得设置 `O_B.request_sent`。另构造 A input hash 相同但 key1 hidden truth 不同的 checkpoint；A 首个 grounded proposal 必须一致，禁止读取 W 或实际 O_B/私有目标历史来挑出 key1。此检查不要求未来轨迹相同。
 5. **预算 cap=1：**诊断 runner 首次扩展后 frontier 非空必须报告 `BUDGET`，不是不可达；不用于扩大正式 cap。
 6. **事件与状态区分/恢复隔离：**holder=A 不能代替 acquisition event；fork/replay、receipt、seal 与 E0 既有回归语义保持，真实 settlement 不得被预测、预演或恢复副本污染。
 
 ## 10. 实施顺序、停止与审阅门
 
-**E1-1（需新授权）：**只接入 E0 独立 executor/Monitor adapter、新增一次性 B request、公开 deterministic B chooser、A-local GOAP 与 `O_world/O_fixedB` 两独立 oracle；运行 12 格和本节负控。E1-1 不含 AND/OR 实现。停止门：任一泄漏、schema/settlement mismatch、未封口 verdict、预算误标或 oracle 不独立即暂停该 case 并保留证据；不得调参掩盖。
+**E1-1（最小实现与开发验证已获授权；正式实验未授权）：**只接入 E0 独立 executor/Monitor adapter、新增一次性 B request、公开 deterministic B chooser、A-local GOAP 与 `O_world/O_fixedB` 两独立 oracle；在开发配置下运行协议病例与负控，结果按 §8 标记 `EXPECTED_VERDICT_CHECK` 或 `INCOMPLETE_BUDGET`。E1-1 不含 AND/OR 实现。开发结果不能称为正式实验或独立关闭。停止门：任一泄漏、schema/settlement mismatch、未封口 verdict、预算误标或 oracle 不独立即暂停该 case 并保留证据；不得调参掩盖。
 
 **E1-2（需另行授权）：**单独实现并评估有限 explicit belief-state AND/OR strong-goal solver；按 §7 的强策略量词报告，不与 E1-1 单轨迹完成率排名。只比较冻结同域及预算下的各自定义对象。
 
 **HAND_DERIVED 规格审阅结论：**无须修改 E0 通用 offer 才能定义 E1；Known/Unknown 是零效果权限负控。真正的实施门是：确保 B policy contract 确实公开进入 A 的合法 O；串行 scheduler 不隐式代选 B；A 的 late-bound key 预测不泄漏 actual ID；两个 oracle 独立且量词各自正确。任何一项实现不满足就阻断该实现结论，协议本身不预判实验通过。
 
-2026-10-09 父级完整复读及另一 Luna 的只读规格审阅已完成；修正了策略/物理前提混淆、披露前后绑定、成功证明与 frontier 穷尽的区别。最终手算时间和域契约未发现阻断矛盾。此为协议级审阅，不是实现测试或 E1 外部独立验收；状态仍为 `READY_FOR_INDEPENDENT_REVIEW`。
+2026-10-09 父级完整复读及另一 Luna 的只读规格审阅已完成；随后独立 WebGPT review 提出 request visibility 与 budget semantics 的窄修正，本版据此澄清。协议修订不构成实现测试、正式实验或 E1 外部独立验收；实施状态为 E1-1 DEVELOPMENT implementation/run authorized，formal experiment 和 E1-2 未授权。不得据此将 E0 或 E1 声明为 `CLOSED`。
 
 限制：有限手工域与三条确定性 B policy 只回答本协议条件；不估计真人/玩家概率，不证明心理规律、方法新颖性、普遍 GOAP/HTN 能力、作者成本、玩家体验或真实 NPC 生命感。13 个长期研究方向仍由其既有 owner 维护，本文不重排或删减。
 
