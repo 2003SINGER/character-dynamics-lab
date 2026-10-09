@@ -1,0 +1,626 @@
+{
+  "created_utc": "2026-10-09T02:06:00.065208+00:00",
+  "scope": "parent audit of one fixed-source CI, no rerun",
+  "run_id": 37872620694,
+  "code_revision": {
+    "commit": "aba0ddfad08487b963a9fe0bad327e1f3fb54a4f",
+    "repo_root": "/home/runner/work/character-dynamics-lab/character-dynamics-lab",
+    "e0_scoped_dirty": false,
+    "e0_scoped_status": []
+  },
+  "provenance": {
+    "protocol_freeze_commit": "e411ff45f67855e58d047fd37332b6896db5b8fe",
+    "protocol_sha256": "0837eaa2e7b53e5aa00578534b714f38b055cc6389191ca7c5687eb5f3b1c7f9",
+    "source_sha256": {
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/executor.py": "9bd6782070ce3802e24597d1c32a4aac6f5ac52b4a03bb85874e2cf9a46b52aa",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/planner.py": "d93b0b920724a4d83d0a99075eb7595bee2e2f74d9108477afb93724b4c1ec21",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/oracle.py": "12601b5b1009561f5cb41766016142222253b1f3391b0b16ac22ca8db3d0a412",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/prediction.py": "d971d72635552a1fdab4deef045700413772696afd1669f9ea8fa5aa2868d8a4",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/monitor_bridge.py": "116d9613c5374790874003dab1c76e6231ebf1c979401734e5d2b3cc6ce4162b",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/runner.py": "781ab42002e75928a80a952c1aad993e2acd25b969475d9e41d4bdf7c6faacb3",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/fixtures.py": "547851a8f77272be910c3c6a372b216d8e262ebf464b10e0f62e6c40a8855b6a",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/tests/test_executor.py": "c2feb330ccaed7789bfe6c7eafc71318de9f16873c1837c192264d3bd9dbce9b",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/tests/test_oracle.py": "e3c4daeaaf747d22d41f3d214d7a9b1433b3602fd84955c0f2b1d3febfc6f08d",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/tests/test_monitor_bridge.py": "5128507aa7333500ad66fc8fd8ec886571170972ac2d7cdfbac14f8b4d162a98",
+      "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/tests/test_runner.py": "fe5245b052ded6c9a026736c472912ab927a6d3df6c4e096d5c414348c562179"
+    },
+    "python": "3.12.15 (main, Oct  1 2026, 02:35:59) [GCC 13.3.0]",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "hardware": {
+      "processor": "x86_64",
+      "machine": "x86_64",
+      "cpu_count": 4,
+      "physical_memory_bytes": 16766410752
+    },
+    "execution_config": {
+      "process_count": 1,
+      "thread_count": 1,
+      "expansion_cap": 10000,
+      "wall_seconds": 2.0
+    }
+  },
+  "budget": {
+    "max_expansions": 10000,
+    "wall_seconds": 2.0
+  },
+  "fixture_test_result": "PASS",
+  "unit_tests": "38/38 PASS",
+  "all_search_and_oracle_records_match_same_source_mac_formal_except_elapsed": true,
+  "raw_P01_receipt_history_checked": {
+    "world_session": "SETTLED",
+    "offer_recorded_session": "OFFERED",
+    "world_ledger_holder": "A",
+    "exchange_recorded_ledger_holder": "ARCHIVE"
+  },
+  "result_member": "20261009T020232Z_all_ci-37872620694-1/result.json",
+  "result_sha256": "490779c52628d8b76a26ccc101381af7b7693bbcbad514d0206b9af06952b5ed",
+  "archive": {
+    "file": "e0-keyledger-37872620694-1.zip",
+    "sha256": "2f29cb9aa0cf22b857ed3d0b1c914da1f6b22ee4e964f4bc95e271374d30c738",
+    "size_bytes": 1646364,
+    "members": [
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-B01/fixture_result.json",
+        "sha256": "4ba2a02be980073fdebe4bef694aeb4f9785842cef1cf3a50d4b44032f039472",
+        "size_bytes": 2241851
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-B01/input_checkpoint.json",
+        "sha256": "0d88cac9418e6e1076e4a007133a3777aabac6152b25e028d4aa068399510e62",
+        "size_bytes": 4978
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-B02/fixture_result.json",
+        "sha256": "14fb9c5b4fea165c66bcefb8bef3851809b07a964df5367ce56bbfe47fe4f367",
+        "size_bytes": 109185
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-B02/input_checkpoint.json",
+        "sha256": "710d6a93362f1367b88e042de9f800b78972594786796eb4236de1055f464a25",
+        "size_bytes": 4978
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-B03/fixture_result.json",
+        "sha256": "83f1108b3b9aa357d2ceba81d16a8305ef9949acbb6af8bf88e4fb762491ebd2",
+        "size_bytes": 2836113
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-B03/input_checkpoint.json",
+        "sha256": "527df61a1d8eb7906eb442008865e4050871e7fcb4acd6498dca8d3d23ab1c92",
+        "size_bytes": 9715
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-C01/fixture_result.json",
+        "sha256": "e6feb6f324f0a5f3c44a0d7379c084f5b187fe7ece4eb2763675401eda2e8736",
+        "size_bytes": 8496
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-C01/input_checkpoint.json",
+        "sha256": "c0c4d3c1718a0b40926631211ae8f4b4e92ddc6ef42aba2b93b20bf19cd5e2e3",
+        "size_bytes": 4979
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-F01/fixture_result.json",
+        "sha256": "7f5cd9a3ec749436de13687a40dabb458293d083b911069947f42e025c42e77e",
+        "size_bytes": 667418
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-F01/input_checkpoint.json",
+        "sha256": "cbb47f06390c676a8ee53e8792286f65ca04e17bb64fa554176695df0cb01636",
+        "size_bytes": 4979
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-H01/fixture_result.json",
+        "sha256": "3a9d1337b7bdd1cfde21953b1c7b121ac6f4b30d800ab7812524ce28acee2d8f",
+        "size_bytes": 2350359
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-H01/input_checkpoint.json",
+        "sha256": "e1bb08d8e4253f51456bd12484bec0c3eda42d6cb28f4ec243159e3bfc1c0049",
+        "size_bytes": 4979
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-H02/fixture_result.json",
+        "sha256": "3181fcc7fe10088c0080fee764275efeca775d8f2f1767df12d6c011e4104739",
+        "size_bytes": 235559
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-H02/input_checkpoint.json",
+        "sha256": "ab28f7c3d0141093721a308b9c8f349551baf229f7feb6a2f1dc0e433ddc7308",
+        "size_bytes": 4971
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-N01/fixture_result.json",
+        "sha256": "72f080aea34769d2b5c80a2004ac91bba18cf6ab95ecdf678e4b8b003c9e722c",
+        "size_bytes": 1292860
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-N02/fixture_result.json",
+        "sha256": "00fc55e8cdd5befbdfa33dd890d163f801b13d5448a440504050da8c4591cce4",
+        "size_bytes": 363969
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-N02/input_checkpoint.json",
+        "sha256": "8b01572198cfc3f520f057b530879233453534f16c6c985e78567d54c8a2758e",
+        "size_bytes": 7293
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-N01/input_checkpoint.json",
+        "sha256": "274ea5aa9217191c3c4abb0d7a3823e445c7133e3314afe445553f9e559a834f",
+        "size_bytes": 4980
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-P01/fixture_result.json",
+        "sha256": "3950d23e1e0a3f4c5b2e4a03b77cc9ac6f84a72becf3ecc8e005206780754cdf",
+        "size_bytes": 2241921
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-P01/input_checkpoint.json",
+        "sha256": "fdb80f8e3f9a2e0b34b5e4069cac4b0d902625b0d4c0314eb4922a83b87a5b39",
+        "size_bytes": 4979
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-P02/fixture_result.json",
+        "sha256": "2c3c118ef3ef37adda31c22a94b015fb4a5978dbffdd5a580b8c4b73eb8805c5",
+        "size_bytes": 2478748
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-P02/input_checkpoint.json",
+        "sha256": "da4801550529750981e3ae27712f207d9758f3a71be2ca9936354b654cacaabd",
+        "size_bytes": 4979
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-U01/fixture_result.json",
+        "sha256": "8bc44e4118d105a563c4f5afc49066a67eb792f50e93aa9e27dfdf5fea5d9f45",
+        "size_bytes": 28376
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-U01/input_checkpoint.json",
+        "sha256": "9561c911737231d0248ef2b9aebcf090612720206057627e2fa560ef4ed64819",
+        "size_bytes": 4979
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-X01/fixture_result.json",
+        "sha256": "ecb8b934a8aeb1fa7e261ce178ccff9ea3bd136bb5a0b2ae698951d8949a364b",
+        "size_bytes": 355693
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-X01/input_checkpoint.json",
+        "sha256": "0088f1e5c8f6cb5a074de340fae1d597b60bd21ada52c74bd0b6cb555b8c86d9",
+        "size_bytes": 4979
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-X02/fixture_result.json",
+        "sha256": "a03e595be0080bc15e2e41778cfa9f92197368ec9d54d0c3549a116ce01bfe25",
+        "size_bytes": 150671
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/E0-X02/input_checkpoint.json",
+        "sha256": "3e875b16a5e67301ae0127c1beb16d926c498bcbe47c314c54cc1e40f4be90a4",
+        "size_bytes": 4979
+      },
+      {
+        "path": "20261009T020232Z_all_ci-37872620694-1/result.json",
+        "sha256": "490779c52628d8b76a26ccc101381af7b7693bbcbad514d0206b9af06952b5ed",
+        "size_bytes": 17449069
+      },
+      {
+        "path": "unit-tests.log",
+        "sha256": "33e6c60fa0bc5ce135f936ac252e3844875830e893c8d53bdca06bee9b493841",
+        "size_bytes": 5840
+      }
+    ]
+  },
+  "cases": [
+    {
+      "fixture_id": "E0-P01",
+      "input_hash": "e62711d65be6c8d8c0267c5ed5ff18b64c65da05c902a83debf18a96353fb897",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "WITNESS_FOUND",
+        "termination_reason": "SHORTEST_WITNESS_PROVEN",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 84,
+        "elapsed_seconds": 0.07492869600000063,
+        "frontier_count": 114,
+        "earliest_completion_time": 7,
+        "shortest_simulated_duration": 5,
+        "budget": {
+          "max_expansions": 10000,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "POSSIBLE_IN_WORLD",
+        "termination_reason": "FRONTIER_EMPTY",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 2187,
+        "wall_seconds": 0.8105943129999957,
+        "frontier": 0,
+        "earliest_completion_time": 7,
+        "shortest_duration_minutes": 5,
+        "budget": {
+          "max_expansions": 10000,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-N01",
+      "input_hash": "923862517e11792ab463eda00751c5995d950f68cd62ca6277577c23a9120ae1",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "UNREACHABLE",
+        "termination_reason": "FRONTIER_EXHAUSTED",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 711,
+        "elapsed_seconds": 0.3486183870000019,
+        "frontier_count": 0,
+        "earliest_completion_time": null,
+        "shortest_simulated_duration": null,
+        "budget": {
+          "max_expansions": 10000,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "termination_reason": "FRONTIER_EMPTY",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 711,
+        "wall_seconds": 0.19505157600001155,
+        "frontier": 0,
+        "earliest_completion_time": null,
+        "shortest_duration_minutes": null,
+        "budget": {
+          "max_expansions": 10000,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-B01",
+      "input_hash": "44561bf59d95e012d5a2083724d7cf75cabeeb1daf7fe7750a053349994f0096",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "WITNESS_FOUND",
+        "termination_reason": "SHORTEST_WITNESS_PROVEN",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 84,
+        "elapsed_seconds": 0.07209955999999806,
+        "frontier_count": 108,
+        "earliest_completion_time": 7,
+        "shortest_simulated_duration": 5,
+        "budget": {
+          "max_expansions": 10000,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "POSSIBLE_IN_WORLD",
+        "termination_reason": "FRONTIER_EMPTY",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 192,
+        "wall_seconds": 0.0471208750000045,
+        "frontier": 0,
+        "earliest_completion_time": 7,
+        "shortest_duration_minutes": 5,
+        "budget": {
+          "max_expansions": 10000,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-B02",
+      "input_hash": "e3d8876efed22e9f0cc9466be186da07e84aac6c29206fe0bf080fa7d37f5708",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "UNREACHABLE",
+        "termination_reason": "FRONTIER_EXHAUSTED",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 80,
+        "elapsed_seconds": 0.03564644000000783,
+        "frontier_count": 0,
+        "earliest_completion_time": null,
+        "shortest_simulated_duration": null,
+        "budget": {
+          "max_expansions": 10000,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "termination_reason": "FRONTIER_EMPTY",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 80,
+        "wall_seconds": 0.01716381399999989,
+        "frontier": 0,
+        "earliest_completion_time": null,
+        "shortest_duration_minutes": null,
+        "budget": {
+          "max_expansions": 10000,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-B03",
+      "input_hash": "c956803d155a6efe2bd9fab4b101819b50b586a5bfb581f6bcc4c76b91af3f11",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "WITNESS_FOUND",
+        "termination_reason": "SHORTEST_WITNESS_PROVEN",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 84,
+        "elapsed_seconds": 0.09351405900000032,
+        "frontier_count": 108,
+        "earliest_completion_time": 10,
+        "shortest_simulated_duration": 5,
+        "budget": {
+          "max_expansions": 10000,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "POSSIBLE_IN_WORLD",
+        "termination_reason": "FRONTIER_EMPTY",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 192,
+        "wall_seconds": 0.06794176600000412,
+        "frontier": 0,
+        "earliest_completion_time": 10,
+        "shortest_duration_minutes": 5,
+        "budget": {
+          "max_expansions": 10000,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-H01",
+      "input_hash": "0d99bbb3f44aaa66a111a426950e8e86db1a766c71803f15e2e908f193ee585d",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "WITNESS_FOUND",
+        "termination_reason": "SHORTEST_WITNESS_PROVEN",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 84,
+        "elapsed_seconds": 0.07412266899999054,
+        "frontier_count": 114,
+        "earliest_completion_time": 7,
+        "shortest_simulated_duration": 5,
+        "budget": {
+          "max_expansions": 10000,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "POSSIBLE_IN_WORLD",
+        "termination_reason": "FRONTIER_EMPTY",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 2187,
+        "wall_seconds": 0.8184367620000046,
+        "frontier": 0,
+        "earliest_completion_time": 7,
+        "shortest_duration_minutes": 5,
+        "budget": {
+          "max_expansions": 10000,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-N02",
+      "input_hash": "0c477c14f7a3ad6f2e6d9a98096554f571aa0e4fa1329f8c7306993c3f485f7c",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "UNREACHABLE",
+        "termination_reason": "FRONTIER_EXHAUSTED",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 711,
+        "elapsed_seconds": 0.4092733220000042,
+        "frontier_count": 0,
+        "earliest_completion_time": null,
+        "shortest_simulated_duration": null,
+        "budget": {
+          "max_expansions": 10000,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "termination_reason": "FRONTIER_EMPTY",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 711,
+        "wall_seconds": 0.2432680590000018,
+        "frontier": 0,
+        "earliest_completion_time": null,
+        "shortest_duration_minutes": null,
+        "budget": {
+          "max_expansions": 10000,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-H02",
+      "input_hash": "02e5e5df85f51422479e277dc32a82a51450271e6c724cdb30b9c0859fd919d1",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "UNREACHABLE",
+        "termination_reason": "FRONTIER_EXHAUSTED",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 1887,
+        "elapsed_seconds": 1.3121094920000047,
+        "frontier_count": 0,
+        "earliest_completion_time": null,
+        "shortest_simulated_duration": null,
+        "budget": {
+          "max_expansions": 10000,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "PROVEN_UNREACHABLE_IN_FINITE_DOMAIN",
+        "termination_reason": "FRONTIER_EMPTY",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 1887,
+        "wall_seconds": 0.682192423999993,
+        "frontier": 0,
+        "earliest_completion_time": null,
+        "shortest_duration_minutes": null,
+        "budget": {
+          "max_expansions": 10000,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-X01",
+      "input_hash": "d1f8892518ad25d1eec4f4f7cfcc32abf8651ce3009992d696a36a3275c12508",
+      "fixture_test_result": "PASS",
+      "search_result": {},
+      "oracle_result": {}
+    },
+    {
+      "fixture_id": "E0-X02",
+      "input_hash": "14eb207d53e554df06c2fe7e2940dfbdc5031a8a0eee0b139070f5ea8ba0c052",
+      "fixture_test_result": "PASS",
+      "search_result": {},
+      "oracle_result": {}
+    },
+    {
+      "fixture_id": "E0-P02",
+      "input_hash": "fdbef0826a378590245b3d51bb81ffb8862f5f30eca800244557d8a7bcbc3a08",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "WITNESS_FOUND",
+        "termination_reason": "SHORTEST_WITNESS_PROVEN",
+        "complete": true,
+        "exhausted": false,
+        "expansions": 432,
+        "elapsed_seconds": 0.4063837300000017,
+        "frontier_count": 400,
+        "earliest_completion_time": 9,
+        "shortest_simulated_duration": 7,
+        "budget": {
+          "max_expansions": 10000,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "POSSIBLE_IN_WORLD",
+        "termination_reason": "FRONTIER_EMPTY",
+        "complete": true,
+        "exhausted": true,
+        "expansions": 1488,
+        "wall_seconds": 0.5142949140000042,
+        "frontier": 0,
+        "earliest_completion_time": 9,
+        "shortest_duration_minutes": 7,
+        "budget": {
+          "max_expansions": 10000,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-U01",
+      "input_hash": "24ee5fb1b4bcbd595e5ca13d5744a53c0b4ce1807b9ad4de4581124cf2630f53",
+      "fixture_test_result": "PASS",
+      "search_result": {},
+      "oracle_result": {}
+    },
+    {
+      "fixture_id": "E0-C01",
+      "input_hash": "a1fdb299a15ead36cb8dd21660f7f5c293c3a7a4f197bdeacd96eeb3f85b7dd4",
+      "fixture_test_result": "PASS",
+      "search_result": {
+        "solve_status": "BUDGET",
+        "termination_reason": "STATE_CAP",
+        "complete": false,
+        "exhausted": false,
+        "expansions": 1,
+        "elapsed_seconds": 0.0006700739999985217,
+        "frontier_count": 3,
+        "earliest_completion_time": null,
+        "shortest_simulated_duration": null,
+        "budget": {
+          "max_expansions": 1,
+          "wall_seconds": 2.0
+        }
+      },
+      "oracle_result": {
+        "solve_status": "BUDGET",
+        "termination_reason": "STATE_CAP",
+        "complete": false,
+        "exhausted": false,
+        "expansions": 1,
+        "wall_seconds": 0.0005439030000076173,
+        "frontier": 3,
+        "earliest_completion_time": null,
+        "shortest_duration_minutes": null,
+        "budget": {
+          "max_expansions": 1,
+          "timeout_seconds": 2.0
+        }
+      }
+    },
+    {
+      "fixture_id": "E0-F01",
+      "input_hash": "47a8118f7486e8b6711257c186cc34f39ff843330a45027be013b5fbd51221a1",
+      "fixture_test_result": "PASS",
+      "search_result": {},
+      "oracle_result": {}
+    }
+  ],
+  "jobs": [
+    {
+      "name": "public-evidence-integrity",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "e0-keyledger-contract",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "trajectory-constraint-contract",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "source-ranking-contract",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "regression",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "praxish-contract",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}
