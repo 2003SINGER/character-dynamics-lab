@@ -47,6 +47,12 @@
 
 ## 接下来与停止条件
 
+### 推送后的 CI（代码 checkpoint `e5eeedd`）
+
+[npc-system-development run 37934365423](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37934365423) 的 job log 已核对：**新应用 32/32、E1 30/30 均通过**，10 条开发矩阵运行成功且各条件 verdict 与本机一致，artifact 上传成功。合并 unit step 随后在未改动的冻结 E0 `test_h02_keeps_state_and_event_outcomes_distinct` 失败：期望 UNREACHABLE 而固定预算返回 BUDGET。因此该 workflow 的 overall 仍为 **FAILURE**，不能称“全 CI 绿”。冻结 E0 的失败只在其[唯一结果 owner](../E0_KeyLedger_v0/RESULTS.md)记录，不放宽 cap、删测试或重跑追绿。
+
+同 source 的 [runtime-regression run 37934365282](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/37934365282) 中 C++ build/CTest/reference、TypedIR 等其余五个 jobs 成功，E0 job 失败。CI 属软件回归，不是独立用户 closure 或玩家有效性验证。最后的报告提交只维护这些实际观测，不改代码与运行条件。
+
 已经达到本次有限 vertical slice 的开发交付点，等待独立检查原需求映射、权限边界、真实 trace 与可替换后端。下一次功能扩展应围绕一个可玩场景和具体作者要求选择；不是把该 synthetic trace 当论文成果或直接扩大城市/长期/LLM 批次。
 
 这版仍不是完整 Character Dynamics 产品：没有 C++ native 集成、开放多 NPC 并发、长时程世界、LLM 高层规划、作者 UI、独立玩家评估、心理训练或科研方法收益。GTPyhop/GOAP 能跑、director 能达成一个有限目标，是实现证据而非上述结论。
