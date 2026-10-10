@@ -1,10 +1,10 @@
 # 研究设计：唯一维护入口
 
-整理日期：2026-10-10
+整理日期：2026-10-11
 
 ## 项目架构定位
 
-2026-10-10 当前路线：**Evennia 为主平台、Ensemble 为首个原生人物机制参照**；P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 均保留各自历史 owner。当前有限阶段 P5 Author Bundle 集成状态为 **READY_FOR_INDEPENDENT_REVIEW**（未 CLOSED）；唯一状态/结果见 [P5 README](../02_实验/Native_Platform_P5_v0/README.md) / [RESULTS](../02_实验/Native_Platform_P5_v0/RESULTS.md)，核心 API 见[代码 README](../tools/native_platform_v0/p5/README.md)。P5 只新增有限、条件性的作者机会 AND/OR 候选枚举；不等于完整 DM，11/12 结构检查通过不代表整套目标均满足。
+当前有限原生平台实例使用 **Evennia 与 Ensemble**；它们仍是现有执行与社会机制资产，但不定义所有游戏的通用结构。P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 均保留各自历史 owner。P5 Author Bundle 集成状态为 **READY_FOR_INDEPENDENT_REVIEW**（未 CLOSED）；唯一状态/结果见 [P5 README](../02_实验/Native_Platform_P5_v0/README.md) / [RESULTS](../02_实验/Native_Platform_P5_v0/RESULTS.md)，核心 API 见[代码 README](../tools/native_platform_v0/p5/README.md)。P5 只新增有限、条件性的作者机会 AND/OR 候选枚举；不等于完整 DM，11/12 结构检查通过不代表整套目标均满足。
 
 2026-10-09 用户在新目标讨论后明确从外围维护切换为实现：[NPC System Integration v0](../tools/npc_system_v0/README.md)是获授权的有限应用整合，不是 E1-2 或重开冻结 C++ Runtime。授权/下一动作见 [TODO](TODO.md)，能力/验收只看[唯一结果](../02_实验/NPC_System_Integration_v0/RESULTS.md)。下方旧草案的“未开发 Director”不能再作为禁止本应用实现的当前规则。
 
@@ -21,7 +21,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [完整机制说明 v0](完整机制说明_v0.md) | 已确认的 W/O/X/S/P/D/A 工程语义、任务承诺、场景/动作、时间、低耦合及消融约束 | 心理规律已验证的声明；未采纳公式、代码完成清单 |
 | [前台问题与候选创新](前台问题与候选创新.md) | 旧行为预测 / Paper-0 分支的课题锚、Forward/Inverse、研究候选与评价边界 | 全系统当前研究问题；再写一套机制总说明 |
 | [未决问题与机制候选](未决问题与机制候选.md) | 具体缺口、备选计算、用户原意、决策条件 | 把提案写成已实现或已验证 |
-| **[Character Dynamics｜系统问题与执行语义 v0](CharacterDynamics_FormalProblem_v0.md)** | **唯一 F0/F1 owner**：算法无关的问题定义与执行语义；状态对象/权限、时间、转移、作者意图/绑定、规划器/导演、性质/反例及近期 A/B 研究组合；状态 DRAFT / READY_FOR_INDEPENDENT_REVIEW | 长期研究版图、算法选型、实现完成或研究有效性主张 |
+| **[Character Dynamics｜系统问题与执行语义 v0](CharacterDynamics_FormalProblem_v0.md)** | **唯一 F0/F1 owner**：作者部分约束下游戏世界在线规划与控制的问题定义；状态 DRAFT / READY_FOR_INDEPENDENT_REVIEW | 长期研究版图、算法选型、实现完成或研究有效性主张 |
 | [AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md) | 候选 F2 与 TypedIR / 预实验的较低层 owner；保留已有语义契约和 reference 证据 | 整个系统的正式定义；把候选写成获批路线或将 reference 测试冒充 Director/多 NPC 方法结果 |
 | [E0 Key Ledger Protocol v0](E0_KeyLedger_Protocol_v0.md) | 唯一有限钥匙账本 E0 执行定义与 fixture/search/monitor acceptance protocol；PROTOCOL_FROZEN / E0-KeyLedger-v0；实现与逐例验收状态见 [E0 实验入口](../02_实验/E0_KeyLedger_v0/README.md) | F0/F1 总设计、Pilot Monitor/reference 契约、未验收的实现能力或实验结果 |
 | [E1 局部信息与独立角色协议 v0](E1_KeyLedger_LocalAgency_Protocol_v0.md) | E1-0 有限域与协议；E1-1 独立开发包已交付。实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)；代码入口：[runner](../tools/e1_keyledger_v0/runner.py) | E0 冻结规则；将开发验证写成正式实验、新颖性声明；自动授权正式实验/E1-2 |
@@ -72,11 +72,11 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 完成 / 候选 / 暂停及下一动作只查 [TODO](TODO.md)。四问能准确回答即足够，不为历史材料措辞统一再新增总纲或重构冻结实现。
 
-继续研究开发：先看[研究重建审计的用户目标校正](研究重建审计_2026-10-06.md#用户目标校正游戏中的可置信-npc)，再看[NPC 评测定向核查](../01_文献/定向核查_NPC可置信性评测_2026-10-06.md)。先选择能检验玩家感知的场景、比较基线与评价方法，不以真人动作预测作为统一前置任务。M2 candidate-set admission 仍阻止旧 Paper-0 formal test；PredictionBaselineV1 / SourceRankingV1 保留为有限开发证据。Runtime 已冻结，不因行为模型问题重开 Engine。
+此前 NPC 可置信性开发路线的证据与限制见[研究重建审计](研究重建审计_2026-10-06.md)及[NPC 评测定向核查](../01_文献/定向核查_NPC可置信性评测_2026-10-06.md)；这些记录不构成当前系统的研究路线或已授权实验。旧 Paper-0 的 M2 candidate-set admission 只约束该预测分支。Runtime 冻结状态只约束相应 C++ Kernel。
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 
-当前作者约束线的问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)，候选 F2 / TypedIR / 预实验由 [Pilot](AuthorialTrajectoryPilotV0.md)维护；完整研究方向见 [System Vision 长期研究版图](Character_Dynamics_System_Vision_v0.md#长期研究版图)。A（规划/执行能力）与 B（稀疏作者控制）是近期选基线时抽取的研究组合；[04 综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md)的 Q1–Q3 是有限实例下的候选问题，不代表完整研究版图，也未决定研究缺口、方法或开工路线。Node/Maze 与 LLM/HTN 是替换候选；Minecraft 最新路线见上方入口，尚未集成。TypedIR 不是作者 UI。本轮有限语义返修已完成，待独立复核；当前下一动作及状态见 [TODO](TODO.md)。现有有限 Director 仅在新授权 NPC System Integration v0 应用中开发；冻结 C++ Runtime 不改。
+当前问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)；完整长期研究版图见 [System Vision](Character_Dynamics_System_Vision_v0.md#长期研究版图)。LLM × 成熟规划是主轴候选，可服务语义、因果候选、grounded 绑定、层次细化与反馈修复；不要求每层都用 LLM。层次、联合或混合候选组织尚未冻结。A/B 与 Q1–Q3 仅是此前基线讨论和有限实例；不代表完整研究任务或已确认 gap。[Pilot](AuthorialTrajectoryPilotV0.md)只维护 TypedIR/reference 候选契约。下一候选研究动作状态见 [TODO](TODO.md)，尚未启动；不自动授权新实验或 P6。现有 P5 Director 只是有限间接模式，不定义全局作者权限。
 
 例如本次三项想法分别落位：分段逆映射保留原话于问题 Q01；低耦合的确定边界在完整机制 §8，未落实方案在 Q03；Object/Scene/W 动作职责在完整机制 §4，具体实现缺口在 Q05。TODO 只链接并安排验证，不再复制三遍原理。
 

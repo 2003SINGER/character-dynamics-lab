@@ -1,5 +1,7 @@
 # IntegrationBlueprint v0｜全系统装配草案
 
+> **历史提案范围说明（2026-10-11）：**本蓝图保留此前的装配假设与伪代码，不是当前全系统定义、权限政策或下一步计划。现行问题由 [F0/F1](../../CharacterDynamics_FormalProblem_v0.md) 维护：作者部分约束下，基于游戏原生机制的可执行未来规划与控制。这里的 OHXSP 映射、间接 Director、八文件范围和 C++→TypedIR 桥均不是通用要求；当前行动只查 [TODO](../../TODO.md)。不要从历史伪代码推断当前能力或实施授权。
+
 状态：DRAFT / READY_FOR_INDEPENDENT_REVIEW。源码核对基线：`webgpt-sync@19e5b373303b1504b7fa46f6e01af4563947171a`；本轮只新增本目录的设计文件，不实现功能、不训练、不运行 E1-2、不改冻结 Runtime 与实验结果，不进入下一阶段。
 
 ## 要恢复的目标

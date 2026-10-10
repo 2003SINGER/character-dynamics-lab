@@ -1,42 +1,46 @@
 # Character Dynamics：系统主线与研究支线 v0
 
-更新时间：2026-10-08（作者控制需求；冻结执行边界不重开）
+更新时间：2026-10-11（作者控制谱系、规划层次与游戏原生机制边界）
 
 **正式问题语义 owner：**全系统算法无关的 F0/F1 定义唯一维护于 [CharacterDynamics_FormalProblem_v0](CharacterDynamics_FormalProblem_v0.md)（当前 DRAFT，未实现）。本页只维护架构/运行时层级视图；作者控制的候选 F2、Typed Trajectory IR 与预实验由 [AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md) 维护。若本页的高层描述与 F0/F1 定义冲突，以 F0/F1 owner 为准。
 
 ## 系统定位
 
-2026-10-09 用户再次确认系统集成优先：成熟算法可替换，高层/低层规划并存，角色动力仍居于人物因果链中；世界控制者是有自己权限与动作的规划参与者，不等于 W 本身。用户已从外围维护切换为有限实现授权。现有 [NPC System Integration v0](../tools/npc_system_v0/README.md)仅是 E1 之上的应用接缝实例，实际证据和缺项见其 [RESULTS](../02_实验/NPC_System_Integration_v0/RESULTS.md)，不替代长期版图、不改冻结 C++ Kernel。
+系统目标是：在游戏原生状态、事件、角色机制与权威执行之上，针对作者给出的部分约束规划一条合理、可执行的未来路径，并随真实反馈调整尚未发生的部分。作者可自由决定控制范围与密度：零约束、点、线、多条线协同，直至完全编排；同一作品可以混合这些方式。系统在作者留白处继续补全。角色规划器为角色生成、经游戏真实执行的合理行为，可以呈现角色自主；自主性不是不允许上层规划，也不是对作者控制的硬性限制。
 
-Character Dynamics 的主产品是一个可持续运行的 NPC 角色动力学框架，而不是某一篇 Paper-0 的实验脚本集合。
+系统依赖目标游戏定义自己的状态、事件、动作、角色属性与演化规则，不要求每个游戏都实现 `O/H/X/S/P`。这些符号可描述既有 C++ Runtime 或某个 reference instance，不是跨游戏的必需内部模型。接入层绑定游戏语义、控制权限与真实结算；不得把计划当事实，也不得改写已经结算的玩家/世界历史。天气、资源变化等自然过程可与人物行为一起进入规划和反馈问题，但系统不要求建立通用的天气或物理模型。
+
+目标架构的核心组织思路是从上到下的多层规划：作者意图/约束先绑定到游戏语义，高层规划确定世界、角色与剧情未来，中间层把它细化为持续的过程、轨迹或任务控制，底层适配器再将动作请求交给游戏核验合法性并执行。此图景是目标职责，不是当前代码已实现的端到端链路。实际采用分层、联合、混合规划及具体算法仍待选择和比较；这不是已经冻结的新算法。LLM 是本研究的重要技术机会之一，覆盖语义理解、因果候选生成、跨层细化与反馈修复等环节；不要求每层都用 LLM，也不预设其优于成熟规划器，需设置成熟规划及规划+LLM 强基线。
+
+2026-10-09 用户授权形成的 [NPC System Integration v0](../tools/npc_system_v0/README.md)仍只是有限应用接缝实例；实际证据和缺项见其 [RESULTS](../02_实验/NPC_System_Integration_v0/RESULTS.md)。其控制范围和已实现能力不定义完整系统边界，不改冻结 C++ Kernel。
+
+Character Dynamics 的主线是一个能协调游戏原生机制、角色与世界行为、作者意图及真实执行的规划系统，而不是统一心理状态模型或某一篇 Paper-0 的实验脚本集合。人物动力学可以由游戏自身提供，也可按需作为可替换机制接入。
 
 目标包含：
 
-1. NPC 在可结算世界中表现出更连贯、可响应、可恢复、彼此有差异的长期行为；
-2. 常规决策不必每一步重新调用大模型，从而降低模型调用次数、token、延迟和运行成本。
-3. 世界中心的作者控制：作者可混用稀疏世界/人物节点、趋势包络、锁定段落与允许分支，不逐情境枚举全部反应；NPC仍有自身任务和信息，玩家成功改变条件后只调整未提交未来。
+1. 在可结算的持续世界里，规划出的角色与世界过程连贯、响应实际变化，并能形成玩家可理解的合理表现；
+2. 支持作者从完全留白到完全编排的任意控制粒度，并能在受约束与自由生成的区域之间协调；
+3. 让高层目标经过中间持续规划细化为游戏可执行的合法动作，并依据执行结果修订未来；效率、调用成本和玩家体验是需要测量的结果，不预先承诺。
 
-这是创作/体验需求，不是已证实低成本或活人感的算法成果。自然世界机会、显式作者覆写与锁定内容分三条权限通道；作者覆写如获授权必须留下authored_override，不假装人物自然得出。点/线引用有定义的typed量，不能自动造trust/chaos浮点。具体候选规格由[AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md)维护，本文不复制契约或实验状态。
+这是系统目标，不是已证实的低成本、合理性或玩家体验成果。间接世界引导、直接角色/世界编排与锁定内容都可由作者选择；系统须标记来源和权限，不把明确编排伪装为角色自然选择。作者目标要绑定游戏已定义或明确新增的语义；若当前规则、权限、资源或预算下不可行，规划器应给出冲突/不可行及证据。点、线、多线不强制对应一种几何数据结构，也不要求作者填写通用心理数值曲线。具体 TypedIR / Pilot 规格由[AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md)维护，本文不复制其协议或实验状态。
 
-Continuous Runtime v1 的正式计算范式是：**an event-driven incremental
-stateful dataflow runtime over one authoritative simulation timeline**。W/O/S/P
-与 RunningAction 是持久节点；正常运行传播的是 Delta-t、WorldEvent、
-ActionOutcome、Delta-O、X、StateDelta 与 DecisionGateReason，而不是每轮重算
-完整世界。Reference v0 保留其 action-step 语义作对照。
+现有 Continuous Runtime v1 的工程计算范式是：**an event-driven incremental
+stateful dataflow runtime over one authoritative simulation timeline**。这描述冻结 C++ Kernel 的内部语义，不规定接入的每个游戏都采用同一世界/人物对象模型。该实现保留 W/O/S/P 与 RunningAction 等节点，并传播 Delta-t、WorldEvent、ActionOutcome、观察投影、StateDelta 与 DecisionGateReason；它是可复用的执行实例，不是通用规划系统的强制架构。Reference v0 保留 action-step 语义作对照。
 
-三条 runtime flow 为：时间流 `Delta-t → W/S/action progress`；事件流
+该旧 C++ Kernel 的三条 runtime flow 为：时间流 `Delta-t → W/S/action progress`；事件流
 `WorldEvent/Outcome → legal O projection → Delta-O → X → S impulse`；决策流
-`DecisionGate → A^O → pi → ActionIntent`。普通事件不自动运行 policy。
+`DecisionGate → A^O → π → ActionIntent`。普通事件不自动运行 policy。它们是该实现的真实内部语义，不规定其他游戏必须实现同名 `O/X/S`。
 
 三条流共享以下持久节点：
 
 ```text
-Persistent: W ── O ── S ── P ── RunningAction
-                 │     │       │
-TIME:       Δt → W dynamics / S continuous / action progress
-EVENT: WorldEvent/Outcome → legal ΔO → X → S impulse
-DECISION: DecisionGate → A^O → π → ActionIntent → W validate
+Persistent in this old C++ runtime: W ── O ── S ── P ── RunningAction
+TIME:       Δt → W/S/action progress
+EVENT: WorldEvent/Outcome → legal O projection → ΔO → X → S impulse
+DECISION: DecisionGate → A^O → π → ActionIntent → W validation
 ```
+
+上面的运行时图只记录冻结 C++ 分支。系统目标中的作者意图到动作的多层规划链属于更高层架构，不能据此推断已接入该 Kernel 或任意游戏。
 
 其中下列链只表示角色因果语义子路径，不再是完整 runtime mental model：
 
@@ -50,17 +54,23 @@ W authoritative world
   → W'
 ```
 
-LLM 不是整个 NPC，也不是必选组件。按具体任务，它可以作为受限的语义前端、策略前端或规划前端；各角色的输入与输出契约须明确。LLM 不能自行扩张角色可见信息、创造世界状态或历史、授予执行权限，也不能代替权威 executor 校验并结算动作。是否采用及由它承担哪种职责，属于待比较的研究/应用选择，不是架构前提。
+LLM 不是整个 NPC，也不拥有权威世界或执行权限；但 LLM 与多层规划的结合是本研究主线的重要候选技术问题，不应降为只在末端生成对白的插件。它可参与作者语义理解、绑定候选、因果路径构造、层次细化或反馈修复；每个角色的输入/输出契约、信息权限和可执行性须明确。LLM 不能创造已结算世界事实或取代 executor。具体哪些层采用 LLM、是否带来质量/成本收益，须与成熟规划及成熟规划+LLM 基线实证比较。
 
 ## 五个系统模块
 
+核心多层规划链是目标系统的组织主线；以下先说明这条规划链，再保留旧 C++ 分支的五模块分工。其 Dynamics、状态参数 Evaluator/Optimizer 等不是所有游戏接入的前置要求；新规划方案的评价与优化须按相应比较协议定义。
+
+### 多层规划（目标架构）
+
+将作者与世界约束绑定到具体游戏语义，再规划角色/世界的高层未来，向中间层持续过程控制细化，最后交由游戏动作接口检查并结算。中间层须承接目标与具体动作之间的持续控制职责；层次/联合/混合算法及各层是否使用 LLM 均为待比较选择。当前 NPC System Integration、P5 和冻结 C++ Runtime 都只是有限实例，不代表这条完整通用链已经实现。
+
 ### Runtime Kernel
 
-共享的执行骨架，负责 authoritative clock、RunningAction、runtime boundary、World event 调度、合法的 O 投影、typed settlement、DecisionGate、trace 和 provenance。Kernel 不拥有某一套 state law、appraisal law 或 policy。
+冻结 C++ 分支中的共享执行骨架，负责 authoritative clock、RunningAction、runtime boundary、World event 调度、合法的 O 投影、typed settlement、DecisionGate、trace 和 provenance。它不拥有某一套 state law、appraisal law 或 policy；这些字段与 flow 是该分支实现，不是跨游戏接入的共同要求。
 
 ### Dynamics Model
 
-由调用方显式注入的行为假设，提供 continuous state dynamics、appraisal/impulse、persistent intention 更新与 policy。`ReferenceRuleDynamicsV0` 冻结 `5d3c164` 的规则语义，仅作可复现实验基线；`DemoLivingDynamicsV0` 是 living sandbox 的应用模型，不是心理学真理。两者共享 Kernel，但不可互相替代或隐式回退。
+旧 C++ Runtime 中由调用方显式注入的角色行为模型，可提供 continuous state dynamics、appraisal/impulse、persistent intention 更新与 policy。`ReferenceRuleDynamicsV0` 冻结 `5d3c164` 的规则语义，仅作可复现实验基线；`DemoLivingDynamicsV0` 是 living sandbox 的应用模型，不是心理学真理。其他游戏可以直接采用自己的属性和行为机制；是否额外接入角色动力学是实例选择。
 
 ### Evaluator
 
@@ -74,7 +84,7 @@ LLM 不是整个 NPC，也不是必选组件。按具体任务，它可以作为
 
 ### Applications
 
-现有Room Demo、free-run与可视化消费Runtime trace和显式模型输出。未来作者控制应用通过注册执行adapter提出合法世界操作或明确授权的创作操作，不能直接改Kernel时钟/真实历史，也不能把NPC未来计划当必执行命令。应用可以选择Demo模型，但不得把Demo行为或视觉表现写回Reference、Evaluator或研究结论。
+现有 Room Demo、free-run 与可视化消费旧 C++ Runtime trace 和显式模型输出。在该旧 Kernel 的应用边界内，adapter 提交的操作仍须服从游戏合法性，且不能直接改 Kernel 时钟或真实历史；缓存的 NPC 未来计划本身不代表已经授权或已提交执行。目标系统允许作者明确编排并授权角色/世界未来，待语义、能力、权限及资源检查通过后可执行，不能用旧 Kernel 的计划缓存规则限制完整系统。应用可以选择 Demo 模型，但不得把 Demo 行为或视觉表现写回 Reference、Evaluator 或研究结论。
 
 ## 评价边界
 
@@ -98,13 +108,13 @@ Character Dynamics 是一个长期研究计划，不等于当前一项实验或�
 | 规划、执行与修复 | 角色如何实现长期目标，并在真实执行、拒绝、失败或世界变化后调整未完成的未来？ | Runtime 提供执行核，文献综合给出成熟近邻和候选基线；完整规划—反馈—修复闭环尚未实现/验证。[统一基线综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md) · [F0/F1](CharacterDynamics_FormalProblem_v0.md) |
 | 社会关系与角色互动 | 关系、信任、利益与知识差异如何由互动积累并改变后续行为？ | 文献和历史讨论提供候选机制；项目尚未选定关系状态/更新机制，也没有相关效果验证。[算法积木](../01_文献/算法积木/README.md) · [F0/F1](CharacterDynamics_FormalProblem_v0.md) |
 | 作者意图的形式化 | 如何把稀疏、抽象的创作要求绑定到可检查的世界条件、角色变化和证据？ | Typed Registry/Monitor 与独立合成 reference 已有设计/工程证据；真实作者语言到游戏语义的绑定仍待实例化。[F0/F1](CharacterDynamics_FormalProblem_v0.md) · [候选 Pilot](AuthorialTrajectoryPilotV0.md) |
-| 自主性与作者控制 | 作者如何以合法、有限的机会或干预引导过程，同时保留角色与玩家选择及失败的空间？ | 04 已比较相关成熟方法与权限边界；Director 未实现，低劳动/自主性组合效果未测。[统一基线综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md) · [候选 Pilot](AuthorialTrajectoryPilotV0.md) |
+| 作者控制与留白处的规划补全 | 作者如何在零约束、点线、多线与完整编排之间选择控制密度，并让系统规划可行的未指定过程？ | 04 已比较相关成熟方法与权限边界；通用端到端能力、控制粒度转换及作者劳动/体验效果未证。[统一基线综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md) · [候选 Pilot](AuthorialTrajectoryPilotV0.md) |
 | 剧情生成与内容衔接 | 如何在权威世界状态、角色认知、作者片段与玩家行为之间连接可执行的内容过程？ | 算法积木整理了内容绑定、固定域编译和剧情引导近邻；项目尚无贯通内容与真实执行的通用链。[算法积木](../01_文献/算法积木/README.md) · [统一基线综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md) |
 | 运行效率与扩展性 | 如何让更多 NPC 长时运行，同时控制推理、存储、延迟和模型调用成本？ | 单时钟 Runtime 是工程底座；大规模角色负载、端到端成本与质量权衡未测。[Runtime Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) · [实现进度](当前实现进度.md) |
 | 作者创作工具与总成本 | 作者需要多少编写、补例、审核、调试和维护劳动；系统是否降低总制作成本？ | 已有候选指标与成熟系统参照；没有同等功能条件下的受控总工时比较。[统一基线综合](../01_文献/算法积木/04_统一问题与成熟基线准入.md) · [候选 Pilot](AuthorialTrajectoryPilotV0.md) |
 | 玩家可感知的生命感 | 哪些可观察行为让目标玩家感到 NPC 有持续生活、连贯经历、情境响应与差异？ | 评测外围调研及 development 轨迹可复用；尚无目标游戏中的独立玩家效度结果。[玩家评测核查](../01_文献/定向核查_NPC可置信性评测_2026-10-06.md) · [研究重建审计](研究重建审计_2026-10-06.md) |
 
-这些方向部分交叉、彼此关联，但不与五个系统技术模块一一对应。要区分：**Research Program → Research Area → Research Question**。长期版图保留完整方向；A（规划/执行）与 B（稀疏作者控制）是近期为选择基线而抽取的研究组合；04 中的 Q1–Q3 是有限实例下的条件化候选问题，不是全项目问题总表。任何方向是否形成可研究的具体问题、是否有 gap、是否产生贡献，均须由对应证据决定。
+这些方向部分交叉、彼此关联，但不与各系统模块一一对应。要区分：**Research Program → Research Area → Research Question**。长期版图保留完整方向；A（规划/执行）与 B（作者控制和留白补全）是近期为选择基线而抽取的研究组合；04 中的 Q1–Q3 是有限实例下的条件化候选问题，不是全项目问题总表。任何方向是否形成可研究的具体问题、是否有 gap、是否产生贡献，均须由对应证据决定。
 
 Paper-0 关于“历史如何进入未来行为”的表示/预测问题保持为独立方向。LIGHT 的既有负结果限制的是已测协议与数据条件，不能据此判定该方向已结束；它也不是所有 NPC 研究必须先通过的统一门槛。
 

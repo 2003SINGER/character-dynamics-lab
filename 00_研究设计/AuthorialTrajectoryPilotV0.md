@@ -2,6 +2,8 @@
 
 日期：2026-10-08。状态：**系统设计与独立参考契约交付；READY_FOR_INDEPENDENT_REVIEW，不是 Pilot 已运行、方法有效或 milestone CLOSED。**
 
+> 2026-10-11 scope note：本页只拥有候选 F2 / TypedIR 与其 reference 契约，不定义游戏规划系统的全局权限原则。当前问题定义见 [F0/F1](CharacterDynamics_FormalProblem_v0.md)：作者部分约束下的游戏世界在线规划与控制。作者介入范围可从零约束延伸到全编排；在授权、合法且可追溯时，允许直接编排角色或世界。NPC 独立性不是高于作者权限的绝对规则。间接 Director 仅是现有 P5 的一种有限模式。所有执行仍须遵守真实规则、结算与知识边界；不得伪造历史或角色隐藏知识。本页的候选 F2 方案不改变既有 TypedIR schema，也不改写 E0–E5 历史协议。
+
 阶段说明：下文 E0–E5 是整体候选计划，不能据此推断整套阶段已获授权。E0 的实际有界验收只查[结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)。用户已授权[E1-0 有限协议](E1_KeyLedger_LocalAgency_Protocol_v0.md)下的 E1-1 最小实现与开发验证，独立开发包已交付；实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)。正式实验与 E1-2 未授权；2026-10-09 用户另行授权的有限世界 Director/角色整合由 [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md)维护，不覆盖本页整套阶段。E1 代码入口见[runner](../tools/e1_keyledger_v0/runner.py)。文中的“E0 待审/待编码”及 reference-only 实施边界保留为其历史阶段描述，不再代表全项目当前授权。
 
 本页是作者轨迹分支的设计 owner；[算法积木](../01_文献/算法积木/README.md)维护原算法及来源，不在这里重写论文。输入为本地私有完整讨论两部分：持续人物与作者控制的接口，以及 Typed Trajectory Constraint IR 四份契约。原文 SHA256 为 `65d9142d1b09526fb3d678fd335837d40f04cc923beda5f5c03767d6cea20c94`。自然语言例子不是自动获得执行资格的世界能力。
@@ -10,11 +12,11 @@
 
 ## 0. 要交付什么，不能声称什么
 
-作者想控制的是**持续世界中允许的未来区域及少数必需事件**，不是一条 NPC 必须照演的完整录像。玩家、NPC、世界过程都能改变条件；已经发生的历史不能被重写。人物日常行为仍由其自己的模型产生。
+本 Pilot 研究的是**持续世界约束接口这一候选子问题**：作者可表达未来区域、少数必需事件，也可在其他授权模式下直接安排角色或世界行动。它不把“只改机会、NPC 必须自主”规定为全局原则，也不要求每个项目都采用本页接口。无论何种模式，已经结算的历史不能伪造；角色也不能凭空获得隐藏知识。
 
 | 等级 | 本轮处理 | 验收对象 |
 |---|---|---|
-| 用户要求 | 世界中心、多轨迹、稀疏作者控制、可锁定片段、可显式覆写 | 设计不能把其中任何一项删成“导演改 W 就够了” |
+| 本 Pilot 接口覆盖的用户要求 | 世界中心、多轨迹、稀疏作者控制、可锁定片段、可显式覆写 | 这些是受测接口覆盖项，不是对全局授权范围的限制 |
 | 算法候选 | 规划域绑定、时序 monitor、依赖修复、人物可行性、有限 rollout、语义补桥 | 有输入、计算、输出、前提及拒绝分支；可替换 |
 | 研究假设 | 信息机会是否更好、局部修复是否保护生活、不可达诊断是否有用 | E0–E5 才产生实验结果；本轮没有结果 |
 
@@ -36,7 +38,7 @@ PlotPoint、Arc、锁定片段等是作者表达的候选形式，不是要求�
 | Evaluator / Optimizer | 多维诊断、运行产物及开发/验证隔离纪律 | 当前 no-selection 流程不是 Director 优化器 |
 | ActionType / WorldPrimitive | 有限房间域中的实际执行能力 | 没有 `lend_spare/reveal_secret/damage_bridge`；字符串声明不产生能力 |
 
-已有实验的否定和限制以[研究重建审计](研究重建审计_2026-10-06.md)和各 RESULTS 为准；设计不把加入 LLM 当成既定收益。便宜人物模型负责日常生活；LLM 只在已识别缺口时提候选，这是待比较的分工，不是新方法有效的事实。
+已有实验的否定和限制以[研究重建审计](研究重建审计_2026-10-06.md)和各 RESULTS 为准；设计不把加入 LLM 当成既定收益。LLM 与成熟规划方法可用于语义、因果候选、grounded 绑定、层次细化和反馈修复；“缺口时提候选”只是一个可比较分工，不要求 LLM 位于每层，也不是新方法有效的事实。
 
 ## 1. 总体闭环：由谁读、由谁改、何时运行
 
@@ -56,14 +58,15 @@ PlotPoint、Arc、锁定片段等是作者表达的候选形式，不是要求�
                再验证 → 真实执行接口 → 新历史
 ```
 
-Director 能全知读 W 作规划，不代表 NPC 能读 W。把世界事实喂入 ActorFeasibility 的候选集构造或 policy 输入属于信息泄漏。预测的未来与已提交历史分两层保存；rollout 失败不会回滚真实 ledger。
+获授权的规划器可使用其权限范围内的世界状态；这不意味着 NPC 可以读 W。把隐藏世界事实喂入 NPC 的 ActorFeasibility 或 policy 输入仍是信息泄漏。预测的未来与已提交历史分两层保存；rollout 失败不会回滚真实 ledger。
 
 ### 1.1 四条控制通道，不因“写进 W”而混同
 
 | 通道 | 可执行权 | 禁止的捷径 | 必须记账 |
 |---|---|---|---|
-| WorldOpportunitySteering | 仅注册过、作者授权的世界操作：递送线索、提供资源/机会等 | 以 `source=director` 伪装新增执行权限；秘密改 NPC 选择 | 操作、合法性、可见传播、机会收缩/资源成本 |
-| NPC autonomous | 由自己的 O/S/P/history/eligible A^O 决策 | 把 A* 的动作直接塞给 NPC 就称自主 | 预测分布与实际选择、持续活动、gap |
+| WorldOpportunitySteering | 本 Pilot 覆盖的授权世界机会操作 | 以 `source=director` 伪装新增执行权限 | 操作、合法性、可见传播、机会收缩/资源成本 |
+| NPC autonomous | 本 Pilot 的人物自主比较条件，由自己的 O/S/P/history/eligible A^O 决策 | 把 A* 的动作直接塞给 NPC 就称自主 | 预测分布与实际选择、持续活动、gap |
+| Authorized direct orchestration | 可作为作者授予权限后的直接控制条件；须由真实 executor 合法执行 | 伪装成自主选择、伪造历史结算或注入隐藏知识 | 授权范围、actor/world 指令、结算凭证与 AUTHORED 来源标记 |
 | Player | 真实玩家操作不可被 Director 保证 | 不经授权屏蔽毁物/离场等自由 | 玩家实际干预、限制及允许分支 |
 | AuthoredOverride / locked sequence | 显式许可的作者 setter 或手写段落 | 假装覆写来自自然 O→X→S；绕过 W 硬合法性 | override ID、条件、setter/model 版本、内容 hash、偏离 |
 

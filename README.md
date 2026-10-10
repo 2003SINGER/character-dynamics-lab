@@ -1,12 +1,14 @@
 # Character Dynamics Lab｜角色动力学实验室
 
-> 目标愿景：面向可持续运行、世界中心的 NPC，用可审计的观察、状态与执行机制支持可信行为和作者控制。局部策略、规划与开放语义模型的组合仍是候选路线，不是已经证明的低成本方法。
+> 长期目标：研究作者部分约束下，游戏世界中合理、可执行未来的在线规划与控制。LLM × 成熟规划是研究主轴候选，涵盖语义、因果候选、grounded 绑定、层次细化与反馈修复，不要求每层都使用 LLM。详细问题定义由 [F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md) 唯一维护；旧 C++ 的 OHXSP 人物模型是参考实现，不是所有游戏都必须采用的 schema。
 
 本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`；`webgpt-sync` 是项目 review branch owner。本地本轮 P3 开发 checkout 位于 `codex/native-agency-p3-20261010`，不应将其描述成 `webgpt-sync` checkout。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
 
-当前已有规则化 C++ 参考模拟与批量日志；**Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**：统一时钟、RunningAction、事件/信息边界、DecisionGate、typed rejection、scheduler-native fixtures、trace、case-isolated CTest 与 CI 已闭环。Evaluator、Objective、Optimizer 与 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
+旧 C++ **Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**，其时钟、RunningAction、事件/信息边界与 trace 是该参考实现的工程边界，不定义所有游戏的系统结构。Evaluator、Objective、Optimizer 与旧 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
 
-2026-10-10 当前路线：**Evennia 为主平台、Ensemble 为首个原生人物机制参照**。P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。当前有限阶段 P5 Author Bundle 为 **READY_FOR_INDEPENDENT_REVIEW**（未 CLOSED）；12 场 development 结果、11/12 结构审计及一个真实 shared-supply 失败见唯一 [P5 RESULTS](02_实验/Native_Platform_P5_v0/RESULTS.md) 及其压缩 evidence manifest/reviewer summary。代码结构复用现有 TypedIR、GTPyhop HTN 与原生 Ensemble；新加部分是有限、条件性的作者机会 AND/OR 候选枚举，不是完整 DM。LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 不阻塞，真人试玩可选且未确认。P5 的唯一事实 owner 与历史阶段指针见实验入口；不自动扩展后续阶段。
+P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author Bundle 为 **READY_FOR_INDEPENDENT_REVIEW**（未 CLOSED）；12 场 development 结果、11/12 结构审计及一个真实 shared-supply 失败见唯一 [P5 RESULTS](02_实验/Native_Platform_P5_v0/RESULTS.md)。P5 的间接 Director 只是一个有限候选模式，不是全系统权限原则；不自动扩展后续阶段。
+
+下一候选研究动作是做有界“最强近邻”机制对照并选择一个可检验未知数；目前尚未启动该对照。协议获批前不启动新实验、P6 或模型开发。成熟组件的整合本身及其可能的协同增益都尚无研究证据。
 
 ## 从这里进入
 
@@ -16,12 +18,12 @@
 
 | 要找什么 | 唯一维护位置 |
 |---|---|
-| 系统主线、Engine / Evaluator / Optimizer、长期研究版图与研究支线 ownership | [系统愿景](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图) |
+| System Vision 中的长期研究版图与研究支线 ownership | [系统愿景](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图)；现行问题定义见 F0/F1 |
 | Runtime / Engine v1 的冻结边界与可执行验收 | [Runtime Scheduler](00_研究设计/Runtime_Scheduler_v1.md)；[Closure Matrix](00_研究设计/Runtime_Closure_Acceptance_Matrix.md) |
 | 第一个可展示 Demo（单人房间 Runtime Visualizer v0） | [Demo README](Demo%20codex-generated/demo/single_room_v0/README.md)；构建后生成 Deadline / Stale Phone / Commitment traces |
 | Demo 长时程行为审计与人格/历史 fork 对照 | [core behavior evaluation v0](Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；仅为 demo development evidence |
 | 本机 Laya typed policy（O/S/P 驱动的可回放 policy A/B） | [Laya typed policy](Demo%20codex-generated/demo/laya_typed_policy_v0/README.md)；可公开的运行证据见下方审阅索引，只连 loopback 本地 checkpoint，不进入科研线 |
-| 整体机制、各层职责、任务/承诺、时间与低耦合 | [完整机制说明](00_研究设计/完整机制说明_v0.md) |
+| 旧 C++ / Paper-0 参考机制的模块实例与工程语义 | [完整机制说明](00_研究设计/完整机制说明_v0.md)；游戏无关问题定义见 [F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md) |
 | 旧行为预测 / Paper-0 分支的 Forward/Inverse、候选创新及评价边界 | [分支研究问题](00_研究设计/前台问题与候选创新.md)；当前系统问题另见下方 F0/F1 |
 | 项目历史失败、科研证据距离与研究重建顺序 | [研究重建审计（2026-10-06）](00_研究设计/研究重建审计_2026-10-06.md) |
 | 尚未定下的计算、具体机制/实现缺口 | [未决问题](00_研究设计/未决问题与机制候选.md) |
@@ -37,12 +39,12 @@
 | 可运行的有限整合开发样机 | [NPC System Integration v0](tools/npc_system_v0/README.md)；[开发结果与 TXT 映射](02_实验/NPC_System_Integration_v0/RESULTS.md)。实际世界干预、模型/规划替换、director-off 与玩家扰动；不是完整通用系统 |
 | WebGPT 审阅：实验报告、逐条结果、失败记录、文献审计及上传排除清单 | [公开审阅索引（2026-10-07）](02_实验/PUBLIC_REVIEW_INDEX_2026-10-07.md) |
 | 文献 PDF、职责级阅读与证据 | [文献库](01_文献/README.md) |
-| 作者约束系统的问题定义与执行语义（F0/F1） | [Character Dynamics｜系统问题与执行语义 v0](00_研究设计/CharacterDynamics_FormalProblem_v0.md)：DRAFT / READY_FOR_INDEPENDENT_REVIEW，算法无关的唯一问题定义 owner；[System Vision 长期研究版图](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图)保留完整研究方向；[04 综合](01_文献/算法积木/04_统一问题与成熟基线准入.md)维护有限实例的问题与基线准入判断；[AuthorialTrajectoryPilotV0](00_研究设计/AuthorialTrajectoryPilotV0.md)仅为候选 F2 及 TypedIR / 预实验下层 owner，不定义全系统；[算法积木](01_文献/算法积木/README.md)保留具体原算法；[独立reference](tools/trajectory_constraints_v0/README.md)不等于Director或NPC实验 |
+| 作者约束下游戏世界在线规划与控制的问题定义 | [F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md)是唯一问题定义 owner；[System Vision](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图)维护长期研究版图；[Pilot](00_研究设计/AuthorialTrajectoryPilotV0.md)只维护局部 TypedIR/reference 契约；原算法见[算法积木](01_文献/算法积木/README.md) |
 | 用户原话、模型提案、对话与来源 | [原始材料](90_原始材料/README.md) |
 
 仓库治理护栏：[ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md)；廉价健康检查可运行 `python tools/repo_health_check.py`，ReplayRecord 样例可用 `python tools/validate_replay_record.py <record.json>` 校验。健康脚本只提供文件大小、重复材料及部分 manifest 告警，不验证文档链接、术语或现状声明；CI 通过也不等于文档语义一致。实现、规格、结果与历史的权威范围见[项目规则](AGENTS.md)。
 
-当前应用目标由用户确认是“NPC 在玩家眼中在游戏里面活起来”，不要求先拟合真实人物心理。[既有近邻与共同小场景检查点](00_研究设计/研究重建审计_2026-10-06.md#已完成执行检查点近邻原件与共同小场景)的 Praxish 原件解释与[共同小场景](02_实验/Praxish_Activity_Pilot_v0/README.md)已有执行证据；2026-10-07 授权的第 3 步已形成[活动组织与独立参数化 utility 的匹配比较结果](02_实验/Praxish_Utility_Comparison_v0/RESULTS.md)，保留真实失败与修改账本，待外审。当前小场景未显示活动组织行为优势；原件 bug 不作为方法收益，不据此开发新心理机制，尚无玩家比较结果。既有 coursework/历史 LLM 探针保留，PredictionBaselineV1 / SourceRankingV1 只作有限来源预测开发证据，不是 NPC 可置信性、心理状态 `S` 或 Runtime policy 训练证据；Paper-0 的独立 `A*` 准入只约束该冻结分支。不能用便宜、能跑或自有评分器的分数替代独立研究证明。作者约束系统的算法无关 F0/F1 定义仍为草案；A（规划/执行能力）与 B（稀疏作者控制）只是近期为基线讨论抽取的研究组合，04 的 Q1–Q3 是有限实例下的候选问题，不代表完整研究任务；长期方向见[System Vision 研究版图](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图)。这些候选分类本身不是新颖性或自动开工承诺；2026-10-09 用户已另行明确授权本页上方的有限应用集成。
+当前没有新机制、组合增益或人类可信度证据。历史候选组合、有限实例和 P5 应按各自结果 owner 解读；下一候选研究动作见 [TODO](00_研究设计/TODO.md)。Paper-0 的独立 `A*` 准入只约束旧预测分支，不是当前游戏规划目标的前置门。
 
 ## 代码与材料的归属
 

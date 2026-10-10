@@ -1,6 +1,8 @@
 # TODO｜active research queue
 
-更新时间：2026-10-10。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
+更新时间：2026-10-11。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
+
+当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。**下一候选研究动作（NOT_STARTED）：**对最强近邻做有界机制对照，选定一个可检验未知数，并整理比较协议；协议获授权前不开发新机制、不启动新实验或 P6。此候选只做机制与问题收敛，不重调研文献。接受结果可以是成熟方法已足够、候选机制不值得做，或出现一个经公平对照仍未解决的未知数；不预设新颖性或增益。
 
 角色动力3的[阶段与过关证据](研究重建审计_2026-10-06.md)与各原生平台历史阶段分别保留；当前执行指针是 P5 Author Bundle 有限集成。不是全部工作归零；本轮文档更新不算原生运行通过。
 
@@ -8,13 +10,14 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| AUTHOR-PLANNING-NEIGHBOR-CHECK | **NEXT / NOT_STARTED** | 对最强近邻做机制级对照，基于具体差异选择一个可检验未知数；形成有基线、变量、观测结果和停止条件的协议，供后续审议 | 输入/事件/规则属于游戏原生模型；区分统一高层规划与异构原生执行。可从作者零约束到全编排，不以 NPC 独立性压过明确授权；不得伪造历史结算或隐藏知识。**无新机制、组合增益或人类可信度证据；不得自动开实验或 P6。**问题定义见 [F0/F1](CharacterDynamics_FormalProblem_v0.md)，详细算法证据仍限现有算法卡 |
 | BOUNDARY-V1 | **CLOSED / FROZEN** | Kernel / Dynamics / Demo ownership 与依赖边界已完成复核 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
 | DEMO-LIVING | **ACTIVE / DEMO ONLY** | 保留历史批次为实现诊断。Laya v4.3 一日工程 gate 通过、行为 scale gate 未通过：no-history 单 seed 睡眠 1,149 分钟且历史输入使首请求分布大幅变化；停止扩成 64 actors / 7 days | [core behavior eval](../Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；[Laya typed policy](../Demo%20codex-generated/demo/laya_typed_policy_v0/README.md)；[v4.3 audit](../outputs/laya_runs/laya_v43_66ebfe7_20260925/RESULTS.md) |
 | RESEARCH-DYNAMICS | **TOY_NOT_ADMITTED / 未训练** | 不把四字段手写 law、相对分数 policy 或当前不足的干预测试称作机制通过；不运行会覆盖 artifacts 的生成器 | [研究重建审计](研究重建审计_2026-10-06.md)；[ResearchDynamicsV1 source](../02_实验/ResearchDynamicsV1/README.md) |
 | NPC-SYSTEM-INTEGRATION-V0 | **DEVELOPMENT_VERIFIED / READY_FOR_INDEPENDENT_REVIEW** | 首个 vertical slice 已交付，保留独立审阅实际链与未实现项；后续动作不自动设为 C++ 桥或独立 Python CLI | [唯一结果/需求映射](../02_实验/NPC_System_Integration_v0/RESULTS.md)；[可运行入口](../tools/npc_system_v0/README.md)。不等于正式 E1-2、LLM 接入或完整系统 |
 | TRADITIONAL-CHAIN-BASELINE | **P5 Author Bundle：READY_FOR_INDEPENDENT_REVIEW** | 12 场、11/12结构审计及18-world旧回归已复核；保留1项shared-supply真实失败，不改预期、不自动修复。等待独立审阅；不标CLOSED、不自动进入后续阶段 | [当前 P5 README](../02_实验/Native_Platform_P5_v0/README.md) / [唯一 RESULTS 与公开证据索引](../02_实验/Native_Platform_P5_v0/RESULTS.md)；[核心 API](../tools/native_platform_v0/p5/README.md)；历史阶段仍见 [P4-0](../02_实验/Native_Platform_P4_0_v0/README.md) |
-| MC-EXECUTION-ROUTE | **DEFERRED_CANDIDATE** | 暂不启动。保留 Minecraft/Mineflayer/煤炭任务作为后续执行载体候选；它不是传统全链原生复现的前置条件 | [历史候选与边界](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md#历史延期候选-minecraft-执行) |
+| MC-EXECUTION-ROUTE | **DEFERRED_CANDIDATE** | 暂不启动。保留 Minecraft/Mineflayer/煤炭任务作为后续执行载体候选；它不是传统全链原生复现的前置条件 | [历史候选与边界](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md#历史延期候选minecraft-执行) |
 | DIRECTOR-BUDGET-QUESTION | **待源码复现** | 若重新处理，先按来源审计/复现预算疑点；该恢复摘要不构成本轮新确认 | [NPC System Integration v0 结果](../02_实验/NPC_System_Integration_v0/RESULTS.md) |
 
 ## ACTIVE

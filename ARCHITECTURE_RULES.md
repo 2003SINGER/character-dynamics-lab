@@ -27,6 +27,8 @@ These are guardrails for an AI-heavy research prototype. They are deliberately s
 
 ## Semantic-stage preservation
 
+Rules 18–32 preserve the semantic-stage protocol for the legacy Dynamics / Paper-0 mechanism-identification branch. They do not prohibit LLM participation in the current game-world planning problem, including high-level planning; use the permissions and evidence contract defined by the current F0 problem owner.
+
 18. Preserve the research chain `ΔO/O/S/P → semantic interpretation X → explicit updater U → S' → π(A)` even when the current implementation is rule-based.
 19. `X` is an inspectable intermediate product; do not permanently fold semantic interpretation into `event → numeric StateDelta`.
 20. A future LLM or hybrid semantic frontend may replace the rule placeholder without changing the `U`/`S` boundary. Do not introduce a provider/factory framework just to reserve this hook.
