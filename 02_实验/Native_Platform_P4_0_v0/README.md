@@ -14,7 +14,13 @@
 
 本探针使用 pinned Ensemble 原生源码，但只创建 hero/love 两个物理 NPC。原 `loversAndRivals` cast 中未在场的 rival 仍可能影响原生触发规则；它不是第三个 Evennia NPC，也不表示全量 social state 已镜像到世界中或完整实现独立私有 cognition。
 
-范围固定为：原生互动链必须由 A courier 发起真实 note request，再由 B resident 的真实 callback 依据其原生 volition/action 选择接受或拒绝，且物理 note response 与 native commit 均结算。此处不预置接收者意愿，也不强制任何 arm 达成会合或成功 response。
+两阶段原生互动：A courier 完成自己的 delivery、且本地看见 B 后，`calculateVolition` 筛出 A→B 的 positive closeness intent 并触发 note request，把真实 note 交付到 B；随后 B 在自己的 callback 中持有该 note，响应阶段才调用 `getActions(hero,love)`，并由匹配的 Love→Hero `(category,type,intentType)` 反向 volition gate 决定接受或拒绝：权重 `<0` 拒绝、`>=0` 接受、无匹配时上游默认接受。runner 只从最高权重并列候选中选择受支持的 `WRITELOVENOTE` lineage；正式轨迹中 `writeLoveNoteReject` 与 `kissFail` 同为 20，固定种子选中前者并拒绝（不把它说成上游从任意行为独立选出唯一拒绝动作）。只有同一 note 的物理响应与 native commit 都结算才形成 response witness。B callback 是响应执行位置，不代表 B 独立规划社交目标或完整 BDI。拒绝仍给 Hero→Love closeness 加 10、写入 `romantic-failure`，不等于关系恶化或无副作用。实现边界见 [p4_social.py](../../tools/native_platform_v0/p3/p4_social.py#L221)；响应阶段候选见 [runner.mjs](../../tools/native_platform_v0/ensemble/runner.mjs#L166)、[候选选择](../../tools/native_platform_v0/ensemble/runner.mjs#L173) 与 [桥接回归](../../tools/native_platform_v0/bridge/test_p4_social.py#L28)。
+
+### 观察与节奏假设
+
+当前本地观察只把当前可见出口的 actor-specific `traverse` 权限检查作为 `traversable` affordance（[agency.py](../../tools/native_platform_v0/p3/agency.py#L63-L81)）；这不是隐锁识别或“看见了锁”的证据，本场景也没有可见锁门标牌。因而这里只采用有限游戏语义假设：显式可见阻挡/明示规则可以直接知道；隐蔽锁门应由不同的信息契约表达。本轮不强制 NPC 先尝试失败动作来发现规则。
+
+每个 simulated-minute 执行 callback 及其详细日志，是开发时的观察粒度，不推出高层活动必须每分钟重新决策，也不代表现实步行速度或真实游戏节奏。patrol 是 [planning.py](../../tools/native_platform_v0/p3/planning.py#L196-L225) 中项目自有的稳定排序可见出口规则；只有 delivery 的 `plan_next` 调用 GTPyhop。[P4 Results](RESULTS.md) 解释已观察到的意图、W 结算和回调时序。
 
 该固定机会规则借用 DM action/refiner 与 null-action 的设计动机；不声称复现 DODM/SAS/RL，也不主张新算法。它是 bounded engineering feasibility check，不是心理效度或完整 DM。
 

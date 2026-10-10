@@ -15,17 +15,28 @@
 
 ## 失败机制与复用边界
 
-失败类型不是同一种：author-off 的封门场景缺少合法 east 路线；`blocked-held` 中 courier supply 持续被玩家持有，NPC 的局部观察也没有该物品，故恢复路径未出现；`short-deadline` 的有限窗口结束前没有 response。账本/轨迹没有显示 GTPyhop 或原生 Ensemble intrinsic failure；不应把这些负例归因成 planner budget。`blocked-return` 的 author-on 成功发生在路由开放、玩家按固定 schedule 归还后，实际 A/B 行为与互动仍由各自 native callback 决定，没有脚本化会合。
+失败类型不是同一种：author-off 的封门场景缺少合法 east 路线；`blocked-held` 中 courier supply 持续被玩家持有、A 的局部观察没有该物品，也没有自己的 delivery drop receipt，因而不触发 note request；`short-deadline` 在 t6 截止，A 当时已离开 pickup，只有 west move intent、还没有 settlement。后者是当前有限 horizon/callback 粒度下未及时完成，不是物理不可达证明。账本/轨迹没有显示 GTPyhop 或原生 Ensemble intrinsic failure，也没有证据可把失败归因成 planner budget。`blocked-return` 的 author-on response 发生在路线开放、玩家按固定 schedule 归还后；自然行动时序形成了相遇，未脚本 rendezvous。
 
-组件归属：上游 Ensemble 负责原生 volition 与 response action 选择；既有 GTPyhop 负责有限 delivery/patrol 规划。项目新增 glue 负责场景/profile 到原生角色的映射、手动 server clock、固定 one-shot passage rule、settlement receipt、append-only ledger 与审计封口。它们不是新规划算法或完整社交世界。
+组件归属：`plan_next` 的有限 delivery HTN 使用 GTPyhop；`plan_patrol` 则是项目自己的稳定排序可见出口规则，不是 GTPyhop（[planning.py](../../tools/native_platform_v0/p3/planning.py#L55)、[patrol adapter](../../tools/native_platform_v0/p3/planning.py#L196)）。项目胶水另负责 profile/场景映射、手动 server clock、固定 one-shot passage、receipt 与 append-only ledger。互动分两段：A 自己的 drop 与本地可见 B 触发 A→B note request、note 实物送入 B 库存；随后 B callback 持有该 note，原生接受门按匹配的 Love→Hero `(category,type,intentType)` volition 判断（权重 `<0` 拒绝、`>=0` 接受、无匹配默认接受），再由 B 结算同一 note。runner 从最高权重并列 native 候选中选择受支持的 `WRITELOVENOTE` lineage；正式轨迹的 `writeLoveNoteReject` 与 `kissFail` 均为 20，种子选择了前者。这不是 B 自主规划社交目标或完整 BDI，也不是上游唯一指定拒绝动作。拒绝仍给 Hero→Love closeness 加 10 并写入 `romantic-failure`，不表示关系恶化或无副作用。胶水见 [p4_social.py](../../tools/native_platform_v0/p3/p4_social.py#L221)，候选/投影见 [runner.mjs](../../tools/native_platform_v0/ensemble/runner.mjs#L166)、[runner selection](../../tools/native_platform_v0/ensemble/runner.mjs#L173)、[bridge regression](../../tools/native_platform_v0/bridge/test_p4_social.py#L28)。
 
 本地回归记录：P3 tests 53/53、旧 bridge 9/9、P4 bridge 6/6、TypedIR 30/30、上游 Ensemble 45/45、wrapper 28/28；旧 native A/B/C0/C1 九个回归案例及独立 DB audit 见 [`legacy_regression_audit.json`](legacy_regression_audit.json) / [regression evidence manifest](regression_evidence_manifest.json)，runner 输出见 [`ensemble-regression-20261010.json`](runs/ensemble-regression-20261010.json)。旧 A/B 四例是本轮选取的回归子集，不冒充原阶段全部七例。
 
-`blocked-return` ON 的可读机制链：t1 玩家取走同一物品 → t2 A 的取物被原生世界拒绝 → t4 作者开通路线 → t6 玩家归还时 A 不在场、没有立刻恢复 → t8 A 重新观察到物品 → t9 取物、t11 移动、t13 实际交付 → t14 A 在当地看到 B 后提出 note，B 在自己的 callback 拒绝并结算。同一 seed 的 OFF 臂保留真实拒绝与归还历史，但路线未开放，没有发生互动。逐事件字段见 [trajectory excerpt](trajectory_excerpt.json)，完整证据由下述压缩索引定位。
+`blocked-return` 的事件顺序按 server callbacks 与 player commands 记录；意图与 W 结算分开：
 
-READY_FOR_INDEPENDENT_REVIEW 后的研究检查点是读取这些真实 trajectories，挑选一个值得比较的困难维度；这不是自动开工或进入 P4-1 的授权。
+| 时间 | Author OFF | Author ON | 游戏/因果语义 |
+|---|---|---|---|
+| t1 | A delivery `ACTIVE`，`NO_PLAN`、无 intent；之后玩家成功 get supply | 相同；玩家 get 发生在 NPC callbacks 后 | 不是 NPC get 被 W 拒绝。seed10：`/runs/1/decision_rows/0`、`/runs/1/world_interventions/0`。 |
+| t2 | A 转 patrol，`SUSPENDED_LOCAL_ITEM_UNAVAILABLE`，patrol `WAIT`、无 intent | 同样尚无 courier get dispatch | OFF `/runs/0/t2_courier_check`、ON `/runs/1/t2_courier_check`：无 get rejection 或 settlement。 |
+| t4–t5 | 门仍关闭，无 east route | `OPEN_PASSAGE` 是唯一 author W 改动；t4 A east、B get 只有 intent，t5 才结算 | 不是 author 直接命令 NPC：`/runs/1/world_interventions/1`、`/runs/1/decision_rows/4`、`/runs/1/decision_rows/5`、`/runs/1/all_primitive_settlements/0`、`/runs/1/all_primitive_settlements/1`。 |
+| t6–t9 | 玩家归还后 A 已重见 item，但封闭路线下仍 `NO_PLAN` | t6 玩家归还时 A 在外；t7 回 pickup、t8 看见 item 并形成 get intent、t9 才结算 | `/runs/1/world_interventions/2`、`/runs/1/all_primitive_settlements/2`、`/runs/1/decision_rows/8`、`/runs/1/all_primitive_settlements/4`。OFF 相应 t6 状态见 `/runs/0/decision_rows/6`。 |
+| t9–t13 | 无 note response | B t9 完成自己的 delivery；t10 west intent/t11 settle、t12 east intent/t13 settle，两 NPC 在 destination 自然相遇 | B delivery drop `/runs/1/all_primitive_settlements/5`；patrol 选择 `/runs/1/decision_rows/11`、`/runs/1/decision_rows/13`；settlement `/runs/1/all_primitive_settlements/7`、`/runs/1/all_primitive_settlements/8`、`/runs/1/all_primitive_settlements/9`。非脚本 rendezvous。 |
+| t14 | 无互动 | A 请求实际 note；B 持有同一 note 时在自己的 callback 响应并 commit 拒绝 | `/runs/1/social_events/0` 为 request，`/runs/1/social_events/1` 为 response，`/runs/1/social_events/2` 为 native commit。不是 accept，也不是 B 独立生成社交目标。 |
 
-时钟是服务端 simulated-minute，每步推进 1 分钟，不是墙钟或连续物理模拟。两 seed 是配对开发复跑标签，不是随机抽样；没有预设 NPC 会合/response。Monitor 依据 sealed native ledger/receipt 与独立 DB，不将 proposal 当 witness。
+父级只读因果审计 [causal_audit.json](causal_audit.json) 由 12 份已存 raw run 确定性抽取、没有新 run；文件 SHA-256：`0b39362220da699a723e42d5d47ddba77a5914637cd916cb2dc22b6de13a0f68`。正文中的 RFC 6901 pointers 指向该文件，并链接到解压后 run JSON 对应记录；`/runs/0`、`/runs/1` 是 seed10 return OFF/ON，`/runs/2`、`/runs/3` 是 seed11，`/runs/4..7` 为 held、`/runs/8..11` 为 short；`/assertions` 含通过断言。Raw/archive SHA-256 与对应关系见[证据 manifest](evidence_manifest.json)，事件摘录见 [trajectory excerpt](trajectory_excerpt.json)。
+
+本轮因果诊断已完成：现有配对只比较固定 minute-4 开门机会与关闭门，没有改变开门时机，也没有测量干预成本，因而没有证据判断“更早开门更优”或存在可识别的时机权衡。后续只有在另行选出可区分的条件/协议后，才考虑用成熟方法比较；不重跑“4 分钟开门”命题，不自动进入 P4-1 或造新算法。
+
+时钟是服务端 simulated-minute，每步推进 1 分钟，不是墙钟或连续物理模拟。两 seed 是配对开发复跑标签，不是随机抽样；没有预设 NPC 会合/response。Monitor 依据 sealed native ledger/receipt 与独立 DB，不将 proposal 当 witness。观察中的出口 `traversable` 是对当前可见 exit 的 actor-specific `traverse` 权限检查结果（[agency.py](../../tools/native_platform_v0/p3/agency.py#L63)），不是 NPC 看到了“锁门”标识或理解了障碍语义；本地图没有该可见标识。解释仅是本地通行 affordance 假设：可见阻挡或明示规则可直接知道，隐锁需要另一种观察契约，本轮不强制失败探测。每分钟 callback 与细日志是实现观察粒度，不证明高层活动必须频繁决策或对应现实行走效率。
 
 ## 配对 audit
 
