@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-2026-10-10 当前路线：**Evennia 为主平台、Ensemble 为首个原生人物机制参照**；P1/P2 已完成，P3-A/B 为 **DEVELOPMENT_VERIFIED（限定场景）**；P3-C0 限定 DEVELOPMENT 已获外审认可，原 owner 保留 `READY_FOR_INDEPENDENT_REVIEW`（未明确 CLOSED）。P3-C1a 的有限 native-server headless 场景与独立 DB 审计已完成，当前 **READY_FOR_INDEPENDENT_REVIEW**、等待独立审阅，尚未 CLOSED。结果唯一见 [Native Platform P3-C1a](../02_实验/Native_Platform_P3_C1a_v0/README.md) / [RESULTS](../02_实验/Native_Platform_P3_C1a_v0/RESULTS.md)，P3-C0 与 P3-A/B 结果仍由各自 owner 维护。本轮完成后停止，不自动扩展 P3-C1/C2 或进入 P4；不代表生产就绪或全项目关闭。P1/P2 运行证据与 LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 保留在[历史结果](../02_实验/Native_Platform_P1P2_v0/RESULTS.md)，LIGHT 不阻塞。真人试玩是可选体验反馈、未确认，不是技术 gate 或全局 blocker；此前[技术准入报告](../01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)是只读候选审查快照；Minecraft 仍为延期候选。
+2026-10-10 当前路线：**Evennia 为主平台、Ensemble 为首个原生人物机制参照**；P1/P2 完成，P3-A/B 为限定场景 DEVELOPMENT_VERIFIED，P3-C0 保留有限 DEVELOPMENT 外审状态，P3-C1a 保留历史 owner。当前有限阶段 P4-0 的 16 个 native-server 场景及 8 组配对/DB 审计已完成，**READY_FOR_INDEPENDENT_REVIEW**；唯一结果见 [P4-0 README](../02_实验/Native_Platform_P4_0_v0/README.md) / [RESULTS](../02_实验/Native_Platform_P4_0_v0/RESULTS.md)。本轮停止，不自动进入 P4-1；CI 状态以本提交的 GitHub Actions 为准。它不是生产就绪、完整 DM、玩家体验或心理效度证据；P3 及 P1/P2 历史仍由各自 owner 维护。
 
 2026-10-09 用户在新目标讨论后明确从外围维护切换为实现：[NPC System Integration v0](../tools/npc_system_v0/README.md)是获授权的有限应用整合，不是 E1-2 或重开冻结 C++ Runtime。授权/下一动作见 [TODO](TODO.md)，能力/验收只看[唯一结果](../02_实验/NPC_System_Integration_v0/RESULTS.md)。下方旧草案的“未开发 Director”不能再作为禁止本应用实现的当前规则。
 
@@ -27,7 +27,8 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [E1 局部信息与独立角色协议 v0](E1_KeyLedger_LocalAgency_Protocol_v0.md) | E1-0 有限域与协议；E1-1 独立开发包已交付。实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)；代码入口：[runner](../tools/e1_keyledger_v0/runner.py) | E0 冻结规则；将开发验证写成正式实验、新颖性声明；自动授权正式实验/E1-2 |
 | [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md) | 新授权应用 vertical slice 的唯一开发结果；实现与协议见[代码 README](../tools/npc_system_v0/README.md) | 全系统正式语义、冻结 E1 结果、心理验证或玩家评价 |
 | [IntegrationBlueprint v0 §07](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md) | 当前传统基线接线边界；历史 MC 候选与 C++ 证据桥分区保留 | 原件复现结果、已集成能力或实施授权 |
-| [Native Platform P3-C1a](../02_实验/Native_Platform_P3_C1a_v0/README.md) | 当前 P3-C1a 临时不可观察/恢复实现状态与结果入口；P3-C0/A/B 保留各自历史 owner | 后续扩展、P4、玩家效度或研究收益结论 |
+| [Native Platform P3-C1a](../02_实验/Native_Platform_P3_C1a_v0/README.md) | P3-C1a 临时不可观察/恢复历史结果入口；P3-C0/A/B 保留各自 owner | 后续扩展、P4、玩家效度或研究收益结论 |
+| [Native Platform P4-0](../02_实验/Native_Platform_P4_0_v0/README.md) | 当前有限 native-server opportunity 与原生 note-response 结果 owner；audit、完整压缩证据和复现入口见 RESULTS | P4-1、完整 DM、心理/玩家效度或新颖性结论 |
 | [Native Platform P1/P2](../02_实验/Native_Platform_P1P2_v0/README.md) | 已完成 P1/P2 的历史验收、失败记录与复现指针 | 当前 P3 状态；玩家效度或研究收益结论 |
 | [传统全链基线与文字平台技术准入](../01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md) | 此前只读候选审查的源码事实、未知项及历史候选 | 当前选型、安装/运行状态或研究结论 |
 | [04 统一问题与成熟基线准入](../01_文献/算法积木/04_统一问题与成熟基线准入.md) | 有限统一实例下的成熟方法综合、候选问题与方法准入判断 | 全部长期研究方向、已确认研究缺口或实验通过结论 |

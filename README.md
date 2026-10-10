@@ -6,7 +6,7 @@
 
 当前已有规则化 C++ 参考模拟与批量日志；**Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**：统一时钟、RunningAction、事件/信息边界、DecisionGate、typed rejection、scheduler-native fixtures、trace、case-isolated CTest 与 CI 已闭环。Evaluator、Objective、Optimizer 与 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
 
-2026-10-10 当前路线：**Evennia 为主平台、Ensemble 为首个原生人物机制参照**。P1/P2 已完成；P3-A/B 为 **DEVELOPMENT_VERIFIED（限定场景）**；P3-C0 的有限 DEVELOPMENT 已获外审认可，原 owner 状态保留 **READY_FOR_INDEPENDENT_REVIEW**（未明确 CLOSED）。P3-C1a 的有限 native-server headless 场景与独立 DB 审计已完成，当前 **READY_FOR_INDEPENDENT_REVIEW**、等待独立审阅，尚未 CLOSED。结果唯一见 [Native Platform P3-C1a](02_实验/Native_Platform_P3_C1a_v0/README.md)；C0 与 A/B 仍由各自 owner 维护。本轮完成后停止，不自动扩展 P3-C1/C2 或进入 P4；不代表生产就绪或全项目关闭。P1/P2 历史验收和 LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 保留于[历史结果](02_实验/Native_Platform_P1P2_v0/RESULTS.md)，LIGHT 不阻塞。真人试玩是可选体验反馈、尚未确认，不是技术 gate 或全局 blocker。旧[技术准入报告](01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)是候选审查快照；Minecraft/MC 挖煤仍延期。
+2026-10-10 当前路线：**Evennia 为主平台、Ensemble 为首个原生人物机制参照**。P1/P2 完成；P3-A/B 为 **DEVELOPMENT_VERIFIED（限定场景）**；P3-C0 有限 DEVELOPMENT 获外审认可、P3-C1a 保留其历史 owner。当前有限阶段 P4-0 的 16 个 native-server 场景已完成，8 组配对及独立 DB 审计 PASS，状态 **READY_FOR_INDEPENDENT_REVIEW**；唯一结果见 [P4-0](02_实验/Native_Platform_P4_0_v0/README.md) / [RESULTS](02_实验/Native_Platform_P4_0_v0/RESULTS.md)。本轮停止，不自动进入 P4-1；CI 状态以本提交的 GitHub Actions 为准。非生产就绪、完整 DM、玩家体验或心理效度证据。P3/C0/A/B、C1a 与 P1/P2 各自保留 owner/历史结果；LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 不阻塞，真人试玩可选且尚未确认。旧[技术准入报告](01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)是候选审查快照；Minecraft/MC 挖煤仍延期。
 
 ## 从这里进入
 
@@ -29,7 +29,8 @@
 | Self-Play / Self-Evaluation v0 | [评测协议](02_实验/Self_Evaluation_v0.md)；[scorecard runner](tools/self_evaluation_v0.py)；[scenario manifest](tools/self_evaluation_scenarios_v0.json) |
 | 实验导出器、切片与可复现记录 | [实验总路由](02_实验/README.md)；[跨数据集 Replay 接口草案](02_实验/跨数据集Replay接口_v0.md)；[机制识别循环与反事实诊断](02_实验/机制识别循环与反事实诊断_v0.md) |
 | P3-A/B 历史证据 | [Native Platform P3](02_实验/Native_Platform_P3_v0/README.md)；[RESULTS](02_实验/Native_Platform_P3_v0/RESULTS.md) |
-| 当前授权的 P3-C1a 临时不可观察与配送恢复 | [Native Platform P3-C1a](02_实验/Native_Platform_P3_C1a_v0/README.md)；[RESULTS](02_实验/Native_Platform_P3_C1a_v0/RESULTS.md) |
+| P3-C1a 历史阶段证据 | [Native Platform P3-C1a](02_实验/Native_Platform_P3_C1a_v0/README.md)；[RESULTS](02_实验/Native_Platform_P3_C1a_v0/RESULTS.md) |
+| 当前有限 native-platform 阶段 P4-0 | [README](02_实验/Native_Platform_P4_0_v0/README.md)；[RESULTS 与完整证据](02_实验/Native_Platform_P4_0_v0/RESULTS.md) |
 | E0 钥匙—账本有限基线的固定协议、代码和实际证据 | [冻结协议](00_研究设计/E0_KeyLedger_Protocol_v0.md)；[代码与复现](tools/e0_keyledger_v0/README.md)；[实验入口](02_实验/E0_KeyLedger_v0/README.md)。独立有限 Executor，不等于 C++ Runtime 集成、NPC 自主性或新方法效果 |
 | E1 局部信息与独立 B 策略 | [E1-0 有限协议](00_研究设计/E1_KeyLedger_LocalAgency_Protocol_v0.md)；[E1-1 代码入口](tools/e1_keyledger_v0/runner.py)；[唯一结果 owner](02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)。E1-1 独立开发包已交付；实际状态与证据只查唯一结果 owner。正式实验与 E1-2 未授权 |
 | 可运行的有限整合开发样机 | [NPC System Integration v0](tools/npc_system_v0/README.md)；[开发结果与 TXT 映射](02_实验/NPC_System_Integration_v0/RESULTS.md)。实际世界干预、模型/规划替换、director-off 与玩家扰动；不是完整通用系统 |

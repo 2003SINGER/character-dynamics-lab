@@ -1,0 +1,228 @@
+{
+  "schema": "native-p4-legacy-regression-v1",
+  "status": "PASS",
+  "frozen_code_commit": "8396341",
+  "summaries": [
+    {
+      "scenario": "C0-after-delivery",
+      "run": "p3-c0-C0-after-delivery-seed20261010-20261010T083458Z-e66a3d.json",
+      "db": "p3-db-evidence-20261010083458-1035d4-20261010T083649Z-9e8ba3.json",
+      "audit": {
+        "status": "PASS",
+        "scope": "one bounded P3-C0 development run plus independent read-only DB readback",
+        "semantic_acceptance": {
+          "scenario": "C0-after-delivery",
+          "scene_ids": [
+            "20261010083458-1035d4"
+          ],
+          "settled_drop_receipts": 1,
+          "patrol_selected": true,
+          "settled_patrol_moves": 7
+        },
+        "db_actor_rows_checked": 1,
+        "inputs": {
+          "run": {
+            "file": "p3-c0-C0-after-delivery-seed20261010-20261010T083458Z-e66a3d.json",
+            "sha256": "99ca50c8e090d3f7e585af5f0e8755cbbde2fe534d6a9a37b5f42103162dfd4d"
+          },
+          "db": {
+            "file": "p3-db-evidence-20261010083458-1035d4-20261010T083649Z-9e8ba3.json",
+            "sha256": "c253518e8e6ed20250f28e25254ed18518c45456ab630ee43b94bee04668a19e"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "C0-delivery-priority",
+      "run": "p3-c0-C0-delivery-priority-seed20261010-20261010T083458Z-45feba.json",
+      "db": "p3-db-evidence-20261010083457-1e252a-20261010T083649Z-8081e6.json",
+      "audit": {
+        "status": "PASS",
+        "scope": "one bounded P3-C0 development run plus independent read-only DB readback",
+        "semantic_acceptance": {
+          "scenario": "C0-delivery-priority",
+          "scene_ids": [
+            "20261010083457-1e252a"
+          ],
+          "settled_drop_receipts": 1,
+          "patrol_selected": true,
+          "settled_patrol_moves": 3
+        },
+        "db_actor_rows_checked": 1,
+        "inputs": {
+          "run": {
+            "file": "p3-c0-C0-delivery-priority-seed20261010-20261010T083458Z-45feba.json",
+            "sha256": "6943c71285dc193d1592ce0e5fb25643bd86f0a82c9f8d9b4e27c0cc220c9be9"
+          },
+          "db": {
+            "file": "p3-db-evidence-20261010083457-1e252a-20261010T083649Z-8081e6.json",
+            "sha256": "9011aaf3d268c8b0555f1a3cecfaef317e799d505a0daf10f8a753b40d1866cb"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "C0-no-delivery",
+      "run": "p3-c0-C0-no-delivery-seed20261010-20261010T083457Z-b1a670.json",
+      "db": "p3-db-evidence-20261010083457-8eb36a-20261010083457-850675-20261010T083649Z-08d26f.json",
+      "audit": {
+        "status": "PASS",
+        "scope": "one bounded P3-C0 development run plus independent read-only DB readback",
+        "semantic_acceptance": {
+          "scenario": "C0-no-delivery",
+          "patrol_moves": 6,
+          "locked_exit_rejections": 1,
+          "locked_exit_move_retries": 0,
+          "scene_ids": [
+            "20261010083457-8eb36a",
+            "20261010083457-850675"
+          ]
+        },
+        "db_actor_rows_checked": 2,
+        "inputs": {
+          "run": {
+            "file": "p3-c0-C0-no-delivery-seed20261010-20261010T083457Z-b1a670.json",
+            "sha256": "58cadd934de9660695392729bc1cea3ee72971f82ed4f1e0769937b4c4b99529"
+          },
+          "db": {
+            "file": "p3-db-evidence-20261010083457-8eb36a-20261010083457-850675-20261010T083649Z-08d26f.json",
+            "sha256": "1313225bb9169d2ce596586cce3ee51dd7a93db0440d721e4476471e50c19681"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "C1a-blocked-switch",
+      "run": "p3-c1a-C1a-blocked-switch-seed20261010-20261010T083459Z-85bf00.json",
+      "db": "p3-db-evidence-20261010083458-48a3db-20261010T083649Z-920fbe.json",
+      "audit": {
+        "status": "PASS",
+        "scope": "bounded C1a development case and independent exact-scene ORM readback",
+        "semantic_acceptance": {
+          "scenario": "C1a-blocked-switch",
+          "scene_id": "20261010083458-48a3db",
+          "stale_native_get_rejected": true,
+          "settled_patrol_moves": 5,
+          "delivery_contract_retained": true
+        },
+        "db_scene_objects_checked": 8,
+        "inputs": {
+          "run": {
+            "file": "p3-c1a-C1a-blocked-switch-seed20261010-20261010T083459Z-85bf00.json",
+            "sha256": "a1a55740f32d815b5cfa81f1a16443f90380f4acccc601456e37cd3568476201"
+          },
+          "db": {
+            "file": "p3-db-evidence-20261010083458-48a3db-20261010T083649Z-920fbe.json",
+            "sha256": "54229755d355e44dee346f1cb81b1ec213d664eb2bc36bf6c46986e55b5f5217"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "C1a-observed-resume",
+      "run": "p3-c1a-C1a-observed-resume-seed20261010-20261010T083459Z-ac4187.json",
+      "db": "p3-db-evidence-20261010083459-0d974a-20261010T083649Z-5ae929.json",
+      "audit": {
+        "status": "PASS",
+        "scope": "bounded C1a development case and independent exact-scene ORM readback",
+        "semantic_acceptance": {
+          "scenario": "C1a-observed-resume",
+          "scene_id": "20261010083459-0d974a",
+          "stale_native_get_rejected": true,
+          "away_room_negative_control": true,
+          "resume_after_local_visibility": true,
+          "settled_delivery_receipts": [
+            "get",
+            "move",
+            "drop"
+          ]
+        },
+        "db_scene_objects_checked": 8,
+        "inputs": {
+          "run": {
+            "file": "p3-c1a-C1a-observed-resume-seed20261010-20261010T083459Z-ac4187.json",
+            "sha256": "d219d269293e49c541dbbe97ea8dfb9ffb132ed43e41f75ed8917bba4f210229"
+          },
+          "db": {
+            "file": "p3-db-evidence-20261010083459-0d974a-20261010T083649Z-5ae929.json",
+            "sha256": "85cd2710a4d0fafc43f88ed677d7d72020d328ac8fc4100bcda90759a86371d4"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "Aclean",
+      "run": "p3-headless-Aclean-seed20261010-20261010T083456Z-df10a8.json",
+      "db": "p3-db-evidence-20261010083455-de523d-20261010T083649Z-395541.json",
+      "audit": {
+        "status": "PASS",
+        "scope": "named A/B subset, not original seven-case suite",
+        "semantics": {
+          "scenario": "Aclean",
+          "scene_id": "20261010083455-de523d",
+          "courier_receipts": [
+            "get",
+            "move",
+            "drop"
+          ]
+        },
+        "db_actor_rows_checked": 1
+      }
+    },
+    {
+      "scenario": "Asteal-return",
+      "run": "p3-headless-Asteal-return-seed20261010-20261010T083456Z-3305d2.json",
+      "db": "p3-db-evidence-20261010083456-475438-20261010T083649Z-764666.json",
+      "audit": {
+        "status": "PASS",
+        "scope": "named A/B subset, not original seven-case suite",
+        "semantics": {
+          "scenario": "Asteal-return",
+          "scene_id": "20261010083456-475438",
+          "stale_get_rejected_then_recovered": true
+        },
+        "db_actor_rows_checked": 1
+      }
+    },
+    {
+      "scenario": "Bclean",
+      "run": "p3-headless-Bclean-seed20261010-20261010T083456Z-40e863.json",
+      "db": "p3-db-evidence-20261010083456-5a8e07-20261010T083649Z-1dae97.json",
+      "audit": {
+        "status": "PASS",
+        "scope": "named A/B subset, not original seven-case suite",
+        "semantics": {
+          "scenario": "Bclean",
+          "scene_id": "20261010083456-5a8e07",
+          "native_candidates": [
+            "writeLoveNoteReject",
+            "kissFail"
+          ],
+          "selected": "kissFail",
+          "ensemble_revision": 1
+        },
+        "db_actor_rows_checked": 2
+      }
+    },
+    {
+      "scenario": "Bsteal-resident-parcel",
+      "run": "p3-headless-Bsteal-resident-parcel-seed20261010-20261010T083457Z-fc4ff8.json",
+      "db": "p3-db-evidence-20261010083456-32a798-20261010T083649Z-c67ccc.json",
+      "audit": {
+        "status": "PASS",
+        "scope": "named A/B subset, not original seven-case suite",
+        "semantics": {
+          "scenario": "Bsteal-resident-parcel",
+          "scene_id": "20261010083456-32a798",
+          "resident_no_candidate_and_recovery": true,
+          "courier_independent_receipts": [
+            "get",
+            "move",
+            "drop"
+          ]
+        },
+        "db_actor_rows_checked": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "schema": "native-p4-audit-v1",
+  "created_at": "2026-10-10T08:28:03.966128+00:00",
+  "status": "PASS",
+  "scope": "bounded paired P4-0 native ledger and independent query-only DB consistency",
+  "summary": {
+    "case": "blocked-held",
+    "director_enabled": false,
+    "seed": 20261011,
+    "ledger_events": 98,
+    "unsealed_rows": 0,
+    "deadline_minutes": 24,
+    "scene_id": "20261010082657-b3a1cd",
+    "actor_callbacks": 48,
+    "role_ids": {
+      "courier": 1617,
+      "resident": 1618,
+      "player": 1621
+    },
+    "item_ids": {
+      "courier_supply": 1619,
+      "resident_parcel": 1620
+    },
+    "director_decisions": 24,
+    "settled_author_actions": 0,
+    "player_interventions": [
+      [
+        1,
+        "get",
+        "courier_supply"
+      ]
+    ],
+    "typedir_author_constraint": {
+      "constraint_id": "single-note-response",
+      "verdict": "VIOLATED",
+      "reason": "completed event-count window",
+      "witness": []
+    },
+    "settled_note_interaction": null,
+    "sealed_successful_response_count": 0,
+    "persisted_scene_objects_checked": 9,
+    "paired_arm": {
+      "case": "blocked-held",
+      "director_enabled": true,
+      "seed": 20261011,
+      "ledger_events": 99,
+      "unsealed_rows": 0,
+      "deadline_minutes": 24,
+      "scene_id": "20261010082701-fa076d",
+      "actor_callbacks": 48,
+      "role_ids": {
+        "courier": 1626,
+        "resident": 1627,
+        "player": 1630
+      },
+      "item_ids": {
+        "courier_supply": 1628,
+        "resident_parcel": 1629
+      },
+      "director_decisions": 24,
+      "settled_author_actions": 1,
+      "player_interventions": [
+        [
+          1,
+          "get",
+          "courier_supply"
+        ]
+      ],
+      "typedir_author_constraint": {
+        "constraint_id": "single-note-response",
+        "verdict": "VIOLATED",
+        "reason": "completed event-count window",
+        "witness": []
+      },
+      "settled_note_interaction": null,
+      "sealed_successful_response_count": 0,
+      "persisted_scene_objects_checked": 9
+    }
+  },
+  "paired_comparison": {
+    "paired": true,
+    "case": "blocked-held",
+    "seed": 20261011,
+    "replication_type": "paired_development_replication_not_random_sample",
+    "only_author_arm_changed": "director_enabled",
+    "normalized_player_schedule": [
+      [
+        1,
+        "player",
+        "player_takes_courier_supply",
+        "get",
+        "courier_supply"
+      ]
+    ]
+  },
+  "inputs": [
+    {
+      "run": "p4-blocked-held-director-False-seed20261011-20261010T082701Z-f1c03e.json",
+      "run_sha256": "eae28d2fc3b641d27f71731a7b8aad512d151849ee892cbed130f805d06389c3",
+      "db": "p3-db-evidence-20261010082657-b3a1cd-20261010T082802Z-61a8a7.json",
+      "db_sha256": "f7787b0172246ee00e1e86fddc5346b9f116b3e16fd545e81bc2291040a49f8d"
+    },
+    {
+      "run": "p4-blocked-held-director-True-seed20261011-20261010T082706Z-f3699f.json",
+      "run_sha256": "b12ee063838016de54cc3a50b845d60ee6b7c05dc3e4628f20617739894b0740",
+      "db": "p3-db-evidence-20261010082701-fa076d-20261010T082802Z-597d63.json",
+      "db_sha256": "9328b2976c9741de28132b2dc71e92eec8281d5fdb77f36b1e664ebf4938247e"
+    }
+  ]
+}

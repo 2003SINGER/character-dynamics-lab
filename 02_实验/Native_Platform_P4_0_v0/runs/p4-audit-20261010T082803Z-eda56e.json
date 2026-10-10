@@ -1,0 +1,108 @@
+{
+  "schema": "native-p4-audit-v1",
+  "created_at": "2026-10-10T08:28:03.948510+00:00",
+  "status": "PASS",
+  "scope": "bounded paired P4-0 native ledger and independent query-only DB consistency",
+  "summary": {
+    "case": "open",
+    "director_enabled": false,
+    "seed": 20261011,
+    "ledger_events": 100,
+    "unsealed_rows": 0,
+    "deadline_minutes": 24,
+    "scene_id": "20261010082637-e08694",
+    "actor_callbacks": 48,
+    "role_ids": {
+      "courier": 1578,
+      "resident": 1579,
+      "player": 1582
+    },
+    "item_ids": {
+      "courier_supply": 1580,
+      "resident_parcel": 1581
+    },
+    "director_decisions": 24,
+    "settled_author_actions": 0,
+    "player_interventions": [],
+    "typedir_author_constraint": {
+      "constraint_id": "single-note-response",
+      "verdict": "SATISFIED",
+      "reason": "completed event count within bounds",
+      "witness": [
+        "p4:20261011:love:note-response:episode1"
+      ]
+    },
+    "settled_note_interaction": {
+      "decision": "rejected",
+      "selected_action": "writeLoveNoteReject",
+      "note_id": 1583,
+      "request_id": "p4:20261011:hero:note-request:episode1",
+      "native_response_and_commit_joined": true,
+      "resident_callback_minute": 7
+    },
+    "sealed_successful_response_count": 1,
+    "persisted_scene_objects_checked": 10,
+    "paired_arm": {
+      "case": "open",
+      "director_enabled": true,
+      "seed": 20261011,
+      "ledger_events": 100,
+      "unsealed_rows": 0,
+      "deadline_minutes": 24,
+      "scene_id": "20261010082642-78c983",
+      "actor_callbacks": 48,
+      "role_ids": {
+        "courier": 1588,
+        "resident": 1589,
+        "player": 1592
+      },
+      "item_ids": {
+        "courier_supply": 1590,
+        "resident_parcel": 1591
+      },
+      "director_decisions": 24,
+      "settled_author_actions": 0,
+      "player_interventions": [],
+      "typedir_author_constraint": {
+        "constraint_id": "single-note-response",
+        "verdict": "SATISFIED",
+        "reason": "completed event count within bounds",
+        "witness": [
+          "p4:20261011:love:note-response:episode1"
+        ]
+      },
+      "settled_note_interaction": {
+        "decision": "rejected",
+        "selected_action": "writeLoveNoteReject",
+        "note_id": 1593,
+        "request_id": "p4:20261011:hero:note-request:episode1",
+        "native_response_and_commit_joined": true,
+        "resident_callback_minute": 7
+      },
+      "sealed_successful_response_count": 1,
+      "persisted_scene_objects_checked": 10
+    }
+  },
+  "paired_comparison": {
+    "paired": true,
+    "case": "open",
+    "seed": 20261011,
+    "replication_type": "paired_development_replication_not_random_sample",
+    "only_author_arm_changed": "director_enabled",
+    "normalized_player_schedule": []
+  },
+  "inputs": [
+    {
+      "run": "p4-open-director-False-seed20261011-20261010T082642Z-d68a2b.json",
+      "run_sha256": "167d7b42fc8b77b9da0f012ea67c061b5a5c168f06e2bad6471cb309785d1555",
+      "db": "p3-db-evidence-20261010082637-e08694-20261010T082803Z-565ed8.json",
+      "db_sha256": "f99cf9718464d70b9cdce10c965cccc0dd6c84a063eca022e7d2b7b527df261c"
+    },
+    {
+      "run": "p4-open-director-True-seed20261011-20261010T082648Z-098e49.json",
+      "run_sha256": "3e66f981c4cee72abd6be9409fed2881da6a67d3a39d55d1502ecc190fde1f8f",
+      "db": "p3-db-evidence-20261010082642-78c983-20261010T082803Z-21ef28.json",
+      "db_sha256": "b40d52d62907b11c35faad0013785ed94af3e5077d6f52ca675bd6156812d91a"
+    }
+  ]
+}

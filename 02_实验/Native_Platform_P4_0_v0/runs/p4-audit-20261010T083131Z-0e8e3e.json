@@ -1,0 +1,139 @@
+{
+  "schema": "native-p4-parent-verification-v1",
+  "created_at": "2026-10-10T08:31:31.573744+00:00",
+  "status": "PASS",
+  "frozen_code_commit": "8396341",
+  "checks": [
+    {
+      "check": "all16_exact_frozen_source_bytes",
+      "passed": true,
+      "sha256": "90fd17ac66797201fb2901afce43d9cd9010926855d78c390a9557d6f6a53fbb"
+    },
+    {
+      "check": "actual_initial_actor_room_inventory_task_binding_equal",
+      "case": "open",
+      "seed": 20261010,
+      "passed": true
+    },
+    {
+      "check": "actual_initial_actor_room_inventory_task_binding_equal",
+      "case": "blocked-return",
+      "seed": 20261010,
+      "passed": true
+    },
+    {
+      "check": "actual_initial_actor_room_inventory_task_binding_equal",
+      "case": "blocked-held",
+      "seed": 20261010,
+      "passed": true
+    },
+    {
+      "check": "actual_initial_actor_room_inventory_task_binding_equal",
+      "case": "short-deadline",
+      "seed": 20261010,
+      "passed": true
+    },
+    {
+      "check": "actual_initial_actor_room_inventory_task_binding_equal",
+      "case": "open",
+      "seed": 20261011,
+      "passed": true
+    },
+    {
+      "check": "actual_initial_actor_room_inventory_task_binding_equal",
+      "case": "blocked-return",
+      "seed": 20261011,
+      "passed": true
+    },
+    {
+      "check": "actual_initial_actor_room_inventory_task_binding_equal",
+      "case": "blocked-held",
+      "seed": 20261011,
+      "passed": true
+    },
+    {
+      "check": "actual_initial_actor_room_inventory_task_binding_equal",
+      "case": "short-deadline",
+      "seed": 20261011,
+      "passed": true
+    },
+    {
+      "negative_control": "wrong_responder",
+      "rejected": true,
+      "reason": "native response is not the real A-to-B accepted/refused family action"
+    },
+    {
+      "negative_control": "unsettled_physical_note",
+      "rejected": true,
+      "reason": "response did not physically settle on the same note in B's inventory"
+    },
+    {
+      "negative_control": "changed_task_contract",
+      "rejected": true,
+      "reason": "courier original authored delivery contract was changed"
+    },
+    {
+      "negative_control": "private_director_field",
+      "rejected": true,
+      "reason": "authorized view must contain exactly the five public P4 fields"
+    },
+    {
+      "negative_control": "missing_native_commit",
+      "rejected": true,
+      "reason": "timeline is not an exact copy of the append-only ledger"
+    },
+    {
+      "negative_control": "different_actor_source_in_paired_arm",
+      "rejected": true,
+      "reason": "paired actors/tasks/initial config differ beyond director_enabled"
+    }
+  ],
+  "test_commands": [
+    {
+      "command": [
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/native_platform_v0/evennia/venv/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/native_platform_v0/p3/tests",
+        "-q"
+      ],
+      "exit_code": 0,
+      "stdout": "  Native P3 control RPC: 127.0.0.1:14011\n",
+      "stderr": "----------------------------------------------------------------------\nRan 53 tests in 0.016s\n\nOK\n"
+    },
+    {
+      "command": [
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/native_platform_v0/evennia/venv/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "tools.native_platform_v0.bridge.test_social",
+        "tools.native_platform_v0.bridge.test_p4_social",
+        "-q"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 15 tests in 0.928s\n\nOK\n"
+    },
+    {
+      "command": [
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/native_platform_v0/evennia/venv/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/trajectory_constraints_v0/tests",
+        "-q"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 30 tests in 0.006s\n\nOK\n"
+    }
+  ],
+  "raw_run_count": 16,
+  "claimed_scope": "bounded correctness and actual paired inputs; not research effect or psychological validation"
+}

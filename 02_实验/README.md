@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-10 当前原生平台路线为 **Evennia 主平台 + Ensemble 首个原生人物机制参照**：P1/P2 已完成，P3-A/B 为 **DEVELOPMENT_VERIFIED（限定场景）**；P3-C0 限定 DEVELOPMENT 已获外审认可（其 owner 状态保留 READY_FOR_INDEPENDENT_REVIEW，未明确 CLOSED）；P3-C1a 两场景与 hidden-return 负控的有限 native-server headless 运行及独立 DB audit 已完成，当前 **READY_FOR_INDEPENDENT_REVIEW**、等待独立审阅，尚未 CLOSED。结果唯一见 [Native Platform P3-C1a](Native_Platform_P3_C1a_v0/README.md) / [RESULTS](Native_Platform_P3_C1a_v0/RESULTS.md)；C0 与 P3-A/B 结果仍由各自 owner 维护。本轮完成后停止，不自动扩展 P3-C1/C2 或进入 P4；不改变 C0/A/B 默认行为与合同，不覆盖旧结果/raw，E0 与冻结 C++ 保持不变。不代表生产就绪或全项目关闭。P1/P2 历史验收、负结果及 LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 保留在 [P1/P2 结果](Native_Platform_P1P2_v0/RESULTS.md)。LIGHT 不阻塞。真人试玩是可选体验反馈且尚未确认，不是技术 gate 或全局 blocker。
+2026-10-10 当前原生平台路线为 **Evennia 主平台 + Ensemble 首个原生人物机制参照**：P1/P2 完成，P3-A/B 为限定场景 DEVELOPMENT_VERIFIED，P3-C0 与 C1a 保留各自有限开发/历史 owner。当前有限阶段 P4-0 的 16 个 native-server runs COMPLETE，8 组 author-off/on 配对和独立精确场景 DB audits PASS，状态 **READY_FOR_INDEPENDENT_REVIEW**；唯一结果见 [P4-0 README](Native_Platform_P4_0_v0/README.md) / [RESULTS 与证据](Native_Platform_P4_0_v0/RESULTS.md)。本轮停止，不自动进入 P4-1；CI 状态以本提交的 GitHub Actions 为准。P4-0 是固定规则与 pinned Ensemble 原生回应链的有限 DEVELOPMENT，不是完整 DM、心理/玩家效度或新算法结论。P3 与 P1/P2、LIGHT 历史负结果仍由各自 owner 维护；LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 不阻塞，真人试玩可选且尚未确认。
 
 2026-10-09 用户另行明确授权按目标 TXT 改系统：[NPC System Integration v0](NPC_System_Integration_v0/RESULTS.md) 已形成有限 DEVELOPMENT 应用闭环，含合法世界干预、演员状态/承诺、GOAP/HTN、director-off 和玩家扰动。它是新的有限软件开发验收，不是 NPC 玩家实验、E1-2 formal、心理训练或冻结 Runtime 改动；下方 E1-1 交付时的范围不禁止该新应用。
 

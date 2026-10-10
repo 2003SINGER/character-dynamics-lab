@@ -1,12 +1,12 @@
 # Native Platform P4-0
 
-状态：IMPLEMENTING。范围是固定规则 author opportunity + 原生双 NPC note-response 的有限 Evennia 开发验证；当前尚无本轮场景运行结果。
+状态：**READY_FOR_INDEPENDENT_REVIEW**。16 个固定范围 native-server 场景均 COMPLETE，8 组配对及逐场景 DB 证据经独立审计；结果见[RESULTS](RESULTS.md)。这是有限 DEVELOPMENT 检查点，不是 CLOSED、生产就绪或研究效度结论。本轮至此停止，不进入 P4-1。
 
 ## 冻结范围
 
 - `p4_story_v0`、手动驱动、两房间、courier/resident 两个物理 NPC 与一个测试玩家；保留双方原 delivery goal。
-- 四个场景：`open`、`blocked-return`、`blocked-held`、`short-deadline`。正式开发矩阵为每场景×author on/off×seed `20261010`/`20261011`，共 16 次；这是配对开发复跑，不是随机样本。`short-deadline` 为 6 simulated minutes，其余 24。
-- `blocked-return` 与 `short-deadline`：测试玩家在第 1 分钟真实取走 courier supply，并在第 6 分钟前归还同一物品；`blocked-held` 只取走并持有到 deadline；`open` 不做玩家物品干预。各 arm 使用相同 schedule、actors、seed 与预算。
+- 四个场景：`open`、`blocked-return`、`blocked-held`、`short-deadline`。开发矩阵为每场景×author on/off×seed `20261010`/`20261011`，共 16 次；这是配对开发复跑，不是随机样本。`short-deadline` 为 6 simulated minutes，其余 24。
+- `blocked-return` 与 `short-deadline`：测试玩家在第 1 分钟真实取走 courier supply，并在第 6 分钟归还同一物品；`blocked-held` 只取走并持有到 deadline；`open` 不做玩家物品干预。各 arm 使用相同 schedule、actors、seed 与预算。
 - 唯一 author action 为 `OPEN_PASSAGE` 或 `NO_OP`。最多一次开通初始封闭的 east passage；不直接控制 NPC、不改社交记录或玩家物品。
 - 固定机会规则为 simulated minute ≥4、门仍关闭、机会未用且尚无目标 witness 时才允许开门；否则 `NO_OP`。不给 NPC 预设会合点或 rendezvous 脚本。
 - `step_world` 每步推进服务器拥有的模拟时钟 1 分钟；每分钟两个 NPC 各执行 callback。它不是墙钟计时或连续物理模拟。
@@ -21,6 +21,8 @@
 ## 运行与审计
 
 需预先运行当前 branch 已初始化的 P1 Evennia 服务，保留场景所属管理员账户，并准备项目 Python venv、隔离 loopback RPC 与固定 Ensemble Node runner。普通 clone 不能仅靠 `--check` 自动安装 hook；依照 P3 owner 的 hook install 说明完成初始化。不要求管理员登录、浏览器客户端或人工输入命令。
+
+原始运行、DB 证据及压缩副本校验索引见[完整证据清单](evidence_manifest.json)；逐例 outcome 与配对检查见[RESULTS](RESULTS.md)。CI 状态以本提交的 GitHub Actions 为准。
 
 单场景（保存原始响应，不作 PASS 判定）：
 
