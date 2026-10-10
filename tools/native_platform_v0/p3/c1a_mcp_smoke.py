@@ -90,7 +90,8 @@ def main(argv=None) -> int:
     try:
         response = run_smoke(args.seed)
         document = {"recorded_at": datetime.now(timezone.utc).isoformat(),
-                    "manifest": manifest(), "response": response}
+                    "manifest": manifest(), "response": response,
+                    "scenario": response["scenario"], "seed": response["seed"]}
         output = write_result(document)
     except Exception as exc:
         print(json.dumps({"status": "FAILED", "error_type": type(exc).__name__}, ensure_ascii=False))
