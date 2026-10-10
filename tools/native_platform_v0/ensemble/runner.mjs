@@ -9,6 +9,18 @@ const example = path.join(root, 'examples/loversAndRivals');
 const dataDir = path.join(example, 'data');
 const names = ['schema', 'cast', 'triggerRules', 'volitionRules', 'actions', 'history'];
 const raw = Object.fromEntries(names.map(n => [n, fs.readFileSync(path.join(dataDir, `${n}.json`), 'utf8')]));
+const P5_PRESET_ENV = 'ENSEMBLE_P5_SOCIAL_PRESET';
+const P5_PRESETS = Object.freeze({
+  native_default_reject_v0: Object.freeze([]),
+  hero_intelligence_30_v0: Object.freeze([
+    Object.freeze({ category: 'attribute', type: 'intelligence', first: 'hero', value: 30 }),
+  ]),
+});
+const p5Preset = process.env[P5_PRESET_ENV] ?? null;
+if (p5Preset !== null && !Object.hasOwn(P5_PRESETS, p5Preset)) {
+  throw new Error(`${P5_PRESET_ENV} must be one of the registered P5 social presets`);
+}
+const p5InitialFacts = p5Preset === null ? [] : P5_PRESETS[p5Preset];
 const source = fs.readFileSync(path.join(example, 'ensemble.js'), 'utf8');
 const context = { console: { log() {}, warn() {}, error() {} } };
 vm.createContext(context);
@@ -22,6 +34,15 @@ engine.addRules(loaded.triggerRules);
 engine.addRules(loaded.volitionRules);
 engine.addActions(loaded.actions);
 engine.addHistory(loaded.history);
+// P5's one optional initial-state patch is applied once, after pinned history
+// loading and before any request can calculate volition. No runtime operation
+// can change this preset; native action commits remain available below.
+if (p5InitialFacts.length) {
+  const initialFacts = validateFacts(p5InitialFacts);
+  for (const fact of initialFacts) {
+    engine.set(vm.runInContext(`JSON.parse(${JSON.stringify(JSON.stringify(fact))})`, context));
+  }
+}
 
 const proposals = new Map();
 const committed = new Set();
@@ -55,6 +76,12 @@ function propose(msg) {
   if (typeof msg.eventId !== 'string' || !msg.eventId.trim()) return reject('eventId is required to bind proposal to a source event');
   if (sourceEvents.has(msg.eventId)) return reject('eventId already used');
   if (!hasChar(msg.actor) || !hasChar(msg.responder)) return reject('unknown actor or responder');
+  if (p5Preset !== null && Array.isArray(msg.facts) && msg.facts.length > 0) {
+    return reject('P5 initial social preset is immutable; runtime facts are forbidden');
+  }
+  if (p5Preset !== null && msg.facts !== undefined && !Array.isArray(msg.facts)) {
+    return reject('facts must be an array');
+  }
   const facts = validateFacts(msg.facts ?? []);
   if (facts.length) revision++;
   for (const fact of facts) engine.set(vm.runInContext(`JSON.parse(${JSON.stringify(JSON.stringify(fact))})`, context));
@@ -221,7 +248,9 @@ for await (const line of rl) {
   try {
     const msg = JSON.parse(line);
     let result;
-    if (msg.op === 'propose') result = propose(msg);
+    if (msg.op === 'hello') result = { ok: true, p5Preset,
+      initialFacts: json(p5InitialFacts), initialStateApplied: p5Preset !== null };
+    else if (msg.op === 'propose') result = propose(msg);
     else if (msg.op === 'authorize') result = authorize(msg);
     else if (msg.op === 'commit') result = commit(msg);
     else if (msg.op === 'request_note') result = requestNote(msg);

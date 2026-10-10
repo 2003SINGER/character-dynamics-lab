@@ -60,7 +60,8 @@ class McpStdioTests(unittest.TestCase):
         names = {tool["name"] for tool in response["result"]["tools"]}
         self.assertEqual(names, {"start_world", "stop_world", "health", "reset_scenario", "pause_scenario", "step_world",
                                  "inject_action", "observe_actor", "get_trace", "run_scenario", "run_c0_scenario",
-                                 "run_c1a_scenario", "run_p4_scenario"})
+                                 "run_c1a_scenario", "run_p4_scenario", "reset_p5_scenario",
+                                 "run_p5_scenario", "edit_author_bundle"})
         self.assertTrue(all(tool["inputSchema"].get("additionalProperties") is False
                             for tool in response["result"]["tools"]))
 

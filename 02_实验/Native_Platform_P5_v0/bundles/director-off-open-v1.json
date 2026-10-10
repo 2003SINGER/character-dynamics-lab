@@ -1,0 +1,16 @@
+{
+  "schema": "native-author-bundle-v1",
+  "bundle_id": "p5-director-off-open",
+  "version": 1,
+  "source": "external-development-bundle-director-disabled-open-world",
+  "constraints": [
+    {"id": "courier-delivery", "kind": "event_by_deadline", "event": "delivery_settled", "filters": {"actor": "A", "item": "courier_supply"}, "start": 0, "deadline": 24, "hard": true},
+    {"id": "resident-delivery", "kind": "event_by_deadline", "event": "delivery_settled", "filters": {"actor": "B", "item": "resident_parcel"}, "start": 0, "deadline": 24, "hard": true},
+    {"id": "native-note-response", "kind": "event_by_deadline", "event": "note_response", "filters": {"actor": "A", "recipient": "B", "item": "note"}, "start": 0, "deadline": 24, "hard": true}
+  ],
+  "branches": [
+    {"id": "accepted-note", "when": {"event": "note_response", "response": "accepted"}, "storylet": {"id": "note-accepted-v1", "text": "The note is accepted."}},
+    {"id": "rejected-note", "when": {"event": "note_response", "response": "rejected"}, "storylet": {"id": "note-declined-v1", "text": "The note is declined."}}
+  ],
+  "permissions": {"world_opportunities": [], "force_npc_response": false, "max_opportunities": 1, "cost_budget": 0}
+}

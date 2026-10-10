@@ -44,6 +44,12 @@ SAFE_P3_KEYS = (
     "p4_social_attempted", "p4_social_status", "p4_social_result", "p4_note_request_id",
     "p4_note_source_event_id", "p4_note_status", "p4_note_action", "p4_note_response_event_id",
     "p4_note_initiator_id", "p4_note_recipient_id",
+    "p5_scene_id", "p5_side_room_id", "p5_active_bundle", "p5_entities",
+    "p5_bundle_archive", "p5_spent_cost", "p5_opportunities_used",
+    "p5_event_coverage_minute", "p5_snapshot_coverage_minute", "p5_completed_minutes",
+    "p5_director_enabled", "p5_horizon", "p5_shared_supply", "p5_world_snapshots",
+    "p5_actor_alias", "p5_task_item_alias", "p5_native_social_preset",
+    "p5_social_target_alias", "p5_delivery_task", "p5_item_alias", "p5_route_id",
 )
 
 
@@ -205,6 +211,9 @@ class P3Control:
             "run_c0_scenario": self.run_c0_scenario,
             "run_c1a_scenario": self.run_c1a_scenario,
             "run_p4_scenario": self.run_p4_scenario,
+            "reset_p5_scenario": self.reset_p5_scenario,
+            "run_p5_scenario": self.run_p5_scenario,
+            "edit_author_bundle": self.edit_author_bundle,
             "step_world": self.step_world,
             "inject_action": self.inject_action,
             "observe_actor": self.observe_actor,
@@ -214,6 +223,47 @@ class P3Control:
         if op not in handlers:
             raise ValueError("unsupported operation")
         return handlers[op](args)
+
+    def reset_p5_scenario(self, args):
+        allowed = {"bundle", "initial_social_preset", "horizon", "seed", "director_enabled",
+                   "shared_supply", "initial_main_open"}
+        if set(args) - allowed or "bundle" not in args:
+            raise ValueError("reset_p5_scenario requires bundle and only registered P5 options")
+        if self.created_scenes >= MAX_SCENES_PER_PROCESS:
+            raise ValueError("scene creation limit reached for this server process")
+        from tools.native_platform_v0.p5.service import reset_p5_scenario
+        created = reset_p5_scenario(owner=_owner_account(), **args)
+        if isinstance(created, dict) and created.get("ok") is False:
+            return created
+        self.created_scenes += 1
+        return {"ok": True, "scene": created}
+
+    def run_p5_scenario(self, args):
+        allowed = {"bundle", "initial_social_preset", "horizon", "interventions", "edits",
+                   "director_enabled", "seed", "shared_supply", "initial_main_open"}
+        if set(args) - allowed or not {"bundle", "initial_social_preset", "horizon"}.issubset(args):
+            raise ValueError("run_p5_scenario requires bundle, initial_social_preset, horizon")
+        if self.created_scenes >= MAX_SCENES_PER_PROCESS:
+            raise ValueError("scene creation limit reached for this server process")
+        from tools.native_platform_v0.p5.service import run_p5_scenario
+        result = run_p5_scenario(owner=_owner_account(), **args)
+        if isinstance(result, dict) and result.get("ok") is False:
+            return result
+        self.created_scenes += 1
+        return result
+
+    def edit_author_bundle(self, args):
+        if set(args) != {"scene_id", "raw_bundle", "expected_version"}:
+            raise ValueError("edit_author_bundle requires scene_id/raw_bundle/expected_version")
+        scene_id = _validate_scene_id(args["scene_id"])
+        account, objects = _load_scene(scene_id)
+        pickup = next((obj for obj in objects
+                       if obj.attributes.get("p5_scene_id", category="native_p3", default=None) == scene_id), None)
+        if pickup is None:
+            raise ValueError("edit_author_bundle is available only for a P5-owned generated scene")
+        from tools.native_platform_v0.p5.service import edit_author_bundle
+        result = edit_author_bundle(scene_id, args["raw_bundle"], args["expected_version"])
+        return result
 
     def health(self, args):
         if args:
@@ -382,13 +432,22 @@ class P3Control:
 
     @defer.inlineCallbacks
     def step_world(self, args):
-        if set(args) - {"scene_id", "rounds"}:
-            raise ValueError("step_world accepts only scene_id and rounds")
+        if set(args) - {"scene_id", "rounds", "interventions", "edits"}:
+            raise ValueError("step_world accepts scene_id, rounds, and optional P5 interventions/edits")
         scene_id = _validate_scene_id(args.get("scene_id"))
         rounds = args.get("rounds", 1)
         if type(rounds) is not int or not (1 <= rounds <= 50):
             raise ValueError("rounds must be an integer from 1 through 50")
         account, objects = _load_scene(scene_id)
+        pickup = next((obj for obj in objects
+                       if obj.attributes.get("p5_scene_id", category="native_p3", default=None) == scene_id), None)
+        if pickup is not None:
+            from tools.native_platform_v0.p5.service import step_world
+            return step_world(scene_id, rounds=rounds,
+                              interventions=args.get("interventions", ()),
+                              edits=args.get("edits", ()))
+        if args.get("interventions") or args.get("edits"):
+            raise ValueError("scheduled interventions/edits are available only for P5 scenes")
         actors = _role_actor_rows(objects, account.id)
         runners = [actors[role] for role in ("courier", "resident") if role in actors]
         if not runners:
@@ -432,8 +491,10 @@ class P3Control:
             if set(args) - {"scene_id", "actor_role", "operation", "direction"}:
                 raise ValueError("move accepts only a direction")
             direction = args.get("direction")
-            if direction not in ("east", "west") or actor.location is None:
-                raise ValueError("direction must be an available generated east/west exit")
+            p5_actor = actor.attributes.get("activity_profile", category="native_p3", default=None) == "p5_story_v0"
+            allowed_directions = {"east", "west", "north", "south"} if p5_actor else {"east", "west"}
+            if direction not in allowed_directions or actor.location is None:
+                raise ValueError("direction must be available from the actor's current generated room")
             edge = next((exit_obj for exit_obj in actor.location.exits
                          if exit_obj.key == direction and exit_obj.destination and
                          exit_obj.attributes.get("p3_scene_id", category="native_p3") == scene_id), None)
@@ -509,6 +570,14 @@ class P3Control:
             raise ValueError("get_trace requires only scene_id")
         scene_id = _validate_scene_id(args["scene_id"])
         account, objects = _load_scene(scene_id)
+        pickup = next((obj for obj in objects
+                       if obj.attributes.get("p5_scene_id", category="native_p3", default=None) == scene_id), None)
+        if pickup is not None:
+            from tools.native_platform_v0.p5.service import get_trace as get_p5_trace
+            evidence = get_p5_trace(scene_id)
+            evidence["source"] = "P5 TypedIR projection over live Evennia and complete server ledger/snapshot prefixes"
+            evidence["account_fields_exported"] = False
+            return _json_safe(evidence)
         rows = []
         for obj in objects:
             attrs = {}
@@ -519,6 +588,13 @@ class P3Control:
             social = obj.attributes.get("native_social_events", category="native_social", default=[])
             if social:
                 attrs["native_social_events"] = _json_safe(social)
+            p5 = {}
+            for key in SAFE_P3_KEYS:
+                value = obj.attributes.get(key, category="native_p5", default=None)
+                if value is not None:
+                    p5[key] = _json_safe(value)
+            if p5:
+                attrs["native_p5"] = p5
             rows.append({"id": int(obj.id), "dbref": str(obj.dbref), "key": str(obj.key),
                          "typeclass_path": str(obj.db_typeclass_path),
                          "location_id": int(obj.location.id) if obj.location else None,

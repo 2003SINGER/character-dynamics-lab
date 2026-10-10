@@ -12,6 +12,7 @@ from collections.abc import Mapping
 
 PRODUCER_VERSION = "native-p4-ledger-v1"
 P4_PROFILE = "p4_story_v0"
+P5_PROFILE = "p5_story_v0"
 
 
 def _attr(obj, key, default=None):
@@ -38,10 +39,13 @@ def pickup_for_scene(scene_id):
 
 def clock_for_actor(actor):
     """Return a copy of the current scene clock; expose no peer state."""
-    if _attr(actor, "activity_profile") != P4_PROFILE:
+    profile = _attr(actor, "activity_profile")
+    if profile not in (P4_PROFILE, P5_PROFILE):
         raise ValueError("P4 clock is available only to p4_story_v0 actors")
     scene_id = _attr(actor, "scene_id")
     pickup, _ = pickup_for_scene(scene_id)
+    if profile == P5_PROFILE and _attr(pickup, "p5_scene_id") != scene_id:
+        raise ValueError("P5 clock access requires a P5-owned generated scene")
     clock = pickup.attributes.get("p4_clock", category="native_p3")
     return {"now": int(clock["now"]), "unit": str(clock["unit"]),
             "step_minutes": int(clock["step_minutes"]), "deadline": int(clock["deadline"])}

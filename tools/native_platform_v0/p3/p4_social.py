@@ -23,6 +23,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 RUNNER = PROJECT_ROOT / "tools/native_platform_v0/ensemble/runner.mjs"
 NODE = os.environ.get("ENSEMBLE_NODE") or shutil.which("node") or "/opt/homebrew/bin/node"
 MAX_REQUEST_SECONDS = 5.0
+P5_PRESET_ENV = "ENSEMBLE_P5_SOCIAL_PRESET"
+P5_PRESETS = {
+    "native_default_reject_v0": [],
+    "hero_intelligence_30_v0": [{
+        "category": "attribute", "type": "intelligence", "first": "hero", "value": 30,
+    }],
+}
 _CLIENTS: dict[str, "P4EnsembleClient"] = {}
 _CLIENT_LOCK = threading.RLock()
 _P4_ACTIONS = {"writeLoveNoteAccept", "writeLoveNoteReject"}
@@ -31,10 +38,18 @@ _P4_ACTIONS = {"writeLoveNoteAccept", "writeLoveNoteReject"}
 class P4EnsembleClient:
     """One P4-only runner per scene, with bounded JSONL round trips and HMAC."""
 
-    def __init__(self, timeout: float = MAX_REQUEST_SECONDS):
+    def __init__(self, timeout: float = MAX_REQUEST_SECONDS, p5_preset: str | None = None):
+        if p5_preset is not None and p5_preset not in P5_PRESETS:
+            raise ValueError("unsupported P5 native social preset")
         self.timeout = min(float(timeout), MAX_REQUEST_SECONDS)
+        self.p5_preset = p5_preset
         self.secret = secrets.token_hex(32)
         env = os.environ.copy()
+        # A P4 process must remain legacy even if the parent environment happens
+        # to contain the P5-only selector.
+        env.pop(P5_PRESET_ENV, None)
+        if p5_preset is not None:
+            env[P5_PRESET_ENV] = p5_preset
         env["ENSEMBLE_BRIDGE_SECRET"] = self.secret
         self.proc = subprocess.Popen(
             [NODE, str(RUNNER)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -42,6 +57,13 @@ class P4EnsembleClient:
         )
         self._buffer = bytearray()
         self._lock = threading.RLock()
+        if p5_preset is not None:
+            hello = self.request({"op": "hello"})
+            if (hello.get("ok") is not True or hello.get("p5Preset") != p5_preset
+                    or hello.get("initialStateApplied") is not True
+                    or hello.get("initialFacts") != P5_PRESETS[p5_preset]):
+                self.invalidate()
+                raise RuntimeError("P5 Ensemble runner did not confirm its immutable initial preset")
 
     def request(self, payload):
         with self._lock:
@@ -109,11 +131,15 @@ def _record(actor, event):
     record(actor, event)
 
 
-def _client(scene_id):
+def _client(scene_id, p5_preset=None):
+    if p5_preset is not None and p5_preset not in P5_PRESETS:
+        raise ValueError("unsupported P5 native social preset")
     with _CLIENT_LOCK:
         client = _CLIENTS.get(scene_id)
+        if client is not None and client.p5_preset != p5_preset:
+            raise RuntimeError("native social preset cannot change within a scene runner")
         if client is None or client.proc.poll() is not None:
-            client = P4EnsembleClient()
+            client = P4EnsembleClient(p5_preset=p5_preset)
             _CLIENTS[scene_id] = client
         return client
 
@@ -183,6 +209,8 @@ def _request_note(actor, target, client):
                     ("p4_note_initiator_id", int(actor.id), "native_p3"),
                     ("p4_note_recipient_id", int(target.id), "native_p3")],
     )
+    if _value(actor, "activity_profile") == "p5_story_v0":
+        note.attributes.add("p5_item_alias", "note", category="native_p5")
     before_location_id = int(note.db_location_id) if note.db_location_id else None
     moved = bool(note.move_to(target, quiet=True))
     settled = moved and note.db_location_id == target.id and note in target.contents
@@ -393,11 +421,15 @@ def _respond_to_note(actor, note, client):
 
 
 def step_social(actor) -> bool:
-    """Consume a P4 actor callback only for a local, supported social transition."""
-    if _value(actor, "activity_profile") != "p4_story_v0":
+    """Consume a P4/P5 actor callback only for a local, supported social transition."""
+    profile = _value(actor, "activity_profile")
+    if profile not in {"p4_story_v0", "p5_story_v0"}:
         return False
     if _value(actor, "mode") != "b" or _value(actor, "drive_mode") != "manual":
         return False
+    p5_preset = _value(actor, "p5_native_social_preset") if profile == "p5_story_v0" else None
+    if profile == "p5_story_v0" and p5_preset not in P5_PRESETS:
+        raise ValueError("P5 actor is missing a registered immutable native social preset")
     role = actor.attributes.get("ensemble_character_id", category="ensemble_bridge", default=None)
     scene_id = _value(actor, "scene_id")
     if role == "hero":
@@ -409,7 +441,7 @@ def step_social(actor) -> bool:
         if _value(actor, "p4_social_attempted", False):
             return False
         try:
-            return _request_note(actor, target, _client(scene_id))
+            return _request_note(actor, target, _client(scene_id, p5_preset))
         except TimeoutError as err:
             result = {"status": "UNAVAILABLE", "error": str(err), "reason": "native request timed out"}
             _set(actor, "p4_social_status", "UNAVAILABLE")
@@ -430,7 +462,7 @@ def step_social(actor) -> bool:
         if note is None:
             return False
         try:
-            return _respond_to_note(actor, note, _client(scene_id))
+            return _respond_to_note(actor, note, _client(scene_id, p5_preset))
         except TimeoutError as err:
             _set(note, "p4_note_status", "response_unavailable")
             result = {"status": "UNAVAILABLE", "decision": "unavailable",

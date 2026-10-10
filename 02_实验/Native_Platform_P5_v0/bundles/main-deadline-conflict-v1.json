@@ -1,0 +1,11 @@
+{
+  "schema": "native-author-bundle-v1",
+  "bundle_id": "p5-main-deadline-conflict",
+  "version": 1,
+  "source": "external-development-bundle-deadline-negative",
+  "constraints": [
+    {"id": "main-route-open-too-soon", "kind": "state_by_deadline", "observable": "route_open", "args": {"route": "main_passage"}, "value": true, "start": 0, "deadline": 0, "hard": true}
+  ],
+  "branches": [],
+  "permissions": {"world_opportunities": ["open_main_passage"], "force_npc_response": false, "max_opportunities": 1, "cost_budget": 2}
+}

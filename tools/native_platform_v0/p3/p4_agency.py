@@ -133,8 +133,8 @@ def make_decision_view(actor):
 
     view = observe_actor(actor)
     observation = view["observation"]
-    if view["activity_contract"].get("profile") != "p4_story_v0":
-        raise ValueError("P4 agency received an actor outside p4_story_v0")
+    if view["activity_contract"].get("profile") not in {"p4_story_v0", "p5_story_v0"}:
+        raise ValueError("P4/P5 HTN adapter received an actor outside its native scene profiles")
     if any("traversable" not in row for row in observation.get("exits", ())):
         raise ValueError("P4 local observation is missing native exit traversability")
     return view
@@ -153,7 +153,7 @@ def step_actor(actor):
     tick = get_value(actor, "tick_count", 0) + 1
     set_value(actor, "tick_count", tick)
     _record_clocked(actor, {"kind": "timer_tick", "tick": tick, "status_before": status,
-                            "activity_profile": "p4_story_v0"}, clock_fields)
+                            "activity_profile": get_value(actor, "activity_profile")}, clock_fields)
 
     pending = get_value(actor, "pending_action")
     if pending:

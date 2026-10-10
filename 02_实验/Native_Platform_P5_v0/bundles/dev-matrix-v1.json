@@ -1,0 +1,139 @@
+{
+  "schema": "native-p5-run-suite-v1",
+  "suite_id": "native-p5-development-matrix-v1",
+  "source": "external-development-matrix",
+  "runs": [
+    {
+      "id": "side-reject",
+      "bundle": "side-route-long-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": false,
+      "expect": {"hard_status": "SATISFIED", "goal_statuses": {"side-route-open": "SATISFIED", "courier-delivery": "SATISFIED", "resident-delivery": "SATISFIED", "native-note-response": "SATISFIED"}, "route_traversed": "side_passage", "delivery_actors": ["A", "B"], "note_response": true, "note_decisions": ["rejected"]}
+    },
+    {
+      "id": "side-accept",
+      "bundle": "side-route-long-v1.json",
+      "initial_social_preset": "hero_intelligence_30_v0",
+      "horizon": 24,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": false,
+      "expect": {"hard_status": "SATISFIED", "goal_statuses": {"side-route-open": "SATISFIED", "courier-delivery": "SATISFIED", "resident-delivery": "SATISFIED", "native-note-response": "SATISFIED"}, "route_traversed": "side_passage", "delivery_actors": ["A", "B"], "note_response": true, "note_decisions": ["accepted"]}
+    },
+    {
+      "id": "main-reject",
+      "bundle": "main-route-tight-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": false,
+      "expect": {"hard_status": "SATISFIED", "goal_statuses": {"main-route-open": "SATISFIED", "courier-delivery": "SATISFIED", "resident-delivery": "SATISFIED", "native-note-response": "SATISFIED"}, "route_traversed": "main_passage", "delivery_actors": ["A", "B"], "note_response": true, "note_decisions": ["rejected"]}
+    },
+    {
+      "id": "main-accept",
+      "bundle": "main-route-tight-v1.json",
+      "initial_social_preset": "hero_intelligence_30_v0",
+      "horizon": 24,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": false,
+      "expect": {"hard_status": "SATISFIED", "goal_statuses": {"main-route-open": "SATISFIED", "courier-delivery": "SATISFIED", "resident-delivery": "SATISFIED", "native-note-response": "SATISFIED"}, "route_traversed": "main_passage", "delivery_actors": ["A", "B"], "note_response": true, "note_decisions": ["accepted"]}
+    },
+    {
+      "id": "director-off-blocked",
+      "bundle": "side-route-long-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 8,
+      "seed": 20261010,
+      "director_enabled": false,
+      "initial_main_open": false,
+      "expect": {"hard_status": "VIOLATED", "goal_statuses": {"side-route-open": "VIOLATED"}, "route_traversed": null, "delivery_actors": [], "note_response": false, "no_route_opportunity": true}
+    },
+    {
+      "id": "shared-supply-stolen-returned",
+      "bundle": "side-route-shared-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": false,
+      "shared_supply": true,
+      "interventions": [
+        {"at": 1, "kind": "player_command", "operation": "get", "item_alias": "courier_supply"},
+        {"at": 4, "kind": "player_command", "operation": "drop", "item_alias": "courier_supply"}
+      ],
+      "expect": {"hard_status": "SATISFIED", "goal_statuses": {"side-route-open": "SATISFIED", "courier-delivery": "SATISFIED", "shared-resident-delivery": "SATISFIED", "native-note-response": "SATISFIED"}, "route_traversed": "side_passage", "delivery_actors": ["A", "B"], "note_response": true, "note_decisions": ["rejected"], "player_interventions": [{"operation": "get", "item_alias": "courier_supply"}, {"operation": "drop", "item_alias": "courier_supply"}]}
+    },
+    {
+      "id": "future-edit-and-stale-cas",
+      "bundle": "main-route-tight-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": true,
+      "edits": [
+        {"at": 2, "expected_version": 1, "bundle": "main-route-after-edit-v2.json"},
+        {"at": 3, "expected_version": 1, "bundle": "main-route-after-edit-v2.json"}
+      ],
+      "expect": {"hard_status": "SATISFIED", "goal_statuses": {"main-route-open": "SATISFIED", "side-route-after-edit": "SATISFIED"}, "opportunity_route": "side_passage", "route_traversed": "main_passage", "delivery_actors": ["A", "B"], "note_response": true, "note_decisions": ["rejected"]}
+    },
+    {
+      "id": "restricted-opportunity-denied",
+      "bundle": "side-only-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": false,
+      "interventions": [
+        {"at": 1, "kind": "author_opportunity", "operation": "open_passage", "opportunity_id": "open_main_passage"}
+      ],
+      "expect": {"route_traversed": "side_passage", "delivery_actors": ["A", "B"], "note_response": true, "note_decisions": ["rejected"], "denied_author_opportunities": ["open_main_passage"]}
+    },
+    {
+      "id": "zero-budget-negative",
+      "bundle": "side-zero-budget-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 4,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": false,
+      "expect": {"hard_status": "VIOLATED", "goal_statuses": {"side-route-open": "VIOLATED"}, "route_traversed": null, "delivery_actors": [], "note_response": false, "no_route_opportunity": true}
+    },
+    {
+      "id": "deadline-conflict-negative",
+      "bundle": "main-deadline-conflict-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 4,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": false,
+      "expect": {"hard_status": "VIOLATED", "goal_statuses": {"main-route-open-too-soon": "VIOLATED"}, "route_traversed": null, "delivery_actors": [], "note_response": false, "no_route_opportunity": true}
+    },
+    {
+      "id": "conflicting-route-goals",
+      "bundle": "conflicting-routes-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261010,
+      "director_enabled": true,
+      "initial_main_open": false,
+      "expect": {"hard_status": "VIOLATED", "goal_statuses": {"main-route-open": "VIOLATED", "side-route-open": "VIOLATED"}, "route_traversed": null, "delivery_actors": [], "note_response": false, "no_route_opportunity": true}
+    },
+    {
+      "id": "director-off-open-world-autonomy",
+      "bundle": "director-off-open-v1.json",
+      "initial_social_preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261010,
+      "director_enabled": false,
+      "initial_main_open": true,
+      "expect": {"hard_status": "SATISFIED", "goal_statuses": {"courier-delivery": "SATISFIED", "resident-delivery": "SATISFIED", "native-note-response": "SATISFIED"}, "route_traversed": "main_passage", "delivery_actors": ["A", "B"], "note_response": true, "note_decisions": ["rejected"], "no_route_opportunity": true}
+    }
+  ]
+}

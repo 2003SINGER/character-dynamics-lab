@@ -1,0 +1,12 @@
+{
+  "schema": "native-author-bundle-v1",
+  "bundle_id": "p5-conflicting-routes",
+  "version": 1,
+  "source": "external-development-bundle-incompatible-hard-world-goals",
+  "constraints": [
+    {"id": "main-route-open", "kind": "state_by_deadline", "observable": "route_open", "args": {"route": "main_passage"}, "value": true, "start": 0, "deadline": 24, "hard": true},
+    {"id": "side-route-open", "kind": "state_by_deadline", "observable": "route_open", "args": {"route": "side_passage"}, "value": true, "start": 0, "deadline": 24, "hard": true}
+  ],
+  "branches": [],
+  "permissions": {"world_opportunities": ["open_main_passage", "open_side_passage"], "force_npc_response": false, "max_opportunities": 1, "cost_budget": 2}
+}

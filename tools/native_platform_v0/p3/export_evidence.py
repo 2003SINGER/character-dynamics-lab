@@ -26,7 +26,9 @@ RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P3_v0/runs"
 C0_RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P3_C0_v0/runs"
 C1A_RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P3_C1a_v0/runs"
 P4_RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P4_0_v0/runs"
+P5_RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P5_v0/runs"
 EXPORTED_CATEGORIES = {"native_p3", "native_social"}
+P5_EXPORTED_CATEGORIES = EXPORTED_CATEGORIES | {"native_p5"}
 SENSITIVE_KEY_PARTS = (
     "account", "password", "passwd", "session", "secret", "hmac", "credential",
     "settings", "token",
@@ -70,12 +72,12 @@ def _scene_queryset(ObjectDB, scene_id: str):
     ).distinct().order_by("id")
 
 
-def _persisted_attributes(obj) -> dict[str, dict[str, Any]]:
+def _persisted_attributes(obj, categories: set[str]) -> dict[str, dict[str, Any]]:
     """Read allowed categories through the ORM relation, bypassing AttributeHandler caches."""
-    result: dict[str, dict[str, Any]] = {category: {} for category in EXPORTED_CATEGORIES}
+    result: dict[str, dict[str, Any]] = {category: {} for category in categories}
     rows = obj.db_attributes.filter(
         db_model="objectdb", db_attrtype__isnull=True,
-        db_category__in=EXPORTED_CATEGORIES,
+        db_category__in=categories,
     ).order_by("db_category", "db_key", "id")
     for row in rows:
         key = str(row.db_key)
@@ -105,7 +107,7 @@ def _object_row(obj, attributes: dict[str, dict[str, Any]], scene_object_ids: se
     }
 
 
-def collect_scenes(scene_ids: list[str]) -> dict[str, Any]:
+def collect_scenes(scene_ids: list[str], *, categories: set[str] = EXPORTED_CATEGORIES) -> dict[str, Any]:
     """Query persisted Evennia state for the exact requested scene IDs."""
     if not GAME_ROOT.is_dir():
         raise RuntimeError(f"initialized Evennia game directory not found: {GAME_ROOT}")
@@ -145,7 +147,7 @@ def collect_scenes(scene_ids: list[str]) -> dict[str, Any]:
         object_ids = {int(obj.id) for obj in exact_objects}
         rows = []
         for obj in exact_objects:
-            attrs = _persisted_attributes(obj)
+            attrs = _persisted_attributes(obj, categories)
             rows.append(_object_row(obj, attrs, object_ids))
         exported.append({"scene_id": scene_id, "objects": rows})
 
@@ -154,7 +156,7 @@ def collect_scenes(scene_ids: list[str]) -> dict[str, Any]:
         "exported_at": datetime.now(timezone.utc).isoformat(),
         "source": "initialized Evennia Django ORM; SQLite query_only enabled",
         "selection": {"mode": "explicit_scene_id_allowlist", "scene_ids": list(scene_ids)},
-        "included_categories": sorted(EXPORTED_CATEGORIES),
+        "included_categories": sorted(categories),
         "sensitive_fields": "account/session/password/settings/credential/token/HMAC-like keys omitted",
         "logs": "full persisted lists retained; no tail truncation",
         "scenes": exported,
@@ -208,14 +210,19 @@ def main(argv: list[str] | None = None) -> int:
         "--p4", action="store_true",
         help="write the export under the separate Native_Platform_P4_0_v0/runs directory",
     )
+    parser.add_argument(
+        "--p5", action="store_true",
+        help="include the P5 category and write under Native_Platform_P5_v0/runs",
+    )
     args = parser.parse_args(argv)
     try:
-        if sum((args.c0, args.c1a, args.p4)) > 1:
-            raise ValueError("--c0, --c1a, and --p4 are mutually exclusive")
+        if sum((args.c0, args.c1a, args.p4, args.p5)) > 1:
+            raise ValueError("--c0, --c1a, --p4, and --p5 are mutually exclusive")
         scene_ids = _validate_scene_ids(args.scene_id)
-        document = collect_scenes(scene_ids)
-        output_dir = (P4_RUNS_DIR if args.p4 else C1A_RUNS_DIR if args.c1a
-                      else C0_RUNS_DIR if args.c0 else RUNS_DIR)
+        categories = P5_EXPORTED_CATEGORIES if args.p5 else EXPORTED_CATEGORIES
+        document = collect_scenes(scene_ids, categories=categories)
+        output_dir = (P5_RUNS_DIR if args.p5 else P4_RUNS_DIR if args.p4 else
+                      C1A_RUNS_DIR if args.c1a else C0_RUNS_DIR if args.c0 else RUNS_DIR)
         output = write_unique_export(document, output_dir)
     except Exception as err:
         parser.error(str(err))

@@ -14,7 +14,7 @@ jobs:
       contents: read
     env:
       PYTHONDONTWRITEBYTECODE: '1'
-      PYTHONPATH: .:tools/native_platform_v0/bridge
+      PYTHONPATH: .:tools:tools/native_platform_v0/bridge
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,3 +36,7 @@ jobs:
         run: python -B -m unittest discover -s tools/native_platform_v0/bridge -p 'test_social.py' -v
       - name: P4 native Ensemble source and scene bridge tests
         run: python -B -m unittest tools.native_platform_v0.bridge.test_p4_social -v
+      - name: P5 native Ensemble startup preset tests
+        run: python -B -m unittest tools.native_platform_v0.bridge.test_p5_social -v
+      - name: P5 external bundle runner and evidence audit tests
+        run: python -B -m unittest discover -s tools/native_platform_v0/p5/tests -v

@@ -54,7 +54,7 @@ def observe_actor(actor):
     inventory = [_obj_ref(obj) for obj in actor.contents]
     visible_items = []
     current_exit_rows = []
-    p4_profile = activity_profile == "p4_story_v0"
+    p4_profile = activity_profile in ("p4_story_v0", "p5_story_v0")
     for obj in room.contents:
         if obj.id == actor.id:
             continue
@@ -109,8 +109,17 @@ def observe_actor(actor):
     if item_id is not None:
         task_item = {"id": item_id, "key": (observed_item or held_item or {}).get(
             "key", _get(actor, "task_item_key"))}
-    delivered = bool(observed_item and room.id == destination_id)
     own_delivery_receipts = list(_get(actor, "native_receipts", []))
+    delivered = bool(observed_item and room.id == destination_id)
+    if activity_profile == "p5_story_v0":
+        # A player placing an item at its destination is visible W state, not
+        # proof that this actor completed its assigned task.
+        delivered = any(
+            row.get("kind") == "drop" and row.get("settled") is True
+            and str(row.get("item_id")) == str(item_id)
+            and row.get("after_item_room_id") == destination_id
+            for row in own_delivery_receipts
+        )
     observation = {
         "room_id": room.id,
         "inventory": inventory,
@@ -338,8 +347,8 @@ def _dispatch_pending(actor, pending):
             profile = view.get("activity_contract", {}).get("profile")
             prior_item = view.get("observation", {}).get("task_item", {})
             is_recovery_profile = profile == "delivery_patrol_recovery_v0"
-            is_p4_profile = profile == "p4_story_v0"
-            allows_native_missing_get = is_recovery_profile or is_p4_profile
+            is_native_scene_profile = profile in ("p4_story_v0", "p5_story_v0")
+            allows_native_missing_get = is_recovery_profile or is_native_scene_profile
             was_locally_visible = any(
                 str(row.get("id")) == str(item_id)
                 for row in view.get("observation", {}).get("visible_items", ())
@@ -432,7 +441,8 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
                "submitted_command": pending.get("submitted_command"),
                "before_inventory_ids": before_inventory, "after_inventory_ids": after_inventory,
                "dispatch_succeeded": dispatch_succeeded, "settled": settled}
-    if get_value(actor, "activity_profile", "legacy_delivery_v0") == "p4_story_v0":
+    profile = get_value(actor, "activity_profile", "legacy_delivery_v0")
+    if profile in ("p4_story_v0", "p5_story_v0"):
         # P4 has an explicit simulated clock. Keep this annotation P4-only so old
         # receipt formats remain byte-for-byte compatible.
         from .p4_world import clock_for_actor
@@ -460,7 +470,8 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
         state = get_value(actor, "patrol_rejected_state")
         if not settled:
             move_view = pending["view"]["observation"]
-            p4_profile = pending.get("view", {}).get("activity_contract", {}).get("profile") == "p4_story_v0"
+            p4_profile = pending.get("view", {}).get("activity_contract", {}).get("profile") in {
+                "p4_story_v0", "p5_story_v0"}
             signature = sorted(
                 (str(edge["key"]), int(edge["destination_id"]), bool(edge.get("traversable")))
                 if p4_profile else (str(edge["key"]), int(edge["destination_id"]))
@@ -478,9 +489,14 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
             set_value(actor, "patrol_rejected_state", None)
     settlement = {"kind": "execution_settlement", "status": status, "intent": intent,
                   "receipt": receipt, "detail": detail}
-    if get_value(actor, "activity_profile", "legacy_delivery_v0") == "p4_story_v0":
+    profile = get_value(actor, "activity_profile", "legacy_delivery_v0")
+    if profile in ("p4_story_v0", "p5_story_v0"):
         settlement.update({"sim_minute": receipt["sim_minute"], "deadline": receipt["deadline"],
                            "time_unit": receipt["time_unit"]})
+    if (profile == "p5_story_v0" and intent["operator"] == "drop" and settled):
+        from tools.native_platform_v0.p5.world import record_delivery_receipt
+
+        record_delivery_receipt(actor, receipt)
     record(actor, settlement)
 
 
@@ -589,6 +605,9 @@ class P3AutonomyScript(DefaultScript):
         if get_value(actor, "activity_profile", "legacy_delivery_v0") == "p4_story_v0":
             from .p4_agency import step_actor as step_p4_actor
             return step_p4_actor(actor)
+        if get_value(actor, "activity_profile", "legacy_delivery_v0") == "p5_story_v0":
+            from tools.native_platform_v0.p5.agency import step_actor as step_p5_actor
+            return step_p5_actor(actor)
         status = get_value(actor, "status", "RUNNING")
         if status == "PAUSED":
             return

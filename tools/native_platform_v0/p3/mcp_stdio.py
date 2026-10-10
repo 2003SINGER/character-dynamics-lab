@@ -87,6 +87,34 @@ TOOLS = [
          "director_enabled": {"type": "boolean"},
          "seed": {"type": "integer", "enum": [20261010, 20261011]}},
          "required": ["case", "director_enabled", "seed"], "additionalProperties": False}},
+    {"name": "reset_p5_scenario", "description": "Create one isolated P5 scene from a validated external author bundle; no global world reset.",
+     "inputSchema": {"type": "object", "properties": {
+         "bundle": {"type": "object"},
+         "initial_social_preset": {"type": "string", "enum": ["native_default_reject_v0", "hero_intelligence_30_v0"]},
+         "horizon": {"type": "integer", "minimum": 1, "maximum": 24},
+         "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+         "director_enabled": {"type": "boolean"},
+         "shared_supply": {"type": "boolean"},
+         "initial_main_open": {"type": "boolean"}},
+         "required": ["bundle"], "additionalProperties": False}},
+    {"name": "run_p5_scenario", "description": "Run a bounded P5 bundle through native server callbacks and return raw evidence, not a semantic verdict.",
+     "inputSchema": {"type": "object", "properties": {
+         "bundle": {"type": "object"},
+         "initial_social_preset": {"type": "string", "enum": ["native_default_reject_v0", "hero_intelligence_30_v0"]},
+         "horizon": {"type": "integer", "minimum": 1, "maximum": 24},
+         "interventions": {"type": "array", "items": {"type": "object"}},
+         "edits": {"type": "array", "items": {"type": "object"}},
+         "director_enabled": {"type": "boolean"},
+         "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+         "shared_supply": {"type": "boolean"},
+         "initial_main_open": {"type": "boolean"}},
+         "required": ["bundle", "initial_social_preset", "horizon"], "additionalProperties": False}},
+    {"name": "edit_author_bundle", "description": "Attempt one version-checked P5 author-bundle edit on a named generated scene.",
+     "inputSchema": {"type": "object", "properties": {
+         "scene_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,80}$"},
+         "raw_bundle": {"type": "object"},
+         "expected_version": {"type": "integer", "minimum": 1}},
+         "required": ["scene_id", "raw_bundle", "expected_version"], "additionalProperties": False}},
 ]
 TOOL_BY_NAME = {tool["name"]: tool for tool in TOOLS}
 
