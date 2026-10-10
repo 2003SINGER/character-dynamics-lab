@@ -47,7 +47,7 @@ _local_data/native_platform_v0/evennia/venv/bin/python -m tools.native_platform_
 
 上述 headless runner 需先有本地 Evennia 服务及已安装的 scoped hook；服务入口为 `tools/native_platform_v0/evennia/start_loopback.sh`。复制场景后，应将 runner 输出的新 run 路径与 `export_evidence.py --scene-id <该次场景ID>` 生成的 DB readback 一并提供给审计器；审计器要求精确七份输入，包括当前四场景、timer、MCP 和历史 stale-target 负控。真实 callback 次数不等于经过了同等数量的游戏内时间；场景只验证一个作者给定配送目标及其完成后的单次 social 尝试，不构成日常生活自治。Ensemble 共用记录含三个符号人物，Evennia 中实际控制的只有两个 NPC；仅支持本次验证的两种原生 social action。
 
-CI/本地测试边界：当前 P3 Python contract suite 为 19/19，bridge social suite 为 9/9，父级对原 runner wrapper assertions 28 项通过。它们是测试证据，不替代上列实际运行；本次 workflow 尚未由远端 CI 执行验证，不能写成 CI PASS。
+CI/本地测试边界：当前 P3 Python contract suite 为 19/19，bridge social suite 为 9/9，父级对原 runner wrapper assertions 28 项通过。源码提交 [`a214817`](https://github.com/2003SINGER/character-dynamics-lab/commit/a2148170262181c7238f7b573229b37cd8854b7b) 的 [native-platform-p3 workflow #38018330610](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38018330610) 成功。独立 [runtime-regression workflow #38018330609](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38018330609) 总体失败，但其余 5 个 job 成功；唯一失败为既有 `e0-keyledger-contract`：GitHub Ubuntu CI 日志 37/38 unit、13/14 fixture 通过，H02 实际 `planner status BUDGET` 与预期 `UNREACHABLE` 不符。该有限预算差异保留为未解决 E0 失败；本轮没有修改 E0、没有把它改写成 P3 失败，也没有据此宣称全仓 runtime regression 全绿。精简证据快照见[CI 记录](evidence/ci_runtime_regression_20261010.md)。
 
 ## 启动缺陷、依赖与来源
 
