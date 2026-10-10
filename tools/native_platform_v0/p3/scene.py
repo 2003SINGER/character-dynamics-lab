@@ -8,7 +8,7 @@ from evennia import create_object, create_script
 
 def create_scene(owner, mode="a", interval=4, drive="timer", seed=0, drive_mode=None,
                  activity_profile="legacy_delivery_v0", delivery_task=True,
-                 patrol_exit_locked=False):
+                 patrol_exit_locked=False, p4_east_closed=False, p4_deadline=24):
     from typeclasses.characters import Character
     from typeclasses.exits import Exit
     from typeclasses.objects import Object
@@ -25,24 +25,41 @@ def create_scene(owner, mode="a", interval=4, drive="timer", seed=0, drive_mode=
     if type(seed) is not int or seed < 0:
         raise ValueError("P3 scenario seed must be a nonnegative integer")
     if activity_profile not in ("legacy_delivery_v0", "delivery_patrol_v0",
-                                 "delivery_patrol_recovery_v0"):
+                                 "delivery_patrol_recovery_v0", "p4_story_v0"):
         raise ValueError("unsupported P3 activity profile")
     if type(delivery_task) is not bool:
         raise ValueError("P3 delivery_task must be bool")
     if type(patrol_exit_locked) is not bool:
         raise ValueError("P3 patrol_exit_locked must be bool")
+    if type(p4_east_closed) is not bool:
+        raise ValueError("p4_east_closed must be bool")
+    if type(p4_deadline) is not int or p4_deadline not in (6, 24):
+        raise ValueError("P4 deadline must be 6 or 24 simulated minutes")
+    if activity_profile == "p4_story_v0" and (mode != "b" or drive != "manual" or not delivery_task or patrol_exit_locked):
+        raise ValueError("p4_story_v0 requires mode b, manual drive, both assigned delivery tasks, and no P3 patrol lock")
+    if activity_profile != "p4_story_v0" and (p4_east_closed or p4_deadline != 24):
+        raise ValueError("P4 clock/door options are restricted to p4_story_v0")
     if patrol_exit_locked and (activity_profile != "delivery_patrol_v0" or delivery_task):
         raise ValueError("patrol_exit_locked is only valid for delivery_patrol_v0 without a delivery task")
     if activity_profile == "delivery_patrol_recovery_v0" and (
             mode != "a" or not delivery_task or patrol_exit_locked):
         raise ValueError("delivery_patrol_recovery_v0 requires one actor, an assigned task, and unlocked exits")
-    pickup = create_object(Room, key=f"Courier Pickup {suffix}",
-                           attributes=[("p3_scene_id", suffix, "native_p3")])
+    pickup_attrs = [("p3_scene_id", suffix, "native_p3")]
+    if activity_profile == "p4_story_v0":
+        pickup_attrs.extend([
+            ("p4_clock", {"now": 0, "unit": "simulated-minute", "step_minutes": 1,
+                          "deadline": p4_deadline}, "native_p3"),
+            ("p4_ledger", [], "native_p3"), ("p4_timeline", [], "native_p3"),
+            ("p4_ledger_sequence", 0, "native_p3"), ("p4_opportunity_used", False, "native_p3"),
+            ("scenario_seed", seed, "native_p3"),
+        ])
+    pickup = create_object(Room, key=f"Courier Pickup {suffix}", attributes=pickup_attrs)
     destination = create_object(Room, key=f"Resident Porch {suffix}",
                                  attributes=[("p3_scene_id", suffix, "native_p3")])
     exit_locks = "traverse:false()" if patrol_exit_locked else None
+    p4_east_locks = "traverse:false()" if activity_profile == "p4_story_v0" and p4_east_closed else None
     create_object(Exit, key="east", location=pickup, destination=destination,
-                  locks=exit_locks,
+                  locks=p4_east_locks if activity_profile == "p4_story_v0" else exit_locks,
                   attributes=[("p3_scene_id", suffix, "native_p3")])
     create_object(Exit, key="west", location=destination, destination=pickup,
                   locks=exit_locks,
@@ -66,6 +83,9 @@ def create_scene(owner, mode="a", interval=4, drive="timer", seed=0, drive_mode=
         resident = create_object(Object, key=f"Resident Porch Marker {suffix}", location=destination,
                                  attributes=[("p3_scene_id", suffix, "native_p3"),
                                               ("p3_role", "delivery_destination_marker", "native_p3")])
+    if activity_profile == "p4_story_v0":
+        pickup.attributes.add("p4_pickup_id", int(pickup.id), category="native_p3")
+        pickup.attributes.add("p4_destination_id", int(destination.id), category="native_p3")
     supply = None
     if delivery_task:
         supply = create_object(Object, key=f"Supply {suffix}", location=pickup,
@@ -98,6 +118,12 @@ def create_scene(owner, mode="a", interval=4, drive="timer", seed=0, drive_mode=
         actor.attributes.add("drive_mode", drive, category="native_p3")
         actor.attributes.add("scenario_seed", seed, category="native_p3")
         actor.attributes.add("patrol_exit_locked", patrol_exit_locked, category="native_p3")
+        if activity_profile == "p4_story_v0":
+            actor.attributes.add("p4_pickup_id", int(pickup.id), category="native_p3")
+            actor.attributes.add("p4_destination_id", int(destination.id), category="native_p3")
+            actor.attributes.add("p4_east_initially_closed", p4_east_closed, category="native_p3")
+            actor.attributes.add("p4_social_attempted", False, category="native_p3")
+            actor.attributes.add("p4_social_status", "NOT_ATTEMPTED", category="native_p3")
         actor.attributes.add("status", "RUNNING", category="native_p3")
         actor.attributes.add("tick_count", 0, category="native_p3")
         actor.attributes.add("log", [], category="native_p3")

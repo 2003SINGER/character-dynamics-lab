@@ -30,6 +30,7 @@ ROLE_NAMES = {"player", "courier", "resident"}
 SCENARIO_NAMES = {"Aclean", "Asteal-return", "Bclean", "Bsteal-resident-parcel"}
 C0_SCENARIO_NAMES = {"C0-no-delivery", "C0-delivery-priority", "C0-after-delivery"}
 C1A_SCENARIO_NAMES = {"C1a-blocked-switch", "C1a-observed-resume"}
+P4_SCENARIO_NAMES = {"open", "blocked-return", "blocked-held", "short-deadline"}
 SAFE_P3_KEYS = (
     "p3_scene_id", "p3_control_role", "p3_role", "p3_goal", "goal", "mode", "scenario_seed",
     "activity_profile", "delivery_task", "patrol_exit_locked", "patrol_rejected_state",
@@ -38,6 +39,11 @@ SAFE_P3_KEYS = (
     "witnessed", "log", "native_receipts", "pending_social", "task_item_id", "task_item_key",
     "task_item_dbref", "task_destination_id", "task_destination_dbref", "resident_id",
     "social_attempted", "social_result", "script_id",
+    "p4_clock", "p4_ledger", "p4_timeline", "p4_ledger_sequence", "p4_ledger_seal",
+    "p4_opportunity_used", "p4_pickup_id", "p4_destination_id", "p4_east_initially_closed",
+    "p4_social_attempted", "p4_social_status", "p4_social_result", "p4_note_request_id",
+    "p4_note_source_event_id", "p4_note_status", "p4_note_action", "p4_note_response_event_id",
+    "p4_note_initiator_id", "p4_note_recipient_id",
 )
 
 
@@ -198,6 +204,7 @@ class P3Control:
             "pause_scenario": self.pause_scenario,
             "run_c0_scenario": self.run_c0_scenario,
             "run_c1a_scenario": self.run_c1a_scenario,
+            "run_p4_scenario": self.run_p4_scenario,
             "step_world": self.step_world,
             "inject_action": self.inject_action,
             "observe_actor": self.observe_actor,
@@ -278,6 +285,101 @@ class P3Control:
         return {"scene_id": scene_id, "status": "PAUSED", "actors": paused,
                 "scope": "generated_scene_roles_only"}
 
+    def _p4_snapshot(self, scene_id):
+        account, objects = _load_scene(scene_id)
+        actors = _role_actor_rows(objects, account.id)
+        pickup = next((obj for obj in objects if obj.attributes.get("p4_clock", category="native_p3", default=None)), None)
+        if pickup is None:
+            raise ValueError("generated P4 scene has no clock owner")
+        actor_rows = {}
+        for role in ("courier", "resident", "player"):
+            actor = actors.get(role)
+            if actor is not None:
+                actor_rows[role] = {"id": int(actor.id), "room_id": int(actor.location.id) if actor.location else None,
+                                    "inventory_ids": sorted(int(obj.id) for obj in actor.contents)}
+        items = {}
+        for obj in objects:
+            role = obj.attributes.get("p3_role", category="native_p3", default=None)
+            if role in ("assigned_supply", "resident_assigned_parcel"):
+                name = "courier_supply" if role == "assigned_supply" else "resident_parcel"
+                items[name] = {"id": int(obj.id), "location_id": int(obj.db_location_id) if obj.db_location_id else None}
+        for obj in objects:
+            if obj.attributes.get("p4_note_request_id", category="native_p3", default=None):
+                items.setdefault("note", {"id": int(obj.id), "location_id": int(obj.db_location_id) if obj.db_location_id else None,
+                                           "status": obj.attributes.get("p4_note_status", category="native_p3", default=None)})
+        clock = dict(pickup.attributes.get("p4_clock", category="native_p3"))
+        return {"actors": actor_rows, "items": items, "clock": clock,
+                "east_closed": bool(__import__("tools.native_platform_v0.p3.p4_world", fromlist=["director_view"])
+                                     .director_view(scene_id)["door_closed"]),
+                "opportunity_used": pickup.attributes.get("p4_opportunity_used", category="native_p3", default=False) is True}
+
+    def _p4_round_start(self, scene_id):
+        from tools.native_platform_v0.p3.p4_monitor import choose_director
+        from tools.native_platform_v0.p3.p4_world import advance_clock, append_event, director_view, open_east_passage
+
+        advanced = advance_clock(scene_id)
+        view = director_view(scene_id)
+        _, objects = _load_scene(scene_id)
+        pickup = next(obj for obj in objects if obj.attributes.get("p4_clock", category="native_p3", default=None))
+        enabled = pickup.attributes.get("p4_director_enabled", category="native_p3", default=False) is True
+        decision = choose_director(view, enabled)
+        before = self._p4_snapshot(scene_id)
+        director_args = {"authorized_view": view, "enabled": enabled,
+                         "candidate_actions": decision["candidates"], "action": decision["action"],
+                         "reason": decision["reason"], "before": {"east_closed": before["east_closed"],
+                                                                    "opportunity_used": before["opportunity_used"]}}
+        append_event(scene_id, {"event_type": "DIRECTOR_DECISION",
+                                "event_id": f"p4:{pickup.attributes.get('scenario_seed', category='native_p3', default=0)}:{advanced['now']}:director",
+                                "typed_args": director_args, "sealed": True})
+        world_result = None
+        if decision["action"] == "OPEN_PASSAGE":
+            world_result = open_east_passage(scene_id)
+            after = self._p4_snapshot(scene_id)
+            author_args = {"action": "OPEN_PASSAGE", "settled": world_result["settled"],
+                           "east_exit_id": world_result.get("east_exit_id"),
+                           "before": {"east_closed": before["east_closed"],
+                                      "opportunity_used": before["opportunity_used"]},
+                           "after": {"east_closed": after["east_closed"],
+                                     "opportunity_used": after["opportunity_used"]},
+                           "west_exit_unchanged": world_result.get("west_unchanged") is True,
+                           "west_before_traversable": world_result.get("west_before_traversable"),
+                           "west_after_traversable": world_result.get("west_after_traversable"),
+                           "state_scope": ["generated_east_exit.traverse", "p4_opportunity_used"]}
+            append_event(scene_id, {"event_type": "AUTHOR_WORLD_EVENT",
+                                    "event_id": f"p4:{pickup.attributes.get('scenario_seed', category='native_p3', default=0)}:{advanced['now']}:open-east",
+                                    "typed_args": author_args, "sealed": world_result["settled"],
+                                    "receipt_id": f"p4-author-open:{scene_id}:{advanced['now']}" if world_result["settled"] else None})
+        return {"clock": advanced, "director": decision, "world_result": world_result}
+
+    @defer.inlineCallbacks
+    def _p4_actor_callbacks(self, scene_id, callback_index):
+        account, objects = _load_scene(scene_id)
+        actors = _role_actor_rows(objects, account.id)
+        from tools.native_platform_v0.p3.agency import get_value, step_actor
+        from tools.native_platform_v0.p3.p4_world import append_event
+
+        result_rows = []
+        for role in ("courier", "resident"):
+            actor = actors.get(role)
+            if actor is None:
+                raise ValueError(f"P4 generated actor {role} is missing")
+            before = self._p4_snapshot(scene_id)["actors"][role]
+            log_before = list(get_value(actor, "log", []))
+            result = yield defer.maybeDeferred(step_actor, actor)
+            log_after = list(get_value(actor, "log", []))
+            after = self._p4_snapshot(scene_id)["actors"][role]
+            new_events = log_after[len(log_before):]
+            args = {"role": role, "actor_id": int(actor.id), "callback_index": callback_index,
+                    "before": before, "after": after,
+                    "local_decision_events": new_events,
+                    "callback_result_type": type(result).__name__, "awaited": True}
+            clock = self._p4_snapshot(scene_id)["clock"]
+            event_id = f"p4:{get_value(actor, 'scenario_seed', 0)}:{role}:{clock['now']}:callback"
+            event = append_event(scene_id, {"event_type": "NPC_CALLBACK", "event_id": event_id,
+                                            "typed_args": args, "sealed": True})
+            result_rows.append({"event": event, "callback_result_type": type(result).__name__})
+        defer.returnValue(result_rows)
+
     @defer.inlineCallbacks
     def step_world(self, args):
         if set(args) - {"scene_id", "rounds"}:
@@ -293,14 +395,21 @@ class P3Control:
             raise ValueError("scene has no generated P3 autonomy actors")
         from tools.native_platform_v0.p3.agency import get_value, step_actor
 
+        is_p4 = all(get_value(actor, "activity_profile") == "p4_story_v0" for actor in runners)
+
         results = []
         for round_index in range(rounds):
-            for actor in runners:
-                if get_value(actor, "drive_mode") != "manual":
-                    raise ValueError("step_world requires a manual-drive P3 fixture")
-                result = yield defer.maybeDeferred(step_actor, actor)
-                results.append({"round": round_index + 1, "actor": _actor_snapshot(actor),
-                                "callback_result_type": type(result).__name__})
+            if is_p4:
+                self._p4_round_start(scene_id)
+                results.extend((yield self._p4_actor_callbacks(
+                    scene_id, self._p4_snapshot(scene_id)["clock"]["now"])))
+            else:
+                for actor in runners:
+                    if get_value(actor, "drive_mode") != "manual":
+                        raise ValueError("step_world requires a manual-drive P3 fixture")
+                    result = yield defer.maybeDeferred(step_actor, actor)
+                    results.append({"round": round_index + 1, "actor": _actor_snapshot(actor),
+                                    "callback_result_type": type(result).__name__})
         defer.returnValue({"scene_id": scene_id, "rounds": rounds, "actor_callbacks": results,
                            "awaited": True})
 
@@ -614,6 +723,166 @@ class P3Control:
                            "callbacks_completed": True,
                            "completion_scope": "bounded_callbacks_only_not_semantic_acceptance",
                            "scene_ids": [scene_id], "controller_authored_npc_commands": 0})
+
+    def _create_p4_scene(self, case, director_enabled, seed, deadline):
+        from evennia.utils.create import create_object
+        from typeclasses.characters import Character
+        from tools.native_platform_v0.p3.scene import create_scene
+        from tools.native_platform_v0.p3.p4_social import native_source_manifest
+
+        account = _owner_account()
+        initial_east_closed = case != "open"
+        scene = create_scene(SimpleNamespace(account=account), mode="b", seed=seed,
+                             drive_mode="manual", interval=4, activity_profile="p4_story_v0",
+                             delivery_task=True, patrol_exit_locked=False,
+                             p4_east_closed=initial_east_closed, p4_deadline=deadline)
+        scene_id = scene["scene_id"]
+        scene["courier"].attributes.add("p3_control_role", "courier", category="native_p3")
+        scene["resident"].attributes.add("p3_control_role", "resident", category="native_p3")
+        scene["pickup"].attributes.add("p4_director_enabled", director_enabled, category="native_p3")
+        player = create_object(
+            Character, key=f"P4 Fixture Player {scene_id}", location=scene["pickup"],
+            attributes=[("p3_scene_id", scene_id, "native_p3"),
+                        ("p3_control_role", "player", "native_p3"),
+                        ("owner_account_id", account.id, "native_p3"),
+                        ("drive_mode", "manual", "native_p3"),
+                        ("native_receipts", [], "native_p3"), ("log", [], "native_p3")],
+        )
+        supply, parcel = scene["supply"], scene["return_parcel"]
+        return {
+            "scene_id": scene_id, "mode": "b", "activity_profile": "p4_story_v0",
+            "drive_mode": "manual", "scene": scene,
+            "created_scene": {
+                "scene_id": scene_id, "mode": "b", "activity_profile": "p4_story_v0",
+                "drive_mode": "manual",
+                "rooms": {"pickup": {"id": int(scene["pickup"].id), "dbref": str(scene["pickup"].dbref)},
+                          "destination": {"id": int(scene["destination"].id), "dbref": str(scene["destination"].dbref)}},
+                "roles": {"courier": {"id": int(scene["courier"].id), "dbref": str(scene["courier"].dbref),
+                                        "ensemble_role": "hero"},
+                          "resident": {"id": int(scene["resident"].id), "dbref": str(scene["resident"].dbref),
+                                         "ensemble_role": "love"},
+                          "player": {"id": int(player.id), "dbref": str(player.dbref)}},
+                "items": {"courier_supply": {"id": int(supply.id), "dbref": str(supply.dbref), "key": str(supply.key)},
+                          "resident_parcel": {"id": int(parcel.id), "dbref": str(parcel.dbref), "key": str(parcel.key)}},
+                "initial_clock": {"now": 0, "unit": "simulated-minute", "step_minutes": 1,
+                                  "deadline": deadline},
+                "initial_east_closed": initial_east_closed,
+                "ensemble_source_manifest": native_source_manifest(),
+            },
+        }
+
+    @defer.inlineCallbacks
+    def _p4_player_intervention(self, scene_id, operation, item_id, label):
+        from tools.native_platform_v0.p3.p4_world import append_event
+        before = self._p4_snapshot(scene_id)
+        receipt = yield defer.maybeDeferred(self.inject_action, {
+            "scene_id": scene_id, "actor_role": "player", "operation": operation,
+            "item_id": item_id,
+        })
+        after = self._p4_snapshot(scene_id)
+        seed = next((int(obj.attributes.get("scenario_seed", category="native_p3", default=0))
+                     for obj in _scene_objects(scene_id)
+                     if obj.attributes.get("p4_clock", category="native_p3", default=None)), 0)
+        event_id = f"p4:{seed}:player:{label}"
+        args = {"label": label, "actor_role": "player",
+                "actor_id": before["actors"]["player"]["id"],
+                "operation": operation, "command": receipt.get("command"),
+                "caller_identity": receipt.get("caller_identity"),
+                "intervention_kind": receipt.get("intervention_kind"),
+                "settled": receipt.get("settled"), "item_id": item_id,
+                "before": before, "after": after, "command_receipt": receipt}
+        event = append_event(scene_id, {"event_type": "PLAYER_INTERVENTION", "event_id": event_id,
+                                        "typed_args": args, "sealed": isinstance(receipt, dict),
+                                        "receipt_id": receipt.get("receipt_id", f"p4-player:{label}:{item_id}")})
+        defer.returnValue({"event": event, "receipt": receipt, "before": before, "after": after})
+
+    @defer.inlineCallbacks
+    def run_p4_scenario(self, args):
+        if set(args) != {"case", "director_enabled", "seed"}:
+            raise ValueError("run_p4_scenario requires exactly case, director_enabled, and seed")
+        case, director_enabled, seed = args["case"], args["director_enabled"], args["seed"]
+        if (case not in P4_SCENARIO_NAMES or type(director_enabled) is not bool
+                or type(seed) is not int or not 0 <= seed <= 2**31 - 1):
+            raise ValueError("P4 case, director_enabled, or seed is invalid")
+        if self.created_scenes >= MAX_SCENES_PER_PROCESS:
+            raise ValueError("scene creation limit reached for this server process")
+        deadline = 6 if case == "short-deadline" else 24
+        created = self._create_p4_scene(case, director_enabled, seed, deadline)
+        scene_id = created["scene_id"]
+        self.created_scenes += 1
+        scene = created["scene"]
+        supply_id = int(scene["supply"].id)
+        from tools.native_platform_v0.p3.p4_world import append_event, seal_ledger
+
+        scene_event_args = {"case": case, "director_enabled": director_enabled, "seed": seed,
+                            "activity_profile": "p4_story_v0", "drive_mode": "manual",
+                            "roles": {"courier": int(scene["courier"].id),
+                                      "resident": int(scene["resident"].id)},
+                            "task_items": {"courier": int(scene["supply"].id),
+                                           "resident": int(scene["return_parcel"].id)},
+                            "east_initially_closed": case != "open", "west_modified": False}
+        append_event(scene_id, {"event_type": "SCENE_CREATED",
+                                "event_id": f"p4:{seed}:scene-created",
+                                "typed_args": scene_event_args, "sealed": True})
+        timeline = []
+        for minute in range(1, deadline + 1):
+            start = self._p4_round_start(scene_id)
+            timeline.append({"minute": minute, "phase": "director_before_callbacks",
+                             "clock": start["clock"], "director": start["director"],
+                             "world_result": start["world_result"]})
+            if minute == 6 and case in ("blocked-return", "short-deadline"):
+                returned = yield self._p4_player_intervention(
+                    scene_id, "drop", supply_id, "return_courier_supply")
+                timeline.append({"minute": minute, "phase": "player_intervention_before_callbacks",
+                                 **returned})
+                if returned["receipt"].get("settled") is not True:
+                    raise ValueError("P4 return intervention failed to settle through native drop")
+            callbacks = yield self._p4_actor_callbacks(scene_id, minute)
+            timeline.extend({"minute": minute, "phase": "npc_callback", **row} for row in callbacks)
+            if minute == 1 and case != "open":
+                stolen = yield self._p4_player_intervention(
+                    scene_id, "get", supply_id, "player_takes_courier_supply")
+                timeline.append({"minute": minute, "phase": "player_intervention_after_callbacks",
+                                 **stolen})
+                if stolen["receipt"].get("settled") is not True:
+                    raise ValueError("P4 theft intervention failed to settle through native get")
+        seal = seal_ledger(scene_id)
+        _, objects = _load_scene(scene_id)
+        pickup = next(obj for obj in objects if obj.attributes.get("p4_clock", category="native_p3", default=None))
+        clock = dict(pickup.attributes.get("p4_clock", category="native_p3"))
+        ledger = list(pickup.attributes.get("p4_ledger", category="native_p3", default=[]))
+        actual_timeline = list(pickup.attributes.get("p4_timeline", category="native_p3", default=[]))
+        final_trace = self.get_trace({"scene_id": scene_id})
+        run_reasons = []
+        if seal.get("unsealed_event_ids"):
+            run_reasons.append("one_or_more_native_or_world_events_are_unsealed")
+        if seal.get("missing_records"):
+            run_reasons.append("one_or_more_expected_minute_or_actor_callback_records_are_missing")
+        if seal.get("actor_failures"):
+            run_reasons.extend(seal["actor_failures"])
+        run_status = "COMPLETE" if seal.get("closed") is True else "INCOMPLETE"
+        defer.returnValue({
+            "schema": "native-p4-run-v1",
+            "configuration": {"case": case, "director_enabled": director_enabled, "seed": seed,
+                               "activity_profile": "p4_story_v0", "drive_mode": "manual",
+                               "initial_east_closed": case != "open", "deadline_minutes": deadline,
+                               "player_intervention": ("none" if case == "open" else
+                                  "get courier supply after minute-1 callbacks" +
+                                  ("; drop same supply before minute-6 callbacks"
+                                   if case in ("blocked-return", "short-deadline") else "; retain supply"))},
+            "created_scene": created["created_scene"],
+            "timeline": actual_timeline,
+            "trace": final_trace,
+            "ledger": ledger,
+            "clock": {**clock, "sealed": seal.get("closed") is True,
+                      "source": "server_owned_pickup.p4_clock"},
+            "ledger_sealed_through": seal,
+            "callbacks_completed": True,
+            "run_status": run_status,
+            "run_reasons": run_reasons,
+            "callback_count": deadline * 2,
+            "controller_authored_npc_commands": 0,
+        })
 
     @defer.inlineCallbacks
     def run_scenario(self, args):

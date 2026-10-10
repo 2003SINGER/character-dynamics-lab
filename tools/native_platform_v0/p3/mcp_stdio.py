@@ -81,6 +81,12 @@ TOOLS = [
          "scenario": {"type": "string", "enum": ["C1a-blocked-switch", "C1a-observed-resume"]},
          "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647}},
          "required": ["scenario"], "additionalProperties": False}},
+    {"name": "run_p4_scenario", "description": "Run one bounded P4-0 native two-NPC scenario; returns a recorded development trace, not an acceptance verdict.",
+     "inputSchema": {"type": "object", "properties": {
+         "case": {"type": "string", "enum": ["open", "blocked-return", "blocked-held", "short-deadline"]},
+         "director_enabled": {"type": "boolean"},
+         "seed": {"type": "integer", "enum": [20261010, 20261011]}},
+         "required": ["case", "director_enabled", "seed"], "additionalProperties": False}},
 ]
 TOOL_BY_NAME = {tool["name"]: tool for tool in TOOLS}
 

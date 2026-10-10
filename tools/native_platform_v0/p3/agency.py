@@ -54,6 +54,7 @@ def observe_actor(actor):
     inventory = [_obj_ref(obj) for obj in actor.contents]
     visible_items = []
     current_exit_rows = []
+    p4_profile = activity_profile == "p4_story_v0"
     for obj in room.contents:
         if obj.id == actor.id:
             continue
@@ -62,14 +63,22 @@ def observe_actor(actor):
     for edge in room.exits:
         destination = getattr(edge, "destination", None)
         if destination is not None and edge.access(actor, "view", default=True):
-            current_exit_rows.append({"key": edge.key, "destination_id": destination.id,
-                                      "destination_dbref": destination.dbref})
+            exit_row = {"key": edge.key, "destination_id": destination.id,
+                        "destination_dbref": destination.dbref}
+            if p4_profile:
+                exit_row["traversable"] = bool(edge.access(actor, "traverse", default=True))
+            current_exit_rows.append(exit_row)
 
     # Retain only observed edges and sightings. No global world lookup occurs here.
     knowledge = deepcopy(_get(actor, "witnessed", {"edges": {}, "objects": {}}))
     room_edges = knowledge["edges"].setdefault(str(room.id), {})
     for edge in current_exit_rows:
         room_edges[str(edge["destination_id"])] = edge["key"]
+    if p4_profile:
+        traversability = knowledge.setdefault("traversability", {})
+        room_traversability = traversability.setdefault(str(room.id), {})
+        for edge in current_exit_rows:
+            room_traversability[str(edge["destination_id"])] = edge["traversable"]
     observed_item = next((row for row in visible_items if item_id is not None and row["id"] == item_id), None)
     held_item = next((row for row in inventory if item_id is not None and row["id"] == item_id), None)
     if item_id is None:
@@ -102,27 +111,33 @@ def observe_actor(actor):
             "key", _get(actor, "task_item_key"))}
     delivered = bool(observed_item and room.id == destination_id)
     own_delivery_receipts = list(_get(actor, "native_receipts", []))
+    observation = {
+        "room_id": room.id,
+        "inventory": inventory,
+        "visible_items": visible_items,
+        "task_item": task_item,
+        "task_destination": destination_id,
+        "item_location": item_location,
+        "item_held": held_item is not None,
+        "delivered": delivered,
+        "own_delivery_receipts": own_delivery_receipts,
+        "known_exits": known_exits,
+        "exits": exits,
+        "witnessed": [{"room_id": room.id, "kind": "current_room", "dbref": room.dbref}],
+        "retained_witnesses": list(knowledge["objects"].values()),
+    }
+    if p4_profile:
+        observation["known_traversability"] = {
+            int(source): {int(destination): bool(value) for destination, value in rows.items()}
+            for source, rows in knowledge.get("traversability", {}).items()
+        }
     view = {
         "actor_id": actor.id,
         "activity_contract": {"profile": activity_profile, "delivery_task": delivery_task,
                                "source": "scenario-authored-activity-profile"},
         "goal_contract": {"goal": _get(actor, "goal", "deliver_supply"), "item_id": item_id,
                            "destination_id": destination_id, "source": "scenario-authored-task"},
-        "observation": {
-            "room_id": room.id,
-            "inventory": inventory,
-            "visible_items": visible_items,
-            "task_item": task_item,
-            "task_destination": destination_id,
-            "item_location": item_location,
-            "item_held": held_item is not None,
-            "delivered": delivered,
-            "own_delivery_receipts": own_delivery_receipts,
-            "known_exits": known_exits,
-            "exits": exits,
-            "witnessed": [{"room_id": room.id, "kind": "current_room", "dbref": room.dbref}],
-            "retained_witnesses": list(knowledge["objects"].values()),
-        },
+        "observation": observation,
     }
     _set(actor, "witnessed", knowledge)
     previous = _get(actor, "last_observation")
@@ -323,6 +338,8 @@ def _dispatch_pending(actor, pending):
             profile = view.get("activity_contract", {}).get("profile")
             prior_item = view.get("observation", {}).get("task_item", {})
             is_recovery_profile = profile == "delivery_patrol_recovery_v0"
+            is_p4_profile = profile == "p4_story_v0"
+            allows_native_missing_get = is_recovery_profile or is_p4_profile
             was_locally_visible = any(
                 str(row.get("id")) == str(item_id)
                 for row in view.get("observation", {}).get("visible_items", ())
@@ -334,11 +351,11 @@ def _dispatch_pending(actor, pending):
             same_key_objects = ([obj for obj in actor.location.contents
                                  if obj.key == prior_item.get("key") and
                                  obj.access(actor, "view", default=True)]
-                                if is_recovery_profile and actor.location else [])
-            if (is_recovery_profile and was_locally_visible and
+                                if allows_native_missing_get and actor.location else [])
+            if (allows_native_missing_get and was_locally_visible and
                     prior_item.get("key") and not same_key_objects):
                 command = f"get {prior_item['key']}"
-            elif (is_recovery_profile and same_key_objects and
+            elif (allows_native_missing_get and same_key_objects and
                   all(obj.id != item_id for obj in same_key_objects)):
                 rejection = "assigned item is absent and a same-key local object makes native get ambiguous"
             else:
@@ -415,6 +432,14 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
                "submitted_command": pending.get("submitted_command"),
                "before_inventory_ids": before_inventory, "after_inventory_ids": after_inventory,
                "dispatch_succeeded": dispatch_succeeded, "settled": settled}
+    if get_value(actor, "activity_profile", "legacy_delivery_v0") == "p4_story_v0":
+        # P4 has an explicit simulated clock. Keep this annotation P4-only so old
+        # receipt formats remain byte-for-byte compatible.
+        from .p4_world import clock_for_actor
+
+        clock = clock_for_actor(actor)
+        receipt.update({"sim_minute": clock["now"], "deadline": clock["deadline"],
+                        "time_unit": clock.get("unit", "simulated-minute")})
     set_value(actor, "last_outcome", {"status": status, "intent": intent, "detail": detail,
                                      "receipt": receipt})
     set_value(actor, "pending_action", None)
@@ -435,10 +460,12 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
         state = get_value(actor, "patrol_rejected_state")
         if not settled:
             move_view = pending["view"]["observation"]
-            signature = sorted((str(edge["key"]), int(edge["destination_id"]))
-                               for edge in move_view.get("exits", ()))
-            saved_signature = (sorted((str(row[0]), int(row[1])) for row in state.get("exits", ()))
-                               if state else None)
+            p4_profile = pending.get("view", {}).get("activity_contract", {}).get("profile") == "p4_story_v0"
+            signature = sorted(
+                (str(edge["key"]), int(edge["destination_id"]), bool(edge.get("traversable")))
+                if p4_profile else (str(edge["key"]), int(edge["destination_id"]))
+                for edge in move_view.get("exits", ()))
+            saved_signature = (sorted(tuple(row) for row in state.get("exits", ())) if state else None)
             if not state or state.get("room_id") != before_room or saved_signature != signature:
                 state = {"room_id": before_room, "exits": signature, "rejected": []}
             rejected = list(state.get("rejected", []))
@@ -449,8 +476,12 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
             set_value(actor, "patrol_rejected_state", state)
         elif after_room != before_room:
             set_value(actor, "patrol_rejected_state", None)
-    record(actor, {"kind": "execution_settlement", "status": status, "intent": intent,
-                   "receipt": receipt, "detail": detail})
+    settlement = {"kind": "execution_settlement", "status": status, "intent": intent,
+                  "receipt": receipt, "detail": detail}
+    if get_value(actor, "activity_profile", "legacy_delivery_v0") == "p4_story_v0":
+        settlement.update({"sim_minute": receipt["sim_minute"], "deadline": receipt["deadline"],
+                           "time_unit": receipt["time_unit"]})
+    record(actor, settlement)
 
 
 def _maybe_social_after_delivery(actor, local_view):
@@ -555,6 +586,9 @@ class P3AutonomyScript(DefaultScript):
         if actor is None:
             self.stop()
             return
+        if get_value(actor, "activity_profile", "legacy_delivery_v0") == "p4_story_v0":
+            from .p4_agency import step_actor as step_p4_actor
+            return step_p4_actor(actor)
         status = get_value(actor, "status", "RUNNING")
         if status == "PAUSED":
             return

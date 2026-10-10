@@ -60,7 +60,7 @@ class McpStdioTests(unittest.TestCase):
         names = {tool["name"] for tool in response["result"]["tools"]}
         self.assertEqual(names, {"start_world", "stop_world", "health", "reset_scenario", "pause_scenario", "step_world",
                                  "inject_action", "observe_actor", "get_trace", "run_scenario", "run_c0_scenario",
-                                 "run_c1a_scenario"})
+                                 "run_c1a_scenario", "run_p4_scenario"})
         self.assertTrue(all(tool["inputSchema"].get("additionalProperties") is False
                             for tool in response["result"]["tools"]))
 
@@ -107,6 +107,8 @@ class McpStdioTests(unittest.TestCase):
                          ["C0-no-delivery", "C0-delivery-priority", "C0-after-delivery"])
         self.assertEqual(by_name["run_c1a_scenario"]["inputSchema"]["properties"]["scenario"]["enum"],
                          ["C1a-blocked-switch", "C1a-observed-resume"])
+        self.assertEqual(by_name["run_p4_scenario"]["inputSchema"]["properties"]["case"]["enum"],
+                         ["open", "blocked-return", "blocked-held", "short-deadline"])
 
 
 class TwistedLineProtocolTests(unittest.TestCase):

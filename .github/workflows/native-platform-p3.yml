@@ -20,9 +20,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
       - name: Install pinned P3 planner dependency
         run: python -m pip install -r tools/native_platform_v0/p3/requirements.txt
+      - name: Fetch pinned Ensemble source for native bridge tests
+        run: |
+          mkdir -p _local_data/native_platform_v0
+          git clone https://github.com/ensemble-engine/ensemble.git _local_data/native_platform_v0/ensemble
+          git -C _local_data/native_platform_v0/ensemble checkout --detach 8b74bdec4ba2ef4e14795b7591df3b5d73f283e3
       - name: P3 actor-loop unit tests
         run: python -B -m unittest discover -s tools/native_platform_v0/p3/tests -v
       - name: Import-safe Ensemble social adapter unit tests (fake host only)
         run: python -B -m unittest discover -s tools/native_platform_v0/bridge -p 'test_social.py' -v
+      - name: P4 native Ensemble source and scene bridge tests
+        run: python -B -m unittest tools.native_platform_v0.bridge.test_p4_social -v

@@ -52,7 +52,8 @@ def _path(graph, start, target):
     return None
 
 
-def plan_next(local_view, goal, max_visits=500, wall_seconds=0.25):
+def plan_next(local_view, goal, max_visits=500, wall_seconds=0.25,
+              respect_local_traversability=False):
     """Return only the first HTN primitive for `deliver_supply`.
 
     GTPyhop methods recursively decompose delivery using observed topology and
@@ -68,6 +69,13 @@ def plan_next(local_view, goal, max_visits=500, wall_seconds=0.25):
         return {"status": "BLOCKED", "reason": "task binding is not available in actor view", "intent": None, "plan": []}
     graph = {int(room): tuple(int(n) for n in neighbors)
              for room, neighbors in observation.get("known_exits", {}).items()}
+    if respect_local_traversability:
+        known_traversability = observation.get("known_traversability", {})
+        graph = {
+            room: tuple(neighbor for neighbor in neighbors
+                        if known_traversability.get(room, {}).get(neighbor) is True)
+            for room, neighbors in graph.items()
+        }
     item_location = observation.get("item_location")
     state = None
     start = time.monotonic()

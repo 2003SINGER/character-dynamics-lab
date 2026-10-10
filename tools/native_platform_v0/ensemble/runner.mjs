@@ -28,6 +28,8 @@ const committed = new Set();
 const settlementReceipts = new Set();
 const proposalReceipts = new Map();
 const sourceEvents = new Set();
+const p4Requests = new Map();
+const p4Responses = new Map();
 let proposalSequence = 0;
 let revision = 0;
 function json(value) { return JSON.parse(JSON.stringify(value)); }
@@ -122,6 +124,97 @@ function authorize(msg) {
   return { ok: true, proposalId: msg.proposalId, eventId: msg.eventId, actionName: result.chosen.name, recordRevision: revision, trace: { stage: 'pre-settlement authorization', calls: ['validateCommit'], doActionCalled: false, triggerCalled: false, nextStepCalled: false } };
 }
 
+// P4-only request/response operations. The P4 caller keeps the physical note
+// and receipt in Evennia; these operations expose no responder decision to the
+// initiator and do not alter the pinned source data or initial social record.
+function requestNote(msg) {
+  if (typeof msg.requestId !== 'string' || !msg.requestId.trim()) return reject('requestId is required');
+  if (typeof msg.eventId !== 'string' || !msg.eventId.trim()) return reject('eventId is required');
+  if (msg.actor !== 'hero' || msg.responder !== 'love') return reject('P4 note request requires hero to love');
+  if (p4Requests.has(msg.requestId) || sourceEvents.has(msg.eventId)) return reject('request or source event already used');
+  const before = json(engine.getSocialRecordCopyAtTimestep());
+  const volitions = engine.calculateVolition(cast);
+  const relevant = [];
+  for (let v = volitions.getFirst(msg.actor, msg.responder); v; v = volitions.getNext(msg.actor, msg.responder)) {
+    const row = json(v);
+    if (row.category === 'feeling' && row.type === 'closeness' && row.intentType === true) relevant.push(row);
+  }
+  const positive = relevant.filter(v => Number(v.weight) > 0);
+  if (!positive.length) return { ok: true, status: 'NO_CANDIDATE', requestId: msg.requestId,
+    eventId: msg.eventId, actor: msg.actor, responder: msg.responder,
+    native_intents: relevant, trace: { calls: ['calculateVolition'], getActionsCalled: false,
+      doActionCalled: false, triggerCalled: false, nextStepCalled: false } };
+  positive.sort((a, b) => Number(b.weight) - Number(a.weight));
+  const chosenIntent = positive[0];
+  p4Requests.set(msg.requestId, { eventId: msg.eventId, actor: msg.actor,
+    responder: msg.responder, intent: chosenIntent, responded: false });
+  sourceEvents.add(msg.eventId);
+  const after = json(engine.getSocialRecordCopyAtTimestep());
+  return { ok: true, status: 'PROPOSED', requestId: msg.requestId, eventId: msg.eventId,
+    actor: msg.actor, responder: msg.responder, native_intent: chosenIntent,
+    native_intents: relevant, socialRecordUnchanged: JSON.stringify(before) === JSON.stringify(after),
+    trace: { calls: ['calculateVolition'], getActionsCalled: false, doActionCalled: false,
+      triggerCalled: false, nextStepCalled: false } };
+}
+
+function respondNote(msg) {
+  if (typeof msg.requestId !== 'string' || typeof msg.eventId !== 'string') return reject('requestId and eventId are required');
+  const request = p4Requests.get(msg.requestId);
+  if (!request) return reject('unknown note request');
+  if (request.responded) return reject('note request already received a response');
+  if (msg.actor !== request.actor || msg.responder !== request.responder) return reject('response roles do not match the physical note request');
+  const volitions = engine.calculateVolition(cast);
+  const responderVolitions = [];
+  for (let v = volitions.getFirst(msg.responder, msg.actor); v; v = volitions.getNext(msg.responder, msg.actor)) {
+    const row = json(v);
+    if (row.category === 'feeling' && row.type === 'closeness') responderVolitions.push(row);
+  }
+  const boundActions = engine.getActions(msg.actor, msg.responder, volitions, cast, 20, 100);
+  const nativeCandidates = boundActions;
+  if (!nativeCandidates.length) {
+    request.responded = true;
+    return { ok: true, status: 'NO_CANDIDATE', requestId: msg.requestId, eventId: msg.eventId,
+      actor: msg.actor, responder: msg.responder, responderVolitions,
+      native_candidates: [], trace: { calls: ['calculateVolition', 'getActions'], doActionCalled: false,
+        triggerCalled: false, nextStepCalled: false } };
+  }
+  const weights = nativeCandidates.map(a => Number(a.weight));
+  if (weights.some(w => !Number.isFinite(w))) return reject('native note response has invalid weight');
+  const best = Math.max(...weights);
+  const winners = nativeCandidates.filter(a => Number(a.weight) === best);
+  const noteWinners = winners.filter(a => String(a.lineage || '').includes('RAISECLOSENESS-WRITELOVENOTE'));
+  if (!noteWinners.length) {
+    request.responded = true;
+    return { ok: true, status: 'UNSUPPORTED_NATIVE_ACTION', requestId: msg.requestId,
+      eventId: msg.eventId, actor: msg.actor, responder: msg.responder,
+      responderVolitions, native_candidates: nativeCandidates.map(a => json(a)),
+      native_winning_tie_names: winners.map(a => a.name),
+      unsupported_native_winners: winners.map(a => a.name),
+      trace: { calls: ['calculateVolition', 'getActions'], doActionCalled: false,
+        triggerCalled: false, nextStepCalled: false } };
+  }
+  const digest = crypto.createHash('sha256').update(`${msg.requestId}|${msg.eventId}`).digest();
+  const index = digest.readUInt32BE(0) % noteWinners.length;
+  const selected = noteWinners[index];
+  const proposalId = `p4:${encodeURIComponent(msg.requestId)}:response`;
+  const proposal = { boundActions: [selected], revision, eventId: msg.eventId };
+  proposals.set(proposalId, proposal);
+  request.responded = true;
+  p4Responses.set(msg.requestId, { proposalId, actionName: selected.name });
+  return { ok: true, status: 'PROPOSED', requestId: msg.requestId, eventId: msg.eventId,
+    actor: msg.actor, responder: msg.responder, responderVolitions,
+    native_candidates: nativeCandidates.map(a => json(a)), selected: json(selected),
+    proposalId, recordRevision: revision,
+    decision: selected.isAccept === true ? 'accepted' : 'rejected',
+    selection: { rule: 'max_native_weight_then_seeded_request_tie', winning_weight: best,
+      native_winning_tie_names: winners.map(a => a.name),
+      supported_note_winning_tie_names: noteWinners.map(a => a.name),
+      unsupported_native_winners: winners.filter(a => !noteWinners.includes(a)).map(a => a.name),
+      selected_index: index, selected_name: selected.name },
+    trace: { calls: ['calculateVolition', 'getActions'], doActionCalled: false,
+      triggerCalled: false, nextStepCalled: false } };
+}
+
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
 for await (const line of rl) {
   if (!line.trim()) continue;
@@ -131,7 +224,9 @@ for await (const line of rl) {
     if (msg.op === 'propose') result = propose(msg);
     else if (msg.op === 'authorize') result = authorize(msg);
     else if (msg.op === 'commit') result = commit(msg);
-    else result = reject('op must be propose, authorize, or commit');
+    else if (msg.op === 'request_note') result = requestNote(msg);
+    else if (msg.op === 'respond_note') result = respondNote(msg);
+    else result = reject('op must be propose, authorize, commit, request_note, or respond_note');
     process.stdout.write(JSON.stringify(result) + '\n');
   } catch (e) { process.stdout.write(JSON.stringify(reject(e.message)) + '\n'); }
 }

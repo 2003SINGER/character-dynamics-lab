@@ -25,6 +25,7 @@ VENV_PYTHON = PROJECT_ROOT / "_local_data/native_platform_v0/evennia/venv/bin/py
 RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P3_v0/runs"
 C0_RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P3_C0_v0/runs"
 C1A_RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P3_C1a_v0/runs"
+P4_RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P4_0_v0/runs"
 EXPORTED_CATEGORIES = {"native_p3", "native_social"}
 SENSITIVE_KEY_PARTS = (
     "account", "password", "passwd", "session", "secret", "hmac", "credential",
@@ -203,13 +204,18 @@ def main(argv: list[str] | None = None) -> int:
         "--c1a", action="store_true",
         help="write the export under the separate Native_Platform_P3_C1a_v0/runs directory",
     )
+    parser.add_argument(
+        "--p4", action="store_true",
+        help="write the export under the separate Native_Platform_P4_0_v0/runs directory",
+    )
     args = parser.parse_args(argv)
     try:
-        if args.c0 and args.c1a:
-            raise ValueError("--c0 and --c1a are mutually exclusive")
+        if sum((args.c0, args.c1a, args.p4)) > 1:
+            raise ValueError("--c0, --c1a, and --p4 are mutually exclusive")
         scene_ids = _validate_scene_ids(args.scene_id)
         document = collect_scenes(scene_ids)
-        output_dir = C1A_RUNS_DIR if args.c1a else C0_RUNS_DIR if args.c0 else RUNS_DIR
+        output_dir = (P4_RUNS_DIR if args.p4 else C1A_RUNS_DIR if args.c1a
+                      else C0_RUNS_DIR if args.c0 else RUNS_DIR)
         output = write_unique_export(document, output_dir)
     except Exception as err:
         parser.error(str(err))
