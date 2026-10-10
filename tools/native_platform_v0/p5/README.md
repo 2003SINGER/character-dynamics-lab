@@ -26,7 +26,7 @@ This is project glue, not a replacement for the mature components: GTPyhop plans
 
 The service layer is exposed through the existing P3 control service as `run_p5_scenario`; it creates the bounded shared-world scene, runs native NPC callbacks, applies scheduled player/author interventions and bundle edits, and returns receipts plus trace data. This is a finite development integration, not a general scene editor or durable simulation framework. Current scenario/matrix and evidence status belong to [P5 RESULTS](../../../02_实验/Native_Platform_P5_v0/RESULTS.md).
 
-With the project-local Evennia venv and initialized loopback game service available, the fixed development suite can be invoked as:
+The command below assumes the repository's locally initialized Evennia database/game, project venv, and a fresh loopback service process. The quota cap is 16; this 12-scene suite needs 12 free slots. A public checkout alone does not provide that local environment. If calls have already consumed quota, restart the same configured instance through the existing `stop_loopback.sh` / `start_loopback.sh` helpers; do not delete scenes/database or create another server. Then run the fixed development suite:
 
 ```sh
 PYTHONPATH=.:tools:tools/native_platform_v0/bridge _local_data/native_platform_v0/evennia/venv/bin/python -m tools.native_platform_v0.p5.runner \

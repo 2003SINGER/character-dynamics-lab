@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 from tools.native_platform_v0.p3 import export_evidence, mcp_stdio
 from tools.native_platform_v0.p5.audit import _check_world_and_edits, audit_document
@@ -81,6 +82,47 @@ class P5RunnerAuditTests(unittest.TestCase):
         self.assertNotEqual(malformed["status"], "PASS")
         codes = {row["code"] for row in malformed["findings"]}
         self.assertTrue({"RAW_BUNDLE_MISSING", "RUN_INCOMPLETE", "DB_READBACK_MISSING"} <= codes)
+
+    def test_no_route_opportunity_does_not_imply_no_route_traversal(self):
+        document = {"configuration": {"expect": {
+            "route_traversed": "main_passage", "no_route_opportunity": True}},
+            "response": {"scene": {}, "rounds": [], "final": {"ledger": [], "verdicts": {}}}}
+        findings = []
+        _check_world_and_edits(document, findings)
+        self.assertFalse(any(row["code"] in {"ROUTE_OPPORTUNITY", "UNEXPECTED_ROUTE_OPPORTUNITY"}
+                             for row in findings))
+
+        document["response"]["final"]["ledger"].append({
+            "event_type": "P5_OPPORTUNITY_SETTLED",
+            "typed_args": {"route_id": "main_passage", "cost": 2}})
+        findings = []
+        _check_world_and_edits(document, findings)
+        self.assertTrue(any(row["code"] == "UNEXPECTED_ROUTE_OPPORTUNITY" for row in findings))
+
+    def test_p5_step_world_awaits_service_deferred(self):
+        try:
+            from twisted.internet import defer
+            from tools.native_platform_v0.p3 import control_service
+        except ImportError:
+            self.skipTest("Twisted is available only in the initialized Evennia runtime")
+
+        class Attributes:
+            def get(self, key, category=None, default=None):
+                if key == "p5_scene_id" and category == "native_p3":
+                    return "p5-scene"
+                return default
+
+        pickup = type("Pickup", (), {"attributes": Attributes()})()
+        expected = {"scene_id": "p5-scene", "rounds": [{"minute": 1}]}
+        instance = object.__new__(control_service.P3Control)
+        with patch("tools.native_platform_v0.p3.control_service._load_scene",
+                   return_value=(object(), [pickup])), patch(
+                       "tools.native_platform_v0.p5.service.step_world",
+                       return_value=defer.succeed(expected)):
+            result = instance.step_world({"scene_id": "p5-scene", "rounds": 1})
+        observed = []
+        result.addCallback(observed.append)
+        self.assertEqual(observed, [expected])
 
     def test_player_get_receipt_uses_real_player_location_owner_id(self):
         get_receipt = {"actor_alias": "player", "provenance": "native_player_command",

@@ -2,7 +2,7 @@
 
 更新时间：2026-10-10。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
-角色动力3的[阶段与过关证据](研究重建审计_2026-10-06.md)已维护；当前新链在成熟方案调查→原生复现的接缝。不是全部工作归零，不新增全面综述/总设计作为前置；本轮文档更新不算原生运行通过。
+角色动力3的[阶段与过关证据](研究重建审计_2026-10-06.md)与各原生平台历史阶段分别保留；当前执行指针是 P5 Author Bundle 有限集成。不是全部工作归零；本轮文档更新不算原生运行通过。
 
 ## SYSTEM / APPLICATION TRACK
 
@@ -13,7 +13,7 @@
 | DEMO-LIVING | **ACTIVE / DEMO ONLY** | 保留历史批次为实现诊断。Laya v4.3 一日工程 gate 通过、行为 scale gate 未通过：no-history 单 seed 睡眠 1,149 分钟且历史输入使首请求分布大幅变化；停止扩成 64 actors / 7 days | [core behavior eval](../Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；[Laya typed policy](../Demo%20codex-generated/demo/laya_typed_policy_v0/README.md)；[v4.3 audit](../outputs/laya_runs/laya_v43_66ebfe7_20260925/RESULTS.md) |
 | RESEARCH-DYNAMICS | **TOY_NOT_ADMITTED / 未训练** | 不把四字段手写 law、相对分数 policy 或当前不足的干预测试称作机制通过；不运行会覆盖 artifacts 的生成器 | [研究重建审计](研究重建审计_2026-10-06.md)；[ResearchDynamicsV1 source](../02_实验/ResearchDynamicsV1/README.md) |
 | NPC-SYSTEM-INTEGRATION-V0 | **DEVELOPMENT_VERIFIED / READY_FOR_INDEPENDENT_REVIEW** | 首个 vertical slice 已交付，保留独立审阅实际链与未实现项；后续动作不自动设为 C++ 桥或独立 Python CLI | [唯一结果/需求映射](../02_实验/NPC_System_Integration_v0/RESULTS.md)；[可运行入口](../tools/npc_system_v0/README.md)。不等于正式 E1-2、LLM 接入或完整系统 |
-| TRADITIONAL-CHAIN-BASELINE | **P1/P2 完成；P3-A/B DEVELOPMENT_VERIFIED；P3-C0 有限 DEVELOPMENT 外审认可；P3-C1a 原 owner 保留；P4-0 READY_FOR_INDEPENDENT_REVIEW** | P4-0 的 16 个 native-server runs COMPLETE，8 组配对与 DB audit PASS；差异、拒绝响应和负例见唯一 owner。因果诊断已完成，但当前证据不区分干预时机权衡；只有另行选出可区分条件/协议后才考虑成熟方法比较。本轮停在 P4-0，不自动进入 P4-1；CI 状态以本提交的 GitHub Actions 为准。不是完整 DM、玩家/心理效度或科研创新结论 | [P4-0 状态、RESULTS 与证据 manifest](../02_实验/Native_Platform_P4_0_v0/README.md)；P3-C0/A/B/C1a 与 P1/P2 仍由各自历史 owner 维护：[C0](../02_实验/Native_Platform_P3_C0_v0/README.md) / [A/B](../02_实验/Native_Platform_P3_v0/README.md) / [C1a](../02_实验/Native_Platform_P3_C1a_v0/README.md) / [P1/P2](../02_实验/Native_Platform_P1P2_v0/RESULTS.md) |
+| TRADITIONAL-CHAIN-BASELINE | **P5 Author Bundle：READY_FOR_INDEPENDENT_REVIEW** | 12 场、11/12结构审计及18-world旧回归已复核；保留1项shared-supply真实失败，不改预期、不自动修复。等待独立审阅；不标CLOSED、不自动进入后续阶段 | [当前 P5 README](../02_实验/Native_Platform_P5_v0/README.md) / [唯一 RESULTS 与公开证据索引](../02_实验/Native_Platform_P5_v0/RESULTS.md)；[核心 API](../tools/native_platform_v0/p5/README.md)；历史阶段仍见 [P4-0](../02_实验/Native_Platform_P4_0_v0/README.md) |
 | MC-EXECUTION-ROUTE | **DEFERRED_CANDIDATE** | 暂不启动。保留 Minecraft/Mineflayer/煤炭任务作为后续执行载体候选；它不是传统全链原生复现的前置条件 | [历史候选与边界](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md#历史延期候选-minecraft-执行) |
 | DIRECTOR-BUDGET-QUESTION | **待源码复现** | 若重新处理，先按来源审计/复现预算疑点；该恢复摘要不构成本轮新确认 | [NPC System Integration v0 结果](../02_实验/NPC_System_Integration_v0/RESULTS.md) |
 

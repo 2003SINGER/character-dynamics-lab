@@ -443,9 +443,11 @@ class P3Control:
                        if obj.attributes.get("p5_scene_id", category="native_p3", default=None) == scene_id), None)
         if pickup is not None:
             from tools.native_platform_v0.p5.service import step_world
-            return step_world(scene_id, rounds=rounds,
-                              interventions=args.get("interventions", ()),
-                              edits=args.get("edits", ()))
+            result = yield defer.maybeDeferred(
+                step_world, scene_id, rounds=rounds,
+                interventions=args.get("interventions", ()),
+                edits=args.get("edits", ()))
+            return result
         if args.get("interventions") or args.get("edits"):
             raise ValueError("scheduled interventions/edits are available only for P5 scenes")
         actors = _role_actor_rows(objects, account.id)

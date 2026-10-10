@@ -1,0 +1,53 @@
+{
+  "schema": "native-p5-reviewer-summary-v1",
+  "created_at": "2026-10-10T13:13:50.267177+00:00",
+  "release_path": "02_实验/Native_Platform_P5_v0/public_evidence/p5-evidence-20261010T130007Z-d875ac",
+  "manifest_path": "02_实验/Native_Platform_P5_v0/public_evidence/p5-evidence-20261010T130007Z-d875ac/manifest.json",
+  "manifest_sha256": "7fb5cc59c3a740cc8812466e67adc637bb430bf8ff913d788dc3e1f498ea9fcc",
+  "p5_matrix": "12/12 responses COMPLETE; 11 expected structural audit outcomes PASS; 1 preserved real shared-supply return failure.",
+  "p5_failure": {
+    "run_id": "shared-supply-stolen-returned",
+    "status": "COMPLETE but expected outcome not achieved; monitor VIOLATED",
+    "evidence": "Player get and drop both settled on one physical shared item. After return to origin at minute 4, both NPCs remained in patrol rooms and did not observe it again; neither delivery nor note response occurred. This is retained as a real counterexample, not repaired or recoded as expected success."
+  },
+  "legacy_regression": {
+    "worlds": 18,
+    "files": 40,
+    "raw_runs": 17,
+    "query_only_db_exports": 14,
+    "audits": 9,
+    "P3_subset": "9 calls / 10 worlds; four per-case audits PASS; exact DB/scene/location/receipt joins matched.",
+    "P4_integrity": "four paired audits PASS; goal verdicts preserved separately: open SAT/SAT; blocked-return off VIOLATED/on SAT; blocked-held both VIOLATED; short-deadline both VIOLATED."
+  },
+  "tests": {
+    "P5": 43,
+    "P3": 53,
+    "bridge_social": 9,
+    "bridge_P4": 6,
+    "bridge_P5": 8,
+    "bridge_total": 23,
+    "TypedIR": 30,
+    "all_subprocess_return_codes_zero": true,
+    "full_outputs_and_source_hashes": "02_实验/Native_Platform_P5_v0/public_evidence/p5-evidence-20261010T130007Z-d875ac/contract-test-log-20261010T130128Z-f83428.json"
+  },
+  "compressed_evidence": {
+    "input_files": 103,
+    "raw_bytes": 200001036,
+    "gzip_bytes": 7346013,
+    "all_decompressed_bytes_equal_original": true,
+    "raw_files_retained": true
+  },
+  "failure_retention": "Includes initial Saver/load failure, original off/open audit failure, first MCP Deferred serialization failure, and the shared-supply real failure; corrected evidence is additional and does not overwrite these.",
+  "mcp": "Fresh valid stdio smoke now returns structured step_world and get_trace minute 1; separate unsupported SEMANTIC_GAP reset leaves generated-scene count unchanged.",
+  "claim_boundary": "Structural and integration evidence only; not a research-effectiveness or psychological-validity claim.",
+  "independent_parent_verification": {
+    "run_id": "p5-parent-verification-20261010T131800Z-463fbd",
+    "raw_artifact": "02_实验/Native_Platform_P5_v0/runs/p5-parent-verification-20261010T131800Z-463fbd.json",
+    "sha256": "6e581508312bbc51ca90f5a51ef4bfbce87ba5db58d0fa1f8d3b9fd0c8848c6e",
+    "result": "12 runs re-audited: 11 PASS, 1 preserved real FAIL; four P3 check_run audits passed; exact query-only DB joins passed for 34 objects and six actors task/receipt/location attributes; current source hashes verified with 59 tests.",
+    "source_differences_from_run_baseline": [
+      "tools/native_platform_v0/p5/audit.py",
+      "tools/native_platform_v0/p3/control_service.py"
+    ]
+  }
+}

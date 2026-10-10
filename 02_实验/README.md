@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-10 当前原生平台路线为 **Evennia 主平台 + Ensemble 首个原生人物机制参照**：P1/P2 完成，P3-A/B 为限定场景 DEVELOPMENT_VERIFIED，P3-C0 与 C1a 保留各自有限开发/历史 owner。当前有限阶段 P4-0 的 16 个 native-server runs COMPLETE，8 组 author-off/on 配对和独立精确场景 DB audits PASS，状态 **READY_FOR_INDEPENDENT_REVIEW**；唯一结果见 [P4-0 README](Native_Platform_P4_0_v0/README.md) / [RESULTS 与证据](Native_Platform_P4_0_v0/RESULTS.md)。本轮停止，不自动进入 P4-1；CI 状态以本提交的 GitHub Actions 为准。P4-0 是固定规则与 pinned Ensemble 原生回应链的有限 DEVELOPMENT，不是完整 DM、心理/玩家效度或新算法结论。P3 与 P1/P2、LIGHT 历史负结果仍由各自 owner 维护；LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 不阻塞，真人试玩可选且尚未确认。
+2026-10-10 当前原生平台路线为 **Evennia 主平台 + Ensemble 首个原生人物机制参照**。P5 Author Bundle 有限集成状态 **READY_FOR_INDEPENDENT_REVIEW**，未 CLOSED；12 场结果、11/12 结构审计及一个真实 shared-supply 失败只维护于 [P5 RESULTS](Native_Platform_P5_v0/RESULTS.md)，公开索引从该 owner 进入。MCP smoke、9个legacy cases（10 worlds）与8个P4 worlds回归已完成；四组P4配对integrity audit PASS。范围和边界见 [P5 README](Native_Platform_P5_v0/README.md)，核心接口见[代码 README](../tools/native_platform_v0/p5/README.md)。P5 使用有限、条件性的作者机会 AND/OR 候选枚举，并复用已有 TypedIR、GTPyhop 和原生 Ensemble；不代表完整 DM、可保证的 NPC 响应或研究效果。P1/P2、P3 与 P4-0 均由各自历史 owner 维护，旧结论不在本页重写。
 
 2026-10-09 用户另行明确授权按目标 TXT 改系统：[NPC System Integration v0](NPC_System_Integration_v0/RESULTS.md) 已形成有限 DEVELOPMENT 应用闭环，含合法世界干预、演员状态/承诺、GOAP/HTN、director-off 和玩家扰动。它是新的有限软件开发验收，不是 NPC 玩家实验、E1-2 formal、心理训练或冻结 Runtime 改动；下方 E1-1 交付时的范围不禁止该新应用。
 

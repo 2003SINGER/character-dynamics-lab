@@ -246,7 +246,10 @@ def _check_world_and_edits(document: dict, findings: list[dict]) -> None:
     ledger = _rows(final.get("ledger"))
     expectations = _mapping(config.get("expect"))
     expected_route = expectations.get("route_traversed")
-    expected_opportunity_route = expectations.get("opportunity_route", expected_route)
+    no_route_opportunity = expectations.get("no_route_opportunity") is True
+    expected_opportunity_route = expectations.get("opportunity_route")
+    if expected_opportunity_route is None and not no_route_opportunity:
+        expected_opportunity_route = expected_route
     opportunity_rows = [row for row in ledger if row.get("event_type") == "P5_OPPORTUNITY_SETTLED"]
     route_settlements = [row for row in ledger if row.get("event_type") in {
         "P5_OPPORTUNITY_SETTLED", "P5_OPPORTUNITY_ATTEMPT"} and row.get("typed_args", {}).get("settled") is True]
@@ -274,8 +277,10 @@ def _check_world_and_edits(document: dict, findings: list[dict]) -> None:
             _failure(findings, "PERSISTED_OPPORTUNITY_QUOTA", "persisted opportunity count is not exactly one")
     elif expected_opportunity_route:
         _unknown(findings, "PERSISTED_ROUTE_COST_UNKNOWN", "persisted pickup P5 opportunity budget is unavailable")
-    if expectations.get("route_traversed") is None and expectations.get("no_route_opportunity") is True:
-        if route_settlements:
+    if no_route_opportunity:
+        # P5_OPPORTUNITY_SETTLED is a receipt-backed success event; unlike an
+        # attempted intervention it need not duplicate `settled: true` in args.
+        if opportunity_rows or route_settlements:
             _failure(findings, "UNEXPECTED_ROUTE_OPPORTUNITY", "a physical route opportunity settled in a no-opportunity control")
     for operation in expectations.get("denied_author_opportunities", []):
         rejected = [row for row in ledger if row.get("event_type") == "P5_INTERVENTION"
