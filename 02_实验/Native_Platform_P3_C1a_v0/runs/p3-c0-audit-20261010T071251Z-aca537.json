@@ -1,0 +1,108 @@
+{
+  "schema": "native-p3-c1a-parent-subset-audit-v1",
+  "status": "PASS",
+  "scope": "four manual legacy A/B cases only; check_run plus parent exact receipt/log/task/location DB comparison for six NPCs; not the historical seven-case suite",
+  "summary": [
+    {
+      "scenario": "Aclean",
+      "scene_id": "20261010070751-dc3cca",
+      "courier_receipts": [
+        "get",
+        "move",
+        "drop"
+      ]
+    },
+    {
+      "scenario": "Asteal-return",
+      "scene_id": "20261010070751-a748c6",
+      "stale_get_rejected_then_recovered": true
+    },
+    {
+      "scenario": "Bclean",
+      "scene_id": "20261010070752-dc9bbc",
+      "native_candidates": [
+        "writeLoveNoteReject",
+        "kissFail"
+      ],
+      "selected": "kissFail",
+      "ensemble_revision": 1
+    },
+    {
+      "scenario": "Bsteal-resident-parcel",
+      "scene_id": "20261010070752-f131cf",
+      "resident_no_candidate_and_recovery": true,
+      "courier_independent_receipts": [
+        "get",
+        "move",
+        "drop"
+      ]
+    }
+  ],
+  "db_checked": [
+    {
+      "scene_id": "20261010070751-dc3cca",
+      "actor_id": 1360,
+      "role": "courier",
+      "receipts": 3
+    },
+    {
+      "scene_id": "20261010070751-a748c6",
+      "actor_id": 1368,
+      "role": "courier",
+      "receipts": 3
+    },
+    {
+      "scene_id": "20261010070752-dc9bbc",
+      "actor_id": 1376,
+      "role": "courier",
+      "receipts": 3
+    },
+    {
+      "scene_id": "20261010070752-dc9bbc",
+      "actor_id": 1377,
+      "role": "resident",
+      "receipts": 3
+    },
+    {
+      "scene_id": "20261010070752-f131cf",
+      "actor_id": 1385,
+      "role": "courier",
+      "receipts": 3
+    },
+    {
+      "scene_id": "20261010070752-f131cf",
+      "actor_id": 1386,
+      "role": "resident",
+      "receipts": 3
+    }
+  ],
+  "inputs": {
+    "runs": [
+      {
+        "file": "p3-headless-Aclean-seed20261010-20261010T070751Z-d1f59c.json",
+        "sha256": "9365c357f42fb6177f7711f18eb8c4198b2630fe17eb1be463ebd023e0285c9f"
+      },
+      {
+        "file": "p3-headless-Asteal-return-seed20261010-20261010T070752Z-9d0d6f.json",
+        "sha256": "681af2544ff87d9b95119012b4766d197ef1bfa02e5fae8cd76d75439ae9c907"
+      },
+      {
+        "file": "p3-headless-Bclean-seed20261010-20261010T070752Z-cdac50.json",
+        "sha256": "1f5273ec2fbf20163b1cef849ee869dea058c3f10959abfa21ebd53139448c02"
+      },
+      {
+        "file": "p3-headless-Bsteal-resident-parcel-seed20261010-20261010T070753Z-d37e41.json",
+        "sha256": "23f40a0677cc7edf702386fef53c42334552055d6f96aa592d4d828d476a5d1e"
+      }
+    ],
+    "db": {
+      "file": "p3-db-evidence-20261010070751-dc3cca-20261010070751-a748c6-20261010070752-dc9bbc-20261010070752-f131cf-20261010T071132Z-357f3c.json",
+      "sha256": "f3fe50305cf795c58b9ccce9ca7e3cc3e6698b49d441b8376e8ed8cdc30fa023"
+    }
+  },
+  "prior_audit_attempt": {
+    "status": "FAIL",
+    "reason": "full historical check_db requires at least nine NPCs; four-case subset has six",
+    "response": "kept historical validator unchanged; narrowed parent evidence scope to actual four-case regression"
+  }
+}

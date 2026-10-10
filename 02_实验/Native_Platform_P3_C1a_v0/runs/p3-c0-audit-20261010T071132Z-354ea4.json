@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "scope": "one bounded P3-C0 development run plus independent read-only DB readback",
+  "semantic_acceptance": {
+    "scenario": "C0-no-delivery",
+    "patrol_moves": 6,
+    "locked_exit_rejections": 1,
+    "locked_exit_move_retries": 0,
+    "scene_ids": [
+      "20261010070749-2d15be",
+      "20261010070750-7ed0a3"
+    ]
+  },
+  "db_actor_rows_checked": 2,
+  "inputs": {
+    "run": {
+      "file": "p3-c0-C0-no-delivery-seed20261010-20261010T070750Z-39b56c.json",
+      "sha256": "f0fbdfcafb42f9bbf4cc2e094c364c7ae398203b46bc4b2232e1e3ba7170f320"
+    },
+    "db": {
+      "file": "p3-db-evidence-20261010070749-2d15be-20261010070750-7ed0a3-20261010T071132Z-8ed17a.json",
+      "sha256": "38ab14f0585a7bab6ae9f77ad029f201cba73870de67d2b04dba0907d57e5509"
+    }
+  }
+}

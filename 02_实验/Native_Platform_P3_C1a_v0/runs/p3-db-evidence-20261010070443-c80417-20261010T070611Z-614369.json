@@ -1,0 +1,4205 @@
+{
+  "schema": "native-p3-db-evidence-v1",
+  "exported_at": "2026-10-10T07:06:11.502109+00:00",
+  "source": "initialized Evennia Django ORM; SQLite query_only enabled",
+  "selection": {
+    "mode": "explicit_scene_id_allowlist",
+    "scene_ids": [
+      "20261010070443-c80417"
+    ]
+  },
+  "included_categories": [
+    "native_p3",
+    "native_social"
+  ],
+  "sensitive_fields": "account/session/password/settings/credential/token/HMAC-like keys omitted",
+  "logs": "full persisted lists retained; no tail truncation",
+  "scenes": [
+    {
+      "scene_id": "20261010070443-c80417",
+      "objects": [
+        {
+          "id": 1303,
+          "dbref": "#1303",
+          "key": "Courier Pickup 20261010070443-c80417",
+          "typeclass_path": "typeclasses.rooms.Room",
+          "location": null,
+          "exit_destination": null,
+          "attributes": {
+            "native_p3": {
+              "p3_scene_id": "20261010070443-c80417"
+            }
+          }
+        },
+        {
+          "id": 1304,
+          "dbref": "#1304",
+          "key": "Resident Porch 20261010070443-c80417",
+          "typeclass_path": "typeclasses.rooms.Room",
+          "location": null,
+          "exit_destination": null,
+          "attributes": {
+            "native_p3": {
+              "p3_scene_id": "20261010070443-c80417"
+            }
+          }
+        },
+        {
+          "id": 1305,
+          "dbref": "#1305",
+          "key": "east",
+          "typeclass_path": "typeclasses.exits.Exit",
+          "location": {
+            "id": 1303,
+            "dbref": "#1303",
+            "in_allowlisted_scene": true
+          },
+          "exit_destination": {
+            "id": 1304,
+            "dbref": "#1304",
+            "in_allowlisted_scene": true
+          },
+          "attributes": {
+            "native_p3": {
+              "p3_scene_id": "20261010070443-c80417"
+            }
+          }
+        },
+        {
+          "id": 1306,
+          "dbref": "#1306",
+          "key": "west",
+          "typeclass_path": "typeclasses.exits.Exit",
+          "location": {
+            "id": 1304,
+            "dbref": "#1304",
+            "in_allowlisted_scene": true
+          },
+          "exit_destination": {
+            "id": 1303,
+            "dbref": "#1303",
+            "in_allowlisted_scene": true
+          },
+          "attributes": {
+            "native_p3": {
+              "p3_scene_id": "20261010070443-c80417"
+            }
+          }
+        },
+        {
+          "id": 1307,
+          "dbref": "#1307",
+          "key": "Courier 20261010070443-c80417",
+          "typeclass_path": "typeclasses.characters.Character",
+          "location": {
+            "id": 1304,
+            "dbref": "#1304",
+            "in_allowlisted_scene": true
+          },
+          "exit_destination": null,
+          "attributes": {
+            "native_p3": {
+              "activity_profile": "delivery_patrol_recovery_v0",
+              "delivery_task": true,
+              "drive_mode": "manual",
+              "goal": "deliver_supply",
+              "interval_seconds": 4,
+              "last_observation": {
+                "actor_id": 1307,
+                "activity_contract": {
+                  "profile": "delivery_patrol_recovery_v0",
+                  "delivery_task": true,
+                  "source": "scenario-authored-activity-profile"
+                },
+                "goal_contract": {
+                  "goal": "deliver_supply",
+                  "item_id": 1309,
+                  "destination_id": 1304,
+                  "source": "scenario-authored-task"
+                },
+                "observation": {
+                  "room_id": 1303,
+                  "inventory": [],
+                  "visible_items": [
+                    {
+                      "id": 1305,
+                      "dbref": "#1305",
+                      "key": "east",
+                      "room_id": 1303
+                    },
+                    {
+                      "id": 1310,
+                      "dbref": "#1310",
+                      "key": "P3 Fixture Player 20261010070443-c80417",
+                      "room_id": 1303
+                    }
+                  ],
+                  "task_item": {
+                    "id": 1309,
+                    "key": "Supply 20261010070443-c80417"
+                  },
+                  "task_destination": 1304,
+                  "item_location": 1304,
+                  "item_held": false,
+                  "delivered": false,
+                  "own_delivery_receipts": [
+                    {
+                      "receipt_id": "p3:1307:4:11",
+                      "kind": "move",
+                      "actor_dbref": "#1307",
+                      "item_id": 1309,
+                      "before_room_id": 1303,
+                      "after_room_id": 1304,
+                      "before_item_room_id": null,
+                      "after_item_room_id": null,
+                      "goal": "patrol",
+                      "activity_profile": "delivery_patrol_recovery_v0",
+                      "submitted_command": "east",
+                      "before_inventory_ids": [],
+                      "after_inventory_ids": [],
+                      "dispatch_succeeded": true,
+                      "settled": true
+                    },
+                    {
+                      "receipt_id": "p3:1307:6:18",
+                      "kind": "move",
+                      "actor_dbref": "#1307",
+                      "item_id": 1309,
+                      "before_room_id": 1304,
+                      "after_room_id": 1303,
+                      "before_item_room_id": null,
+                      "after_item_room_id": 1303,
+                      "goal": "patrol",
+                      "activity_profile": "delivery_patrol_recovery_v0",
+                      "submitted_command": "west",
+                      "before_inventory_ids": [],
+                      "after_inventory_ids": [],
+                      "dispatch_succeeded": true,
+                      "settled": true
+                    },
+                    {
+                      "receipt_id": "p3:1307:8:24",
+                      "kind": "get",
+                      "actor_dbref": "#1307",
+                      "item_id": 1309,
+                      "before_room_id": 1303,
+                      "after_room_id": 1303,
+                      "before_item_room_id": 1303,
+                      "after_item_room_id": null,
+                      "goal": "deliver_supply",
+                      "activity_profile": "delivery_patrol_recovery_v0",
+                      "submitted_command": "get Supply 20261010070443-c80417",
+                      "before_inventory_ids": [],
+                      "after_inventory_ids": [
+                        1309
+                      ],
+                      "dispatch_succeeded": true,
+                      "settled": true
+                    },
+                    {
+                      "receipt_id": "p3:1307:10:30",
+                      "kind": "move",
+                      "actor_dbref": "#1307",
+                      "item_id": 1309,
+                      "before_room_id": 1303,
+                      "after_room_id": 1304,
+                      "before_item_room_id": null,
+                      "after_item_room_id": null,
+                      "goal": "deliver_supply",
+                      "activity_profile": "delivery_patrol_recovery_v0",
+                      "submitted_command": "east",
+                      "before_inventory_ids": [
+                        1309
+                      ],
+                      "after_inventory_ids": [
+                        1309
+                      ],
+                      "dispatch_succeeded": true,
+                      "settled": true
+                    },
+                    {
+                      "receipt_id": "p3:1307:12:36",
+                      "kind": "drop",
+                      "actor_dbref": "#1307",
+                      "item_id": 1309,
+                      "before_room_id": 1304,
+                      "after_room_id": 1304,
+                      "before_item_room_id": null,
+                      "after_item_room_id": 1304,
+                      "goal": "deliver_supply",
+                      "activity_profile": "delivery_patrol_recovery_v0",
+                      "submitted_command": "drop Supply 20261010070443-c80417",
+                      "before_inventory_ids": [
+                        1309
+                      ],
+                      "after_inventory_ids": [],
+                      "dispatch_succeeded": true,
+                      "settled": true
+                    },
+                    {
+                      "receipt_id": "p3:1307:14:42",
+                      "kind": "move",
+                      "actor_dbref": "#1307",
+                      "item_id": 1309,
+                      "before_room_id": 1304,
+                      "after_room_id": 1303,
+                      "before_item_room_id": 1304,
+                      "after_item_room_id": null,
+                      "goal": "patrol",
+                      "activity_profile": "delivery_patrol_recovery_v0",
+                      "submitted_command": "west",
+                      "before_inventory_ids": [],
+                      "after_inventory_ids": [],
+                      "dispatch_succeeded": true,
+                      "settled": true
+                    }
+                  ],
+                  "known_exits": {
+                    "1303": [
+                      1304
+                    ],
+                    "1304": [
+                      1303
+                    ]
+                  },
+                  "exits": [
+                    {
+                      "key": "east",
+                      "destination_id": 1304,
+                      "destination_dbref": "#1304"
+                    }
+                  ],
+                  "witnessed": [
+                    {
+                      "room_id": 1303,
+                      "kind": "current_room",
+                      "dbref": "#1303"
+                    }
+                  ],
+                  "retained_witnesses": [
+                    {
+                      "room_id": 1304,
+                      "key": "Supply 20261010070443-c80417",
+                      "last_seen_at": "2026-10-10T07:04:43.711584+00:00",
+                      "status": "seen"
+                    }
+                  ]
+                }
+              },
+              "last_outcome": {
+                "status": "SETTLED",
+                "intent": {
+                  "operator": "move",
+                  "exit_key": "east",
+                  "destination_id": 1304
+                },
+                "detail": null,
+                "receipt": {
+                  "receipt_id": "p3:1307:16:48",
+                  "kind": "move",
+                  "actor_dbref": "#1307",
+                  "item_id": 1309,
+                  "before_room_id": 1303,
+                  "after_room_id": 1304,
+                  "before_item_room_id": null,
+                  "after_item_room_id": 1304,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_recovery_v0",
+                  "submitted_command": "east",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                }
+              },
+              "log": [
+                {
+                  "at": "2026-10-10T07:04:43.236964+00:00",
+                  "kind": "timer_tick",
+                  "tick": 1,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.239562+00:00",
+                  "kind": "observation",
+                  "room": "#1303",
+                  "visible_item_ids": [
+                    1305,
+                    1309,
+                    1310
+                  ],
+                  "inventory_ids": [],
+                  "visible_exit_keys": [
+                    "east"
+                  ]
+                },
+                {
+                  "at": "2026-10-10T07:04:43.240494+00:00",
+                  "kind": "goal_choice",
+                  "inputs": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "delivery_status": "ACTIVE",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": true,
+                      "retained_item_location": 1303,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    }
+                  },
+                  "candidates": [
+                    "deliver_supply",
+                    "patrol"
+                  ],
+                  "rule": "delivery_before_patrol_recovery_v0",
+                  "choice": "deliver_supply",
+                  "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                  "goal": {
+                    "goal": "deliver_supply",
+                    "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                    "rule": "delivery_before_patrol_recovery_v0",
+                    "status": "ACTIVE",
+                    "candidates": [
+                      "deliver_supply",
+                      "patrol"
+                    ],
+                    "choice": "deliver_supply",
+                    "delivery_status": "ACTIVE",
+                    "delivery_reason": "delivery has priority while local evidence supports item availability",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": true,
+                      "retained_item_location": 1303,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    },
+                    "inputs": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "delivery_status": "ACTIVE",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": true,
+                        "retained_item_location": 1303,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      }
+                    }
+                  },
+                  "activity_profile": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "source": "scenario-authored-activity-profile"
+                  },
+                  "view": {
+                    "actor_id": 1307,
+                    "activity_contract": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "source": "scenario-authored-activity-profile"
+                    },
+                    "goal_contract": {
+                      "goal": "deliver_supply",
+                      "item_id": 1309,
+                      "destination_id": 1304,
+                      "source": "scenario-authored-task"
+                    },
+                    "observation": {
+                      "room_id": 1303,
+                      "inventory": [],
+                      "visible_items": [
+                        {
+                          "id": 1305,
+                          "dbref": "#1305",
+                          "key": "east",
+                          "room_id": 1303
+                        },
+                        {
+                          "id": 1309,
+                          "dbref": "#1309",
+                          "key": "Supply 20261010070443-c80417",
+                          "room_id": 1303
+                        },
+                        {
+                          "id": 1310,
+                          "dbref": "#1310",
+                          "key": "P3 Fixture Player 20261010070443-c80417",
+                          "room_id": 1303
+                        }
+                      ],
+                      "task_item": {
+                        "id": 1309,
+                        "key": "Supply 20261010070443-c80417"
+                      },
+                      "task_destination": 1304,
+                      "item_location": 1303,
+                      "item_held": false,
+                      "delivered": false,
+                      "own_delivery_receipts": [],
+                      "known_exits": {
+                        "1303": [
+                          1304
+                        ]
+                      },
+                      "exits": [
+                        {
+                          "key": "east",
+                          "destination_id": 1304,
+                          "destination_dbref": "#1304"
+                        }
+                      ],
+                      "witnessed": [
+                        {
+                          "room_id": 1303,
+                          "kind": "current_room",
+                          "dbref": "#1303"
+                        }
+                      ],
+                      "retained_witnesses": [
+                        {
+                          "room_id": 1303,
+                          "key": "Supply 20261010070443-c80417",
+                          "last_seen_at": "2026-10-10T07:04:43.237955+00:00",
+                          "status": "seen"
+                        }
+                      ]
+                    }
+                  },
+                  "planner": {
+                    "status": "SOLVED",
+                    "reason": "actor-local HTN proposal",
+                    "intent": {
+                      "operator": "get",
+                      "item_id": "1309"
+                    },
+                    "plan": [
+                      {
+                        "operator": "get",
+                        "item_id": "1309"
+                      },
+                      {
+                        "operator": "move",
+                        "exit_key": "east",
+                        "destination_id": 1304
+                      },
+                      {
+                        "operator": "drop",
+                        "item_id": "1309",
+                        "room_id": 1304
+                      }
+                    ],
+                    "method_action_visits": 6,
+                    "implementation": "gtpyhop-core-2.0.2",
+                    "prediction_only": true
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.242413+00:00",
+                  "kind": "primitive_intent",
+                  "pending_action": {
+                    "status": "planned",
+                    "planned_at_tick": 1,
+                    "operation_id": "p3:1307:1",
+                    "goal": {
+                      "goal": "deliver_supply",
+                      "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                      "rule": "delivery_before_patrol_recovery_v0",
+                      "status": "ACTIVE",
+                      "candidates": [
+                        "deliver_supply",
+                        "patrol"
+                      ],
+                      "choice": "deliver_supply",
+                      "delivery_status": "ACTIVE",
+                      "delivery_reason": "delivery has priority while local evidence supports item availability",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": true,
+                        "retained_item_location": 1303,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      },
+                      "inputs": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "delivery_status": "ACTIVE",
+                        "local_evidence": {
+                          "assigned_item_id": 1309,
+                          "destination_id": 1304,
+                          "item_held": false,
+                          "item_currently_visible": true,
+                          "retained_item_location": 1303,
+                          "binding_valid": true,
+                          "own_delivery_receipt": false
+                        }
+                      }
+                    },
+                    "planner": {
+                      "status": "SOLVED",
+                      "reason": "actor-local HTN proposal",
+                      "intent": {
+                        "operator": "get",
+                        "item_id": "1309"
+                      },
+                      "plan": [
+                        {
+                          "operator": "get",
+                          "item_id": "1309"
+                        },
+                        {
+                          "operator": "move",
+                          "exit_key": "east",
+                          "destination_id": 1304
+                        },
+                        {
+                          "operator": "drop",
+                          "item_id": "1309",
+                          "room_id": 1304
+                        }
+                      ],
+                      "method_action_visits": 6,
+                      "implementation": "gtpyhop-core-2.0.2",
+                      "prediction_only": true
+                    },
+                    "intent": {
+                      "operator": "get",
+                      "item_id": "1309"
+                    },
+                    "view": {
+                      "actor_id": 1307,
+                      "activity_contract": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "source": "scenario-authored-activity-profile"
+                      },
+                      "goal_contract": {
+                        "goal": "deliver_supply",
+                        "item_id": 1309,
+                        "destination_id": 1304,
+                        "source": "scenario-authored-task"
+                      },
+                      "observation": {
+                        "room_id": 1303,
+                        "inventory": [],
+                        "visible_items": [
+                          {
+                            "id": 1305,
+                            "dbref": "#1305",
+                            "key": "east",
+                            "room_id": 1303
+                          },
+                          {
+                            "id": 1309,
+                            "dbref": "#1309",
+                            "key": "Supply 20261010070443-c80417",
+                            "room_id": 1303
+                          },
+                          {
+                            "id": 1310,
+                            "dbref": "#1310",
+                            "key": "P3 Fixture Player 20261010070443-c80417",
+                            "room_id": 1303
+                          }
+                        ],
+                        "task_item": {
+                          "id": 1309,
+                          "key": "Supply 20261010070443-c80417"
+                        },
+                        "task_destination": 1304,
+                        "item_location": 1303,
+                        "item_held": false,
+                        "delivered": false,
+                        "own_delivery_receipts": [],
+                        "known_exits": {
+                          "1303": [
+                            1304
+                          ]
+                        },
+                        "exits": [
+                          {
+                            "key": "east",
+                            "destination_id": 1304,
+                            "destination_dbref": "#1304"
+                          }
+                        ],
+                        "witnessed": [
+                          {
+                            "room_id": 1303,
+                            "kind": "current_room",
+                            "dbref": "#1303"
+                          }
+                        ],
+                        "retained_witnesses": [
+                          {
+                            "room_id": 1303,
+                            "key": "Supply 20261010070443-c80417",
+                            "last_seen_at": "2026-10-10T07:04:43.237955+00:00",
+                            "status": "seen"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.370771+00:00",
+                  "kind": "timer_tick",
+                  "tick": 2,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.379760+00:00",
+                  "kind": "execution_settlement",
+                  "status": "WORLD_VALIDATION_REJECTED",
+                  "intent": {
+                    "operator": "get",
+                    "item_id": "1309"
+                  },
+                  "receipt": {
+                    "receipt_id": "p3:1307:2:5",
+                    "kind": "get",
+                    "actor_dbref": "#1307",
+                    "item_id": 1309,
+                    "before_room_id": 1303,
+                    "after_room_id": 1303,
+                    "before_item_room_id": null,
+                    "after_item_room_id": null,
+                    "goal": "deliver_supply",
+                    "activity_profile": "delivery_patrol_recovery_v0",
+                    "submitted_command": "get Supply 20261010070443-c80417",
+                    "before_inventory_ids": [],
+                    "after_inventory_ids": [],
+                    "dispatch_succeeded": true,
+                    "settled": false
+                  },
+                  "detail": "native command completed without a reported error, but the observed world state did not show the expected get transition"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.389756+00:00",
+                  "kind": "timer_tick",
+                  "tick": 3,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.393371+00:00",
+                  "kind": "observation",
+                  "room": "#1303",
+                  "visible_item_ids": [
+                    1305,
+                    1310
+                  ],
+                  "inventory_ids": [],
+                  "visible_exit_keys": [
+                    "east"
+                  ]
+                },
+                {
+                  "at": "2026-10-10T07:04:43.395918+00:00",
+                  "kind": "goal_choice",
+                  "inputs": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": false,
+                      "retained_item_location": null,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    }
+                  },
+                  "candidates": [
+                    "deliver_supply",
+                    "patrol"
+                  ],
+                  "rule": "delivery_before_patrol_recovery_v0",
+                  "choice": "patrol",
+                  "reason": "assigned item is absent from current local observation and has no retained last-known room; patrol while reobserving",
+                  "goal": {
+                    "goal": "patrol",
+                    "reason": "assigned item is absent from current local observation and has no retained last-known room; patrol while reobserving",
+                    "rule": "delivery_before_patrol_recovery_v0",
+                    "status": "ACTIVE",
+                    "candidates": [
+                      "deliver_supply",
+                      "patrol"
+                    ],
+                    "choice": "patrol",
+                    "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                    "delivery_reason": "temporary suspension is derived only from actor-local absence evidence",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": false,
+                      "retained_item_location": null,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    },
+                    "inputs": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": false,
+                        "retained_item_location": null,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      }
+                    }
+                  },
+                  "activity_profile": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "source": "scenario-authored-activity-profile"
+                  },
+                  "view": {
+                    "actor_id": 1307,
+                    "activity_contract": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "source": "scenario-authored-activity-profile"
+                    },
+                    "goal_contract": {
+                      "goal": "deliver_supply",
+                      "item_id": 1309,
+                      "destination_id": 1304,
+                      "source": "scenario-authored-task"
+                    },
+                    "observation": {
+                      "room_id": 1303,
+                      "inventory": [],
+                      "visible_items": [
+                        {
+                          "id": 1305,
+                          "dbref": "#1305",
+                          "key": "east",
+                          "room_id": 1303
+                        },
+                        {
+                          "id": 1310,
+                          "dbref": "#1310",
+                          "key": "P3 Fixture Player 20261010070443-c80417",
+                          "room_id": 1303
+                        }
+                      ],
+                      "task_item": {
+                        "id": 1309,
+                        "key": "Supply 20261010070443-c80417"
+                      },
+                      "task_destination": 1304,
+                      "item_location": null,
+                      "item_held": false,
+                      "delivered": false,
+                      "own_delivery_receipts": [],
+                      "known_exits": {
+                        "1303": [
+                          1304
+                        ]
+                      },
+                      "exits": [
+                        {
+                          "key": "east",
+                          "destination_id": 1304,
+                          "destination_dbref": "#1304"
+                        }
+                      ],
+                      "witnessed": [
+                        {
+                          "room_id": 1303,
+                          "kind": "current_room",
+                          "dbref": "#1303"
+                        }
+                      ],
+                      "retained_witnesses": [
+                        {
+                          "room_id": null,
+                          "key": "Supply 20261010070443-c80417",
+                          "last_seen_at": "2026-10-10T07:04:43.237955+00:00",
+                          "status": "not_visible_after_rejected_get",
+                          "absence_observed_at": "2026-10-10T07:04:43.379218+00:00"
+                        }
+                      ]
+                    }
+                  },
+                  "planner": {
+                    "status": "SOLVED",
+                    "reason": "first un-rejected locally visible exit by stable key order",
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "east",
+                      "destination_id": 1304
+                    },
+                    "candidate_exits": [
+                      {
+                        "key": "east",
+                        "destination_id": 1304
+                      }
+                    ],
+                    "selection_rule": "local_visible_exit_stable_order_v0"
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.399661+00:00",
+                  "kind": "primitive_intent",
+                  "pending_action": {
+                    "status": "planned",
+                    "planned_at_tick": 3,
+                    "operation_id": "p3:1307:3",
+                    "goal": {
+                      "goal": "patrol",
+                      "reason": "assigned item is absent from current local observation and has no retained last-known room; patrol while reobserving",
+                      "rule": "delivery_before_patrol_recovery_v0",
+                      "status": "ACTIVE",
+                      "candidates": [
+                        "deliver_supply",
+                        "patrol"
+                      ],
+                      "choice": "patrol",
+                      "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                      "delivery_reason": "temporary suspension is derived only from actor-local absence evidence",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": false,
+                        "retained_item_location": null,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      },
+                      "inputs": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                        "local_evidence": {
+                          "assigned_item_id": 1309,
+                          "destination_id": 1304,
+                          "item_held": false,
+                          "item_currently_visible": false,
+                          "retained_item_location": null,
+                          "binding_valid": true,
+                          "own_delivery_receipt": false
+                        }
+                      }
+                    },
+                    "planner": {
+                      "status": "SOLVED",
+                      "reason": "first un-rejected locally visible exit by stable key order",
+                      "intent": {
+                        "operator": "move",
+                        "exit_key": "east",
+                        "destination_id": 1304
+                      },
+                      "candidate_exits": [
+                        {
+                          "key": "east",
+                          "destination_id": 1304
+                        }
+                      ],
+                      "selection_rule": "local_visible_exit_stable_order_v0"
+                    },
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "east",
+                      "destination_id": 1304
+                    },
+                    "view": {
+                      "actor_id": 1307,
+                      "activity_contract": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "source": "scenario-authored-activity-profile"
+                      },
+                      "goal_contract": {
+                        "goal": "deliver_supply",
+                        "item_id": 1309,
+                        "destination_id": 1304,
+                        "source": "scenario-authored-task"
+                      },
+                      "observation": {
+                        "room_id": 1303,
+                        "inventory": [],
+                        "visible_items": [
+                          {
+                            "id": 1305,
+                            "dbref": "#1305",
+                            "key": "east",
+                            "room_id": 1303
+                          },
+                          {
+                            "id": 1310,
+                            "dbref": "#1310",
+                            "key": "P3 Fixture Player 20261010070443-c80417",
+                            "room_id": 1303
+                          }
+                        ],
+                        "task_item": {
+                          "id": 1309,
+                          "key": "Supply 20261010070443-c80417"
+                        },
+                        "task_destination": 1304,
+                        "item_location": null,
+                        "item_held": false,
+                        "delivered": false,
+                        "own_delivery_receipts": [],
+                        "known_exits": {
+                          "1303": [
+                            1304
+                          ]
+                        },
+                        "exits": [
+                          {
+                            "key": "east",
+                            "destination_id": 1304,
+                            "destination_dbref": "#1304"
+                          }
+                        ],
+                        "witnessed": [
+                          {
+                            "room_id": 1303,
+                            "kind": "current_room",
+                            "dbref": "#1303"
+                          }
+                        ],
+                        "retained_witnesses": [
+                          {
+                            "room_id": null,
+                            "key": "Supply 20261010070443-c80417",
+                            "last_seen_at": "2026-10-10T07:04:43.237955+00:00",
+                            "status": "not_visible_after_rejected_get",
+                            "absence_observed_at": "2026-10-10T07:04:43.379218+00:00"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.435173+00:00",
+                  "kind": "timer_tick",
+                  "tick": 4,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.446834+00:00",
+                  "kind": "execution_settlement",
+                  "status": "SETTLED",
+                  "intent": {
+                    "operator": "move",
+                    "exit_key": "east",
+                    "destination_id": 1304
+                  },
+                  "receipt": {
+                    "receipt_id": "p3:1307:4:11",
+                    "kind": "move",
+                    "actor_dbref": "#1307",
+                    "item_id": 1309,
+                    "before_room_id": 1303,
+                    "after_room_id": 1304,
+                    "before_item_room_id": null,
+                    "after_item_room_id": null,
+                    "goal": "patrol",
+                    "activity_profile": "delivery_patrol_recovery_v0",
+                    "submitted_command": "east",
+                    "before_inventory_ids": [],
+                    "after_inventory_ids": [],
+                    "dispatch_succeeded": true,
+                    "settled": true
+                  },
+                  "detail": null
+                },
+                {
+                  "at": "2026-10-10T07:04:43.462591+00:00",
+                  "kind": "observation",
+                  "room": "#1304",
+                  "visible_item_ids": [
+                    1306,
+                    1308
+                  ],
+                  "inventory_ids": [],
+                  "visible_exit_keys": [
+                    "west"
+                  ]
+                },
+                {
+                  "at": "2026-10-10T07:04:43.472176+00:00",
+                  "kind": "timer_tick",
+                  "tick": 5,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.476225+00:00",
+                  "kind": "observation",
+                  "room": "#1304",
+                  "visible_item_ids": [
+                    1306,
+                    1308
+                  ],
+                  "inventory_ids": [],
+                  "visible_exit_keys": [
+                    "west"
+                  ]
+                },
+                {
+                  "at": "2026-10-10T07:04:43.479738+00:00",
+                  "kind": "goal_choice",
+                  "inputs": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": false,
+                      "retained_item_location": null,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    }
+                  },
+                  "candidates": [
+                    "deliver_supply",
+                    "patrol"
+                  ],
+                  "rule": "delivery_before_patrol_recovery_v0",
+                  "choice": "patrol",
+                  "reason": "assigned item is absent from current local observation and has no retained last-known room; patrol while reobserving",
+                  "goal": {
+                    "goal": "patrol",
+                    "reason": "assigned item is absent from current local observation and has no retained last-known room; patrol while reobserving",
+                    "rule": "delivery_before_patrol_recovery_v0",
+                    "status": "ACTIVE",
+                    "candidates": [
+                      "deliver_supply",
+                      "patrol"
+                    ],
+                    "choice": "patrol",
+                    "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                    "delivery_reason": "temporary suspension is derived only from actor-local absence evidence",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": false,
+                      "retained_item_location": null,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    },
+                    "inputs": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": false,
+                        "retained_item_location": null,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      }
+                    }
+                  },
+                  "activity_profile": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "source": "scenario-authored-activity-profile"
+                  },
+                  "view": {
+                    "actor_id": 1307,
+                    "activity_contract": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "source": "scenario-authored-activity-profile"
+                    },
+                    "goal_contract": {
+                      "goal": "deliver_supply",
+                      "item_id": 1309,
+                      "destination_id": 1304,
+                      "source": "scenario-authored-task"
+                    },
+                    "observation": {
+                      "room_id": 1304,
+                      "inventory": [],
+                      "visible_items": [
+                        {
+                          "id": 1306,
+                          "dbref": "#1306",
+                          "key": "west",
+                          "room_id": 1304
+                        },
+                        {
+                          "id": 1308,
+                          "dbref": "#1308",
+                          "key": "Resident Porch Marker 20261010070443-c80417",
+                          "room_id": 1304
+                        }
+                      ],
+                      "task_item": {
+                        "id": 1309,
+                        "key": "Supply 20261010070443-c80417"
+                      },
+                      "task_destination": 1304,
+                      "item_location": null,
+                      "item_held": false,
+                      "delivered": false,
+                      "own_delivery_receipts": [
+                        {
+                          "receipt_id": "p3:1307:4:11",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": null,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "east",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        }
+                      ],
+                      "known_exits": {
+                        "1303": [
+                          1304
+                        ],
+                        "1304": [
+                          1303
+                        ]
+                      },
+                      "exits": [
+                        {
+                          "key": "west",
+                          "destination_id": 1303,
+                          "destination_dbref": "#1303"
+                        }
+                      ],
+                      "witnessed": [
+                        {
+                          "room_id": 1304,
+                          "kind": "current_room",
+                          "dbref": "#1304"
+                        }
+                      ],
+                      "retained_witnesses": [
+                        {
+                          "room_id": null,
+                          "key": "Supply 20261010070443-c80417",
+                          "last_seen_at": "2026-10-10T07:04:43.237955+00:00",
+                          "status": "not_visible_after_rejected_get",
+                          "absence_observed_at": "2026-10-10T07:04:43.379218+00:00"
+                        }
+                      ]
+                    }
+                  },
+                  "planner": {
+                    "status": "SOLVED",
+                    "reason": "first un-rejected locally visible exit by stable key order",
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "west",
+                      "destination_id": 1303
+                    },
+                    "candidate_exits": [
+                      {
+                        "key": "west",
+                        "destination_id": 1303
+                      }
+                    ],
+                    "selection_rule": "local_visible_exit_stable_order_v0"
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.483072+00:00",
+                  "kind": "primitive_intent",
+                  "pending_action": {
+                    "status": "planned",
+                    "planned_at_tick": 5,
+                    "operation_id": "p3:1307:5",
+                    "goal": {
+                      "goal": "patrol",
+                      "reason": "assigned item is absent from current local observation and has no retained last-known room; patrol while reobserving",
+                      "rule": "delivery_before_patrol_recovery_v0",
+                      "status": "ACTIVE",
+                      "candidates": [
+                        "deliver_supply",
+                        "patrol"
+                      ],
+                      "choice": "patrol",
+                      "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                      "delivery_reason": "temporary suspension is derived only from actor-local absence evidence",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": false,
+                        "retained_item_location": null,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      },
+                      "inputs": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                        "local_evidence": {
+                          "assigned_item_id": 1309,
+                          "destination_id": 1304,
+                          "item_held": false,
+                          "item_currently_visible": false,
+                          "retained_item_location": null,
+                          "binding_valid": true,
+                          "own_delivery_receipt": false
+                        }
+                      }
+                    },
+                    "planner": {
+                      "status": "SOLVED",
+                      "reason": "first un-rejected locally visible exit by stable key order",
+                      "intent": {
+                        "operator": "move",
+                        "exit_key": "west",
+                        "destination_id": 1303
+                      },
+                      "candidate_exits": [
+                        {
+                          "key": "west",
+                          "destination_id": 1303
+                        }
+                      ],
+                      "selection_rule": "local_visible_exit_stable_order_v0"
+                    },
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "west",
+                      "destination_id": 1303
+                    },
+                    "view": {
+                      "actor_id": 1307,
+                      "activity_contract": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "source": "scenario-authored-activity-profile"
+                      },
+                      "goal_contract": {
+                        "goal": "deliver_supply",
+                        "item_id": 1309,
+                        "destination_id": 1304,
+                        "source": "scenario-authored-task"
+                      },
+                      "observation": {
+                        "room_id": 1304,
+                        "inventory": [],
+                        "visible_items": [
+                          {
+                            "id": 1306,
+                            "dbref": "#1306",
+                            "key": "west",
+                            "room_id": 1304
+                          },
+                          {
+                            "id": 1308,
+                            "dbref": "#1308",
+                            "key": "Resident Porch Marker 20261010070443-c80417",
+                            "room_id": 1304
+                          }
+                        ],
+                        "task_item": {
+                          "id": 1309,
+                          "key": "Supply 20261010070443-c80417"
+                        },
+                        "task_destination": 1304,
+                        "item_location": null,
+                        "item_held": false,
+                        "delivered": false,
+                        "own_delivery_receipts": [
+                          {
+                            "receipt_id": "p3:1307:4:11",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": null,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "east",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          }
+                        ],
+                        "known_exits": {
+                          "1303": [
+                            1304
+                          ],
+                          "1304": [
+                            1303
+                          ]
+                        },
+                        "exits": [
+                          {
+                            "key": "west",
+                            "destination_id": 1303,
+                            "destination_dbref": "#1303"
+                          }
+                        ],
+                        "witnessed": [
+                          {
+                            "room_id": 1304,
+                            "kind": "current_room",
+                            "dbref": "#1304"
+                          }
+                        ],
+                        "retained_witnesses": [
+                          {
+                            "room_id": null,
+                            "key": "Supply 20261010070443-c80417",
+                            "last_seen_at": "2026-10-10T07:04:43.237955+00:00",
+                            "status": "not_visible_after_rejected_get",
+                            "absence_observed_at": "2026-10-10T07:04:43.379218+00:00"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.499403+00:00",
+                  "kind": "timer_tick",
+                  "tick": 6,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.506954+00:00",
+                  "kind": "execution_settlement",
+                  "status": "SETTLED",
+                  "intent": {
+                    "operator": "move",
+                    "exit_key": "west",
+                    "destination_id": 1303
+                  },
+                  "receipt": {
+                    "receipt_id": "p3:1307:6:18",
+                    "kind": "move",
+                    "actor_dbref": "#1307",
+                    "item_id": 1309,
+                    "before_room_id": 1304,
+                    "after_room_id": 1303,
+                    "before_item_room_id": null,
+                    "after_item_room_id": 1303,
+                    "goal": "patrol",
+                    "activity_profile": "delivery_patrol_recovery_v0",
+                    "submitted_command": "west",
+                    "before_inventory_ids": [],
+                    "after_inventory_ids": [],
+                    "dispatch_succeeded": true,
+                    "settled": true
+                  },
+                  "detail": null
+                },
+                {
+                  "at": "2026-10-10T07:04:43.524213+00:00",
+                  "kind": "timer_tick",
+                  "tick": 7,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.528005+00:00",
+                  "kind": "observation",
+                  "room": "#1303",
+                  "visible_item_ids": [
+                    1305,
+                    1310,
+                    1309
+                  ],
+                  "inventory_ids": [],
+                  "visible_exit_keys": [
+                    "east"
+                  ]
+                },
+                {
+                  "at": "2026-10-10T07:04:43.530417+00:00",
+                  "kind": "goal_choice",
+                  "inputs": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "delivery_status": "ACTIVE",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": true,
+                      "retained_item_location": 1303,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    }
+                  },
+                  "candidates": [
+                    "deliver_supply",
+                    "patrol"
+                  ],
+                  "rule": "delivery_before_patrol_recovery_v0",
+                  "choice": "deliver_supply",
+                  "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                  "goal": {
+                    "goal": "deliver_supply",
+                    "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                    "rule": "delivery_before_patrol_recovery_v0",
+                    "status": "ACTIVE",
+                    "candidates": [
+                      "deliver_supply",
+                      "patrol"
+                    ],
+                    "choice": "deliver_supply",
+                    "delivery_status": "ACTIVE",
+                    "delivery_reason": "delivery has priority while local evidence supports item availability",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": true,
+                      "retained_item_location": 1303,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    },
+                    "inputs": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "delivery_status": "ACTIVE",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": true,
+                        "retained_item_location": 1303,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      }
+                    }
+                  },
+                  "activity_profile": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "source": "scenario-authored-activity-profile"
+                  },
+                  "view": {
+                    "actor_id": 1307,
+                    "activity_contract": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "source": "scenario-authored-activity-profile"
+                    },
+                    "goal_contract": {
+                      "goal": "deliver_supply",
+                      "item_id": 1309,
+                      "destination_id": 1304,
+                      "source": "scenario-authored-task"
+                    },
+                    "observation": {
+                      "room_id": 1303,
+                      "inventory": [],
+                      "visible_items": [
+                        {
+                          "id": 1305,
+                          "dbref": "#1305",
+                          "key": "east",
+                          "room_id": 1303
+                        },
+                        {
+                          "id": 1310,
+                          "dbref": "#1310",
+                          "key": "P3 Fixture Player 20261010070443-c80417",
+                          "room_id": 1303
+                        },
+                        {
+                          "id": 1309,
+                          "dbref": "#1309",
+                          "key": "Supply 20261010070443-c80417",
+                          "room_id": 1303
+                        }
+                      ],
+                      "task_item": {
+                        "id": 1309,
+                        "key": "Supply 20261010070443-c80417"
+                      },
+                      "task_destination": 1304,
+                      "item_location": 1303,
+                      "item_held": false,
+                      "delivered": false,
+                      "own_delivery_receipts": [
+                        {
+                          "receipt_id": "p3:1307:4:11",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": null,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "east",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:6:18",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1304,
+                          "after_room_id": 1303,
+                          "before_item_room_id": null,
+                          "after_item_room_id": 1303,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "west",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        }
+                      ],
+                      "known_exits": {
+                        "1303": [
+                          1304
+                        ],
+                        "1304": [
+                          1303
+                        ]
+                      },
+                      "exits": [
+                        {
+                          "key": "east",
+                          "destination_id": 1304,
+                          "destination_dbref": "#1304"
+                        }
+                      ],
+                      "witnessed": [
+                        {
+                          "room_id": 1303,
+                          "kind": "current_room",
+                          "dbref": "#1303"
+                        }
+                      ],
+                      "retained_witnesses": [
+                        {
+                          "room_id": 1303,
+                          "key": "Supply 20261010070443-c80417",
+                          "last_seen_at": "2026-10-10T07:04:43.526745+00:00",
+                          "status": "seen"
+                        }
+                      ]
+                    }
+                  },
+                  "planner": {
+                    "status": "SOLVED",
+                    "reason": "actor-local HTN proposal",
+                    "intent": {
+                      "operator": "get",
+                      "item_id": "1309"
+                    },
+                    "plan": [
+                      {
+                        "operator": "get",
+                        "item_id": "1309"
+                      },
+                      {
+                        "operator": "move",
+                        "exit_key": "east",
+                        "destination_id": 1304
+                      },
+                      {
+                        "operator": "drop",
+                        "item_id": "1309",
+                        "room_id": 1304
+                      }
+                    ],
+                    "method_action_visits": 6,
+                    "implementation": "gtpyhop-core-2.0.2",
+                    "prediction_only": true
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.533602+00:00",
+                  "kind": "primitive_intent",
+                  "pending_action": {
+                    "status": "planned",
+                    "planned_at_tick": 7,
+                    "operation_id": "p3:1307:7",
+                    "goal": {
+                      "goal": "deliver_supply",
+                      "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                      "rule": "delivery_before_patrol_recovery_v0",
+                      "status": "ACTIVE",
+                      "candidates": [
+                        "deliver_supply",
+                        "patrol"
+                      ],
+                      "choice": "deliver_supply",
+                      "delivery_status": "ACTIVE",
+                      "delivery_reason": "delivery has priority while local evidence supports item availability",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": true,
+                        "retained_item_location": 1303,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      },
+                      "inputs": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "delivery_status": "ACTIVE",
+                        "local_evidence": {
+                          "assigned_item_id": 1309,
+                          "destination_id": 1304,
+                          "item_held": false,
+                          "item_currently_visible": true,
+                          "retained_item_location": 1303,
+                          "binding_valid": true,
+                          "own_delivery_receipt": false
+                        }
+                      }
+                    },
+                    "planner": {
+                      "status": "SOLVED",
+                      "reason": "actor-local HTN proposal",
+                      "intent": {
+                        "operator": "get",
+                        "item_id": "1309"
+                      },
+                      "plan": [
+                        {
+                          "operator": "get",
+                          "item_id": "1309"
+                        },
+                        {
+                          "operator": "move",
+                          "exit_key": "east",
+                          "destination_id": 1304
+                        },
+                        {
+                          "operator": "drop",
+                          "item_id": "1309",
+                          "room_id": 1304
+                        }
+                      ],
+                      "method_action_visits": 6,
+                      "implementation": "gtpyhop-core-2.0.2",
+                      "prediction_only": true
+                    },
+                    "intent": {
+                      "operator": "get",
+                      "item_id": "1309"
+                    },
+                    "view": {
+                      "actor_id": 1307,
+                      "activity_contract": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "source": "scenario-authored-activity-profile"
+                      },
+                      "goal_contract": {
+                        "goal": "deliver_supply",
+                        "item_id": 1309,
+                        "destination_id": 1304,
+                        "source": "scenario-authored-task"
+                      },
+                      "observation": {
+                        "room_id": 1303,
+                        "inventory": [],
+                        "visible_items": [
+                          {
+                            "id": 1305,
+                            "dbref": "#1305",
+                            "key": "east",
+                            "room_id": 1303
+                          },
+                          {
+                            "id": 1310,
+                            "dbref": "#1310",
+                            "key": "P3 Fixture Player 20261010070443-c80417",
+                            "room_id": 1303
+                          },
+                          {
+                            "id": 1309,
+                            "dbref": "#1309",
+                            "key": "Supply 20261010070443-c80417",
+                            "room_id": 1303
+                          }
+                        ],
+                        "task_item": {
+                          "id": 1309,
+                          "key": "Supply 20261010070443-c80417"
+                        },
+                        "task_destination": 1304,
+                        "item_location": 1303,
+                        "item_held": false,
+                        "delivered": false,
+                        "own_delivery_receipts": [
+                          {
+                            "receipt_id": "p3:1307:4:11",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": null,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "east",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:6:18",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1304,
+                            "after_room_id": 1303,
+                            "before_item_room_id": null,
+                            "after_item_room_id": 1303,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "west",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          }
+                        ],
+                        "known_exits": {
+                          "1303": [
+                            1304
+                          ],
+                          "1304": [
+                            1303
+                          ]
+                        },
+                        "exits": [
+                          {
+                            "key": "east",
+                            "destination_id": 1304,
+                            "destination_dbref": "#1304"
+                          }
+                        ],
+                        "witnessed": [
+                          {
+                            "room_id": 1303,
+                            "kind": "current_room",
+                            "dbref": "#1303"
+                          }
+                        ],
+                        "retained_witnesses": [
+                          {
+                            "room_id": 1303,
+                            "key": "Supply 20261010070443-c80417",
+                            "last_seen_at": "2026-10-10T07:04:43.526745+00:00",
+                            "status": "seen"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.551171+00:00",
+                  "kind": "timer_tick",
+                  "tick": 8,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.559555+00:00",
+                  "kind": "execution_settlement",
+                  "status": "SETTLED",
+                  "intent": {
+                    "operator": "get",
+                    "item_id": "1309"
+                  },
+                  "receipt": {
+                    "receipt_id": "p3:1307:8:24",
+                    "kind": "get",
+                    "actor_dbref": "#1307",
+                    "item_id": 1309,
+                    "before_room_id": 1303,
+                    "after_room_id": 1303,
+                    "before_item_room_id": 1303,
+                    "after_item_room_id": null,
+                    "goal": "deliver_supply",
+                    "activity_profile": "delivery_patrol_recovery_v0",
+                    "submitted_command": "get Supply 20261010070443-c80417",
+                    "before_inventory_ids": [],
+                    "after_inventory_ids": [
+                      1309
+                    ],
+                    "dispatch_succeeded": true,
+                    "settled": true
+                  },
+                  "detail": null
+                },
+                {
+                  "at": "2026-10-10T07:04:43.576963+00:00",
+                  "kind": "timer_tick",
+                  "tick": 9,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.581243+00:00",
+                  "kind": "observation",
+                  "room": "#1303",
+                  "visible_item_ids": [
+                    1305,
+                    1310
+                  ],
+                  "inventory_ids": [
+                    1309
+                  ],
+                  "visible_exit_keys": [
+                    "east"
+                  ]
+                },
+                {
+                  "at": "2026-10-10T07:04:43.583866+00:00",
+                  "kind": "goal_choice",
+                  "inputs": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "delivery_status": "ACTIVE",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": true,
+                      "item_currently_visible": false,
+                      "retained_item_location": null,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    }
+                  },
+                  "candidates": [
+                    "deliver_supply",
+                    "patrol"
+                  ],
+                  "rule": "delivery_before_patrol_recovery_v0",
+                  "choice": "deliver_supply",
+                  "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                  "goal": {
+                    "goal": "deliver_supply",
+                    "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                    "rule": "delivery_before_patrol_recovery_v0",
+                    "status": "ACTIVE",
+                    "candidates": [
+                      "deliver_supply",
+                      "patrol"
+                    ],
+                    "choice": "deliver_supply",
+                    "delivery_status": "ACTIVE",
+                    "delivery_reason": "delivery has priority while local evidence supports item availability",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": true,
+                      "item_currently_visible": false,
+                      "retained_item_location": null,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    },
+                    "inputs": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "delivery_status": "ACTIVE",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": true,
+                        "item_currently_visible": false,
+                        "retained_item_location": null,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      }
+                    }
+                  },
+                  "activity_profile": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "source": "scenario-authored-activity-profile"
+                  },
+                  "view": {
+                    "actor_id": 1307,
+                    "activity_contract": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "source": "scenario-authored-activity-profile"
+                    },
+                    "goal_contract": {
+                      "goal": "deliver_supply",
+                      "item_id": 1309,
+                      "destination_id": 1304,
+                      "source": "scenario-authored-task"
+                    },
+                    "observation": {
+                      "room_id": 1303,
+                      "inventory": [
+                        {
+                          "id": 1309,
+                          "dbref": "#1309",
+                          "key": "Supply 20261010070443-c80417"
+                        }
+                      ],
+                      "visible_items": [
+                        {
+                          "id": 1305,
+                          "dbref": "#1305",
+                          "key": "east",
+                          "room_id": 1303
+                        },
+                        {
+                          "id": 1310,
+                          "dbref": "#1310",
+                          "key": "P3 Fixture Player 20261010070443-c80417",
+                          "room_id": 1303
+                        }
+                      ],
+                      "task_item": {
+                        "id": 1309,
+                        "key": "Supply 20261010070443-c80417"
+                      },
+                      "task_destination": 1304,
+                      "item_location": null,
+                      "item_held": true,
+                      "delivered": false,
+                      "own_delivery_receipts": [
+                        {
+                          "receipt_id": "p3:1307:4:11",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": null,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "east",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:6:18",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1304,
+                          "after_room_id": 1303,
+                          "before_item_room_id": null,
+                          "after_item_room_id": 1303,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "west",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:8:24",
+                          "kind": "get",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1303,
+                          "before_item_room_id": 1303,
+                          "after_item_room_id": null,
+                          "goal": "deliver_supply",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "get Supply 20261010070443-c80417",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [
+                            1309
+                          ],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        }
+                      ],
+                      "known_exits": {
+                        "1303": [
+                          1304
+                        ],
+                        "1304": [
+                          1303
+                        ]
+                      },
+                      "exits": [
+                        {
+                          "key": "east",
+                          "destination_id": 1304,
+                          "destination_dbref": "#1304"
+                        }
+                      ],
+                      "witnessed": [
+                        {
+                          "room_id": 1303,
+                          "kind": "current_room",
+                          "dbref": "#1303"
+                        }
+                      ],
+                      "retained_witnesses": [
+                        {
+                          "room_id": "inventory",
+                          "key": "Supply 20261010070443-c80417",
+                          "last_seen_at": "2026-10-10T07:04:43.579973+00:00",
+                          "status": "held"
+                        }
+                      ]
+                    }
+                  },
+                  "planner": {
+                    "status": "SOLVED",
+                    "reason": "actor-local HTN proposal",
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "east",
+                      "destination_id": 1304
+                    },
+                    "plan": [
+                      {
+                        "operator": "move",
+                        "exit_key": "east",
+                        "destination_id": 1304
+                      },
+                      {
+                        "operator": "drop",
+                        "item_id": "1309",
+                        "room_id": 1304
+                      }
+                    ],
+                    "method_action_visits": 4,
+                    "implementation": "gtpyhop-core-2.0.2",
+                    "prediction_only": true
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.587668+00:00",
+                  "kind": "primitive_intent",
+                  "pending_action": {
+                    "status": "planned",
+                    "planned_at_tick": 9,
+                    "operation_id": "p3:1307:9",
+                    "goal": {
+                      "goal": "deliver_supply",
+                      "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                      "rule": "delivery_before_patrol_recovery_v0",
+                      "status": "ACTIVE",
+                      "candidates": [
+                        "deliver_supply",
+                        "patrol"
+                      ],
+                      "choice": "deliver_supply",
+                      "delivery_status": "ACTIVE",
+                      "delivery_reason": "delivery has priority while local evidence supports item availability",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": true,
+                        "item_currently_visible": false,
+                        "retained_item_location": null,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      },
+                      "inputs": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "delivery_status": "ACTIVE",
+                        "local_evidence": {
+                          "assigned_item_id": 1309,
+                          "destination_id": 1304,
+                          "item_held": true,
+                          "item_currently_visible": false,
+                          "retained_item_location": null,
+                          "binding_valid": true,
+                          "own_delivery_receipt": false
+                        }
+                      }
+                    },
+                    "planner": {
+                      "status": "SOLVED",
+                      "reason": "actor-local HTN proposal",
+                      "intent": {
+                        "operator": "move",
+                        "exit_key": "east",
+                        "destination_id": 1304
+                      },
+                      "plan": [
+                        {
+                          "operator": "move",
+                          "exit_key": "east",
+                          "destination_id": 1304
+                        },
+                        {
+                          "operator": "drop",
+                          "item_id": "1309",
+                          "room_id": 1304
+                        }
+                      ],
+                      "method_action_visits": 4,
+                      "implementation": "gtpyhop-core-2.0.2",
+                      "prediction_only": true
+                    },
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "east",
+                      "destination_id": 1304
+                    },
+                    "view": {
+                      "actor_id": 1307,
+                      "activity_contract": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "source": "scenario-authored-activity-profile"
+                      },
+                      "goal_contract": {
+                        "goal": "deliver_supply",
+                        "item_id": 1309,
+                        "destination_id": 1304,
+                        "source": "scenario-authored-task"
+                      },
+                      "observation": {
+                        "room_id": 1303,
+                        "inventory": [
+                          {
+                            "id": 1309,
+                            "dbref": "#1309",
+                            "key": "Supply 20261010070443-c80417"
+                          }
+                        ],
+                        "visible_items": [
+                          {
+                            "id": 1305,
+                            "dbref": "#1305",
+                            "key": "east",
+                            "room_id": 1303
+                          },
+                          {
+                            "id": 1310,
+                            "dbref": "#1310",
+                            "key": "P3 Fixture Player 20261010070443-c80417",
+                            "room_id": 1303
+                          }
+                        ],
+                        "task_item": {
+                          "id": 1309,
+                          "key": "Supply 20261010070443-c80417"
+                        },
+                        "task_destination": 1304,
+                        "item_location": null,
+                        "item_held": true,
+                        "delivered": false,
+                        "own_delivery_receipts": [
+                          {
+                            "receipt_id": "p3:1307:4:11",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": null,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "east",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:6:18",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1304,
+                            "after_room_id": 1303,
+                            "before_item_room_id": null,
+                            "after_item_room_id": 1303,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "west",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:8:24",
+                            "kind": "get",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1303,
+                            "before_item_room_id": 1303,
+                            "after_item_room_id": null,
+                            "goal": "deliver_supply",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "get Supply 20261010070443-c80417",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [
+                              1309
+                            ],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          }
+                        ],
+                        "known_exits": {
+                          "1303": [
+                            1304
+                          ],
+                          "1304": [
+                            1303
+                          ]
+                        },
+                        "exits": [
+                          {
+                            "key": "east",
+                            "destination_id": 1304,
+                            "destination_dbref": "#1304"
+                          }
+                        ],
+                        "witnessed": [
+                          {
+                            "room_id": 1303,
+                            "kind": "current_room",
+                            "dbref": "#1303"
+                          }
+                        ],
+                        "retained_witnesses": [
+                          {
+                            "room_id": "inventory",
+                            "key": "Supply 20261010070443-c80417",
+                            "last_seen_at": "2026-10-10T07:04:43.579973+00:00",
+                            "status": "held"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.609212+00:00",
+                  "kind": "timer_tick",
+                  "tick": 10,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.616061+00:00",
+                  "kind": "execution_settlement",
+                  "status": "SETTLED",
+                  "intent": {
+                    "operator": "move",
+                    "exit_key": "east",
+                    "destination_id": 1304
+                  },
+                  "receipt": {
+                    "receipt_id": "p3:1307:10:30",
+                    "kind": "move",
+                    "actor_dbref": "#1307",
+                    "item_id": 1309,
+                    "before_room_id": 1303,
+                    "after_room_id": 1304,
+                    "before_item_room_id": null,
+                    "after_item_room_id": null,
+                    "goal": "deliver_supply",
+                    "activity_profile": "delivery_patrol_recovery_v0",
+                    "submitted_command": "east",
+                    "before_inventory_ids": [
+                      1309
+                    ],
+                    "after_inventory_ids": [
+                      1309
+                    ],
+                    "dispatch_succeeded": true,
+                    "settled": true
+                  },
+                  "detail": null
+                },
+                {
+                  "at": "2026-10-10T07:04:43.636401+00:00",
+                  "kind": "timer_tick",
+                  "tick": 11,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.642087+00:00",
+                  "kind": "observation",
+                  "room": "#1304",
+                  "visible_item_ids": [
+                    1306,
+                    1308
+                  ],
+                  "inventory_ids": [
+                    1309
+                  ],
+                  "visible_exit_keys": [
+                    "west"
+                  ]
+                },
+                {
+                  "at": "2026-10-10T07:04:43.646146+00:00",
+                  "kind": "goal_choice",
+                  "inputs": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "delivery_status": "ACTIVE",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": true,
+                      "item_currently_visible": false,
+                      "retained_item_location": null,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    }
+                  },
+                  "candidates": [
+                    "deliver_supply",
+                    "patrol"
+                  ],
+                  "rule": "delivery_before_patrol_recovery_v0",
+                  "choice": "deliver_supply",
+                  "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                  "goal": {
+                    "goal": "deliver_supply",
+                    "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                    "rule": "delivery_before_patrol_recovery_v0",
+                    "status": "ACTIVE",
+                    "candidates": [
+                      "deliver_supply",
+                      "patrol"
+                    ],
+                    "choice": "deliver_supply",
+                    "delivery_status": "ACTIVE",
+                    "delivery_reason": "delivery has priority while local evidence supports item availability",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": true,
+                      "item_currently_visible": false,
+                      "retained_item_location": null,
+                      "binding_valid": true,
+                      "own_delivery_receipt": false
+                    },
+                    "inputs": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "delivery_status": "ACTIVE",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": true,
+                        "item_currently_visible": false,
+                        "retained_item_location": null,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      }
+                    }
+                  },
+                  "activity_profile": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "source": "scenario-authored-activity-profile"
+                  },
+                  "view": {
+                    "actor_id": 1307,
+                    "activity_contract": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "source": "scenario-authored-activity-profile"
+                    },
+                    "goal_contract": {
+                      "goal": "deliver_supply",
+                      "item_id": 1309,
+                      "destination_id": 1304,
+                      "source": "scenario-authored-task"
+                    },
+                    "observation": {
+                      "room_id": 1304,
+                      "inventory": [
+                        {
+                          "id": 1309,
+                          "dbref": "#1309",
+                          "key": "Supply 20261010070443-c80417"
+                        }
+                      ],
+                      "visible_items": [
+                        {
+                          "id": 1306,
+                          "dbref": "#1306",
+                          "key": "west",
+                          "room_id": 1304
+                        },
+                        {
+                          "id": 1308,
+                          "dbref": "#1308",
+                          "key": "Resident Porch Marker 20261010070443-c80417",
+                          "room_id": 1304
+                        }
+                      ],
+                      "task_item": {
+                        "id": 1309,
+                        "key": "Supply 20261010070443-c80417"
+                      },
+                      "task_destination": 1304,
+                      "item_location": null,
+                      "item_held": true,
+                      "delivered": false,
+                      "own_delivery_receipts": [
+                        {
+                          "receipt_id": "p3:1307:4:11",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": null,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "east",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:6:18",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1304,
+                          "after_room_id": 1303,
+                          "before_item_room_id": null,
+                          "after_item_room_id": 1303,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "west",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:8:24",
+                          "kind": "get",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1303,
+                          "before_item_room_id": 1303,
+                          "after_item_room_id": null,
+                          "goal": "deliver_supply",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "get Supply 20261010070443-c80417",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [
+                            1309
+                          ],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:10:30",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": null,
+                          "goal": "deliver_supply",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "east",
+                          "before_inventory_ids": [
+                            1309
+                          ],
+                          "after_inventory_ids": [
+                            1309
+                          ],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        }
+                      ],
+                      "known_exits": {
+                        "1303": [
+                          1304
+                        ],
+                        "1304": [
+                          1303
+                        ]
+                      },
+                      "exits": [
+                        {
+                          "key": "west",
+                          "destination_id": 1303,
+                          "destination_dbref": "#1303"
+                        }
+                      ],
+                      "witnessed": [
+                        {
+                          "room_id": 1304,
+                          "kind": "current_room",
+                          "dbref": "#1304"
+                        }
+                      ],
+                      "retained_witnesses": [
+                        {
+                          "room_id": "inventory",
+                          "key": "Supply 20261010070443-c80417",
+                          "last_seen_at": "2026-10-10T07:04:43.579973+00:00",
+                          "status": "held"
+                        }
+                      ]
+                    }
+                  },
+                  "planner": {
+                    "status": "SOLVED",
+                    "reason": "actor-local HTN proposal",
+                    "intent": {
+                      "operator": "drop",
+                      "item_id": "1309",
+                      "room_id": 1304
+                    },
+                    "plan": [
+                      {
+                        "operator": "drop",
+                        "item_id": "1309",
+                        "room_id": 1304
+                      }
+                    ],
+                    "method_action_visits": 2,
+                    "implementation": "gtpyhop-core-2.0.2",
+                    "prediction_only": true
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.651266+00:00",
+                  "kind": "primitive_intent",
+                  "pending_action": {
+                    "status": "planned",
+                    "planned_at_tick": 11,
+                    "operation_id": "p3:1307:11",
+                    "goal": {
+                      "goal": "deliver_supply",
+                      "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                      "rule": "delivery_before_patrol_recovery_v0",
+                      "status": "ACTIVE",
+                      "candidates": [
+                        "deliver_supply",
+                        "patrol"
+                      ],
+                      "choice": "deliver_supply",
+                      "delivery_status": "ACTIVE",
+                      "delivery_reason": "delivery has priority while local evidence supports item availability",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": true,
+                        "item_currently_visible": false,
+                        "retained_item_location": null,
+                        "binding_valid": true,
+                        "own_delivery_receipt": false
+                      },
+                      "inputs": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "delivery_status": "ACTIVE",
+                        "local_evidence": {
+                          "assigned_item_id": 1309,
+                          "destination_id": 1304,
+                          "item_held": true,
+                          "item_currently_visible": false,
+                          "retained_item_location": null,
+                          "binding_valid": true,
+                          "own_delivery_receipt": false
+                        }
+                      }
+                    },
+                    "planner": {
+                      "status": "SOLVED",
+                      "reason": "actor-local HTN proposal",
+                      "intent": {
+                        "operator": "drop",
+                        "item_id": "1309",
+                        "room_id": 1304
+                      },
+                      "plan": [
+                        {
+                          "operator": "drop",
+                          "item_id": "1309",
+                          "room_id": 1304
+                        }
+                      ],
+                      "method_action_visits": 2,
+                      "implementation": "gtpyhop-core-2.0.2",
+                      "prediction_only": true
+                    },
+                    "intent": {
+                      "operator": "drop",
+                      "item_id": "1309",
+                      "room_id": 1304
+                    },
+                    "view": {
+                      "actor_id": 1307,
+                      "activity_contract": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "source": "scenario-authored-activity-profile"
+                      },
+                      "goal_contract": {
+                        "goal": "deliver_supply",
+                        "item_id": 1309,
+                        "destination_id": 1304,
+                        "source": "scenario-authored-task"
+                      },
+                      "observation": {
+                        "room_id": 1304,
+                        "inventory": [
+                          {
+                            "id": 1309,
+                            "dbref": "#1309",
+                            "key": "Supply 20261010070443-c80417"
+                          }
+                        ],
+                        "visible_items": [
+                          {
+                            "id": 1306,
+                            "dbref": "#1306",
+                            "key": "west",
+                            "room_id": 1304
+                          },
+                          {
+                            "id": 1308,
+                            "dbref": "#1308",
+                            "key": "Resident Porch Marker 20261010070443-c80417",
+                            "room_id": 1304
+                          }
+                        ],
+                        "task_item": {
+                          "id": 1309,
+                          "key": "Supply 20261010070443-c80417"
+                        },
+                        "task_destination": 1304,
+                        "item_location": null,
+                        "item_held": true,
+                        "delivered": false,
+                        "own_delivery_receipts": [
+                          {
+                            "receipt_id": "p3:1307:4:11",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": null,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "east",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:6:18",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1304,
+                            "after_room_id": 1303,
+                            "before_item_room_id": null,
+                            "after_item_room_id": 1303,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "west",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:8:24",
+                            "kind": "get",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1303,
+                            "before_item_room_id": 1303,
+                            "after_item_room_id": null,
+                            "goal": "deliver_supply",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "get Supply 20261010070443-c80417",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [
+                              1309
+                            ],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:10:30",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": null,
+                            "goal": "deliver_supply",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "east",
+                            "before_inventory_ids": [
+                              1309
+                            ],
+                            "after_inventory_ids": [
+                              1309
+                            ],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          }
+                        ],
+                        "known_exits": {
+                          "1303": [
+                            1304
+                          ],
+                          "1304": [
+                            1303
+                          ]
+                        },
+                        "exits": [
+                          {
+                            "key": "west",
+                            "destination_id": 1303,
+                            "destination_dbref": "#1303"
+                          }
+                        ],
+                        "witnessed": [
+                          {
+                            "room_id": 1304,
+                            "kind": "current_room",
+                            "dbref": "#1304"
+                          }
+                        ],
+                        "retained_witnesses": [
+                          {
+                            "room_id": "inventory",
+                            "key": "Supply 20261010070443-c80417",
+                            "last_seen_at": "2026-10-10T07:04:43.579973+00:00",
+                            "status": "held"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.674621+00:00",
+                  "kind": "timer_tick",
+                  "tick": 12,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.685248+00:00",
+                  "kind": "execution_settlement",
+                  "status": "SETTLED",
+                  "intent": {
+                    "operator": "drop",
+                    "item_id": "1309",
+                    "room_id": 1304
+                  },
+                  "receipt": {
+                    "receipt_id": "p3:1307:12:36",
+                    "kind": "drop",
+                    "actor_dbref": "#1307",
+                    "item_id": 1309,
+                    "before_room_id": 1304,
+                    "after_room_id": 1304,
+                    "before_item_room_id": null,
+                    "after_item_room_id": 1304,
+                    "goal": "deliver_supply",
+                    "activity_profile": "delivery_patrol_recovery_v0",
+                    "submitted_command": "drop Supply 20261010070443-c80417",
+                    "before_inventory_ids": [
+                      1309
+                    ],
+                    "after_inventory_ids": [],
+                    "dispatch_succeeded": true,
+                    "settled": true
+                  },
+                  "detail": null
+                },
+                {
+                  "at": "2026-10-10T07:04:43.707448+00:00",
+                  "kind": "timer_tick",
+                  "tick": 13,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.712911+00:00",
+                  "kind": "observation",
+                  "room": "#1304",
+                  "visible_item_ids": [
+                    1306,
+                    1308,
+                    1309
+                  ],
+                  "inventory_ids": [],
+                  "visible_exit_keys": [
+                    "west"
+                  ]
+                },
+                {
+                  "at": "2026-10-10T07:04:43.717335+00:00",
+                  "kind": "goal_choice",
+                  "inputs": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "delivery_status": "SETTLED",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": true,
+                      "retained_item_location": 1304,
+                      "binding_valid": true,
+                      "own_delivery_receipt": true
+                    }
+                  },
+                  "candidates": [
+                    "deliver_supply",
+                    "patrol"
+                  ],
+                  "rule": "delivery_before_patrol_recovery_v0",
+                  "choice": "patrol",
+                  "reason": "matching settled drop receipt permanently completes this actor's delivery task",
+                  "goal": {
+                    "goal": "patrol",
+                    "reason": "matching settled drop receipt permanently completes this actor's delivery task",
+                    "rule": "delivery_before_patrol_recovery_v0",
+                    "status": "ACTIVE",
+                    "candidates": [
+                      "deliver_supply",
+                      "patrol"
+                    ],
+                    "choice": "patrol",
+                    "delivery_status": "SETTLED",
+                    "delivery_reason": "this actor has its own matching settled drop receipt",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": true,
+                      "retained_item_location": 1304,
+                      "binding_valid": true,
+                      "own_delivery_receipt": true
+                    },
+                    "inputs": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "delivery_status": "SETTLED",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": true,
+                        "retained_item_location": 1304,
+                        "binding_valid": true,
+                        "own_delivery_receipt": true
+                      }
+                    }
+                  },
+                  "activity_profile": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "source": "scenario-authored-activity-profile"
+                  },
+                  "view": {
+                    "actor_id": 1307,
+                    "activity_contract": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "source": "scenario-authored-activity-profile"
+                    },
+                    "goal_contract": {
+                      "goal": "deliver_supply",
+                      "item_id": 1309,
+                      "destination_id": 1304,
+                      "source": "scenario-authored-task"
+                    },
+                    "observation": {
+                      "room_id": 1304,
+                      "inventory": [],
+                      "visible_items": [
+                        {
+                          "id": 1306,
+                          "dbref": "#1306",
+                          "key": "west",
+                          "room_id": 1304
+                        },
+                        {
+                          "id": 1308,
+                          "dbref": "#1308",
+                          "key": "Resident Porch Marker 20261010070443-c80417",
+                          "room_id": 1304
+                        },
+                        {
+                          "id": 1309,
+                          "dbref": "#1309",
+                          "key": "Supply 20261010070443-c80417",
+                          "room_id": 1304
+                        }
+                      ],
+                      "task_item": {
+                        "id": 1309,
+                        "key": "Supply 20261010070443-c80417"
+                      },
+                      "task_destination": 1304,
+                      "item_location": 1304,
+                      "item_held": false,
+                      "delivered": true,
+                      "own_delivery_receipts": [
+                        {
+                          "receipt_id": "p3:1307:4:11",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": null,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "east",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:6:18",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1304,
+                          "after_room_id": 1303,
+                          "before_item_room_id": null,
+                          "after_item_room_id": 1303,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "west",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:8:24",
+                          "kind": "get",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1303,
+                          "before_item_room_id": 1303,
+                          "after_item_room_id": null,
+                          "goal": "deliver_supply",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "get Supply 20261010070443-c80417",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [
+                            1309
+                          ],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:10:30",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": null,
+                          "goal": "deliver_supply",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "east",
+                          "before_inventory_ids": [
+                            1309
+                          ],
+                          "after_inventory_ids": [
+                            1309
+                          ],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:12:36",
+                          "kind": "drop",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1304,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": 1304,
+                          "goal": "deliver_supply",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "drop Supply 20261010070443-c80417",
+                          "before_inventory_ids": [
+                            1309
+                          ],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        }
+                      ],
+                      "known_exits": {
+                        "1303": [
+                          1304
+                        ],
+                        "1304": [
+                          1303
+                        ]
+                      },
+                      "exits": [
+                        {
+                          "key": "west",
+                          "destination_id": 1303,
+                          "destination_dbref": "#1303"
+                        }
+                      ],
+                      "witnessed": [
+                        {
+                          "room_id": 1304,
+                          "kind": "current_room",
+                          "dbref": "#1304"
+                        }
+                      ],
+                      "retained_witnesses": [
+                        {
+                          "room_id": 1304,
+                          "key": "Supply 20261010070443-c80417",
+                          "last_seen_at": "2026-10-10T07:04:43.711584+00:00",
+                          "status": "seen"
+                        }
+                      ]
+                    }
+                  },
+                  "planner": {
+                    "status": "SOLVED",
+                    "reason": "first un-rejected locally visible exit by stable key order",
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "west",
+                      "destination_id": 1303
+                    },
+                    "candidate_exits": [
+                      {
+                        "key": "west",
+                        "destination_id": 1303
+                      }
+                    ],
+                    "selection_rule": "local_visible_exit_stable_order_v0"
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.722100+00:00",
+                  "kind": "primitive_intent",
+                  "pending_action": {
+                    "status": "planned",
+                    "planned_at_tick": 13,
+                    "operation_id": "p3:1307:13",
+                    "goal": {
+                      "goal": "patrol",
+                      "reason": "matching settled drop receipt permanently completes this actor's delivery task",
+                      "rule": "delivery_before_patrol_recovery_v0",
+                      "status": "ACTIVE",
+                      "candidates": [
+                        "deliver_supply",
+                        "patrol"
+                      ],
+                      "choice": "patrol",
+                      "delivery_status": "SETTLED",
+                      "delivery_reason": "this actor has its own matching settled drop receipt",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": true,
+                        "retained_item_location": 1304,
+                        "binding_valid": true,
+                        "own_delivery_receipt": true
+                      },
+                      "inputs": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "delivery_status": "SETTLED",
+                        "local_evidence": {
+                          "assigned_item_id": 1309,
+                          "destination_id": 1304,
+                          "item_held": false,
+                          "item_currently_visible": true,
+                          "retained_item_location": 1304,
+                          "binding_valid": true,
+                          "own_delivery_receipt": true
+                        }
+                      }
+                    },
+                    "planner": {
+                      "status": "SOLVED",
+                      "reason": "first un-rejected locally visible exit by stable key order",
+                      "intent": {
+                        "operator": "move",
+                        "exit_key": "west",
+                        "destination_id": 1303
+                      },
+                      "candidate_exits": [
+                        {
+                          "key": "west",
+                          "destination_id": 1303
+                        }
+                      ],
+                      "selection_rule": "local_visible_exit_stable_order_v0"
+                    },
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "west",
+                      "destination_id": 1303
+                    },
+                    "view": {
+                      "actor_id": 1307,
+                      "activity_contract": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "source": "scenario-authored-activity-profile"
+                      },
+                      "goal_contract": {
+                        "goal": "deliver_supply",
+                        "item_id": 1309,
+                        "destination_id": 1304,
+                        "source": "scenario-authored-task"
+                      },
+                      "observation": {
+                        "room_id": 1304,
+                        "inventory": [],
+                        "visible_items": [
+                          {
+                            "id": 1306,
+                            "dbref": "#1306",
+                            "key": "west",
+                            "room_id": 1304
+                          },
+                          {
+                            "id": 1308,
+                            "dbref": "#1308",
+                            "key": "Resident Porch Marker 20261010070443-c80417",
+                            "room_id": 1304
+                          },
+                          {
+                            "id": 1309,
+                            "dbref": "#1309",
+                            "key": "Supply 20261010070443-c80417",
+                            "room_id": 1304
+                          }
+                        ],
+                        "task_item": {
+                          "id": 1309,
+                          "key": "Supply 20261010070443-c80417"
+                        },
+                        "task_destination": 1304,
+                        "item_location": 1304,
+                        "item_held": false,
+                        "delivered": true,
+                        "own_delivery_receipts": [
+                          {
+                            "receipt_id": "p3:1307:4:11",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": null,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "east",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:6:18",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1304,
+                            "after_room_id": 1303,
+                            "before_item_room_id": null,
+                            "after_item_room_id": 1303,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "west",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:8:24",
+                            "kind": "get",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1303,
+                            "before_item_room_id": 1303,
+                            "after_item_room_id": null,
+                            "goal": "deliver_supply",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "get Supply 20261010070443-c80417",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [
+                              1309
+                            ],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:10:30",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": null,
+                            "goal": "deliver_supply",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "east",
+                            "before_inventory_ids": [
+                              1309
+                            ],
+                            "after_inventory_ids": [
+                              1309
+                            ],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:12:36",
+                            "kind": "drop",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1304,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": 1304,
+                            "goal": "deliver_supply",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "drop Supply 20261010070443-c80417",
+                            "before_inventory_ids": [
+                              1309
+                            ],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          }
+                        ],
+                        "known_exits": {
+                          "1303": [
+                            1304
+                          ],
+                          "1304": [
+                            1303
+                          ]
+                        },
+                        "exits": [
+                          {
+                            "key": "west",
+                            "destination_id": 1303,
+                            "destination_dbref": "#1303"
+                          }
+                        ],
+                        "witnessed": [
+                          {
+                            "room_id": 1304,
+                            "kind": "current_room",
+                            "dbref": "#1304"
+                          }
+                        ],
+                        "retained_witnesses": [
+                          {
+                            "room_id": 1304,
+                            "key": "Supply 20261010070443-c80417",
+                            "last_seen_at": "2026-10-10T07:04:43.711584+00:00",
+                            "status": "seen"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.751038+00:00",
+                  "kind": "timer_tick",
+                  "tick": 14,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.760069+00:00",
+                  "kind": "execution_settlement",
+                  "status": "SETTLED",
+                  "intent": {
+                    "operator": "move",
+                    "exit_key": "west",
+                    "destination_id": 1303
+                  },
+                  "receipt": {
+                    "receipt_id": "p3:1307:14:42",
+                    "kind": "move",
+                    "actor_dbref": "#1307",
+                    "item_id": 1309,
+                    "before_room_id": 1304,
+                    "after_room_id": 1303,
+                    "before_item_room_id": 1304,
+                    "after_item_room_id": null,
+                    "goal": "patrol",
+                    "activity_profile": "delivery_patrol_recovery_v0",
+                    "submitted_command": "west",
+                    "before_inventory_ids": [],
+                    "after_inventory_ids": [],
+                    "dispatch_succeeded": true,
+                    "settled": true
+                  },
+                  "detail": null
+                },
+                {
+                  "at": "2026-10-10T07:04:43.786552+00:00",
+                  "kind": "timer_tick",
+                  "tick": 15,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.792820+00:00",
+                  "kind": "observation",
+                  "room": "#1303",
+                  "visible_item_ids": [
+                    1305,
+                    1310
+                  ],
+                  "inventory_ids": [],
+                  "visible_exit_keys": [
+                    "east"
+                  ]
+                },
+                {
+                  "at": "2026-10-10T07:04:43.798756+00:00",
+                  "kind": "goal_choice",
+                  "inputs": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "delivery_status": "SETTLED",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": false,
+                      "retained_item_location": 1304,
+                      "binding_valid": true,
+                      "own_delivery_receipt": true
+                    }
+                  },
+                  "candidates": [
+                    "deliver_supply",
+                    "patrol"
+                  ],
+                  "rule": "delivery_before_patrol_recovery_v0",
+                  "choice": "patrol",
+                  "reason": "matching settled drop receipt permanently completes this actor's delivery task",
+                  "goal": {
+                    "goal": "patrol",
+                    "reason": "matching settled drop receipt permanently completes this actor's delivery task",
+                    "rule": "delivery_before_patrol_recovery_v0",
+                    "status": "ACTIVE",
+                    "candidates": [
+                      "deliver_supply",
+                      "patrol"
+                    ],
+                    "choice": "patrol",
+                    "delivery_status": "SETTLED",
+                    "delivery_reason": "this actor has its own matching settled drop receipt",
+                    "local_evidence": {
+                      "assigned_item_id": 1309,
+                      "destination_id": 1304,
+                      "item_held": false,
+                      "item_currently_visible": false,
+                      "retained_item_location": 1304,
+                      "binding_valid": true,
+                      "own_delivery_receipt": true
+                    },
+                    "inputs": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "delivery_status": "SETTLED",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": false,
+                        "retained_item_location": 1304,
+                        "binding_valid": true,
+                        "own_delivery_receipt": true
+                      }
+                    }
+                  },
+                  "activity_profile": {
+                    "profile": "delivery_patrol_recovery_v0",
+                    "delivery_task": true,
+                    "source": "scenario-authored-activity-profile"
+                  },
+                  "view": {
+                    "actor_id": 1307,
+                    "activity_contract": {
+                      "profile": "delivery_patrol_recovery_v0",
+                      "delivery_task": true,
+                      "source": "scenario-authored-activity-profile"
+                    },
+                    "goal_contract": {
+                      "goal": "deliver_supply",
+                      "item_id": 1309,
+                      "destination_id": 1304,
+                      "source": "scenario-authored-task"
+                    },
+                    "observation": {
+                      "room_id": 1303,
+                      "inventory": [],
+                      "visible_items": [
+                        {
+                          "id": 1305,
+                          "dbref": "#1305",
+                          "key": "east",
+                          "room_id": 1303
+                        },
+                        {
+                          "id": 1310,
+                          "dbref": "#1310",
+                          "key": "P3 Fixture Player 20261010070443-c80417",
+                          "room_id": 1303
+                        }
+                      ],
+                      "task_item": {
+                        "id": 1309,
+                        "key": "Supply 20261010070443-c80417"
+                      },
+                      "task_destination": 1304,
+                      "item_location": 1304,
+                      "item_held": false,
+                      "delivered": false,
+                      "own_delivery_receipts": [
+                        {
+                          "receipt_id": "p3:1307:4:11",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": null,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "east",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:6:18",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1304,
+                          "after_room_id": 1303,
+                          "before_item_room_id": null,
+                          "after_item_room_id": 1303,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "west",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:8:24",
+                          "kind": "get",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1303,
+                          "before_item_room_id": 1303,
+                          "after_item_room_id": null,
+                          "goal": "deliver_supply",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "get Supply 20261010070443-c80417",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [
+                            1309
+                          ],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:10:30",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1303,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": null,
+                          "goal": "deliver_supply",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "east",
+                          "before_inventory_ids": [
+                            1309
+                          ],
+                          "after_inventory_ids": [
+                            1309
+                          ],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:12:36",
+                          "kind": "drop",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1304,
+                          "after_room_id": 1304,
+                          "before_item_room_id": null,
+                          "after_item_room_id": 1304,
+                          "goal": "deliver_supply",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "drop Supply 20261010070443-c80417",
+                          "before_inventory_ids": [
+                            1309
+                          ],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        },
+                        {
+                          "receipt_id": "p3:1307:14:42",
+                          "kind": "move",
+                          "actor_dbref": "#1307",
+                          "item_id": 1309,
+                          "before_room_id": 1304,
+                          "after_room_id": 1303,
+                          "before_item_room_id": 1304,
+                          "after_item_room_id": null,
+                          "goal": "patrol",
+                          "activity_profile": "delivery_patrol_recovery_v0",
+                          "submitted_command": "west",
+                          "before_inventory_ids": [],
+                          "after_inventory_ids": [],
+                          "dispatch_succeeded": true,
+                          "settled": true
+                        }
+                      ],
+                      "known_exits": {
+                        "1303": [
+                          1304
+                        ],
+                        "1304": [
+                          1303
+                        ]
+                      },
+                      "exits": [
+                        {
+                          "key": "east",
+                          "destination_id": 1304,
+                          "destination_dbref": "#1304"
+                        }
+                      ],
+                      "witnessed": [
+                        {
+                          "room_id": 1303,
+                          "kind": "current_room",
+                          "dbref": "#1303"
+                        }
+                      ],
+                      "retained_witnesses": [
+                        {
+                          "room_id": 1304,
+                          "key": "Supply 20261010070443-c80417",
+                          "last_seen_at": "2026-10-10T07:04:43.711584+00:00",
+                          "status": "seen"
+                        }
+                      ]
+                    }
+                  },
+                  "planner": {
+                    "status": "SOLVED",
+                    "reason": "first un-rejected locally visible exit by stable key order",
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "east",
+                      "destination_id": 1304
+                    },
+                    "candidate_exits": [
+                      {
+                        "key": "east",
+                        "destination_id": 1304
+                      }
+                    ],
+                    "selection_rule": "local_visible_exit_stable_order_v0"
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.804464+00:00",
+                  "kind": "primitive_intent",
+                  "pending_action": {
+                    "status": "planned",
+                    "planned_at_tick": 15,
+                    "operation_id": "p3:1307:15",
+                    "goal": {
+                      "goal": "patrol",
+                      "reason": "matching settled drop receipt permanently completes this actor's delivery task",
+                      "rule": "delivery_before_patrol_recovery_v0",
+                      "status": "ACTIVE",
+                      "candidates": [
+                        "deliver_supply",
+                        "patrol"
+                      ],
+                      "choice": "patrol",
+                      "delivery_status": "SETTLED",
+                      "delivery_reason": "this actor has its own matching settled drop receipt",
+                      "local_evidence": {
+                        "assigned_item_id": 1309,
+                        "destination_id": 1304,
+                        "item_held": false,
+                        "item_currently_visible": false,
+                        "retained_item_location": 1304,
+                        "binding_valid": true,
+                        "own_delivery_receipt": true
+                      },
+                      "inputs": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "delivery_status": "SETTLED",
+                        "local_evidence": {
+                          "assigned_item_id": 1309,
+                          "destination_id": 1304,
+                          "item_held": false,
+                          "item_currently_visible": false,
+                          "retained_item_location": 1304,
+                          "binding_valid": true,
+                          "own_delivery_receipt": true
+                        }
+                      }
+                    },
+                    "planner": {
+                      "status": "SOLVED",
+                      "reason": "first un-rejected locally visible exit by stable key order",
+                      "intent": {
+                        "operator": "move",
+                        "exit_key": "east",
+                        "destination_id": 1304
+                      },
+                      "candidate_exits": [
+                        {
+                          "key": "east",
+                          "destination_id": 1304
+                        }
+                      ],
+                      "selection_rule": "local_visible_exit_stable_order_v0"
+                    },
+                    "intent": {
+                      "operator": "move",
+                      "exit_key": "east",
+                      "destination_id": 1304
+                    },
+                    "view": {
+                      "actor_id": 1307,
+                      "activity_contract": {
+                        "profile": "delivery_patrol_recovery_v0",
+                        "delivery_task": true,
+                        "source": "scenario-authored-activity-profile"
+                      },
+                      "goal_contract": {
+                        "goal": "deliver_supply",
+                        "item_id": 1309,
+                        "destination_id": 1304,
+                        "source": "scenario-authored-task"
+                      },
+                      "observation": {
+                        "room_id": 1303,
+                        "inventory": [],
+                        "visible_items": [
+                          {
+                            "id": 1305,
+                            "dbref": "#1305",
+                            "key": "east",
+                            "room_id": 1303
+                          },
+                          {
+                            "id": 1310,
+                            "dbref": "#1310",
+                            "key": "P3 Fixture Player 20261010070443-c80417",
+                            "room_id": 1303
+                          }
+                        ],
+                        "task_item": {
+                          "id": 1309,
+                          "key": "Supply 20261010070443-c80417"
+                        },
+                        "task_destination": 1304,
+                        "item_location": 1304,
+                        "item_held": false,
+                        "delivered": false,
+                        "own_delivery_receipts": [
+                          {
+                            "receipt_id": "p3:1307:4:11",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": null,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "east",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:6:18",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1304,
+                            "after_room_id": 1303,
+                            "before_item_room_id": null,
+                            "after_item_room_id": 1303,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "west",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:8:24",
+                            "kind": "get",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1303,
+                            "before_item_room_id": 1303,
+                            "after_item_room_id": null,
+                            "goal": "deliver_supply",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "get Supply 20261010070443-c80417",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [
+                              1309
+                            ],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:10:30",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1303,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": null,
+                            "goal": "deliver_supply",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "east",
+                            "before_inventory_ids": [
+                              1309
+                            ],
+                            "after_inventory_ids": [
+                              1309
+                            ],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:12:36",
+                            "kind": "drop",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1304,
+                            "after_room_id": 1304,
+                            "before_item_room_id": null,
+                            "after_item_room_id": 1304,
+                            "goal": "deliver_supply",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "drop Supply 20261010070443-c80417",
+                            "before_inventory_ids": [
+                              1309
+                            ],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          },
+                          {
+                            "receipt_id": "p3:1307:14:42",
+                            "kind": "move",
+                            "actor_dbref": "#1307",
+                            "item_id": 1309,
+                            "before_room_id": 1304,
+                            "after_room_id": 1303,
+                            "before_item_room_id": 1304,
+                            "after_item_room_id": null,
+                            "goal": "patrol",
+                            "activity_profile": "delivery_patrol_recovery_v0",
+                            "submitted_command": "west",
+                            "before_inventory_ids": [],
+                            "after_inventory_ids": [],
+                            "dispatch_succeeded": true,
+                            "settled": true
+                          }
+                        ],
+                        "known_exits": {
+                          "1303": [
+                            1304
+                          ],
+                          "1304": [
+                            1303
+                          ]
+                        },
+                        "exits": [
+                          {
+                            "key": "east",
+                            "destination_id": 1304,
+                            "destination_dbref": "#1304"
+                          }
+                        ],
+                        "witnessed": [
+                          {
+                            "room_id": 1303,
+                            "kind": "current_room",
+                            "dbref": "#1303"
+                          }
+                        ],
+                        "retained_witnesses": [
+                          {
+                            "room_id": 1304,
+                            "key": "Supply 20261010070443-c80417",
+                            "last_seen_at": "2026-10-10T07:04:43.711584+00:00",
+                            "status": "seen"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-10T07:04:43.835838+00:00",
+                  "kind": "timer_tick",
+                  "tick": 16,
+                  "status_before": "RUNNING"
+                },
+                {
+                  "at": "2026-10-10T07:04:43.877778+00:00",
+                  "kind": "execution_settlement",
+                  "status": "SETTLED",
+                  "intent": {
+                    "operator": "move",
+                    "exit_key": "east",
+                    "destination_id": 1304
+                  },
+                  "receipt": {
+                    "receipt_id": "p3:1307:16:48",
+                    "kind": "move",
+                    "actor_dbref": "#1307",
+                    "item_id": 1309,
+                    "before_room_id": 1303,
+                    "after_room_id": 1304,
+                    "before_item_room_id": null,
+                    "after_item_room_id": 1304,
+                    "goal": "patrol",
+                    "activity_profile": "delivery_patrol_recovery_v0",
+                    "submitted_command": "east",
+                    "before_inventory_ids": [],
+                    "after_inventory_ids": [],
+                    "dispatch_succeeded": true,
+                    "settled": true
+                  },
+                  "detail": null
+                }
+              ],
+              "mode": "a",
+              "native_receipts": [
+                {
+                  "receipt_id": "p3:1307:4:11",
+                  "kind": "move",
+                  "actor_dbref": "#1307",
+                  "item_id": 1309,
+                  "before_room_id": 1303,
+                  "after_room_id": 1304,
+                  "before_item_room_id": null,
+                  "after_item_room_id": null,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_recovery_v0",
+                  "submitted_command": "east",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1307:6:18",
+                  "kind": "move",
+                  "actor_dbref": "#1307",
+                  "item_id": 1309,
+                  "before_room_id": 1304,
+                  "after_room_id": 1303,
+                  "before_item_room_id": null,
+                  "after_item_room_id": 1303,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_recovery_v0",
+                  "submitted_command": "west",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1307:8:24",
+                  "kind": "get",
+                  "actor_dbref": "#1307",
+                  "item_id": 1309,
+                  "before_room_id": 1303,
+                  "after_room_id": 1303,
+                  "before_item_room_id": 1303,
+                  "after_item_room_id": null,
+                  "goal": "deliver_supply",
+                  "activity_profile": "delivery_patrol_recovery_v0",
+                  "submitted_command": "get Supply 20261010070443-c80417",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [
+                    1309
+                  ],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1307:10:30",
+                  "kind": "move",
+                  "actor_dbref": "#1307",
+                  "item_id": 1309,
+                  "before_room_id": 1303,
+                  "after_room_id": 1304,
+                  "before_item_room_id": null,
+                  "after_item_room_id": null,
+                  "goal": "deliver_supply",
+                  "activity_profile": "delivery_patrol_recovery_v0",
+                  "submitted_command": "east",
+                  "before_inventory_ids": [
+                    1309
+                  ],
+                  "after_inventory_ids": [
+                    1309
+                  ],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1307:12:36",
+                  "kind": "drop",
+                  "actor_dbref": "#1307",
+                  "item_id": 1309,
+                  "before_room_id": 1304,
+                  "after_room_id": 1304,
+                  "before_item_room_id": null,
+                  "after_item_room_id": 1304,
+                  "goal": "deliver_supply",
+                  "activity_profile": "delivery_patrol_recovery_v0",
+                  "submitted_command": "drop Supply 20261010070443-c80417",
+                  "before_inventory_ids": [
+                    1309
+                  ],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1307:14:42",
+                  "kind": "move",
+                  "actor_dbref": "#1307",
+                  "item_id": 1309,
+                  "before_room_id": 1304,
+                  "after_room_id": 1303,
+                  "before_item_room_id": 1304,
+                  "after_item_room_id": null,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_recovery_v0",
+                  "submitted_command": "west",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1307:16:48",
+                  "kind": "move",
+                  "actor_dbref": "#1307",
+                  "item_id": 1309,
+                  "before_room_id": 1303,
+                  "after_room_id": 1304,
+                  "before_item_room_id": null,
+                  "after_item_room_id": 1304,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_recovery_v0",
+                  "submitted_command": "east",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                }
+              ],
+              "p3_control_role": "courier",
+              "p3_goal": "deliver_supply",
+              "p3_scene_id": "20261010070443-c80417",
+              "patrol_exit_locked": false,
+              "patrol_rejected_state": null,
+              "pending_action": null,
+              "resident_id": 1308,
+              "scenario_seed": 20261010,
+              "scene_id": "20261010070443-c80417",
+              "script_id": 341,
+              "status": "RUNNING",
+              "task_destination_dbref": "#1304",
+              "task_destination_id": 1304,
+              "task_item_dbref": "#1309",
+              "task_item_id": 1309,
+              "task_item_key": "Supply 20261010070443-c80417",
+              "tick_count": 16,
+              "witnessed": {
+                "edges": {
+                  "1303": {
+                    "1304": "east"
+                  },
+                  "1304": {
+                    "1303": "west"
+                  }
+                },
+                "objects": {
+                  "1309": {
+                    "room_id": 1304,
+                    "key": "Supply 20261010070443-c80417",
+                    "last_seen_at": "2026-10-10T07:04:43.711584+00:00",
+                    "status": "seen"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": 1308,
+          "dbref": "#1308",
+          "key": "Resident Porch Marker 20261010070443-c80417",
+          "typeclass_path": "typeclasses.objects.Object",
+          "location": {
+            "id": 1304,
+            "dbref": "#1304",
+            "in_allowlisted_scene": true
+          },
+          "exit_destination": null,
+          "attributes": {
+            "native_p3": {
+              "p3_role": "delivery_destination_marker",
+              "p3_scene_id": "20261010070443-c80417"
+            }
+          }
+        },
+        {
+          "id": 1309,
+          "dbref": "#1309",
+          "key": "Supply 20261010070443-c80417",
+          "typeclass_path": "typeclasses.objects.Object",
+          "location": {
+            "id": 1304,
+            "dbref": "#1304",
+            "in_allowlisted_scene": true
+          },
+          "exit_destination": null,
+          "attributes": {
+            "native_p3": {
+              "p3_role": "assigned_supply",
+              "p3_scene_id": "20261010070443-c80417"
+            }
+          }
+        },
+        {
+          "id": 1310,
+          "dbref": "#1310",
+          "key": "P3 Fixture Player 20261010070443-c80417",
+          "typeclass_path": "typeclasses.characters.Character",
+          "location": {
+            "id": 1303,
+            "dbref": "#1303",
+            "in_allowlisted_scene": true
+          },
+          "exit_destination": null,
+          "attributes": {
+            "native_p3": {
+              "drive_mode": "manual",
+              "log": [],
+              "native_receipts": [],
+              "p3_control_role": "player",
+              "p3_scene_id": "20261010070443-c80417"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

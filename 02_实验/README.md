@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-10 当前原生平台路线为 **Evennia 主平台 + Ensemble 首个原生人物机制参照**：P1/P2 已完成，P3-A/B 为 **DEVELOPMENT_VERIFIED（限定场景）**；P3-C0 限定 DEVELOPMENT CLI 场景与逐例 DB 审计已完成，当前 **READY_FOR_INDEPENDENT_REVIEW**，等待用户独立审阅、尚未 CLOSED。C0 到此暂停，不自动进入 P3-C1/C2 或 P4；只验证无配送目标时的 opt-in 巡查与配送优先的固定目标选择。C0 唯一状态/实际结果见 [Native Platform P3-C0](Native_Platform_P3_C0_v0/README.md) / [RESULTS](Native_Platform_P3_C0_v0/RESULTS.md)；P3-A/B 证据仍由[历史 owner](Native_Platform_P3_v0/README.md)维护。不代表生产就绪或全项目关闭。P1/P2 历史验收、负结果及 LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 保留在 [P1/P2 结果](Native_Platform_P1P2_v0/RESULTS.md)。LIGHT 不阻塞。真人试玩是可选体验反馈且尚未确认，不是技术 gate 或全局 blocker。
+2026-10-10 当前原生平台路线为 **Evennia 主平台 + Ensemble 首个原生人物机制参照**：P1/P2 已完成，P3-A/B 为 **DEVELOPMENT_VERIFIED（限定场景）**；P3-C0 限定 DEVELOPMENT 已获外审认可（其 owner 状态保留 READY_FOR_INDEPENDENT_REVIEW，未明确 CLOSED）；P3-C1a 两场景与 hidden-return 负控的有限 native-server headless 运行及独立 DB audit 已完成，当前 **READY_FOR_INDEPENDENT_REVIEW**、等待独立审阅，尚未 CLOSED。结果唯一见 [Native Platform P3-C1a](Native_Platform_P3_C1a_v0/README.md) / [RESULTS](Native_Platform_P3_C1a_v0/RESULTS.md)；C0 与 P3-A/B 结果仍由各自 owner 维护。本轮完成后停止，不自动扩展 P3-C1/C2 或进入 P4；不改变 C0/A/B 默认行为与合同，不覆盖旧结果/raw，E0 与冻结 C++ 保持不变。不代表生产就绪或全项目关闭。P1/P2 历史验收、负结果及 LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 保留在 [P1/P2 结果](Native_Platform_P1P2_v0/RESULTS.md)。LIGHT 不阻塞。真人试玩是可选体验反馈且尚未确认，不是技术 gate 或全局 blocker。
 
 2026-10-09 用户另行明确授权按目标 TXT 改系统：[NPC System Integration v0](NPC_System_Integration_v0/RESULTS.md) 已形成有限 DEVELOPMENT 应用闭环，含合法世界干预、演员状态/承诺、GOAP/HTN、director-off 和玩家扰动。它是新的有限软件开发验收，不是 NPC 玩家实验、E1-2 formal、心理训练或冻结 Runtime 改动；下方 E1-1 交付时的范围不禁止该新应用。
 

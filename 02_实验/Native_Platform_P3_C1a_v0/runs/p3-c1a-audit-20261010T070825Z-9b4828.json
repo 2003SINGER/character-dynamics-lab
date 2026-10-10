@@ -1,0 +1,15 @@
+{
+  "schema": "native-p3-c1a-parent-diagnostic-v1",
+  "recorded_at": "2026-10-10T07:08:25.006979+00:00",
+  "status": "FAIL",
+  "source_revision": "caf327b",
+  "command": "c1a_mcp_smoke.py --seed 20261010",
+  "observed_output": {
+    "status": "FAILED",
+    "error_type": "KeyError"
+  },
+  "cause": "main document omitted top-level seed required by write_result filename",
+  "scope": "MCP evidence writer; not C1a behavior or tool-call rejection",
+  "retained_response": "writer failed before artifact allocation; raw subprocess response not retained",
+  "repair": "add explicit seed/schema and writer contract test, then new non-overwriting smoke"
+}
