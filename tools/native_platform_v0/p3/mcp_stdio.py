@@ -34,7 +34,9 @@ TOOLS = [
          "mode": {"type": "string", "enum": ["a", "b"]},
          "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
          "drive_mode": {"type": "string", "enum": ["manual", "timer"]},
-         "interval": {"type": "integer", "minimum": 2, "maximum": 30}},
+         "interval": {"type": "integer", "minimum": 2, "maximum": 30},
+         "activity_profile": {"type": "string", "enum": ["legacy_delivery_v0", "delivery_patrol_v0"]},
+         "delivery_task": {"type": "boolean"}, "patrol_exit_locked": {"type": "boolean"}},
          "additionalProperties": False}},
     {"name": "pause_scenario", "description": "Pause only generated P3 actors in the named scene; preserve state and logs.",
      "inputSchema": {"type": "object", "properties": {
@@ -66,6 +68,11 @@ TOOLS = [
     {"name": "run_scenario", "description": "Run one bounded autonomous P3 scenario with explicit test interventions.",
      "inputSchema": {"type": "object", "properties": {
          "scenario": {"type": "string", "enum": ["Aclean", "Asteal-return", "Bclean", "Bsteal-resident-parcel"]},
+         "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647}},
+         "required": ["scenario"], "additionalProperties": False}},
+    {"name": "run_c0_scenario", "description": "Run exactly one bounded P3-C0 development case with no authored in-run commands.",
+     "inputSchema": {"type": "object", "properties": {
+         "scenario": {"type": "string", "enum": ["C0-no-delivery", "C0-delivery-priority", "C0-after-delivery"]},
          "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647}},
          "required": ["scenario"], "additionalProperties": False}},
 ]

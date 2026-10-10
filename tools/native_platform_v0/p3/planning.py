@@ -183,3 +183,35 @@ def plan_next(local_view, goal, max_visits=500, wall_seconds=0.25):
     return {"status": "SOLVED", "reason": "actor-local HTN proposal", "intent": steps[0] if steps else None,
             "plan": steps, "method_action_visits": visits,
             "implementation": "gtpyhop-core-2.0.2", "prediction_only": True}
+
+
+def plan_patrol(local_view, rejected_exits=()):
+    """Propose one move using only currently observed, visible exits.
+
+    This is deliberately a thin application adapter inspired by EvAdventure's
+    roaming action, not a port of its NPC FSM or random roaming policy.
+    """
+    observation = thaw(local_view)["observation"]
+    exits = sorted(
+        (edge for edge in observation.get("exits", ())
+         if edge.get("key") and edge.get("destination_id") is not None),
+        key=lambda edge: (str(edge["key"]).casefold(), int(edge["destination_id"])),
+    )
+    if not exits:
+        return {"status": "WAIT", "reason": "no currently visible exits",
+                "intent": None, "candidate_exits": []}
+    rejected = {(str(row[0]), int(row[1])) for row in rejected_exits}
+    candidates = [edge for edge in exits
+                  if (str(edge["key"]), int(edge["destination_id"])) not in rejected]
+    if not candidates:
+        return {"status": "WAIT", "reason": "all currently visible exits were rejected; wait for local change",
+                "intent": None,
+                "candidate_exits": [{"key": edge["key"], "destination_id": edge["destination_id"]}
+                                    for edge in exits]}
+    selected = candidates[0]
+    return {"status": "SOLVED", "reason": "first un-rejected locally visible exit by stable key order",
+            "intent": {"operator": "move", "exit_key": selected["key"],
+                       "destination_id": int(selected["destination_id"])},
+            "candidate_exits": [{"key": edge["key"], "destination_id": edge["destination_id"]}
+                                for edge in exits],
+            "selection_rule": "local_visible_exit_stable_order_v0"}

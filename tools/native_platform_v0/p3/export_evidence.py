@@ -23,6 +23,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 GAME_ROOT = PROJECT_ROOT / "_local_data/native_platform_v0/evennia/nativep1"
 VENV_PYTHON = PROJECT_ROOT / "_local_data/native_platform_v0/evennia/venv/bin/python"
 RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P3_v0/runs"
+C0_RUNS_DIR = PROJECT_ROOT / "02_实验/Native_Platform_P3_C0_v0/runs"
 EXPORTED_CATEGORIES = {"native_p3", "native_social"}
 SENSITIVE_KEY_PARTS = (
     "account", "password", "passwd", "session", "secret", "hmac", "credential",
@@ -193,11 +194,15 @@ def main(argv: list[str] | None = None) -> int:
         "--scene-id", action="append", required=True,
         help="exact P3 scene ID to export; repeat for an explicit allowlist",
     )
+    parser.add_argument(
+        "--c0", action="store_true",
+        help="write the export under the separate Native_Platform_P3_C0_v0/runs directory",
+    )
     args = parser.parse_args(argv)
     try:
         scene_ids = _validate_scene_ids(args.scene_id)
         document = collect_scenes(scene_ids)
-        output = write_unique_export(document)
+        output = write_unique_export(document, C0_RUNS_DIR if args.c0 else RUNS_DIR)
     except Exception as err:
         parser.error(str(err))
     print(json.dumps({"status": "EXPORTED", "path": str(output), "scene_ids": scene_ids,

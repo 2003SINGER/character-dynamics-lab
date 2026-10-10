@@ -1,10 +1,11 @@
 import unittest
 from collections import UserDict, UserList
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from tools.native_platform_v0.p3.agency import (P3AutonomyScript, _settle_pending,
-                                                choose_goal, observe_actor)
-from tools.native_platform_v0.p3.planning import freeze, plan_next, thaw
+                                                choose_goal, make_decision, observe_actor)
+from tools.native_platform_v0.p3.planning import freeze, plan_next, plan_patrol, thaw
 
 
 class Attrs:
@@ -51,6 +52,7 @@ class Actor(Thing):
 def view(room_id=1, item_room=1, item_held=False, exits=None):
     return {
         "actor_id": 9,
+        "activity_contract": {"profile": "legacy_delivery_v0", "delivery_task": True},
         "goal_contract": {"goal": "deliver_supply", "item_id": 10,
                            "destination_id": 2, "source": "scenario-authored-task"},
         "observation": {
@@ -90,6 +92,120 @@ class P3ActorLoopTests(unittest.TestCase):
         carried = plan_next(view(room_id=1, item_room=None, item_held=True), "deliver_supply")
         self.assertEqual(carried["intent"], {"operator": "move", "exit_key": "east", "destination_id": 2})
         self.assertTrue(carried["prediction_only"])
+
+    def test_patrol_planner_uses_only_visible_exits_and_waits_when_none(self):
+        patrol_view = view()
+        patrol_view["observation"]["exits"] = [
+            {"key": "west", "destination_id": 3},
+            {"key": "east", "destination_id": 2},
+        ]
+        result = plan_patrol(patrol_view)
+        self.assertEqual(result["intent"], {"operator": "move", "exit_key": "east", "destination_id": 2})
+        waiting = plan_patrol(patrol_view, rejected_exits=[("east", 2), ("west", 3)])
+        self.assertIsNone(waiting["intent"])
+        self.assertEqual(waiting["status"], "WAIT")
+        no_exits = plan_patrol({"observation": {"exits": []}})
+        self.assertIsNone(no_exits["intent"])
+        self.assertEqual(no_exits["reason"], "no currently visible exits")
+
+    def test_delivery_priority_and_persistent_own_receipt_choose_patrol(self):
+        active = view()
+        active["activity_contract"] = {"profile": "delivery_patrol_v0", "delivery_task": True}
+        choice = choose_goal(active)
+        self.assertEqual(choice["candidates"], ["deliver_supply", "patrol"])
+        self.assertEqual(choice["choice"], "deliver_supply")
+
+        blocked = view(item_room=None)
+        blocked["activity_contract"] = {"profile": "delivery_patrol_v0", "delivery_task": True}
+        self.assertEqual(choose_goal(blocked)["choice"], "deliver_supply")
+        self.assertIsNone(plan_next(blocked, "deliver_supply")["intent"])
+
+        completed = view(room_id=2, item_room=None)
+        completed["activity_contract"] = {"profile": "delivery_patrol_v0", "delivery_task": True}
+        completed["observation"]["own_delivery_receipts"] = [
+            {"kind": "drop", "settled": True, "item_id": 10, "after_item_room_id": 2}
+        ]
+        self.assertEqual(choose_goal(completed)["choice"], "patrol")
+
+        no_task = view()
+        no_task["activity_contract"] = {"profile": "delivery_patrol_v0", "delivery_task": False}
+        no_task["goal_contract"]["item_id"] = None
+        self.assertEqual(choose_goal(no_task)["choice"], "patrol")
+
+    def test_rejected_patrol_move_records_native_command_and_waits_without_retry(self):
+        room = Room(1, "#1")
+        destination = Room(2, "#2")
+        room.exits.append(Exit("east", room, destination))
+        actor = Actor(9, room, {
+            ("native_p3", "activity_profile"): "delivery_patrol_v0",
+            ("native_p3", "delivery_task"): False,
+            ("native_p3", "goal"): "deliver_supply",
+            ("native_p3", "task_item_id"): None,
+            ("native_p3", "task_destination_id"): 2,
+            ("native_p3", "status"): "RUNNING",
+            ("native_p3", "tick_count"): 0,
+            ("native_p3", "log"): [],
+            ("native_p3", "native_receipts"): [],
+            ("native_p3", "witnessed"): {"edges": {}, "objects": {}},
+        })
+        decision = make_decision(actor)
+        self.assertEqual(decision["goal"]["choice"], "patrol")
+        self.assertEqual(decision["intent"]["operator"], "move")
+        pending = {"goal": decision["goal"], "intent": decision["intent"],
+                   "view": thaw(decision["view"]), "submitted_command": "east"}
+        _settle_pending(actor, pending, 1, [], None, None, None, dispatch_succeeded=True)
+        outcome = actor.attributes.get("last_outcome", category="native_p3")
+        self.assertEqual(outcome["receipt"]["submitted_command"], "east")
+        self.assertFalse(outcome["receipt"]["settled"])
+        self.assertIn("observed world state did not show the expected move transition", outcome["detail"])
+        self.assertEqual(actor.attributes.get("native_receipts", category="native_p3"), [])
+        waiting = make_decision(actor)
+        self.assertIsNone(waiting["intent"])
+        self.assertEqual(waiting["planner"]["status"], "WAIT")
+        self.assertEqual(actor.attributes.get("patrol_rejected_state", category="native_p3")["rejected"], [["east", 2]])
+
+    def test_no_task_script_records_choice_and_settles_one_move_command(self):
+        room = Room(1, "#1")
+        destination = Room(2, "#2")
+        room.exits.append(Exit("east", room, destination))
+        actor = Actor(9, room, {
+            ("native_p3", "activity_profile"): "delivery_patrol_v0",
+            ("native_p3", "delivery_task"): False,
+            ("native_p3", "goal"): "deliver_supply",
+            ("native_p3", "task_item_id"): None,
+            ("native_p3", "task_destination_id"): 2,
+            ("native_p3", "status"): "RUNNING",
+            ("native_p3", "tick_count"): 0,
+            ("native_p3", "log"): [],
+            ("native_p3", "native_receipts"): [],
+            ("native_p3", "witnessed"): {"edges": {}, "objects": {}},
+        })
+        actor.ndb = SimpleNamespace(p3_pending_operation_id=None)
+
+        def move(command):
+            self.assertEqual(command, "east")
+            room.contents.remove(actor)
+            destination.contents.append(actor)
+            actor.location = destination
+            return None
+
+        actor.execute_cmd = move
+        script = P3AutonomyScript()
+        script.obj = actor
+        script.at_repeat()  # choose and persist; do not execute in the same callback
+        choice = next(event for event in actor.attributes.get("log", category="native_p3")
+                      if event.get("kind") == "goal_choice")
+        self.assertEqual(choice["inputs"]["delivery_task"], False)
+        self.assertEqual(choice["candidates"], ["patrol"])
+        self.assertEqual(choice["rule"], "delivery_before_patrol_v0")
+        self.assertEqual(choice["choice"], "patrol")
+        script.at_repeat()  # the persisted move is submitted and settled
+        receipts = actor.attributes.get("native_receipts", category="native_p3")
+        self.assertEqual(actor.location.id, 2)
+        self.assertEqual(len(receipts), 1)
+        self.assertEqual(receipts[0]["kind"], "move")
+        self.assertEqual(receipts[0]["submitted_command"], "east")
+        self.assertTrue(receipts[0]["settled"])
 
     def test_observer_does_not_leak_hidden_local_item_or_stale_location(self):
         room = Room(1, "#1")

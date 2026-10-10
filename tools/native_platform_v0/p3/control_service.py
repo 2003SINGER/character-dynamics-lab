@@ -28,8 +28,11 @@ MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 MAX_SCENES_PER_PROCESS = 16
 ROLE_NAMES = {"player", "courier", "resident"}
 SCENARIO_NAMES = {"Aclean", "Asteal-return", "Bclean", "Bsteal-resident-parcel"}
+C0_SCENARIO_NAMES = {"C0-no-delivery", "C0-delivery-priority", "C0-after-delivery"}
 SAFE_P3_KEYS = (
-    "p3_scene_id", "p3_control_role", "p3_role", "p3_goal", "mode", "scenario_seed",
+    "p3_scene_id", "p3_control_role", "p3_role", "p3_goal", "goal", "mode", "scenario_seed",
+    "activity_profile", "delivery_task", "patrol_exit_locked", "patrol_rejected_state",
+    "drive_mode", "interval_seconds",
     "status", "tick_count", "pending_action", "last_outcome", "last_observation",
     "witnessed", "log", "native_receipts", "pending_social", "task_item_id", "task_item_key",
     "task_item_dbref", "task_destination_id", "task_destination_dbref", "resident_id",
@@ -85,17 +88,28 @@ def _validate_scene_id(scene_id: Any) -> str:
     return scene_id
 
 
-def _reset_options(args: dict[str, Any]) -> tuple[str, int, str, int]:
-    if set(args) - {"mode", "seed", "drive_mode", "interval"}:
-        raise ValueError("reset_scenario accepts only mode, seed, drive_mode, and interval")
+def _reset_options(args: dict[str, Any]) -> tuple[str, int, str, int, str, bool, bool]:
+    allowed = {"mode", "seed", "drive_mode", "interval", "activity_profile", "delivery_task",
+               "patrol_exit_locked"}
+    if set(args) - allowed:
+        raise ValueError("reset_scenario contains unsupported fields")
     mode = args.get("mode", "a")
     seed = args.get("seed", 0)
     drive_mode = args.get("drive_mode", "manual")
     interval = args.get("interval", 4)
+    profile = args.get("activity_profile", "legacy_delivery_v0")
+    delivery_task = args.get("delivery_task", True)
+    patrol_exit_locked = args.get("patrol_exit_locked", False)
     if (mode not in ("a", "b") or type(seed) is not int or not (0 <= seed <= 2**31 - 1) or
-            drive_mode not in ("manual", "timer") or type(interval) is not int or not 2 <= interval <= 30):
-        raise ValueError("mode must be a/b, seed 0..2147483647, drive_mode manual/timer, interval 2..30")
-    return mode, seed, drive_mode, interval
+            drive_mode not in ("manual", "timer") or type(interval) is not int or not 2 <= interval <= 30 or
+            profile not in ("legacy_delivery_v0", "delivery_patrol_v0") or type(delivery_task) is not bool or
+            type(patrol_exit_locked) is not bool):
+        raise ValueError("invalid mode/seed/drive/interval/activity profile/task flag")
+    if patrol_exit_locked and (mode != "a" or profile != "delivery_patrol_v0" or delivery_task):
+        raise ValueError("patrol_exit_locked is only allowed for the C0 single-actor no-delivery profile")
+    if profile == "legacy_delivery_v0" and (delivery_task is not True or patrol_exit_locked):
+        raise ValueError("legacy_delivery_v0 preserves a required delivery task and unlocked exits")
+    return mode, seed, drive_mode, interval, profile, delivery_task, patrol_exit_locked
 
 
 def _owner_account():
@@ -178,6 +192,7 @@ class P3Control:
             "health": self.health,
             "reset_scenario": self.reset_scenario,
             "pause_scenario": self.pause_scenario,
+            "run_c0_scenario": self.run_c0_scenario,
             "step_world": self.step_world,
             "inject_action": self.inject_action,
             "observe_actor": self.observe_actor,
@@ -194,7 +209,7 @@ class P3Control:
         return {"status": "READY", "service": "native-p3-control", "bind": f"{HOST}:{PORT}"}
 
     def reset_scenario(self, args):
-        mode, seed, drive_mode, interval = _reset_options(args)
+        mode, seed, drive_mode, interval, profile, delivery_task, patrol_exit_locked = _reset_options(args)
         if self.created_scenes >= MAX_SCENES_PER_PROCESS:
             raise ValueError("scene creation limit reached for this server process")
         from evennia.utils.create import create_object
@@ -203,7 +218,8 @@ class P3Control:
 
         account = _owner_account()
         scene = create_scene(SimpleNamespace(account=account), mode=mode, seed=seed,
-                             drive_mode=drive_mode, interval=interval)
+                             drive_mode=drive_mode, interval=interval, activity_profile=profile,
+                             delivery_task=delivery_task, patrol_exit_locked=patrol_exit_locked)
         roles = {"courier": scene["courier"]}
         scene["courier"].attributes.add("p3_control_role", "courier", category="native_p3")
         if mode == "b":
@@ -226,6 +242,8 @@ class P3Control:
         return {
             "scene_id": scene["scene_id"], "mode": mode, "seed": seed,
             "drive_mode": drive_mode, "interval": interval,
+            "activity_profile": profile, "delivery_task": delivery_task,
+            "patrol_exit_locked": patrol_exit_locked,
             "roles": {role: {"id": int(obj.id), "dbref": str(obj.dbref)} for role, obj in roles.items()},
             "rooms": {"pickup": {"id": int(scene["pickup"].id), "dbref": str(scene["pickup"].dbref)},
                       "destination": {"id": int(scene["destination"].id), "dbref": str(scene["destination"].dbref)}},
@@ -394,6 +412,72 @@ class P3Control:
                          "attributes": attrs})
         return {"scene_id": scene_id, "source": "live Evennia object and attribute state",
                 "full_logs": True, "account_fields_exported": False, "objects": rows}
+
+    def _c0_actor_trace(self, scene_id):
+        trace = self.get_trace({"scene_id": scene_id})
+        actor = next((row for row in trace["objects"]
+                      if row["attributes"].get("p3_control_role") == "courier"), None)
+        if actor is None:
+            raise ValueError("generated C0 scene is missing its courier actor")
+        attrs = actor["attributes"]
+        return {"id": actor["id"], "dbref": actor["dbref"], "room_id": actor["location_id"],
+                "status": attrs.get("status"), "tick_count": attrs.get("tick_count", 0),
+                "last_outcome": attrs.get("last_outcome"), "pending_action": attrs.get("pending_action"),
+                "native_receipts": attrs.get("native_receipts", []), "log_length": len(attrs.get("log", []))}
+
+    @defer.inlineCallbacks
+    def _c0_drive_callbacks(self, scene_id, count):
+        callbacks = []
+        for index in range(count):
+            step = yield defer.maybeDeferred(self.step_world, {"scene_id": scene_id, "rounds": 1})
+            callbacks.append({"callback_index": index + 1, "step": step,
+                              "actor": self._c0_actor_trace(scene_id)})
+        defer.returnValue(callbacks)
+
+    @defer.inlineCallbacks
+    def run_c0_scenario(self, args):
+        if set(args) - {"scenario", "seed"}:
+            raise ValueError("run_c0_scenario accepts only scenario and seed")
+        scenario = args.get("scenario")
+        seed = args.get("seed", 0)
+        if scenario not in C0_SCENARIO_NAMES or type(seed) is not int or not 0 <= seed <= 2**31 - 1:
+            raise ValueError("scenario must be one of the three C0 cases; seed must be 0..2147483647")
+        common = {"mode": "a", "seed": seed, "drive_mode": "manual", "interval": 4,
+                  "activity_profile": "delivery_patrol_v0"}
+        if scenario == "C0-no-delivery":
+            primary_config = {**common, "delivery_task": False, "patrol_exit_locked": False}
+            primary_scene = self.reset_scenario(primary_config)
+            primary_callbacks = yield self._c0_drive_callbacks(primary_scene["scene_id"], 12)
+            negative_config = {**common, "delivery_task": False, "patrol_exit_locked": True}
+            negative_scene = self.reset_scenario(negative_config)
+            # Tick 1 proposes and tick 2 makes the native rejected move; the
+            # next eight callbacks prove the same intent is not retried.
+            negative_callbacks = yield self._c0_drive_callbacks(negative_scene["scene_id"], 10)
+            defer.returnValue({"schema": "native-p3-c0-run-v1", "scenario": scenario, "seed": seed,
+                               "profile": "delivery_patrol_v0", "drive_mode": "manual",
+                               "controller_interventions": 0,
+                               "scenes": [
+                                   {"role": "no_delivery_primary", "configuration": primary_config,
+                                    "callbacks": primary_callbacks,
+                                    "trace": self.get_trace({"scene_id": primary_scene["scene_id"]})},
+                                   {"role": "locked_exit_negative_control", "configuration": negative_config,
+                                    "callbacks": negative_callbacks,
+                                    "trace": self.get_trace({"scene_id": negative_scene["scene_id"]})},
+                               ], "callbacks_completed": True,
+                               "completion_scope": "bounded_callbacks_only_not_semantic_acceptance"})
+
+        delivery_task = True
+        configuration = {**common, "delivery_task": delivery_task, "patrol_exit_locked": False}
+        scene = self.reset_scenario(configuration)
+        callback_count = 12 if scenario == "C0-delivery-priority" else 20
+        callbacks = yield self._c0_drive_callbacks(scene["scene_id"], callback_count)
+        defer.returnValue({"schema": "native-p3-c0-run-v1", "scenario": scenario, "seed": seed,
+                           "profile": "delivery_patrol_v0", "drive_mode": "manual",
+                           "controller_interventions": 0, "configuration": configuration,
+                           "callback_limit": callback_count, "callbacks": callbacks,
+                           "trace": self.get_trace({"scene_id": scene["scene_id"]}),
+                           "callbacks_completed": True,
+                           "completion_scope": "bounded_callbacks_only_not_semantic_acceptance"})
 
     @defer.inlineCallbacks
     def run_scenario(self, args):

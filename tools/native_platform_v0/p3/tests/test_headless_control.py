@@ -59,7 +59,7 @@ class McpStdioTests(unittest.TestCase):
         response = handle_message({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
         names = {tool["name"] for tool in response["result"]["tools"]}
         self.assertEqual(names, {"start_world", "stop_world", "health", "reset_scenario", "pause_scenario", "step_world",
-                                 "inject_action", "observe_actor", "get_trace", "run_scenario"})
+                                 "inject_action", "observe_actor", "get_trace", "run_scenario", "run_c0_scenario"})
         self.assertTrue(all(tool["inputSchema"].get("additionalProperties") is False
                             for tool in response["result"]["tools"]))
 
@@ -82,10 +82,15 @@ class McpStdioTests(unittest.TestCase):
     def test_reset_supports_bounded_manual_or_timer_drive_and_pause_tool_is_scene_scoped(self):
         self.assertEqual(_reset_options({"mode": "a", "seed": 7,
                                          "drive_mode": "timer", "interval": 30}),
-                         ("a", 7, "timer", 30))
-        self.assertEqual(_reset_options({}), ("a", 0, "manual", 4))
+                         ("a", 7, "timer", 30, "legacy_delivery_v0", True, False))
+        self.assertEqual(_reset_options({}), ("a", 0, "manual", 4, "legacy_delivery_v0", True, False))
+        self.assertEqual(_reset_options({"activity_profile": "delivery_patrol_v0", "delivery_task": False}),
+                         ("a", 0, "manual", 4, "delivery_patrol_v0", False, False))
         for invalid in ({"interval": 1}, {"interval": 31}, {"interval": True},
-                        {"drive_mode": "automatic"}, {"extra": "value"}):
+                        {"drive_mode": "automatic"}, {"extra": "value"},
+                        {"delivery_task": False},
+                        {"activity_profile": "delivery_patrol_v0", "delivery_task": False,
+                         "patrol_exit_locked": True, "mode": "b"}):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):
                 _reset_options(invalid)
         response = handle_message({"jsonrpc": "2.0", "id": 5, "method": "tools/list"})
@@ -93,6 +98,8 @@ class McpStdioTests(unittest.TestCase):
         self.assertEqual(by_name["reset_scenario"]["inputSchema"]["properties"]["interval"]["minimum"], 2)
         self.assertEqual(by_name["reset_scenario"]["inputSchema"]["properties"]["interval"]["maximum"], 30)
         self.assertIn("scene_id", by_name["pause_scenario"]["inputSchema"]["required"])
+        self.assertEqual(by_name["run_c0_scenario"]["inputSchema"]["properties"]["scenario"]["enum"],
+                         ["C0-no-delivery", "C0-delivery-priority", "C0-after-delivery"])
 
 
 class TwistedLineProtocolTests(unittest.TestCase):

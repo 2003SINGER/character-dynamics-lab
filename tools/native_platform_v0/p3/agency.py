@@ -8,7 +8,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import threading
 
-from .planning import freeze, plan_next, thaw
+from .planning import freeze, plan_next, plan_patrol, thaw
 
 CATEGORY = "native_p3"
 _SOCIAL_CLIENTS = {}
@@ -49,6 +49,8 @@ def observe_actor(actor):
 
     item_id = _get(actor, "task_item_id")
     destination_id = _get(actor, "task_destination_id")
+    activity_profile = _get(actor, "activity_profile", "legacy_delivery_v0")
+    delivery_task = _get(actor, "delivery_task", True)
     inventory = [_obj_ref(obj) for obj in actor.contents]
     visible_items = []
     current_exit_rows = []
@@ -68,9 +70,12 @@ def observe_actor(actor):
     room_edges = knowledge["edges"].setdefault(str(room.id), {})
     for edge in current_exit_rows:
         room_edges[str(edge["destination_id"])] = edge["key"]
-    observed_item = next((row for row in visible_items if row["id"] == item_id), None)
-    held_item = next((row for row in inventory if row["id"] == item_id), None)
-    if observed_item:
+    observed_item = next((row for row in visible_items if item_id is not None and row["id"] == item_id), None)
+    held_item = next((row for row in inventory if item_id is not None and row["id"] == item_id), None)
+    if item_id is None:
+        item_location = None
+        task_item = {"id": None, "key": None}
+    elif observed_item:
         old = knowledge["objects"].get(str(item_id), {})
         if old.get("room_id") != room.id or old.get("key") != observed_item["key"] or old.get("status") != "seen":
             knowledge["objects"][str(item_id)] = {"room_id": room.id, "key": observed_item["key"],
@@ -85,17 +90,22 @@ def observe_actor(actor):
             item_knowledge.update({"room_id": None, "status": "not_visible_in_last_seen_room",
                                    "absence_observed_at": _stamp()})
 
-    item_knowledge = knowledge["objects"].get(str(item_id), {})
-    item_location = (room.id if observed_item else None if held_item else
-                     item_knowledge.get("room_id") if isinstance(item_knowledge.get("room_id"), int) else None)
+    if item_id is not None:
+        item_knowledge = knowledge["objects"].get(str(item_id), {})
+        item_location = (room.id if observed_item else None if held_item else
+                         item_knowledge.get("room_id") if isinstance(item_knowledge.get("room_id"), int) else None)
     exits = list(current_exit_rows)
     known_exits = {int(source): tuple(int(destination) for destination in rows)
                    for source, rows in knowledge["edges"].items()}
-    task_item = {"id": item_id, "key": (observed_item or held_item or {}).get("key", _get(actor, "task_item_key"))}
+    if item_id is not None:
+        task_item = {"id": item_id, "key": (observed_item or held_item or {}).get(
+            "key", _get(actor, "task_item_key"))}
     delivered = bool(observed_item and room.id == destination_id)
     own_delivery_receipts = list(_get(actor, "native_receipts", []))
     view = {
         "actor_id": actor.id,
+        "activity_contract": {"profile": activity_profile, "delivery_task": delivery_task,
+                               "source": "scenario-authored-activity-profile"},
         "goal_contract": {"goal": _get(actor, "goal", "deliver_supply"), "item_id": item_id,
                            "destination_id": destination_id, "source": "scenario-authored-task"},
         "observation": {
@@ -126,33 +136,84 @@ def observe_actor(actor):
 
 
 def choose_goal(local_view):
-    """A versioned authored objective rule; it is not a learned utility/personality."""
+    """Apply the opt-in fixed-priority activity rule; this is not learned utility."""
     view = local_view
     goal = view["goal_contract"]["goal"]
+    profile = view.get("activity_contract", {}).get("profile", "legacy_delivery_v0")
+    delivery_task = view.get("activity_contract", {}).get("delivery_task", True) is True
+    if profile not in ("legacy_delivery_v0", "delivery_patrol_v0"):
+        return {"goal": None, "reason": "unsupported activity profile", "rule": "p3-authored-goal-v0",
+                "status": "UNSUPPORTED_PROFILE", "candidates": [], "choice": None,
+                "inputs": {"profile": profile, "delivery_task": delivery_task}}
+    if profile == "legacy_delivery_v0" and not delivery_task:
+        return {"goal": None, "reason": "delivery task was cancelled; patrol is not enabled in the legacy profile",
+                "rule": "p3-authored-goal-v0", "status": "NO_TASK", "candidates": [], "choice": None,
+                "inputs": {"profile": profile, "delivery_task": False}}
     if goal != "deliver_supply":
-        return {"goal": None, "reason": "no supported authored task", "rule": "p3-authored-goal-v0"}
+        return {"goal": None, "reason": "no supported authored task", "rule": "p3-authored-goal-v0",
+                "status": "NO_TASK", "candidates": [], "choice": None,
+                "inputs": {"profile": profile, "delivery_task": delivery_task}}
     observation = view["observation"]
-    own_receipt = any(row.get("kind") == "drop" and row.get("settled") and
+    own_receipt = bool(observation["task_item"].get("id") is not None and any(
+                      row.get("kind") == "drop" and row.get("settled") and
                       str(row.get("item_id")) == str(observation["task_item"]["id"]) and
                       row.get("after_item_room_id") == observation["task_destination"]
-                      for row in observation["own_delivery_receipts"])
+                      for row in observation["own_delivery_receipts"]))
+    if profile == "delivery_patrol_v0":
+        candidates = ["deliver_supply", "patrol"] if delivery_task and not own_receipt else ["patrol"]
+        if delivery_task and not own_receipt:
+            reason = ("delivery outranks patrol until this actor has its own matching settled drop receipt; "
+                      "visible destination state alone does not complete the task")
+            return {"goal": "deliver_supply", "reason": reason,
+                    "rule": "delivery_before_patrol_v0", "status": "ACTIVE",
+                    "candidates": candidates, "choice": "deliver_supply",
+                    "inputs": {"profile": profile, "delivery_task": True,
+                               "own_delivery_receipt": False}}
+        reason = ("matching settled drop receipt permanently completes this actor's delivery task"
+                  if own_receipt else "no active delivery task; use the opt-in patrol activity")
+        return {"goal": "patrol", "reason": reason, "rule": "delivery_before_patrol_v0",
+                "status": "ACTIVE", "candidates": candidates, "choice": "patrol",
+                "inputs": {"profile": profile, "delivery_task": delivery_task,
+                           "own_delivery_receipt": own_receipt}}
     if own_receipt:
         return {"goal": None, "reason": "this actor has a settled drop receipt for the assigned item and destination",
-                "rule": "p3-authored-goal-v0", "status": "ACTOR_DELIVERY_SETTLED"}
+                "rule": "p3-authored-goal-v0", "status": "ACTOR_DELIVERY_SETTLED",
+                "candidates": ["deliver_supply"], "choice": None,
+                "inputs": {"profile": profile, "delivery_task": delivery_task,
+                           "own_delivery_receipt": True}}
     if observation["delivered"]:
         return {"goal": None, "reason": "world goal is visibly satisfied, but no actor drop receipt proves who delivered it",
-                "rule": "p3-authored-goal-v0", "status": "WORLD_GOAL_SATISFIED_EXTERNAL"}
+                "rule": "p3-authored-goal-v0", "status": "WORLD_GOAL_SATISFIED_EXTERNAL",
+                "candidates": ["deliver_supply"], "choice": None,
+                "inputs": {"profile": profile, "delivery_task": delivery_task,
+                           "own_delivery_receipt": False}}
     return {"goal": goal, "reason": "continue the scenario-authored delivery objective",
-            "rule": "p3-authored-goal-v0", "status": "ACTIVE"}
+            "rule": "p3-authored-goal-v0", "status": "ACTIVE",
+            "candidates": ["deliver_supply"], "choice": goal,
+            "inputs": {"profile": profile, "delivery_task": delivery_task,
+                       "own_delivery_receipt": False}}
 
 
 def make_decision(actor):
-    """Observe, arbitrate, and propose at most one HTN primitive."""
+    """Observe, arbitrate, and propose at most one delivery or patrol primitive."""
     view = observe_actor(actor)
     choice = choose_goal(view)
     if choice["goal"] is None:
         return {"view": view, "goal": choice, "planner": None, "intent": None}
-    planned = plan_next(view, choice["goal"])
+    if choice["goal"] == "patrol":
+        observation = view["observation"]
+        signature = sorted((str(edge["key"]), int(edge["destination_id"]))
+                           for edge in observation.get("exits", ()))
+        state = get_value(actor, "patrol_rejected_state")
+        saved_signature = (sorted((str(row[0]), int(row[1])) for row in state.get("exits", ()))
+                           if state else None)
+        if not state or state.get("room_id") != observation["room_id"] or saved_signature != signature:
+            state = {"room_id": observation["room_id"], "exits": signature, "rejected": []}
+            set_value(actor, "patrol_rejected_state", state)
+        rejected = [(str(row[0]), int(row[1])) for row in state.get("rejected", ())]
+        planned = plan_patrol(view, rejected)
+    else:
+        planned = plan_next(view, choice["goal"])
     return {"view": view, "goal": choice, "planner": planned, "intent": planned.get("intent")}
 
 
@@ -180,10 +241,10 @@ def _dispatch_pending(actor, pending):
     """Run one native command and settle only from the resulting Evennia state."""
     operation = pending["intent"]
     view = thaw(pending["view"])
-    item_id = view["goal_contract"]["item_id"]
+    item_id = view["goal_contract"].get("item_id")
     before_room = actor.location.id if actor.location else None
     before_inventory = [obj.id for obj in actor.contents]
-    before_item_room = before_room if _visible_item_in_room(actor, item_id) else None
+    before_item_room = before_room if item_id is not None and _visible_item_in_room(actor, item_id) else None
     command = None
     rejection = None
     if operation["operator"] == "move":
@@ -215,22 +276,23 @@ def _dispatch_pending(actor, pending):
                         "WORLD_VALIDATION_REJECTED", rejection, dispatch_succeeded=False)
         return
 
-    set_value(actor, "pending_action", {**pending, "status": "executing"})
+    executing = {**pending, "status": "executing", "submitted_command": command}
+    set_value(actor, "pending_action", executing)
     operation_id = pending.get("operation_id")
     actor.ndb.p3_pending_operation_id = operation_id
     try:
         deferred = actor.execute_cmd(command)
     except Exception as exc:  # command dispatch errors are recorded, never treated as success
-        _settle_pending(actor, pending, before_room, before_inventory, before_item_room,
+        _settle_pending(actor, executing, before_room, before_inventory, before_item_room,
                         "COMMAND_ERROR", f"{type(exc).__name__}: {exc}", dispatch_succeeded=False)
         return
 
     def completed(result):
         if hasattr(result, "getErrorMessage"):
-            _settle_pending(actor, pending, before_room, before_inventory, before_item_room,
+            _settle_pending(actor, executing, before_room, before_inventory, before_item_room,
                             "COMMAND_ERROR", result.getErrorMessage(), dispatch_succeeded=False)
         else:
-            _settle_pending(actor, pending, before_room, before_inventory, before_item_room,
+            _settle_pending(actor, executing, before_room, before_inventory, before_item_room,
                             None, None, dispatch_succeeded=True)
         return result
 
@@ -244,10 +306,10 @@ def _dispatch_pending(actor, pending):
 def _settle_pending(actor, pending, before_room, before_inventory, before_item_room, failure, detail,
                     dispatch_succeeded):
     intent = pending["intent"]
-    item_id = pending["view"]["goal_contract"]["item_id"]
+    item_id = pending["view"]["goal_contract"].get("item_id")
     after_room = actor.location.id if actor.location else None
     after_inventory = [obj.id for obj in actor.contents]
-    after_item_room = after_room if _visible_item_in_room(actor, item_id) else None
+    after_item_room = after_room if item_id is not None and _visible_item_in_room(actor, item_id) else None
     if intent["operator"] == "move":
         settled = bool(dispatch_succeeded and after_room == intent["destination_id"] and before_room != after_room)
     elif intent["operator"] == "get":
@@ -255,11 +317,17 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
     else:
         settled = bool(dispatch_succeeded and item_id in before_inventory and
                        after_item_room == intent["room_id"] and item_id not in after_inventory)
+    if not settled and detail is None:
+        detail = ("native command completed without a reported error, but the observed world state "
+                  f"did not show the expected {intent['operator']} transition")
     status = "SETTLED" if settled else failure or "WORLD_VALIDATION_REJECTED"
     event_id = f"p3:{actor.id}:{get_value(actor, 'tick_count', 0)}:{len(get_value(actor, 'log', []))}"
     receipt = {"receipt_id": event_id, "kind": intent["operator"], "actor_dbref": actor.dbref,
                "item_id": item_id, "before_room_id": before_room, "after_room_id": after_room,
                "before_item_room_id": before_item_room, "after_item_room_id": after_item_room,
+               "goal": pending.get("goal", {}).get("choice", pending.get("goal", {}).get("goal")),
+               "activity_profile": get_value(actor, "activity_profile", "legacy_delivery_v0"),
+               "submitted_command": pending.get("submitted_command"),
                "before_inventory_ids": before_inventory, "after_inventory_ids": after_inventory,
                "dispatch_succeeded": dispatch_succeeded, "settled": settled}
     set_value(actor, "last_outcome", {"status": status, "intent": intent, "detail": detail,
@@ -267,7 +335,7 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
     set_value(actor, "pending_action", None)
     if getattr(actor, "ndb", None) is not None:
         actor.ndb.p3_pending_operation_id = None
-    if intent["operator"] == "get" and not settled and after_room == before_room:
+    if intent["operator"] == "get" and not settled and item_id is not None and after_room == before_room:
         knowledge = get_value(actor, "witnessed", {"edges": {}, "objects": {}})
         fact = knowledge.get("objects", {}).get(str(item_id))
         if fact and fact.get("room_id") == after_room:
@@ -278,6 +346,24 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
         native_receipts = list(get_value(actor, "native_receipts", []))
         native_receipts.append(receipt)
         set_value(actor, "native_receipts", native_receipts)
+    if intent["operator"] == "move" and pending.get("goal", {}).get("choice") == "patrol":
+        state = get_value(actor, "patrol_rejected_state")
+        if not settled:
+            move_view = pending["view"]["observation"]
+            signature = sorted((str(edge["key"]), int(edge["destination_id"]))
+                               for edge in move_view.get("exits", ()))
+            saved_signature = (sorted((str(row[0]), int(row[1])) for row in state.get("exits", ()))
+                               if state else None)
+            if not state or state.get("room_id") != before_room or saved_signature != signature:
+                state = {"room_id": before_room, "exits": signature, "rejected": []}
+            rejected = list(state.get("rejected", []))
+            fingerprint = [str(intent["exit_key"]), int(intent["destination_id"])]
+            if fingerprint not in rejected:
+                rejected.append(fingerprint)
+            state["rejected"] = rejected
+            set_value(actor, "patrol_rejected_state", state)
+        elif after_room != before_room:
+            set_value(actor, "patrol_rejected_state", None)
     record(actor, {"kind": "execution_settlement", "status": status, "intent": intent,
                    "receipt": receipt, "detail": detail})
 
@@ -413,8 +499,17 @@ class P3AutonomyScript(DefaultScript):
             set_value(actor, "status", "ERROR")
             record(actor, {"kind": "loop_error", "error": f"{type(exc).__name__}: {exc}"})
             return
-        record(actor, {"kind": "goal_choice", "goal": decision["goal"],
+        selection = decision["goal"]
+        record(actor, {"kind": "goal_choice", "inputs": selection.get("inputs"),
+                       "candidates": selection.get("candidates", []),
+                       "rule": selection.get("rule"), "choice": selection.get("choice"),
+                       "reason": selection.get("reason"), "goal": selection,
+                       "activity_profile": decision["view"]["activity_contract"],
                        "view": thaw(decision["view"]), "planner": decision["planner"]})
+        if selection.get("status") == "NO_TASK":
+            set_value(actor, "status", "IDLE")
+            record(actor, {"kind": "activity_idle", "reason": selection["reason"]})
+            return
         if decision["goal"].get("status") in ("ACTOR_DELIVERY_SETTLED", "WORLD_GOAL_SATISFIED_EXTERNAL"):
             outcome = decision["goal"]["status"]
             if status != outcome:
@@ -426,8 +521,15 @@ class P3AutonomyScript(DefaultScript):
                 _maybe_social_after_delivery(actor, thaw(decision["view"]))
             return
         if decision["intent"] is None:
-            set_value(actor, "status", "BLOCKED")
-            record(actor, {"kind": "blocked", "reason": decision["planner"].get("reason")})
+            planner = decision["planner"] or {}
+            if selection.get("choice") == "patrol":
+                set_value(actor, "status", "PATROL_WAITING")
+                record(actor, {"kind": "activity_wait", "activity": "patrol",
+                               "status": planner.get("status"), "reason": planner.get("reason"),
+                               "candidate_exits": planner.get("candidate_exits", [])})
+            else:
+                set_value(actor, "status", "BLOCKED")
+                record(actor, {"kind": "blocked", "reason": planner.get("reason")})
             return
         set_value(actor, "status", "RUNNING")
         pending = {"status": "planned", "planned_at_tick": tick,
