@@ -54,3 +54,5 @@ MCP stdio 命令保持前台 JSON-RPC stdin/stdout；本地控制服务须已启
 ## 实现与来源边界
 
 P3 的 HTN planner 调用 GTPyhop 2.0.2（打包 fork：PCfVW/GTPyhop；BSD 清许可；作者 Dana Nau、Eric Jacopin），人物任务/方法配置及 Evennia 世界适配属于本项目的有限应用实现。算法调用不等于原创 HTN 研究或独立方法贡献；具体运行来源哈希保存在每个 run JSON。
+
+P3-C0 的限定 DEVELOPMENT 已验证，当前等待独立审阅；其当前状态、范围与结果唯一见 [Native Platform P3-C0](../Native_Platform_P3_C0_v0/README.md) / [RESULTS](../Native_Platform_P3_C0_v0/RESULTS.md)。本页只维护 P3-A/B 历史结果，不复制 C0 结果。

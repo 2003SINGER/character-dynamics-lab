@@ -1,0 +1,618 @@
+{
+  "schema": "native-p3-c0-mcp-transport-v1",
+  "recorded_at": "2026-10-10T03:55:34.104616+00:00",
+  "request": {
+    "scenario": "MCPstdio-C0-transport",
+    "seed": 20261010
+  },
+  "manifest": {
+    "git_revision": "108f563534ddc7dfe77ccd0ffaad58d2155d20de",
+    "hash_scope": "sha256 of actual working-tree source bytes; git revision is base commit only",
+    "source_sha256": {
+      "tools/native_platform_v0/p3/c0_runner.py": "bab50a53d5924f3c327a8d2f49715aa8a8941b989a800f55a7bfc8d6f1a08905",
+      "tools/native_platform_v0/p3/control_service.py": "b31c8134a10c4e51ce3b72e07620cabba368f4bf469cf58f67dd5f72eab109a6",
+      "tools/native_platform_v0/p3/export_evidence.py": "fd9826f3c0ac000eeb4cb2017faf6333ae5a2381c4c3a8e3512676594e4790a1",
+      "tools/native_platform_v0/p3/mcp_stdio.py": "6cdf74b7f4cb16ce3301a3d1701d07f4b30433eaeba6a76fc6086d1757994ef2",
+      "tools/native_platform_v0/p3/agency.py": "9c8e4bd7bf0ddeb8a81c293ff9fe32b0962a265c021314bb47abaabdb02d61b1",
+      "tools/native_platform_v0/p3/planning.py": "2e47d2f9374d9f76c2435141d5e0d2918962780ea85686ab14fc6059b74325a6",
+      "tools/native_platform_v0/p3/scene.py": "044a8cb6b44cd2cd2adcf612bbf53fcb5426d8be3df7e37e831174735aa6a30e",
+      "tools/native_platform_v0/p3/commands.py": "d53bdf7d18f3c14f9a3e67cc0db1e1e121d3784191ad2a1633c365d3bd431b8e",
+      "tools/native_platform_v0/bridge/social.py": "4e841ca146662dd0dc802f6aecf4793bc1549b7b74dc42666762882c3322b9b3",
+      "tools/native_platform_v0/ensemble/runner.mjs": "7b86daadcc67a4e9b44cdd6d3fa7c20eb38742292706481a95a39bff87b44c55"
+    },
+    "source_snapshot_sha256": "fdcf3cbed07cc7f64e39f91364946886792805b0687b409796cd48a682919e5a"
+  },
+  "messages": [
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "method": "initialize",
+      "params": {
+        "protocolVersion": "2025-06-18",
+        "capabilities": {},
+        "clientInfo": {
+          "name": "p3-c0-parent-audit",
+          "version": "1"
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "method": "notifications/initialized"
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "method": "tools/list"
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "method": "tools/call",
+      "params": {
+        "name": "observe_actor",
+        "arguments": {
+          "scene_id": "20261010035340-afce88",
+          "actor_role": "courier"
+        }
+      }
+    }
+  ],
+  "responses": [
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "protocolVersion": "2025-06-18",
+        "capabilities": {
+          "tools": {
+            "listChanged": false
+          }
+        },
+        "serverInfo": {
+          "name": "native-p3-local-control",
+          "version": "0.1.0"
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "result": {
+        "tools": [
+          {
+            "name": "start_world",
+            "description": "Start the existing local Evennia game using its scoped CLI wrapper.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "stop_world",
+            "description": "Stop only the local Evennia instance using its scoped CLI wrapper.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "health",
+            "description": "Check the authenticated local P3 control service.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "reset_scenario",
+            "description": "Create a fresh isolated P3 scene in manual or timer drive; never resets the world.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "a",
+                    "b"
+                  ]
+                },
+                "seed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2147483647
+                },
+                "drive_mode": {
+                  "type": "string",
+                  "enum": [
+                    "manual",
+                    "timer"
+                  ]
+                },
+                "interval": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 30
+                },
+                "activity_profile": {
+                  "type": "string",
+                  "enum": [
+                    "legacy_delivery_v0",
+                    "delivery_patrol_v0"
+                  ]
+                },
+                "delivery_task": {
+                  "type": "boolean"
+                },
+                "patrol_exit_locked": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "pause_scenario",
+            "description": "Pause only generated P3 actors in the named scene; preserve state and logs.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "scene_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                }
+              },
+              "required": [
+                "scene_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "step_world",
+            "description": "Advance generated P3 actors through real manual script callbacks.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "scene_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                },
+                "rounds": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 50
+                }
+              },
+              "required": [
+                "scene_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "inject_action",
+            "description": "Issue one whitelisted real Evennia command to a generated scene role.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "scene_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                },
+                "actor_role": {
+                  "type": "string",
+                  "enum": [
+                    "player",
+                    "courier",
+                    "resident"
+                  ]
+                },
+                "operation": {
+                  "type": "string",
+                  "enum": [
+                    "move",
+                    "get",
+                    "drop",
+                    "look",
+                    "inventory",
+                    "say"
+                  ]
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "east",
+                    "west"
+                  ]
+                },
+                "item_id": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              },
+              "required": [
+                "scene_id",
+                "actor_role",
+                "operation"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "observe_actor",
+            "description": "Return one generated actor's local observation only.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "scene_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                },
+                "actor_role": {
+                  "type": "string",
+                  "enum": [
+                    "player",
+                    "courier",
+                    "resident"
+                  ]
+                }
+              },
+              "required": [
+                "scene_id",
+                "actor_role"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "get_trace",
+            "description": "Read full live logs and bounded generated-scene P3/social evidence.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "scene_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                }
+              },
+              "required": [
+                "scene_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "run_scenario",
+            "description": "Run one bounded autonomous P3 scenario with explicit test interventions.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "scenario": {
+                  "type": "string",
+                  "enum": [
+                    "Aclean",
+                    "Asteal-return",
+                    "Bclean",
+                    "Bsteal-resident-parcel"
+                  ]
+                },
+                "seed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2147483647
+                }
+              },
+              "required": [
+                "scenario"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "run_c0_scenario",
+            "description": "Run exactly one bounded P3-C0 development case with no authored in-run commands.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "scenario": {
+                  "type": "string",
+                  "enum": [
+                    "C0-no-delivery",
+                    "C0-delivery-priority",
+                    "C0-after-delivery"
+                  ]
+                },
+                "seed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2147483647
+                }
+              },
+              "required": [
+                "scenario"
+              ],
+              "additionalProperties": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"scene_id\": \"20261010035340-afce88\", \"actor_role\": \"courier\", \"local_observation\": {\"actor_id\": 1071, \"activity_contract\": {\"profile\": \"delivery_patrol_v0\", \"delivery_task\": true, \"source\": \"scenario-authored-activity-profile\"}, \"goal_contract\": {\"goal\": \"deliver_supply\", \"item_id\": 1073, \"destination_id\": 1068, \"source\": \"scenario-authored-task\"}, \"observation\": {\"room_id\": 1067, \"inventory\": [], \"visible_items\": [{\"id\": 1069, \"dbref\": \"#1069\", \"key\": \"east\", \"room_id\": 1067}, {\"id\": 1074, \"dbref\": \"#1074\", \"key\": \"P3 Fixture Player 20261010035340-afce88\", \"room_id\": 1067}], \"task_item\": {\"id\": 1073, \"key\": \"Supply 20261010035340-afce88\"}, \"task_destination\": 1068, \"item_location\": 1068, \"item_held\": false, \"delivered\": false, \"own_delivery_receipts\": [{\"receipt_id\": \"p3:1071:2:5\", \"kind\": \"get\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1067, \"after_room_id\": 1067, \"before_item_room_id\": 1067, \"after_item_room_id\": null, \"goal\": \"deliver_supply\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"get Supply 20261010035340-afce88\", \"before_inventory_ids\": [], \"after_inventory_ids\": [1073], \"dispatch_succeeded\": true, \"settled\": true}, {\"receipt_id\": \"p3:1071:4:11\", \"kind\": \"move\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1067, \"after_room_id\": 1068, \"before_item_room_id\": null, \"after_item_room_id\": null, \"goal\": \"deliver_supply\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"east\", \"before_inventory_ids\": [1073], \"after_inventory_ids\": [1073], \"dispatch_succeeded\": true, \"settled\": true}, {\"receipt_id\": \"p3:1071:6:17\", \"kind\": \"drop\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1068, \"after_room_id\": 1068, \"before_item_room_id\": null, \"after_item_room_id\": 1068, \"goal\": \"deliver_supply\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"drop Supply 20261010035340-afce88\", \"before_inventory_ids\": [1073], \"after_inventory_ids\": [], \"dispatch_succeeded\": true, \"settled\": true}, {\"receipt_id\": \"p3:1071:8:23\", \"kind\": \"move\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1068, \"after_room_id\": 1067, \"before_item_room_id\": 1068, \"after_item_room_id\": null, \"goal\": \"patrol\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"west\", \"before_inventory_ids\": [], \"after_inventory_ids\": [], \"dispatch_succeeded\": true, \"settled\": true}, {\"receipt_id\": \"p3:1071:10:29\", \"kind\": \"move\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1067, \"after_room_id\": 1068, \"before_item_room_id\": null, \"after_item_room_id\": 1068, \"goal\": \"patrol\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"east\", \"before_inventory_ids\": [], \"after_inventory_ids\": [], \"dispatch_succeeded\": true, \"settled\": true}, {\"receipt_id\": \"p3:1071:12:35\", \"kind\": \"move\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1068, \"after_room_id\": 1067, \"before_item_room_id\": 1068, \"after_item_room_id\": null, \"goal\": \"patrol\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"west\", \"before_inventory_ids\": [], \"after_inventory_ids\": [], \"dispatch_succeeded\": true, \"settled\": true}, {\"receipt_id\": \"p3:1071:14:41\", \"kind\": \"move\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1067, \"after_room_id\": 1068, \"before_item_room_id\": null, \"after_item_room_id\": 1068, \"goal\": \"patrol\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"east\", \"before_inventory_ids\": [], \"after_inventory_ids\": [], \"dispatch_succeeded\": true, \"settled\": true}, {\"receipt_id\": \"p3:1071:16:47\", \"kind\": \"move\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1068, \"after_room_id\": 1067, \"before_item_room_id\": 1068, \"after_item_room_id\": null, \"goal\": \"patrol\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"west\", \"before_inventory_ids\": [], \"after_inventory_ids\": [], \"dispatch_succeeded\": true, \"settled\": true}, {\"receipt_id\": \"p3:1071:18:53\", \"kind\": \"move\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1067, \"after_room_id\": 1068, \"before_item_room_id\": null, \"after_item_room_id\": 1068, \"goal\": \"patrol\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"east\", \"before_inventory_ids\": [], \"after_inventory_ids\": [], \"dispatch_succeeded\": true, \"settled\": true}, {\"receipt_id\": \"p3:1071:20:59\", \"kind\": \"move\", \"actor_dbref\": \"#1071\", \"item_id\": 1073, \"before_room_id\": 1068, \"after_room_id\": 1067, \"before_item_room_id\": 1068, \"after_item_room_id\": null, \"goal\": \"patrol\", \"activity_profile\": \"delivery_patrol_v0\", \"submitted_command\": \"west\", \"before_inventory_ids\": [], \"after_inventory_ids\": [], \"dispatch_succeeded\": true, \"settled\": true}], \"known_exits\": {\"1067\": [1068], \"1068\": [1067]}, \"exits\": [{\"key\": \"east\", \"destination_id\": 1068, \"destination_dbref\": \"#1068\"}], \"witnessed\": [{\"room_id\": 1067, \"kind\": \"current_room\", \"dbref\": \"#1067\"}], \"retained_witnesses\": [{\"room_id\": 1068, \"key\": \"Supply 20261010035340-afce88\", \"last_seen_at\": \"2026-10-10T03:53:40.614817+00:00\", \"status\": \"seen\"}]}}}"
+          }
+        ],
+        "structuredContent": {
+          "scene_id": "20261010035340-afce88",
+          "actor_role": "courier",
+          "local_observation": {
+            "actor_id": 1071,
+            "activity_contract": {
+              "profile": "delivery_patrol_v0",
+              "delivery_task": true,
+              "source": "scenario-authored-activity-profile"
+            },
+            "goal_contract": {
+              "goal": "deliver_supply",
+              "item_id": 1073,
+              "destination_id": 1068,
+              "source": "scenario-authored-task"
+            },
+            "observation": {
+              "room_id": 1067,
+              "inventory": [],
+              "visible_items": [
+                {
+                  "id": 1069,
+                  "dbref": "#1069",
+                  "key": "east",
+                  "room_id": 1067
+                },
+                {
+                  "id": 1074,
+                  "dbref": "#1074",
+                  "key": "P3 Fixture Player 20261010035340-afce88",
+                  "room_id": 1067
+                }
+              ],
+              "task_item": {
+                "id": 1073,
+                "key": "Supply 20261010035340-afce88"
+              },
+              "task_destination": 1068,
+              "item_location": 1068,
+              "item_held": false,
+              "delivered": false,
+              "own_delivery_receipts": [
+                {
+                  "receipt_id": "p3:1071:2:5",
+                  "kind": "get",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1067,
+                  "after_room_id": 1067,
+                  "before_item_room_id": 1067,
+                  "after_item_room_id": null,
+                  "goal": "deliver_supply",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "get Supply 20261010035340-afce88",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [
+                    1073
+                  ],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1071:4:11",
+                  "kind": "move",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1067,
+                  "after_room_id": 1068,
+                  "before_item_room_id": null,
+                  "after_item_room_id": null,
+                  "goal": "deliver_supply",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "east",
+                  "before_inventory_ids": [
+                    1073
+                  ],
+                  "after_inventory_ids": [
+                    1073
+                  ],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1071:6:17",
+                  "kind": "drop",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1068,
+                  "after_room_id": 1068,
+                  "before_item_room_id": null,
+                  "after_item_room_id": 1068,
+                  "goal": "deliver_supply",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "drop Supply 20261010035340-afce88",
+                  "before_inventory_ids": [
+                    1073
+                  ],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1071:8:23",
+                  "kind": "move",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1068,
+                  "after_room_id": 1067,
+                  "before_item_room_id": 1068,
+                  "after_item_room_id": null,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "west",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1071:10:29",
+                  "kind": "move",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1067,
+                  "after_room_id": 1068,
+                  "before_item_room_id": null,
+                  "after_item_room_id": 1068,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "east",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1071:12:35",
+                  "kind": "move",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1068,
+                  "after_room_id": 1067,
+                  "before_item_room_id": 1068,
+                  "after_item_room_id": null,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "west",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1071:14:41",
+                  "kind": "move",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1067,
+                  "after_room_id": 1068,
+                  "before_item_room_id": null,
+                  "after_item_room_id": 1068,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "east",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1071:16:47",
+                  "kind": "move",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1068,
+                  "after_room_id": 1067,
+                  "before_item_room_id": 1068,
+                  "after_item_room_id": null,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "west",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1071:18:53",
+                  "kind": "move",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1067,
+                  "after_room_id": 1068,
+                  "before_item_room_id": null,
+                  "after_item_room_id": 1068,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "east",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                },
+                {
+                  "receipt_id": "p3:1071:20:59",
+                  "kind": "move",
+                  "actor_dbref": "#1071",
+                  "item_id": 1073,
+                  "before_room_id": 1068,
+                  "after_room_id": 1067,
+                  "before_item_room_id": 1068,
+                  "after_item_room_id": null,
+                  "goal": "patrol",
+                  "activity_profile": "delivery_patrol_v0",
+                  "submitted_command": "west",
+                  "before_inventory_ids": [],
+                  "after_inventory_ids": [],
+                  "dispatch_succeeded": true,
+                  "settled": true
+                }
+              ],
+              "known_exits": {
+                "1067": [
+                  1068
+                ],
+                "1068": [
+                  1067
+                ]
+              },
+              "exits": [
+                {
+                  "key": "east",
+                  "destination_id": 1068,
+                  "destination_dbref": "#1068"
+                }
+              ],
+              "witnessed": [
+                {
+                  "room_id": 1067,
+                  "kind": "current_room",
+                  "dbref": "#1067"
+                }
+              ],
+              "retained_witnesses": [
+                {
+                  "room_id": 1068,
+                  "key": "Supply 20261010035340-afce88",
+                  "last_seen_at": "2026-10-10T03:53:40.614817+00:00",
+                  "status": "seen"
+                }
+              ]
+            }
+          }
+        },
+        "isError": false
+      }
+    }
+  ],
+  "global_mcp_registration_modified": false
+}
