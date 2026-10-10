@@ -24,14 +24,18 @@ def create_scene(owner, mode="a", interval=4, drive="timer", seed=0, drive_mode=
         raise ValueError("P3 drive must be 'timer' or 'manual'")
     if type(seed) is not int or seed < 0:
         raise ValueError("P3 scenario seed must be a nonnegative integer")
-    if activity_profile not in ("legacy_delivery_v0", "delivery_patrol_v0"):
-        raise ValueError("P3 activity_profile must be 'legacy_delivery_v0' or 'delivery_patrol_v0'")
+    if activity_profile not in ("legacy_delivery_v0", "delivery_patrol_v0",
+                                 "delivery_patrol_recovery_v0"):
+        raise ValueError("unsupported P3 activity profile")
     if type(delivery_task) is not bool:
         raise ValueError("P3 delivery_task must be bool")
     if type(patrol_exit_locked) is not bool:
         raise ValueError("P3 patrol_exit_locked must be bool")
     if patrol_exit_locked and (activity_profile != "delivery_patrol_v0" or delivery_task):
         raise ValueError("patrol_exit_locked is only valid for delivery_patrol_v0 without a delivery task")
+    if activity_profile == "delivery_patrol_recovery_v0" and (
+            mode != "a" or not delivery_task or patrol_exit_locked):
+        raise ValueError("delivery_patrol_recovery_v0 requires one actor, an assigned task, and unlocked exits")
     pickup = create_object(Room, key=f"Courier Pickup {suffix}",
                            attributes=[("p3_scene_id", suffix, "native_p3")])
     destination = create_object(Room, key=f"Resident Porch {suffix}",

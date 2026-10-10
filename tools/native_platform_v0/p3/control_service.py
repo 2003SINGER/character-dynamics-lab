@@ -29,6 +29,7 @@ MAX_SCENES_PER_PROCESS = 16
 ROLE_NAMES = {"player", "courier", "resident"}
 SCENARIO_NAMES = {"Aclean", "Asteal-return", "Bclean", "Bsteal-resident-parcel"}
 C0_SCENARIO_NAMES = {"C0-no-delivery", "C0-delivery-priority", "C0-after-delivery"}
+C1A_SCENARIO_NAMES = {"C1a-blocked-switch", "C1a-observed-resume"}
 SAFE_P3_KEYS = (
     "p3_scene_id", "p3_control_role", "p3_role", "p3_goal", "goal", "mode", "scenario_seed",
     "activity_profile", "delivery_task", "patrol_exit_locked", "patrol_rejected_state",
@@ -102,13 +103,16 @@ def _reset_options(args: dict[str, Any]) -> tuple[str, int, str, int, str, bool,
     patrol_exit_locked = args.get("patrol_exit_locked", False)
     if (mode not in ("a", "b") or type(seed) is not int or not (0 <= seed <= 2**31 - 1) or
             drive_mode not in ("manual", "timer") or type(interval) is not int or not 2 <= interval <= 30 or
-            profile not in ("legacy_delivery_v0", "delivery_patrol_v0") or type(delivery_task) is not bool or
+            profile not in ("legacy_delivery_v0", "delivery_patrol_v0", "delivery_patrol_recovery_v0") or
+            type(delivery_task) is not bool or
             type(patrol_exit_locked) is not bool):
         raise ValueError("invalid mode/seed/drive/interval/activity profile/task flag")
     if patrol_exit_locked and (mode != "a" or profile != "delivery_patrol_v0" or delivery_task):
         raise ValueError("patrol_exit_locked is only allowed for the C0 single-actor no-delivery profile")
     if profile == "legacy_delivery_v0" and (delivery_task is not True or patrol_exit_locked):
         raise ValueError("legacy_delivery_v0 preserves a required delivery task and unlocked exits")
+    if profile == "delivery_patrol_recovery_v0" and (mode != "a" or not delivery_task or patrol_exit_locked):
+        raise ValueError("delivery_patrol_recovery_v0 requires a single actor, assigned task, and unlocked exits")
     return mode, seed, drive_mode, interval, profile, delivery_task, patrol_exit_locked
 
 
@@ -193,6 +197,7 @@ class P3Control:
             "reset_scenario": self.reset_scenario,
             "pause_scenario": self.pause_scenario,
             "run_c0_scenario": self.run_c0_scenario,
+            "run_c1a_scenario": self.run_c1a_scenario,
             "step_world": self.step_world,
             "inject_action": self.inject_action,
             "observe_actor": self.observe_actor,
@@ -478,6 +483,137 @@ class P3Control:
                            "trace": self.get_trace({"scene_id": scene["scene_id"]}),
                            "callbacks_completed": True,
                            "completion_scope": "bounded_callbacks_only_not_semantic_acceptance"})
+
+    def _c1a_snapshot(self, scene_id):
+        trace = self.get_trace({"scene_id": scene_id})
+        actor = next(row for row in trace["objects"]
+                     if row["attributes"].get("p3_control_role") == "courier")
+        player = next(row for row in trace["objects"]
+                      if row["attributes"].get("p3_control_role") == "player")
+        item = next(row for row in trace["objects"]
+                    if row["attributes"].get("p3_role") == "assigned_supply")
+        attrs = actor["attributes"]
+        return {"scene_id": scene_id, "actor": {
+                    "id": actor["id"], "dbref": actor["dbref"], "room_id": actor["location_id"],
+                    "status": attrs.get("status"), "tick_count": attrs.get("tick_count"),
+                    "pending_action": attrs.get("pending_action"), "last_outcome": attrs.get("last_outcome"),
+                    "task_item_id": attrs.get("task_item_id"),
+                    "task_destination_id": attrs.get("task_destination_id"),
+                    "native_receipts": attrs.get("native_receipts", []),
+                    "last_observation": attrs.get("last_observation"),
+                    "witnessed": attrs.get("witnessed", {})},
+                "player": {"id": player["id"], "dbref": player["dbref"],
+                           "room_id": player["location_id"],
+                           "inventory_ids": [row.get("id") for row in trace["objects"]
+                                             if row.get("location_id") == player["id"]]},
+                "item": {"id": item["id"], "location_id": item["location_id"]}}
+
+    @defer.inlineCallbacks
+    def _c1a_callback(self, scene_id, callback_index):
+        before = self._c1a_snapshot(scene_id)
+        before_trace = self.get_trace({"scene_id": scene_id})
+        actor_before = next(row for row in before_trace["objects"]
+                            if row["attributes"].get("p3_control_role") == "courier")
+        log_start = len(actor_before["attributes"].get("log", []))
+        step = yield defer.maybeDeferred(self.step_world, {"scene_id": scene_id, "rounds": 1})
+        after_trace = self.get_trace({"scene_id": scene_id})
+        actor_after = next(row for row in after_trace["objects"]
+                           if row["attributes"].get("p3_control_role") == "courier")
+        log = actor_after["attributes"].get("log", [])
+        defer.returnValue({"kind": "npc_callback", "callback_index": callback_index,
+                           "before": before, "callback": step["actor_callbacks"][0],
+                           "after": self._c1a_snapshot(scene_id), "new_log_events": log[log_start:],
+                           "local_observation": actor_after["attributes"].get("last_observation"),
+                           "callback_log_length_before": log_start,
+                           "callback_log_length_after": len(log)})
+
+    def _c1a_player_command(self, scene_id, operation, item_id, label):
+        before = self._c1a_snapshot(scene_id)
+        result = defer.maybeDeferred(self.inject_action, {
+            "scene_id": scene_id, "actor_role": "player", "operation": operation,
+            "item_id": item_id,
+        })
+        def captured(receipt):
+            return {"kind": "player_intervention", "label": label,
+                    "pre_snapshot": before, "command_receipt": receipt,
+                    "post_snapshot": self._c1a_snapshot(scene_id)}
+        result.addCallback(captured)
+        return result
+
+    @defer.inlineCallbacks
+    def run_c1a_scenario(self, args):
+        if set(args) - {"scenario", "seed"}:
+            raise ValueError("run_c1a_scenario accepts only scenario and seed")
+        scenario = args.get("scenario")
+        seed = args.get("seed", 0)
+        if scenario not in C1A_SCENARIO_NAMES or type(seed) is not int or not 0 <= seed <= 2**31 - 1:
+            raise ValueError("scenario must be one of the two C1a cases; seed must be 0..2147483647")
+        if self.created_scenes >= MAX_SCENES_PER_PROCESS:
+            raise ValueError("scene creation limit reached for this server process")
+        config = {"mode": "a", "seed": seed, "drive_mode": "manual", "interval": 4,
+                  "activity_profile": "delivery_patrol_recovery_v0", "delivery_task": True,
+                  "patrol_exit_locked": False}
+        created = self.reset_scenario(config)
+        scene_id = created["scene_id"]
+        courier_id = created["roles"]["courier"]["id"]
+        player_id = created["roles"]["player"]["id"]
+        item_id = next(row["id"] for row in self.get_trace({"scene_id": scene_id})["objects"]
+                       if row["attributes"].get("p3_role") == "assigned_supply")
+        timeline = []
+
+        # First native callback persists a GTPyhop get intent; then the generated
+        # ordinary player takes the item through a real Evennia command.
+        timeline.append((yield self._c1a_callback(scene_id, 1)))
+        steal = yield self._c1a_player_command(scene_id, "get", item_id, "player_steals_assigned_supply")
+        timeline.append(steal)
+        if steal["command_receipt"].get("settled") is not True:
+            raise ValueError("C1a setup intervention failed to settle through the generated player command")
+
+        # Submit the actor's persisted pre-intervention get. The C1a-only native
+        # fallback may dispatch the observed exact key, never a global dbref.
+        timeline.append((yield self._c1a_callback(scene_id, 2)))
+        after_reject = timeline[-1]
+        rejection = next((event for event in after_reject["new_log_events"]
+                          if event.get("kind") == "execution_settlement"
+                          and event.get("receipt", {}).get("kind") == "get"), None)
+        if (not rejection or rejection.get("status") != "WORLD_VALIDATION_REJECTED"
+                or rejection.get("receipt", {}).get("settled") is not False
+                or rejection.get("receipt", {}).get("dispatch_succeeded") is not True
+                or rejection.get("receipt", {}).get("submitted_command") !=
+                   f"get {after_reject['before']['actor'].get('last_observation', {}).get('observation', {}).get('task_item', {}).get('key')}"):
+            raise ValueError("C1a stale get was not submitted as the previously observed native command and rejected by world state")
+
+        timeline.append((yield self._c1a_callback(scene_id, 3)))
+        timeline.append((yield self._c1a_callback(scene_id, 4)))
+        moved = timeline[-1]["after"]
+        pickup_id = created["rooms"]["pickup"]["id"]
+        if moved["actor"]["room_id"] == pickup_id:
+            raise ValueError("C1a patrol did not leave the original room after the failed get")
+
+        if scenario == "C1a-blocked-switch":
+            for index in range(5, 13):
+                timeline.append((yield self._c1a_callback(scene_id, index)))
+        else:
+            # Return the item to the original room while the actor is away, then
+            # perform an explicit local observation and one negative-control tick.
+            timeline.append((yield self._c1a_player_command(scene_id, "drop", item_id,
+                                                            "player_returns_supply_to_original_room")))
+            immediate_observation = self.observe_actor({"scene_id": scene_id, "actor_role": "courier"})
+            timeline.append({"kind": "away_room_negative_observation", "observation": immediate_observation,
+                             "snapshot": self._c1a_snapshot(scene_id)})
+            timeline.append((yield self._c1a_callback(scene_id, 5)))
+            for index in range(6, 17):
+                timeline.append((yield self._c1a_callback(scene_id, index)))
+
+        final_trace = self.get_trace({"scene_id": scene_id})
+        defer.returnValue({"schema": "native-p3-c1a-run-v1", "scenario": scenario, "seed": seed,
+                           "activity_profile": "delivery_patrol_recovery_v0", "drive_mode": "manual",
+                           "configuration": config, "created_scene": created,
+                           "callback_count": 12 if scenario == "C1a-blocked-switch" else 16,
+                           "timeline": timeline, "trace": final_trace,
+                           "callbacks_completed": True,
+                           "completion_scope": "bounded_callbacks_only_not_semantic_acceptance",
+                           "scene_ids": [scene_id], "controller_authored_npc_commands": 0})
 
     @defer.inlineCallbacks
     def run_scenario(self, args):

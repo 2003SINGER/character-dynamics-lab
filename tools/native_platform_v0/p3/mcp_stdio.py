@@ -35,7 +35,8 @@ TOOLS = [
          "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
          "drive_mode": {"type": "string", "enum": ["manual", "timer"]},
          "interval": {"type": "integer", "minimum": 2, "maximum": 30},
-         "activity_profile": {"type": "string", "enum": ["legacy_delivery_v0", "delivery_patrol_v0"]},
+         "activity_profile": {"type": "string", "enum": ["legacy_delivery_v0", "delivery_patrol_v0",
+                                                                "delivery_patrol_recovery_v0"]},
          "delivery_task": {"type": "boolean"}, "patrol_exit_locked": {"type": "boolean"}},
          "additionalProperties": False}},
     {"name": "pause_scenario", "description": "Pause only generated P3 actors in the named scene; preserve state and logs.",
@@ -73,6 +74,11 @@ TOOLS = [
     {"name": "run_c0_scenario", "description": "Run exactly one bounded P3-C0 development case with no authored in-run commands.",
      "inputSchema": {"type": "object", "properties": {
          "scenario": {"type": "string", "enum": ["C0-no-delivery", "C0-delivery-priority", "C0-after-delivery"]},
+         "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647}},
+         "required": ["scenario"], "additionalProperties": False}},
+    {"name": "run_c1a_scenario", "description": "Run one of exactly two bounded native recovery development cases.",
+     "inputSchema": {"type": "object", "properties": {
+         "scenario": {"type": "string", "enum": ["C1a-blocked-switch", "C1a-observed-resume"]},
          "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647}},
          "required": ["scenario"], "additionalProperties": False}},
 ]

@@ -141,7 +141,8 @@ def choose_goal(local_view):
     goal = view["goal_contract"]["goal"]
     profile = view.get("activity_contract", {}).get("profile", "legacy_delivery_v0")
     delivery_task = view.get("activity_contract", {}).get("delivery_task", True) is True
-    if profile not in ("legacy_delivery_v0", "delivery_patrol_v0"):
+    if profile not in ("legacy_delivery_v0", "delivery_patrol_v0",
+                       "delivery_patrol_recovery_v0"):
         return {"goal": None, "reason": "unsupported activity profile", "rule": "p3-authored-goal-v0",
                 "status": "UNSUPPORTED_PROFILE", "candidates": [], "choice": None,
                 "inputs": {"profile": profile, "delivery_task": delivery_task}}
@@ -175,6 +176,68 @@ def choose_goal(local_view):
                 "status": "ACTIVE", "candidates": candidates, "choice": "patrol",
                 "inputs": {"profile": profile, "delivery_task": delivery_task,
                            "own_delivery_receipt": own_receipt}}
+    if profile == "delivery_patrol_recovery_v0":
+        item_id = observation["task_item"].get("id")
+        item_location = observation.get("item_location")
+        item_held = observation.get("item_held") is True
+        item_currently_visible = bool(item_id is not None and any(
+            str(row.get("id")) == str(item_id) for row in observation.get("visible_items", ())))
+        binding_valid = item_id is not None and observation.get("task_destination") is not None
+        available_under_local_observation = item_held or item_currently_visible or item_location is not None
+        local_evidence = {
+            "assigned_item_id": item_id,
+            "destination_id": observation.get("task_destination"),
+            "item_held": item_held,
+            "item_currently_visible": item_currently_visible,
+            "retained_item_location": item_location,
+            "binding_valid": binding_valid,
+            "own_delivery_receipt": own_receipt,
+        }
+        if not delivery_task:
+            return {"goal": "patrol", "reason": "delivery task was cancelled; use the opt-in patrol activity",
+                    "rule": "delivery_before_patrol_recovery_v0", "status": "ACTIVE",
+                    "candidates": ["patrol"], "choice": "patrol",
+                    "delivery_status": "CANCELLED",
+                    "delivery_reason": "delivery_task is false in the authored activity contract",
+                    "local_evidence": local_evidence,
+                    "inputs": {"profile": profile, "delivery_task": False,
+                               "delivery_status": "CANCELLED", "local_evidence": local_evidence}}
+        if own_receipt:
+            return {"goal": "patrol", "reason": "matching settled drop receipt permanently completes this actor's delivery task",
+                    "rule": "delivery_before_patrol_recovery_v0", "status": "ACTIVE",
+                    "candidates": ["deliver_supply", "patrol"], "choice": "patrol",
+                    "delivery_status": "SETTLED",
+                    "delivery_reason": "this actor has its own matching settled drop receipt",
+                    "local_evidence": local_evidence,
+                    "inputs": {"profile": profile, "delivery_task": True,
+                               "delivery_status": "SETTLED", "local_evidence": local_evidence}}
+        if not binding_valid:
+            return {"goal": "deliver_supply", "reason": "delivery binding is invalid; keep delivery selected so the planner reports the binding failure",
+                    "rule": "delivery_before_patrol_recovery_v0", "status": "ACTIVE",
+                    "candidates": ["deliver_supply", "patrol"], "choice": "deliver_supply",
+                    "delivery_status": "INVALID_BINDING",
+                    "delivery_reason": "assigned item or destination is missing from the actor-local task contract",
+                    "local_evidence": local_evidence,
+                    "inputs": {"profile": profile, "delivery_task": True,
+                               "delivery_status": "INVALID_BINDING", "local_evidence": local_evidence}}
+        if not available_under_local_observation:
+            return {"goal": "patrol", "reason": "assigned item is absent from current local observation and has no retained last-known room; patrol while reobserving",
+                    "rule": "delivery_before_patrol_recovery_v0", "status": "ACTIVE",
+                    "candidates": ["deliver_supply", "patrol"], "choice": "patrol",
+                    "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                    "delivery_reason": "temporary suspension is derived only from actor-local absence evidence",
+                    "local_evidence": local_evidence,
+                    "inputs": {"profile": profile, "delivery_task": True,
+                               "delivery_status": "SUSPENDED_LOCAL_ITEM_UNAVAILABLE",
+                               "local_evidence": local_evidence}}
+        return {"goal": "deliver_supply", "reason": "assigned item is available in own inventory, current visibility, or retained witnessed location; GTPyhop continues delivery",
+                "rule": "delivery_before_patrol_recovery_v0", "status": "ACTIVE",
+                "candidates": ["deliver_supply", "patrol"], "choice": "deliver_supply",
+                "delivery_status": "ACTIVE",
+                "delivery_reason": "delivery has priority while local evidence supports item availability",
+                "local_evidence": local_evidence,
+                "inputs": {"profile": profile, "delivery_task": True,
+                           "delivery_status": "ACTIVE", "local_evidence": local_evidence}}
     if own_receipt:
         return {"goal": None, "reason": "this actor has a settled drop receipt for the assigned item and destination",
                 "rule": "p3-authored-goal-v0", "status": "ACTOR_DELIVERY_SETTLED",
@@ -257,7 +320,29 @@ def _dispatch_pending(actor, pending):
     elif operation["operator"] == "get":
         target = _visible_item_in_room(actor, item_id)
         if target is None:
-            rejection = "assigned item is not visible in the actor's current room"
+            profile = view.get("activity_contract", {}).get("profile")
+            prior_item = view.get("observation", {}).get("task_item", {})
+            is_recovery_profile = profile == "delivery_patrol_recovery_v0"
+            was_locally_visible = any(
+                str(row.get("id")) == str(item_id)
+                for row in view.get("observation", {}).get("visible_items", ())
+            )
+            # For C1 recovery evidence, let Evennia's ordinary local `get <key>`
+            # validation reject a formerly visible item that disappeared after
+            # planning. Never use a dbref/global search, and refuse ambiguous
+            # same-key substitutes rather than taking another object's item.
+            same_key_objects = ([obj for obj in actor.location.contents
+                                 if obj.key == prior_item.get("key") and
+                                 obj.access(actor, "view", default=True)]
+                                if is_recovery_profile and actor.location else [])
+            if (is_recovery_profile and was_locally_visible and
+                    prior_item.get("key") and not same_key_objects):
+                command = f"get {prior_item['key']}"
+            elif (is_recovery_profile and same_key_objects and
+                  all(obj.id != item_id for obj in same_key_objects)):
+                rejection = "assigned item is absent and a same-key local object makes native get ambiguous"
+            else:
+                rejection = "assigned item is not visible in the actor's current room"
         else:
             command = f"get {target.key}"
     elif operation["operator"] == "drop":
