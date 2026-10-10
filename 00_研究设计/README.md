@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-2026-10-10 当前已授权路线：以 **Evennia 为主平台、Ensemble 为首个原生人物机制参照**，完成有限 P1/P2 原生复现与最小互通探针后停止；LIGHT 独立无模型限时探针不阻塞主线。环境与实际运行状态唯一维护于 [Native Platform P1/P2](../02_实验/Native_Platform_P1P2_v0/README.md)。此前的[技术准入报告](../01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)是只读候选审查快照，不定义当前选型。Minecraft/MC 挖煤仍是延期候选，不是默认下一步。
+2026-10-10 当前路线：**Evennia 为主平台、Ensemble 为首个原生人物机制参照**；P1/P2 已完成，P3-A 单自主 NPC 与 P3-B 原生 Ensemble 双 NPC 交互为 **DEVELOPMENT_VERIFIED（限定场景）**，不代表生产就绪或全项目关闭。当前状态/结果唯一维护于 [Native Platform P3](../02_实验/Native_Platform_P3_v0/README.md)。P1/P2 运行证据与 LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 保留在[历史结果](../02_实验/Native_Platform_P1P2_v0/RESULTS.md)，LIGHT 不阻塞。真人试玩是可选体验反馈、未确认，不是技术 gate 或全局 blocker；P4 未授权。此前[技术准入报告](../01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)是只读候选审查快照；Minecraft 仍为延期候选。
 
 2026-10-09 用户在新目标讨论后明确从外围维护切换为实现：[NPC System Integration v0](../tools/npc_system_v0/README.md)是获授权的有限应用整合，不是 E1-2 或重开冻结 C++ Runtime。授权/下一动作见 [TODO](TODO.md)，能力/验收只看[唯一结果](../02_实验/NPC_System_Integration_v0/RESULTS.md)。下方旧草案的“未开发 Director”不能再作为禁止本应用实现的当前规则。
 
@@ -27,7 +27,8 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [E1 局部信息与独立角色协议 v0](E1_KeyLedger_LocalAgency_Protocol_v0.md) | E1-0 有限域与协议；E1-1 独立开发包已交付。实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)；代码入口：[runner](../tools/e1_keyledger_v0/runner.py) | E0 冻结规则；将开发验证写成正式实验、新颖性声明；自动授权正式实验/E1-2 |
 | [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md) | 新授权应用 vertical slice 的唯一开发结果；实现与协议见[代码 README](../tools/npc_system_v0/README.md) | 全系统正式语义、冻结 E1 结果、心理验证或玩家评价 |
 | [IntegrationBlueprint v0 §07](草案/IntegrationBlueprint_v0/07_INTEGRATION_GAPS.md) | 当前传统基线接线边界；历史 MC 候选与 C++ 证据桥分区保留 | 原件复现结果、已集成能力或实施授权 |
-| [Native Platform P1/P2](../02_实验/Native_Platform_P1P2_v0/README.md) | 当前 Evennia + Ensemble 原生复现与最小互通探针的唯一状态/结果入口 | 玩家效度或研究收益结论 |
+| [Native Platform P3](../02_实验/Native_Platform_P3_v0/README.md) | 当前 P3-A/B 实施状态与结果入口 | P4、玩家效度或研究收益结论 |
+| [Native Platform P1/P2](../02_实验/Native_Platform_P1P2_v0/README.md) | 已完成 P1/P2 的历史验收、失败记录与复现指针 | 当前 P3 状态；玩家效度或研究收益结论 |
 | [传统全链基线与文字平台技术准入](../01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md) | 此前只读候选审查的源码事实、未知项及历史候选 | 当前选型、安装/运行状态或研究结论 |
 | [04 统一问题与成熟基线准入](../01_文献/算法积木/04_统一问题与成熟基线准入.md) | 有限统一实例下的成熟方法综合、候选问题与方法准入判断 | 全部长期研究方向、已确认研究缺口或实验通过结论 |
 | **[整合系统视角复核](审核_整合系统视角复核_2026-09-05.md)** | **判断复核**：回到实现核对旧判断的前提是否成立 | 文献层面的重新论证 |

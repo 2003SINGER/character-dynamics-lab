@@ -2,11 +2,11 @@
 
 > 目标愿景：面向可持续运行、世界中心的 NPC，用可审计的观察、状态与执行机制支持可信行为和作者控制。局部策略、规划与开放语义模型的组合仍是候选路线，不是已经证明的低成本方法。
 
-本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`；`webgpt-sync` 是项目 review branch owner。本地本轮开发 checkout 位于 `codex/native-platform-p1p2-20261010`，不应将其描述成 `webgpt-sync` checkout。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
+本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`；`webgpt-sync` 是项目 review branch owner。本地本轮 P3 开发 checkout 位于 `codex/native-agency-p3-20261010`，不应将其描述成 `webgpt-sync` checkout。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
 
 当前已有规则化 C++ 参考模拟与批量日志；**Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**：统一时钟、RunningAction、事件/信息边界、DecisionGate、typed rejection、scheduler-native fixtures、trace、case-isolated CTest 与 CI 已闭环。Evaluator、Objective、Optimizer 与 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
 
-2026-10-10 当前已授权路线：以 **Evennia 为主平台、Ensemble 为首个原生人物机制参照**，完成有限的 P1/P2 原生复现与最小互通探针后停止；LIGHT 独立无模型限时探针不阻塞主线。实际环境、运行状态与准入结论只维护于 [Native Platform P1/P2](02_实验/Native_Platform_P1P2_v0/README.md)。旧[技术准入报告](01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)记录的是此前只读候选审查，不代表当前选型或运行状态；历史判断见[研究重建审计](00_研究设计/研究重建审计_2026-10-06.md)。Minecraft/MC 挖煤仍是延期候选，不是当前启动步骤或前置条件。
+2026-10-10 当前路线：**Evennia 为主平台、Ensemble 为首个原生人物机制参照**。P1/P2 已完成；P3-A 单自主 NPC、P3-B 原生 Ensemble 双 NPC 交互当前为 **DEVELOPMENT_VERIFIED（限定场景）**，不是生产就绪或全项目关闭。状态/证据唯一维护于 [Native Platform P3](02_实验/Native_Platform_P3_v0/README.md) / [RESULTS](02_实验/Native_Platform_P3_v0/RESULTS.md)。P1/P2 历史验收和 LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 保留于[历史结果](02_实验/Native_Platform_P1P2_v0/RESULTS.md)，LIGHT 不阻塞。真人试玩是可选体验反馈、尚未确认，不是技术 gate 或全局 blocker；P4 未授权。旧[技术准入报告](01_文献/技术准入_传统全链基线与文字平台_2026-10-10.md)是候选审查快照；Minecraft/MC 挖煤仍延期。
 
 ## 从这里进入
 
@@ -28,6 +28,7 @@
 | 下一动作、候选 / 暂停状态、依赖与验收 | [TODO](00_研究设计/TODO.md)；LIGHT 来源条件预测支线的任务及结果另由 [SourceRanking README](02_实验/LIGHT_SourceRankingV1/README.md) / [INPUT_REVIEW](02_实验/LIGHT_SourceRankingV1/INPUT_REVIEW.md)维护，不代表全项目下一动作 |
 | Self-Play / Self-Evaluation v0 | [评测协议](02_实验/Self_Evaluation_v0.md)；[scorecard runner](tools/self_evaluation_v0.py)；[scenario manifest](tools/self_evaluation_scenarios_v0.json) |
 | 实验导出器、切片与可复现记录 | [实验总路由](02_实验/README.md)；[跨数据集 Replay 接口草案](02_实验/跨数据集Replay接口_v0.md)；[机制识别循环与反事实诊断](02_实验/机制识别循环与反事实诊断_v0.md) |
+| 当前 Evennia 原生人物实施状态与 P3-A/B 结果 | [Native Platform P3](02_实验/Native_Platform_P3_v0/README.md)；[RESULTS](02_实验/Native_Platform_P3_v0/RESULTS.md) |
 | E0 钥匙—账本有限基线的固定协议、代码和实际证据 | [冻结协议](00_研究设计/E0_KeyLedger_Protocol_v0.md)；[代码与复现](tools/e0_keyledger_v0/README.md)；[实验入口](02_实验/E0_KeyLedger_v0/README.md)。独立有限 Executor，不等于 C++ Runtime 集成、NPC 自主性或新方法效果 |
 | E1 局部信息与独立 B 策略 | [E1-0 有限协议](00_研究设计/E1_KeyLedger_LocalAgency_Protocol_v0.md)；[E1-1 代码入口](tools/e1_keyledger_v0/runner.py)；[唯一结果 owner](02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)。E1-1 独立开发包已交付；实际状态与证据只查唯一结果 owner。正式实验与 E1-2 未授权 |
 | 可运行的有限整合开发样机 | [NPC System Integration v0](tools/npc_system_v0/README.md)；[开发结果与 TXT 映射](02_实验/NPC_System_Integration_v0/RESULTS.md)。实际世界干预、模型/规划替换、director-off 与玩家扰动；不是完整通用系统 |

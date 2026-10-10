@@ -4,7 +4,7 @@
 
 ## 历史候选检查点（2026-10-10）：成熟方案先复现，传统基线覆盖全链
 
-下列次序记录的是本蓝图形成时的候选审查，不再定义当前选型。之后用户已明确选择 Evennia 为主平台、Ensemble 为首个原生人物机制参照，并授权有限 P1/P2 原生复现与最小互通探针；LIGHT 限时独立探针不阻塞主线。实际环境及运行状态唯一见 [Native Platform P1/P2](../../../02_实验/Native_Platform_P1P2_v0/README.md)。
+下列次序记录的是本蓝图形成时的候选审查，不再定义当前选型。当前已选 Evennia 为主平台、Ensemble 为首个原生人物机制参照；P1/P2 已完成，当前授权依次实施 P3-A 单自主 NPC、P3-B 原生 Ensemble 双 NPC 交互。当前状态/结果唯一见 [Native Platform P3](../../../02_实验/Native_Platform_P3_v0/README.md)。真人试玩为可选体验反馈、尚未确认，不是技术 gate；P4 未授权。LIGHT 为 `NO_GO_WITHIN_THIS_TIMEBOX` 且不阻塞，P1/P2 历史证据见[唯一结果](../../../02_实验/Native_Platform_P1P2_v0/RESULTS.md)。
 
 在该历史检查点，建议先在合适的文字冒险平台复现成熟传统方案，尽量覆盖 W/O/H、评价、人物动机与规划、执行反馈、作者约束和 Director 全链，再根据实际运行判断传统机制哪里不足；当时不建议先写自制 MC 挖煤 demo，也不要求先造大型插件集合。
 

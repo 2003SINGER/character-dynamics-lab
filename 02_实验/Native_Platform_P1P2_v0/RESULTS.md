@@ -1,6 +1,6 @@
 # Native Platform P1/P2 v0｜实际结果
 
-日期：2026-10-10（Asia/Shanghai）。状态：**技术交付 READY_FOR_INDEPENDENT_REVIEW；用户亲自试玩 UNCONFIRMED**。
+日期：2026-10-10（Asia/Shanghai），记录 P1/P2 验收截面。该截面状态：**技术交付 READY_FOR_INDEPENDENT_REVIEW；用户亲自试玩 UNCONFIRMED**。随后已授权 P3-A/B；当前状态只见[ P3 唯一结果入口](../Native_Platform_P3_v0/RESULTS.md)。真人试玩是可选体验反馈、尚未确认，不是技术 gate 或全局 blocker；P4 未授权。以下 P1/P2 事实及日志为历史记录，不因后续授权改写。
 起点 `976658b92195af0cff6b8cb9d1453171950636fe`，独立开发分支
 `codex/native-platform-p1p2-20261010`；本次只做 P1/P2 原生复现、最窄互通及 LIGHT 限时探针。
 代码工作委托 Luna，父级审查实际接口、重跑 JS 测试并实际操作原生浏览器。
@@ -23,8 +23,8 @@
 | LIGHT no-model admission | **NO_GO_WITHIN_THIS_TIMEBOX** | 固定原源码，依赖解析长期回溯取消；原入口真实失败 `No module named hydra`。无 look/action/世界变化；[失败及捕获缺口](evidence/light/RESULT.md)。不据此判算法不可用，不阻塞主线 |
 | Existing asset reuse / P3 plan | DELIVERED / not implemented | [源码级复用矩阵与 P3 清单](REUSE_AND_P3.md)。旧 Executor 不再结算新世界，TypedIR coverage 不补造；不自动扩村庄/Director |
 
-**工程决策：Evennia + Ensemble 继续保留为后续 P3 候选基座，技术 GO 有边界；
-完整玩家 gate 未关、独立复核未完成，不自行 CLOSED。LIGHT 本轮 NO_GO，停止依赖改造。**
+**该验收截面的工程决策：Evennia + Ensemble 保留为后续 P3 候选基座，技术 GO 有边界；
+当时独立复核未完成，未自行 CLOSED。LIGHT 本轮 NO_GO，停止依赖改造。** 当前 P3 状态见上方入口，不由本历史结果页维护。
 现在降低的是“原平台/原算法能否在本机真实运行、最窄接缝是否可执行”的不确定性，
 不是“组合系统是否有生命感、低作者成本或科研贡献”的不确定性。
 
@@ -87,4 +87,4 @@ CI 只能按对应提交的实际状态报告；既有 CI 不运行这次 Evenni
 代码/维护文档 diff whitespace 检查通过；原始 `evadventure_npcs_roam.log` 的 EOF 空行
 保留字节原样，因此全量 `git diff --check` 有该条警告，不为格式修改原始证据。
 
-**停止：等待独立审阅与用户试玩确认；P3 只给清单，不自动实施。**
+**历史停止点：**当时等待独立审阅与用户试玩反馈，P3 仅列清单。后续 P3-A/B 已获授权；当前实施与结果由 P3 owner 记录，不把本历史停止点继续视为 blocker。

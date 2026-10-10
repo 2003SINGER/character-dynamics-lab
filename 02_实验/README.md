@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-10 当前授权的原生平台 P1/P2 以 **Evennia 为主平台、Ensemble 为首个原生人物机制参照**，完成限界内的原生复现与最小互通探针后停止。LIGHT 独立无模型限时探针不阻塞主线；本轮准入和后续全部实际运行状态唯一见 [Native Platform P1/P2](Native_Platform_P1P2_v0/README.md)，此处不另记状态或重复结果。
+2026-10-10 当前原生平台路线为 **Evennia 主平台 + Ensemble 首个原生人物机制参照**：P1/P2 已完成；P3-A/B 为 **DEVELOPMENT_VERIFIED（限定场景）**，有真实 run、timer/MCP 与 SQLite readback 证据，不代表生产就绪或全项目关闭。状态/实际结果唯一见 [Native Platform P3](Native_Platform_P3_v0/README.md) / [RESULTS](Native_Platform_P3_v0/RESULTS.md)；P1/P2 历史验收、负结果及 LIGHT `NO_GO_WITHIN_THIS_TIMEBOX` 保留在 [P1/P2 结果](Native_Platform_P1P2_v0/RESULTS.md)。LIGHT 不阻塞。真人试玩是可选体验反馈且尚未确认，不是技术 gate 或全局 blocker；P4 未授权。
 
 2026-10-09 用户另行明确授权按目标 TXT 改系统：[NPC System Integration v0](NPC_System_Integration_v0/RESULTS.md) 已形成有限 DEVELOPMENT 应用闭环，含合法世界干预、演员状态/承诺、GOAP/HTN、director-off 和玩家扰动。它是新的有限软件开发验收，不是 NPC 玩家实验、E1-2 formal、心理训练或冻结 Runtime 改动；下方 E1-1 交付时的范围不禁止该新应用。
 

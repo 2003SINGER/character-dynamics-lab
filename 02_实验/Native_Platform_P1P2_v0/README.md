@@ -1,9 +1,9 @@
 # Native Platform P1/P2 v0｜Evennia + Ensemble
 
-状态：**技术交付 READY_FOR_INDEPENDENT_REVIEW；用户亲自试玩 UNCONFIRMED**。2026-10-10 原生复现、限时 LIGHT 对照与最窄实际互通探针已交付；完成 P1/P2 技术验收后停止，不实施 P3/P4。开发分支 `codex/native-platform-p1p2-20261010`，起点 `976658b`；冻结 C++/E0/E1 和已有未提交配对实验保持不动。
+历史范围：本页记录 P1/P2 验收截面，不代表当前实施状态。该截面的技术交付及当时未实施 P3/P4 按记录时间理解；随后用户授权 P3-A 单自主 NPC、P3-B 原生 Ensemble 双 NPC 交互。当前状态仅见 [Native Platform P3](../Native_Platform_P3_v0/README.md)。真人试玩是可选体验反馈、尚未确认，不是技术 gate 或全局 blocker；P4 未授权。原验收内容和证据不覆盖。
 
 先读[唯一结果与 GO/NO-GO](RESULTS.md)、[父级真实浏览器验收](BROWSER_AUDIT.md)，
-再查[源码级复用矩阵 / 未实施的 P3 清单](REUSE_AND_P3.md)。
+再查[源码级复用矩阵 / P3 接缝参考](REUSE_AND_P3.md)。
 Evennia 原样漫游失败，最小兼容后 ADAPTED_PASS；Ensemble 原件测试及真实世界桥接通过；
 LIGHT 本轮 NO_GO。代理交互不替代用户亲自试玩，不宣称完整人物系统/科研收益。
 

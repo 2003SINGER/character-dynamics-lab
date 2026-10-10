@@ -1,0 +1,290 @@
+{
+  "schema": "native-p3-mcp-live-audit-v1",
+  "recorded_at": "2026-10-10T02:35:06.199577+00:00",
+  "request": {
+    "scenario": "MCPstdio-live",
+    "seed": 20261010
+  },
+  "source_sha256": {
+    "tools/native_platform_v0/p3/scene.py": "00e0b20d9605b219f936286524b6bf302c0126e51e702dc9f9a6b6bede057533",
+    "tools/native_platform_v0/p3/agency.py": "c173d8c707a7f7a419ef7a33278ab6efd817efb6deeba4be3804d39c55357685",
+    "tools/native_platform_v0/p3/planning.py": "79a638229fe410bc88687b3873443f72aed39073721d398e7a7df5072a3bbd01",
+    "tools/native_platform_v0/p3/commands.py": "d53bdf7d18f3c14f9a3e67cc0db1e1e121d3784191ad2a1633c365d3bd431b8e",
+    "tools/native_platform_v0/p3/control_service.py": "c5dc36f5cb48b90746cd095c165afcdaecd62da6534e2e9b54b70d10ba6b826d",
+    "tools/native_platform_v0/p3/mcp_stdio.py": "7d356c7eb9d6394b55b8fa750dec6b0f7906f1bb7f972d89a44a685f3c1ee45e",
+    "tools/native_platform_v0/bridge/social.py": "4e841ca146662dd0dc802f6aecf4793bc1549b7b74dc42666762882c3322b9b3",
+    "tools/native_platform_v0/ensemble/runner.mjs": "7b86daadcc67a4e9b44cdd6d3fa7c20eb38742292706481a95a39bff87b44c55"
+  },
+  "response": {
+    "completed": true,
+    "initialize_list_health": [
+      {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+          "protocolVersion": "2025-06-18",
+          "capabilities": {
+            "tools": {
+              "listChanged": false
+            }
+          },
+          "serverInfo": {
+            "name": "native-p3-local-control",
+            "version": "0.1.0"
+          }
+        }
+      },
+      {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "result": {
+          "tools": [
+            {
+              "name": "start_world",
+              "description": "Start the existing local Evennia game using its scoped CLI wrapper.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "stop_world",
+              "description": "Stop only the local Evennia instance using its scoped CLI wrapper.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "health",
+              "description": "Check the authenticated local P3 control service.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "reset_scenario",
+              "description": "Create a fresh isolated P3 scene in manual or timer drive; never resets the world.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "a",
+                      "b"
+                    ]
+                  },
+                  "seed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483647
+                  },
+                  "drive_mode": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "timer"
+                    ]
+                  },
+                  "interval": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 30
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "pause_scenario",
+              "description": "Pause only generated P3 actors in the named scene; preserve state and logs.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "scene_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                  }
+                },
+                "required": [
+                  "scene_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "step_world",
+              "description": "Advance generated P3 actors through real manual script callbacks.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "scene_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                  },
+                  "rounds": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50
+                  }
+                },
+                "required": [
+                  "scene_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "inject_action",
+              "description": "Issue one whitelisted real Evennia command to a generated scene role.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "scene_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                  },
+                  "actor_role": {
+                    "type": "string",
+                    "enum": [
+                      "player",
+                      "courier",
+                      "resident"
+                    ]
+                  },
+                  "operation": {
+                    "type": "string",
+                    "enum": [
+                      "move",
+                      "get",
+                      "drop",
+                      "look",
+                      "inventory",
+                      "say"
+                    ]
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "east",
+                      "west"
+                    ]
+                  },
+                  "item_id": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  }
+                },
+                "required": [
+                  "scene_id",
+                  "actor_role",
+                  "operation"
+                ],
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "observe_actor",
+              "description": "Return one generated actor's local observation only.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "scene_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                  },
+                  "actor_role": {
+                    "type": "string",
+                    "enum": [
+                      "player",
+                      "courier",
+                      "resident"
+                    ]
+                  }
+                },
+                "required": [
+                  "scene_id",
+                  "actor_role"
+                ],
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "get_trace",
+              "description": "Read full live logs and bounded generated-scene P3/social evidence.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "scene_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,80}$"
+                  }
+                },
+                "required": [
+                  "scene_id"
+                ],
+                "additionalProperties": false
+              }
+            },
+            {
+              "name": "run_scenario",
+              "description": "Run one bounded autonomous P3 scenario with explicit test interventions.",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "scenario": {
+                    "type": "string",
+                    "enum": [
+                      "Aclean",
+                      "Asteal-return",
+                      "Bclean",
+                      "Bsteal-resident-parcel"
+                    ]
+                  },
+                  "seed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483647
+                  }
+                },
+                "required": [
+                  "scenario"
+                ],
+                "additionalProperties": false
+              }
+            }
+          ]
+        }
+      },
+      {
+        "jsonrpc": "2.0",
+        "id": 3,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"status\": \"READY\", \"service\": \"native-p3-control\", \"bind\": \"127.0.0.1:14011\"}"
+            }
+          ],
+          "structuredContent": {
+            "status": "READY",
+            "service": "native-p3-control",
+            "bind": "127.0.0.1:14011"
+          },
+          "isError": false
+        }
+      }
+    ],
+    "registration": "tested as stdio subprocess; no global Codex MCP registration"
+  }
+}

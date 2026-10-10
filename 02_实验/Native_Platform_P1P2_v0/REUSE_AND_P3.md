@@ -1,6 +1,6 @@
 # 现有资产复用与 P3 实施清单
 
-状态：源码接缝审阅；P3 **未实施、未授权自动开始**。本轮只做原生 P1/P2 与最窄互通探针，不把规划、人物观察、作者约束全部移植进新世界。
+状态：本文件是 P1/P2 后形成的源码接缝审阅与复用参考。用户现已授权 P3-A（一个自主 NPC）及 P3-B（原生 Ensemble 双 NPC 交互）；实施状态/证据仅见 [Native Platform P3](../Native_Platform_P3_v0/README.md) / [RESULTS](../Native_Platform_P3_v0/RESULTS.md)。P4 未授权。本清单不代表实现完成，也不要求把规划、人物观察、作者约束全部移植进新世界。
 
 ## 复用不是把旧 Executor 再运行一遍
 
