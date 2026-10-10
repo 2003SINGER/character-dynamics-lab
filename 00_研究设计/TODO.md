@@ -2,7 +2,7 @@
 
 更新时间：2026-10-11。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
-当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。**下一候选研究动作（NOT_STARTED）：**对最强近邻做有界机制对照，选定一个可检验未知数，并整理比较协议；协议获授权前不开发新机制、不启动新实验或 P6。此候选只做机制与问题收敛，不重调研文献。接受结果可以是成熟方法已足够、候选机制不值得做，或出现一个经公平对照仍未解决的未知数；不预设新颖性或增益。
+当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。**本轮有界近邻机制对照已交付，待独立审阅**；下一步仅审阅[比较候选](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md#6-第一个可检验未知数与有限比较候选)，决定是否冻结共同域/强基线准入协议。协议未冻结、实现/实验未启动；不自动开发新机制、开实验或 P6，不预设新颖性或增益。
 
 角色动力3的[阶段与过关证据](研究重建审计_2026-10-06.md)与各原生平台历史阶段分别保留；当前执行指针是 P5 Author Bundle 有限集成。不是全部工作归零；本轮文档更新不算原生运行通过。
 
@@ -10,7 +10,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| AUTHOR-PLANNING-NEIGHBOR-CHECK | **NEXT / NOT_STARTED** | 对最强近邻做机制级对照，基于具体差异选择一个可检验未知数；形成有基线、变量、观测结果和停止条件的协议，供后续审议 | 输入/事件/规则属于游戏原生模型；区分统一高层规划与异构原生执行。可从作者零约束到全编排，不以 NPC 独立性压过明确授权；不得伪造历史结算或隐藏知识。**无新机制、组合增益或人类可信度证据；不得自动开实验或 P6。**问题定义见 [F0/F1](CharacterDynamics_FormalProblem_v0.md)，详细算法证据仍限现有算法卡 |
+| AUTHOR-PLANNING-NEIGHBOR-CHECK | **MECHANISM_AUDIT_DELIVERED / READY_FOR_INDEPENDENT_REVIEW** | 审阅[强近邻总表及比较候选](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)：同一固定G/权限/扰动，成熟符号重规划 vs LLM候选+独立检查，反馈粒度作为受控变量；先核共同语义与强实现准入 | 原件、方法/源码定位、交换接口、世界过程纸面诊断与评价分层已交付；这不是冻结实验协议。改G、固定G规划、文本storylet分账。**未复现软件、未运行新比较，无新机制/组合增益/玩家可信度证据；不自行CLOSED，不自动实验/P6。**定义仍见[F0/F1](CharacterDynamics_FormalProblem_v0.md) |
 | BOUNDARY-V1 | **CLOSED / FROZEN** | Kernel / Dynamics / Demo ownership 与依赖边界已完成复核 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |
 | DEMO-LIVING | **ACTIVE / DEMO ONLY** | 保留历史批次为实现诊断。Laya v4.3 一日工程 gate 通过、行为 scale gate 未通过：no-history 单 seed 睡眠 1,149 分钟且历史输入使首请求分布大幅变化；停止扩成 64 actors / 7 days | [core behavior eval](../Demo%20codex-generated/demo/core_behavior_eval_v0/README.md)；[Laya typed policy](../Demo%20codex-generated/demo/laya_typed_policy_v0/README.md)；[v4.3 audit](../outputs/laya_runs/laya_v43_66ebfe7_20260925/RESULTS.md) |

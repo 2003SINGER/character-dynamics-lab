@@ -76,7 +76,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 
-当前问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)；完整长期研究版图见 [System Vision](Character_Dynamics_System_Vision_v0.md#长期研究版图)。LLM × 成熟规划是主轴候选，可服务语义、因果候选、grounded 绑定、层次细化与反馈修复；不要求每层都用 LLM。层次、联合或混合候选组织尚未冻结。A/B 与 Q1–Q3 仅是此前基线讨论和有限实例；不代表完整研究任务或已确认 gap。[Pilot](AuthorialTrajectoryPilotV0.md)只维护 TypedIR/reference 候选契约。下一候选研究动作状态见 [TODO](TODO.md)，尚未启动；不自动授权新实验或 P6。现有 P5 Director 只是有限间接模式，不定义全局作者权限。
+当前问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)；完整长期研究版图见 [System Vision](Character_Dynamics_System_Vision_v0.md#长期研究版图)。LLM × 成熟规划是主轴候选，可服务语义、因果候选、grounded 绑定、层次细化与反馈修复；不要求每层都用 LLM。层次、联合或混合候选组织尚未冻结。A/B 与 Q1–Q3 仅是此前基线讨论和有限实例；不代表完整研究任务或已确认 gap。[Pilot](AuthorialTrajectoryPilotV0.md)只维护 TypedIR/reference 候选契约。[本轮强近邻机制对照](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)已交付，下一候选与状态只见[TODO](TODO.md)；不自动授权新实验或 P6。现有 P5 Director 只是有限间接模式，不定义全局作者权限。
 
 例如本次三项想法分别落位：分段逆映射保留原话于问题 Q01；低耦合的确定边界在完整机制 §8，未落实方案在 Q03；Object/Scene/W 动作职责在完整机制 §4，具体实现缺口在 Q05。TODO 只链接并安排验证，不再复制三遍原理。
 
