@@ -1,6 +1,6 @@
 # Native Platform P3-C0｜结果
 
-状态：**READY_FOR_INDEPENDENT_REVIEW（有限 DEVELOPMENT 已实测；尚未 CLOSED）**。C0 授权范围和边界见 [README](README.md)。三组正式 CLI run、独立只读 DB export 与逐例 audit 均已完成；这只验证限定开发场景，不代表生产就绪、完整 NPC 自治或科研创新。CI 状态尚未更新，不在此处预写。
+状态：**READY_FOR_INDEPENDENT_REVIEW（有限 DEVELOPMENT 已实测；尚未 CLOSED）**。C0 授权范围和边界见 [README](README.md)。三组正式 CLI run、独立只读 DB export 与逐例 audit 均已完成；这只验证限定开发场景，不代表生产就绪、完整 NPC 自治或科研创新。
 
 ## 正式有限 DEVELOPMENT 结果（2026-10-10）
 
@@ -12,9 +12,16 @@
 | 配送优先 | [run](runs/p3-c0-C0-delivery-priority-seed20261010-20261010T035340Z-c21705.json)；[audit PASS](runs/p3-c0-audit-20261010T035416Z-946a9c.json)：1 个 settled drop receipt，随后 3 次巡查移动。 |
 | 配送后巡查 | [run](runs/p3-c0-C0-after-delivery-seed20261010-20261010T035340Z-afb15c.json)；[audit PASS](runs/p3-c0-audit-20261010T035416Z-b17fb3.json)：同一 actor 有 1 个 settled drop receipt，随后 7 次巡查移动。 |
 
-三份正式 run 对应的独立只读 SQLite/ORM 导出为 [p3-db-evidence-…-a04914.json](runs/p3-db-evidence-20261010035339-c7a7e8-20261010035339-5ac8f9-20261010035340-020688-20261010035340-afce88-20261010T035358Z-a04914.json)：覆盖 4 个场景、30 个对象。每份 audit 检查对应 DB actor rows 并记录 run/DB 输入 SHA-256。27/27 个 P3 单测与 9/9 个 bridge 测试通过（父级已执行）；CI 状态未更新，不预写。上述结论限于这三种固定场景与有限 callback；callback 次数不代表真实经过的游戏时间。
+三份正式 run 对应的独立只读 SQLite/ORM 导出为 [p3-db-evidence-…-a04914.json](runs/p3-db-evidence-20261010035339-c7a7e8-20261010035339-5ac8f9-20261010035340-020688-20261010035340-afce88-20261010T035358Z-a04914.json)：覆盖 4 个场景、30 个对象。每份 audit 检查对应 DB actor rows 并记录 run/DB 输入 SHA-256。27/27 个 P3 单测与 9/9 个 bridge 测试通过。上述结论限于这三种固定场景与有限 callback；callback 次数不代表真实经过的游戏时间。
 
 实际 MCP stdio transport 核验记录：[p3-headless-MCPstdio-C0-transport-seed20261010-20261010T035534Z-33130c.json](runs/p3-headless-MCPstdio-C0-transport-seed20261010-20261010T035534Z-33130c.json)。该记录验证 initialize、tools/list（11 tools）及 observe_actor 调用；`run_c0_scenario` 可列出，但未全局注册。它与三组 C0 CLI run 走同一认证 RPC handler 不同，不应描述成 CLI 经 MCP stdio 调用。
+
+## CI 快照（exact head `ad557be07c0914964d6a363c23462b20604ac29c`）
+
+- [native-platform-p3 #38025431156](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38025431156)：SUCCESS；P3 27/27 单测与 bridge 9/9 测试通过。
+- [runtime-regression #38025431162](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38025431162)：FAILURE；6 个 job 中仅 `e0-keyledger-contract` 失败，其余 `public-evidence-integrity`、`praxish-contract`、`source-ranking-contract`、`regression`、`trajectory-constraint-contract` 成功。完整 GitHub Ubuntu CI 日志显示 E0-H02 的 planner status 为 `BUDGET`，而 fixture 期待 `UNREACHABLE`；该 job 汇总为 37/38 unit、13/14 fixture。固定预算行为未改，也未重跑以刷绿。
+
+父级观察到的精简摘要保存在 [ci-observed-ad557be.json](runs/ci-observed-ad557be.json)；它不是原始 workflow artifact 或完整日志。该 CI 工作流验证 host-side contracts，不是 live Evennia server 验收；后者证据是上面的本地真实 run 与独立 DB audit。
 
 ## 首轮 exploratory snapshot（保留，不覆盖）
 

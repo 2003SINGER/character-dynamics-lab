@@ -1,0 +1,42 @@
+{
+  "schema": "parent-observed-ci-summary-v1",
+  "classification": "summary_only_not_raw_workflow_artifact_or_log",
+  "observed_at": "2026-10-10",
+  "commit": "ad557be07c0914964d6a363c23462b20604ac29c",
+  "runs": [
+    {
+      "workflow": "native-platform-p3",
+      "run_id": 38025431156,
+      "url": "https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38025431156",
+      "conclusion": "success",
+      "summary": {
+        "p3_unit_tests": "27/27 passed",
+        "bridge_tests": "9/9 passed"
+      }
+    },
+    {
+      "workflow": "runtime-regression",
+      "run_id": 38025431162,
+      "url": "https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38025431162",
+      "conclusion": "failure",
+      "job_summary": {
+        "failed": ["e0-keyledger-contract"],
+        "succeeded": [
+          "public-evidence-integrity",
+          "praxish-contract",
+          "source-ranking-contract",
+          "regression",
+          "trajectory-constraint-contract"
+        ]
+      },
+      "e0_keyledger_contract": {
+        "failure": "E0-H02 planner status BUDGET != UNREACHABLE",
+        "unit_tests": "37/38",
+        "fixtures": "13/14",
+        "fixed_budget_changed": false,
+        "rerun_to_force_green": false
+      }
+    }
+  ],
+  "boundary": "CI validates host-side contracts; it is not live Evennia server evidence. Native C0 evidence is recorded separately in the local run artifacts and independent database audits."
+}
