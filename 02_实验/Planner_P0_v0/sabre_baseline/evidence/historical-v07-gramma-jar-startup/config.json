@@ -1,0 +1,63 @@
+{
+  "run_id": "historical-v07-gramma-jar-startup",
+  "started_at_utc": "2026-10-11T05:47:11.288396+00:00",
+  "planner_version": "Sabre v0.7 bundled jar from planning-stories-neurally",
+  "planner_configuration": {
+    "method": "bf",
+    "cost_measure": "t",
+    "heuristic": "rp",
+    "goal_utility": 1.0,
+    "epistemic_limit": 1
+  },
+  "problem_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/planning-stories-neurally/problems/gramma.txt",
+  "problem_sha256": "042b2672b56322dc0e89b88443cda2e75cb138d7c6d1604b58a362a01eea5446",
+  "java_executable": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/jdk/jdk-21.0.12.1+1/Contents/Home/bin/java",
+  "classpath": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/planning-stories-neurally/lib/sabre.jar",
+  "command": [
+    "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/jdk/jdk-21.0.12.1+1/Contents/Home/bin/java",
+    "-Xms64m",
+    "-Xmx1g",
+    "-Duser.language=en",
+    "-Duser.country=US",
+    "-Duser.timezone=UTC",
+    "-cp",
+    "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/planning-stories-neurally/lib/sabre.jar",
+    "edu.uky.cs.nil.sabre.Main",
+    "-v",
+    "-p",
+    "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/planning-stories-neurally/problems/gramma.txt",
+    "-m",
+    "bf",
+    "-c",
+    "t",
+    "-h",
+    "rp",
+    "-el",
+    "1",
+    "-vl",
+    "200",
+    "-gl",
+    "0",
+    "-tl",
+    "5000",
+    "-g",
+    "1.0",
+    "-atl",
+    "5",
+    "-ctl",
+    "4"
+  ],
+  "environment": {
+    "LANG": "C",
+    "TZ": "UTC"
+  },
+  "wrapper_process_timeout_s": 30.0,
+  "limits": {
+    "max_visited": 200,
+    "max_generated": 0,
+    "time_limit_ms": 5000,
+    "author_limit": 5,
+    "character_limit": 4,
+    "epistemic_limit": 1
+  }
+}

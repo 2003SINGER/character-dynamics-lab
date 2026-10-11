@@ -1,0 +1,1516 @@
+{
+  "schema": "planner-p0-sabre-native-v0",
+  "run_id": "p0-sabre-allblockednegative-20261011T060229Z-3709cf",
+  "case": "allblockednegative",
+  "classification": "ORIGINAL_SABRE_PLAN_EXECUTED_IN_NATIVE_EVENNIA",
+  "started_at_utc": "2026-10-11T06:02:29.762720+00:00",
+  "source_sha256": {
+    "tools/planner_p0_v0/shared_world/semantics.py": "bea793c788d9dc5288b2b608a0d6e0164208953f23d5502a470f48ab9c9be770",
+    "tools/planner_p0_v0/shared_world/native_world.py": "5fe0d5f70b99f75935144a122c2ad1e07acfb3526888b64e8247ba84d66b8a6b",
+    "tools/planner_p0_v0/shared_world/sabre_export.py": "bdfae7ece3d01cd718926e3c2b5fd691a122b8384bd375234bfd4854282f2113",
+    "tools/planner_p0_v0/shared_world/planner_runner.py": "57db43315bbe31e30661db6448ada224aecb78db83a351bd3ac809c7b875cd8f",
+    "tools/native_platform_v0/p3/control_service.py": "8e0fca62ac29ee319a02dca3e8a698f4a9772ef907b582e3edcdadf079842cbf"
+  },
+  "steps": [
+    {
+      "phase": "original_plan_prefix",
+      "token": "move(A, Junction, Inn, H0, H1)",
+      "action": {
+        "kind": "move",
+        "actor": "A",
+        "from": "junction",
+        "to": "inn"
+      },
+      "native": {
+        "scene_id": "p0_20261011060229_b5316974",
+        "request_id": "allblockednegative-planner-step-01",
+        "action": {
+          "kind": "move",
+          "actor": "A",
+          "from": "junction",
+          "to": "inn"
+        },
+        "accepted": true,
+        "reason": "",
+        "precondition_reason": "",
+        "settled": true,
+        "pre": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 0,
+          "deadline": 48,
+          "weather": "clear",
+          "actors": {
+            "A": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [
+            "main",
+            "passage_inn",
+            "side"
+          ],
+          "met": false,
+          "sealed_prefix_hour": null,
+          "seed": 0
+        },
+        "post_action": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 0,
+          "deadline": 48,
+          "weather": "clear",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": null
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [
+            "main",
+            "passage_inn",
+            "side"
+          ],
+          "met": false,
+          "sealed_prefix_hour": null,
+          "seed": 0
+        },
+        "post": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 1,
+          "deadline": 48,
+          "weather": "clear",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": null
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [
+            "main",
+            "passage_inn",
+            "side"
+          ],
+          "met": false,
+          "sealed_prefix_hour": null,
+          "seed": 0
+        },
+        "deltas": {
+          "now": {
+            "before": 0,
+            "after": 1
+          },
+          "actors": {
+            "before": {
+              "A": {
+                "room": "junction",
+                "known_weather": []
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": []
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": []
+              }
+            },
+            "after": {
+              "A": {
+                "room": "inn",
+                "known_weather": []
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": []
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": []
+              }
+            }
+          }
+        },
+        "predicted_post": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 1,
+          "deadline": 48,
+          "weather": "clear",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": null
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [
+            "main",
+            "passage_inn",
+            "side"
+          ],
+          "met": false,
+          "sealed_prefix_hour": null,
+          "seed": 0
+        },
+        "prediction_matches": true,
+        "clock": {
+          "before": 0,
+          "after": 1,
+          "weather_changed": false,
+          "weather": "clear"
+        },
+        "author_goal_witness": false,
+        "ledger_sequence": 4
+      }
+    },
+    {
+      "phase": "original_plan_prefix",
+      "token": "wait(A, H1, H2)",
+      "action": {
+        "kind": "wait",
+        "actor": "A"
+      },
+      "native": {
+        "scene_id": "p0_20261011060229_b5316974",
+        "request_id": "allblockednegative-planner-step-02",
+        "action": {
+          "kind": "wait",
+          "actor": "A"
+        },
+        "accepted": true,
+        "reason": "",
+        "precondition_reason": "",
+        "settled": true,
+        "pre": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 1,
+          "deadline": 48,
+          "weather": "clear",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": null
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [
+            "main",
+            "passage_inn",
+            "side"
+          ],
+          "met": false,
+          "sealed_prefix_hour": null,
+          "seed": 0
+        },
+        "post_action": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 1,
+          "deadline": 48,
+          "weather": "clear",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": {
+                "kind": "wait",
+                "role": "A"
+              }
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [
+            "main",
+            "passage_inn",
+            "side"
+          ],
+          "met": false,
+          "sealed_prefix_hour": null,
+          "seed": 0
+        },
+        "post": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 2,
+          "deadline": 48,
+          "weather": "storm",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": {
+                "kind": "wait",
+                "role": "A"
+              }
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [
+            "main",
+            "passage_inn",
+            "side"
+          ],
+          "met": false,
+          "sealed_prefix_hour": 2,
+          "seed": 0
+        },
+        "deltas": {
+          "now": {
+            "before": 1,
+            "after": 2
+          },
+          "weather": {
+            "before": "clear",
+            "after": "storm"
+          }
+        },
+        "predicted_post": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 2,
+          "deadline": 48,
+          "weather": "storm",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": null
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [
+            "main",
+            "passage_inn",
+            "side"
+          ],
+          "met": false,
+          "sealed_prefix_hour": null,
+          "seed": 0
+        },
+        "prediction_matches": true,
+        "clock": {
+          "before": 1,
+          "after": 2,
+          "weather_changed": true,
+          "weather": "storm"
+        },
+        "author_goal_witness": false,
+        "ledger_sequence": 9
+      }
+    },
+    {
+      "phase": "testplayer_intervention",
+      "native": {
+        "scene_id": "p0_20261011060229_b5316974",
+        "request_id": "allblockednegative-testplayer-block-at-sealed-prefix",
+        "route": "all",
+        "settled": true,
+        "pre": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 2,
+          "deadline": 48,
+          "weather": "storm",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": {
+                "kind": "wait",
+                "role": "A"
+              }
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [
+            "main",
+            "passage_inn",
+            "side"
+          ],
+          "met": false,
+          "sealed_prefix_hour": 2,
+          "seed": 0
+        },
+        "post_action": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 2,
+          "deadline": 48,
+          "weather": "storm",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": {
+                "kind": "wait",
+                "role": "A"
+              }
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [],
+          "met": false,
+          "sealed_prefix_hour": 2,
+          "seed": 0
+        },
+        "post": {
+          "scene_id": "p0_20261011060229_b5316974",
+          "now": 3,
+          "deadline": 48,
+          "weather": "storm",
+          "actors": {
+            "A": {
+              "room": "inn",
+              "known_weather": [],
+              "last_command": {
+                "kind": "wait",
+                "role": "A"
+              }
+            },
+            "B": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            },
+            "testplayer": {
+              "room": "junction",
+              "known_weather": [],
+              "last_command": null
+            }
+          },
+          "open_routes": [],
+          "met": false,
+          "sealed_prefix_hour": 2,
+          "seed": 0
+        },
+        "clock": {
+          "before": 2,
+          "after": 3,
+          "weather_changed": false,
+          "weather": "storm"
+        },
+        "ledger_sequence": 13
+      }
+    }
+  ],
+  "planner_runs": [
+    {
+      "status": "SUCCESS",
+      "native_result": "Success!",
+      "utility_achieved": 1,
+      "nodes_visited": 18,
+      "nodes_generated": 264,
+      "elapsed_native_text": "12ms",
+      "elapsed_native_ms": 12.0,
+      "elapsed_native_parse_warning": null,
+      "plan_actions": [
+        "move(A, Junction, Inn, H0, H1)",
+        "wait(A, H1, H2)",
+        "observe_weather(B, H2, H3)",
+        "move(B, Junction, Inn, H3, H4)",
+        "meet(H4, H5)"
+      ],
+      "run_id": "p0-sabre-allblockednegative-20261011T060229Z-3709cf-initial",
+      "planner_version": "Sabre v0.8.0",
+      "native_cost_measure": "t",
+      "java_stack_size": "8m",
+      "wrapper_process_timeout_s": 12.0,
+      "wrapper_started_at_utc": "2026-10-11T06:02:29.850215+00:00",
+      "wrapper_finished_at_utc": "2026-10-11T06:02:37.959559+00:00",
+      "exit_code": 0,
+      "run_dir": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/p0-sabre-allblockednegative-20261011T060229Z-3709cf-initial",
+      "stdout_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/p0-sabre-allblockednegative-20261011T060229Z-3709cf-initial/stdout.log",
+      "stderr_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/p0-sabre-allblockednegative-20261011T060229Z-3709cf-initial/stderr.log",
+      "wrapper_exit_code": 0,
+      "problem_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/shared_world/runs/p0-sabre-allblockednegative-20261011T060229Z-3709cf/p0-sabre-allblockednegative-20261011T060229Z-3709cf-initial.txt",
+      "problem_sha256": "9c1c6e250a7f0aab1fa08ca56e5c9fa39bf482287e90ae057734590313398f50"
+    },
+    {
+      "status": "NATIVE_NO_SOLUTION",
+      "native_result": "No solution exists.",
+      "utility_achieved": null,
+      "nodes_visited": 0,
+      "nodes_generated": 0,
+      "elapsed_native_text": "1ms",
+      "elapsed_native_ms": 1.0,
+      "elapsed_native_parse_warning": null,
+      "plan_actions": [],
+      "run_id": "p0-sabre-allblockednegative-20261011T060229Z-3709cf-after-block",
+      "planner_version": "Sabre v0.8.0",
+      "native_cost_measure": "t",
+      "java_stack_size": "8m",
+      "wrapper_process_timeout_s": 12.0,
+      "wrapper_started_at_utc": "2026-10-11T06:02:38.082539+00:00",
+      "wrapper_finished_at_utc": "2026-10-11T06:02:46.276726+00:00",
+      "exit_code": 0,
+      "run_dir": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/p0-sabre-allblockednegative-20261011T060229Z-3709cf-after-block",
+      "stdout_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/p0-sabre-allblockednegative-20261011T060229Z-3709cf-after-block/stdout.log",
+      "stderr_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/p0-sabre-allblockednegative-20261011T060229Z-3709cf-after-block/stderr.log",
+      "wrapper_exit_code": 0,
+      "problem_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/shared_world/runs/p0-sabre-allblockednegative-20261011T060229Z-3709cf/p0-sabre-allblockednegative-20261011T060229Z-3709cf-after-block.txt",
+      "problem_sha256": "7ea8d0f882cbec54db2dbdeaa4db9e9c2d3a192494a42c61922e7795c812bd31"
+    }
+  ],
+  "status": "REPLAN_NATIVE_NO_SOLUTION",
+  "scene": {
+    "scene_id": "p0_20261011060229_b5316974",
+    "rooms": {
+      "junction": {
+        "id": 3573,
+        "dbref": "#3573"
+      },
+      "side_passage": {
+        "id": 3574,
+        "dbref": "#3574"
+      },
+      "inn": {
+        "id": 3575,
+        "dbref": "#3575"
+      }
+    },
+    "roles": {
+      "A": {
+        "id": 3580,
+        "dbref": "#3580"
+      },
+      "B": {
+        "id": 3581,
+        "dbref": "#3581"
+      },
+      "testplayer": {
+        "id": 3582,
+        "dbref": "#3582"
+      }
+    },
+    "exits": {
+      "main": {
+        "id": 3576,
+        "key": "main",
+        "source": "junction",
+        "destination": "inn"
+      },
+      "side": {
+        "id": 3577,
+        "key": "side",
+        "source": "junction",
+        "destination": "side_passage"
+      },
+      "passage_inn": {
+        "id": 3578,
+        "key": "passage_inn",
+        "source": "side_passage",
+        "destination": "inn"
+      }
+    },
+    "seed": 0,
+    "deadline": 48,
+    "control_mode": "explicit_joint_orchestration"
+  },
+  "trace": {
+    "scene_id": "p0_20261011060229_b5316974",
+    "source": "live Evennia P0 room, Exit, actor and server ledger readback",
+    "snapshot": {
+      "scene_id": "p0_20261011060229_b5316974",
+      "now": 3,
+      "deadline": 48,
+      "weather": "storm",
+      "actors": {
+        "A": {
+          "room": "inn",
+          "known_weather": [],
+          "last_command": {
+            "kind": "wait",
+            "role": "A"
+          }
+        },
+        "B": {
+          "room": "junction",
+          "known_weather": [],
+          "last_command": null
+        },
+        "testplayer": {
+          "room": "junction",
+          "known_weather": [],
+          "last_command": null
+        }
+      },
+      "open_routes": [],
+      "met": false,
+      "sealed_prefix_hour": 2,
+      "seed": 0
+    },
+    "ledger": [
+      {
+        "sequence": 1,
+        "event_id": "p0_20261011060229_b5316974:1",
+        "event_type": "SCENE_CREATED",
+        "time": 0,
+        "fields": {
+          "state": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 0,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "control_mode": "explicit_joint_orchestration",
+          "seed": 0
+        }
+      },
+      {
+        "sequence": 2,
+        "event_id": "p0_20261011060229_b5316974:2",
+        "event_type": "PLANNER_REQUEST",
+        "time": 0,
+        "fields": {
+          "request_id": "allblockednegative-planner-step-01",
+          "action": {
+            "kind": "move",
+            "actor": "A",
+            "from": "junction",
+            "to": "inn"
+          },
+          "predicted_post": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 1,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "pre": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 0,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "status": "PROPOSED"
+        }
+      },
+      {
+        "sequence": 3,
+        "event_id": "p0_20261011060229_b5316974:3",
+        "event_type": "TIME_ADVANCED",
+        "time": 1,
+        "fields": {
+          "before": 0,
+          "after": 1,
+          "weather_changed": false,
+          "weather": "clear",
+          "unit": "hour",
+          "step_hours": 1,
+          "source": "server_clock"
+        }
+      },
+      {
+        "sequence": 4,
+        "event_id": "p0_20261011060229_b5316974:4",
+        "event_type": "ACTION_SETTLED",
+        "time": 1,
+        "fields": {
+          "request_id": "allblockednegative-planner-step-01",
+          "action": {
+            "kind": "move",
+            "actor": "A",
+            "from": "junction",
+            "to": "inn"
+          },
+          "command": "main",
+          "accepted": true,
+          "reason": "",
+          "precondition_reason": "",
+          "settled": true,
+          "pre": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 0,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "post_action": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 0,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "post": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 1,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "deltas": {
+            "now": {
+              "before": 0,
+              "after": 1
+            },
+            "actors": {
+              "before": {
+                "A": {
+                  "room": "junction",
+                  "known_weather": []
+                },
+                "B": {
+                  "room": "junction",
+                  "known_weather": []
+                },
+                "testplayer": {
+                  "room": "junction",
+                  "known_weather": []
+                }
+              },
+              "after": {
+                "A": {
+                  "room": "inn",
+                  "known_weather": []
+                },
+                "B": {
+                  "room": "junction",
+                  "known_weather": []
+                },
+                "testplayer": {
+                  "room": "junction",
+                  "known_weather": []
+                }
+              }
+            }
+          },
+          "predicted_post": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 1,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "prediction_matches": true,
+          "clock": {
+            "before": 0,
+            "after": 1,
+            "weather_changed": false,
+            "weather": "clear"
+          },
+          "author_goal_witness": false,
+          "evidence": "native_evennia_command_and_post_readback"
+        }
+      },
+      {
+        "sequence": 5,
+        "event_id": "p0_20261011060229_b5316974:5",
+        "event_type": "PLANNER_REQUEST",
+        "time": 1,
+        "fields": {
+          "request_id": "allblockednegative-planner-step-02",
+          "action": {
+            "kind": "wait",
+            "actor": "A"
+          },
+          "predicted_post": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 2,
+            "deadline": 48,
+            "weather": "storm",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "pre": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 1,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "status": "PROPOSED"
+        }
+      },
+      {
+        "sequence": 6,
+        "event_id": "p0_20261011060229_b5316974:6",
+        "event_type": "WEATHER_CHANGED",
+        "time": 2,
+        "fields": {
+          "from": "clear",
+          "to": "storm",
+          "trigger_hour": 2,
+          "source": "server_world_rule"
+        }
+      },
+      {
+        "sequence": 7,
+        "event_id": "p0_20261011060229_b5316974:7",
+        "event_type": "TIME_ADVANCED",
+        "time": 2,
+        "fields": {
+          "before": 1,
+          "after": 2,
+          "weather_changed": true,
+          "weather": "storm",
+          "unit": "hour",
+          "step_hours": 1,
+          "source": "server_clock"
+        }
+      },
+      {
+        "sequence": 8,
+        "event_id": "p0_20261011060229_b5316974:8",
+        "event_type": "PREFIX_SEALED",
+        "time": 2,
+        "fields": {
+          "hour": 2,
+          "snapshot": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 2,
+            "deadline": 48,
+            "weather": "storm",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": {
+                  "kind": "wait",
+                  "role": "A"
+                }
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "source": "server_world_rule"
+        }
+      },
+      {
+        "sequence": 9,
+        "event_id": "p0_20261011060229_b5316974:9",
+        "event_type": "ACTION_SETTLED",
+        "time": 2,
+        "fields": {
+          "request_id": "allblockednegative-planner-step-02",
+          "action": {
+            "kind": "wait",
+            "actor": "A"
+          },
+          "command": "p0-wait",
+          "accepted": true,
+          "reason": "",
+          "precondition_reason": "",
+          "settled": true,
+          "pre": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 1,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "post_action": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 1,
+            "deadline": 48,
+            "weather": "clear",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": {
+                  "kind": "wait",
+                  "role": "A"
+                }
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "post": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 2,
+            "deadline": 48,
+            "weather": "storm",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": {
+                  "kind": "wait",
+                  "role": "A"
+                }
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": 2,
+            "seed": 0
+          },
+          "deltas": {
+            "now": {
+              "before": 1,
+              "after": 2
+            },
+            "weather": {
+              "before": "clear",
+              "after": "storm"
+            }
+          },
+          "predicted_post": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 2,
+            "deadline": 48,
+            "weather": "storm",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": null
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": null,
+            "seed": 0
+          },
+          "prediction_matches": true,
+          "clock": {
+            "before": 1,
+            "after": 2,
+            "weather_changed": true,
+            "weather": "storm"
+          },
+          "author_goal_witness": false,
+          "evidence": "native_evennia_command_and_post_readback"
+        }
+      },
+      {
+        "sequence": 10,
+        "event_id": "p0_20261011060229_b5316974:10",
+        "event_type": "PLAYER_BLOCK_REQUEST",
+        "time": 2,
+        "fields": {
+          "request_id": "allblockednegative-testplayer-block-at-sealed-prefix",
+          "route": "all",
+          "pre": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 2,
+            "deadline": 48,
+            "weather": "storm",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": {
+                  "kind": "wait",
+                  "role": "A"
+                }
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": 2,
+            "seed": 0
+          },
+          "source": "testplayer_p0_command"
+        }
+      },
+      {
+        "sequence": 11,
+        "event_id": "p0_20261011060229_b5316974:11",
+        "event_type": "ROUTE_BLOCKED",
+        "time": 2,
+        "fields": {
+          "route": "all",
+          "routes": [
+            "main",
+            "side",
+            "passage_inn"
+          ],
+          "actor": "testplayer",
+          "hour": 2,
+          "source": "in_world_command",
+          "sealed_prefix_unchanged": true
+        }
+      },
+      {
+        "sequence": 12,
+        "event_id": "p0_20261011060229_b5316974:12",
+        "event_type": "TIME_ADVANCED",
+        "time": 3,
+        "fields": {
+          "before": 2,
+          "after": 3,
+          "weather_changed": false,
+          "weather": "storm",
+          "unit": "hour",
+          "step_hours": 1,
+          "source": "server_clock"
+        }
+      },
+      {
+        "sequence": 13,
+        "event_id": "p0_20261011060229_b5316974:13",
+        "event_type": "PLAYER_BLOCK_SETTLED",
+        "time": 3,
+        "fields": {
+          "request_id": "allblockednegative-testplayer-block-at-sealed-prefix",
+          "route": "all",
+          "pre": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 2,
+            "deadline": 48,
+            "weather": "storm",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": {
+                  "kind": "wait",
+                  "role": "A"
+                }
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [
+              "main",
+              "passage_inn",
+              "side"
+            ],
+            "met": false,
+            "sealed_prefix_hour": 2,
+            "seed": 0
+          },
+          "post_action": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 2,
+            "deadline": 48,
+            "weather": "storm",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": {
+                  "kind": "wait",
+                  "role": "A"
+                }
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [],
+            "met": false,
+            "sealed_prefix_hour": 2,
+            "seed": 0
+          },
+          "post": {
+            "scene_id": "p0_20261011060229_b5316974",
+            "now": 3,
+            "deadline": 48,
+            "weather": "storm",
+            "actors": {
+              "A": {
+                "room": "inn",
+                "known_weather": [],
+                "last_command": {
+                  "kind": "wait",
+                  "role": "A"
+                }
+              },
+              "B": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              },
+              "testplayer": {
+                "room": "junction",
+                "known_weather": [],
+                "last_command": null
+              }
+            },
+            "open_routes": [],
+            "met": false,
+            "sealed_prefix_hour": 2,
+            "seed": 0
+          },
+          "deltas": {
+            "now": {
+              "before": 2,
+              "after": 3
+            },
+            "open_routes": {
+              "before": [
+                "main",
+                "passage_inn",
+                "side"
+              ],
+              "after": []
+            }
+          },
+          "settled": true,
+          "clock": {
+            "before": 2,
+            "after": 3,
+            "weather_changed": false,
+            "weather": "storm"
+          },
+          "evidence": "player_execute_cmd_exit_lock_and_readback"
+        }
+      }
+    ],
+    "sealed_prefix": {
+      "scene_id": "p0_20261011060229_b5316974",
+      "now": 2,
+      "deadline": 48,
+      "weather": "storm",
+      "actors": {
+        "A": {
+          "room": "inn",
+          "known_weather": [],
+          "last_command": {
+            "kind": "wait",
+            "role": "A"
+          }
+        },
+        "B": {
+          "room": "junction",
+          "known_weather": [],
+          "last_command": null
+        },
+        "testplayer": {
+          "room": "junction",
+          "known_weather": [],
+          "last_command": null
+        }
+      },
+      "open_routes": [
+        "main",
+        "passage_inn",
+        "side"
+      ],
+      "met": false,
+      "sealed_prefix_hour": null,
+      "seed": 0
+    },
+    "control_mode": "explicit_joint_orchestration"
+  },
+  "author_goal_witnessed": false,
+  "elapsed_wall_seconds": 16.527,
+  "finished_at_utc": "2026-10-11T06:02:46.289709+00:00"
+}

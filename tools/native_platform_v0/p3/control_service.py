@@ -212,6 +212,11 @@ class P3Control:
             "run_c1a_scenario": self.run_c1a_scenario,
             "run_p4_scenario": self.run_p4_scenario,
             "reset_p5_scenario": self.reset_p5_scenario,
+            "reset_p0_shared_world": self.reset_p0_shared_world,
+            "snapshot_p0_shared_world": self.snapshot_p0_shared_world,
+            "step_p0_shared_world": self.step_p0_shared_world,
+            "inject_p0_route_block": self.inject_p0_route_block,
+            "get_p0_shared_world_trace": self.get_p0_shared_world_trace,
             "run_p5_scenario": self.run_p5_scenario,
             "edit_author_bundle": self.edit_author_bundle,
             "step_world": self.step_world,
@@ -223,6 +228,54 @@ class P3Control:
         if op not in handlers:
             raise ValueError("unsupported operation")
         return handlers[op](args)
+
+    def reset_p0_shared_world(self, args):
+        if set(args) - {"seed"}:
+            raise ValueError("reset_p0_shared_world accepts only seed")
+        if self.created_scenes >= MAX_SCENES_PER_PROCESS:
+            raise ValueError("scene creation limit reached for this server process")
+        seed = args.get("seed", 0)
+        if type(seed) is not int or not 0 <= seed <= 2**31 - 1:
+            raise ValueError("seed must be an integer in [0, 2147483647]")
+        from tools.planner_p0_v0.shared_world.native_world import create_scene
+        scene = create_scene(_owner_account().id, seed=seed)
+        self.created_scenes += 1
+        return {"ok": True, "scene": _json_safe(scene)}
+
+    def snapshot_p0_shared_world(self, args):
+        if set(args) != {"scene_id"}:
+            raise ValueError("snapshot_p0_shared_world requires only scene_id")
+        from tools.planner_p0_v0.shared_world.native_world import snapshot
+        return {"ok": True, "snapshot": _json_safe(snapshot(args["scene_id"], _owner_account().id))}
+
+    def step_p0_shared_world(self, args):
+        if set(args) - {"scene_id", "request_id", "action", "predicted_post"} or not {
+                "scene_id", "request_id", "action"}.issubset(args):
+            raise ValueError("step_p0_shared_world requires scene_id, request_id, action and optional predicted_post")
+        import re
+        request_id = args["request_id"]
+        if not isinstance(request_id, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,80}", request_id):
+            raise ValueError("request_id must be a bounded identifier")
+        from tools.planner_p0_v0.shared_world.native_world import apply_planner_action
+        return apply_planner_action(args["scene_id"], _owner_account().id, request_id,
+                                    args["action"], args.get("predicted_post"))
+
+    def inject_p0_route_block(self, args):
+        if set(args) - {"scene_id", "route", "request_id"} or not {
+                "scene_id", "route", "request_id"}.issubset(args):
+            raise ValueError("inject_p0_route_block requires scene_id, route, request_id")
+        import re
+        request_id = args["request_id"]
+        if not isinstance(request_id, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,80}", request_id):
+            raise ValueError("request_id must be a bounded identifier")
+        from tools.planner_p0_v0.shared_world.native_world import inject_block
+        return inject_block(args["scene_id"], _owner_account().id, args["route"], request_id)
+
+    def get_p0_shared_world_trace(self, args):
+        if set(args) != {"scene_id"}:
+            raise ValueError("get_p0_shared_world_trace requires only scene_id")
+        from tools.planner_p0_v0.shared_world.native_world import trace
+        return {"ok": True, "trace": _json_safe(trace(args["scene_id"], _owner_account().id))}
 
     def reset_p5_scenario(self, args):
         allowed = {"bundle", "initial_social_preset", "horizon", "seed", "director_enabled",

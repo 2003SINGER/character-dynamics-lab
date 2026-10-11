@@ -1,0 +1,55 @@
+{
+  "schema": "planner-p0-parent-checks-v0",
+  "checked_on": "2026-10-11",
+  "baseline_commit": "08373231fc197af11474e99b5c1a9e5726962aad",
+  "checks": {
+    "upstream_sabre_src_git_diff_empty": true,
+    "upstream_llm_sabre_src_git_diff_empty": true,
+    "exact_replay_search_sha256": "365e91de54695f86ec89dac6414014f86c663c1a184ec735dc2a28977d566fe0",
+    "exact_replay_transcript_sha256": "55e77253e4c43e7bec02f87b3ad94579d87ed56f75e3820e0053b53224b1939f",
+    "wrapper_unittests": {"passed": 5, "total": 5},
+    "projection_unittests": {"passed": 7, "total": 7},
+    "existing_p3_unittests": {"passed": 53, "total": 53},
+    "public_text_file_ast_json_and_relative_links": "PASS",
+    "credential_pattern_scan": "PASS_NOT_A_COMPREHENSIVE_SECRET_PROOF",
+    "repository_health": {"exit_code": 0, "warnings": 6},
+    "temporary_local_chat_service_stopped": true,
+    "same_database_evennia_server_restored_running": true
+  },
+  "native_readonly_db_checks": [
+    {
+      "case": "parent-clean",
+      "run_file": "shared_world/runs/p0-sabre-clean-20261011T060159Z-297200/run.json",
+      "assertions": ["plan_tokens_equal_executed_actions", "accepted_settled_prediction_matches", "ledger_ids_unique_sequences_monotone", "B_observation_before_qualifying_meet", "weather_event_does_not_grant_B_observation", "actual_db_positions_match_final_trace"],
+      "result": "PASS",
+      "final_hour": 5,
+      "locations": [{"role": "A", "object_id": 3560, "db_location_id": 3555}, {"role": "B", "object_id": 3561, "db_location_id": 3555}, {"role": "testplayer", "object_id": 3562, "db_location_id": 3553}]
+    },
+    {
+      "case": "mainblockedrepair",
+      "run_file": "shared_world/runs/p0-sabre-mainblockedrepair-20261011T060203Z-bb72ed/run.json",
+      "sha256": "bf6a2b38fe3499c96fc61acf786954dc6b30b0ebf8a0281943ff0b42d66a1654",
+      "assertions": ["actual_initial_plan_prefix", "sealed_snapshot_unchanged", "no_deadline_or_A_progress_reset", "block_consumes_H2_to_H3", "no_B_hidden_weather_knowledge", "side_replan_tokens_equal_settled_actions", "qualifying_meet_after_B_observation", "actual_db_positions_match_final_trace"],
+      "result": "PASS",
+      "final_hour": 7,
+      "locations": [{"role": "A", "object_id": 3570, "db_location_id": 3565}, {"role": "B", "object_id": 3571, "db_location_id": 3565}, {"role": "testplayer", "object_id": 3572, "db_location_id": 3563}]
+    },
+    {
+      "case": "allblockednegative",
+      "run_file": "shared_world/runs/p0-sabre-allblockednegative-20261011T060229Z-3709cf/run.json",
+      "sha256": "7e90b6bf52d3806a40386e9698b7c83a74f8a4890d2b5626441b67688bd153a9",
+      "assertions": ["actual_initial_plan_prefix", "sealed_snapshot_unchanged", "no_deadline_or_A_progress_reset", "NATIVE_NO_SOLUTION_distinct_from_budget", "no_new_plan_actions_or_meet_events", "actual_db_positions_match_final_trace"],
+      "result": "PASS",
+      "final_hour": 3,
+      "locations": [{"role": "A", "object_id": 3580, "db_location_id": 3575}, {"role": "B", "object_id": 3581, "db_location_id": 3573}, {"role": "testplayer", "object_id": 3582, "db_location_id": 3573}]
+    }
+  ],
+  "protected_preexisting_worktree_sha256": {
+    "Demo codex-generated/CMakeLists.txt": "b13f01bdea84a4a34694406a063079ebba735b387090a3adfaf371f4d6212788",
+    "Demo codex-generated/applications/npc_continuity_v0/npc_continuity_paired_harness.cpp": "4deb3e92352f70804a539f40b5a1a83bf9028ef9a6e35b3ae5d0d88a1f0b7b92",
+    "Demo codex-generated/applications/npc_continuity_v0/npc_continuity_paired_v1.cpp": "04ea172ec08bc7d5aff801eece7e7ce2137773db6f86e557e84d0fbcd24dd314",
+    "Demo codex-generated/applications/npc_continuity_v0/npc_continuity_paired_v1.h": "d8189e8f31b5640ca4219ff0285df90c3c5c04310b30d2c3d40d27a4a8477004",
+    "Demo codex-generated/tests/npc_continuity_paired_contract_v1.cpp": "4bc44299bc8cf2f7d598bedb6e4fd7004464b3ac18b19c22afe1a20f0f6a6142"
+  },
+  "claims_excluded": ["full_benchmark_reproduction", "live_LLM_search", "A_B_C_performance_comparison", "C_implemented", "player_believability", "novel_method"]
+}

@@ -1,0 +1,22 @@
+{
+  "case": "allblockednegative",
+  "scene": "registered three-room P0 fixture",
+  "seed": 0,
+  "deadline_hours": 48,
+  "storm_at_hour": 2,
+  "control_mode": "explicit_joint_orchestration",
+  "prefix_policy": "first_two_actions_from_original_clean_Sabre_plan_then_testplayer_route_block",
+  "planner": {
+    "version": "Sabre v0.8.0",
+    "java_stack_size": "8m",
+    "method": "bf",
+    "cost": "t",
+    "heuristic": "h+",
+    "epistemic_limit": 1,
+    "max_visited": 200,
+    "max_generated": 5000,
+    "time_limit_ms": 5000,
+    "author_limit": 48,
+    "goal_utility": 1
+  }
+}

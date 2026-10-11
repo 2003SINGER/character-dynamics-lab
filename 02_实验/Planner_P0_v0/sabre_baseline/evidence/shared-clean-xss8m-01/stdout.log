@@ -1,0 +1,61 @@
+The Sabre Narrative Planner v0.8.0 by Stephen G. Ware
+Problem: clean_initial
+  characters: 2
+  entities:   56
+  fluents:    7
+  actions:    4
+  triggers:   1
+
+Making effects explicit and adding new triggers (iteration 1): 0 effects; 0 triggers
+Making effects explicit and adding new triggers (iteration 1): 0 effects; 0 triggers
+Making effects explicit and adding new triggers (iteration 1): 0 effects; 0 triggers
+Making effects explicit and adding new triggers (iteration 1): 0 effects; 0 triggers
+Making effects explicit and adding new triggers (iteration 1): 0 effects; 0 triggers
+Making effects explicit and adding new triggers (iteration 1): 0 effects; 0 triggers
+Making effects explicit and adding new triggers (iteration 1): 0 effects; 0 triggers
+Simplifying problem "clean_initial": Calculating possible values for fluents...     
+Simplifying problem "clean_initial": 2417/2417 fluents; 55224/55224 events; 3/3 utilities
+Compiled Problem: clean_initial
+  characters: 2
+  entities:   56
+  fluents:    7
+  actions:    528
+  triggers:   1
+Heuristic Progression Search:
+  problem:               clean_initial
+  starting utility:      0
+  goal utility:          1
+  method:                best-first
+  cost:                  temporal
+  heuristic:             sum graph
+  explanation pruning:   true
+  search limit:          200
+  space limit:           unlimited
+  time limit:            5s
+  author temporal limit: 48
+  character limit:       unlimited
+  epistemic limit:       1
+Result: Success!
+  solution:         true
+  utility achieved: 1
+  nodes visited:    18
+  nodes generated:  264
+  time:             13ms
+move(A, Junction, Inn, H0, H1)
+| goal(A, at(A) == Inn & known_storm(B) == False)
+wait(A, H1, H2)
+| observe_weather(B, H2, H3)
+| | goal(B, at(B) != Inn & known_storm(B) == True & met_witness() == False)
+| move(B, Junction, Inn, H3, H4)
+| | goal(B, at(B) == Inn & known_storm(B) == True & met_witness() == False)
+| meet(H4, H5)
+| | goal(B, known_storm(B) == True & met_witness() == True & weather() == Storm)
+| goal(A, known_storm(B) == True & met_witness() == True & weather() == Storm)
+observe_weather(B, H2, H3)
+| goal(B, at(B) != Inn & known_storm(B) == True & met_witness() == False)
+move(B, Junction, Inn, H3, H4)
+| goal(B, at(B) == Inn & known_storm(B) == True & met_witness() == False)
+meet(H4, H5)
+| goal(A, known_storm(B) == True & met_witness() == True & weather() == Storm)
+| goal(B, known_storm(B) == True & met_witness() == True & weather() == Storm)
+goal(at(A) == Inn & at(B) == Inn & known_storm(B) == True & met_witness() == True & weather() == Storm)

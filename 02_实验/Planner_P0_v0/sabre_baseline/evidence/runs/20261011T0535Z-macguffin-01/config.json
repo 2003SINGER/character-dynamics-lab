@@ -1,0 +1,57 @@
+{
+  "run_id": "20261011T0535Z-macguffin-01",
+  "started_at_utc": "2026-10-11T05:41:09.599696+00:00",
+  "planner_version": "Sabre v0.8.0",
+  "planner_configuration": {
+    "method": "bf",
+    "cost_measure": "t",
+    "heuristic": "h+",
+    "goal_utility": null,
+    "epistemic_limit": 1
+  },
+  "problem_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/sabre-benchmarks/problems/macguffin.txt",
+  "problem_sha256": "0b8f2311b4bca9083e51b9d724767d22b15f83feb414e346a12f79af02316957",
+  "java_executable": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/jdk/jdk-17.0.20.1+1/Contents/Home/bin/java",
+  "classpath": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/sabre/bin",
+  "command": [
+    "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/jdk/jdk-17.0.20.1+1/Contents/Home/bin/java",
+    "-Xms64m",
+    "-Xmx1g",
+    "-Duser.language=en",
+    "-Duser.country=US",
+    "-Duser.timezone=UTC",
+    "-cp",
+    "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/sabre/bin",
+    "edu.uky.cs.nil.sabre.Main",
+    "-v",
+    "-p",
+    "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/sabre-benchmarks/problems/macguffin.txt",
+    "-m",
+    "bf",
+    "-c",
+    "t",
+    "-h",
+    "h+",
+    "-el",
+    "1",
+    "-vl",
+    "200",
+    "-gl",
+    "0",
+    "-tl",
+    "5000"
+  ],
+  "environment": {
+    "LANG": "C",
+    "TZ": "UTC"
+  },
+  "wrapper_process_timeout_s": 30.0,
+  "limits": {
+    "max_visited": 200,
+    "max_generated": 0,
+    "time_limit_ms": 5000,
+    "author_limit": null,
+    "character_limit": null,
+    "epistemic_limit": 1
+  }
+}

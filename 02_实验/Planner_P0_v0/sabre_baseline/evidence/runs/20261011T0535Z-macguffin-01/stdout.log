@@ -1,0 +1,41 @@
+The Sabre Narrative Planner v0.8.0 by Stephen G. Ware
+Problem: macguffin
+  characters: 2
+  entities:   5
+  fluents:    4
+  actions:    2
+  triggers:   2
+Compiled Problem: macguffin
+  characters: 2
+  entities:   5
+  fluents:    9
+  actions:    5
+  triggers:   12
+Heuristic Progression Search:
+  problem:               macguffin
+  starting utility:      0
+  goal utility:          1
+  method:                best-first
+  cost:                  temporal
+  heuristic:             sum graph
+  explanation pruning:   true
+  search limit:          200
+  space limit:           unlimited
+  time limit:            5s
+  author temporal limit: unlimited
+  character limit:       unlimited
+  epistemic limit:       1
+Result: Success!
+  solution:         true
+  utility achieved: 1
+  nodes visited:    10
+  nodes generated:  57
+  time:             4ms
+walk(Tom, Home, Market)
+| buy(Tom, MacGuffin, Merchant)
+| | goal(Merchant, money(Merchant) == 1)
+| goal(Tom, at(MacGuffin) == Tom)
+buy(Tom, MacGuffin, Merchant)
+| goal(Tom, at(MacGuffin) == Tom)
+| goal(Merchant, money(Merchant) == 1)
+goal(at(MacGuffin) == Tom)

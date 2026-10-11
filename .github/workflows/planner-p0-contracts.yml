@@ -1,0 +1,26 @@
+name: planner-p0-contracts
+
+on:
+  push:
+    branches: [webgpt-sync]
+    paths:
+      - 'tools/planner_p0_v0/**'
+      - 'tools/native_platform_v0/p3/control_service.py'
+      - '.github/workflows/planner-p0-contracts.yml'
+
+jobs:
+  offline-adapter-contracts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Native-output parser contracts (no downloaded planner)
+        run: python -B -m unittest discover -s tools/planner_p0_v0/sabre_baseline/tests -v
+      - name: Shared-world projection contracts (no live server)
+        run: python -B -m unittest tools.planner_p0_v0.shared_world.test_semantics -v

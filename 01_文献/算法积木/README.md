@@ -23,6 +23,7 @@
 | [03 内容绑定与 LLM 桥接](03_内容绑定与LLM桥接.md) | Anansi query binding / dispatch；WhatELSE 固定动作编译；Drama Llama 有序触发；DiriGent tension / enforcement；NCP 外部核验与提交 |
 | [04 统一问题与成熟基线准入](04_统一问题与成熟基线准入.md) | 同一钥匙—账本实例下的能力/权限边界、最小成熟基线、可反证的研究候选；综合审查，不新增原算法卡 |
 | [05 游戏世界规划强近邻机制总表](05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md) | 固定域规划/动态改域/文本生成分账；具体生成—搜索—检查—执行交换；世界过程诊断与待审比较候选，无新实验 |
+| [06 P0 原始规划路线](06_P0原始规划路线_2026-10-11/README.md) | Sabre 原始搜索、LLM 建议／embedding 边成本、经典启发式对照、Fisher 抽象输入输出；de Lima 2023 系统身份已明确。实际复现与缺口查 P0 RESULTS，不用方法卡替代运行证据 |
 
 12 张主卡均使用 17 个字段：Problem、State、Author input、Character input、World model、Control authority、Planner/search、Trigger、Repair、Can change、Cannot change、Handwrite、Old cost、LLM replace、LLM must not replace、Evaluation、Failure。PDDL3 与 Porteous 在同卡中分清规格/算法；Sabre 为辅助简卡。旧报告、原件、固定源码版本和阅读覆盖保留在每卡来源栏；**17 字段填齐不等于源码都已核、全部论文都已复现。**
 

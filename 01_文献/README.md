@@ -1,5 +1,7 @@
 # 本地文献库
 
+当前原始算法路线：[P0 Sabre／LLM 搜索与抽象机制入口](算法积木/06_P0原始规划路线_2026-10-11/README.md)。2023 系统级近邻明确为 de Lima、Feijó、Furtado 的 *Managing the Plot Structure of Character-based Interactive Narratives in Games*；身份与作者摘要已核，全文及实现准入待核，不以此阻断原始 Sabre 复现。运行证据只由 [P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)维护。
+
 入口更新：2026-10-11；下载盘点快照：2026-09-05
 截至该盘点快照：**82 篇 PDF 已下载并以 `%PDF-` 文件头校验；4 篇已定位但待取得。** 这不是今日全库统计。下载只表示可离线阅读，不表示已精读、已认可其中论断，或已完成查新。
 
