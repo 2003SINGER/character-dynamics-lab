@@ -6,6 +6,8 @@
 
 讨论原文已私有归档于本机项目路径 `90_原始材料/_private/2026-10-11_P0_Author_Binding/pasted-text-1.txt`（ignored，不进入公开仓库），SHA-256 `452f1c5c2d43f7b66f5563c6c904b2e157da1002a6cfb3dc53ff2e273193bdc3`。原文混合用户提问、讨论过程与助手提出的路线；下列决策以本轮明确任务边界和后续确认的有限代码设计为准，不能把原文中所有助手建议都当作已确认决定。
 
+本轮新增背景输入《系统完成度总览.md》归档于 `90_原始材料/_private/2026-10-11_系统完成度总览/系统完成度总览.md`，SHA-256 `40352b314e97009938398a6a3877a3a04379c47b70258c8ef09e03b54c823f6c`；它基于旧快照 `a044136`，且源文本存在截断/坏 markup，缺失部分不补造。附件 `任务提炼_已粘贴的文本.txt` 归档于同目录，SHA-256 `fcc23ece0fcb30d06d3467321ddc3ee0ad786848b11824acde66dfc5ca275ccb`。附件是以总览为背景的任务提炼，不是新任务实施授权；不得倒置二者因果关系或据此重新实施。
+
 另复核了用户明确强调完整研究方向的导出：本机私有归档 `90_原始材料/_private/2026-10-11_新角色动力2/新角色动力2.md`（ignored），SHA-256 `587c71ce3fe2cddbf31f7c338b8c7ddeffd2966331a68e976f4f49a979c81d10`；相关用户原话集中于 2026-10-10 23:42:46 至 2026-10-11 00:34:26。其确认组合是否产生系统贡献要靠比较/消融判断；游戏原生状态与事件为权威；作者控制范围可从留白到完全编排；世界过程也可成为规划对象；多层规划是系统主线，具体层数不冻结；LLM 是重要的当代研究机会。前述主线已由 F0/F1 和 System Vision 维护，本轮不因此重写架构或扩大实现授权。
 
 现有材料已覆盖大部分基础：F0/F1 定义作者控制范围、状态所有者、时间、真实执行反馈、作者要求与派生子目标的区别；System Vision 说明目标规划链及候选算法边界；Pilot 定义 Registry、TypedIR、hard/soft、版本与 monitor 证据语义。此次差异不是新增一套 IR，而是把同一作者要求的规划投影与监测投影、来源可信度和未落实义务明确关联起来。详见 [F0/F1](CharacterDynamics_FormalProblem_v0.md)、[System Vision](Character_Dynamics_System_Vision_v0.md)、[Pilot](AuthorialTrajectoryPilotV0.md)。
@@ -28,6 +30,14 @@
 ## 本轮有限接口边界
 
 P0 Author Binding 工作只在既有固定 P0 域内验证同一已绑定要求能否生成 Sabre 与 Pilot TypedIR 两种投影，并追溯来源、版本、权限、期限、假设和 residual。具体表达子集、fixture pin 范围及每项测试结果只看 [唯一 RESULTS](../02_实验/Planner_P0_Author_Binding_v0/RESULTS.md)。Unsupported、来源缺失或证据不足必须显式保留，不能因另一投影可满足而报告整体 SATISFIED。该工作不改变冻结 Baseline Gate、P0 原始算法/实验结果、P5 结果或 C++ Runtime。
+
+补充的研究候选仍未定案：
+
+- 优先核验原生注册表/配方中的实体、消耗与产物，再形成候选前提/效果并与原生结算对账；自动提取尚未实现。
+- LLM 关系更新、语言记忆与情境决定可作为替换候选，不预设关系数值；LLM 生成评分规则或 Judge 评价也待验证，不能代替事实证据或降低硬语义。
+- 事件发生、持续状态与轨迹约束是不同对象；历史记忆、硬承诺与切换惩罚也不等价。
+
+Author Binding 的 `1323196` 仅是固定域离线原型，live 接入未做；实际完成度只查该实验唯一 [RESULTS](../02_实验/Planner_P0_Author_Binding_v0/RESULTS.md)，不从旧总览复制计数或 CI 结论。
 
 既有 P0 Baseline Gate 在三个固定场景中显示单层 Sabre 已足够；每格一次的开发性结果不证明分层无用，也不提供统计优势或泛化证据。其唯一结果见 [P0 Baseline Gate RESULTS](../02_实验/Planner_P0_Baseline_Gate_v0/RESULTS.md)。旧 E0-H02 CI 的 `BUDGET != UNREACHABLE` 失败另由 [E0 RESULTS](../02_实验/E0_KeyLedger_v0/RESULTS.md) 保存；预算耗尽不能冒充不可达，本文不改旧预算、预期或失败状态。
 
