@@ -1,0 +1,30 @@
+Source: `gh run view 38158476174 --log-failed`, filtered to the E0 unit-contract and frozen-fixture steps. Lines below are the actual CI output lines returned by GitHub Actions.
+
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:10.0769679Z test_h02_keeps_state_and_event_outcomes_distinct (test_runner.RunnerContractTests.test_h02_keeps_state_and_event_outcomes_distinct) ... FAIL
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:11.7944828Z FAIL: test_h02_keeps_state_and_event_outcomes_distinct (test_runner.RunnerContractTests.test_h02_keeps_state_and_event_outcomes_distinct)
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:11.7955086Z   File "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/tests/test_runner.py", line 31, in test_h02_keeps_state_and_event_outcomes_distinct
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:11.7956798Z     self.assertEqual(result["fixture_test_result"], "PASS", result["errors"])
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:11.7957467Z AssertionError: 'FAIL' != 'PASS'
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:11.7957853Z - FAIL
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:11.7961234Z  : [{'type': 'AssertionError', 'message': 'planner status BUDGET != UNREACHABLE', 'traceback': 'Traceback (most recent call last):\n  File "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/runner.py", line 683, in run_case\n    _check_search(case_id, planner, oracle, expected)\n  File "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/runner.py", line 320, in _check_search\n    raise AssertionError(f"planner status {planner.get(\'solve_status\')} != {expected_planner}")\nAssertionError: planner status BUDGET != UNREACHABLE'}]
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:11.7964402Z Ran 38 tests in 11.830s
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:11.7964684Z FAILED (failures=1)
+e0-keyledger-contract E0 unit contracts 2026-10-11T17:10:11.8099164Z ##[error]Process completed with exit code 1.
+
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:11.8179041Z ##[group]Run python -B -m tools.e0_keyledger_v0.runner --case all --run-id ci-38158476174-1 --output-root runs/e0_keyledger_v0/ci
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4333199Z   "fixture_test_result": "FAIL",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4334027Z     "E0-P01": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4334394Z     "E0-N01": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4334745Z     "E0-B01": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4335092Z     "E0-B02": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4335442Z     "E0-B03": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4335788Z     "E0-H01": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4336135Z     "E0-N02": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4336992Z     "E0-H02": "FAIL",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4337571Z     "E0-X01": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4338058Z     "E0-X02": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4338441Z     "E0-P02": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4338815Z     "E0-U01": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4339172Z     "E0-C01": "PASS",
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4339527Z     "E0-F01": "PASS"
+e0-keyledger-contract Run all frozen E0 fixtures under protocol budgets 2026-10-11T17:10:28.4489105Z ##[error]Process completed with exit code 1.

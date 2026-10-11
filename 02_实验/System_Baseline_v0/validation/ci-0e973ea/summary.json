@@ -1,0 +1,57 @@
+{
+  "head_sha": "0e973ea4ebcd7d0889920b82232483885b3bbf79",
+  "branch": "webgpt-sync",
+  "runs": {
+    "38158475962": {
+      "name": "planner-p0-contracts",
+      "conclusion": "success",
+      "url": "https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38158475962",
+      "jobs": {"offline-adapter-contracts": "success"},
+      "relevant_steps": [
+        "Install pinned P3 dependencies: success",
+        "Build pinned Sabre v0.8.0: success",
+        "P0 integration native contracts: success",
+        "P0 planner and monitor projections: success",
+        "P0 baseline gate projections: success",
+        "P0 author binding projections: success",
+        "System Baseline Sabre/P5 contracts: success"
+      ]
+    },
+    "38158475869": {
+      "name": "native-platform-p3",
+      "conclusion": "success",
+      "url": "https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38158475869",
+      "jobs": {"isolated-python-contracts": "success"},
+      "relevant_steps": [
+        "P3 actor-loop unit tests: success",
+        "Import-safe Ensemble social adapter tests: success",
+        "P4 native Ensemble source/scene bridge: success",
+        "P5 startup preset tests: success",
+        "P5 external bundle runner/evidence audit: success"
+      ]
+    },
+    "38158476174": {
+      "name": "runtime-regression",
+      "conclusion": "failure",
+      "url": "https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38158476174",
+      "jobs": {
+        "regression": "success",
+        "e0-keyledger-contract": "failure",
+        "public-evidence-integrity": "success",
+        "praxish-contract": "success",
+        "trajectory-constraint-contract": "success",
+        "source-ranking-contract": "success"
+      },
+      "e0_unit_contracts": {"passed": 37, "failed": 1, "total": 38},
+      "frozen_fixtures": {"passed": 13, "failed": 1, "total": 14, "failure": "E0-H02"},
+      "fixture_results": {
+        "E0-P01": "PASS", "E0-N01": "PASS", "E0-B01": "PASS", "E0-B02": "PASS",
+        "E0-B03": "PASS", "E0-H01": "PASS", "E0-N02": "PASS", "E0-H02": "FAIL",
+        "E0-X01": "PASS", "E0-X02": "PASS", "E0-P02": "PASS", "E0-U01": "PASS",
+        "E0-C01": "PASS", "E0-F01": "PASS"
+      },
+      "failure_reason": "H02 expected planner status UNREACHABLE but observed BUDGET; fixture fails under protocol budget."
+    }
+  },
+  "scope_note": "Evidence-only record. No E0 budget/test/code changes made and no workflow rerun started."
+}

@@ -67,6 +67,14 @@ Raw requests, responses, original outcomes, configs, usage metadata, and later o
 
 The final bounded regression report is [validation/20261012T-final-bounded-regression-03/summary.json](validation/20261012T-final-bounded-regression-03/summary.json), with its [raw test log](validation/20261012T-final-bounded-regression-03/raw-regression.log), [source hashes](validation/20261012T-final-bounded-regression-03/source-sha256.txt), and [LLM raw-call audit](validation/20261012T-final-bounded-regression-03/llm-raw-call-audit.json). It reports 133/133 passing across System Baseline 25, P5 43, P0 integration 7, P0 baseline gate 6, author binding 22, and TypedIR trajectory constraints 30; zero failures/errors. This is bounded regression and raw-evidence verification, not evidence that M2 works or that another native simulation was run.
 
+## CI for implementation commit `0e973ea`
+
+- [planner-p0-contracts](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38158475962) — success.
+- [native-platform-p3](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38158475869) — success.
+- [runtime-regression](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38158476174) — partial failure: the sole failing legacy `e0-keyledger-contract` case was H02, where planner outcome `BUDGET` differed from expected `UNREACHABLE` (37/38 unit checks; 13/14 fixtures). The other five jobs passed, including C++ configure/build/CTest/reference and repository-health checks.
+
+This keeps the overall report `PARTIAL`. The legacy budget expectation was not changed or renamed, no old budget was tuned, and no retry was used to turn the failure green. The independently checked local audit summary is [validation/ci-0e973ea/summary.json](validation/ci-0e973ea/summary.json); the captured H02 failure output is [actual-failure-log.txt](validation/ci-0e973ea/actual-failure-log.txt).
+
 ## Closeout
 
 M1 shows this specific route-selection seam can choose between two matched native opportunities, pass a same-minute stale candidate to native rejection, and observe downstream receipts/readback in the fixed scene matrix. It does not show Sabre planning the complete authored story. Non-route hard obligations remain native monitor/NPC-callback responsibilities, and the route-only planner cannot certify them prospectively. M2 remains unresolved after three invalid outputs. The next step is to discuss the observed format/reference-generation bottleneck before deciding whether to modify the binding contract or make any further model calls; no additional call or P6 scope is authorized by this report.
