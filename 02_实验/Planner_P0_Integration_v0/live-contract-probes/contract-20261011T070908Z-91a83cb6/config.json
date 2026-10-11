@@ -1,0 +1,20 @@
+{
+  "schema": "planner-p0-live-contract-probe-v0",
+  "run_id": "contract-20261011T070908Z-91a83cb6",
+  "created_at_utc": "2026-10-11T07:09:08.552220+00:00",
+  "scenes": [
+    "conditional accept_task=false",
+    "direct accept_task=false"
+  ],
+  "actions": [
+    "conditional offer refusal",
+    "conditional dispatch ACL denial",
+    "direct author-forced task dispatch",
+    "native GET",
+    "idempotent replay",
+    "same request id with altered payload",
+    "seed then wait to storm",
+    "dissipate after storm must not reverse weather"
+  ],
+  "does_not_start_server": true
+}

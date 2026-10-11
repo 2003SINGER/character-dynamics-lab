@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-11 新授权 **P0 原始规划复现与共同游戏实例** 已形成有界 DEVELOPMENT 检查点；A 原生执行、B 历史回放与实时未准入分账，A/B/C 比较未完成。结果、预算、失败与下一步只由 [P0 RESULTS](Planner_P0_v0/RESULTS.md)维护。以下 P5 及旧路线保留为历史结果，不是本轮继续补功能的默认入口。
+原始 P0 A/B 及 LLM/embedding/Qwen 比较的暂停边界见[原始 P0 RESULTS](Planner_P0_v0/RESULTS.md)。P0-Integration 目前是 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 的有限检查点；运行、DB/ledger 审计、失败与边界只见[唯一 RESULTS](Planner_P0_Integration_v0/RESULTS.md)。它不是完整传统系统或独立 NPC agency；CI 仅验证离线契约，exact-head 状态以 GitHub Actions 为准。P5 shared-supply 失败与其他历史路线继续由各自结果 owner 保留。
 
 2026-10-10 当前原生平台路线为 **Evennia 主平台 + Ensemble 首个原生人物机制参照**。P5 Author Bundle 有限集成状态 **READY_FOR_INDEPENDENT_REVIEW**，未 CLOSED；12 场结果、11/12 结构审计及一个真实 shared-supply 失败只维护于 [P5 RESULTS](Native_Platform_P5_v0/RESULTS.md)，公开索引从该 owner 进入。MCP smoke、9个legacy cases（10 worlds）与8个P4 worlds回归已完成；四组P4配对integrity audit PASS。范围和边界见 [P5 README](Native_Platform_P5_v0/README.md)，核心接口见[代码 README](../tools/native_platform_v0/p5/README.md)。P5 使用有限、条件性的作者机会 AND/OR 候选枚举，并复用已有 TypedIR、GTPyhop 和原生 Ensemble；不代表完整 DM、可保证的 NPC 响应或研究效果。P1/P2、P3 与 P4-0 均由各自历史 owner 维护，旧结论不在本页重写。
 

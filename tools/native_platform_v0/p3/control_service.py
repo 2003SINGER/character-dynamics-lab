@@ -217,6 +217,11 @@ class P3Control:
             "step_p0_shared_world": self.step_p0_shared_world,
             "inject_p0_route_block": self.inject_p0_route_block,
             "get_p0_shared_world_trace": self.get_p0_shared_world_trace,
+            "reset_p0_integration_v0": self.reset_p0_integration_v0,
+            "snapshot_p0_integration_v0": self.snapshot_p0_integration_v0,
+            "step_p0_integration_v0": self.step_p0_integration_v0,
+            "inject_p0_integration_mutation_v0": self.inject_p0_integration_mutation_v0,
+            "get_p0_integration_trace_v0": self.get_p0_integration_trace_v0,
             "run_p5_scenario": self.run_p5_scenario,
             "edit_author_bundle": self.edit_author_bundle,
             "step_world": self.step_world,
@@ -228,6 +233,41 @@ class P3Control:
         if op not in handlers:
             raise ValueError("unsupported operation")
         return handlers[op](args)
+
+    def reset_p0_integration_v0(self, args):
+        if set(args) - {"mode", "seed", "accept_task"}:
+            raise ValueError("reset_p0_integration_v0 accepts only mode, seed, accept_task")
+        if self.created_scenes >= MAX_SCENES_PER_PROCESS:
+            raise ValueError("scene creation limit reached for this server process")
+        mode, seed, accept_task = args.get("mode", "direct"), args.get("seed", 0), args.get("accept_task", True)
+        if mode not in {"free", "conditional", "direct"} or type(seed) is not int or not 0 <= seed <= 2**31 - 1 or type(accept_task) is not bool:
+            raise ValueError("invalid integration fixture parameters")
+        from tools.planner_p0_v0.integration_v0.native_world import create_scene
+        scene = create_scene(_owner_account().id, mode=mode, seed=seed, accept_task=accept_task)
+        self.created_scenes += 1
+        return {"ok": True, "scene": _json_safe(scene)}
+
+    def snapshot_p0_integration_v0(self, args):
+        if set(args) != {"scene_id"}: raise ValueError("snapshot requires only scene_id")
+        from tools.planner_p0_v0.integration_v0.native_world import snapshot
+        return {"ok": True, "snapshot": _json_safe(snapshot(args["scene_id"], _owner_account().id))}
+
+    def step_p0_integration_v0(self, args):
+        if set(args) != {"scene_id", "request_id", "driver", "action"}:
+            raise ValueError("step requires scene_id, request_id, driver, action")
+        from tools.planner_p0_v0.integration_v0.native_world import step
+        return step(args["scene_id"], _owner_account().id, args["request_id"], args["driver"], args["action"])
+
+    def inject_p0_integration_mutation_v0(self, args):
+        if set(args) not in ({"scene_id", "request_id", "kind"}, {"scene_id", "request_id", "kind", "route"}):
+            raise ValueError("mutation requires scene_id, request_id, kind, and optional route")
+        from tools.planner_p0_v0.integration_v0.native_world import inject_mutation
+        return inject_mutation(args["scene_id"], _owner_account().id, args["request_id"], args["kind"], args.get("route"))
+
+    def get_p0_integration_trace_v0(self, args):
+        if set(args) != {"scene_id"}: raise ValueError("trace requires only scene_id")
+        from tools.planner_p0_v0.integration_v0.native_world import trace
+        return {"ok": True, "trace": _json_safe(trace(args["scene_id"], _owner_account().id))}
 
     def reset_p0_shared_world(self, args):
         if set(args) - {"seed"}:

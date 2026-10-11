@@ -2,7 +2,7 @@
 
 更新时间：2026-10-11。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
-当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。2026-10-11 用户进一步授权 **P0：原始规划器复现与共同游戏规划实例**：先运行原始 Sabre／LLM 搜索引导，保留模型、embedding、版本和执行权限的真实差异，再决定共同域比较能否准入。[此前比较候选](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md#6-第一个可检验未知数与有限比较候选)不是已批准的新算法。结果只见 [P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)，不预设 LLM 增益、不自动进入 P6 或训练。
+当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。当前 **P0-Integration / DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 是有限检查点，未 CLOSED；唯一结果与边界见 [RESULTS](../02_实验/Planner_P0_Integration_v0/RESULTS.md)。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准；P5 shared-supply 失败保留，不自动进入 P6 或训练。
 
 角色动力3的[阶段与过关证据](研究重建审计_2026-10-06.md)与各原生平台历史阶段分别保留；当前执行指针是 P0，P5 Author Bundle 保持待独立审阅及原失败结果。不是全部工作归零；文档更新不算原生运行通过。
 
@@ -10,7 +10,8 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| PLANNER-P0 | **有界 DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；A/B/C 比较 NOT_READY** | 审阅原始 Sabre 复现、真实快照执行／封路修复和 B 五轮历史回放；B 新响应 embedding 资源未准入，C 未实现。先决定资源或显式变体，不自动扩游戏或 benchmark。de Lima 2023 系统级近邻已定位，全文后续定向核读 | [唯一运行与缺口](../02_实验/Planner_P0_v0/RESULTS.md)；[方法与版本核查](../01_文献/算法积木/06_P0原始规划路线_2026-10-11/README.md)。历史重放不称 live；预算耗尽不称不可达；当前不能谈 LLM 增量。不改 frozen C++，不自行 CLOSED |
+| PLANNER-P0-ORIGINAL | **A/B 有界 DEVELOPMENT 检查点保留；LLM/embedding/Qwen 与 A/B/C 比较 PAUSED** | 保留 A 原生 Sabre/Evennia 证据与 B 五轮历史缓存 replay；不再启动模型/embedding 资源准入，不补做新 LLM 搜索，不比较跨 Sabre 版本节点数。历史重放不称 live，B 实时未准入；不改 frozen C++，不自行 CLOSED | [原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)；[LLM 机制与历史 replay 记录](../01_文献/算法积木/06_P0原始规划路线_2026-10-11/LLM_Sabre_Search.md) |
+| P0-INTEGRATION | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED** | 独立审阅有限运行、失败与边界；CI 仅覆盖离线契约，exact-head 状态以 Actions 为准 | [唯一 RESULTS](../02_实验/Planner_P0_Integration_v0/RESULTS.md)；不等于完整传统系统或独立 NPC agency |
 | AUTHOR-PLANNING-NEIGHBOR-CHECK | **MECHANISM_AUDIT_DELIVERED / READY_FOR_INDEPENDENT_REVIEW** | 审阅[强近邻总表及比较候选](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)：同一固定G/权限/扰动，成熟符号重规划 vs LLM候选+独立检查，反馈粒度作为受控变量；先核共同语义与强实现准入 | 原件、方法/源码定位、交换接口、世界过程纸面诊断与评价分层已交付；这不是冻结实验协议。改G、固定G规划、文本storylet分账。**未复现软件、未运行新比较，无新机制/组合增益/玩家可信度证据；不自行CLOSED，不自动实验/P6。**定义仍见[F0/F1](CharacterDynamics_FormalProblem_v0.md) |
 | BOUNDARY-V1 | **CLOSED / FROZEN** | Kernel / Dynamics / Demo ownership 与依赖边界已完成复核 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |

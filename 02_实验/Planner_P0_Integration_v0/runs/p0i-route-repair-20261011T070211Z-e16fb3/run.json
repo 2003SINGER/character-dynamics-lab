@@ -1,0 +1,3793 @@
+{
+  "schema": "planner-p0-integration-v0",
+  "run_id": "p0i-route-repair-20261011T070211Z-e16fb3",
+  "case": "route-repair",
+  "mode": "direct",
+  "classification": "INCOMPLETE",
+  "started_at_utc": "2026-10-11T07:02:11.343966+00:00",
+  "configuration": {
+    "seed": 20261011,
+    "sabre": "v0.8.0",
+    "method": "bf",
+    "cost": "t",
+    "heuristic": "h+",
+    "max_visited": 200,
+    "max_generated": 5000,
+    "native_time_limit_ms": 5000,
+    "wrapper_process_timeout_s": 12,
+    "java_stack_size": "8m",
+    "p3_goal": "deliver_supply",
+    "p3_budget": {
+      "visits": 500,
+      "wall_seconds": 0.25
+    },
+    "driver_semantics": {
+      "direct": "authorized joint control, not independent agency",
+      "conditional": "fixed own-goal offer gate plus trusted controller; not autonomous NPC",
+      "free": "author/direct-driver ACL negative control; no autonomous loop tested"
+    }
+  },
+  "source_sha256": {
+    "tools/planner_p0_v0/integration_v0/runner.py": "0623a3ef1666bbf68c55580a36040d9039e795ee3aad6372117bb08418390ce9",
+    "tools/planner_p0_v0/integration_v0/sabre_export.py": "55b4d5c63bbd3b05c0a6d8d2a235568fe11413b10ce1c10def68dcf3d16cf87e",
+    "tools/planner_p0_v0/integration_v0/monitor.py": "d0df705ae69e7faf6831b99508303c8c15cd1ec421e088d5d905408c8b81f260",
+    "tools/native_platform_v0/p3/planning.py": "93c835cdd693cf37b80540246ccc33ca976f62bd9cc8ede4ffdbc4242b2336c4",
+    "tools/planner_p0_v0/sabre_baseline/runner.py": "b38a3058bdbd9992fe8d83e285793df430f097b6d284211bfbf5470701e5262d",
+    "tools/planner_p0_v0/integration_v0/contract.py": "68174d4d25b57df2e1a440ab4e8c804019ff7d8026f9675f9405c63c333df5e7",
+    "tools/native_platform_v0/p3/mcp_stdio.py": "4fb809d8450cbcca723c988757b5a2fc42025c247a4b9e604738448f0880972f",
+    "tools/native_platform_v0/p3/control_service.py": "d265e21df80ca93c67581e6e2096b8bd0e45c815ac776272f64d940d0be53e0e",
+    "tools/planner_p0_v0/integration_v0/native_world.py": "93e3f925c464456eadae9422806fdd77f1554877cc927c8a51eecd5cdba35b00",
+    "tools/planner_p0_v0/integration_v0/audit_readback.py": "6eed690a0a9501fc8419800702ae9892eadd932fa3dca3f83c3ff3995a1b6c4f"
+  },
+  "planner_runs": [
+    {
+      "status": "SUCCESS",
+      "native_result": "Success!",
+      "utility_achieved": 1,
+      "nodes_visited": 12,
+      "nodes_generated": 164,
+      "elapsed_native_text": "9ms",
+      "elapsed_native_ms": 9.0,
+      "elapsed_native_parse_warning": null,
+      "plan_actions": [
+        "dispatch_task()",
+        "deliver_shelter(Junction)",
+        "move(B, Junction, Inn)",
+        "cloud_seed()",
+        "wait(A)",
+        "look(B)",
+        "meet()"
+      ],
+      "run_id": "p0i-route-repair-20261011T070211Z-e16fb3-s01",
+      "planner_version": "Sabre v0.8.0",
+      "native_cost_measure": "t",
+      "java_stack_size": "8m",
+      "wrapper_process_timeout_s": 12.0,
+      "wrapper_started_at_utc": "2026-10-11T07:02:11.454005+00:00",
+      "wrapper_finished_at_utc": "2026-10-11T07:02:11.736779+00:00",
+      "exit_code": 0,
+      "run_dir": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/integration-v0/p0i-route-repair-20261011T070211Z-e16fb3/p0i-route-repair-20261011T070211Z-e16fb3-s01",
+      "stdout_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/integration-v0/p0i-route-repair-20261011T070211Z-e16fb3/p0i-route-repair-20261011T070211Z-e16fb3-s01/stdout.log",
+      "stderr_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/integration-v0/p0i-route-repair-20261011T070211Z-e16fb3/p0i-route-repair-20261011T070211Z-e16fb3-s01/stderr.log",
+      "wrapper_exit_code": 0,
+      "wrapper_stderr": "",
+      "problem": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_Integration_v0/runs/p0i-route-repair-20261011T070211Z-e16fb3/problem-01.txt",
+      "problem_sha256": "73a9be6a59d0c27cee8edaad22d40f386911e1fafea11b7e07601fb7be86f1ed",
+      "sabre_command": [
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/native_platform_v0/evennia/venv/bin/python",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/planner_p0_v0/sabre_baseline/runner.py",
+        "--problem",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_Integration_v0/runs/p0i-route-repair-20261011T070211Z-e16fb3/problem-01.txt",
+        "--run-id",
+        "p0i-route-repair-20261011T070211Z-e16fb3-s01",
+        "--output-root",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/integration-v0/p0i-route-repair-20261011T070211Z-e16fb3",
+        "--java",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/jdk/jdk-17.0.20.1+1/Contents/Home/bin/java",
+        "--classpath",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/sabre/bin",
+        "--planner-version",
+        "Sabre v0.8.0",
+        "--method",
+        "bf",
+        "--cost",
+        "t",
+        "--heuristic",
+        "h+",
+        "--epistemic-limit",
+        "1",
+        "--max-visited",
+        "200",
+        "--max-generated",
+        "5000",
+        "--time-limit-ms",
+        "5000",
+        "--process-timeout-s",
+        "12",
+        "--character-limit",
+        "2",
+        "--stack-size",
+        "8m",
+        "--goal-utility",
+        "1",
+        "--author-limit",
+        "24"
+      ]
+    },
+    {
+      "status": "SUCCESS",
+      "native_result": "Success!",
+      "utility_achieved": 1,
+      "nodes_visited": 11,
+      "nodes_generated": 139,
+      "elapsed_native_text": "7ms",
+      "elapsed_native_ms": 7.0,
+      "elapsed_native_parse_warning": null,
+      "plan_actions": [
+        "deliver_shelter(Junction)",
+        "move(B, Junction, Inn)",
+        "cloud_seed()",
+        "wait(A)",
+        "look(B)",
+        "meet()"
+      ],
+      "run_id": "p0i-route-repair-20261011T070211Z-e16fb3-s02",
+      "planner_version": "Sabre v0.8.0",
+      "native_cost_measure": "t",
+      "java_stack_size": "8m",
+      "wrapper_process_timeout_s": 12.0,
+      "wrapper_started_at_utc": "2026-10-11T07:02:11.796958+00:00",
+      "wrapper_finished_at_utc": "2026-10-11T07:02:11.964323+00:00",
+      "exit_code": 0,
+      "run_dir": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/integration-v0/p0i-route-repair-20261011T070211Z-e16fb3/p0i-route-repair-20261011T070211Z-e16fb3-s02",
+      "stdout_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/integration-v0/p0i-route-repair-20261011T070211Z-e16fb3/p0i-route-repair-20261011T070211Z-e16fb3-s02/stdout.log",
+      "stderr_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/integration-v0/p0i-route-repair-20261011T070211Z-e16fb3/p0i-route-repair-20261011T070211Z-e16fb3-s02/stderr.log",
+      "wrapper_exit_code": 0,
+      "wrapper_stderr": "",
+      "problem": "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_Integration_v0/runs/p0i-route-repair-20261011T070211Z-e16fb3/problem-02.txt",
+      "problem_sha256": "7742b7e9c93d399432614ee3bc4b30e6a167e3d4bd36715c31f152e0460e431b",
+      "sabre_command": [
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/native_platform_v0/evennia/venv/bin/python",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/planner_p0_v0/sabre_baseline/runner.py",
+        "--problem",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_Integration_v0/runs/p0i-route-repair-20261011T070211Z-e16fb3/problem-02.txt",
+        "--run-id",
+        "p0i-route-repair-20261011T070211Z-e16fb3-s02",
+        "--output-root",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/sabre_baseline/evidence/integration-v0/p0i-route-repair-20261011T070211Z-e16fb3",
+        "--java",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/jdk/jdk-17.0.20.1+1/Contents/Home/bin/java",
+        "--classpath",
+        "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/sabre/bin",
+        "--planner-version",
+        "Sabre v0.8.0",
+        "--method",
+        "bf",
+        "--cost",
+        "t",
+        "--heuristic",
+        "h+",
+        "--epistemic-limit",
+        "1",
+        "--max-visited",
+        "200",
+        "--max-generated",
+        "5000",
+        "--time-limit-ms",
+        "5000",
+        "--process-timeout-s",
+        "12",
+        "--character-limit",
+        "2",
+        "--stack-size",
+        "8m",
+        "--goal-utility",
+        "1",
+        "--author-limit",
+        "24"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "phase": "RECEDING_HORIZON_CHECK",
+      "iteration": 1,
+      "minute": 0,
+      "typed_monitor": {
+        "monitor": "repository-TypedIR-EventCount-EventOrder",
+        "status": "PENDING",
+        "complete_ledger_prefix": true,
+        "constraints": [
+          {
+            "constraint_id": "delivery-once",
+            "status": "PENDING",
+            "reason": "event-count window has future remaining",
+            "witness": null
+          },
+          {
+            "constraint_id": "b-observed-storm-once",
+            "status": "PENDING",
+            "reason": "event-count window has future remaining",
+            "witness": null
+          },
+          {
+            "constraint_id": "meeting-witness-once",
+            "status": "PENDING",
+            "reason": "event-count window has future remaining",
+            "witness": null
+          },
+          {
+            "constraint_id": "delivery-before-meeting",
+            "status": "PENDING",
+            "reason": "ordered events may still occur",
+            "witness": null
+          },
+          {
+            "constraint_id": "observation-before-meeting",
+            "status": "PENDING",
+            "reason": "ordered events may still occur",
+            "witness": null
+          }
+        ],
+        "projected_receipts": []
+      }
+    },
+    {
+      "phase": "sabre_atomic_action",
+      "token": "dispatch_task()",
+      "action": {
+        "kind": "dispatch_task",
+        "actor": "A",
+        "task": "deliver_shelter"
+      },
+      "native": {
+        "schema": "planner-p0-integration-v0",
+        "scene_id": "p0i_20261011070211_63282fb9",
+        "request_id": "p0i-route-repair-20261011T070211Z-e16fb3-atom-01",
+        "driver": "author",
+        "action": {
+          "kind": "dispatch_task",
+          "actor": "A",
+          "task": "deliver_shelter"
+        },
+        "status": "SETTLED",
+        "code": null,
+        "accepted": true,
+        "settled": true,
+        "receipt_id": "p0i:dispatch_task:p0i_20261011070211_63282fb9:1",
+        "pre": {
+          "schema": "planner-p0-integration-v0",
+          "scene_id": "p0i_20261011070211_63282fb9",
+          "mode": "direct",
+          "clock": {
+            "now": 0,
+            "deadline": 24,
+            "unit": "minute",
+            "step_minutes": 1
+          },
+          "weather": "clear",
+          "pending_cloud": null,
+          "rooms": {
+            "junction": 3674,
+            "side_passage": 3675,
+            "inn": 3676
+          },
+          "actors": {
+            "A": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": "deliver_shelter",
+              "active_task": null,
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": null,
+                  "task_destination": null,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": [
+                    {
+                      "id": "3687"
+                    }
+                  ]
+                }
+              }
+            },
+            "B": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": null,
+                  "task_destination": null,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": [
+                    {
+                      "id": "3687"
+                    }
+                  ]
+                }
+              }
+            },
+            "player": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": null
+            }
+          },
+          "items": {
+            "shelter_kit": {
+              "id": 3687,
+              "location_id": 3674,
+              "holder_role": null
+            }
+          },
+          "routes": [
+            {
+              "id": "main",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "inn",
+                  "exit_id": 3677,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "junction",
+                  "exit_id": 3678,
+                  "traversable": true
+                }
+              ]
+            },
+            {
+              "id": "side",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "side_passage",
+                  "exit_id": 3679,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "junction",
+                  "exit_id": 3680,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "inn",
+                  "exit_id": 3681,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "side_passage",
+                  "exit_id": 3682,
+                  "traversable": true
+                }
+              ]
+            }
+          ],
+          "open_edges": [
+            [
+              "junction",
+              "inn"
+            ],
+            [
+              "inn",
+              "junction"
+            ],
+            [
+              "junction",
+              "side_passage"
+            ],
+            [
+              "side_passage",
+              "junction"
+            ],
+            [
+              "side_passage",
+              "inn"
+            ],
+            [
+              "inn",
+              "side_passage"
+            ]
+          ],
+          "item": {
+            "location": "junction",
+            "holder": null
+          },
+          "task": null,
+          "ledger_frontier": 1,
+          "sealed_through": 0
+        },
+        "post_action": {
+          "schema": "planner-p0-integration-v0",
+          "scene_id": "p0i_20261011070211_63282fb9",
+          "mode": "direct",
+          "clock": {
+            "now": 0,
+            "deadline": 24,
+            "unit": "minute",
+            "step_minutes": 1
+          },
+          "weather": "clear",
+          "pending_cloud": null,
+          "rooms": {
+            "junction": 3674,
+            "side_passage": 3675,
+            "inn": 3676
+          },
+          "actors": {
+            "A": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": "deliver_shelter",
+              "active_task": {
+                "task_id": "task:p0i_20261011070211_63282fb9:1",
+                "kind": "deliver_shelter",
+                "actor": "A",
+                "item_id": 3687,
+                "goal_room": "inn",
+                "status": "active",
+                "own_goal": "deliver_shelter",
+                "held": false,
+                "item_progress": [],
+                "progress_seq": 0,
+                "decision_source": "author_forced_dispatch"
+              },
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": {
+                    "id": "3687",
+                    "key": "shelter_kit p0i_20261011070211_63282fb9"
+                  },
+                  "task_destination": 3676,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": [
+                    {
+                      "id": "3687"
+                    }
+                  ]
+                }
+              }
+            },
+            "B": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": null,
+                  "task_destination": null,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": [
+                    {
+                      "id": "3687"
+                    }
+                  ]
+                }
+              }
+            },
+            "player": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": null
+            }
+          },
+          "items": {
+            "shelter_kit": {
+              "id": 3687,
+              "location_id": 3674,
+              "holder_role": null
+            }
+          },
+          "routes": [
+            {
+              "id": "main",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "inn",
+                  "exit_id": 3677,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "junction",
+                  "exit_id": 3678,
+                  "traversable": true
+                }
+              ]
+            },
+            {
+              "id": "side",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "side_passage",
+                  "exit_id": 3679,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "junction",
+                  "exit_id": 3680,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "inn",
+                  "exit_id": 3681,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "side_passage",
+                  "exit_id": 3682,
+                  "traversable": true
+                }
+              ]
+            }
+          ],
+          "open_edges": [
+            [
+              "junction",
+              "inn"
+            ],
+            [
+              "inn",
+              "junction"
+            ],
+            [
+              "junction",
+              "side_passage"
+            ],
+            [
+              "side_passage",
+              "junction"
+            ],
+            [
+              "side_passage",
+              "inn"
+            ],
+            [
+              "inn",
+              "side_passage"
+            ]
+          ],
+          "item": {
+            "location": "junction",
+            "holder": null
+          },
+          "task": {
+            "task_id": "task:p0i_20261011070211_63282fb9:1",
+            "kind": "deliver_shelter",
+            "actor": "A",
+            "item_id": 3687,
+            "goal_room": "inn",
+            "status": "active",
+            "own_goal": "deliver_shelter",
+            "held": false,
+            "item_progress": [],
+            "progress_seq": 0,
+            "decision_source": "author_forced_dispatch"
+          },
+          "ledger_frontier": 2,
+          "sealed_through": 0
+        },
+        "post": {
+          "schema": "planner-p0-integration-v0",
+          "scene_id": "p0i_20261011070211_63282fb9",
+          "mode": "direct",
+          "clock": {
+            "now": 1,
+            "deadline": 24,
+            "unit": "minute",
+            "step_minutes": 1
+          },
+          "weather": "clear",
+          "pending_cloud": null,
+          "rooms": {
+            "junction": 3674,
+            "side_passage": 3675,
+            "inn": 3676
+          },
+          "actors": {
+            "A": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": "deliver_shelter",
+              "active_task": {
+                "task_id": "task:p0i_20261011070211_63282fb9:1",
+                "kind": "deliver_shelter",
+                "actor": "A",
+                "item_id": 3687,
+                "goal_room": "inn",
+                "status": "active",
+                "own_goal": "deliver_shelter",
+                "held": false,
+                "item_progress": [],
+                "progress_seq": 0,
+                "decision_source": "author_forced_dispatch"
+              },
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": {
+                    "id": "3687",
+                    "key": "shelter_kit p0i_20261011070211_63282fb9"
+                  },
+                  "task_destination": 3676,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": [
+                    {
+                      "id": "3687"
+                    }
+                  ]
+                }
+              }
+            },
+            "B": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": null,
+                  "task_destination": null,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": [
+                    {
+                      "id": "3687"
+                    }
+                  ]
+                }
+              }
+            },
+            "player": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": null
+            }
+          },
+          "items": {
+            "shelter_kit": {
+              "id": 3687,
+              "location_id": 3674,
+              "holder_role": null
+            }
+          },
+          "routes": [
+            {
+              "id": "main",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "inn",
+                  "exit_id": 3677,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "junction",
+                  "exit_id": 3678,
+                  "traversable": true
+                }
+              ]
+            },
+            {
+              "id": "side",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "side_passage",
+                  "exit_id": 3679,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "junction",
+                  "exit_id": 3680,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "inn",
+                  "exit_id": 3681,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "side_passage",
+                  "exit_id": 3682,
+                  "traversable": true
+                }
+              ]
+            }
+          ],
+          "open_edges": [
+            [
+              "junction",
+              "inn"
+            ],
+            [
+              "inn",
+              "junction"
+            ],
+            [
+              "junction",
+              "side_passage"
+            ],
+            [
+              "side_passage",
+              "junction"
+            ],
+            [
+              "side_passage",
+              "inn"
+            ],
+            [
+              "inn",
+              "side_passage"
+            ]
+          ],
+          "item": {
+            "location": "junction",
+            "holder": null
+          },
+          "task": {
+            "task_id": "task:p0i_20261011070211_63282fb9:1",
+            "kind": "deliver_shelter",
+            "actor": "A",
+            "item_id": 3687,
+            "goal_room": "inn",
+            "status": "active",
+            "own_goal": "deliver_shelter",
+            "held": false,
+            "item_progress": [],
+            "progress_seq": 0,
+            "decision_source": "author_forced_dispatch"
+          },
+          "ledger_frontier": 3,
+          "sealed_through": 1
+        },
+        "clock": {
+          "before": 0,
+          "after": 1,
+          "weather_changed": false,
+          "weather": "clear",
+          "unit": "minute"
+        }
+      },
+      "classification": "SETTLED_NATIVE_ACTION"
+    },
+    {
+      "phase": "RECEDING_HORIZON_CHECK",
+      "iteration": 2,
+      "minute": 1,
+      "typed_monitor": {
+        "monitor": "repository-TypedIR-EventCount-EventOrder",
+        "status": "PENDING",
+        "complete_ledger_prefix": true,
+        "constraints": [
+          {
+            "constraint_id": "delivery-once",
+            "status": "PENDING",
+            "reason": "event-count window has future remaining",
+            "witness": null
+          },
+          {
+            "constraint_id": "b-observed-storm-once",
+            "status": "PENDING",
+            "reason": "event-count window has future remaining",
+            "witness": null
+          },
+          {
+            "constraint_id": "meeting-witness-once",
+            "status": "PENDING",
+            "reason": "event-count window has future remaining",
+            "witness": null
+          },
+          {
+            "constraint_id": "delivery-before-meeting",
+            "status": "PENDING",
+            "reason": "ordered events may still occur",
+            "witness": null
+          },
+          {
+            "constraint_id": "observation-before-meeting",
+            "status": "PENDING",
+            "reason": "ordered events may still occur",
+            "witness": null
+          }
+        ],
+        "projected_receipts": []
+      }
+    },
+    {
+      "phase": "htn_proposal",
+      "snapshot_minute": 1,
+      "task_id": "task:p0i_20261011070211_63282fb9:1",
+      "task_progress_before": [
+        "task:p0i_20261011070211_63282fb9:1",
+        0,
+        false,
+        "active"
+      ],
+      "proposal": {
+        "status": "SOLVED",
+        "reason": "actor-local HTN proposal",
+        "intent": {
+          "operator": "get",
+          "item_id": "3687"
+        },
+        "plan": [
+          {
+            "operator": "get",
+            "item_id": "3687"
+          },
+          {
+            "operator": "move",
+            "exit_key": "main",
+            "destination_id": 3676
+          },
+          {
+            "operator": "drop",
+            "item_id": "3687",
+            "room_id": 3676
+          }
+        ],
+        "method_action_visits": 6,
+        "implementation": "gtpyhop-core-2.0.2",
+        "prediction_only": true
+      },
+      "prediction_only": true
+    },
+    {
+      "phase": "native_htn_primitive",
+      "primitive": {
+        "operator": "get",
+        "item_id": "3687"
+      },
+      "action": {
+        "kind": "get",
+        "actor": "A",
+        "item": "shelter_kit"
+      },
+      "native": {
+        "schema": "planner-p0-integration-v0",
+        "scene_id": "p0i_20261011070211_63282fb9",
+        "request_id": "p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343",
+        "driver": "direct_driver",
+        "action": {
+          "kind": "get",
+          "actor": "A",
+          "item": "shelter_kit"
+        },
+        "status": "SETTLED",
+        "code": null,
+        "accepted": true,
+        "settled": true,
+        "receipt_id": "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343",
+        "pre": {
+          "schema": "planner-p0-integration-v0",
+          "scene_id": "p0i_20261011070211_63282fb9",
+          "mode": "direct",
+          "clock": {
+            "now": 1,
+            "deadline": 24,
+            "unit": "minute",
+            "step_minutes": 1
+          },
+          "weather": "clear",
+          "pending_cloud": null,
+          "rooms": {
+            "junction": 3674,
+            "side_passage": 3675,
+            "inn": 3676
+          },
+          "actors": {
+            "A": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": "deliver_shelter",
+              "active_task": {
+                "task_id": "task:p0i_20261011070211_63282fb9:1",
+                "kind": "deliver_shelter",
+                "actor": "A",
+                "item_id": 3687,
+                "goal_room": "inn",
+                "status": "active",
+                "own_goal": "deliver_shelter",
+                "held": false,
+                "item_progress": [],
+                "progress_seq": 0,
+                "decision_source": "author_forced_dispatch"
+              },
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": {
+                    "id": "3687",
+                    "key": "shelter_kit p0i_20261011070211_63282fb9"
+                  },
+                  "task_destination": 3676,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": [
+                    {
+                      "id": "3687"
+                    }
+                  ]
+                }
+              }
+            },
+            "B": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": null,
+                  "task_destination": null,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": [
+                    {
+                      "id": "3687"
+                    }
+                  ]
+                }
+              }
+            },
+            "player": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": null
+            }
+          },
+          "items": {
+            "shelter_kit": {
+              "id": 3687,
+              "location_id": 3674,
+              "holder_role": null
+            }
+          },
+          "routes": [
+            {
+              "id": "main",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "inn",
+                  "exit_id": 3677,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "junction",
+                  "exit_id": 3678,
+                  "traversable": true
+                }
+              ]
+            },
+            {
+              "id": "side",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "side_passage",
+                  "exit_id": 3679,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "junction",
+                  "exit_id": 3680,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "inn",
+                  "exit_id": 3681,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "side_passage",
+                  "exit_id": 3682,
+                  "traversable": true
+                }
+              ]
+            }
+          ],
+          "open_edges": [
+            [
+              "junction",
+              "inn"
+            ],
+            [
+              "inn",
+              "junction"
+            ],
+            [
+              "junction",
+              "side_passage"
+            ],
+            [
+              "side_passage",
+              "junction"
+            ],
+            [
+              "side_passage",
+              "inn"
+            ],
+            [
+              "inn",
+              "side_passage"
+            ]
+          ],
+          "item": {
+            "location": "junction",
+            "holder": null
+          },
+          "task": {
+            "task_id": "task:p0i_20261011070211_63282fb9:1",
+            "kind": "deliver_shelter",
+            "actor": "A",
+            "item_id": 3687,
+            "goal_room": "inn",
+            "status": "active",
+            "own_goal": "deliver_shelter",
+            "held": false,
+            "item_progress": [],
+            "progress_seq": 0,
+            "decision_source": "author_forced_dispatch"
+          },
+          "ledger_frontier": 4,
+          "sealed_through": 1
+        },
+        "post_action": {
+          "schema": "planner-p0-integration-v0",
+          "scene_id": "p0i_20261011070211_63282fb9",
+          "mode": "direct",
+          "clock": {
+            "now": 1,
+            "deadline": 24,
+            "unit": "minute",
+            "step_minutes": 1
+          },
+          "weather": "clear",
+          "pending_cloud": null,
+          "rooms": {
+            "junction": 3674,
+            "side_passage": 3675,
+            "inn": 3676
+          },
+          "actors": {
+            "A": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [
+                3687
+              ],
+              "known_weather": [],
+              "own_goal": "deliver_shelter",
+              "active_task": {
+                "task_id": "task:p0i_20261011070211_63282fb9:1",
+                "kind": "deliver_shelter",
+                "actor": "A",
+                "item_id": 3687,
+                "goal_room": "inn",
+                "status": "active",
+                "own_goal": "deliver_shelter",
+                "held": true,
+                "item_progress": [
+                  "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+                ],
+                "progress_seq": 1,
+                "decision_source": "author_forced_dispatch"
+              },
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": {
+                    "id": "3687",
+                    "key": "shelter_kit p0i_20261011070211_63282fb9"
+                  },
+                  "task_destination": 3676,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {
+                    "3674": {
+                      "3676": true,
+                      "3675": true
+                    }
+                  },
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": null,
+                  "item_held": true,
+                  "delivered": false,
+                  "visible_items": []
+                }
+              }
+            },
+            "B": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": null,
+                  "task_destination": null,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": []
+                }
+              }
+            },
+            "player": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": null
+            }
+          },
+          "items": {
+            "shelter_kit": {
+              "id": 3687,
+              "location_id": 3684,
+              "holder_role": "A"
+            }
+          },
+          "routes": [
+            {
+              "id": "main",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "inn",
+                  "exit_id": 3677,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "junction",
+                  "exit_id": 3678,
+                  "traversable": true
+                }
+              ]
+            },
+            {
+              "id": "side",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "side_passage",
+                  "exit_id": 3679,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "junction",
+                  "exit_id": 3680,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "inn",
+                  "exit_id": 3681,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "side_passage",
+                  "exit_id": 3682,
+                  "traversable": true
+                }
+              ]
+            }
+          ],
+          "open_edges": [
+            [
+              "junction",
+              "inn"
+            ],
+            [
+              "inn",
+              "junction"
+            ],
+            [
+              "junction",
+              "side_passage"
+            ],
+            [
+              "side_passage",
+              "junction"
+            ],
+            [
+              "side_passage",
+              "inn"
+            ],
+            [
+              "inn",
+              "side_passage"
+            ]
+          ],
+          "item": {
+            "location": null,
+            "holder": "A"
+          },
+          "task": {
+            "task_id": "task:p0i_20261011070211_63282fb9:1",
+            "kind": "deliver_shelter",
+            "actor": "A",
+            "item_id": 3687,
+            "goal_room": "inn",
+            "status": "active",
+            "own_goal": "deliver_shelter",
+            "held": true,
+            "item_progress": [
+              "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+            ],
+            "progress_seq": 1,
+            "decision_source": "author_forced_dispatch"
+          },
+          "ledger_frontier": 5,
+          "sealed_through": 1
+        },
+        "post": {
+          "schema": "planner-p0-integration-v0",
+          "scene_id": "p0i_20261011070211_63282fb9",
+          "mode": "direct",
+          "clock": {
+            "now": 2,
+            "deadline": 24,
+            "unit": "minute",
+            "step_minutes": 1
+          },
+          "weather": "clear",
+          "pending_cloud": null,
+          "rooms": {
+            "junction": 3674,
+            "side_passage": 3675,
+            "inn": 3676
+          },
+          "actors": {
+            "A": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [
+                3687
+              ],
+              "known_weather": [],
+              "own_goal": "deliver_shelter",
+              "active_task": {
+                "task_id": "task:p0i_20261011070211_63282fb9:1",
+                "kind": "deliver_shelter",
+                "actor": "A",
+                "item_id": 3687,
+                "goal_room": "inn",
+                "status": "active",
+                "own_goal": "deliver_shelter",
+                "held": true,
+                "item_progress": [
+                  "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+                ],
+                "progress_seq": 1,
+                "decision_source": "author_forced_dispatch"
+              },
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": {
+                    "id": "3687",
+                    "key": "shelter_kit p0i_20261011070211_63282fb9"
+                  },
+                  "task_destination": 3676,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {
+                    "3674": {
+                      "3676": true,
+                      "3675": true
+                    }
+                  },
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": null,
+                  "item_held": true,
+                  "delivered": false,
+                  "visible_items": []
+                }
+              }
+            },
+            "B": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": {
+                "observation": {
+                  "room_id": 3674,
+                  "task_item": null,
+                  "task_destination": null,
+                  "known_exits": {
+                    "3674": [
+                      3675,
+                      3676
+                    ],
+                    "3675": [
+                      3674,
+                      3676
+                    ],
+                    "3676": [
+                      3674,
+                      3675
+                    ]
+                  },
+                  "known_traversability": {},
+                  "exits": [
+                    {
+                      "key": "main",
+                      "destination_id": 3676,
+                      "traversable": true
+                    },
+                    {
+                      "key": "side",
+                      "destination_id": 3675,
+                      "traversable": true
+                    }
+                  ],
+                  "item_location": 3674,
+                  "item_held": false,
+                  "delivered": false,
+                  "visible_items": []
+                }
+              }
+            },
+            "player": {
+              "room_id": 3674,
+              "room": "junction",
+              "inventory_ids": [],
+              "known_weather": [],
+              "own_goal": null,
+              "active_task": null,
+              "local_view": null
+            }
+          },
+          "items": {
+            "shelter_kit": {
+              "id": 3687,
+              "location_id": 3684,
+              "holder_role": "A"
+            }
+          },
+          "routes": [
+            {
+              "id": "main",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "inn",
+                  "exit_id": 3677,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "junction",
+                  "exit_id": 3678,
+                  "traversable": true
+                }
+              ]
+            },
+            {
+              "id": "side",
+              "edges": [
+                {
+                  "from": "junction",
+                  "to": "side_passage",
+                  "exit_id": 3679,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "junction",
+                  "exit_id": 3680,
+                  "traversable": true
+                },
+                {
+                  "from": "side_passage",
+                  "to": "inn",
+                  "exit_id": 3681,
+                  "traversable": true
+                },
+                {
+                  "from": "inn",
+                  "to": "side_passage",
+                  "exit_id": 3682,
+                  "traversable": true
+                }
+              ]
+            }
+          ],
+          "open_edges": [
+            [
+              "junction",
+              "inn"
+            ],
+            [
+              "inn",
+              "junction"
+            ],
+            [
+              "junction",
+              "side_passage"
+            ],
+            [
+              "side_passage",
+              "junction"
+            ],
+            [
+              "side_passage",
+              "inn"
+            ],
+            [
+              "inn",
+              "side_passage"
+            ]
+          ],
+          "item": {
+            "location": null,
+            "holder": "A"
+          },
+          "task": {
+            "task_id": "task:p0i_20261011070211_63282fb9:1",
+            "kind": "deliver_shelter",
+            "actor": "A",
+            "item_id": 3687,
+            "goal_room": "inn",
+            "status": "active",
+            "own_goal": "deliver_shelter",
+            "held": true,
+            "item_progress": [
+              "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+            ],
+            "progress_seq": 1,
+            "decision_source": "author_forced_dispatch"
+          },
+          "ledger_frontier": 6,
+          "sealed_through": 2
+        },
+        "clock": {
+          "before": 1,
+          "after": 2,
+          "weather_changed": false,
+          "weather": "clear",
+          "unit": "minute"
+        }
+      },
+      "classification": "SETTLED_NATIVE_ACTION",
+      "task_id": "task:p0i_20261011070211_63282fb9:1",
+      "progress_before": [
+        "task:p0i_20261011070211_63282fb9:1",
+        0,
+        false,
+        "active"
+      ]
+    },
+    {
+      "phase": "htn_proposal",
+      "snapshot_minute": 2,
+      "task_id": "task:p0i_20261011070211_63282fb9:1",
+      "task_progress_before": [
+        "task:p0i_20261011070211_63282fb9:1",
+        1,
+        true,
+        "active"
+      ],
+      "proposal": {
+        "status": "SOLVED",
+        "reason": "actor-local HTN proposal",
+        "intent": {
+          "operator": "move",
+          "exit_key": "main",
+          "destination_id": 3676
+        },
+        "plan": [
+          {
+            "operator": "move",
+            "exit_key": "main",
+            "destination_id": 3676
+          },
+          {
+            "operator": "drop",
+            "item_id": "3687",
+            "room_id": 3676
+          }
+        ],
+        "method_action_visits": 4,
+        "implementation": "gtpyhop-core-2.0.2",
+        "prediction_only": true
+      },
+      "prediction_only": true
+    }
+  ],
+  "mutations": [],
+  "status": "FAILED",
+  "scene": {
+    "scene_id": "p0i_20261011070211_63282fb9",
+    "schema": "planner-p0-integration-v0",
+    "mode": "direct",
+    "rooms": {
+      "junction": {
+        "id": 3674,
+        "dbref": "#3674"
+      },
+      "side_passage": {
+        "id": 3675,
+        "dbref": "#3675"
+      },
+      "inn": {
+        "id": 3676,
+        "dbref": "#3676"
+      }
+    },
+    "actors": {
+      "A": {
+        "id": 3684,
+        "dbref": "#3684"
+      },
+      "B": {
+        "id": 3685,
+        "dbref": "#3685"
+      },
+      "player": {
+        "id": 3686,
+        "dbref": "#3686"
+      }
+    },
+    "item": {
+      "id": 3687,
+      "dbref": "#3687",
+      "alias": "shelter_kit"
+    },
+    "clock": {
+      "now": 0,
+      "deadline": 24,
+      "unit": "minute"
+    },
+    "accept_task": true
+  },
+  "failure": {
+    "type": "RuntimeError",
+    "message": "P3 control rejected operation (NameError)"
+  },
+  "partial_trace": {
+    "schema": "planner-p0-integration-v0",
+    "scene_id": "p0i_20261011070211_63282fb9",
+    "snapshot": {
+      "schema": "planner-p0-integration-v0",
+      "scene_id": "p0i_20261011070211_63282fb9",
+      "mode": "direct",
+      "clock": {
+        "now": 2,
+        "deadline": 24,
+        "unit": "minute",
+        "step_minutes": 1
+      },
+      "weather": "clear",
+      "pending_cloud": null,
+      "rooms": {
+        "junction": 3674,
+        "side_passage": 3675,
+        "inn": 3676
+      },
+      "actors": {
+        "A": {
+          "room_id": 3674,
+          "room": "junction",
+          "inventory_ids": [
+            3687
+          ],
+          "known_weather": [],
+          "own_goal": "deliver_shelter",
+          "active_task": {
+            "task_id": "task:p0i_20261011070211_63282fb9:1",
+            "kind": "deliver_shelter",
+            "actor": "A",
+            "item_id": 3687,
+            "goal_room": "inn",
+            "status": "active",
+            "own_goal": "deliver_shelter",
+            "held": true,
+            "item_progress": [
+              "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+            ],
+            "progress_seq": 1,
+            "decision_source": "author_forced_dispatch"
+          },
+          "local_view": {
+            "observation": {
+              "room_id": 3674,
+              "task_item": {
+                "id": "3687",
+                "key": "shelter_kit p0i_20261011070211_63282fb9"
+              },
+              "task_destination": 3676,
+              "known_exits": {
+                "3674": [
+                  3675,
+                  3676
+                ],
+                "3675": [
+                  3674,
+                  3676
+                ],
+                "3676": [
+                  3674,
+                  3675
+                ]
+              },
+              "known_traversability": {
+                "3674": {
+                  "3676": true,
+                  "3675": true
+                }
+              },
+              "exits": [
+                {
+                  "key": "main",
+                  "destination_id": 3676,
+                  "traversable": true
+                },
+                {
+                  "key": "side",
+                  "destination_id": 3675,
+                  "traversable": true
+                }
+              ],
+              "item_location": null,
+              "item_held": true,
+              "delivered": false,
+              "visible_items": []
+            }
+          }
+        },
+        "B": {
+          "room_id": 3674,
+          "room": "junction",
+          "inventory_ids": [],
+          "known_weather": [],
+          "own_goal": null,
+          "active_task": null,
+          "local_view": {
+            "observation": {
+              "room_id": 3674,
+              "task_item": null,
+              "task_destination": null,
+              "known_exits": {
+                "3674": [
+                  3675,
+                  3676
+                ],
+                "3675": [
+                  3674,
+                  3676
+                ],
+                "3676": [
+                  3674,
+                  3675
+                ]
+              },
+              "known_traversability": {},
+              "exits": [
+                {
+                  "key": "main",
+                  "destination_id": 3676,
+                  "traversable": true
+                },
+                {
+                  "key": "side",
+                  "destination_id": 3675,
+                  "traversable": true
+                }
+              ],
+              "item_location": 3674,
+              "item_held": false,
+              "delivered": false,
+              "visible_items": []
+            }
+          }
+        },
+        "player": {
+          "room_id": 3674,
+          "room": "junction",
+          "inventory_ids": [],
+          "known_weather": [],
+          "own_goal": null,
+          "active_task": null,
+          "local_view": null
+        }
+      },
+      "items": {
+        "shelter_kit": {
+          "id": 3687,
+          "location_id": 3684,
+          "holder_role": "A"
+        }
+      },
+      "routes": [
+        {
+          "id": "main",
+          "edges": [
+            {
+              "from": "junction",
+              "to": "inn",
+              "exit_id": 3677,
+              "traversable": true
+            },
+            {
+              "from": "inn",
+              "to": "junction",
+              "exit_id": 3678,
+              "traversable": true
+            }
+          ]
+        },
+        {
+          "id": "side",
+          "edges": [
+            {
+              "from": "junction",
+              "to": "side_passage",
+              "exit_id": 3679,
+              "traversable": true
+            },
+            {
+              "from": "side_passage",
+              "to": "junction",
+              "exit_id": 3680,
+              "traversable": true
+            },
+            {
+              "from": "side_passage",
+              "to": "inn",
+              "exit_id": 3681,
+              "traversable": true
+            },
+            {
+              "from": "inn",
+              "to": "side_passage",
+              "exit_id": 3682,
+              "traversable": true
+            }
+          ]
+        }
+      ],
+      "open_edges": [
+        [
+          "junction",
+          "inn"
+        ],
+        [
+          "inn",
+          "junction"
+        ],
+        [
+          "junction",
+          "side_passage"
+        ],
+        [
+          "side_passage",
+          "junction"
+        ],
+        [
+          "side_passage",
+          "inn"
+        ],
+        [
+          "inn",
+          "side_passage"
+        ]
+      ],
+      "item": {
+        "location": null,
+        "holder": "A"
+      },
+      "task": {
+        "task_id": "task:p0i_20261011070211_63282fb9:1",
+        "kind": "deliver_shelter",
+        "actor": "A",
+        "item_id": 3687,
+        "goal_room": "inn",
+        "status": "active",
+        "own_goal": "deliver_shelter",
+        "held": true,
+        "item_progress": [
+          "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+        ],
+        "progress_seq": 1,
+        "decision_source": "author_forced_dispatch"
+      },
+      "ledger_frontier": 7,
+      "sealed_through": 2
+    },
+    "events": [
+      {
+        "sequence": 1,
+        "event_id": "p0i_20261011070211_63282fb9:1",
+        "minute": 0,
+        "event_type": "SCENE_CREATED",
+        "source": "server",
+        "driver": null,
+        "request_id": null,
+        "actor": null,
+        "action": null,
+        "accepted": null,
+        "settled": null,
+        "code": null,
+        "receipt_id": null,
+        "typed_args": {},
+        "details": {
+          "mode": "direct",
+          "seed": 20261011
+        }
+      },
+      {
+        "sequence": 2,
+        "event_id": "p0i_20261011070211_63282fb9:2",
+        "minute": 0,
+        "event_type": "TASK_DISPATCH",
+        "source": "authorized_author_action",
+        "driver": "author",
+        "request_id": "p0i-route-repair-20261011T070211Z-e16fb3-atom-01",
+        "actor": null,
+        "action": {
+          "kind": "dispatch_task",
+          "actor": "A",
+          "task": "deliver_shelter"
+        },
+        "accepted": true,
+        "settled": true,
+        "code": null,
+        "receipt_id": "p0i:dispatch_task:p0i_20261011070211_63282fb9:1",
+        "typed_args": {
+          "actor": "A",
+          "task": "deliver_shelter",
+          "decision": "author_forced"
+        },
+        "details": {
+          "own_goal": "deliver_shelter",
+          "decision_source": "author_forced_dispatch"
+        }
+      },
+      {
+        "sequence": 3,
+        "event_id": "p0i_20261011070211_63282fb9:3",
+        "minute": 1,
+        "event_type": "TIME_ADVANCED",
+        "source": "server_clock",
+        "driver": null,
+        "request_id": null,
+        "actor": null,
+        "action": null,
+        "accepted": null,
+        "settled": null,
+        "code": null,
+        "receipt_id": null,
+        "typed_args": {},
+        "details": {
+          "before": 0,
+          "after": 1,
+          "unit": "minute"
+        }
+      },
+      {
+        "sequence": 4,
+        "event_id": "p0i_20261011070211_63282fb9:4",
+        "minute": 1,
+        "event_type": "ACTION_RESULT",
+        "source": "control_executor",
+        "driver": "author",
+        "request_id": "p0i-route-repair-20261011T070211Z-e16fb3-atom-01",
+        "actor": null,
+        "action": {
+          "kind": "dispatch_task",
+          "actor": "A",
+          "task": "deliver_shelter"
+        },
+        "accepted": true,
+        "settled": true,
+        "code": null,
+        "receipt_id": "p0i:dispatch_task:p0i_20261011070211_63282fb9:1",
+        "typed_args": {},
+        "details": {
+          "clock": {
+            "before": 0,
+            "after": 1,
+            "weather_changed": false,
+            "weather": "clear",
+            "unit": "minute"
+          },
+          "pre": {
+            "schema": "planner-p0-integration-v0",
+            "scene_id": "p0i_20261011070211_63282fb9",
+            "mode": "direct",
+            "clock": {
+              "now": 0,
+              "deadline": 24,
+              "unit": "minute",
+              "step_minutes": 1
+            },
+            "weather": "clear",
+            "pending_cloud": null,
+            "rooms": {
+              "junction": 3674,
+              "side_passage": 3675,
+              "inn": 3676
+            },
+            "actors": {
+              "A": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": "deliver_shelter",
+                "active_task": null,
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": null,
+                    "task_destination": null,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": [
+                      {
+                        "id": "3687"
+                      }
+                    ]
+                  }
+                }
+              },
+              "B": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": null,
+                    "task_destination": null,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": [
+                      {
+                        "id": "3687"
+                      }
+                    ]
+                  }
+                }
+              },
+              "player": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": null
+              }
+            },
+            "items": {
+              "shelter_kit": {
+                "id": 3687,
+                "location_id": 3674,
+                "holder_role": null
+              }
+            },
+            "routes": [
+              {
+                "id": "main",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "inn",
+                    "exit_id": 3677,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "junction",
+                    "exit_id": 3678,
+                    "traversable": true
+                  }
+                ]
+              },
+              {
+                "id": "side",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "side_passage",
+                    "exit_id": 3679,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "junction",
+                    "exit_id": 3680,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "inn",
+                    "exit_id": 3681,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "side_passage",
+                    "exit_id": 3682,
+                    "traversable": true
+                  }
+                ]
+              }
+            ],
+            "open_edges": [
+              [
+                "junction",
+                "inn"
+              ],
+              [
+                "inn",
+                "junction"
+              ],
+              [
+                "junction",
+                "side_passage"
+              ],
+              [
+                "side_passage",
+                "junction"
+              ],
+              [
+                "side_passage",
+                "inn"
+              ],
+              [
+                "inn",
+                "side_passage"
+              ]
+            ],
+            "item": {
+              "location": "junction",
+              "holder": null
+            },
+            "task": null,
+            "ledger_frontier": 1,
+            "sealed_through": 0
+          },
+          "post_action": {
+            "schema": "planner-p0-integration-v0",
+            "scene_id": "p0i_20261011070211_63282fb9",
+            "mode": "direct",
+            "clock": {
+              "now": 0,
+              "deadline": 24,
+              "unit": "minute",
+              "step_minutes": 1
+            },
+            "weather": "clear",
+            "pending_cloud": null,
+            "rooms": {
+              "junction": 3674,
+              "side_passage": 3675,
+              "inn": 3676
+            },
+            "actors": {
+              "A": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": "deliver_shelter",
+                "active_task": {
+                  "task_id": "task:p0i_20261011070211_63282fb9:1",
+                  "kind": "deliver_shelter",
+                  "actor": "A",
+                  "item_id": 3687,
+                  "goal_room": "inn",
+                  "status": "active",
+                  "own_goal": "deliver_shelter",
+                  "held": false,
+                  "item_progress": [],
+                  "progress_seq": 0,
+                  "decision_source": "author_forced_dispatch"
+                },
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": {
+                      "id": "3687",
+                      "key": "shelter_kit p0i_20261011070211_63282fb9"
+                    },
+                    "task_destination": 3676,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": [
+                      {
+                        "id": "3687"
+                      }
+                    ]
+                  }
+                }
+              },
+              "B": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": null,
+                    "task_destination": null,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": [
+                      {
+                        "id": "3687"
+                      }
+                    ]
+                  }
+                }
+              },
+              "player": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": null
+              }
+            },
+            "items": {
+              "shelter_kit": {
+                "id": 3687,
+                "location_id": 3674,
+                "holder_role": null
+              }
+            },
+            "routes": [
+              {
+                "id": "main",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "inn",
+                    "exit_id": 3677,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "junction",
+                    "exit_id": 3678,
+                    "traversable": true
+                  }
+                ]
+              },
+              {
+                "id": "side",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "side_passage",
+                    "exit_id": 3679,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "junction",
+                    "exit_id": 3680,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "inn",
+                    "exit_id": 3681,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "side_passage",
+                    "exit_id": 3682,
+                    "traversable": true
+                  }
+                ]
+              }
+            ],
+            "open_edges": [
+              [
+                "junction",
+                "inn"
+              ],
+              [
+                "inn",
+                "junction"
+              ],
+              [
+                "junction",
+                "side_passage"
+              ],
+              [
+                "side_passage",
+                "junction"
+              ],
+              [
+                "side_passage",
+                "inn"
+              ],
+              [
+                "inn",
+                "side_passage"
+              ]
+            ],
+            "item": {
+              "location": "junction",
+              "holder": null
+            },
+            "task": {
+              "task_id": "task:p0i_20261011070211_63282fb9:1",
+              "kind": "deliver_shelter",
+              "actor": "A",
+              "item_id": 3687,
+              "goal_room": "inn",
+              "status": "active",
+              "own_goal": "deliver_shelter",
+              "held": false,
+              "item_progress": [],
+              "progress_seq": 0,
+              "decision_source": "author_forced_dispatch"
+            },
+            "ledger_frontier": 2,
+            "sealed_through": 0
+          },
+          "post": {
+            "schema": "planner-p0-integration-v0",
+            "scene_id": "p0i_20261011070211_63282fb9",
+            "mode": "direct",
+            "clock": {
+              "now": 1,
+              "deadline": 24,
+              "unit": "minute",
+              "step_minutes": 1
+            },
+            "weather": "clear",
+            "pending_cloud": null,
+            "rooms": {
+              "junction": 3674,
+              "side_passage": 3675,
+              "inn": 3676
+            },
+            "actors": {
+              "A": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": "deliver_shelter",
+                "active_task": {
+                  "task_id": "task:p0i_20261011070211_63282fb9:1",
+                  "kind": "deliver_shelter",
+                  "actor": "A",
+                  "item_id": 3687,
+                  "goal_room": "inn",
+                  "status": "active",
+                  "own_goal": "deliver_shelter",
+                  "held": false,
+                  "item_progress": [],
+                  "progress_seq": 0,
+                  "decision_source": "author_forced_dispatch"
+                },
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": {
+                      "id": "3687",
+                      "key": "shelter_kit p0i_20261011070211_63282fb9"
+                    },
+                    "task_destination": 3676,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": [
+                      {
+                        "id": "3687"
+                      }
+                    ]
+                  }
+                }
+              },
+              "B": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": null,
+                    "task_destination": null,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": [
+                      {
+                        "id": "3687"
+                      }
+                    ]
+                  }
+                }
+              },
+              "player": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": null
+              }
+            },
+            "items": {
+              "shelter_kit": {
+                "id": 3687,
+                "location_id": 3674,
+                "holder_role": null
+              }
+            },
+            "routes": [
+              {
+                "id": "main",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "inn",
+                    "exit_id": 3677,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "junction",
+                    "exit_id": 3678,
+                    "traversable": true
+                  }
+                ]
+              },
+              {
+                "id": "side",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "side_passage",
+                    "exit_id": 3679,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "junction",
+                    "exit_id": 3680,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "inn",
+                    "exit_id": 3681,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "side_passage",
+                    "exit_id": 3682,
+                    "traversable": true
+                  }
+                ]
+              }
+            ],
+            "open_edges": [
+              [
+                "junction",
+                "inn"
+              ],
+              [
+                "inn",
+                "junction"
+              ],
+              [
+                "junction",
+                "side_passage"
+              ],
+              [
+                "side_passage",
+                "junction"
+              ],
+              [
+                "side_passage",
+                "inn"
+              ],
+              [
+                "inn",
+                "side_passage"
+              ]
+            ],
+            "item": {
+              "location": "junction",
+              "holder": null
+            },
+            "task": {
+              "task_id": "task:p0i_20261011070211_63282fb9:1",
+              "kind": "deliver_shelter",
+              "actor": "A",
+              "item_id": 3687,
+              "goal_room": "inn",
+              "status": "active",
+              "own_goal": "deliver_shelter",
+              "held": false,
+              "item_progress": [],
+              "progress_seq": 0,
+              "decision_source": "author_forced_dispatch"
+            },
+            "ledger_frontier": 3,
+            "sealed_through": 1
+          },
+          "own_goal": "deliver_shelter",
+          "decision_source": "author_forced_dispatch"
+        }
+      },
+      {
+        "sequence": 5,
+        "event_id": "p0i_20261011070211_63282fb9:5",
+        "minute": 1,
+        "event_type": "GET_SETTLED",
+        "source": "native_evennia_readback",
+        "driver": "direct_driver",
+        "request_id": "p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343",
+        "actor": "A",
+        "action": {
+          "kind": "get",
+          "actor": "A",
+          "item": "shelter_kit"
+        },
+        "accepted": true,
+        "settled": true,
+        "code": null,
+        "receipt_id": "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343",
+        "typed_args": {},
+        "details": {}
+      },
+      {
+        "sequence": 6,
+        "event_id": "p0i_20261011070211_63282fb9:6",
+        "minute": 2,
+        "event_type": "TIME_ADVANCED",
+        "source": "server_clock",
+        "driver": null,
+        "request_id": null,
+        "actor": null,
+        "action": null,
+        "accepted": null,
+        "settled": null,
+        "code": null,
+        "receipt_id": null,
+        "typed_args": {},
+        "details": {
+          "before": 1,
+          "after": 2,
+          "unit": "minute"
+        }
+      },
+      {
+        "sequence": 7,
+        "event_id": "p0i_20261011070211_63282fb9:7",
+        "minute": 2,
+        "event_type": "ACTION_RESULT",
+        "source": "control_executor",
+        "driver": "direct_driver",
+        "request_id": "p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343",
+        "actor": null,
+        "action": {
+          "kind": "get",
+          "actor": "A",
+          "item": "shelter_kit"
+        },
+        "accepted": true,
+        "settled": true,
+        "code": null,
+        "receipt_id": "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343",
+        "typed_args": {},
+        "details": {
+          "clock": {
+            "before": 1,
+            "after": 2,
+            "weather_changed": false,
+            "weather": "clear",
+            "unit": "minute"
+          },
+          "pre": {
+            "schema": "planner-p0-integration-v0",
+            "scene_id": "p0i_20261011070211_63282fb9",
+            "mode": "direct",
+            "clock": {
+              "now": 1,
+              "deadline": 24,
+              "unit": "minute",
+              "step_minutes": 1
+            },
+            "weather": "clear",
+            "pending_cloud": null,
+            "rooms": {
+              "junction": 3674,
+              "side_passage": 3675,
+              "inn": 3676
+            },
+            "actors": {
+              "A": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": "deliver_shelter",
+                "active_task": {
+                  "task_id": "task:p0i_20261011070211_63282fb9:1",
+                  "kind": "deliver_shelter",
+                  "actor": "A",
+                  "item_id": 3687,
+                  "goal_room": "inn",
+                  "status": "active",
+                  "own_goal": "deliver_shelter",
+                  "held": false,
+                  "item_progress": [],
+                  "progress_seq": 0,
+                  "decision_source": "author_forced_dispatch"
+                },
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": {
+                      "id": "3687",
+                      "key": "shelter_kit p0i_20261011070211_63282fb9"
+                    },
+                    "task_destination": 3676,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": [
+                      {
+                        "id": "3687"
+                      }
+                    ]
+                  }
+                }
+              },
+              "B": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": null,
+                    "task_destination": null,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": [
+                      {
+                        "id": "3687"
+                      }
+                    ]
+                  }
+                }
+              },
+              "player": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": null
+              }
+            },
+            "items": {
+              "shelter_kit": {
+                "id": 3687,
+                "location_id": 3674,
+                "holder_role": null
+              }
+            },
+            "routes": [
+              {
+                "id": "main",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "inn",
+                    "exit_id": 3677,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "junction",
+                    "exit_id": 3678,
+                    "traversable": true
+                  }
+                ]
+              },
+              {
+                "id": "side",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "side_passage",
+                    "exit_id": 3679,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "junction",
+                    "exit_id": 3680,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "inn",
+                    "exit_id": 3681,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "side_passage",
+                    "exit_id": 3682,
+                    "traversable": true
+                  }
+                ]
+              }
+            ],
+            "open_edges": [
+              [
+                "junction",
+                "inn"
+              ],
+              [
+                "inn",
+                "junction"
+              ],
+              [
+                "junction",
+                "side_passage"
+              ],
+              [
+                "side_passage",
+                "junction"
+              ],
+              [
+                "side_passage",
+                "inn"
+              ],
+              [
+                "inn",
+                "side_passage"
+              ]
+            ],
+            "item": {
+              "location": "junction",
+              "holder": null
+            },
+            "task": {
+              "task_id": "task:p0i_20261011070211_63282fb9:1",
+              "kind": "deliver_shelter",
+              "actor": "A",
+              "item_id": 3687,
+              "goal_room": "inn",
+              "status": "active",
+              "own_goal": "deliver_shelter",
+              "held": false,
+              "item_progress": [],
+              "progress_seq": 0,
+              "decision_source": "author_forced_dispatch"
+            },
+            "ledger_frontier": 4,
+            "sealed_through": 1
+          },
+          "post_action": {
+            "schema": "planner-p0-integration-v0",
+            "scene_id": "p0i_20261011070211_63282fb9",
+            "mode": "direct",
+            "clock": {
+              "now": 1,
+              "deadline": 24,
+              "unit": "minute",
+              "step_minutes": 1
+            },
+            "weather": "clear",
+            "pending_cloud": null,
+            "rooms": {
+              "junction": 3674,
+              "side_passage": 3675,
+              "inn": 3676
+            },
+            "actors": {
+              "A": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [
+                  3687
+                ],
+                "known_weather": [],
+                "own_goal": "deliver_shelter",
+                "active_task": {
+                  "task_id": "task:p0i_20261011070211_63282fb9:1",
+                  "kind": "deliver_shelter",
+                  "actor": "A",
+                  "item_id": 3687,
+                  "goal_room": "inn",
+                  "status": "active",
+                  "own_goal": "deliver_shelter",
+                  "held": true,
+                  "item_progress": [
+                    "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+                  ],
+                  "progress_seq": 1,
+                  "decision_source": "author_forced_dispatch"
+                },
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": {
+                      "id": "3687",
+                      "key": "shelter_kit p0i_20261011070211_63282fb9"
+                    },
+                    "task_destination": 3676,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {
+                      "3674": {
+                        "3676": true,
+                        "3675": true
+                      }
+                    },
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": null,
+                    "item_held": true,
+                    "delivered": false,
+                    "visible_items": []
+                  }
+                }
+              },
+              "B": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": null,
+                    "task_destination": null,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": []
+                  }
+                }
+              },
+              "player": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": null
+              }
+            },
+            "items": {
+              "shelter_kit": {
+                "id": 3687,
+                "location_id": 3684,
+                "holder_role": "A"
+              }
+            },
+            "routes": [
+              {
+                "id": "main",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "inn",
+                    "exit_id": 3677,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "junction",
+                    "exit_id": 3678,
+                    "traversable": true
+                  }
+                ]
+              },
+              {
+                "id": "side",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "side_passage",
+                    "exit_id": 3679,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "junction",
+                    "exit_id": 3680,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "inn",
+                    "exit_id": 3681,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "side_passage",
+                    "exit_id": 3682,
+                    "traversable": true
+                  }
+                ]
+              }
+            ],
+            "open_edges": [
+              [
+                "junction",
+                "inn"
+              ],
+              [
+                "inn",
+                "junction"
+              ],
+              [
+                "junction",
+                "side_passage"
+              ],
+              [
+                "side_passage",
+                "junction"
+              ],
+              [
+                "side_passage",
+                "inn"
+              ],
+              [
+                "inn",
+                "side_passage"
+              ]
+            ],
+            "item": {
+              "location": null,
+              "holder": "A"
+            },
+            "task": {
+              "task_id": "task:p0i_20261011070211_63282fb9:1",
+              "kind": "deliver_shelter",
+              "actor": "A",
+              "item_id": 3687,
+              "goal_room": "inn",
+              "status": "active",
+              "own_goal": "deliver_shelter",
+              "held": true,
+              "item_progress": [
+                "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+              ],
+              "progress_seq": 1,
+              "decision_source": "author_forced_dispatch"
+            },
+            "ledger_frontier": 5,
+            "sealed_through": 1
+          },
+          "post": {
+            "schema": "planner-p0-integration-v0",
+            "scene_id": "p0i_20261011070211_63282fb9",
+            "mode": "direct",
+            "clock": {
+              "now": 2,
+              "deadline": 24,
+              "unit": "minute",
+              "step_minutes": 1
+            },
+            "weather": "clear",
+            "pending_cloud": null,
+            "rooms": {
+              "junction": 3674,
+              "side_passage": 3675,
+              "inn": 3676
+            },
+            "actors": {
+              "A": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [
+                  3687
+                ],
+                "known_weather": [],
+                "own_goal": "deliver_shelter",
+                "active_task": {
+                  "task_id": "task:p0i_20261011070211_63282fb9:1",
+                  "kind": "deliver_shelter",
+                  "actor": "A",
+                  "item_id": 3687,
+                  "goal_room": "inn",
+                  "status": "active",
+                  "own_goal": "deliver_shelter",
+                  "held": true,
+                  "item_progress": [
+                    "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+                  ],
+                  "progress_seq": 1,
+                  "decision_source": "author_forced_dispatch"
+                },
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": {
+                      "id": "3687",
+                      "key": "shelter_kit p0i_20261011070211_63282fb9"
+                    },
+                    "task_destination": 3676,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {
+                      "3674": {
+                        "3676": true,
+                        "3675": true
+                      }
+                    },
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": null,
+                    "item_held": true,
+                    "delivered": false,
+                    "visible_items": []
+                  }
+                }
+              },
+              "B": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": {
+                  "observation": {
+                    "room_id": 3674,
+                    "task_item": null,
+                    "task_destination": null,
+                    "known_exits": {
+                      "3674": [
+                        3675,
+                        3676
+                      ],
+                      "3675": [
+                        3674,
+                        3676
+                      ],
+                      "3676": [
+                        3674,
+                        3675
+                      ]
+                    },
+                    "known_traversability": {},
+                    "exits": [
+                      {
+                        "key": "main",
+                        "destination_id": 3676,
+                        "traversable": true
+                      },
+                      {
+                        "key": "side",
+                        "destination_id": 3675,
+                        "traversable": true
+                      }
+                    ],
+                    "item_location": 3674,
+                    "item_held": false,
+                    "delivered": false,
+                    "visible_items": []
+                  }
+                }
+              },
+              "player": {
+                "room_id": 3674,
+                "room": "junction",
+                "inventory_ids": [],
+                "known_weather": [],
+                "own_goal": null,
+                "active_task": null,
+                "local_view": null
+              }
+            },
+            "items": {
+              "shelter_kit": {
+                "id": 3687,
+                "location_id": 3684,
+                "holder_role": "A"
+              }
+            },
+            "routes": [
+              {
+                "id": "main",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "inn",
+                    "exit_id": 3677,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "junction",
+                    "exit_id": 3678,
+                    "traversable": true
+                  }
+                ]
+              },
+              {
+                "id": "side",
+                "edges": [
+                  {
+                    "from": "junction",
+                    "to": "side_passage",
+                    "exit_id": 3679,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "junction",
+                    "exit_id": 3680,
+                    "traversable": true
+                  },
+                  {
+                    "from": "side_passage",
+                    "to": "inn",
+                    "exit_id": 3681,
+                    "traversable": true
+                  },
+                  {
+                    "from": "inn",
+                    "to": "side_passage",
+                    "exit_id": 3682,
+                    "traversable": true
+                  }
+                ]
+              }
+            ],
+            "open_edges": [
+              [
+                "junction",
+                "inn"
+              ],
+              [
+                "inn",
+                "junction"
+              ],
+              [
+                "junction",
+                "side_passage"
+              ],
+              [
+                "side_passage",
+                "junction"
+              ],
+              [
+                "side_passage",
+                "inn"
+              ],
+              [
+                "inn",
+                "side_passage"
+              ]
+            ],
+            "item": {
+              "location": null,
+              "holder": "A"
+            },
+            "task": {
+              "task_id": "task:p0i_20261011070211_63282fb9:1",
+              "kind": "deliver_shelter",
+              "actor": "A",
+              "item_id": 3687,
+              "goal_room": "inn",
+              "status": "active",
+              "own_goal": "deliver_shelter",
+              "held": true,
+              "item_progress": [
+                "p0i:p0i_20261011070211_63282fb9:p0i-route-repair-20261011T070211Z-e16fb3-m2-primitive-00-4343"
+              ],
+              "progress_seq": 1,
+              "decision_source": "author_forced_dispatch"
+            },
+            "ledger_frontier": 6,
+            "sealed_through": 2
+          }
+        }
+      }
+    ],
+    "ledger_frontier": 7,
+    "sealed_through": 2
+  },
+  "finished_at_utc": "2026-10-11T07:02:12.052636+00:00"
+}
