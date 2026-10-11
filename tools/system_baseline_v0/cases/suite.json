@@ -1,0 +1,44 @@
+{
+  "schema": "system-baseline-p5-cases-v1",
+  "purpose": "Fixed matched M1 development cases; route target and social preset are isolated contrasts.",
+  "stale_negative": {"bundle": "main-route-matched-v1.json", "edited_bundle": "stale-edit-side-v2.json"},
+  "cases": [
+    {
+      "id": "C1-C2-main-C3-reject",
+      "bundle": "main-route-matched-v1.json",
+      "preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261012,
+      "initial_main_open": false
+    },
+    {
+      "id": "C1-C2-side-C3-reject",
+      "bundle": "side-route-matched-v1.json",
+      "preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261012,
+      "initial_main_open": false
+    },
+    {
+      "id": "C3-side-accept",
+      "bundle": "side-route-matched-v1.json",
+      "preset": "hero_intelligence_30_v0",
+      "horizon": 24,
+      "seed": 20261012,
+      "initial_main_open": false
+    },
+    {
+      "id": "C4-C5-edit-player-perturbation",
+      "bundle": "edit-base-v1.json",
+      "preset": "native_default_reject_v0",
+      "horizon": 24,
+      "seed": 20261012,
+      "initial_main_open": false,
+      "scheduled_edit": {"at": 2, "bundle": "edit-side-v2.json"},
+      "scheduled_interventions": [
+        {"at": 2, "kind": "player_command", "operation": "get", "item_alias": "courier_supply"},
+        {"at": 3, "kind": "player_command", "operation": "drop", "item_alias": "courier_supply"}
+      ]
+    }
+  ]
+}

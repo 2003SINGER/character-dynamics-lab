@@ -1,0 +1,51 @@
+System Baseline v0 runner and focused regression audit
+Date: 2026-10-12
+Commands and compact unittest output from the final stable checkpoint:
+
+$ PYTHONPATH=tools:tools/system_baseline_v0/tests _local_data/native_platform_v0/evennia/venv/bin/python -B -m unittest discover -s tools/system_baseline_v0/tests -p 'test_*.py'
+./Users/2003singer/Workspace/Research/character-dynamics-lab/tools/native_platform_v0/p5/service.py:437: DeprecationWarning: twisted.internet.defer.returnValue was deprecated in Twisted 24.7.0; please use standard return statement instead
+  defer.returnValue(result)
+.......................
+----------------------------------------------------------------------
+Ran 24 tests in 0.727s
+
+OK
+
+$ PYTHONPATH=tools _local_data/native_platform_v0/evennia/venv/bin/python -B -m unittest discover -s tools/native_platform_v0/p5/tests -p 'test_*.py'
+...........................................
+----------------------------------------------------------------------
+Ran 43 tests in 0.088s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/planner_p0_v0/integration_v0/tests -p 'test_*.py'
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/planner_p0_v0/baseline_gate_v0/tests -p 'test_*.py'
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/planner_p0_v0/author_binding_v0/tests -p 'test_*.py'
+......................
+----------------------------------------------------------------------
+Ran 22 tests in 0.299s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/trajectory_constraints_v0/tests -p 'test_*.py'
+..............................
+----------------------------------------------------------------------
+Ran 30 tests in 0.008s
+
+OK
+
+Independent read-only DB/trace cross-check (Python JSON comparison):
+Each of the five M1 scene IDs is present in the DB export allowlist; live trace ledger equals the SQLite-persisted P4 ledger; SQLite-exported P5 snapshots equal the live trace snapshots for the four completed mainline runs; exported file SHA-256 equals export metadata; copied DB JSON is structurally equal to the referenced exported JSON.
+All five rows returned True for ledger equality, scene selection, and export hash; all four full-run rows returned True for snapshot equality; all five returned True for DB-copy structural equality.

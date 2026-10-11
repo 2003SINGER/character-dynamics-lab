@@ -1,0 +1,82 @@
+{
+  "schema": "system-baseline-public-summary-v1",
+  "state": "READY_FOR_INDEPENDENT_REVIEW",
+  "baseline_git_commit": "50eb855",
+  "implementation_revision": "uncommitted working-tree sources; per-run SHA-256 values are authoritative",
+  "suite": {
+    "path": "tools/system_baseline_v0/cases/suite.json",
+    "sha256": "823c980489d9a4be45f77a7f618e21d1821d25c793217b571066c0b6bf27c58d",
+    "summary": "02_实验/System_Baseline_v0/runs/suite-20261011T164714Z-7d0d08.json"
+  },
+  "final_m1_cases": [
+    {
+      "id": "C1-C2-main-C3-reject",
+      "scene_id": "20261011164634-b17b71",
+      "run": "runs/C1-C2-main-C3-reject-20261011T164634Z-b48bff/",
+      "hard_status": "SATISFIED",
+      "route": {"main_passage": true, "side_passage": false},
+      "delivery_minutes": [6, 6],
+      "note_response": "rejected",
+      "branch": "rejected-note:ELIGIBLE",
+      "independent_db_readback": true
+    },
+    {
+      "id": "C1-C2-side-C3-reject",
+      "scene_id": "20261011164643-eacb2b",
+      "run": "runs/C1-C2-side-C3-reject-20261011T164643Z-5b5c12/",
+      "hard_status": "SATISFIED",
+      "route": {"main_passage": false, "side_passage": true},
+      "delivery_minutes": [16, 16],
+      "note_response": "rejected",
+      "branch": "rejected-note:ELIGIBLE",
+      "independent_db_readback": true
+    },
+    {
+      "id": "C3-side-accept",
+      "scene_id": "20261011164653-2e2007",
+      "run": "runs/C3-side-accept-20261011T164653Z-16ca2c/",
+      "hard_status": "SATISFIED",
+      "route": {"main_passage": false, "side_passage": true},
+      "delivery_minutes": [16, 16],
+      "note_response": "accepted",
+      "branch": "accepted-note:ELIGIBLE",
+      "independent_db_readback": true
+    },
+    {
+      "id": "C4-C5-edit-player-perturbation",
+      "scene_id": "20261011164702-bcc9c9",
+      "run": "runs/C4-C5-edit-player-perturbation-20261011T164702Z-5b228a/",
+      "hard_status": "SATISFIED",
+      "bundle_edit": "v1->v2 accepted at minute 2; side route added with start=2, deadline=4",
+      "player_commands": ["get courier_supply at minute 2: settled", "drop courier_supply at minute 3: settled"],
+      "route": {"main_passage": false, "side_passage": true},
+      "delivery_minutes": [19, 19],
+      "independent_db_readback": true
+    },
+    {
+      "id": "same-minute-stale-candidate-negative",
+      "scene_id": "20261011164712-6b023b",
+      "run": "runs/stale-edit-negative-20261011T164712Z-54d4ac/",
+      "status": "STALE_GUARD_NEGATIVE_PASS",
+      "version_change": "v1->v2 accepted before intervention",
+      "native_candidate_result": "STALE_CANDIDATE",
+      "routes_opened": false,
+      "independent_db_readback": true
+    }
+  ],
+  "preserved_first_attempt": {
+    "summary": "Four complete but unsuccessful runs; the runner did not dispatch due to a normalized-status/raw-literal mismatch. The stale case is INCOMPLETE_ERROR.",
+    "suite_summary": "02_实验/System_Baseline_v0/runs/suite-20261011T164515Z-2d5ac4.json",
+    "included_in_archive": true
+  },
+  "evidence_pack": {
+    "archive": "system-baseline-runs-20261011T165402Z-9ee51f.tar.gz",
+    "manifest": "system-baseline-runs-20261011T165402Z-9ee51f.manifest.json",
+    "archive_sha256": "46bd9f55fc43a85b0d131e61daa60fb93384f122ca71d9fa512fd1bff5c646b6",
+    "file_count": 293,
+    "uncompressed_bytes": 190826542,
+    "roundtrip_verified": true
+  },
+  "m2": {"status": "PENDING_SEPARATE_REVIEW", "model_calls_made_by_this-runner": 0},
+  "claim_boundary": "Fixed local development matrix only. Sabre selected route opportunities; native P5 determined deliveries and social responses. No general NL completeness, NPC autonomy, learning, or research efficacy claim."
+}

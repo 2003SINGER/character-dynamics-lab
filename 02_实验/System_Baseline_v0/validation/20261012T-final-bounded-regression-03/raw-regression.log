@@ -1,0 +1,49 @@
+System Baseline v0 bounded final regression — 2026-10-12
+Working tree: codex/system-baseline-20261012
+Commands executed in order; outputs are verbatim command output (the first test emitted a Twisted deprecation warning).
+
+$ PYTHONPATH=tools:tools/system_baseline_v0/tests _local_data/native_platform_v0/evennia/venv/bin/python -B -m unittest discover -s tools/system_baseline_v0/tests -p 'test_*.py'
+./Users/2003singer/Workspace/Research/character-dynamics-lab/tools/native_platform_v0/p5/service.py:437: DeprecationWarning: twisted.internet.defer.returnValue was deprecated in Twisted 24.7.0; please use standard return statement instead
+  defer.returnValue(result)
+........................
+----------------------------------------------------------------------
+Ran 25 tests in 0.731s
+
+OK
+
+$ PYTHONPATH=tools _local_data/native_platform_v0/evennia/venv/bin/python -B -m unittest discover -s tools/native_platform_v0/p5/tests -p 'test_*.py'
+...........................................
+----------------------------------------------------------------------
+Ran 43 tests in 0.079s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/planner_p0_v0/integration_v0/tests -p 'test_*.py'
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/planner_p0_v0/baseline_gate_v0/tests -p 'test_*.py'
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/planner_p0_v0/author_binding_v0/tests -p 'test_*.py'
+......................
+----------------------------------------------------------------------
+Ran 22 tests in 0.258s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/trajectory_constraints_v0/tests -p 'test_*.py'
+..............................
+----------------------------------------------------------------------
+Ran 30 tests in 0.007s
+
+OK
+
+TOTAL: 133 tests, all passed across six suites. No native simulation was started.

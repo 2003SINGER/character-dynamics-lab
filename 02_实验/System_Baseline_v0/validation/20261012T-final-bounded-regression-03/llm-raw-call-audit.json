@@ -1,0 +1,40 @@
+{
+  "scope": "Three archived local-model calls inspected directly via response.raw, outcome.json, metadata.json, offline_revalidation.json; no candidate was accepted in any call.",
+  "calls": [
+    {
+      "label": "negative",
+      "artifact": "02_实验/System_Baseline_v0/runs/m2-llm-20261012-positive-negative/negative/llm_binding_b337b373390a4a2596de72ef40bd7b7d",
+      "response_sha256": "6676e1c0c5b120bfc4af3a074cba3f19e1999102b70c432ac2ef3e18fd2cc299",
+      "wrapper_status": "INVALID_RESPONSE",
+      "offline_revalidation_error": "JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 1771 (char 1770)",
+      "candidate_accepted": false,
+      "semantic_finding": "Not a correct negative residual. Raw response maps hard requirement hard-relationship-worsening to an invented state_by_deadline observable relationship_worsened with residual null, while the supported observable schema only includes holding and route_open. Thus the call is invalid and does not demonstrate that the unsupported hard requirement was preserved as a residual."
+    },
+    {
+      "label": "positive",
+      "artifact": "02_实验/System_Baseline_v0/runs/m2-llm-20261012-positive-negative/positive/llm_binding_38797fb055134f73836e9cc38ab810fa",
+      "response_sha256": "8d8af5cb112204e5f9d76b4f0e77479beaffa47012e5f29c2a35821a3cbe0ddc",
+      "wrapper_status": "INVALID_RESPONSE",
+      "offline_revalidation_error": "ValueError: duplicate JSON key: id",
+      "candidate_accepted": false,
+      "semantic_finding": "Raw response has duplicate IDs and malformed candidate/coverage structures; strict revalidation rejects it. This is not a valid positive candidate."
+    },
+    {
+      "label": "retry-positive",
+      "artifact": "02_实验/System_Baseline_v0/runs/m2-llm-20261012-positive-negative/retry-positive/llm_binding_df755eb771e542b78db81de14aa69eba",
+      "response_sha256": "b71933eb3a728bceab98d3324c347c197989e51081bf4d268e27c0b39c737eb7",
+      "wrapper_status": "INVALID_RESPONSE",
+      "outcome_errors": [
+        "requirement 'deliveries-by-24' points to missing candidate ref 'constraint/deliveries-by-24'",
+        "requirement 'deliveries-before-note' points to missing candidate ref 'constraint/deliveries-before-note'",
+        "requirement 'side-route-by-8' points to missing candidate ref 'constraint/side-route-by-8'",
+        "requirement 'optional-rejection-branch' points to missing candidate ref 'constraint/optional-rejection-branch'"
+      ],
+      "offline_revalidation_error": "ValueError: duplicate JSON key: constraints",
+      "candidate_accepted": false,
+      "semantic_finding": "No valid positive candidate. Wrapper outcome records missing references and empty residuals; the separate strict offline revalidation detects a duplicate constraints key. These artifacts are consistent on rejection but not a semantic pass."
+    }
+  ],
+  "normalization": "The retry-positive raw response begins with an exactly empty <think>...</think> prefix. Its response_normalization record names strip_exact_empty_think_prefix and records nonempty_think_content_is_not_stripped=true; the unit suite also checks the exact-prefix boundary.",
+  "bounded_conclusion": "Three raw calls yielded zero accepted candidates. The negative call did not correctly encode the unsupported hard relationship requirement as a residual; it falsely mapped it to an unsupported observable with residual null before failing structural validation. No claim of successful negative semantic handling is warranted."
+}

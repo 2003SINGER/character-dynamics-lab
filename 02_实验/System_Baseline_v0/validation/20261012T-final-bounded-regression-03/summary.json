@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-12",
+  "branch": "codex/system-baseline-20261012",
+  "validation_id": "20261012T-final-bounded-regression-03",
+  "suites": {
+    "system_baseline_v0": {"tests": 25, "passed": 25},
+    "p5": {"tests": 43, "passed": 43},
+    "p0_integration": {"tests": 7, "passed": 7},
+    "p0_baseline_gate": {"tests": 6, "passed": 6},
+    "author_binding": {"tests": 22, "passed": 22},
+    "typed_ir_trajectory_constraints": {"tests": 30, "passed": 30}
+  },
+  "total_tests": 133,
+  "failures": 0,
+  "errors": 0,
+  "native_simulation_started": false,
+  "llm_raw_call_audit": "llm-raw-call-audit.json",
+  "limitations": [
+    "The three archived local-model calls all failed validation; none is a valid candidate acceptance.",
+    "The hard relationship-worsening negative response was not represented as an explicit residual; do not claim correct negative semantic handling.",
+    "P5 emitted one pre-existing Twisted returnValue deprecation warning during System Baseline tests."
+  ]
+}

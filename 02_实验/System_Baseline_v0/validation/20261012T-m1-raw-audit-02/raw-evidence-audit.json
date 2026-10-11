@@ -1,0 +1,122 @@
+{
+  "suite_summary_path": "02_实验/System_Baseline_v0/runs/suite-20261011T164714Z-7d0d08.json",
+  "suite_summary_sha256": "823c980489d9a4be45f77a7f618e21d1821d25c793217b571066c0b6bf27c58d",
+  "observed_scope": "native P5 traces, raw P4 ledger, independent SQLite export files and metadata, bundle inputs, per-minute step artifacts",
+  "checks": [
+    {
+      "run": "C1-C2-main-C3-reject-20261011T164634Z-b48bff",
+      "scene_id": "20261011164634-b17b71",
+      "run_status": "COMPLETE",
+      "hard_status": "SATISFIED",
+      "route": {"main_passage": true, "side_passage": false},
+      "sabre_selected_action": "open_main_passage",
+      "native_route_receipt": {"minute": 1, "opportunity_id": "open_main_passage", "status": "SETTLED", "cost": 2},
+      "delivery_events": [
+        {"minute": 6, "actor": "A", "item": "courier_supply"},
+        {"minute": 6, "actor": "B", "item": "resident_parcel"}
+      ],
+      "social_response": {"minute": 7, "decision": "rejected", "native_commit_status": "settled", "same_note_id": 4651},
+      "controller_authored_npc_commands": 0,
+      "db_artifact": "02_实验/Native_Platform_P5_v0/runs/p3-db-evidence-20261011164634-b17b71-20261011T164643Z-f692ec.json",
+      "db_artifact_sha256": "0eec44b0d23279bd1828472281c76c151e5b17cf52c40f8caa818fdef22b52b6",
+      "trace_db_ledger_equal": true,
+      "trace_db_snapshots_equal": true,
+      "db_copy_structurally_equal_to_export": true
+    },
+    {
+      "run": "C1-C2-side-C3-reject-20261011T164643Z-5b5c12",
+      "scene_id": "20261011164643-eacb2b",
+      "run_status": "COMPLETE",
+      "hard_status": "SATISFIED",
+      "route": {"main_passage": false, "side_passage": true},
+      "sabre_selected_action": "open_side_passage",
+      "native_route_receipt": {"minute": 1, "opportunity_id": "open_side_passage", "status": "SETTLED", "cost": 1},
+      "delivery_events": [
+        {"minute": 16, "actor": "A", "item": "courier_supply"},
+        {"minute": 16, "actor": "B", "item": "resident_parcel"}
+      ],
+      "social_response": {"minute": 17, "decision": "rejected", "native_commit_status": "settled", "same_note_id": 4669},
+      "controller_authored_npc_commands": 0,
+      "db_artifact": "02_实验/Native_Platform_P5_v0/runs/p3-db-evidence-20261011164643-eacb2b-20261011T164652Z-a3d53e.json",
+      "db_artifact_sha256": "5aff8a732a17fa495dd92cc06256531a03f4ce738be3580c53a676fa1c90abf6",
+      "trace_db_ledger_equal": true,
+      "trace_db_snapshots_equal": true,
+      "db_copy_structurally_equal_to_export": true
+    },
+    {
+      "run": "C3-side-accept-20261011T164653Z-16ca2c",
+      "scene_id": "20261011164653-2e2007",
+      "run_status": "COMPLETE",
+      "hard_status": "SATISFIED",
+      "route": {"main_passage": false, "side_passage": true},
+      "sabre_selected_action": "open_side_passage",
+      "native_route_receipt": {"minute": 1, "opportunity_id": "open_side_passage", "status": "SETTLED", "cost": 1},
+      "delivery_events": [
+        {"minute": 16, "actor": "A", "item": "courier_supply"},
+        {"minute": 16, "actor": "B", "item": "resident_parcel"}
+      ],
+      "social_response": {"minute": 17, "decision": "accepted", "native_commit_status": "settled", "same_note_id": 4684},
+      "controller_authored_npc_commands": 0,
+      "db_artifact": "02_实验/Native_Platform_P5_v0/runs/p3-db-evidence-20261011164653-2e2007-20261011T164702Z-51cf8e.json",
+      "db_artifact_sha256": "eb5c82812510746b1d7edf30cadec35b1ba5bc1f9cc5faa63f103d0761be0ec9",
+      "trace_db_ledger_equal": true,
+      "trace_db_snapshots_equal": true,
+      "db_copy_structurally_equal_to_export": true
+    },
+    {
+      "run": "C4-C5-edit-player-perturbation-20261011T164702Z-5b228a",
+      "scene_id": "20261011164702-bcc9c9",
+      "run_status": "COMPLETE",
+      "hard_status": "SATISFIED",
+      "bundle_edit": {
+        "minute": 2,
+        "accepted": true,
+        "from_version": 1,
+        "to_version": 2,
+        "historical_prefix_preserved": true,
+        "pending_identity_preserved": true,
+        "pending_actions_before": {"A": null, "B": null},
+        "pending_actions_after": {"A": null, "B": null},
+        "db_active_version": 2,
+        "db_archive_versions": [1]
+      },
+      "new_route_constraint": {"route": "side_passage", "value": true, "start": 2, "deadline": 4},
+      "player_commands": [
+        {"minute": 2, "operation": "get", "settled": true, "provenance": "native_player_command"},
+        {"minute": 3, "operation": "drop", "settled": true, "provenance": "native_player_command"}
+      ],
+      "route_receipt": {"minute": 4, "opportunity_id": "open_side_passage", "status": "SETTLED", "cost": 1},
+      "sabre_selected_action": "open_side_passage",
+      "db_artifact": "02_实验/Native_Platform_P5_v0/runs/p3-db-evidence-20261011164702-bcc9c9-20261011T164712Z-da8689.json",
+      "db_artifact_sha256": "1c5222f05170882083b15e19830e23a42240d50535629b9e3458f0dd856c0cfb",
+      "trace_db_ledger_equal": true,
+      "trace_db_snapshots_equal": true,
+      "db_copy_structurally_equal_to_export": true
+    },
+    {
+      "run": "stale-edit-negative-20261011T164712Z-54d4ac",
+      "scene_id": "20261011164712-6b023b",
+      "native_run_status": "INCOMPLETE",
+      "incomplete_is_expected": "negative control stops immediately after one-minute stale-candidate rejection",
+      "bundle_edit_accepted": true,
+      "old_candidate_version": 1,
+      "active_bundle_version": 2,
+      "native_intervention_status": "STALE_CANDIDATE",
+      "route_state_after_rejection": {"main_passage": false, "side_passage": false},
+      "native_stale_event_and_db_export_verified": true,
+      "db_artifact": "02_实验/Native_Platform_P5_v0/runs/p3-db-evidence-20261011164712-6b023b-20261011T164714Z-1a73d1.json",
+      "db_artifact_sha256": "60d0d132354b254304f6367328dcf65298d6ece9948eaa830b5b612faa431efb",
+      "trace_db_ledger_equal": true,
+      "db_copy_structurally_equal_to_export": true
+    }
+  ],
+  "matched_input_check": {
+    "main_and_side_bundle_digest_after_route_target_normalization": "676eac8e46891cb8590713b165077ed5dd6c0adf931e0bca41f5566efd959e32",
+    "seed": 20261012,
+    "preset_for_main_and_side_reject": "native_default_reject_v0",
+    "route_goal_isolated_contrast": true,
+    "side_reject_vs_side_accept_bundle_sha256": "2b62c85770467a3bb2a55776a963cf4425b2870f63992ff8a0518714a2c5b409",
+    "only_social_preset_changes_for_accept_case": true,
+    "accept_preset": "hero_intelligence_30_v0"
+  }
+}

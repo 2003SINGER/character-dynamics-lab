@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-12",
+  "validation_id": "20261012T-system-contract-audit",
+  "status": "PASS_WITH_SCOPE_LIMIT",
+  "scope": "independent contract tests and focused regression suites; no implementation, frozen assets, commit, or push",
+  "test_suites": {
+    "system_baseline_v0": {"passed": 18, "failed": 0, "skipped": 0},
+    "native_platform_v0_p5": {"passed": 43, "failed": 0, "skipped": 0},
+    "planner_p0_integration": {"passed": 7, "failed": 0, "skipped": 0},
+    "planner_p0_baseline_gate": {"passed": 6, "failed": 0, "skipped": 0},
+    "planner_p0_author_binding": {"passed": 22, "failed": 0, "skipped": 0},
+    "trajectory_constraints_typed_ir": {"passed": 30, "failed": 0, "skipped": 0}
+  },
+  "scope_limit": "No System Baseline M1 native run directory or independent DB readback was present at audit time; this is not native-run/raw-artifact acceptance.",
+  "notes": [
+    "The system contract suite used the existing Evennia virtualenv so its fake-host P5 guard test had pinned Twisted available.",
+    "A default-system-Python attempt was non-acceptance diagnostic only: Twisted absent and sandbox temporary-directory writes denied; the project-venv rerun passed without skips.",
+    "Existing planner P0 workflow steps were retained and the system contract step was appended."
+  ]
+}

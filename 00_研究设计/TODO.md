@@ -1,19 +1,20 @@
 # TODO｜active research queue
 
-更新时间：2026-10-11。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
+更新时间：2026-10-12。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
-当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。当前 P0 Baseline Gate 已完成三场景有限对比，状态 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW**，唯一结果见 [RESULTS](../02_实验/Planner_P0_Baseline_Gate_v0/RESULTS.md)；结论仅适用于固定 direct fixtures，未 CLOSED。P0-Integration 的独立 READY 检查点仍由其[唯一 RESULTS](../02_实验/Planner_P0_Integration_v0/RESULTS.md)维护。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准；P5 shared-supply 失败保留，不自动进入 P6 或训练。
+当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。**System Baseline v0 当前 `PARTIAL`：M1 `READY_FOR_INDEPENDENT_REVIEW`，M2 `INVALID`，无 native LLM candidate execution；本阶段停止，不进入 P6。**唯一任务/结果 owner 为 [`System Baseline v0 RESULTS`](../02_实验/System_Baseline_v0/RESULTS.md)，M2 原始调用证据见[小型证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)及[逐文件 manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json)。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。P0 Baseline Gate、P0-Integration 与 P0 Author Binding 的既有状态/结果各由自己的 RESULTS 维护；暂停它们的局部扩张，不覆盖历史结果或 P5 shared-supply 失败。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准。
 
-角色动力3的[阶段与过关证据](研究重建审计_2026-10-06.md)与各原生平台历史阶段分别保留；当前执行指针是 P0，P5 Author Bundle 保持待独立审阅及原失败结果。不是全部工作归零；文档更新不算原生运行通过。
+角色动力3的[阶段与过关证据](研究重建审计_2026-10-06.md)与各原生平台历史阶段分别保留；当前执行指针是 System Baseline v0，P0/P5 历史检查点与失败结果不被抹除。文档更新不算原生运行通过。
 
 ## SYSTEM / APPLICATION TRACK
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| SYSTEM-BASELINE-V0 | **PARTIAL；M1 READY_FOR_INDEPENDENT_REVIEW；M2 INVALID；本阶段停止** | 等待 M1 独立审阅；无 native LLM candidate execution，不进入 P6。任何继续实施或新阶段须另行授权 | [唯一 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)；[M2 证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)及[manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json) |
 | PLANNER-P0-ORIGINAL | **A/B 有界 DEVELOPMENT 检查点保留；LLM/embedding/Qwen 与 A/B/C 比较 PAUSED** | 保留 A 原生 Sabre/Evennia 证据与 B 五轮历史缓存 replay；不再启动模型/embedding 资源准入，不补做新 LLM 搜索，不比较跨 Sabre 版本节点数。历史重放不称 live，B 实时未准入；不改 frozen C++，不自行 CLOSED | [原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)；[LLM 机制与历史 replay 记录](../01_文献/算法积木/06_P0原始规划路线_2026-10-11/LLM_Sabre_Search.md) |
 | P0-INTEGRATION | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED** | 独立审阅有限运行、失败与边界；CI 仅覆盖离线契约，exact-head 状态以 Actions 为准 | [唯一 RESULTS](../02_实验/Planner_P0_Integration_v0/RESULTS.md)；不等于完整传统系统或独立 NPC agency |
 | P0-BASELINE-GATE | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED** | 三个固定 direct 场景已各做一对运行；停止扩场景、调参或自动修复，等待独立审阅/后续讨论 | [唯一 RESULTS](../02_实验/Planner_P0_Baseline_Gate_v0/RESULTS.md)；[协议](../02_实验/Planner_P0_Baseline_Gate_v0/README.md)；P0-Integration 原 READY 检查点独立保留 |
-| P0-AUTHOR-BINDING | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW（固定域离线原型）；未 CLOSED** | 离线接口交付待独立审阅；不是原生执行、live dispatch/replanning 或完整系统；后续比较/扩域另需授权 | [唯一 RESULTS](../02_实验/Planner_P0_Author_Binding_v0/RESULTS.md)；[讨论决策与差异记录](2026-10-11_P0_Author_Binding_Discussion.md)；问题语义见 [F0/F1](CharacterDynamics_FormalProblem_v0.md)，TypedIR owner 见 [Pilot](AuthorialTrajectoryPilotV0.md) |
+| P0-AUTHOR-BINDING | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW（固定域离线原型）；未 CLOSED，当前局部扩张暂停** | 保留离线原型和审阅边界；仅在 System Baseline v0 接线需要时复用，不另开 P0-vNext 或 live gate | [唯一 RESULTS](../02_实验/Planner_P0_Author_Binding_v0/RESULTS.md)；[讨论决策与差异记录](2026-10-11_P0_Author_Binding_Discussion.md)；问题语义见 [F0/F1](CharacterDynamics_FormalProblem_v0.md)，TypedIR owner 见 [Pilot](AuthorialTrajectoryPilotV0.md) |
 | AUTHOR-PLANNING-NEIGHBOR-CHECK | **MECHANISM_AUDIT_DELIVERED / READY_FOR_INDEPENDENT_REVIEW** | 审阅[强近邻总表及比较候选](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)：同一固定G/权限/扰动，成熟符号重规划 vs LLM候选+独立检查，反馈粒度作为受控变量；先核共同语义与强实现准入 | 原件、方法/源码定位、交换接口、世界过程纸面诊断与评价分层已交付；这不是冻结实验协议。改G、固定G规划、文本storylet分账。**未复现软件、未运行新比较，无新机制/组合增益/玩家可信度证据；不自行CLOSED，不自动实验/P6。**定义仍见[F0/F1](CharacterDynamics_FormalProblem_v0.md) |
 | BOUNDARY-V1 | **CLOSED / FROZEN** | Kernel / Dynamics / Demo ownership 与依赖边界已完成复核 | [架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md) |
 | RUNTIME | **Shared Runtime Kernel v1：CLOSED / FROZEN** | 不因 Demo naturalness 重开；仅处理 execution invariant | [Closure Matrix](Runtime_Closure_Acceptance_Matrix.md) |

@@ -46,7 +46,9 @@ TOOLS = [
     {"name": "step_world", "description": "Advance generated P3 actors through real manual script callbacks.",
      "inputSchema": {"type": "object", "properties": {
          "scene_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,80}$"},
-         "rounds": {"type": "integer", "minimum": 1, "maximum": 50}},
+         "rounds": {"type": "integer", "minimum": 1, "maximum": 50},
+         "interventions": {"type": "array", "items": {"type": "object"}},
+         "edits": {"type": "array", "items": {"type": "object"}}},
          "required": ["scene_id"], "additionalProperties": False}},
     {"name": "inject_action", "description": "Issue one whitelisted real Evennia command to a generated scene role.",
      "inputSchema": {"type": "object", "properties": {

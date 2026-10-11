@@ -44,3 +44,11 @@ Author Binding 的 `1323196` 仅是固定域离线原型，live 接入未做；�
 ## 下一步的条件分支
 
 先完成有限接口与反例审阅，再根据实际失败选择下一研究题：若现有 TypedIR/少量绑定即可覆盖，保留简单方案；若发生语义丢失，研究映射义务和反例驱动细化；若预测与真实执行分歧，研究跨层反馈/局部修复；若人工绑定维护成本反复出现，再比较 LLM 辅助绑定；若 A/B 最终行为相同，则测量复杂场景里的维护与修复成本。以上是条件分支，不是后续自动授权。
+
+## 2026-10-12 System Baseline v0 授权增量
+
+用户续谈原件私有归档于 `90_原始材料/_private/2026-10-12_System_Baseline_v0/续谈_已粘贴的文本.txt`，SHA-256 `54445eaee9a2f0c41380f72356656c57ee901b73c1c6fe1479102a5cc0761234`。用户明确当前方向不是继续扩展 P0 局部接口，而是基于既有成熟组件，在同一 Evennia/P5 世界形成一条可核对的系统纵向基线。
+
+- **状态与任务边界（2026-10-12 收尾）：**System Baseline v0 当前为 `PARTIAL`；M1 `READY_FOR_INDEPENDENT_REVIEW`，M2 `INVALID`，没有 native LLM candidate execution。本阶段停止，不进入 P6；任何后续实现须另行授权。P0 局部扩张暂停，既有 P0、P5 结果各留在原 RESULTS owner。M2 完整 request/response 证据及逐文件 manifest 见[小型证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)与[manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json)；唯一运行状态仍由 [System Baseline v0 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md) 维护。
+- **已定接线方向：**P5/Evennia 是唯一权威世界、时钟、事件账本和执行器；Sabre 作为高层候选，GTPyhop 与 Ensemble 复用现有角色/社会行为，LLM 在 M1 原生链成立后进入 M2 高层语义候选。有限运行结果见 [System Baseline v0 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)，不构成一般方法优势或完整系统验证。
+- **系统目标：**以物流交付与便条回应构成共享状态的最小双线实例，覆盖高层选择、角色自主回应、玩家扰动和未来作者编辑。有限运行结果及其边界只见 [System Baseline v0 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)；执行指针只见 [TODO](TODO.md)。

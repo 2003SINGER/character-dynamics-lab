@@ -1,0 +1,47 @@
+System Baseline v0 independent contract regression
+Date: 2026-10-12
+Working tree only; no commit/push. Test output captured from the commands below.
+
+$ PYTHONPATH=tools _local_data/native_platform_v0/evennia/venv/bin/python -B -m unittest discover -s tools/system_baseline_v0/tests -p 'test_*.py'
+./Users/2003singer/Workspace/Research/character-dynamics-lab/tools/native_platform_v0/p5/service.py:437: DeprecationWarning: twisted.internet.defer.returnValue was deprecated in Twisted 24.7.0; please use standard return statement instead
+  defer.returnValue(result)
+.................
+----------------------------------------------------------------------
+Ran 18 tests in 0.697s
+
+OK
+
+$ PYTHONPATH=tools _local_data/native_platform_v0/evennia/venv/bin/python -B -m unittest discover -s tools/native_platform_v0/p5/tests -p 'test_*.py'
+...........................................
+----------------------------------------------------------------------
+Ran 43 tests in 0.085s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/planner_p0_v0/integration_v0/tests -p 'test_*.py'
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/planner_p0_v0/baseline_gate_v0/tests -p 'test_*.py'
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/planner_p0_v0/author_binding_v0/tests -p 'test_*.py'
+......................
+----------------------------------------------------------------------
+Ran 22 tests in 0.273s
+
+OK
+
+$ PYTHONPATH=tools python3 -B -m unittest discover -s tools/trajectory_constraints_v0/tests -p 'test_*.py'
+..............................
+----------------------------------------------------------------------
+Ran 30 tests in 0.008s
+
+OK

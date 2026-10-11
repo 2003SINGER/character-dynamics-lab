@@ -5,7 +5,10 @@ on:
     branches: [webgpt-sync]
     paths:
       - 'tools/planner_p0_v0/**'
+      - 'tools/system_baseline_v0/**'
       - 'tools/native_platform_v0/p3/control_service.py'
+      - 'tools/native_platform_v0/p3/mcp_stdio.py'
+      - 'tools/native_platform_v0/p5/service.py'
       - '.github/workflows/planner-p0-contracts.yml'
 
 jobs:
@@ -20,6 +23,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install pinned P3 dependencies for the fake-host native guard contract
+        run: python -m pip install -r tools/native_platform_v0/p3/requirements.txt
+      - name: Build pinned Sabre v0.8.0 for real selection contracts
+        run: |
+          mkdir -p _local_data/planner_p0_v0
+          git clone --filter=blob:none https://github.com/sgware/sabre.git _local_data/planner_p0_v0/sabre
+          git -C _local_data/planner_p0_v0/sabre checkout --detach 73a128123b10a57843068b69d0b0e0601f37488a
+          mvn -B -f _local_data/planner_p0_v0/sabre/pom.xml -Dmaven.javadoc.skip=true -DskipTests package
+          echo "SYSTEM_BASELINE_SABRE_JAVA=$JAVA_HOME/bin/java" >> "$GITHUB_ENV"
+          echo "SYSTEM_BASELINE_SABRE_CLASSPATH=$GITHUB_WORKSPACE/_local_data/planner_p0_v0/sabre/target/classes" >> "$GITHUB_ENV"
       - name: Native-output parser contracts (no downloaded planner)
         run: python -B -m unittest discover -s tools/planner_p0_v0/sabre_baseline/tests -v
       - name: Shared-world projection contracts (no live server)
@@ -32,3 +49,5 @@ jobs:
         run: python -B -m unittest discover -s tools/planner_p0_v0/baseline_gate_v0/tests -p 'test_*.py' -v
       - name: P0 author binding projections (offline; no Evennia/Sabre/JDK/server)
         run: python -B -m unittest discover -s tools/planner_p0_v0/author_binding_v0/tests -p 'test_*.py' -v
+      - name: System Baseline Sabre/P5 contracts (pinned real Sabre; no Evennia server)
+        run: python -B -m unittest discover -s tools/system_baseline_v0/tests -p 'test_*.py' -v

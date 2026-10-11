@@ -670,7 +670,6 @@ class P3Control:
         if pickup is not None:
             from tools.native_platform_v0.p5.service import get_trace as get_p5_trace
             evidence = get_p5_trace(scene_id)
-            evidence["source"] = "P5 TypedIR projection over live Evennia and complete server ledger/snapshot prefixes"
             evidence["account_fields_exported"] = False
             return _json_safe(evidence)
         rows = []

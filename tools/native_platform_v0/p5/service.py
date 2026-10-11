@@ -96,6 +96,34 @@ def _ledger_prefix(pickup, before_minute):
             if int(row.get("minute", -1)) < before_minute]
 
 
+def _candidate_guard_matches(guard, *, scene_id, bundle_version, now,
+                             events_through, values_through, action, opportunity_id):
+    """Recheck an external planner candidate at native dispatch time.
+
+    This is a narrow freshness/identity guard, not a signature or planner
+    authentication mechanism. World permission and physical budget are still
+    checked by ``world.activate_opportunity`` after this guard passes.
+    """
+    if (not isinstance(guard, Mapping) or set(guard) != {
+            "scene_id", "bundle_version", "based_on_minute", "events_through",
+            "values_through", "selected_action", "opportunity_id"}):
+        return False
+    based = guard.get("based_on_minute")
+    return (
+        guard.get("scene_id") == scene_id
+        and type(guard.get("bundle_version")) is int
+        and guard["bundle_version"] == bundle_version
+        and type(based) is int
+        and now == based + 1
+        and type(guard.get("events_through")) is int
+        and guard["events_through"] == events_through == based
+        and type(guard.get("values_through")) is int
+        and guard["values_through"] == values_through == based
+        and guard.get("selected_action") == action
+        and guard.get("opportunity_id") == opportunity_id
+    )
+
+
 def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_reject_v0",
                       horizon=24, seed=0, director_enabled=True, shared_supply=False,
                       initial_main_open=True):
@@ -373,11 +401,40 @@ def _apply_intervention(scene_id, row, bundle):
     if not isinstance(row, Mapping):
         raise ValueError("P5 intervention row must be an object")
     if row.get("kind") == "author_opportunity":
-        if set(row) != {"at", "kind", "operation", "opportunity_id"}:
+        required = {"at", "kind", "operation", "opportunity_id"}
+        if not required.issubset(row) or set(row) - required - {"candidate_guard"}:
             raise ValueError("author intervention rows require at/kind/operation/opportunity_id")
         action = row["opportunity_id"]
         if row["operation"] != "open_passage" or action not in world.ROUTE_ACTIONS:
             raise ValueError("unsupported P5 author intervention or route action")
+        guard = row.get("candidate_guard")
+        if guard is not None:
+            pickup, _ = _scene_objects(scene_id)
+            current_now = int(_attr(pickup, "p4_clock")["now"])
+            current_events = int(_attr(pickup, "p5_event_coverage_minute", category="native_p5", default=0))
+            current_values = int(_attr(pickup, "p5_snapshot_coverage_minute", category="native_p5", default=0))
+            guard_valid = _candidate_guard_matches(
+                guard, scene_id=scene_id, bundle_version=bundle.version, now=current_now,
+                events_through=current_events, values_through=current_values,
+                action=action, opportunity_id=row["opportunity_id"])
+            if not guard_valid:
+                result = {"settled": False, "status": "STALE_CANDIDATE",
+                          "reason": "scene, author version, next-minute boundary, or sealed frontier changed",
+                          "candidate_guard": _plain_json(guard),
+                          "current": {"scene_id": scene_id, "bundle_version": bundle.version,
+                                      "now": current_now, "events_through": current_events,
+                                      "values_through": current_values,
+                                      "selected_action": action,
+                                      "opportunity_id": row["opportunity_id"]}}
+                provenance = "stale_planner_candidate"
+                command_receipt = None
+                from tools.native_platform_v0.p3.p4_world import append_event
+                append_event(scene_id, {"event_type": "P5_INTERVENTION",
+                                        "event_id": f"p5:{_attr(pickup, 'scenario_seed', default=0)}:{row['at']}:intervention:{provenance}",
+                                        "typed_args": {"kind": provenance, "intervention": dict(row),
+                                                       "settlement": result, "command_receipt": None,
+                                                       "bundle_version": bundle.version}, "sealed": True})
+                defer.returnValue(result)
         actor = next(obj for obj in _scene_objects(scene_id)[1]
                      if _attr(obj, "p5_actor_alias", category="native_p5") == "A")
         result = world.activate_opportunity(scene_id, actor, action, bundle,
@@ -503,7 +560,17 @@ def _evidence(scene_id, bundle):
                                                  "WORLD_SETTLEMENT_PENDING", "UNSUPPORTED_NATIVE_ACTION",
                                                  "STALE_NATIVE_PROPOSAL", "WORLD_VALIDATION_REJECTED"}:
             reasons.append(f"actor_{alias}_social_{_attr(actor, 'p4_social_status')}")
-    return {"scene_id": scene_id, "now": now,
+    event_frontier = int(_attr(pickup, "p5_event_coverage_minute", category="native_p5", default=0))
+    value_frontier = int(_attr(pickup, "p5_snapshot_coverage_minute", category="native_p5", default=0))
+    prefix_sealed = (event_frontier == value_frontier == now and any(
+        isinstance(row, Mapping) and row.get("minute") == now
+        for row in _attr(pickup, "p5_world_snapshots", category="native_p5", default=[])))
+    return {"evidence_schema": "p5-live-trace-v1",
+            "source": "native_platform_v0.p5.service._evidence",
+            "prefix_status": "SEALED_COMPLETE" if prefix_sealed else "INCOMPLETE",
+            "bundle_identity": {"bundle_id": bundle.bundle_id, "version": bundle.version},
+            "scene_id": scene_id, "now": now,
+            "horizon": int(_attr(pickup, "p5_horizon", category="native_p5")),
             "complete_through": {"events": int(_attr(pickup, "p5_event_coverage_minute", category="native_p5", default=0)),
                                   "values": int(_attr(pickup, "p5_snapshot_coverage_minute", category="native_p5", default=0))},
             "run_status": "COMPLETE" if not reasons else "INCOMPLETE",

@@ -2,11 +2,13 @@
 
 > 长期目标：研究作者部分约束下，游戏世界中合理、可执行未来的在线规划与控制。LLM × 成熟规划是研究主轴候选，涵盖语义、因果候选、grounded 绑定、层次细化与反馈修复，不要求每层都使用 LLM。详细问题定义由 [F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md) 唯一维护；旧 C++ 的 OHXSP 人物模型是参考实现，不是所有游戏都必须采用的 schema。
 
-本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`；`webgpt-sync` 是项目 review branch owner。本地本轮 P3 开发 checkout 位于 `codex/native-agency-p3-20261010`，不应将其描述成 `webgpt-sync` checkout。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
+本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`；`webgpt-sync` 是项目 review branch owner。工作分支随任务变化，分支归属以 Git 当前状态为准，不在项目总览中固定本地任务分支。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
 
 旧 C++ **Continuous Runtime / Engine v1 已 `CLOSED / FROZEN`**，其时钟、RunningAction、事件/信息边界与 trace 是该参考实现的工程边界，不定义所有游戏的系统结构。Evaluator、Objective、Optimizer 与旧 Paper-0 科研验证仍未完成。具体版本与证据只在[当前实现进度](00_研究设计/当前实现进度.md)维护。
 
 P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author Bundle 为 **READY_FOR_INDEPENDENT_REVIEW**（未 CLOSED）；12 场 development 结果、11/12 结构审计及一个真实 shared-supply 失败见唯一 [P5 RESULTS](02_实验/Native_Platform_P5_v0/RESULTS.md)。P5 的间接 Director 只是一个有限候选模式，不是全系统权限原则；不自动扩展后续阶段。
+
+2026-10-12 **System Baseline v0 当前为 `PARTIAL`**：M1 是 `READY_FOR_INDEPENDENT_REVIEW`，M2 为 `INVALID`；没有 native LLM candidate execution。本阶段在此停止，不进入 P6。唯一状态与运行证据归 [System Baseline v0 RESULTS](02_实验/System_Baseline_v0/RESULTS.md)，当前指针见 [TODO](00_研究设计/TODO.md)；M2 原始调用证据与逐文件 manifest 见[小型证据包](02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)和[manifest](02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json)。
 
 `c228301` 已收到研究主轴方向的外部通过意见；不是新系统能力验收。[有界强近邻机制对照](01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)作为历史审查检查点保留。原始 P0 A/B 与 LLM/embedding/Qwen 比较的暂停边界见[原始 P0 RESULTS](02_实验/Planner_P0_v0/RESULTS.md)。**P0 Baseline Gate 三场景开发比较已完成，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW（未 CLOSED）**；唯一结果入口是 [RESULTS](02_实验/Planner_P0_Baseline_Gate_v0/RESULTS.md)。P0-Integration 的独立有限检查点仍见 [RESULTS](02_实验/Planner_P0_Integration_v0/RESULTS.md)。这不表示完整传统系统、独立 NPC agency 或 P5 shared-supply 问题已完成。CI 只验证离线契约；原生运行证据见各自 RESULTS，exact-head workflow 状态以 GitHub Actions 为准。下一步见 [TODO](00_研究设计/TODO.md)。
 

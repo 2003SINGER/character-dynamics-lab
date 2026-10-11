@@ -1,0 +1,26 @@
+{
+  "review_scope": "parent readback of M1 archive and actual M2 raw responses; bounded development acceptance only",
+  "m1_archive": "public_evidence/system-baseline-runs-20261011T165402Z-9ee51f.tar.gz",
+  "m1_archive_sha256": "46bd9f55fc43a85b0d131e61daa60fb93384f122ca71d9fa512fd1bff5c646b6",
+  "m1_manifest_files_checked": 293,
+  "m1_member_size_or_sha_mismatches": [],
+  "m1_unsafe_or_nonregular_members": [],
+  "m1_credentials_account_or_private_dialogue_pattern_hits": [],
+  "m2_actual_calls": 3,
+  "m2_archive": "public_evidence/llm-binding-20261012.tar.gz",
+  "m2_archive_sha256": "d60c8df08361b421239fa418437f3e4a52bdca0251962d6908d7111be1be5d2e",
+  "m2_manifest_files_checked": 19,
+  "m2_member_size_or_sha_mismatches": [],
+  "m2_unsafe_or_nonregular_members": [],
+  "m2_credentials_pattern_hits": [],
+  "m2_original_outcomes": ["INVALID_RESPONSE", "INVALID_RESPONSE", "INVALID_RESPONSE"],
+  "m2_strict_offline_review": {
+    "positive": "duplicate JSON key id after exactly empty think prefix normalization",
+    "negative": "invalid JSON syntax; raw also invents unregistered relationship_worsened semantics",
+    "retry_positive": "duplicate JSON key constraints; original validator already rejected missing coverage references"
+  },
+  "m2_native_dispatches": 0,
+  "negative_is_correct_residual_evidence": false,
+  "overall": "PARTIAL / READY_FOR_INDEPENDENT_REVIEW",
+  "limitations": ["Pattern scan is bounded privacy screening, not a proof that every possible sensitive string is absent", "Invalid local model output is not a planning-performance result"]
+}

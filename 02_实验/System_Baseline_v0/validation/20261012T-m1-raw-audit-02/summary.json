@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-12",
+  "validation_id": "20261012T-m1-raw-audit-02",
+  "status": "FOCUSED_TESTS_PASS_AND_M1_RAW_EVIDENCE_CROSSCHECK_PASS",
+  "test_suites": {
+    "system_baseline_v0": {"passed": 24, "failed": 0, "skipped": 0},
+    "native_platform_v0_p5": {"passed": 43, "failed": 0, "skipped": 0},
+    "planner_p0_integration": {"passed": 7, "failed": 0, "skipped": 0},
+    "planner_p0_baseline_gate": {"passed": 6, "failed": 0, "skipped": 0},
+    "planner_p0_author_binding": {"passed": 22, "failed": 0, "skipped": 0},
+    "trajectory_constraints_typed_ir": {"passed": 30, "failed": 0, "skipped": 0}
+  },
+  "native_suite": "02_实验/System_Baseline_v0/runs/suite-20261011T164714Z-7d0d08.json",
+  "native_suite_sha256": "823c980489d9a4be45f77a7f618e21d1821d25c793217b571066c0b6bf27c58d",
+  "native_cases": [
+    "C1-C2-main-C3-reject-20261011T164634Z-b48bff",
+    "C1-C2-side-C3-reject-20261011T164643Z-5b5c12",
+    "C3-side-accept-20261011T164653Z-16ca2c",
+    "C4-C5-edit-player-perturbation-20261011T164702Z-5b228a",
+    "stale-edit-negative-20261011T164712Z-54d4ac"
+  ],
+  "scope_note": "This is an independent audit of these raw local run artifacts, not a general claim about future scenes or user-facing product acceptance. The stale negative is intentionally incomplete at minute 1 and is accepted only as a successful rejection control."
+}
