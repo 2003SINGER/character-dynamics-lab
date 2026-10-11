@@ -1,0 +1,48 @@
+{
+  "run_id": "p0bg-route-repair-A-20261011T115612Z-14caf8",
+  "audit": "parent_readonly_sqlite_and_native_ledger",
+  "database_mode": "read-only/query-only",
+  "checks": {
+    "complete_sequence": true,
+    "nondecreasing_event_time": true,
+    "time_sealed": true,
+    "frontier_matches": true,
+    "unique_events": true,
+    "no_repeat_pickup_delivery_witness": true,
+    "actor_database_readback": true,
+    "item_database_readback": true,
+    "scene_identity": true,
+    "native_goal_positions": true,
+    "one_real_delivery_and_meeting": true
+  },
+  "counts": {
+    "GET_SETTLED": 1,
+    "DROP_SETTLED": 1,
+    "MEETING_WITNESS": 1,
+    "CLOUD_SEEDED": 1,
+    "CLOUD_DISSIPATED": 0
+  },
+  "database_objects": {
+    "A": {
+      "id": 4139,
+      "key": "P0I A p0i_20261011115612_36917ff8",
+      "location_id": 4131
+    },
+    "B": {
+      "id": 4140,
+      "key": "P0I B p0i_20261011115612_36917ff8",
+      "location_id": 4131
+    },
+    "player": {
+      "id": 4141,
+      "key": "P0I player p0i_20261011115612_36917ff8",
+      "location_id": 4129
+    },
+    "shelter_kit": {
+      "id": 4142,
+      "key": "shelter_kit p0i_20261011115612_36917ff8",
+      "location_id": 4131
+    }
+  },
+  "pass": true
+}

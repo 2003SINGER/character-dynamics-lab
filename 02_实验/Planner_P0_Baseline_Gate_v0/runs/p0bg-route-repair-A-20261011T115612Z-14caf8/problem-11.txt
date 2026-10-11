@@ -1,0 +1,109 @@
+type character : location;
+type place : location;
+type weather;
+entity A : character;
+entity B : character;
+entity Clear : weather;
+entity Storm : weather;
+entity Junction : place;
+entity SidePassage : place;
+entity Inn : place;
+
+property at(character : character) : place;
+property now() : number;
+property weather() : weather;
+property path(from : place, to : place) : boolean;
+property knows_storm(character : character) : boolean;
+property kit_held(character : character) : boolean;
+property kit_at(place : place) : boolean;
+property shelter_delivered() : boolean;
+property task_bound() : boolean;
+property met_witness() : boolean;
+property offerable() : boolean;
+property author_actions_allowed() : boolean;
+property character_actions_allowed() : boolean;
+property direct_control_allowed() : boolean;
+property delivery_feasible(source : place) : boolean;
+property pending_cloud() : boolean;
+property cloud_due() : number;
+property delivery_cost(source : place) : number;
+
+now() = 10;
+weather() = Storm;
+at(A) = Inn;
+at(B) = Inn;
+task_bound();
+shelter_delivered();
+author_actions_allowed();
+character_actions_allowed();
+direct_control_allowed();
+path(Junction, SidePassage);
+path(SidePassage, Junction);
+path(SidePassage, Inn);
+path(Inn, SidePassage);
+
+trigger storm_arrives() {
+	precondition:
+		pending_cloud() & now() >= cloud_due() & weather() == Clear;
+	effect: weather() = Storm & !pending_cloud();
+};
+
+action wait(actor : character) {
+	precondition: character_actions_allowed() & now() < 24;
+	effect: now() = now() + 1;
+};
+
+action look(actor : character) {
+	precondition: character_actions_allowed() & !knows_storm(actor) & now() < 24;
+	effect: if(weather() == Storm) knows_storm(actor) & now() = now() + 1 else now() = now() + 1;
+};
+
+action move(actor : character, source : place, destination : place) {
+	precondition: character_actions_allowed() & at(actor) == source & path(source, destination) & now() < 24;
+	effect: at(actor) = destination & now() = now() + 1;
+};
+
+action cloud_seed() {
+	precondition:
+		author_actions_allowed() & weather() == Clear & now() <= 22;
+	effect: pending_cloud() & cloud_due() = now() + 2 & now() = now() + 1;
+};
+
+action offer_task() {
+	precondition:
+		author_actions_allowed() & offerable() & !task_bound() & now() < 24;
+	effect: task_bound() & now() = now() + 1;
+};
+
+action dispatch_task() {
+	precondition:
+		author_actions_allowed() & direct_control_allowed() & !task_bound() & now() < 24;
+	effect: task_bound() & now() = now() + 1;
+};
+
+action get_shelter_kit(source : place) {
+	precondition:
+		character_actions_allowed() & task_bound() & at(A) == source & kit_at(source) & !kit_held(A) & now() < 24;
+	effect: !kit_at(source) & kit_held(A) & now() = now() + 1;
+};
+
+action drop_shelter_kit() {
+	precondition:
+		character_actions_allowed() & task_bound() & at(A) == Inn & kit_held(A) & !shelter_delivered() & now() < 24;
+	effect: !kit_held(A) & shelter_delivered() & now() = now() + 1;
+};
+
+action meet() {
+	precondition:
+		character_actions_allowed() & at(A) == Inn & at(B) == Inn & !met_witness() & now() < 24;
+	effect: if(weather() == Storm & knows_storm(B) & shelter_delivered()) met_witness() & now() = now() + 1 else now() = now() + 1;
+};
+
+utility(): if(met_witness() & weather() == Storm & knows_storm(B) & shelter_delivered()) 1 else 0;
+utility(A): if(shelter_delivered() & met_witness()) 2 elseif(shelter_delivered()) 1 else 0;
+utility(B): if(met_witness() & knows_storm(B)) 2 elseif(knows_storm(B)) 1 else 0;
+
+/* Hand-authored finite fixture domain; not a complete traditional planner.
+   `delivery_cost` is an exact forecast, not a receipt. Sabre action choice
+   is separate from the existing P3 GTPyhop macro refinement and native
+   settlement. The native clock/weather ledger is authoritative. */
