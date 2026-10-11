@@ -1,0 +1,41 @@
+parent independent offline preflight
+command: '/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/jdk/jdk-17.0.20.1+1/Contents/Home/bin/java' -Xms64m -Xmx1g -Xss1m -Duser.language=en -Duser.country=US -Duser.timezone=UTC -cp '/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/sabre/bin' edu.uky.cs.nil.sabre.Main -v -p '/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_Author_Binding_v0/verification/sabre_preflight/delivery-only.problem' -m bf -c t -h h+ -el 1 -vl 200 -gl 5000 -tl 5000 -atl 24 -ctl 2
+exit_code: 0
+The Sabre Narrative Planner v0.8.0 by Stephen G. Ware
+Problem: delivery-only
+  characters: 2
+  entities:   7
+  fluents:    24
+  actions:    9
+  triggers:   1
+Compiled Problem: delivery-only
+  characters: 2
+  entities:   7
+  fluents:    21
+  actions:    21
+  triggers:   1
+Heuristic Progression Search:
+  problem:               delivery-only
+  starting utility:      0
+  goal utility:          1
+  method:                best-first
+  cost:                  temporal
+  heuristic:             sum graph
+  explanation pruning:   true
+  search limit:          200
+  space limit:           5000
+  time limit:            5s
+  author temporal limit: 24
+  character limit:       2
+  epistemic limit:       1
+Result: Success!
+  solution:         true
+  utility achieved: 1
+  nodes visited:    4
+  nodes generated:  39
+  time:             6ms
+dispatch_task()
+get_shelter_kit(Junction)
+move(A, Junction, Inn)
+drop_shelter_kit()
+goal(delivery_count() == 1)

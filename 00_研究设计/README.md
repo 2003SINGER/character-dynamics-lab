@@ -23,6 +23,8 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [未决问题与机制候选](未决问题与机制候选.md) | 具体缺口、备选计算、用户原意、决策条件 | 把提案写成已实现或已验证 |
 | **[Character Dynamics｜系统问题与执行语义 v0](CharacterDynamics_FormalProblem_v0.md)** | **唯一 F0/F1 owner**：作者部分约束下游戏世界在线规划与控制的问题定义；状态 DRAFT / READY_FOR_INDEPENDENT_REVIEW | 长期研究版图、算法选型、实现完成或研究有效性主张 |
 | [AuthorialTrajectoryPilotV0](AuthorialTrajectoryPilotV0.md) | 候选 F2 与 TypedIR / 预实验的较低层 owner；保留已有语义契约和 reference 证据 | 整个系统的正式定义；把候选写成获批路线或将 reference 测试冒充 Director/多 NPC 方法结果 |
+| [2026-10-11 Author Binding 讨论决策与差异记录](2026-10-11_P0_Author_Binding_Discussion.md) | 本轮六项设计原则、候选机制、已有覆盖/差异、未决条件与反例的短期决策记录 | 第二套系统定义、实现状态或实验结果 |
+| [P0 Author Binding v0 唯一 RESULTS](../02_实验/Planner_P0_Author_Binding_v0/RESULTS.md) | 固定 P0 约束绑定的唯一实现/验证结果 owner | 通用编译器、全系统完成或方法有效性主张 |
 | [E0 Key Ledger Protocol v0](E0_KeyLedger_Protocol_v0.md) | 唯一有限钥匙账本 E0 执行定义与 fixture/search/monitor acceptance protocol；PROTOCOL_FROZEN / E0-KeyLedger-v0；实现与逐例验收状态见 [E0 实验入口](../02_实验/E0_KeyLedger_v0/README.md) | F0/F1 总设计、Pilot Monitor/reference 契约、未验收的实现能力或实验结果 |
 | [E1 局部信息与独立角色协议 v0](E1_KeyLedger_LocalAgency_Protocol_v0.md) | E1-0 有限域与协议；E1-1 独立开发包已交付。实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)；代码入口：[runner](../tools/e1_keyledger_v0/runner.py) | E0 冻结规则；将开发验证写成正式实验、新颖性声明；自动授权正式实验/E1-2 |
 | [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md) | 新授权应用 vertical slice 的唯一开发结果；实现与协议见[代码 README](../tools/npc_system_v0/README.md) | 全系统正式语义、冻结 E1 结果、心理验证或玩家评价 |

@@ -30,3 +30,5 @@ jobs:
         run: python -B -m unittest discover -s tools/planner_p0_v0/integration_v0/tests -p 'test_*.py' -v
       - name: P0 baseline gate projections (offline; no Evennia/Sabre/JDK/server)
         run: python -B -m unittest discover -s tools/planner_p0_v0/baseline_gate_v0/tests -p 'test_*.py' -v
+      - name: P0 author binding projections (offline; no Evennia/Sabre/JDK/server)
+        run: python -B -m unittest discover -s tools/planner_p0_v0/author_binding_v0/tests -p 'test_*.py' -v

@@ -1,0 +1,23 @@
+Parent acceptance scope: fixed P0 offline adapter, not full system closure.
+
+Verified:
+- New contract and independently authored semantic tests: see author_binding_tests.txt.
+- Original Sabre parser/solver rerun on three generated inputs: see sabre_preflight/parent-*.txt.
+- Regeneration matches all three checked-in .problem inputs byte for byte.
+- Same author binding drives candidate event goals and the existing TypedIR AST; unsupported hard obligations block overall satisfaction.
+- Compilation retains original binding, source digests, fixture SHA, actual scene entity IDs, absolute deadline and residual obligations.
+- Source changes outside the new adapter are documentation and the scoped CI step only. Existing tracked P0 integration, Baseline Gate, TypedIR, P3, P5 and E0 paths have no diff.
+- Protected source hashes and the pre-existing dirty CMake hash match the start-of-task values.
+- Twenty scoped local Markdown links resolve; git diff --check passes.
+- Both private input archives match their named Trash copies by SHA-256; both original inbox paths are absent; both archives are ignored by Git.
+
+Limitations:
+- No native game actions were newly executed. Six native runs are replayed as pinned historical evidence, not regenerated.
+- Producer identity is not authenticated. Pins prove fixture byte integrity relative to this source checkout only.
+- Plan metadata guard is a primitive, not integrated into native dispatch.
+- Only clean initial pinned direct-control fixtures compile. Midtask prefix/progress replanning is not implemented.
+- Synthetic TypedIR counterexamples are labeled as synthetic, never accepted by the pinned-evidence API.
+- Existing P5 regression has one dependency-related skip; see its raw log.
+- Prior E0 H02 budget failures and P5 shared-supply failure are retained. No search budget was expanded, no expected result weakened.
+- No LLM calls, training, new formal comparison, Runtime modification, or main mutation was performed.
+- Status remains DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW. No general compiler correctness, player credibility, novel algorithm or CLOSED claim follows.

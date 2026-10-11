@@ -279,6 +279,12 @@ E0先在有限离散域做全量均匀代价/A*搜索。状态key包括所有影
 
 最短world plan仅证明假定所有动作执行时可达；输出NPC actions为**预测/建议条件**，不是可直接执行的Director commands。planner model与real executor不一致时停止并记录domain gap，而不是补一段文本继续。
 
+### 6.3 Author binding 接缝（P0 固定域候选）
+
+在已授权的有限 P0 接口工作中，同一份已确认的作者要求描述应同时产生规划器可消费的条件投影与本 Pilot TypedIR 可检查的监测投影，并保留二者到原要求的映射。这里复用本页 Registry/TypedIR 作为验证后端，不另建通用语义 IR 或游戏状态库；每条投影须标记来源类别、来源版本/证据、权限、时间锚、依赖假设及尚未落实的义务。只有经核验并固定版本的原生 API、注册语义或真实结算行为可标作原生来源；手写近似动作/事件模型必须单独标为抽象，并记录假设与偏差边界。
+
+这是待结果 owner 验收的接口约束，不是现有 reference monitor 已接入 Sabre 的事实。无法映射的作者硬要求保留为未解决义务，不能降成 soft，也不能因规划器投影可满足而报告作者要求已满足。Sabre 搜索状态、TypedIR 证据 verdict 与执行器真实 receipt 仍是不同来源；具体支持子集、测试与实现状态只由 [P0 Author Binding RESULTS](../02_实验/Planner_P0_Author_Binding_v0/RESULTS.md) 维护。
+
 ## 7. 永久账本、checkpoint/fork与因果依赖
 
 ### 7.1 CommittedWorldLedger

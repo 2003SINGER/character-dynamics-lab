@@ -1,0 +1,21 @@
+exit_code=1
+test_contract (unittest.loader._FailedTest.test_contract) ... ERROR
+
+======================================================================
+ERROR: test_contract (unittest.loader._FailedTest.test_contract)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_contract
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/trajectory_constraints_v0/tests/test_contract.py", line 6, in <module>
+    from trajectory_constraints_v0.ast import (
+ModuleNotFoundError: No module named 'trajectory_constraints_v0'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+FAILED (errors=1)
