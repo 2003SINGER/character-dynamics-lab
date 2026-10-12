@@ -135,7 +135,7 @@ def _candidate_guard_matches(guard, *, scene_id, bundle_version, now,
 
 def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_reject_v0",
                       horizon=24, seed=0, director_enabled=True, shared_supply=False,
-                      initial_main_open=True):
+                      initial_main_open=True, story_process=None, story_strategy="gtpyhop"):
     """Create a fresh P5 scene without reusing or overwriting any generated objects."""
     if initial_social_preset not in SOCIAL_PRESETS:
         raise ValueError("initial_social_preset is not a registered native preset")
@@ -145,6 +145,8 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
         raise ValueError("P5 seed must be an integer in [0,2147483647]")
     if type(director_enabled) is not bool or type(shared_supply) is not bool or type(initial_main_open) is not bool:
         raise ValueError("P5 director, shared_supply, and initial_main_open must be booleans")
+    if story_process is not None and story_strategy not in {"gtpyhop", "event_driven"}:
+        raise ValueError("story_strategy must be gtpyhop or event_driven")
     entities = _stable_entities()
     try:
         # Validate external author input before importing Evennia factories or
@@ -153,6 +155,15 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
     except BundleError as exc:
         return {"ok": False, "scene_created": False,
                 "error": {"code": exc.code, "details": dict(exc.details)}}
+    if story_process is not None:
+        try:
+            from tools.native_platform_v0.p5.story_process.model import load_request
+            template = load_request(story_process, allow_template=True)
+            if template.scenario_id is not None or template.task_control_grant.get("scenario_id") is not None:
+                raise ValueError("story-process reset template must leave scene and grant scenario IDs unbound")
+        except (ValueError, TypeError) as exc:
+            return {"ok": False, "scene_created": False,
+                    "error": {"code": "INVALID_STORY_PROCESS_REQUEST", "details": {"reason": str(exc)}}}
     from evennia import create_object
     from typeclasses.characters import Character
     from typeclasses.exits import Exit
@@ -254,6 +265,12 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
     world.capture_snapshot(scene_id, 0)
     # Mark initial time as a complete, immutable snapshot, not as actor evidence.
     _set(pickup, "p5_snapshot_coverage_minute", 0)
+    if story_process is not None:
+        from tools.native_platform_v0.p5.story_process.native import initialize_story_process
+        story_request = initialize_story_process(pickup, story_process, scene_id, story_strategy)
+        for actor in actors.values():
+            _set(actor, "p5_story_postresponse_policy", _plain_json(story_request.actor_postresponse))
+            _set(actor, "p5_story_deadline", int(story_request.objective["by_minute"]))
     return {"scene_id": scene_id, "seed": seed, "horizon": horizon, "now": 0,
             "preset": initial_social_preset, "director_enabled": director_enabled,
             "shared_supply": shared_supply,
@@ -264,7 +281,10 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
             "items": {alias: {"id": int(item.id), "dbref": str(item.dbref)}
                       for alias, item in items.items() if item is not None},
             "active_bundle": {"bundle_id": active.bundle_id, "version": active.version},
-            "pending_actions": {alias: None for alias in actors}}
+            "pending_actions": {alias: None for alias in actors},
+            **({"story_process": {"strategy": story_strategy,
+                                  "note_binding": "native_note_pending"}}
+               if story_process is not None else {})}
 
 
 def edit_author_bundle(scene_id, raw_bundle, expected_version):
@@ -541,7 +561,9 @@ def _apply_intervention(scene_id, row, bundle):
         if set(row) != {"at", "kind", "operation", "item_alias"}:
             raise ValueError("player interventions require at/kind/operation/item_alias")
         operation, item_alias = row["operation"], row["item_alias"]
-        if operation not in {"get", "drop"} or item_alias not in {"courier_supply", "resident_parcel"}:
+        story_enabled = _attr(_scene_objects(scene_id)[0], "p5_story_request", category="native_p5") is not None
+        allowed_items = {"courier_supply", "resident_parcel"} | ({"note"} if story_enabled else set())
+        if operation not in {"get", "drop"} or item_alias not in allowed_items:
             raise ValueError("P5 player intervention supports only get/drop of a named generated item")
         _, rows = _scene_objects(scene_id)
         player = next((obj for obj in rows if _attr(obj, "p3_control_role") == "player"), None)
@@ -567,6 +589,13 @@ def _apply_intervention(scene_id, row, bundle):
         result = {"settled": bool(settled), "status": "SETTLED" if settled else "WORLD_VALIDATION_REJECTED",
                   "receipt": command_receipt}
         provenance = "player_native_command"
+    elif row.get("kind") == "author_story_edit":
+        if set(row) != {"at", "kind", "expected_version", "request"}:
+            raise ValueError("author_story_edit requires at/kind/expected_version/request")
+        from tools.native_platform_v0.p5.story_process.native import edit_story_request
+        result = edit_story_request(scene_id, row["request"], row["expected_version"])
+        provenance = "author_story_process_edit"
+        command_receipt = None
     else:
         raise ValueError("unknown P5 intervention kind")
     pickup, _ = _scene_objects(scene_id)
@@ -589,6 +618,10 @@ def _round_deferred(scene_id, intervention=None, edit=None):
         from twisted.internet import defer as d
 
         pickup, rows = _scene_objects(scene_id)
+        actor_callback = step_actor
+        if _attr(pickup, "p5_story_request", category="native_p5") is not None:
+            from tools.native_platform_v0.p5.story_process.actor import step_story_aware_actor
+            actor_callback = step_story_aware_actor
         clock = advance_clock(scene_id)
         minute = int(clock["now"])
         edit_result = None
@@ -612,7 +645,7 @@ def _round_deferred(scene_id, intervention=None, edit=None):
             actor = actors[alias]
             log_before = list(_attr(actor, "log", default=[]))
             receipt_before = list(_attr(actor, "native_receipts", default=[]))
-            callback_result = yield d.maybeDeferred(step_actor, actor)
+            callback_result = yield d.maybeDeferred(actor_callback, actor)
             log_after = list(_attr(actor, "log", default=[]))
             receipt_after = list(_attr(actor, "native_receipts", default=[]))
             actor_rows.append({"actor_alias": alias, "callback_result_type": type(callback_result).__name__,
@@ -620,10 +653,36 @@ def _round_deferred(scene_id, intervention=None, edit=None):
                                "native_receipts": receipt_after[len(receipt_before):],
                                "snapshot": _snapshot_actor(actor)})
         completed = _complete_minute(scene_id, minute)
+        story_result = None
+        if _attr(pickup, "p5_story_request", category="native_p5") is not None:
+            from tools.native_platform_v0.p5.story_process.native import build_sealed_state, apply_story_decision
+            from tools.native_platform_v0.p5.story_process.model import load_request
+            from tools.native_platform_v0.p5.story_process.planning import plan_story_process
+            story_state = build_sealed_state(scene_id, minute)
+            if story_state is not None:
+                story_request = load_request(_plain_json(
+                    _attr(pickup, "p5_story_request", category="native_p5")))
+                strategy = _attr(pickup, "p5_story_strategy", category="native_p5", default="gtpyhop")
+                story_decision = plan_story_process(story_request, story_state, strategy=strategy)
+                queued = apply_story_decision(scene_id, story_state, story_decision)
+                story_result = {"decision": story_decision, **queued,
+                                "bound_note_id": story_request.objective.get("note_id"),
+                                "effects_applied": False,
+                                "controller_events": queued.get("controller_events", []),
+                                "sealed_frontier": completed["trace_frontier"]}
+            else:
+                raw_request = load_request(_plain_json(
+                    _attr(pickup, "p5_story_request", category="native_p5")))
+                story_result = {"status": "WAITING_FOR_SEALED_NATIVE_NOTE_RESPONSE",
+                                "bound_note_id": raw_request.objective.get("note_id"),
+                                "effects_applied": False,
+                                "sealed_frontier": completed["trace_frontier"],
+                                "diagnostic": "no bound exact LoveNote with verified sealed SOCIAL_REQUEST and physical receipt"}
         bundle = _bundle_for(pickup)
         verdicts, trace = _current_verdicts(scene_id, bundle)
         defer.returnValue({"minute": minute, "edits": [edit_result] if edit_result else [],
                            "interventions": [] if intervention_result is None else [intervention_result],
+                           **({"story_process": story_result} if story_result is not None else {}),
                            "director": director, "actor_steps": actor_rows,
                            "snapshot": completed["snapshot"], "minute_complete": True,
                            "event_complete": completed["event_complete"],
@@ -664,6 +723,39 @@ def _evidence(scene_id, bundle):
     prefix_sealed = (event_frontier == value_frontier == now and any(
         isinstance(row, Mapping) and row.get("minute") == now
         for row in _attr(pickup, "p5_world_snapshots", category="native_p5", default=[])))
+    story_evidence = None
+    if _attr(pickup, "p5_story_request", category="native_p5") is not None:
+        raw_story = _attr(pickup, "p5_story_meta", category="native_p5", default={})
+        from tools.native_platform_v0.p5.story_process.model import load_request
+        from tools.native_platform_v0.p5.story_process.native import build_sealed_state
+        from tools.native_platform_v0.p5.story_process.planning import _typedir_monitor
+        request = load_request(_plain_json(
+            _attr(pickup, "p5_story_request", category="native_p5")))
+        sealed_state = build_sealed_state(scene_id, now)
+        story_evidence = {"schema": "story-process-native-evidence-v1",
+                          "request": dict(request.raw),
+                          "strategy": _attr(pickup, "p5_story_strategy", category="native_p5"),
+                          "bound_note_id": request.objective.get("note_id"),
+                          "controller_decisions": list(raw_story.get("controller_decisions", [])),
+                          "controller_events": list(raw_story.get("controller_events", [])),
+                          "pending_task_requests": list(raw_story.get("task_offers", [])),
+                          "stale_future_request_ids": list(raw_story.get("stale_future_request_ids", [])),
+                          "actor_tasks": [{"actor_alias": _attr(actor, "p5_actor_alias", category="native_p5"),
+                                           "task": deepcopy(_attr(actor, "p5_story_task", category="native_p5"))}
+                                          for actor in actors],
+                          "receipts": list(raw_story.get("receipts", [])),
+                          "real_verdicts": (_typedir_monitor(request, sealed_state)
+                                            if sealed_state is not None else [{
+                                                "verdict": "NOT_SATISFIED",
+                                                "status": "NO_NATIVE_NOTE_EVIDENCE",
+                                                "request_id": request.request_id,
+                                                "sealed_frontier": now,
+                                                "reason": "the exact LoveNote has not been physically created, delivered, and sealed"}]),
+                          "controller_authored_npc_task_requests": int(raw_story.get(
+                              "controller_authored_npc_task_requests", 0)),
+                          "controller_authored_npc_commands": int(raw_story.get(
+                              "controller_authored_npc_commands", 0)),
+                          "execution_authority": "native_actor_callback_only"}
     return {"evidence_schema": "p5-live-trace-v1",
             "source": "native_platform_v0.p5.service._evidence",
             "prefix_status": "SEALED_COMPLETE" if prefix_sealed else "INCOMPLETE",
@@ -679,7 +771,9 @@ def _evidence(scene_id, bundle):
                 _attr(actor, "p5_actor_alias", category="native_p5"): _pending_identity(actor)
                 for actor in actors if isinstance(_attr(actor, "pending_action"), Mapping)
                 and _attr(actor, "pending_action").get("status") == "planned"},
-            "controller_authored_npc_commands": 0,
+            "controller_authored_npc_commands": (story_evidence["controller_authored_npc_commands"]
+                                                  if story_evidence else 0),
+            **({"story_process": story_evidence} if story_evidence is not None else {}),
             "verdicts": verdicts, "typed_trace": world.serialize_typed_trace(trace),
             "ledger": list(_attr(pickup, "p4_ledger", default=[])),
             "world_snapshots": list(_attr(pickup, "p5_world_snapshots", category="native_p5", default=[])),
@@ -737,13 +831,15 @@ def step_world(scene_id, rounds=1, *, interventions=(), edits=()):
 
 
 def run_p5_scenario(*, owner, bundle, initial_social_preset, horizon, interventions=(), edits=(),
-                    director_enabled=True, seed=0, shared_supply=False, initial_main_open=True):
+                    director_enabled=True, seed=0, shared_supply=False, initial_main_open=True,
+                    story_process=None, story_strategy="gtpyhop"):
     from twisted.internet import defer
 
     created = reset_p5_scenario(owner=owner, bundle=bundle,
                                 initial_social_preset=initial_social_preset, horizon=horizon,
                                 seed=seed, director_enabled=director_enabled,
-                                shared_supply=shared_supply, initial_main_open=initial_main_open)
+                                shared_supply=shared_supply, initial_main_open=initial_main_open,
+                                story_process=story_process, story_strategy=story_strategy)
     if isinstance(created, Mapping) and created.get("ok") is False:
         return dict(created)
     @defer.inlineCallbacks

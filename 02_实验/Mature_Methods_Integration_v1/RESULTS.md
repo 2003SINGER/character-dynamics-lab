@@ -1,6 +1,8 @@
 # Mature-Methods Integration v1 — bounded native evidence
 
-状态：**DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**（2026-10-12；未 CLOSED）。四组配对原生场景证明了一个最低闭环正例、一个物资扰动闭环、一个安全负例；S2 作者权限编辑未被原生运行支持，重选与旧候选失效未实际测试。因此本结果不是完整系统通过、性能比较、研究新颖性或机制有效性证据。授权范围内的运行已完成，下一步是独立审阅；不自动进入新阶段。
+状态：**DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**（2026-10-12；未 CLOSED）。原 S1–S4 与 S2 权限编辑拒绝仍是历史结果；同阶段新增的“真实便条回应后归档”有界增量已完成开发运行，现待独立审阅。该增量不改变旧结果，也不构成完整系统通过、性能优势、研究新颖性或机制有效性证据；不自动进入新阶段。
+
+> **历史分隔：** 下方原 S1–S4 内容维持其原始结果和边界，不应用作本次 story-process 增量的当前状态。新增增量的唯一结果见本文末尾“2026-10-12 Story-process 增量”。
 
 ## 范围与可复核证据
 
@@ -39,3 +41,36 @@
 ## 2026-10-12 定向外部审阅已收到
 
 审阅认可有界装配与真实反馈，不通过全部能力验收，也未证明高层独立方法选择或相对原 P5 的增益；本页的 PARTIAL 和 S2 未测试结论保持不变。审阅后的能力缺口与下一候选只维护于[未决页](../../00_研究设计/未决问题与机制候选.md#2026-10-12-成熟装配复核与下一能力入口)，执行指针见 [TODO](../../00_研究设计/TODO.md)。此次仅核对源码和沉淀讨论，未重跑旧场景、改写数据或新增方法结果；原文私有保存。
+
+## 2026-10-12 Story-process 增量：真实便条回应后归档
+
+### 范围与结论
+
+本次在同一 P5 世界实现并验收一个限定目标：原生 A→B 便条取得真实回应后，同一实体便条须在绝对期限内进入注册档案地点。规划器提出角色可接受或拒绝的任务请求；角色、物理世界和现有时钟仍是任务接受、移动、交接与归档的事实来源。方法搜索与事件驱动对照共享游戏内容、可见状态、动作权限、反馈、任务授权和 24 分钟物理期限。事件驱动策略也完成了相同目标；结果不支持 GTPyhop 优于该对照。
+
+最终固定审计包括 **14 个代表性条件**（13 个实际原生场景加 1 个 reset 前权限拒绝条件），其中正例目标均满足，四个负控产生预期拒绝或不满足结果。发布归档包含 **16 个唯一实际 scene ID**：上述 13 个代表场景之外，还保留两个 task-refusal 失败 scene 和一个早期 future-edit 成功但遥测缺失的 scene。scene 数、代表性条件数和运行尝试数不是同一个分母；不据此声称所有尝试通过或报告总体成功率。
+
+### 关键运行事实与失败保留
+
+- 接受与拒绝回应的 GTPyhop / event-driven 配对均满足目标。rejected 配对中的拒绝是便条回应内容；该分支的实例内容规则预先规定 B 不愿承担归档任务，因此 `file_by_B` 不适用，实际由 A 路线完成。B 的交接任务在该路线中被接受。它不是一次归档任务拒绝事件；方法提案也不作为接收或完成的证据。
+- 另两个 `task-refusal` 条件使用本实例 `LOCAL_CHOICE` 角色内容规则：GTPyhop 和 event-driven 均观察到 B 在第 18 分钟实际拒绝归档任务，并转向 A 路线。此前两次 GTPyhop 失败 scene 未能完成真实交接/会合并以 VIOLATED 结束；第三个独立同输入修复 scene 在显式建模同一注册交接地点的会合支持和真实 give 前置后满足目标。失败现场保留。修补是执行器/会合接线，不是改变角色规则或方法搜索。
+- accepted 正例和 locked-fragment 正例的续跑均保留。accepted 场景曾在第 18 分钟封存后触发 planner 异常；锁定片段场景曾在第 17 分钟触发 `UnboundLocalError`，当时尚未产生 controller decision。修复后均从原场景继续，封存前缀逐行不变并完成；这些故障不是抹除的重跑。
+- future file-actor 编辑的早期 SAT 运行缺少持久遥测。另一个独立同输入运行补足 trace 与 DB 核验：v1 请求失效、v2 选择 A 路线，旧请求未派发，目标满足。无权限条件则在 reset 阶段按预期拒绝，scene 未创建、目标未评估；locked-refusal 负控保留原锁定核心并中止。资源仍由玩家持有的条件下，未绑定新便条且归档目标未满足；期限负例在第 24 分钟为 VIOLATED。
+
+### 证据、成本与边界
+
+逐条件事实和尝试/续跑账本见最终发布副本中的[固定 case table](public_evidence/story-process-v1-20261012T152500Z/case-table.md)（SHA-256：`b2e45cc024beb8d59b361d1ade37c1fb9706d754d2bbe43ee585ce5da2863090`）；机器可核验的[manifest](public_evidence/story-process-v1-20261012T152500Z/audit-manifest.json) SHA-256：`8692a459f478b88dafad91acc3221ed5838b41cef653bda0cd87514d56c7b1e2`。发布证据为[story-process-v1.tar.gz](public_evidence/story-process-v1-20261012T152500Z/story-process-v1.tar.gz)：30 个明确 allowlist 目录、1,354 个归档成员、192,660,283 原始字节；归档 SHA-256：`4d29a96891564921c079db0ab9aa19c6cd011ab79ff0b08de51f711a16be53c4`。仅此最终发布包作为本次引用；较早包是旧表版本。
+
+本次工程内容/代码账如下；行数是所列当前文件的 `wc -l` 规模（含空行/注释），不是新增行差、作者工时或成本下降的估计：
+
+| 维度 | 实际新增/维护内容 | 可核验规模或边界 |
+|---|---|---|
+| 游戏内容 | `handover_note`、`archive_note` 两种授权任务；接受/拒绝回应后的角色 disposition 规则，含 `LOCAL_CHOICE` | 本实例内容规则；不等于普遍角色心理法则 |
+| 方法/策略知识 | 两个独立 GTPyhop 替代方法、等待回应方法；event-driven 的对应候选规则 | 方法各自检查前提并分解；不是新动作能力，也不预设哪一臂占优 |
+| 适配与运行工具 | `story_process` model/planning/actor/native 与单条件 runner | 2,615 行当前文件规模；不是纯新增 LOC 或耗时 |
+| 契约与回归测试 | 新增 story-process、native adapter 与 case contract tests | 1,076 行当前文件规模；总计上述目标文件 3,691 行 |
+| 调试修补类别 | 持久化/TypedIR 边界；模式分支变量初始化；recipient 路由；会合地点与真实交接前置；嵌套 parser 审计 | 修复及离线审计均保留；不能转写为作者劳动减少 |
+
+运行成本账本另分记 controller decisions、原 GTPyhop 实际 method callbacks、仅诊断用途的替代 guard 检查、原生 P4 ledger/角色回执及 sealed minute；墙钟记录排除 service lifecycle，只作描述。源代码在修复和续跑期间发生变化，且对照同样成功，因此不做算法性能排序或总成功率包装。专项复核记录：P5 为 85 项中 84 PASS、1 skip；成熟方法集成 34 项；P3 为 53 项通过。它们是开发验收，不等于整个系统 CLOSED。
+
+此增量仅支持该有限实例的原生行为和失败反馈证据，不证明通用调度、方法优势、研究新颖性、玩家可信度或系统完整性。原 S1–S4 / S2 权限编辑拒绝仍按历史边界解释；当前成熟方法集成总体仍为 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**，未 CLOSED。

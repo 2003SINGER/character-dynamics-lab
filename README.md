@@ -10,7 +10,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 2026-10-12 **System Baseline v0 当前为 `PARTIAL`**：M1 是 `READY_FOR_INDEPENDENT_REVIEW`，M2 为 `INVALID`；没有 native LLM candidate execution。本阶段在此停止，不进入 P6。唯一状态与运行证据归 [System Baseline v0 RESULTS](02_实验/System_Baseline_v0/RESULTS.md)，当前指针见 [TODO](00_研究设计/TODO.md)；M2 原始调用证据与逐文件 manifest 见[小型证据包](02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)和[manifest](02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json)。
 
-2026-10-12 **Planner Adapter Integration v1 的历史 PARTIAL 保留**。当前 **Mature-Methods Integration v1 已交付 DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**：最低原生闭环与物资反馈已运行，S2 权限编辑被原生拒绝，重选仍未验证。装配高层 GTPyhop、原 P5 机会评价、NPC 局部任务与真实反馈，不再扩张平坦 Sabre。状态/证据只看[本轮 RESULTS](02_实验/Mature_Methods_Integration_v1/RESULTS.md)，下一动作见 [TODO](00_研究设计/TODO.md)。不改写[旧结果](02_实验/Planner_Adapter_Integration_v1/RESULTS.md)，不宣称完整系统通过。
+2026-10-12 **Planner Adapter Integration v1 的历史 PARTIAL 保留**。Mature-Methods Integration v1 的原 S1–S4 `PARTIAL` 与 S2 权限编辑拒绝仍有效；同阶段“真实便条回应后归档”有界增量已完成开发运行，处于 `DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW`，不代表全套系统完成。设计契约见[故事过程代码说明](tools/native_platform_v0/p5/story_process/README.md)，唯一运行结果及限制见[本轮 RESULTS](02_实验/Mature_Methods_Integration_v1/RESULTS.md)，执行指针见 [TODO](00_研究设计/TODO.md)。不改写[旧 Planner Adapter 结果](02_实验/Planner_Adapter_Integration_v1/RESULTS.md)。
 
 `c228301` 已收到研究主轴方向的外部通过意见；不是新系统能力验收。[有界强近邻机制对照](01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)作为历史审查检查点保留。原始 P0 A/B 与 LLM/embedding/Qwen 比较的暂停边界见[原始 P0 RESULTS](02_实验/Planner_P0_v0/RESULTS.md)。**P0 Baseline Gate 三场景开发比较已完成，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW（未 CLOSED）**；唯一结果入口是 [RESULTS](02_实验/Planner_P0_Baseline_Gate_v0/RESULTS.md)。P0-Integration 的独立有限检查点仍见 [RESULTS](02_实验/Planner_P0_Integration_v0/RESULTS.md)。这不表示完整传统系统、独立 NPC agency 或 P5 shared-supply 问题已完成。CI 只验证离线契约；原生运行证据见各自 RESULTS，exact-head workflow 状态以 GitHub Actions 为准。下一步见 [TODO](00_研究设计/TODO.md)。
 
@@ -48,7 +48,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 仓库治理护栏：[ARCHITECTURE_RULES.md](ARCHITECTURE_RULES.md)；廉价健康检查可运行 `python tools/repo_health_check.py`，ReplayRecord 样例可用 `python tools/validate_replay_record.py <record.json>` 校验。健康脚本只提供文件大小、重复材料及部分 manifest 告警，不验证文档链接、术语或现状声明；CI 通过也不等于文档语义一致。实现、规格、结果与历史的权威范围见[项目规则](AGENTS.md)。
 
-当前没有新机制、组合增益或人类可信度证据。2026-10-12 新定向审阅已收到：本轮 GTPyhop 分解的是 P5 已选的支持方案，并未证明高层独立选择故事实现方法。下一步不优先修 S2 权限热更新，而是按完整目标核对游戏能力，并选择具有不同实际后果的可替代故事过程；[能力缺口与候选](00_研究设计/未决问题与机制候选.md#2026-10-12-成熟装配复核与下一能力入口)只做设计准入，不代表新场景已实施。历史候选组合、有限实例和 P5 应按各自结果 owner 解读；执行动作只见 [TODO](00_研究设计/TODO.md)。Paper-0 的独立 `A*` 准入只约束旧预测分支，不是当前游戏规划目标的前置门。
+当前没有新机制、组合增益或人类可信度证据。2026-10-12 新定向审阅指出的独立方法选择缺口，已通过用户授权的同阶段便条归档增量进行有限原生实现与开发验收；其状态为 `DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW`。实现边界见[故事过程代码说明](tools/native_platform_v0/p5/story_process/README.md)，事实和限制只见唯一[本轮 RESULTS](02_实验/Mature_Methods_Integration_v1/RESULTS.md)，执行指针见 [TODO](00_研究设计/TODO.md)。不据此主张方法收益或玩家可信度，不改写历史候选、旧有限实例和 P5 结果。Paper-0 的独立 `A*` 准入只约束旧预测分支，不是当前游戏规划目标的前置门。
 
 ## 代码与材料的归属
 

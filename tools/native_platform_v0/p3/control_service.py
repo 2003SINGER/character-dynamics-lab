@@ -50,6 +50,10 @@ SAFE_P3_KEYS = (
     "p5_director_enabled", "p5_horizon", "p5_shared_supply", "p5_world_snapshots",
     "p5_actor_alias", "p5_task_item_alias", "p5_native_social_preset",
     "p5_social_target_alias", "p5_delivery_task", "p5_item_alias", "p5_route_id",
+    "p5_story_request", "p5_story_meta", "p5_story_strategy", "p5_story_task",
+    "p5_story_offer", "p5_story_receipts", "p5_story_known_exits",
+    "p5_story_archive", "p5_story_willing_to_archive", "p5_story_postresponse_policy",
+    "p5_story_local_choice_history",
 )
 
 
@@ -319,7 +323,7 @@ class P3Control:
 
     def reset_p5_scenario(self, args):
         allowed = {"bundle", "initial_social_preset", "horizon", "seed", "director_enabled",
-                   "shared_supply", "initial_main_open"}
+                   "shared_supply", "initial_main_open", "story_process", "story_strategy"}
         if set(args) - allowed or "bundle" not in args:
             raise ValueError("reset_p5_scenario requires bundle and only registered P5 options")
         if self.created_scenes >= MAX_SCENES_PER_PROCESS:
@@ -333,7 +337,8 @@ class P3Control:
 
     def run_p5_scenario(self, args):
         allowed = {"bundle", "initial_social_preset", "horizon", "interventions", "edits",
-                   "director_enabled", "seed", "shared_supply", "initial_main_open"}
+                   "director_enabled", "seed", "shared_supply", "initial_main_open",
+                   "story_process", "story_strategy"}
         if set(args) - allowed or not {"bundle", "initial_social_preset", "horizon"}.issubset(args):
             raise ValueError("run_p5_scenario requires bundle, initial_social_preset, horizon")
         if self.created_scenes >= MAX_SCENES_PER_PROCESS:
