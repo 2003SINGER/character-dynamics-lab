@@ -5,6 +5,7 @@ on:
     branches: [webgpt-sync]
     paths:
       - 'tools/native_platform_v0/**'
+      - 'tools/mature_methods_integration_v1/**'
       - '.github/workflows/native-platform-p3.yml'
 
 jobs:
@@ -40,3 +41,5 @@ jobs:
         run: python -B -m unittest tools.native_platform_v0.bridge.test_p5_social -v
       - name: P5 external bundle runner and evidence audit tests
         run: python -B -m unittest discover -s tools/native_platform_v0/p5/tests -v
+      - name: Mature-methods fixed-case and runner contracts (offline only)
+        run: python -B -m unittest discover -s tools/mature_methods_integration_v1/tests -v

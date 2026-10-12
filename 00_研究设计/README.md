@@ -12,7 +12,7 @@
 
 2026-10-12 **System Baseline v0 当前为 `PARTIAL`**：M1 `READY_FOR_INDEPENDENT_REVIEW`，M2 `INVALID`，没有 native LLM candidate execution；本阶段停止，不进入 P6。P0 局部扩张暂停。状态与运行事实只由 [System Baseline v0 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md) 维护，唯一执行指针见 [TODO](TODO.md)；M2 原始调用证据见[证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)及其[manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json)。
 
-**Planner Adapter Integration v1 已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`**；交付与状态只看[唯一 RESULTS](../02_实验/Planner_Adapter_Integration_v1/RESULTS.md)，执行指针只看 [TODO](TODO.md)。本轮停止代码扩张，不自动开始下一阶段。此前 System Baseline v0 的 `PARTIAL` 保持历史记录，不在此重写；F0/F1 与 LLM prompt 不因本任务改动。
+**Planner Adapter Integration v1 的历史 PARTIAL 保留**。当前 **Mature-Methods Integration v1 已交付 DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**，最低原生链和物资反馈有证据，但 S2 权限编辑被原生拒绝；具体能力、失败和证据仅查[本轮 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，下一动作只看 [TODO](TODO.md)。本轮停止；不继续扩张旧平坦 Sabre，不改写此前 System Baseline v0 的 `PARTIAL`，不改 F0/F1 或 LLM prompt。
 
 Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。完整机制说明中已确认的内容是工程语义与模块契约，不是已验证心理规律。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
 
@@ -30,6 +30,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [2026-10-11 Author Binding 讨论决策与差异记录](2026-10-11_P0_Author_Binding_Discussion.md) | 本轮六项设计原则、候选机制、已有覆盖/差异、未决条件与反例的短期决策记录 | 第二套系统定义、实现状态或实验结果 |
 | [P0 Author Binding v0 唯一 RESULTS](../02_实验/Planner_P0_Author_Binding_v0/RESULTS.md) | 固定 P0 约束绑定的唯一实现/验证结果 owner | 通用编译器、全系统完成或方法有效性主张 |
 | [System Baseline v0 唯一 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md) | 历史 M0–M3 单一系统集成任务的运行证据与状态 owner（PARTIAL） | 已完成系统能力的推断、独立审阅结论或下一阶段授权 |
+| [Mature-Methods Integration v1 唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md) | 当前授权的分层成熟方法装配、S1–S4 有界原生验收与强对照的状态/结果 owner | 整个系统已完成、原创算法或自动进入后续阶段 |
 | [E0 Key Ledger Protocol v0](E0_KeyLedger_Protocol_v0.md) | 唯一有限钥匙账本 E0 执行定义与 fixture/search/monitor acceptance protocol；PROTOCOL_FROZEN / E0-KeyLedger-v0；实现与逐例验收状态见 [E0 实验入口](../02_实验/E0_KeyLedger_v0/README.md) | F0/F1 总设计、Pilot Monitor/reference 契约、未验收的实现能力或实验结果 |
 | [E1 局部信息与独立角色协议 v0](E1_KeyLedger_LocalAgency_Protocol_v0.md) | E1-0 有限域与协议；E1-1 独立开发包已交付。实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)；代码入口：[runner](../tools/e1_keyledger_v0/runner.py) | E0 冻结规则；将开发验证写成正式实验、新颖性声明；自动授权正式实验/E1-2 |
 | [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md) | 新授权应用 vertical slice 的唯一开发结果；实现与协议见[代码 README](../tools/npc_system_v0/README.md) | 全系统正式语义、冻结 E1 结果、心理验证或玩家评价 |
@@ -83,7 +84,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 
-当前问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)；完整长期研究版图见 [System Vision](Character_Dynamics_System_Vision_v0.md#长期研究版图)。LLM × 成熟规划是主轴候选，可服务语义、因果候选、grounded 绑定、层次细化与反馈修复；不要求每层都用 LLM。层次、联合或混合候选组织尚未冻结。A/B 与 Q1–Q3 仅是此前基线讨论和有限实例；不代表完整研究任务或已确认 gap。[Pilot](AuthorialTrajectoryPilotV0.md)只维护 TypedIR/reference 候选契约。[强近邻机制对照](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)保留。当前执行指针是 Planner Adapter Integration v1；具体任务与下一动作只见[TODO](TODO.md)，交付状态只见对应唯一 RESULTS，不自动生成后续 stage。现有 P5 Director 仍是有限间接模式，不定义全局作者权限。
+当前问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)；完整长期研究版图见 [System Vision](Character_Dynamics_System_Vision_v0.md#长期研究版图)。LLM × 成熟规划是主轴候选，可服务语义、因果候选、grounded 绑定、层次细化与反馈修复；不要求每层都用 LLM。层次、联合或混合候选组织尚未冻结。A/B 与 Q1–Q3 仅是此前基线讨论和有限实例；不代表完整研究任务或已确认 gap。[Pilot](AuthorialTrajectoryPilotV0.md)只维护 TypedIR/reference 候选契约。[强近邻机制对照](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)保留。当前执行指针是 Mature-Methods Integration v1；具体任务与下一动作只见[TODO](TODO.md)，交付状态只见对应唯一 RESULTS，不自动生成后续 stage。现有 P5 Director 仍是有限间接模式，不定义全局作者权限。
 
 例如本次三项想法分别落位：分段逆映射保留原话于问题 Q01；低耦合的确定边界在完整机制 §8，未落实方案在 Q03；Object/Scene/W 动作职责在完整机制 §4，具体实现缺口在 Q05。TODO 只链接并安排验证，不再复制三遍原理。
 

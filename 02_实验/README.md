@@ -4,6 +4,8 @@
 
 ## 当前状态与结果复用
 
+当前交付入口：[Mature-Methods Integration v1 RESULTS](Mature_Methods_Integration_v1/RESULTS.md)，DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW。S1–S4 有界原生配对已运行；最低闭环、物资反馈和安全负例有证据，权限编辑后的重选未实际验证。结果、原始失败和公开哈希证据仅由该 owner 维护；本轮停止。System Baseline v0 与 Planner Adapter Integration v1 的历史 PARTIAL 保留。
+
 原始 P0 A/B 及 LLM/embedding/Qwen 比较的暂停边界见[原始 P0 RESULTS](Planner_P0_v0/RESULTS.md)。当前 P0 Baseline Gate 固定三场景比较为 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW**，运行、成本、审计与限制只见[唯一 RESULTS](Planner_P0_Baseline_Gate_v0/RESULTS.md)；P0-Integration 独立检查点仍见[其 RESULTS](Planner_P0_Integration_v0/RESULTS.md)。Gate 不是完整传统系统或独立 NPC agency；CI 仅验证离线契约，exact-head 状态以 GitHub Actions 为准。P5 shared-supply 失败与其他历史路线继续由各自结果 owner 保留。
 
 2026-10-10 当前原生平台路线为 **Evennia 主平台 + Ensemble 首个原生人物机制参照**。P5 Author Bundle 有限集成状态 **READY_FOR_INDEPENDENT_REVIEW**，未 CLOSED；12 场结果、11/12 结构审计及一个真实 shared-supply 失败只维护于 [P5 RESULTS](Native_Platform_P5_v0/RESULTS.md)，公开索引从该 owner 进入。MCP smoke、9个legacy cases（10 worlds）与8个P4 worlds回归已完成；四组P4配对integrity audit PASS。范围和边界见 [P5 README](Native_Platform_P5_v0/README.md)，核心接口见[代码 README](../tools/native_platform_v0/p5/README.md)。P5 使用有限、条件性的作者机会 AND/OR 候选枚举，并复用已有 TypedIR、GTPyhop 和原生 Ensemble；不代表完整 DM、可保证的 NPC 响应或研究效果。P1/P2、P3 与 P4-0 均由各自历史 owner 维护，旧结论不在本页重写。

@@ -1,0 +1,113 @@
+{
+  "schema": "mature-methods-integration-suite-v1",
+  "suite_id": "mature-methods-integration-v1-fixed-four-pairs",
+  "revision": 1,
+  "scope": "four bounded matched case pairs; no flat Sabre expansion",
+  "common": {
+    "horizon": 24,
+    "seed": 20261012,
+    "initial_main_open": false,
+    "shared_supply": false,
+    "external_observe_actor_calls": 0,
+    "native_callback_observations": "retained symmetrically from sealed P5 traces",
+    "npc_dispatch": "none; only existing native actor tasks/callbacks",
+    "author_opportunity_limit": 1,
+    "physical_budget": 2
+  },
+  "arms": {
+    "mature_methods": {"controller": "p5_mature_methods_v1", "native_director_enabled": false},
+    "baseline": {"controller": "p5_director_v0", "native_director_enabled": true}
+  },
+  "acceptance_vocabulary": {
+    "proposal_is_goal_satisfaction": false,
+    "wait_is_native_fact": false,
+    "npc_plan_is_native_receipt": false,
+    "monitor_verdict_is_authoritative": true
+  },
+  "cases": [
+    {
+      "case_id": "S1-result-only-reject",
+      "bundle": "bundle-result-only-v1.json",
+      "preset": "native_default_reject_v0",
+      "edits": [],
+      "interventions": [],
+      "expected": {
+        "initial_routes": {"main_passage": false, "side_passage": false},
+        "route_goal_present": false,
+        "method_support": ["existing_path", "open_main", "open_side", "blocked"],
+        "delivery_actors": ["A", "B"],
+        "A_delivery_physically_precedes_note_response": true,
+        "B_delivery_must_precede_note_response": false,
+        "note_response_is_native_and_rejection_is_valid": true,
+        "proposal_status_satisfies_goals": false
+      }
+    },
+    {
+      "case_id": "S2-edit-reselect-accept",
+      "bundle": "bundle-result-only-v1.json",
+      "preset": "hero_intelligence_30_v0",
+      "edits": [{"at": 1, "expected_version": 1, "bundle": "bundle-main-only-v2.json"}],
+      "interventions": [],
+      "expected": {
+        "initial_routes": {"main_passage": false, "side_passage": false},
+        "initial_bundle": {"bundle_id": "mature-methods-result-only", "version": 1,
+                            "world_opportunities": ["open_main_passage", "open_side_passage"], "cost_budget": 2},
+        "edit_bundle": {"bundle_id": "mature-methods-result-only", "version": 2,
+                         "world_opportunities": ["open_main_passage"], "cost_budget": 2},
+        "candidate_before_edit": "open_side_passage",
+        "edit_precedes_candidate_settlement": true,
+        "old_candidate_guard_result": "STALE_CANDIDATE",
+        "reselect_after_edit": "open_main_passage",
+        "response_preset": "hero_intelligence_30_v0",
+        "expected_native_response": "accepted",
+        "A_delivery_physically_precedes_note_response": true,
+        "B_delivery_must_precede_note_response": false,
+        "history_and_absolute_deadlines_preserved": true
+      }
+    },
+    {
+      "case_id": "S3-player-get-drop-recovery-reject",
+      "bundle": "bundle-result-only-v1.json",
+      "preset": "native_default_reject_v0",
+      "edits": [],
+      "interventions": [
+        {"at": 2, "kind": "player_command", "operation": "get", "item_alias": "courier_supply"},
+        {"at": 6, "kind": "player_command", "operation": "drop", "item_alias": "courier_supply"}
+      ],
+      "expected": {
+        "initial_routes": {"main_passage": false, "side_passage": false},
+        "interruption_get_minute": 2,
+        "recovery_drop_minute": 6,
+        "support_change": "A courier_supply unavailable => BLOCKED_OR_WAIT; B unchanged and may progress",
+        "recovery": "only native item location/holder and receipts can restore support",
+        "preserve_pending_and_ledger_history": true,
+        "npc_status_mutations": 0,
+        "delivery_actors": ["A", "B"],
+        "A_delivery_physically_precedes_note_response": true
+      }
+    },
+    {
+      "case_id": "S4-no-permission-safety-negative",
+      "bundle": "bundle-no-opportunities-v1.json",
+      "preset": "native_default_reject_v0",
+      "edits": [],
+      "interventions": [],
+      "expected": {
+        "initial_routes": {"main_passage": false, "side_passage": false},
+        "world_opportunities": [],
+        "cost_budget": 0,
+        "high_level_status": "BLOCKED",
+        "native_opportunity_executions": 0,
+        "unmet_hard_monitor_status": ["PENDING", "VIOLATED"],
+        "must_not_claim_world_unreachable": true
+      }
+    }
+  ],
+  "native_run_policy": {
+    "max_case_pairs": 4,
+    "max_native_scenes": 8,
+    "stop_on_precondition_mismatch": true,
+    "never_change_suite_after_first_native_run": true,
+    "failed_runs_are_retained": true
+  }
+}

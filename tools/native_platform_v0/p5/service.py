@@ -11,6 +11,8 @@ from collections.abc import Mapping
 from collections.abc import Sequence
 from copy import deepcopy
 from functools import wraps
+from hashlib import sha256
+import json
 from types import SimpleNamespace
 
 from .bundle import BundleError, BundleStore, load_bundle
@@ -72,6 +74,12 @@ def _plain_json(value):
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         return [_plain_json(item) for item in value]
     return value
+
+
+def _bundle_sha256(bundle):
+    raw = json.dumps(_plain_json(bundle.raw), sort_keys=True, ensure_ascii=False,
+                     separators=(",", ":")).encode("utf-8")
+    return sha256(raw).hexdigest()
 
 
 def _current_verdicts(scene_id, bundle, *, through_minute=None):
@@ -313,6 +321,30 @@ def edit_author_bundle(scene_id, raw_bundle, expected_version):
             "pending_identity_preserved": before == after}
 
 
+def _director_planning_view(scene_id, bundle, *, now, verdicts_through_minute):
+    """Return the exact symbolic input consumed by the existing P5 Director.
+
+    ``verdicts_through_minute`` is explicit so the live Director can retain its
+    prior-sealed-prefix semantics while read-only evidence can request the
+    current sealed frontier. This helper only reads native world state.
+    """
+    pickup, rows = _scene_objects(scene_id)
+    actors = {str(_attr(obj, "p5_actor_alias", category="native_p5")): obj
+              for obj in rows if _attr(obj, "activity_profile") == world.PROFILE}
+    trace_result, _trace = _current_verdicts(
+        scene_id, bundle, through_minute=verdicts_through_minute)
+    state = {"now": int(now), "horizon": int(_attr(pickup, "p5_horizon", category="native_p5")),
+             "routes": world.route_rows(scene_id, actors["A"], bundle),
+             "spent_cost": int(_attr(pickup, "p5_spent_cost", category="native_p5", default=0)),
+             "opportunities_used": int(_attr(pickup, "p5_opportunities_used", category="native_p5", default=0)),
+             "verdicts": [{"constraint_id": row["constraint_id"], "status": row["status"]}
+                          for row in trace_result["constraints"]],
+             "physical_budget": 2}
+    return {"state": state,
+            "verdicts": trace_result,
+            "typed_trace": world.serialize_typed_trace(_trace)}
+
+
 def _director(scene_id, bundle, *, enabled):
     from tools.native_platform_v0.p3.p4_world import append_event, clock_for_actor
 
@@ -320,18 +352,12 @@ def _director(scene_id, bundle, *, enabled):
     actors = {str(_attr(obj, "p5_actor_alias", category="native_p5")): obj
               for obj in rows if _attr(obj, "activity_profile") == world.PROFILE}
     clock = clock_for_actor(actors["A"])
-    # The current round has advanced the server clock but its two actor
-    # callbacks have not yet completed. Decisions use only the previous sealed
-    # prefix, never a fabricated observation at this minute.
-    trace_result, trace = _current_verdicts(scene_id, bundle,
-                                            through_minute=max(0, int(clock["now"]) - 1))
-    state = {"now": int(clock["now"]), "horizon": int(_attr(pickup, "p5_horizon", category="native_p5")),
-             "routes": world.route_rows(scene_id, actors["A"], bundle),
-             "spent_cost": int(_attr(pickup, "p5_spent_cost", category="native_p5", default=0)),
-             "opportunities_used": int(_attr(pickup, "p5_opportunities_used", category="native_p5", default=0)),
-             "verdicts": [{"constraint_id": row["constraint_id"], "status": row["status"]}
-                          for row in trace_result["constraints"]],
-             "physical_budget": 2}
+    now = int(clock["now"])
+    # Keep the original live policy boundary: callbacks at this minute have
+    # not happened yet, so planning uses only through the prior sealed prefix.
+    authorized = _director_planning_view(scene_id, bundle, now=now,
+                                          verdicts_through_minute=max(0, now - 1))
+    state = authorized["state"]
     proposal = plan(bundle, state)
     action = proposal["selected_action"] if enabled else NO_OP
     director_id = f"p5:{_attr(pickup, 'scenario_seed', default=0)}:{clock['now']}:director:v{bundle.version}"
@@ -392,7 +418,8 @@ def _planner_scene_binding(scene_id):
             raise ValueError(f"generated actor {alias} lacks its existing bound task identity")
         if item_alias not in {"courier_supply", "resident_parcel"}:
             raise ValueError(f"generated actor {alias} has an unregistered P5 task item alias")
-        task_bindings[alias] = {"item_alias": item_alias, "item_id": int(bound_item.id),
+        task_bindings[alias] = {"actor_id": int(actor.id), "item_alias": item_alias,
+                                "item_id": int(bound_item.id),
                                 "destination_id": int(bound_destination),
                                 "source": "existing_scene_actor_binding"}
     routes = []
@@ -631,13 +658,17 @@ def _evidence(scene_id, bundle):
             reasons.append(f"actor_{alias}_social_{_attr(actor, 'p4_social_status')}")
     event_frontier = int(_attr(pickup, "p5_event_coverage_minute", category="native_p5", default=0))
     value_frontier = int(_attr(pickup, "p5_snapshot_coverage_minute", category="native_p5", default=0))
+    planning_frontier = min(event_frontier, value_frontier)
+    planning = _director_planning_view(scene_id, bundle, now=now,
+                                        verdicts_through_minute=planning_frontier)
     prefix_sealed = (event_frontier == value_frontier == now and any(
         isinstance(row, Mapping) and row.get("minute") == now
         for row in _attr(pickup, "p5_world_snapshots", category="native_p5", default=[])))
     return {"evidence_schema": "p5-live-trace-v1",
             "source": "native_platform_v0.p5.service._evidence",
             "prefix_status": "SEALED_COMPLETE" if prefix_sealed else "INCOMPLETE",
-            "bundle_identity": {"bundle_id": bundle.bundle_id, "version": bundle.version},
+            "bundle_identity": {"bundle_id": bundle.bundle_id, "version": bundle.version,
+                                "sha256": _bundle_sha256(bundle)},
             "scene_id": scene_id, "now": now,
             "horizon": int(_attr(pickup, "p5_horizon", category="native_p5")),
             "complete_through": {"events": int(_attr(pickup, "p5_event_coverage_minute", category="native_p5", default=0)),
@@ -654,7 +685,18 @@ def _evidence(scene_id, bundle):
             "world_snapshots": list(_attr(pickup, "p5_world_snapshots", category="native_p5", default=[])),
             "actor_evidence": [_snapshot_actor(obj) for obj in rows
                                if _attr(obj, "activity_profile") == world.PROFILE],
-            "world_capability_projection": _planner_scene_binding(scene_id)}
+            "world_capability_projection": _planner_scene_binding(scene_id),
+            "planning_view": {
+                "schema": "p5-native-planning-view-v1",
+                "source": "native_platform_v0.p5.service._director_planning_view",
+                "scene_id": scene_id,
+                "based_on_minute": now,
+                "bundle_identity": {"bundle_id": bundle.bundle_id,
+                                    "version": bundle.version,
+                                    "sha256": _bundle_sha256(bundle)},
+                "frontiers": {"events_through": event_frontier,
+                              "values_through": value_frontier},
+                "state": planning["state"]}}
 
 
 def get_trace(scene_id):
