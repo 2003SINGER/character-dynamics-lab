@@ -12,7 +12,7 @@
 
 2026-10-12 **System Baseline v0 当前为 `PARTIAL`**：M1 `READY_FOR_INDEPENDENT_REVIEW`，M2 `INVALID`，没有 native LLM candidate execution；本阶段停止，不进入 P6。P0 局部扩张暂停。状态与运行事实只由 [System Baseline v0 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md) 维护，唯一执行指针见 [TODO](TODO.md)；M2 原始调用证据见[证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)及其[manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json)。
 
-**Planner Adapter Integration v1 的历史 PARTIAL 保留**。当前 **Mature-Methods Integration v1 已交付 DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**，最低原生链和物资反馈有证据，但 S2 权限编辑被原生拒绝；具体能力、失败和证据仅查[本轮 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，下一动作只看 [TODO](TODO.md)。本轮停止；不继续扩张旧平坦 Sabre，不改写此前 System Baseline v0 的 `PARTIAL`，不改 F0/F1 或 LLM prompt。
+**Planner Adapter Integration v1 的历史 PARTIAL 保留**。当前 **Mature-Methods Integration v1 已交付 DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**，最低原生链和物资反馈有证据，但 S2 权限编辑被原生拒绝；具体能力、失败和证据仅查[本轮 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)。2026-10-12 定向审阅已收到；下一能力设计见[未决页](未决问题与机制候选.md#2026-10-12-成熟装配复核与下一能力入口)，执行指针只看 [TODO](TODO.md)。停止刷旧验收，不把权限热更新作为默认下一题；不继续扩张旧平坦 Sabre，不改写此前 System Baseline v0 的 `PARTIAL`。
 
 Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。完整机制说明中已确认的内容是工程语义与模块契约，不是已验证心理规律。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
 
