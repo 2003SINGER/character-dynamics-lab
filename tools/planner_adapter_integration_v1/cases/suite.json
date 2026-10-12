@@ -1,0 +1,16 @@
+{
+  "schema": "planner-adapter-integration-v1-cases",
+  "purpose": "Small fixed native pilot matrix; each Sabre case has a P5 Director method-matched control.",
+  "methods": ["sabre", "p5_director"],
+  "stale_negative":{"bundle":"wide24.json","edited_bundle":"wide24-v2.json"},
+  "scenarios": [
+    {"id":"outcome-wide24","bundle":"wide24.json","preset":"native_default_reject_v0","horizon":24,"seed":20261012,"initial_main_open":false},
+    {"id":"outcome-tight12","bundle":"tight12.json","preset":"native_default_reject_v0","horizon":24,"seed":20261012,"initial_main_open":false},
+    {"id":"outcome-wide24-accept","bundle":"wide24.json","preset":"hero_intelligence_30_v0","horizon":24,"seed":20261012,"initial_main_open":false},
+    {"id":"outcome-wide24-budget1","bundle":"wide24-budget1.json","preset":"native_default_reject_v0","horizon":24,"seed":20261012,"initial_main_open":false},
+    {"id":"outcome-tight12-budget1","bundle":"tight12-budget1.json","preset":"native_default_reject_v0","horizon":24,"seed":20261012,"initial_main_open":false},
+    {"id":"outcome-no-opportunity-budget","bundle":"no-opportunity-budget.json","preset":"native_default_reject_v0","horizon":24,"seed":20261012,"initial_main_open":false},
+    {"id":"outcome-no-world-permission","bundle":"no-world-permission.json","preset":"native_default_reject_v0","horizon":24,"seed":20261012,"initial_main_open":false},
+    {"id":"outcome-player-interruption-cas-edit","bundle":"wide24.json","preset":"native_default_reject_v0","horizon":24,"seed":20261012,"initial_main_open":false,"scheduled_edit":{"at":2,"bundle":"wide24-v2.json"},"scheduled_interventions":[{"at":2,"kind":"player_command","operation":"get","item_alias":"courier_supply"},{"at":6,"kind":"player_command","operation":"drop","item_alias":"courier_supply"}]}
+  ]
+}

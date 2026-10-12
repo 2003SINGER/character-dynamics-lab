@@ -1,0 +1,357 @@
+type character;
+entity A : character;
+entity B : character;
+type place;
+entity Pickup : place;
+entity Porch : place;
+entity Side : place;
+type item;
+entity Supply : item;
+entity Parcel : item;
+entity Note : item;
+type response;
+entity Accepted : response;
+entity Rejected : response;
+
+property now() : number;
+property horizon() : number;
+property at(character : character) : place;
+property possible_path(from : place, to : place) : boolean;
+property known_path(actor : character, from : place, to : place) : boolean;
+property bound_item(actor : character, item : item) : boolean;
+property task_destination(actor : character, place : place) : boolean;
+property item_at(item : item, place : place) : boolean;
+property held_by(item : item, actor : character) : boolean;
+property known_item_at(actor : character, item : item, place : place) : boolean;
+property delivered(actor : character, item : item) : boolean;
+property delivery_time(actor : character, item : item) : number;
+property delivery_sequence(actor : character, item : item) : number;
+property note_requested() : boolean;
+property response_recorded() : boolean;
+property response_value() : response;
+property response_time() : number;
+property response_sequence() : number;
+property event_sequence() : number;
+property route_open_time_main_passage() : number;
+property route_open_time_side_passage() : number;
+property actor_next(character : character) : number;
+property actor_ready(character : character) : boolean;
+property opportunity_count() : number;
+property spent_cost() : number;
+property route_open_main_passage() : boolean;
+property route_open_side_passage() : boolean;
+property no_hard_goal() : boolean;
+property projection_complete() : boolean;
+property already_witnessed() : boolean;
+property goal_deliver_A() : boolean;
+property goal_deliver_B() : boolean;
+property goal_A_delivery_before_note() : boolean;
+property window_start_deliver_A() : boolean;
+property window_start_deliver_B() : boolean;
+property window_start_A_delivery_before_note() : boolean;
+property window_ordered_A_delivery_before_note() : boolean;
+property window_deliver_A() : boolean;
+property window_deliver_B() : boolean;
+property window_A_delivery_before_note() : boolean;
+
+now() = 0;
+horizon() = 24;
+opportunity_count() = 0;
+spent_cost() = 0;
+event_sequence() = 0;
+actor_next(A) = 2;
+actor_next(B) = 2;
+actor_ready(A);
+actor_ready(B);
+at(A) = Pickup;
+at(B) = Pickup;
+bound_item(A, Supply);
+task_destination(A, Porch);
+bound_item(B, Parcel);
+task_destination(B, Porch);
+possible_path(Porch, Pickup);
+known_path(A, Pickup, Porch);
+known_path(A, Pickup, Side);
+known_path(B, Pickup, Porch);
+known_path(B, Pickup, Side);
+item_at(Supply, Pickup);
+item_at(Parcel, Pickup);
+known_item_at(A, Supply, Pickup);
+known_item_at(B, Parcel, Pickup);
+
+action open_main_passage() {
+	precondition:
+		!route_open_main_passage() & now() == 0 & now() + 1 <= horizon() & opportunity_count() < 1 & spent_cost() + 2 <= 2;
+	effect: route_open_main_passage() & route_open_time_main_passage() = now() + 1 & opportunity_count() = opportunity_count() + 1 & spent_cost() = spent_cost() + 2 & now() = now() + 1 & possible_path(Pickup, Porch);
+};
+
+action open_side_passage() {
+	precondition:
+		!route_open_side_passage() & now() == 0 & now() + 1 <= horizon() & opportunity_count() < 1 & spent_cost() + 1 <= 2;
+	effect: route_open_side_passage() & route_open_time_side_passage() = now() + 1 & opportunity_count() = opportunity_count() + 1 & spent_cost() = spent_cost() + 1 & now() = now() + 1 & possible_path(Pickup, Side) & possible_path(Side, Pickup) & possible_path(Side, Porch) & possible_path(Porch, Side);
+};
+
+action explore_A_Pickup_Porch() {
+	precondition:
+		actor_ready(A) & at(A) == Pickup & possible_path(Pickup, Porch) & !known_path(A, Pickup, Porch) & now() <= actor_next(A);
+	effect: at(A) = Porch & known_path(A, Pickup, Porch) & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action move_A_Pickup_Porch() {
+	precondition:
+		actor_ready(A) & at(A) == Pickup & possible_path(Pickup, Porch) & known_path(A, Pickup, Porch) & now() <= actor_next(A);
+	effect: at(A) = Porch & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action explore_A_Pickup_Side() {
+	precondition:
+		actor_ready(A) & at(A) == Pickup & possible_path(Pickup, Side) & !known_path(A, Pickup, Side) & now() <= actor_next(A);
+	effect: at(A) = Side & known_path(A, Pickup, Side) & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action move_A_Pickup_Side() {
+	precondition:
+		actor_ready(A) & at(A) == Pickup & possible_path(Pickup, Side) & known_path(A, Pickup, Side) & now() <= actor_next(A);
+	effect: at(A) = Side & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action explore_A_Porch_Pickup() {
+	precondition:
+		actor_ready(A) & at(A) == Porch & possible_path(Porch, Pickup) & !known_path(A, Porch, Pickup) & now() <= actor_next(A);
+	effect: at(A) = Pickup & known_path(A, Porch, Pickup) & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action move_A_Porch_Pickup() {
+	precondition:
+		actor_ready(A) & at(A) == Porch & possible_path(Porch, Pickup) & known_path(A, Porch, Pickup) & now() <= actor_next(A);
+	effect: at(A) = Pickup & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action explore_A_Porch_Side() {
+	precondition:
+		actor_ready(A) & at(A) == Porch & possible_path(Porch, Side) & !known_path(A, Porch, Side) & now() <= actor_next(A);
+	effect: at(A) = Side & known_path(A, Porch, Side) & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action move_A_Porch_Side() {
+	precondition:
+		actor_ready(A) & at(A) == Porch & possible_path(Porch, Side) & known_path(A, Porch, Side) & now() <= actor_next(A);
+	effect: at(A) = Side & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action explore_A_Side_Pickup() {
+	precondition:
+		actor_ready(A) & at(A) == Side & possible_path(Side, Pickup) & !known_path(A, Side, Pickup) & now() <= actor_next(A);
+	effect: at(A) = Pickup & known_path(A, Side, Pickup) & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action move_A_Side_Pickup() {
+	precondition:
+		actor_ready(A) & at(A) == Side & possible_path(Side, Pickup) & known_path(A, Side, Pickup) & now() <= actor_next(A);
+	effect: at(A) = Pickup & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action explore_A_Side_Porch() {
+	precondition:
+		actor_ready(A) & at(A) == Side & possible_path(Side, Porch) & !known_path(A, Side, Porch) & now() <= actor_next(A);
+	effect: at(A) = Porch & known_path(A, Side, Porch) & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action move_A_Side_Porch() {
+	precondition:
+		actor_ready(A) & at(A) == Side & possible_path(Side, Porch) & known_path(A, Side, Porch) & now() <= actor_next(A);
+	effect: at(A) = Porch & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action explore_B_Pickup_Porch() {
+	precondition:
+		actor_ready(B) & at(B) == Pickup & possible_path(Pickup, Porch) & !known_path(B, Pickup, Porch) & now() <= actor_next(B);
+	effect: at(B) = Porch & known_path(B, Pickup, Porch) & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action move_B_Pickup_Porch() {
+	precondition:
+		actor_ready(B) & at(B) == Pickup & possible_path(Pickup, Porch) & known_path(B, Pickup, Porch) & now() <= actor_next(B);
+	effect: at(B) = Porch & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action explore_B_Pickup_Side() {
+	precondition:
+		actor_ready(B) & at(B) == Pickup & possible_path(Pickup, Side) & !known_path(B, Pickup, Side) & now() <= actor_next(B);
+	effect: at(B) = Side & known_path(B, Pickup, Side) & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action move_B_Pickup_Side() {
+	precondition:
+		actor_ready(B) & at(B) == Pickup & possible_path(Pickup, Side) & known_path(B, Pickup, Side) & now() <= actor_next(B);
+	effect: at(B) = Side & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action explore_B_Porch_Pickup() {
+	precondition:
+		actor_ready(B) & at(B) == Porch & possible_path(Porch, Pickup) & !known_path(B, Porch, Pickup) & now() <= actor_next(B);
+	effect: at(B) = Pickup & known_path(B, Porch, Pickup) & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action move_B_Porch_Pickup() {
+	precondition:
+		actor_ready(B) & at(B) == Porch & possible_path(Porch, Pickup) & known_path(B, Porch, Pickup) & now() <= actor_next(B);
+	effect: at(B) = Pickup & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action explore_B_Porch_Side() {
+	precondition:
+		actor_ready(B) & at(B) == Porch & possible_path(Porch, Side) & !known_path(B, Porch, Side) & now() <= actor_next(B);
+	effect: at(B) = Side & known_path(B, Porch, Side) & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action move_B_Porch_Side() {
+	precondition:
+		actor_ready(B) & at(B) == Porch & possible_path(Porch, Side) & known_path(B, Porch, Side) & now() <= actor_next(B);
+	effect: at(B) = Side & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action explore_B_Side_Pickup() {
+	precondition:
+		actor_ready(B) & at(B) == Side & possible_path(Side, Pickup) & !known_path(B, Side, Pickup) & now() <= actor_next(B);
+	effect: at(B) = Pickup & known_path(B, Side, Pickup) & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action move_B_Side_Pickup() {
+	precondition:
+		actor_ready(B) & at(B) == Side & possible_path(Side, Pickup) & known_path(B, Side, Pickup) & now() <= actor_next(B);
+	effect: at(B) = Pickup & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action explore_B_Side_Porch() {
+	precondition:
+		actor_ready(B) & at(B) == Side & possible_path(Side, Porch) & !known_path(B, Side, Porch) & now() <= actor_next(B);
+	effect: at(B) = Porch & known_path(B, Side, Porch) & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action move_B_Side_Porch() {
+	precondition:
+		actor_ready(B) & at(B) == Side & possible_path(Side, Porch) & known_path(B, Side, Porch) & now() <= actor_next(B);
+	effect: at(B) = Porch & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action get_item_A() {
+	precondition:
+		actor_ready(A) & bound_item(A, Supply) & !delivered(A, Supply) & at(A) == Pickup & item_at(Supply, Pickup) & known_item_at(A, Supply, Pickup) & now() <= actor_next(A);
+	effect: held_by(Supply, A) & !item_at(Supply, Pickup) & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action get_item_B() {
+	precondition:
+		actor_ready(B) & bound_item(B, Parcel) & !delivered(B, Parcel) & at(B) == Pickup & item_at(Parcel, Pickup) & known_item_at(B, Parcel, Pickup) & now() <= actor_next(B);
+	effect: held_by(Parcel, B) & !item_at(Parcel, Pickup) & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action drop_item_A() {
+	precondition:
+		actor_ready(A) & bound_item(A, Supply) & !delivered(A, Supply) & task_destination(A, Porch) & at(A) == Porch & held_by(Supply, A) & now() <= actor_next(A);
+	effect: item_at(Supply, Porch) & !held_by(Supply, A) & delivered(A, Supply) & delivery_time(A, Supply) = actor_next(A) & delivery_sequence(A, Supply) = event_sequence() + 1 & event_sequence() = event_sequence() + 1 & now() = actor_next(A) & actor_next(A) = actor_next(A) + 2;
+	consenting: A;
+};
+
+action drop_item_B() {
+	precondition:
+		actor_ready(B) & bound_item(B, Parcel) & !delivered(B, Parcel) & task_destination(B, Porch) & at(B) == Porch & held_by(Parcel, B) & now() <= actor_next(B);
+	effect: item_at(Parcel, Porch) & !held_by(Parcel, B) & delivered(B, Parcel) & delivery_time(B, Parcel) = actor_next(B) & delivery_sequence(B, Parcel) = event_sequence() + 1 & event_sequence() = event_sequence() + 1 & now() = actor_next(B) & actor_next(B) = actor_next(B) + 2;
+	consenting: B;
+};
+
+action request_note() {
+	precondition:
+		delivered(A, Supply) & held_by(Note, A) & at(A) == at(B) & !note_requested() & now() < horizon();
+	effect: note_requested() & now() = now() + 1 & event_sequence() = event_sequence() + 1;
+};
+
+action respond_note(value : response) {
+	precondition:
+		note_requested() & !response_recorded() & now() <= horizon();
+	effect: response_recorded() & response_value() = value & response_time() = now() & response_sequence() = event_sequence() + 1 & event_sequence() = event_sequence() + 1;
+};
+
+action check_window_start_deliver_A() {
+	precondition:
+		delivered(A, Supply) & delivery_time(A, Supply) >= 0;
+	effect: window_start_deliver_A();
+};
+
+action check_window_end_deliver_A() {
+	precondition:
+		window_start_deliver_A() & delivered(A, Supply) & delivery_time(A, Supply) <= 24;
+	effect: window_deliver_A() & goal_deliver_A();
+};
+
+action check_window_start_deliver_B() {
+	precondition:
+		delivered(B, Parcel) & delivery_time(B, Parcel) >= 0;
+	effect: window_start_deliver_B();
+};
+
+action check_window_end_deliver_B() {
+	precondition:
+		window_start_deliver_B() & delivered(B, Parcel) & delivery_time(B, Parcel) <= 24;
+	effect: window_deliver_B() & goal_deliver_B();
+};
+
+action check_window_start_A_delivery_before_note() {
+	precondition:
+		delivered(A, Supply) & delivery_time(A, Supply) >= 0;
+	effect: window_start_A_delivery_before_note();
+};
+
+action check_window_order_A_delivery_before_note() {
+	precondition:
+		window_start_A_delivery_before_note() & response_recorded() & delivery_time(A, Supply) < response_time();
+	effect: window_ordered_A_delivery_before_note();
+};
+
+action check_window_end_A_delivery_before_note() {
+	precondition:
+		window_ordered_A_delivery_before_note() & response_recorded() & response_time() <= 24;
+	effect: window_A_delivery_before_note() & goal_A_delivery_before_note();
+};
+
+utility(): if(projection_complete() & goal_deliver_A() & goal_deliver_B() & goal_A_delivery_before_note()) 1 else 0;
+utility(A): if(delivered(A, Supply)) 1 else 0;
+utility(B): if(delivered(B, Supply)) 1 elseif(delivered(B, Parcel)) 1 else 0;
+
+/* Planner Adapter Integration v1. Sabre searches registered
+   move/get/drop/request/conditional-response causal actions.
+   Existing-task actions remain consenting character plans, not
+   controller assignments. W possible_path is separate from each
+   character's known_path. Callback-derived 2-minute actor primitive
+   cadence is a conditional forecast. The note request/response
+   are conditional native-social branches, not NPC commands or
+   response guarantees. Only route operations
+   are native-dispatchable; all other effects require later receipts. */
+/* PROJECTION_RESIDUAL: A-note-response: native request_note requires the physical Note already held by A; no note-recovery action is registered */

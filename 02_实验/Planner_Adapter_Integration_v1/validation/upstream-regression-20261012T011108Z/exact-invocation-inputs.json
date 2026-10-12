@@ -1,0 +1,124 @@
+{
+  "schema": "upstream-regression-invocations-v1",
+  "sabre": {
+    "cwd": "/tmp",
+    "executable": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/jdk/jdk-17.0.20.1+1/Contents/Home/bin/java",
+    "argv": [
+      "-Xms64m",
+      "-Xmx1g",
+      "-Xss8m",
+      "-Duser.language=en",
+      "-Duser.country=US",
+      "-Duser.timezone=UTC",
+      "-cp",
+      "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/planner_p0_v0/sabre/bin",
+      "edu.uky.cs.nil.sabre.Main",
+      "-v",
+      "-p",
+      "/Users/2003singer/Workspace/Research/character-dynamics-lab/02_实验/Planner_P0_v0/integration_v0/preflight/direct_clean.txt",
+      "-m",
+      "bf",
+      "-c",
+      "t",
+      "-h",
+      "h+",
+      "-el",
+      "1",
+      "-vl",
+      "200",
+      "-gl",
+      "5000",
+      "-tl",
+      "5000",
+      "-g",
+      "1",
+      "-atl",
+      "24",
+      "-ctl",
+      "2"
+    ],
+    "input_sha256": "f77ffcb41b44e9352a7026ac8c0489a5cdab45f04ff87239c92eb6b83a482af1",
+    "upstream": {
+      "repository": "sgware/sabre",
+      "version": "0.8.0",
+      "commit": "73a128123b10a57843068b69d0b0e0601f37488a",
+      "license": "GPL-3.0",
+      "classpath_main_class_sha256": "3835ffd623059aa0806974632675fc4acdf3d46243660270e48cb16fc6d97678"
+    }
+  },
+  "gtpyhop": {
+    "cwd": "/Users/2003singer/Workspace/Research/character-dynamics-lab",
+    "executable": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/native_platform_v0/evennia/venv/bin/python",
+    "environment": {
+      "PYTHONPATH": "."
+    },
+    "package": {
+      "distribution": "gtpyhop-core",
+      "version": "2.0.2",
+      "license": "Clear BSD License"
+    },
+    "goal": "deliver_supply",
+    "parameters": {
+      "max_visits": 500,
+      "wall_seconds": 0.25,
+      "respect_local_traversability": true
+    },
+    "local_view": {
+      "actor_id": 9,
+      "activity_contract": {
+        "profile": "p4_story_v0",
+        "delivery_task": true
+      },
+      "goal_contract": {
+        "goal": "deliver_supply",
+        "item_id": 10,
+        "destination_id": 2
+      },
+      "observation": {
+        "room_id": 1,
+        "inventory": [],
+        "visible_items": [
+          {
+            "id": 10,
+            "key": "Parcel",
+            "room_id": 1
+          }
+        ],
+        "task_item": {
+          "id": 10,
+          "key": "Parcel"
+        },
+        "task_destination": 2,
+        "item_location": 1,
+        "item_held": false,
+        "delivered": false,
+        "own_delivery_receipts": [],
+        "known_exits": {
+          "1": [2],
+          "2": [1]
+        },
+        "known_traversability": {
+          "1": {
+            "2": true
+          },
+          "2": {
+            "1": true
+          }
+        },
+        "exits": [
+          {
+            "key": "east",
+            "destination_id": 2,
+            "traversable": true
+          }
+        ],
+        "witnessed": [],
+        "retained_witnesses": []
+      }
+    },
+    "input_key_types": "In the actual Python literal, keys of known_exits and known_traversability were integers (1 and 2); JSON object keys above are strings by JSON definition. Convert those keys to integers when reconstructing the exact call.",
+    "actual_python_call": "plan_next(v, \"deliver_supply\", max_visits=500, wall_seconds=0.25, respect_local_traversability=True)",
+    "relevant_source_sha256": "93c835cdd693cf37b80540246ccc33ca976f62bd9cc8ede4ffdbc4242b2336c4",
+    "package_examples": "gtpyhop-core 2.0.2 metadata states bundled example domains are not installed; the original direct call used the installed planner core and repository adapter."
+  }
+}

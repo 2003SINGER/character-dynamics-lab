@@ -2,14 +2,15 @@
 
 更新时间：2026-10-12。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
-当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。**System Baseline v0 当前 `PARTIAL`：M1 `READY_FOR_INDEPENDENT_REVIEW`，M2 `INVALID`，无 native LLM candidate execution；本阶段停止，不进入 P6。**唯一任务/结果 owner 为 [`System Baseline v0 RESULTS`](../02_实验/System_Baseline_v0/RESULTS.md)，M2 原始调用证据见[小型证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)及[逐文件 manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json)。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。P0 Baseline Gate、P0-Integration 与 P0 Author Binding 的既有状态/结果各由自己的 RESULTS 维护；暂停它们的局部扩张，不覆盖历史结果或 P5 shared-supply 失败。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准。
+当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。**Planner Adapter Integration v1 已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`，本轮停止代码扩张**；唯一任务/结果 owner 是[RESULTS](../02_实验/Planner_Adapter_Integration_v1/RESULTS.md)。System Baseline v0 仍为历史 `PARTIAL`（M1 `READY_FOR_INDEPENDENT_REVIEW`、M2 `INVALID`），其阶段已停止且不进入 P6；状态和旧证据只见[原 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。P0 Baseline Gate、P0-Integration 与 P0 Author Binding 的既有状态/结果各由自己的 RESULTS 维护；暂停它们的局部扩张，不覆盖历史结果或 P5 shared-supply 失败。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准。
 
-角色动力3的[阶段与过关证据](研究重建审计_2026-10-06.md)与各原生平台历史阶段分别保留；当前执行指针是 System Baseline v0，P0/P5 历史检查点与失败结果不被抹除。文档更新不算原生运行通过。
+角色动力学的[阶段与过关证据](研究重建审计_2026-10-06.md)与各原生平台历史阶段分别保留；当前执行指针是 Planner Adapter Integration v1，System Baseline v0、P0/P5 历史检查点与失败结果不被抹除。文档更新不算原生运行通过。
 
 ## SYSTEM / APPLICATION TRACK
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| PLANNER-ADAPTER-INTEGRATION-V1 | **PARTIAL / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | 审阅实际候选缺失、同域对照和反馈边界；后续仅提出 domain/heuristic 一致性诊断，不自动实施、扩预算、进入 P6 或接 LLM | [唯一 RESULTS](../02_实验/Planner_Adapter_Integration_v1/RESULTS.md)；A1/A2/A4 未证明，不自行 CLOSED；不改历史结果或 F0/F1 |
 | SYSTEM-BASELINE-V0 | **PARTIAL；M1 READY_FOR_INDEPENDENT_REVIEW；M2 INVALID；本阶段停止** | 等待 M1 独立审阅；无 native LLM candidate execution，不进入 P6。任何继续实施或新阶段须另行授权 | [唯一 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)；[M2 证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)及[manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json) |
 | PLANNER-P0-ORIGINAL | **A/B 有界 DEVELOPMENT 检查点保留；LLM/embedding/Qwen 与 A/B/C 比较 PAUSED** | 保留 A 原生 Sabre/Evennia 证据与 B 五轮历史缓存 replay；不再启动模型/embedding 资源准入，不补做新 LLM 搜索，不比较跨 Sabre 版本节点数。历史重放不称 live，B 实时未准入；不改 frozen C++，不自行 CLOSED | [原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)；[LLM 机制与历史 replay 记录](../01_文献/算法积木/06_P0原始规划路线_2026-10-11/LLM_Sabre_Search.md) |
 | P0-INTEGRATION | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED** | 独立审阅有限运行、失败与边界；CI 仅覆盖离线契约，exact-head 状态以 Actions 为准 | [唯一 RESULTS](../02_实验/Planner_P0_Integration_v0/RESULTS.md)；不等于完整传统系统或独立 NPC agency |

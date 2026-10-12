@@ -1,0 +1,43 @@
+{
+  "cases": [
+    {
+      "case": "positive-24",
+      "native_result": null,
+      "problem_sha256": "2cbfba2aa8714952954d8d7421760a35a18bf0c1c8ec3d2d2877064ad40e59c7",
+      "status": "PROCESS_TIMEOUT"
+    },
+    {
+      "case": "negative-no-opportunity",
+      "native_result": "No solution exists.",
+      "problem_sha256": "3f5af4829e7eadddef5470a54574a9e9f532320d814c4d342c4edf4245549a14",
+      "status": "NATIVE_NO_SOLUTION"
+    },
+    {
+      "case": "positive-tight-12",
+      "native_result": null,
+      "problem_sha256": "35df38bdfcc0ff9bbf324a36f355d9ca215d244d3923d08546f891351261187c",
+      "status": "PROCESS_TIMEOUT"
+    }
+  ],
+  "purpose": "synthetic parser/search preflight only; no native execution evidence",
+  "schema": "integration-v1-sabre-preflight-v1",
+  "search_limits": {
+    "author_limit": 24,
+    "character_limit": 16,
+    "cost": "t",
+    "epistemic_limit": 1,
+    "heap_max": "1g",
+    "heap_min": "64m",
+    "heuristic": "h+",
+    "max_generated": 5000,
+    "max_visited": 200,
+    "method": "bf",
+    "stack_size": "8m",
+    "time_limit_ms": 5000
+  },
+  "source_files": {
+    "model.py": "750e6ab6f99a0c8250bc59c7c8df1df2135be0afbf89e1a71a43a39844e02b6a",
+    "preflight.py": "e6e5b739e54b500165a2da35fd431c14432e8260b4b28ac584704a428424f7c6",
+    "sabre.py": "bbe46dcfd2c5b7e20da8aee74b5f659b757a25f1d955bb73b556d8128ef6963f"
+  }
+}

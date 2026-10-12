@@ -84,6 +84,13 @@ class FakeActor(FakeObject):
 
 
 class P5AdapterTests(unittest.TestCase):
+    def test_p5_aliases_use_existing_authenticated_p3_control_roles(self):
+        from tools.native_platform_v0.p5.service import _P5_CONTROL_ROLE_BY_ALIAS
+
+        # These are the role strings accepted by the existing P3 observe_actor
+        # endpoint; avoid importing its Twisted service into this pure unit test.
+        self.assertEqual(_P5_CONTROL_ROLE_BY_ALIAS, {"A": "courier", "B": "resident"})
+
     def test_persisted_saver_containers_are_recursively_normalized_before_strict_load(self):
         from tools.native_platform_v0.p5.bundle import BundleError, load_bundle
         from tools.native_platform_v0.p5.service import _bundle_for, _stable_entities

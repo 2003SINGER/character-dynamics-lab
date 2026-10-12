@@ -1,0 +1,18 @@
+{
+  "schema": "native-author-bundle-v1",
+  "bundle_id": "planner-adapter-outcome-wide-v1",
+  "version": 2,
+  "source": "planner-adapter-integration-v1-fixed-case",
+  "constraints": [
+    {"id":"deliver-A","kind":"event_by_deadline","event":"delivery_settled","filters":{"actor":"A","item":"courier_supply"},"start":0,"deadline":24,"hard":true},
+    {"id":"deliver-B","kind":"event_by_deadline","event":"delivery_settled","filters":{"actor":"B","item":"resident_parcel"},"start":0,"deadline":24,"hard":true},
+    {"id":"A-note-response","kind":"event_by_deadline","event":"note_response","filters":{"actor":"A","recipient":"B","item":"note"},"start":0,"deadline":24,"hard":true},
+    {"id":"A-delivery-before-note","kind":"event_order","before":{"event":"delivery_settled","filters":{"actor":"A","item":"courier_supply"}},"after":{"event":"note_response","filters":{"actor":"A","recipient":"B","item":"note"}},"order":"PHYSICAL_TIME","start":0,"deadline":24,"hard":true},
+    {"id":"post-edit-side-route","kind":"state_by_deadline","observable":"route_open","args":{"route":"side_passage"},"value":true,"start":2,"deadline":4,"hard":true}
+  ],
+  "branches": [
+    {"id":"accepted","when":{"event":"note_response","response":"accepted"},"storylet":{"id":"accepted-text","text":"The note is accepted."}},
+    {"id":"rejected","when":{"event":"note_response","response":"rejected"},"storylet":{"id":"rejected-text","text":"The note is declined."}}
+  ],
+  "permissions":{"world_opportunities":["open_main_passage","open_side_passage"],"force_npc_response":false,"max_opportunities":1,"cost_budget":2}
+}

@@ -1,0 +1,45 @@
+{
+  "cases": [
+    {
+      "case": "positive-24",
+      "native_result": "Search limit reached.",
+      "problem_sha256": "e9426da79e9b91fb882eab0c7c0e8d037d98131c5f16bf01197d0d5127d36173",
+      "status": "BUDGET_LIMIT"
+    },
+    {
+      "case": "positive-tight-12",
+      "native_result": "Search limit reached.",
+      "problem_sha256": "6c365abb5babc738372d7d342a7fd023a794044febda49cc83faf7524cfabd58",
+      "status": "BUDGET_LIMIT"
+    },
+    {
+      "case": "negative-no-opportunity",
+      "native_result": "No solution exists.",
+      "problem_sha256": "58e48e2553ff3c994232c8d0d3f57a49971d524ce88ec1d1e0ee94d1716b0d7d",
+      "status": "NATIVE_NO_SOLUTION"
+    }
+  ],
+  "purpose": "synthetic parser/search preflight only; no native execution evidence",
+  "schema": "integration-v1-sabre-preflight-v1",
+  "search_limits": {
+    "author_limit": 24,
+    "character_limit": 16,
+    "cost": "t",
+    "epistemic_limit": 1,
+    "heap_max": "1g",
+    "heap_min": "64m",
+    "heuristic": "h+",
+    "max_generated": 100000,
+    "max_visited": 10000,
+    "method": "bf",
+    "revision": "primitive-domain-r2",
+    "revision_reason": "r1 hit the inherited 200-node cap in 29ms (604 generated), before its 5s native time limit",
+    "stack_size": "8m",
+    "time_limit_ms": 5000
+  },
+  "source_files": {
+    "model.py": "36cd51c9c303c5d9614e918355cc7dbc74596779325884c74d33cb9d64c3e98d",
+    "preflight.py": "be121d9518250d5055fbe96a80c565d32dbb217a5a3282fdce49cc897e022342",
+    "sabre.py": "19bb111c56d421d755618fc0c00546981194bf9bfa9caa00c071d4b5a6cb757e"
+  }
+}

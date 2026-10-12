@@ -1,0 +1,109 @@
+{
+  "actor_role": "courier",
+  "local_observation": {
+    "activity_contract": {
+      "delivery_task": true,
+      "profile": "p5_story_v0",
+      "source": "scenario-authored-activity-profile"
+    },
+    "actor_id": 5551,
+    "goal_contract": {
+      "destination_id": 5548,
+      "goal": "deliver_supply",
+      "item_id": 5553,
+      "source": "scenario-authored-task"
+    },
+    "observation": {
+      "delivered": false,
+      "exits": [
+        {
+          "destination_dbref": "#5548",
+          "destination_id": 5548,
+          "key": "east",
+          "traversable": false
+        },
+        {
+          "destination_dbref": "#5556",
+          "destination_id": 5556,
+          "key": "south",
+          "traversable": false
+        }
+      ],
+      "inventory": [],
+      "item_held": false,
+      "item_location": 5547,
+      "known_exits": {
+        "5547": [
+          5548,
+          5556
+        ]
+      },
+      "known_traversability": {
+        "5547": {
+          "5548": false,
+          "5556": false
+        }
+      },
+      "own_delivery_receipts": [],
+      "retained_witnesses": [
+        {
+          "key": "Supply 20261012024000-c1f859",
+          "last_seen_at": "2026-10-12T02:40:01.058818+00:00",
+          "room_id": 5547,
+          "status": "seen"
+        }
+      ],
+      "room_id": 5547,
+      "task_destination": 5548,
+      "task_item": {
+        "id": 5553,
+        "key": "Supply 20261012024000-c1f859"
+      },
+      "visible_items": [
+        {
+          "dbref": "#5549",
+          "id": 5549,
+          "key": "east",
+          "room_id": 5547
+        },
+        {
+          "dbref": "#5552",
+          "id": 5552,
+          "key": "Resident 20261012024000-c1f859",
+          "room_id": 5547
+        },
+        {
+          "dbref": "#5553",
+          "id": 5553,
+          "key": "Supply 20261012024000-c1f859",
+          "room_id": 5547
+        },
+        {
+          "dbref": "#5554",
+          "id": 5554,
+          "key": "Resident Parcel 20261012024000-c1f859",
+          "room_id": 5547
+        },
+        {
+          "dbref": "#5555",
+          "id": 5555,
+          "key": "P5 Fixture Player 20261012024000-c1f859",
+          "room_id": 5547
+        },
+        {
+          "dbref": "#5557",
+          "id": 5557,
+          "key": "south",
+          "room_id": 5547
+        }
+      ],
+      "witnessed": [
+        {
+          "dbref": "#5547",
+          "kind": "current_room",
+          "room_id": 5547
+        }
+      ]
+    }
+  }
+}

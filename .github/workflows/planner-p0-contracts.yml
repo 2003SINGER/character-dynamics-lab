@@ -6,6 +6,7 @@ on:
     paths:
       - 'tools/planner_p0_v0/**'
       - 'tools/system_baseline_v0/**'
+      - 'tools/planner_adapter_integration_v1/**'
       - 'tools/native_platform_v0/p3/control_service.py'
       - 'tools/native_platform_v0/p3/mcp_stdio.py'
       - 'tools/native_platform_v0/p5/service.py'
@@ -51,3 +52,5 @@ jobs:
         run: python -B -m unittest discover -s tools/planner_p0_v0/author_binding_v0/tests -p 'test_*.py' -v
       - name: System Baseline Sabre/P5 contracts (pinned real Sabre; no Evennia server)
         run: python -B -m unittest discover -s tools/system_baseline_v0/tests -p 'test_*.py' -v
+      - name: Planner Adapter Integration v1 contracts (offline; no Evennia server)
+        run: python -B -m unittest discover -s tools/planner_adapter_integration_v1/tests -p 'test_*.py' -v

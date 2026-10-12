@@ -21,6 +21,7 @@ from . import world
 
 SOCIAL_PRESETS = {"native_default_reject_v0", "hero_intelligence_30_v0"}
 MAX_HORIZON = 24
+_P5_CONTROL_ROLE_BY_ALIAS = {"A": "courier", "B": "resident"}
 
 
 def _inline_callbacks(function):
@@ -226,6 +227,12 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
     for edge in (side_in, side_back, side_to_dest, dest_to_side):
         _set(edge, "p5_route_id", "side_passage")
     for alias, actor in actors.items():
+        # P5 actors are freshly-created by the P3 scene factory. Bind their
+        # existing authenticated control roles here so observe_actor's normal
+        # role+owner lookup can resolve the P5 aliases; this does not change
+        # either NPC policy or controller authority.
+        actor.attributes.add("p3_control_role", _P5_CONTROL_ROLE_BY_ALIAS[alias],
+                             category="native_p3")
         actor.attributes.add("activity_profile", "p5_story_v0", category="native_p3")
         _set(actor, "p5_actor_alias", alias)
         _set(actor, "p5_task_item_alias", "courier_supply" if alias == "A" else
@@ -353,6 +360,68 @@ def _snapshot_actor(actor):
             "status": _attr(actor, "status"), "pending_action": deepcopy(_attr(actor, "pending_action")),
             "native_receipts": list(_attr(actor, "native_receipts", default=[])),
             "log": list(_attr(actor, "log", default=[]))}
+
+
+def _planner_scene_binding(scene_id):
+    """Read the exact generated P5 fixture's role IDs and registered exits.
+
+    This is a world-capability projection for the external planner, not an
+    actor observation and not a dispatch/assignment API. It is deliberately
+    scoped to _scene_objects(scene_id) and the two closed P5 route IDs.
+    """
+    pickup, rows = _scene_objects(scene_id)
+    by_id = {int(obj.id): obj for obj in rows}
+    destination_id = _attr(pickup, "p4_destination_id")
+    side_id = _attr(pickup, "p5_side_room_id", category="native_p5")
+    if type(destination_id) is not int or type(side_id) is not int:
+        raise ValueError("generated P5 fixture lacks registered destination/side room bindings")
+    destination, side = by_id.get(destination_id), by_id.get(side_id)
+    if destination is None or side is None:
+        raise ValueError("generated P5 fixture room bindings do not resolve inside the scene")
+    actors = {str(_attr(obj, "p5_actor_alias", category="native_p5")): obj
+              for obj in rows if _attr(obj, "activity_profile") == world.PROFILE}
+    if set(actors) != {"A", "B"}:
+        raise ValueError("planner scene binding requires the generated A/B actors")
+    task_bindings = {}
+    for alias, actor in actors.items():
+        item_id = _attr(actor, "task_item_id")
+        bound_item = by_id.get(int(item_id)) if type(item_id) is int else None
+        item_alias = _attr(actor, "p5_task_item_alias", category="native_p5")
+        bound_destination = _attr(actor, "task_destination_id")
+        if bound_item is None or type(bound_destination) is not int or bound_destination != destination_id:
+            raise ValueError(f"generated actor {alias} lacks its existing bound task identity")
+        if item_alias not in {"courier_supply", "resident_parcel"}:
+            raise ValueError(f"generated actor {alias} has an unregistered P5 task item alias")
+        task_bindings[alias] = {"item_alias": item_alias, "item_id": int(bound_item.id),
+                                "destination_id": int(bound_destination),
+                                "source": "existing_scene_actor_binding"}
+    routes = []
+    author_actor = actors["A"]
+    for route_id, opportunity_id in (("main_passage", "open_main_passage"),
+                                     ("side_passage", "open_side_passage")):
+        changed_edges = world.route_edges(scene_id, route_id)
+        changed_ids = {int(edge.id) for edge in changed_edges}
+        actual_edges = [edge for room in (pickup, side, destination) for edge in room.exits
+                        if edge.destination is not None
+                        and _attr(edge, "p3_scene_id") == scene_id
+                        and _attr(edge, "p5_route_id", category="native_p5") == route_id]
+        if not actual_edges or not changed_ids.issubset({int(edge.id) for edge in actual_edges}):
+            raise ValueError(f"registered route {route_id} has an incomplete changed-edge binding")
+        routes.append({"route_id": route_id, "opportunity_id": opportunity_id,
+                       "cost": world.ROUTE_ACTIONS[opportunity_id][1],
+                       "changed_edge_ids": sorted(changed_ids),
+                       "directed_edges": [{"exit_id": int(edge.id),
+                                           "from_room_id": int(edge.location.id),
+                                           "to_room_id": int(edge.destination.id),
+                                           "changed_by_author_op": int(edge.id) in changed_ids,
+                                           "traversable_now": bool(edge.access(author_actor, "traverse", default=True))}
+                                          for edge in actual_edges]})
+    return {"schema": "p5-planner-scene-binding-v1",
+            "source": "native_platform_v0.p5.service._planner_scene_binding",
+            "scene_id": scene_id,
+            "room_roles": {"pickup": int(pickup.id), "side": int(side.id),
+                           "porch": int(destination.id)},
+            "task_bindings": task_bindings, "routes": routes}
 
 
 def _complete_minute(scene_id, minute):
@@ -584,7 +653,8 @@ def _evidence(scene_id, bundle):
             "ledger": list(_attr(pickup, "p4_ledger", default=[])),
             "world_snapshots": list(_attr(pickup, "p5_world_snapshots", category="native_p5", default=[])),
             "actor_evidence": [_snapshot_actor(obj) for obj in rows
-                               if _attr(obj, "activity_profile") == world.PROFILE]}
+                               if _attr(obj, "activity_profile") == world.PROFILE],
+            "world_capability_projection": _planner_scene_binding(scene_id)}
 
 
 def get_trace(scene_id):

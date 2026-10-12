@@ -1,0 +1,303 @@
+{
+  "actor_ready": [
+    [
+      "A",
+      true
+    ],
+    [
+      "B",
+      true
+    ]
+  ],
+  "actor_roles": [
+    "A",
+    "B"
+  ],
+  "actor_rooms": [
+    [
+      "A",
+      "pickup"
+    ],
+    [
+      "B",
+      "pickup"
+    ]
+  ],
+  "branches": [
+    [
+      "accepted",
+      "accepted",
+      "accepted-text"
+    ],
+    [
+      "rejected",
+      "rejected",
+      "rejected-text"
+    ]
+  ],
+  "bundle_id": "planner-adapter-outcome-wide-v1",
+  "bundle_version": 1,
+  "constraint_statuses": [
+    [
+      "deliver-A",
+      "PENDING"
+    ],
+    [
+      "deliver-B",
+      "PENDING"
+    ],
+    [
+      "A-note-response",
+      "PENDING"
+    ],
+    [
+      "A-delivery-before-note",
+      "PENDING"
+    ]
+  ],
+  "cost_budget": 2,
+  "hard_requirements": [
+    [
+      "deliver-A",
+      "event_by_deadline",
+      0,
+      24,
+      "{\"deadline\":24,\"event\":\"delivery_settled\",\"filters\":{\"actor\":\"A\",\"item\":\"courier_supply\"},\"hard\":true,\"id\":\"deliver-A\",\"kind\":\"event_by_deadline\",\"start\":0}"
+    ],
+    [
+      "deliver-B",
+      "event_by_deadline",
+      0,
+      24,
+      "{\"deadline\":24,\"event\":\"delivery_settled\",\"filters\":{\"actor\":\"B\",\"item\":\"resident_parcel\"},\"hard\":true,\"id\":\"deliver-B\",\"kind\":\"event_by_deadline\",\"start\":0}"
+    ],
+    [
+      "A-note-response",
+      "event_by_deadline",
+      0,
+      24,
+      "{\"deadline\":24,\"event\":\"note_response\",\"filters\":{\"actor\":\"A\",\"item\":\"note\",\"recipient\":\"B\"},\"hard\":true,\"id\":\"A-note-response\",\"kind\":\"event_by_deadline\",\"start\":0}"
+    ],
+    [
+      "A-delivery-before-note",
+      "event_order",
+      0,
+      24,
+      "{\"after\":{\"event\":\"note_response\",\"filters\":{\"actor\":\"A\",\"item\":\"note\",\"recipient\":\"B\"}},\"before\":{\"event\":\"delivery_settled\",\"filters\":{\"actor\":\"A\",\"item\":\"courier_supply\"}},\"deadline\":24,\"hard\":true,\"id\":\"A-delivery-before-note\",\"kind\":\"event_order\",\"order\":\"PHYSICAL_TIME\",\"start\":0}"
+    ]
+  ],
+  "horizon": 24,
+  "known_exits": [
+    [
+      "A",
+      "pickup",
+      "porch"
+    ],
+    [
+      "A",
+      "pickup",
+      "side"
+    ],
+    [
+      "B",
+      "pickup",
+      "porch"
+    ],
+    [
+      "B",
+      "pickup",
+      "side"
+    ]
+  ],
+  "known_held_items": [
+    [
+      "A",
+      []
+    ],
+    [
+      "B",
+      []
+    ]
+  ],
+  "known_task_item_locations": [
+    [
+      "A",
+      "courier_supply",
+      "pickup",
+      false
+    ],
+    [
+      "B",
+      "resident_parcel",
+      "pickup",
+      false
+    ]
+  ],
+  "minute": 0,
+  "observation_evidence": [
+    [
+      "A",
+      "p3.control_service.observe_actor",
+      0
+    ],
+    [
+      "B",
+      "p3.control_service.observe_actor",
+      0
+    ]
+  ],
+  "opportunity_count": 0,
+  "opportunity_limit": 1,
+  "projection_residuals": [],
+  "renderer_version": "p5-sabre-causal-domain-v1",
+  "route_available": [
+    [
+      "main_passage",
+      true
+    ],
+    [
+      "side_passage",
+      true
+    ]
+  ],
+  "route_cost": [
+    [
+      "main_passage",
+      2
+    ],
+    [
+      "side_passage",
+      1
+    ]
+  ],
+  "route_open": [
+    [
+      "main_passage",
+      false
+    ],
+    [
+      "side_passage",
+      false
+    ]
+  ],
+  "scene_id": "20261012024000-c1f859",
+  "scene_room_ids": [
+    [
+      "pickup",
+      5547
+    ],
+    [
+      "porch",
+      5548
+    ],
+    [
+      "side",
+      5556
+    ]
+  ],
+  "scene_room_roles": [
+    [
+      "pickup",
+      "pickup"
+    ],
+    [
+      "porch",
+      "porch"
+    ],
+    [
+      "side",
+      "side"
+    ]
+  ],
+  "social_target_visible": true,
+  "source_bundle_sha256": "e8822fedeeeb2f81e59b27ff85321fb6b9c655f8f97b2578e90374316261f02c",
+  "source_trace_sha256": "46aaf3c735ee2ddf2d7b4f8b33a6b0b3a2fc59e6836557d526df942d343e7589",
+  "spent_cost": 0,
+  "task_bindings": [
+    [
+      "A",
+      "courier_supply",
+      "5553",
+      "porch"
+    ],
+    [
+      "B",
+      "resident_parcel",
+      "5554",
+      "porch"
+    ]
+  ],
+  "witnessed_events": [],
+  "world_holders": [
+    [
+      "courier_supply",
+      null
+    ],
+    [
+      "note",
+      null
+    ],
+    [
+      "resident_parcel",
+      null
+    ]
+  ],
+  "world_item_location": [
+    [
+      "courier_supply",
+      "pickup"
+    ],
+    [
+      "note",
+      null
+    ],
+    [
+      "resident_parcel",
+      "pickup"
+    ]
+  ],
+  "world_route_edges": [
+    [
+      "main_passage",
+      "pickup",
+      "porch",
+      true,
+      false
+    ],
+    [
+      "main_passage",
+      "porch",
+      "pickup",
+      false,
+      true
+    ],
+    [
+      "side_passage",
+      "pickup",
+      "side",
+      true,
+      false
+    ],
+    [
+      "side_passage",
+      "side",
+      "pickup",
+      true,
+      false
+    ],
+    [
+      "side_passage",
+      "side",
+      "porch",
+      true,
+      false
+    ],
+    [
+      "side_passage",
+      "porch",
+      "side",
+      true,
+      false
+    ]
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "actor_evidence": [
+    {
+      "actor_alias": "A",
+      "actor_id": 5551,
+      "inventory_ids": [],
+      "log": [],
+      "native_receipts": [],
+      "pending_action": null,
+      "room_id": 5547,
+      "status": "RUNNING",
+      "task_destination_id": 5548,
+      "task_item_id": 5553
+    },
+    {
+      "actor_alias": "B",
+      "actor_id": 5552,
+      "inventory_ids": [],
+      "log": [],
+      "native_receipts": [],
+      "pending_action": null,
+      "room_id": 5547,
+      "status": "RUNNING",
+      "task_destination_id": 5548,
+      "task_item_id": 5554
+    }
+  ],
+  "bundle_identity": {
+    "bundle_id": "planner-adapter-outcome-wide-v1",
+    "version": 1
+  },
+  "complete_through": {
+    "events": 0,
+    "values": 0
+  },
+  "controller_authored_npc_commands": 0,
+  "evidence_schema": "p5-live-trace-v1",
+  "horizon": 24,
+  "incomplete_reasons": [
+    "horizon_not_reached",
+    "sealed_prefix_short_of_horizon"
+  ],
+  "ledger": [],
+  "now": 0,
+  "pending_future_nonexecuted": {},
+  "prefix_status": "SEALED_COMPLETE",
+  "run_status": "INCOMPLETE",
+  "scene_id": "20261012024000-c1f859",
+  "source": "native_platform_v0.p5.service._evidence",
+  "typed_trace": {
+    "events": [],
+    "events_sealed_through": "0",
+    "now": "0",
+    "points": [
+      {
+        "args": {
+          "actor": {
+            "entity_type": "Actor",
+            "stable_id": "A"
+          },
+          "item": {
+            "entity_type": "Item",
+            "stable_id": "courier_supply"
+          }
+        },
+        "observable_id": "p5_holding",
+        "source": "world_snapshot_projector",
+        "time": "0",
+        "value": false,
+        "version": "p5-world-v1"
+      },
+      {
+        "args": {
+          "actor": {
+            "entity_type": "Actor",
+            "stable_id": "A"
+          },
+          "item": {
+            "entity_type": "Item",
+            "stable_id": "resident_parcel"
+          }
+        },
+        "observable_id": "p5_holding",
+        "source": "world_snapshot_projector",
+        "time": "0",
+        "value": false,
+        "version": "p5-world-v1"
+      },
+      {
+        "args": {
+          "actor": {
+            "entity_type": "Actor",
+            "stable_id": "A"
+          },
+          "item": {
+            "entity_type": "Item",
+            "stable_id": "note"
+          }
+        },
+        "observable_id": "p5_holding",
+        "source": "world_snapshot_projector",
+        "time": "0",
+        "value": false,
+        "version": "p5-world-v1"
+      },
+      {
+        "args": {
+          "actor": {
+            "entity_type": "Actor",
+            "stable_id": "B"
+          },
+          "item": {
+            "entity_type": "Item",
+            "stable_id": "courier_supply"
+          }
+        },
+        "observable_id": "p5_holding",
+        "source": "world_snapshot_projector",
+        "time": "0",
+        "value": false,
+        "version": "p5-world-v1"
+      },
+      {
+        "args": {
+          "actor": {
+            "entity_type": "Actor",
+            "stable_id": "B"
+          },
+          "item": {
+            "entity_type": "Item",
+            "stable_id": "resident_parcel"
+          }
+        },
+        "observable_id": "p5_holding",
+        "source": "world_snapshot_projector",
+        "time": "0",
+        "value": false,
+        "version": "p5-world-v1"
+      },
+      {
+        "args": {
+          "actor": {
+            "entity_type": "Actor",
+            "stable_id": "B"
+          },
+          "item": {
+            "entity_type": "Item",
+            "stable_id": "note"
+          }
+        },
+        "observable_id": "p5_holding",
+        "source": "world_snapshot_projector",
+        "time": "0",
+        "value": false,
+        "version": "p5-world-v1"
+      },
+      {
+        "args": {
+          "route": "main_passage"
+        },
+        "observable_id": "p5_route_open",
+        "source": "world_snapshot_projector",
+        "time": "0",
+        "value": false,
+        "version": "p5-world-v1"
+      },
+      {
+        "args": {
+          "route": "side_passage"
+        },
+        "observable_id": "p5_route_open",
+        "source": "world_snapshot_projector",
+        "time": "0",
+        "value": false,
+        "version": "p5-world-v1"
+      }
+    ],
+    "value_frontiers": {
+      "p5_holding@p5-world-v1:0": "0",
+      "p5_holding@p5-world-v1:1": "0",
+      "p5_holding@p5-world-v1:2": "0",
+      "p5_holding@p5-world-v1:3": "0",
+      "p5_holding@p5-world-v1:4": "0",
+      "p5_holding@p5-world-v1:5": "0",
+      "p5_route_open@p5-world-v1:6": "0",
+      "p5_route_open@p5-world-v1:7": "0"
+    }
+  },
+  "verdicts": {
+    "branches": [
+      {
+        "branch_id": "accepted",
+        "effect": "content_only_no_world_effect",
+        "event_id": null,
+        "response": "accepted",
+        "status": "NOT_APPLICABLE",
+        "storylet": {
+          "id": "accepted-text",
+          "text": "The note is accepted."
+        }
+      },
+      {
+        "branch_id": "rejected",
+        "effect": "content_only_no_world_effect",
+        "event_id": null,
+        "response": "rejected",
+        "status": "NOT_APPLICABLE",
+        "storylet": {
+          "id": "rejected-text",
+          "text": "The note is declined."
+        }
+      }
+    ],
+    "bundle_id": "planner-adapter-outcome-wide-v1",
+    "bundle_version": 1,
+    "constraints": [
+      {
+        "activation_id": null,
+        "constraint_id": "deliver-A",
+        "dependencies": [],
+        "hard": true,
+        "reason": "event-count window has future remaining",
+        "status": "PENDING",
+        "witness": null
+      },
+      {
+        "activation_id": null,
+        "constraint_id": "deliver-B",
+        "dependencies": [],
+        "hard": true,
+        "reason": "event-count window has future remaining",
+        "status": "PENDING",
+        "witness": null
+      },
+      {
+        "activation_id": null,
+        "constraint_id": "A-note-response",
+        "dependencies": [],
+        "hard": true,
+        "reason": "event-count window has future remaining",
+        "status": "PENDING",
+        "witness": null
+      },
+      {
+        "activation_id": null,
+        "constraint_id": "A-delivery-before-note",
+        "dependencies": [],
+        "hard": true,
+        "reason": "ordered events may still occur",
+        "status": "PENDING",
+        "witness": null
+      }
+    ],
+    "hard_status": "PENDING",
+    "now": "0",
+    "storylets_execute_world_effects": false
+  },
+  "world_capability_projection": {
+    "room_roles": {
+      "pickup": 5547,
+      "porch": 5548,
+      "side": 5556
+    },
+    "routes": [
+      {
+        "changed_edge_ids": [
+          5549
+        ],
+        "cost": 2,
+        "directed_edges": [
+          {
+            "changed_by_author_op": true,
+            "exit_id": 5549,
+            "from_room_id": 5547,
+            "to_room_id": 5548,
+            "traversable_now": false
+          },
+          {
+            "changed_by_author_op": false,
+            "exit_id": 5550,
+            "from_room_id": 5548,
+            "to_room_id": 5547,
+            "traversable_now": true
+          }
+        ],
+        "opportunity_id": "open_main_passage",
+        "route_id": "main_passage"
+      },
+      {
+        "changed_edge_ids": [
+          5557,
+          5558,
+          5559,
+          5560
+        ],
+        "cost": 1,
+        "directed_edges": [
+          {
+            "changed_by_author_op": true,
+            "exit_id": 5557,
+            "from_room_id": 5547,
+            "to_room_id": 5556,
+            "traversable_now": false
+          },
+          {
+            "changed_by_author_op": true,
+            "exit_id": 5558,
+            "from_room_id": 5556,
+            "to_room_id": 5547,
+            "traversable_now": false
+          },
+          {
+            "changed_by_author_op": true,
+            "exit_id": 5559,
+            "from_room_id": 5556,
+            "to_room_id": 5548,
+            "traversable_now": false
+          },
+          {
+            "changed_by_author_op": true,
+            "exit_id": 5560,
+            "from_room_id": 5548,
+            "to_room_id": 5556,
+            "traversable_now": false
+          }
+        ],
+        "opportunity_id": "open_side_passage",
+        "route_id": "side_passage"
+      }
+    ],
+    "scene_id": "20261012024000-c1f859",
+    "schema": "p5-planner-scene-binding-v1",
+    "source": "native_platform_v0.p5.service._planner_scene_binding",
+    "task_bindings": {
+      "A": {
+        "destination_id": 5548,
+        "item_alias": "courier_supply",
+        "item_id": 5553,
+        "source": "existing_scene_actor_binding"
+      },
+      "B": {
+        "destination_id": 5548,
+        "item_alias": "resident_parcel",
+        "item_id": 5554,
+        "source": "existing_scene_actor_binding"
+      }
+    }
+  },
+  "world_snapshots": [
+    {
+      "holders": {
+        "courier_supply": {
+          "A": false,
+          "B": false
+        },
+        "note": {
+          "A": false,
+          "B": false
+        },
+        "resident_parcel": {
+          "A": false,
+          "B": false
+        }
+      },
+      "item_locations": {
+        "courier_supply": 5547,
+        "resident_parcel": 5547
+      },
+      "minute": 0,
+      "routes": {
+        "main_passage": false,
+        "side_passage": false
+      }
+    }
+  ]
+}

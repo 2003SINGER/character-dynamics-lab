@@ -1,0 +1,41 @@
+The Sabre Narrative Planner v0.8.0 by Stephen G. Ware
+Problem: direct_clean
+  characters: 2
+  entities:   7
+  fluents:    14
+  actions:    7
+  triggers:   1
+Compiled Problem: direct_clean
+  characters: 2
+  entities:   7
+  fluents:   11
+  actions:   22
+  triggers:   1
+Heuristic Progression Search:
+  problem:               direct_clean
+  starting utility:      0
+  goal utility:          1
+  method:                best-first
+  cost:                  temporal
+  heuristic:             sum graph
+  explanation pruning:   true
+  search limit:          200
+  space limit:           5000
+  time limit:            5s
+  author temporal limit: 24
+  character limit:       2
+  epistemic limit:       1
+Result: Success!
+  solution:         true
+  utility achieved: 1
+  nodes visited:    12
+  nodes generated:  164
+  time:             9ms
+offer_task()
+deliver_shelter(Junction)
+move(B, Junction, Inn)
+cloud_seed()
+wait(A)
+look(B)
+meet()
+goal(knows_storm(B) == True & met_witness() == True & shelter_delivered() == True & weather() == Storm)

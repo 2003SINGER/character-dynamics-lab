@@ -1,0 +1,11 @@
+type character;
+entity A : character;
+property now() : number;
+now() = 0;
+action wait() {
+	precondition: now() < 4;
+	effect: now() = now() + 1;
+	consenting: A;
+};
+utility(): if(now() >= 1) 1 else 0;
+utility(A): if(now() >= 1) 1 else 0;

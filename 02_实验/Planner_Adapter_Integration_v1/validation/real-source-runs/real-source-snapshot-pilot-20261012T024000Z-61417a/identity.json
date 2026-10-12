@@ -1,0 +1,37 @@
+{
+  "baseline_git_commit": "40048c7cf778e9110d6305fd992c8c60f186263a",
+  "bundle_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/planner_adapter_integration_v1/cases/wide24.json",
+  "bundle_sha256": "255d15b051da068334ec340103e30dcdb230bdddad5283296ad2de513ffff814",
+  "evidence_class": "REAL_P5_SNAPSHOT_SEARCH_NO_NATIVE_DISPATCH",
+  "schema": "planner-adapter-real-source-snapshot-pilot-v1",
+  "scoped_worktree_sha256": "5fa2ab3adb3447d08d8645d69469139e976cb15bb95cb84959822143e2ad7b8e",
+  "search_config_id": "planner-adapter-sabre-r2",
+  "search_limits": {
+    "author_limit": 24,
+    "character_limit": 16,
+    "cost": "t",
+    "epistemic_limit": 1,
+    "heap_max": "1g",
+    "heap_min": "64m",
+    "heuristic": "h+",
+    "max_generated": 100000,
+    "max_visited": 10000,
+    "method": "bf",
+    "revision": "primitive-domain-r2",
+    "revision_reason": "r1 hit the inherited 200-node cap in 29ms (604 generated), before its 5s native time limit",
+    "stack_size": "8m",
+    "time_limit_ms": 5000
+  },
+  "source_sha256": {
+    "tools/native_platform_v0/p3/mcp_stdio.py": "b0907ebc6519d9350b117924d5ee1f9392ac0f22467473a242ef7a0d6515be6e",
+    "tools/native_platform_v0/p5/agency.py": "668c897f3726d1fa140da3a415c7e1061933ca3cbd6f65f14c27b37399f265d7",
+    "tools/native_platform_v0/p5/bundle.py": "f729251a23e95b677c43bb6593e6e6538069c2ef0ed26d7138e793280e20717c",
+    "tools/native_platform_v0/p5/planning.py": "010651a5a76e9e2f545023c329168898af60968ccb8e268ac3893bb2ccfc3d18",
+    "tools/native_platform_v0/p5/service.py": "a9b51eac6cd14631983f0a2b61b711dbe217ed611f05bbdf31ecf8fce50c8ed6",
+    "tools/native_platform_v0/p5/world.py": "d7943f8c0f70bf2aec529e818fa753d815d9813154c5fb7e37e71f94de6b7b32",
+    "tools/planner_adapter_integration_v1/audit.py": "3c4950e299e8b048095d2f8f4f9364b95705e1b8c94d0e0fbbc344a3b5e96226",
+    "tools/planner_adapter_integration_v1/model.py": "2e89cd8331fcefac96da78565f34c4aa210d6a00f143c0b4b8f2b80fcc214916",
+    "tools/planner_adapter_integration_v1/runner.py": "5910a85a5fbd8ed57c2ae8e2f87a69630a0e8ad2f861dd66a44bad59244bf6b9",
+    "tools/planner_adapter_integration_v1/sabre.py": "41595c209ce0e3a67eb91909f5b87d1710dc3c1edc3ea3a92d9a0406487d4dcf"
+  }
+}
