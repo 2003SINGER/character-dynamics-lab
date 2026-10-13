@@ -154,6 +154,8 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
         except (TypeError, ValueError, BundleError) as exc:
             return {"ok": False, "scene_created": False,
                     "error": {"code": "INVALID_ONGOING_STATION", "details": {"reason": str(exc)}}}
+    station_work_enabled = bool(station_profile is not None and
+                                getattr(station_profile, "game_content", None) == "station_work_v1")
     if type(horizon) is not int or not 1 <= horizon <= (48 if station_profile else MAX_HORIZON):
         raise ValueError("P5 horizon must be an integer in [1,24]")
     if type(seed) is not int or not 0 <= seed <= 2**31 - 1:
@@ -184,6 +186,7 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
     from evennia import create_object
     from typeclasses.characters import Character
     from typeclasses.exits import Exit
+    from typeclasses.objects import Object
     from typeclasses.rooms import Room
     from tools.native_platform_v0.p3.scene import create_scene
 
@@ -277,6 +280,40 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
         _set(actor, "p5_native_social_preset", initial_social_preset, category="native_p3")
         _set(actor, "p5_social_target_alias", "B" if alias == "A" else "A")
         _set(actor, "p5_delivery_task", True)
+    station_objects = None
+    if station_work_enabled:
+        # In the opt-in work profile both roles begin co-present at their
+        # registered workbench; legacy profiles keep the original P3 starts.
+        for station_actor in actors.values():
+            if station_actor.location != pickup:
+                station_actor.move_to(pickup, quiet=True)
+        station_tool = create_object(Object, key=f"Shared Station Tool {scene_id}", location=pickup,
+                                     attributes=[("p3_scene_id", scene_id, "native_p3")])
+        station_storage = create_object(Object, key=f"Station Storage {scene_id}", location=destination,
+                                        attributes=[("p3_scene_id", scene_id, "native_p3")])
+        from tools.native_platform_v0.p5.ongoing_station.work import initialize_content, TASK_DURATIONS
+        content = initialize_content(pickup, destination, side, scene["supply"], station_tool,
+                                     station_storage, side_in)
+        horizon_deadline = int(horizon)
+        _set(actors["A"], "p5_station_task_bindings", [
+            {"task_kind": "inspect_supply", "item_id": int(scene["supply"].id),
+             "tool_id": int(station_tool.id), "target_id": int(scene["supply"].id),
+             "target_room_id": int(pickup.id), "storage_destination_id": int(station_storage.id),
+             "duration_minutes": TASK_DURATIONS["inspect_supply"], "deadline_minute": horizon_deadline},
+            {"task_kind": "store_item", "item_id": int(scene["supply"].id),
+             "storage_destination_id": int(station_storage.id),
+             "storage_room_id": int(destination.id), "deadline_minute": horizon_deadline},
+        ])
+        _set(actors["B"], "p5_station_task_bindings", [
+            {"task_kind": "repair_passage", "tool_id": int(station_tool.id),
+             "target_id": int(side_in.id), "target_room_id": int(pickup.id),
+             "duration_minutes": TASK_DURATIONS["repair_passage"], "deadline_minute": horizon_deadline},
+        ])
+        for station_actor in (*actors.values(), player):
+            _set(station_actor, "p5_station_profile_enabled", True)
+            from tools.native_platform_v0.p5.ongoing_station.commands import install as install_station_commands
+            install_station_commands(station_actor)
+        station_objects = {"tool": station_tool, "storage": station_storage, "content": content}
     _set(scene["supply"], "p5_item_alias", "courier_supply")
     _set(scene["return_parcel"], "p5_item_alias", "resident_parcel")
     _set(pickup, "p5_world_snapshots", [])
@@ -302,7 +339,12 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
                        for alias, actor in actors.items()},
             "player": {"id": int(player.id), "dbref": str(player.dbref)},
             "items": {alias: {"id": int(item.id), "dbref": str(item.dbref)}
-                      for alias, item in items.items() if item is not None},
+                      for alias, item in items.items() if item is not None} |
+                     ({"station_tool": {"id": int(station_objects["tool"].id),
+                                         "dbref": str(station_objects["tool"].dbref)},
+                       "station_storage": {"id": int(station_objects["storage"].id),
+                                           "dbref": str(station_objects["storage"].dbref)}}
+                      if station_work_enabled else {}),
             "active_bundle": {"bundle_id": active.bundle_id, "version": active.version},
             "pending_actions": {alias: None for alias in actors},
             **({"story_process": {"strategy": story_strategy,
@@ -311,7 +353,13 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
             **({"ongoing_station": {"station_id": station_profile.station_id,
                                       "profile_version": station_profile.version,
                                       "horizon": station_profile.horizon,
-                                      "author_status": "STAGED_INACTIVE" if station_profile.author else "ABSENT"}}
+                                      "author_status": "STAGED_INACTIVE" if station_profile.author else "ABSENT",
+                                      **({"game_content": "station_work_v1",
+                                          "game_content_version": 1,
+                                          "tool_id": int(station_objects["tool"].id),
+                                          "storage_id": int(station_objects["storage"].id),
+                                          "supply_id": int(scene["supply"].id),
+                                          "repair_exit_id": int(side_in.id)} if station_work_enabled else {})}}
                if station_profile is not None else {})}
 
 
@@ -547,6 +595,8 @@ def _complete_minute(scene_id, minute):
                 seen.add(receipt_id)
         station_meta["projected_receipt_ids"] = sorted(seen)
         _set(pickup, "p5_ongoing_station_meta", station_meta)
+    if _attr(pickup, "p5_station_content_v1", category="native_p5") is not None:
+        _project_tool_transfer_events(scene_id, minute, pickup, rows, aliases, append_event)
     snapshots = world.capture_snapshot(scene_id, minute)
     callback_event_ids = [f"p5:{_attr(pickup, 'scenario_seed', default=0)}:{alias}:{minute}:callback"
                           for alias in ("A", "B")]
@@ -577,6 +627,130 @@ def _complete_minute(scene_id, minute):
             "unsealed_event_ids": unsealed, "snapshot": snapshots,
             "callback_event_ids": callback_event_ids,
             "trace_frontier": {"events_through": event_frontier, "values_through": minute}}
+
+
+def _project_tool_transfer_events(scene_id, minute, pickup, rows, actors, append_event):
+    """Publish witnessed loan/return facts only from exact settled give receipts."""
+    content = _plain_json(_attr(pickup, "p5_station_content_v1", category="native_p5", default={}))
+    tool_id = content.get("tool_id")
+    if type(tool_id) is not int:
+        return
+    actor_alias_by_id = {int(actor.id): alias for alias, actor in actors.items()}
+    by_id = {int(obj.id): obj for obj in rows}
+    tool = by_id.get(tool_id)
+    if tool is None:
+        return
+    seen = set(_plain_json(_attr(pickup, "p5_station_meta", category="native_p5", default={})
+                           .get("projected_tool_receipt_ids", [])))
+    for alias, actor in actors.items():
+        receipts = _plain_json(_attr(actor, "native_receipts", default=[]))
+        commitments = _plain_json(_attr(actor, "ongoing_commitments", category="native_p5", default=[]))
+        for receipt in receipts:
+            receipt_id = receipt.get("receipt_id")
+            kind = receipt.get("ongoing_task_kind")
+            if (not receipt_id or receipt_id in seen or receipt.get("settled") is not True
+                    or receipt.get("kind") != "give" or receipt.get("item_id") != tool_id
+                    or kind not in {"lend_tool", "return_tool"}):
+                continue
+            commitment = next((item for item in commitments
+                               if item.get("commitment_id") == receipt.get("ongoing_commitment_id")), None)
+            if not commitment or commitment.get("tool_id") != tool_id:
+                continue
+            recipient_alias = actor_alias_by_id.get(receipt.get("recipient_id"))
+            if recipient_alias not in actors or receipt.get("recipient_id") is None:
+                continue
+            receipt_minute = receipt.get("sim_minute")
+            if (type(receipt_minute) is not int
+                    or tool_id not in receipt.get("before_inventory_ids", [])
+                    or tool_id in receipt.get("after_inventory_ids", [])
+                    or tool_id not in receipt.get("recipient_inventory_ids", [])
+                    or receipt.get("before_room_id") != receipt.get("after_room_id")
+                    or receipt.get("recipient_before_room_id") != receipt.get("before_room_id")
+                    or receipt.get("recipient_after_room_id") != receipt.get("before_room_id")):
+                continue
+            if commitment.get("recipient_alias") != recipient_alias:
+                continue
+            due_minute = commitment.get("due_minute")
+            if type(due_minute) is not int:
+                continue
+            active_loan = _plain_json(_attr(tool, "p5_station_active_loan", category="native_p5", default=None))
+            if kind == "lend_tool":
+                if isinstance(active_loan, Mapping) and active_loan.get("status") == "OUT":
+                    continue
+                lender_alias, borrower_alias = alias, recipient_alias
+                loan_id = f"station-loan:{receipt_id}:{tool_id}"
+                _set(tool, "p5_station_active_loan", {"loan_id": loan_id, "tool_id": tool_id,
+                                                        "lender_alias": lender_alias,
+                                                        "borrower_alias": borrower_alias,
+                                                        "due_minute": due_minute,
+                                                        "loan_receipt_id": receipt_id,
+                                                        "loan_request_id": commitment.get("loan_request_id"),
+                                                        "status": "OUT"})
+                request_id = commitment.get("loan_request_id")
+                if request_id:
+                    for request_witness in (actors[lender_alias], actors[borrower_alias]):
+                        current_request = _plain_json(_attr(request_witness,
+                            "p5_station_loan_request", category="native_p5", default=None))
+                        if isinstance(current_request, Mapping) and current_request.get("request_id") == request_id:
+                            _set(request_witness, "p5_station_loan_request", None, category="native_p5")
+                event_type = "P5_STATION_TOOL_LOANED"
+                event_args = {"lender_alias": lender_alias, "borrower_alias": borrower_alias,
+                              "tool_id": tool_id, "due_minute": due_minute, "loan_id": loan_id,
+                              "receipt_id": receipt_id, "commitment_id": commitment["commitment_id"],
+                              "outcome": "SETTLED"}
+            else:
+                if (not isinstance(active_loan, Mapping) or active_loan.get("status") != "OUT"
+                        or active_loan.get("borrower_alias") != alias
+                        or active_loan.get("lender_alias") != recipient_alias
+                        or active_loan.get("due_minute") != due_minute):
+                    continue
+                # Receipts can be encountered after later callbacks; event time
+                # is the physical give boundary, never the projection pass.
+                returned_minute = receipt_minute
+                outcome = "ON_TIME" if returned_minute <= int(active_loan["due_minute"]) else "LATE"
+                loan_id = str(active_loan["loan_id"])
+                lender_alias, borrower_alias = recipient_alias, alias
+                _set(tool, "p5_station_active_loan", {**active_loan, "status": "RETURNED",
+                                                       "returned_minute": returned_minute,
+                                                       "return_receipt_id": receipt_id,
+                                                       "outcome": outcome})
+                event_type = "P5_STATION_TOOL_RETURNED"
+                event_args = {"lender_alias": lender_alias, "borrower_alias": borrower_alias,
+                              "tool_id": tool_id, "due_minute": due_minute,
+                              "returned_minute": returned_minute, "loan_id": loan_id,
+                              "receipt_id": receipt_id, "commitment_id": commitment["commitment_id"],
+                              "outcome": outcome}
+            append_event(scene_id, {"event_type": event_type, "event_id": f"station:{receipt_id}",
+                                    "typed_args": event_args, "receipt_id": receipt_id, "sealed": True})
+            # Only actors whose location at the actual give receipt is
+            # evidenced may retain the event as local knowledge.
+            receipt_minute = receipt.get("sim_minute")
+            witnesses = {alias}
+            if (receipt.get("after_room_id") == receipt.get("before_room_id")
+                    and receipt.get("recipient_before_room_id") == receipt.get("before_room_id")
+                    and receipt.get("recipient_after_room_id") == receipt.get("before_room_id")):
+                witnesses.add(recipient_alias)
+            for witness_alias in witnesses:
+                witness = actors[witness_alias]
+                known = _plain_json(_attr(witness, "p5_station_known_tool_events",
+                                          category="native_p5", default=[]))
+                lender = actors[lender_alias]
+                borrower = actors[borrower_alias]
+                known.append({"event_type": event_type.lower(), "event_id": f"station:{receipt_id}",
+                              "receipt_id": receipt_id, "loan_id": loan_id, "tool_id": tool_id,
+                              "lender_id": int(lender.id), "borrower_id": int(borrower.id),
+                              "lender_alias": lender_alias, "borrower_alias": borrower_alias,
+                              "due_minute": due_minute,
+                              **({"returned_minute": returned_minute, "outcome": outcome}
+                                 if kind == "return_tool" else {"outcome": "SETTLED"}),
+                              "settled": True, "witnessed_by_actor_id": int(witness.id),
+                              "witnessed_by_alias": witness_alias,
+                              "witnessed_minute": int(receipt_minute)})
+                _set(witness, "p5_station_known_tool_events", known, category="native_p5")
+            seen.add(receipt_id)
+    meta = _plain_json(_attr(pickup, "p5_station_meta", category="native_p5", default={}))
+    meta["projected_tool_receipt_ids"] = sorted(seen)
+    _set(pickup, "p5_station_meta", meta, category="native_p5")
 
 
 @_inline_callbacks
@@ -625,17 +799,57 @@ def _apply_intervention(scene_id, row, bundle):
                                            expected_version=bundle.version)
         provenance = "author_opportunity"
         command_receipt = None
+    elif row.get("kind") == "station_request_tool_loan":
+        required = {"at", "kind", "tool_id", "lender_alias", "borrower_alias", "due_minute"}
+        if (set(row) != required or type(row.get("at")) is not int
+                or row.get("lender_alias") != "A" or row.get("borrower_alias") != "B"):
+            raise ValueError("station_request_tool_loan requires exact registered A/B request fields")
+        if type(row.get("tool_id")) is not int or type(row.get("due_minute")) is not int:
+            raise ValueError("station loan request requires exact tool id and absolute integer due minute")
+        pickup, rows = _scene_objects(scene_id)
+        content = _attr(pickup, "p5_station_content_v1", category="native_p5")
+        if not isinstance(content, Mapping) or row["tool_id"] != content.get("tool_id"):
+            raise ValueError("station loan request must use the exact registered tool")
+        player = next((obj for obj in rows if _attr(obj, "p3_control_role") == "player"), None)
+        if player is None:
+            raise ValueError("generated P5 player is missing")
+        command = (f"station-request-loan {row['tool_id']} A B {row['due_minute']}")
+        yield defer.maybeDeferred(player.execute_cmd, command)
+        result = _plain_json(_attr(player, "p5_station_last_loan_request_result",
+                                   category="native_p5", default={}))
+        request = result.get("request") if isinstance(result, Mapping) else None
+        receipt = result.get("receipt") if isinstance(result, Mapping) else None
+        settled = bool(isinstance(result, Mapping) and result.get("settled") is True
+                       and isinstance(request, Mapping)
+                       and request.get("tool_id") == row["tool_id"]
+                       and request.get("lender_alias") == "A"
+                       and request.get("borrower_alias") == "B"
+                       and request.get("due_minute") == row["due_minute"]
+                       and request.get("requested_minute") == int(row["at"]))
+        command_receipt = {"actor_id": int(player.id), "actor_alias": "player",
+                           "operation": "station-request-loan", "submitted_command": command,
+                           "request": request, "receipt": receipt, "settled": settled,
+                           "provenance": "native_player_station_request_command"}
+        result = {"settled": settled,
+                  "status": "REQUESTED" if settled else "WORLD_VALIDATION_REJECTED",
+                  "reason": None if settled else result.get("reason", "request command did not settle"),
+                  "request": request, "receipt": receipt}
+        provenance = "native_player_station_request_command"
     elif row.get("kind") == "player_command":
         if set(row) != {"at", "kind", "operation", "item_alias"}:
             raise ValueError("player interventions require at/kind/operation/item_alias")
         operation, item_alias = row["operation"], row["item_alias"]
         story_enabled = _attr(_scene_objects(scene_id)[0], "p5_story_request", category="native_p5") is not None
-        allowed_items = {"courier_supply", "resident_parcel"} | ({"note"} if story_enabled else set())
+        station_enabled = _attr(_scene_objects(scene_id)[0], "p5_station_content_v1", category="native_p5") is not None
+        allowed_items = ({"courier_supply", "resident_parcel"} |
+                         ({"note"} if story_enabled else set()) |
+                         ({"shared_station_tool", "station_tool"} if station_enabled else set()))
         if operation not in {"get", "drop"} or item_alias not in allowed_items:
             raise ValueError("P5 player intervention supports only get/drop of a named generated item")
         _, rows = _scene_objects(scene_id)
         player = next((obj for obj in rows if _attr(obj, "p3_control_role") == "player"), None)
-        item = next((obj for obj in rows if _attr(obj, "p5_item_alias", category="native_p5") == item_alias), None)
+        physical_alias = "shared_station_tool" if item_alias == "station_tool" else item_alias
+        item = next((obj for obj in rows if _attr(obj, "p5_item_alias", category="native_p5") == physical_alias), None)
         if player is None or item is None:
             raise ValueError("P5 generated player or intervention item is missing")
         command = f"{operation} {item.key}"

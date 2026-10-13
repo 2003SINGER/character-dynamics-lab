@@ -608,9 +608,12 @@ class P3Control:
             if type(item_id) is not int:
                 raise ValueError("item_id must be an integer in the generated scene")
             item = next((obj for obj in objects if int(obj.id) == item_id), None)
-            if item is None or item.attributes.get("p3_role", category="native_p3") not in (
+            station_tool = bool(item and item.attributes.get("p5_station_tool", category="native_p5", default=False)
+                                and any(obj.attributes.get("p5_station_content_v1", category="native_p5", default=None)
+                                        for obj in objects))
+            if item is None or (item.attributes.get("p3_role", category="native_p3") not in (
                 "assigned_supply", "resident_assigned_parcel", "delivery_destination_marker",
-            ):
+            ) and not station_tool):
                 raise ValueError("item_id is not a generated P3 scene item")
             if operation == "get":
                 if actor.location is None or item.db_location_id != actor.location.id or not item.access(actor, "view", default=True):

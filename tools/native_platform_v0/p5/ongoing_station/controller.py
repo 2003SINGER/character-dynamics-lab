@@ -12,7 +12,53 @@ from . import native
 
 
 def initialize(pickup, actors, raw_profile):
-    return native.initialize_station(pickup, actors, raw_profile)
+    profile = native.initialize_station(pickup, actors, raw_profile)
+    if profile is not None and getattr(profile, "game_content", None) == "station_work_v1":
+        _store_station_entities(pickup, (pickup, *tuple(_scene_rows_for_actors(actors))))
+    return profile
+
+
+def _scene_rows_for_actors(actors):
+    """Resolve only the generated scene bound to the supplied actors."""
+    if not actors:
+        return ()
+    from tools.native_platform_v0.p5.world import scene_objects
+    scene_id = next(iter(actors.values())).attributes.get("p3_scene_id", category="native_p3")
+    return scene_objects(str(scene_id))[1]
+
+
+def _station_entities(rows):
+    """Bind registered station aliases to exact generated Evennia identities."""
+    from tools.native_platform_v0.p5.bundle import DEFAULT_ENTITIES
+    from tools.trajectory_constraints_v0.types import StableEntity
+    entities = dict(DEFAULT_ENTITIES)
+    by_id = {int(obj.id): obj for obj in rows if getattr(obj, "id", None) is not None}
+    pickup = next((obj for obj in rows
+                   if obj.attributes.get("p5_station_content_v1", category="native_p5") is not None), None)
+    if pickup is None:
+        return entities
+    content = pickup.attributes.get("p5_station_content_v1", category="native_p5", default={})
+    aliases = {"station_tool": ("tool_id", "Item"),
+               "station_storage": ("storage_id", "Item"),
+               "courier_supply": ("supply_id", "Item"),
+               "pickup": (None, "Room"),
+               "pickup_to_side_south": ("repair_exit_id", "Exit")}
+    for alias, (key, entity_type) in aliases.items():
+        obj = pickup if key is None else by_id.get(content.get(key))
+        if obj is None:
+            raise ValueError(f"registered station alias {alias!r} has no exact scene object")
+        entities[alias] = StableEntity(entity_type, str(int(obj.id)), str(obj.key))
+    return entities
+
+
+def _store_station_entities(pickup, rows):
+    entities = _station_entities(rows)
+    pickup.attributes.add("p5_station_entities", {
+        alias: {"entity_type": value.entity_type, "stable_id": value.stable_id,
+                "display_name": value.display_name}
+        for alias, value in entities.items()
+    }, category="native_p5")
+    return entities
 
 
 def actor_callback(actor):
@@ -27,13 +73,19 @@ def actor_callback(actor):
     meta = native.meta_for(pickup)
     projection = meta.get("published_projection")
     offers = meta.get("task_offers", [])
+    alias = str(service._attr(actor, "p5_actor_alias", category="native_p5"))
+    # Existing timed work is a separate actor/tool commitment, never a second
+    # P3 pending action. Exactly one due check is made per existing callback.
+    active_work = service._attr(actor, "p5_station_work", category="native_p5")
+    if isinstance(active_work, Mapping) and active_work.get("status") == "IN_PROGRESS":
+        from .work import advance_work
+        return advance_work(actor, now_minute=minute)
     from tools.native_platform_v0.p3.p4_social import step_social
     if step_social(actor):
         from tools.native_platform_v0.p3.agency import record
         record(actor, {"sim_minute": minute, "kind": "ongoing_station_social_callback_consumed",
                        "source": "native_p4_social", "goal_arbitration_deferred": True})
         return {"status": "SOCIAL_CALLBACK_CONSUMED", "minute": minute}
-    alias = str(service._attr(actor, "p5_actor_alias", category="native_p5"))
     actor_offers = [row for row in offers if row.get("actor_alias") == alias]
     from .actor import advance_actor
     decision = advance_actor(actor, projection, actor_offers, minute)
@@ -125,8 +177,15 @@ def author_offers(scene_id, minute):
         return {"station_id": profile.station_id, "version": profile.version,
                 "bundle_hash": service._attr(pickup, "p5_ongoing_station_meta", category="native_p5", default={}).get("source_sha256"),
                 "constraints": []}, []
+    if profile.game_content == "station_work_v1":
+        projection = native.active_projection(pickup, entities=_station_entities(rows))
+        return _station_work_author_offers(scene_id, int(minute), pickup, rows,
+                                           profile, projection, ledger)
     if note_id is None:
-        projection = native.active_projection(pickup)
+        entities = (_station_entities(rows)
+                    if service._attr(pickup, "p5_station_content_v1", category="native_p5") is not None
+                    else None)
+        projection = native.active_projection(pickup, entities=entities)
         return _projection_view(projection, profile), []
     from tools.native_platform_v0.p5.bundle import DEFAULT_ENTITIES
     from tools.trajectory_constraints_v0.types import StableEntity
@@ -135,6 +194,9 @@ def author_offers(scene_id, minute):
     if note_obj is None:
         return None, []
     entities["note"] = StableEntity("Item", str(note_id), str(note_obj.key))
+    if service._attr(pickup, "p5_station_content_v1", category="native_p5") is not None:
+        entities = _station_entities(rows)
+        entities["note"] = StableEntity("Item", str(note_id), str(note_obj.key))
     projection = native.active_projection(pickup, entities=entities)
     if projection is None or response is None:
         return _projection_view(projection, profile), []
@@ -351,6 +413,399 @@ def author_offers(scene_id, minute):
     meta["selected_methods"] = selected_methods
     native._store_meta(pickup, meta)
     return _projection_view(projection, profile), offers
+
+
+def _station_work_author_offers(scene_id, minute, pickup, rows, profile, projection, ledger):
+    """Build a sealed planner input and publish only the next authorized work task.
+
+    This is a thin AuthorBundle adapter: it does not observe actors or mutate
+    world state. The planner receives the last persisted actor-local P3 views,
+    native commitments/pending actions, exact registered station objects, and
+    receipt-authenticated TypedIR events.
+    """
+    from tools.native_platform_v0.p5 import service
+    from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+
+    if projection is None:
+        return _projection_view(None, profile), []
+    entities = _station_entities(rows)
+    content = service._plain_json(service._attr(
+        pickup, "p5_station_content_v1", category="native_p5", default={}))
+    by_id = {int(obj.id): obj for obj in rows if getattr(obj, "id", None) is not None}
+    tool = by_id.get(content.get("tool_id"))
+    storage = by_id.get(content.get("storage_id"))
+    if tool is None or storage is None:
+        raise ValueError("station-work author projection lacks registered tool/storage objects")
+    actors = {str(service._attr(obj, "p5_actor_alias", category="native_p5")): obj
+              for obj in rows if service._attr(obj, "p5_actor_alias", category="native_p5") in {"A", "B"}}
+    if set(actors) != {"A", "B"}:
+        raise ValueError("station-work author planning requires the registered A/B actors")
+    lease = service._plain_json(service._attr(tool, "p5_station_tool_lease",
+                                               category="native_p5", default={}))
+    active_tool_lease = None
+    local_actors = {}
+    for alias, actor in actors.items():
+        decisions = [row for row in service._plain_json(service._attr(actor, "log", default=[]))
+                     if row.get("kind") == "ongoing_station_decision"
+                     and type(row.get("minute")) is int and row.get("minute") <= minute]
+        latest = decisions[-1] if decisions else None
+        local_view = latest.get("view") if isinstance(latest, Mapping) else None
+        pending = service._plain_json(service._attr(actor, "pending_action", category="native_p3"))
+        if local_view is None:
+            # No observe_actor fallback: an absent persisted local view means
+            # the adapter cannot honestly construct planner input yet.
+            return _projection_view(projection, profile), []
+        actor_commitments = service._plain_json(service._attr(
+            actor, "ongoing_commitments", category="native_p5", default=[]))
+        actor_receipts = service._plain_json(service._attr(actor, "native_receipts", default=[]))
+        planner_commitments, matched_lease = _station_planner_commitments(
+            actor, actor_commitments, actor_receipts, lease, tool_id=int(tool.id),
+            actor_alias=alias,
+            active_work=service._plain_json(service._attr(
+                actor, "p5_station_work", category="native_p5", default=None)))
+        if matched_lease is not None:
+            if active_tool_lease is not None and active_tool_lease != matched_lease:
+                raise ValueError("more than one actor claims the registered station tool lease")
+            active_tool_lease = matched_lease
+        local_actors[alias] = {
+            "local_view": local_view,
+            "commitments": planner_commitments,
+            "pending_action": pending,
+        }
+    holder = next((alias for alias, actor in actors.items() if tool in actor.contents), None)
+    station_tool = {"id": int(tool.id),
+                    "room_id": int(tool.location.id) if tool.location else None,
+                    "holder_alias": holder,
+                    "lease_status": lease.get("status", "UNKNOWN")}
+    if type(lease.get("due_minute")) is int:
+        station_tool["due_minute"] = lease["due_minute"]
+    workbench_id = service._attr(tool, "p5_station_workbench_room_id", category="native_p5")
+    if type(workbench_id) is not int:
+        raise ValueError("registered station tool is missing its exact workbench room ID")
+    constraints = [_safe(dict(row)) for row in projection.constraints]
+    grants = {row["constraint_id"]:
+              f"{profile.station_id}:{row['constraint_id']}:fixed-native-grant"
+              for row in constraints}
+    typed_events = _station_work_typed_events(ledger, rows, actors, service)
+    sealed_state = {
+        "sealed_minute": int(minute), "horizon": int(profile.horizon),
+        "station_id": profile.station_id,
+        "projection_id": f"{projection.station_id}:{projection.version}:{projection.source_sha256[:12]}",
+        "grant_id": next(iter(grants.values()), None), "grant_ids": grants,
+        "constraint_id": constraints[0]["constraint_id"] if constraints else None,
+        "station_content": {"tool_id": int(content["tool_id"]),
+            "storage_id": int(content["storage_id"]), "supply_id": int(content["supply_id"]),
+            "repair_exit_id": int(content["repair_exit_id"]),
+            "workbench_room_id": workbench_id, "storage_room_id": int(storage.location.id)},
+        "station_tool": station_tool, "active_tool_lease": active_tool_lease,
+        "actors": local_actors, "constraints": constraints,
+        "typed_trace": {"events": typed_events},
+    }
+    strategy = service._attr(pickup, "p5_ongoing_station_strategy",
+                             category="native_p5", default="gtpyhop")
+    decision = plan_station_work_order(sealed_state, strategy=strategy)
+    offers = _station_work_offers_from_decision(
+        decision, projection, profile, sealed_state, minute)
+    meta = native.meta_for(pickup)
+    # A literal author offer can be deferred while the actor finishes an
+    # already-running local commitment. Keep that same proposal visible at
+    # later boundaries only while its exact source projection/grant/core and
+    # absolute deadline remain current. This is not a queue or a new task:
+    # actor arbitration still decides whether to accept it.
+    offers = _retain_deferred_station_offers(
+        meta.get("task_offers", []), offers, projection, profile, minute,
+        actors, content, typed_events)
+    controller_rows = list(meta.get("controller_decisions", []))
+    for constraint in projection.constraints:
+        constraint_id = constraint["constraint_id"]
+        controller_rows.append({"minute": minute, "constraint_id": constraint_id,
+            "station_id": projection.station_id, "source_bundle_id": projection.bundle_id,
+            "source_version": projection.version, "source_sha256": projection.source_sha256,
+            "decision": _safe({**decision, "grant_id": grants.get(constraint_id)}),
+            "offer_ids": [row["offer_id"] for row in offers
+                          if constraint_id in row.get("required_constraint_ids", [])]})
+    meta["controller_decisions"] = controller_rows
+    meta["task_offers"] = offers
+    native._store_meta(pickup, meta)
+    return _projection_view(projection, profile), offers
+
+
+def _retain_deferred_station_offers(previous, current, projection, profile,
+                                    minute, actors, content, typed_events):
+    """Retain only still-authorized deferred literal station tasks.
+
+    The actor's append-only history is the evidence that this exact offer was
+    deferred. Current actor commitments and receipt-authenticated TypedIR
+    events prevent resurrecting accepted or completed work.
+    """
+    from tools.native_platform_v0.p5 import service
+
+    if not isinstance(previous, list) or not previous:
+        return current
+    projection_id = f"{projection.station_id}:{projection.version}:{projection.source_sha256[:12]}"
+    constraints = {row["constraint_id"]: row for row in projection.constraints}
+    histories = []
+    commitments = []
+    for alias, actor in actors.items():
+        histories.extend(service._plain_json(service._attr(
+            actor, "ongoing_goal_history", category="native_p5", default=[])))
+        commitments.extend(service._plain_json(service._attr(
+            actor, "ongoing_commitments", category="native_p5", default=[])))
+    deferred_ids = {row.get("offer_id") for row in histories
+                    if row.get("event") == "AUTHOR_OFFER_DEFERRED" and row.get("offer_id")}
+    existing_ids = {row.get("offer_id") for row in current if row.get("offer_id")}
+    prior_offers = {row.get("offer_id"): row for row in previous
+                    if isinstance(row, Mapping) and row.get("offer_id")}
+    retained = []
+    for offer_id in deferred_ids - existing_ids:
+        offer = prior_offers.get(offer_id)
+        constraint = (constraints.get(offer.get("constraint_id"))
+                      if isinstance(offer, Mapping) else None)
+        expected_grant = (f"{profile.station_id}:{offer.get('constraint_id')}:fixed-native-grant"
+                          if isinstance(offer, Mapping) else None)
+        if _deferred_literal_offer_is_current(
+                offer, constraint, projection_id, expected_grant, minute,
+                deferred_ids, commitments, typed_events, content):
+            retained.append(dict(offer))
+    return [*current, *retained]
+
+
+def _deferred_literal_offer_is_current(offer, constraint, projection_id, grant_id,
+                                      minute, deferred_ids, commitments,
+                                      typed_events, content):
+    if not isinstance(offer, Mapping) or offer.get("source") != "AUTHOR":
+        return False
+    offer_id = offer.get("offer_id")
+    if (offer_id not in deferred_ids or offer.get("control_source") != "LOCKED_FRAGMENT"
+            or offer.get("projection_id") != projection_id
+            or offer.get("grant_id") != grant_id
+            or type(offer.get("deadline_minute")) is not int
+            or offer["deadline_minute"] < minute
+            or not isinstance(constraint, Mapping)):
+        return False
+    fragment = constraint.get("locked_fragment") or {}
+    sequence = fragment.get("sequence", [])
+    index = offer.get("locked_sequence_index")
+    if (constraint.get("control", {}).get("mode") != "locked_fragment"
+            or offer.get("locked_fragment_hash") != fragment.get("sequence_sha256")
+            or type(index) is not int or not 0 <= index < len(sequence)):
+        return False
+    kind = offer.get("task_kind")
+    exact_refs = {
+        "inspect_supply": {"item_ref": "courier_supply", "tool_ref": "station_tool",
+                           "destination_ref": "station_storage"},
+        "repair_passage": {"tool_ref": "station_tool", "target_ref": "pickup_to_side_south"},
+        "store_item": {"item_ref": "courier_supply", "destination_ref": "station_storage"},
+    }.get(kind)
+    row = sequence[index]
+    if (exact_refs is None or row.get("actor_alias") != offer.get("actor_alias")
+            or row.get("task_kind") != kind
+            or any(row.get(key) != value for key, value in exact_refs.items())):
+        return False
+    if any(commitment.get("source_offer_id") == offer_id
+           or commitment.get("commitment_id") == offer_id for commitment in commitments):
+        return False
+    event_type, arg_name, content_key = {
+        "inspect_supply": ("p5_station_supply_inspected", "item", "supply_id"),
+        "repair_passage": ("p5_station_passage_repaired", "exit", "repair_exit_id"),
+        "store_item": ("p5_station_supply_stored", "item", "supply_id"),
+    }[kind]
+    expected_id = str(content.get(content_key))
+    for event in typed_events:
+        if event.get("event_type") != event_type or event.get("provenance") != "committed_ledger":
+            continue
+        value = event.get("args", {}).get(arg_name)
+        stable_id = value.get("stable_id") if isinstance(value, Mapping) else value
+        if stable_id is not None and str(stable_id) == expected_id:
+            return False
+    return True
+
+
+def _station_work_offers_from_decision(decision, projection, profile, sealed, minute):
+    """Validate planner proposals against the exact bundle grants and prefix."""
+    if not isinstance(decision, Mapping) or decision.get("native_execution_occurred") is not False:
+        raise ValueError("station planner must return a non-executing decision object")
+    if decision.get("status") != "CONDITIONAL_PLAN":
+        return []
+    method = decision.get("selected_method")
+    plans = [row for row in decision.get("method_plans", [])
+             if isinstance(row, Mapping) and row.get("method_id") == method
+             and row.get("feasible") is True]
+    if len(plans) != 1:
+        raise ValueError("station planner selected method must have one feasible candidate record")
+    constraints = {row["constraint_id"]: row for row in projection.constraints}
+    requests = plans[0].get("task_requests", [])
+    if not isinstance(requests, list):
+        raise ValueError("station planner task_requests must be an ordered list")
+    if not requests:
+        return []
+    # The planner emits only unsettled tasks, in method dependency order. Still
+    # re-check exact receipt evidence here so no later child can be published
+    # if an adapter or planner regression returns an incomplete prefix.
+    prior_kinds = {"inspect_supply": "p5_station_supply_inspected",
+                   "repair_passage": "p5_station_passage_repaired",
+                   "store_item": "p5_station_supply_stored"}
+    events = sealed["typed_trace"]["events"]
+    completed = {kind for kind, event_type in prior_kinds.items()
+                 if any(row.get("event_type") == event_type
+                        and row.get("provenance") == "committed_ledger"
+                        for row in events)}
+    task = requests[0]
+    kind = task.get("task_kind")
+    expected_actor = {"inspect_supply": "A", "repair_passage": "B", "store_item": "A"}.get(kind)
+    if expected_actor is None or task.get("actor_alias") != expected_actor:
+        raise ValueError("station planner proposed a task outside the registered actor/task map")
+    if (kind == "store_item" and "inspect_supply" not in completed):
+        return []
+    if kind == "store_item" and "repair_passage" not in completed:
+        # Both registered methods place storage after the two serialized work
+        # tasks. A store proposal cannot jump over the repair dependency.
+        return []
+    if kind == "repair_passage" and method == "inspect_then_repair" and "inspect_supply" not in completed:
+        return []
+    if kind == "inspect_supply" and method == "repair_then_inspect" and "repair_passage" not in completed:
+        return []
+    required_ids = task.get("required_constraint_ids")
+    if (not isinstance(required_ids, list) or not required_ids
+            or any(cid not in constraints for cid in required_ids)):
+        raise ValueError("station planner task lacks exact source constraints")
+    constraint_id = task.get("constraint_id")
+    if constraint_id not in required_ids or constraint_id not in constraints:
+        raise ValueError("station planner task is not bound to one of its exact source constraints")
+    source_constraint = constraints[constraint_id]
+    binding = source_constraint["control"]
+    if any(method not in constraints[cid]["control"].get("allowed_methods", [])
+           for cid in required_ids):
+        raise ValueError("station planner task method is not authorized by every required constraint")
+    expected_ids = {"inspect_supply": sealed["station_content"]["supply_id"],
+                     "repair_passage": sealed["station_content"]["repair_exit_id"],
+                     "store_item": sealed["station_content"]["supply_id"]}
+    if task.get("target_id" if kind == "repair_passage" else "item_id") != expected_ids[kind]:
+        raise ValueError("station planner task exact item/target does not match scene registration")
+    content = sealed["station_content"]
+    if kind in {"inspect_supply", "repair_passage"} and task.get("tool_id") != content["tool_id"]:
+        raise ValueError("station planner task does not bind the exact registered shared tool")
+    expected_room = (content["workbench_room_id"]
+                     if kind in {"inspect_supply", "repair_passage"} else None)
+    if task.get("target_room_id") != expected_room:
+        raise ValueError("station planner task does not preserve its exact registered target room")
+    expected_storage = (content["storage_id"] if kind in {"inspect_supply", "store_item"}
+                        else None)
+    if task.get("storage_destination_id") != expected_storage:
+        raise ValueError("station planner task does not bind its exact storage container")
+    expected_storage_room = (content["storage_room_id"]
+                             if kind in {"inspect_supply", "store_item"} else None)
+    if task.get("storage_room_id") != expected_storage_room:
+        raise ValueError("station planner task does not bind its exact storage room")
+    locked_hash = task.get("locked_fragment_sha256")
+    locked_index = task.get("locked_sequence_index")
+    # A locked binding may own a wider event_order constraint than its literal
+    # fragment.  For example, a B/repair prerequisite can be required by the
+    # locked repair-before-store order while the authored core itself contains
+    # only A/store_item.  Only a task that matches a literal sequence row is a
+    # LOCKED_FRAGMENT task; prerequisite rows remain ordinary planner proposals.
+    fragment = source_constraint.get("locked_fragment") or {}
+    sequence = fragment.get("sequence", [])
+    lock_exact_refs = {
+        "repair_passage": {"tool_ref": "station_tool",
+                           "target_ref": "pickup_to_side_south"},
+        "inspect_supply": {"item_ref": "courier_supply", "tool_ref": "station_tool",
+                           "destination_ref": "station_storage"},
+        "store_item": {"item_ref": "courier_supply",
+                       "destination_ref": "station_storage"},
+    }[kind]
+
+    def is_exact_lock_row(row):
+        return (isinstance(row, Mapping)
+                and row.get("actor_alias") == expected_actor
+                and row.get("task_kind") == kind
+                and all(row.get(ref) == alias for ref, alias in lock_exact_refs.items()))
+
+    matching_lock_indices = [index for index, row in enumerate(sequence)
+                             if is_exact_lock_row(row)]
+    claims_lock = locked_hash is not None or locked_index is not None
+    if matching_lock_indices and not claims_lock:
+        raise ValueError("station planner omitted literal locked-task provenance")
+    if binding.get("mode") == "locked_fragment" and not matching_lock_indices and not claims_lock:
+        # The only supported task outside this exact core is the registered B
+        # repair prerequisite in the hard repair-before-storage order. Do not
+        # let an unrelated row borrow a locked binding's mode/grant and escape
+        # literal-core validation.
+        source_row = source_constraint.get("source_constraint") or {}
+        before = source_row.get("before") or {}
+        after = source_row.get("after") or {}
+        registered_store_core = any(
+            isinstance(row, Mapping) and row.get("actor_alias") == "A"
+            and row.get("task_kind") == "store_item"
+            and row.get("item_ref") == "courier_supply"
+            and row.get("destination_ref") == "station_storage"
+            for row in sequence)
+        valid_repair_dependency = (
+            kind == "repair_passage" and expected_actor == "B"
+            and source_row.get("kind") == "event_order"
+            and source_row.get("hard") is True
+            and source_row.get("order") == "EVENT_KEY"
+            and before.get("event") == "station_passage_repaired"
+            and before.get("filters") == {"actor": "B", "tool": "station_tool",
+                                           "exit": "pickup_to_side_south"}
+            and after.get("event") == "station_supply_stored"
+            and after.get("filters") == {"actor": "A", "item": "courier_supply",
+                                          "storage": "station_storage"}
+            and registered_store_core)
+        if not valid_repair_dependency:
+            raise ValueError("non-core task is not the registered repair-before-store prerequisite")
+    locked_mode = claims_lock
+    if locked_mode:
+        if binding.get("mode") != "locked_fragment":
+            raise ValueError("station planner marked a task locked under a non-locked binding")
+        fragment = source_constraint.get("locked_fragment") or {}
+        sequence = fragment.get("sequence", [])
+        if (locked_hash != fragment.get("sequence_sha256") or type(locked_index) is not int
+                or not 0 <= locked_index < len(sequence)):
+            raise ValueError("station planner locked task lacks exact sequence provenance")
+        if locked_index not in matching_lock_indices:
+            raise ValueError("station planner locked task differs from the authored exact sequence")
+        source_method = "locked_fragment"
+        control_source = "LOCKED_FRAGMENT"
+    else:
+        source_method = method
+        control_source = "AUTHORED" if binding.get("mode") == "direct" else "PLANNER"
+    offer_id = (f"{projection.station_id}:{projection.version}:{projection.source_sha256[:12]}:"
+                f"{constraint_id}:{source_method}:{expected_actor}:{kind}")
+    offer = {"offer_id": offer_id, "source": "AUTHOR",
+        "goal_id": constraint_id, "task_kind": kind,
+        "item_id": task.get("item_id"), "destination_id": task.get("storage_destination_id"),
+        "storage_destination_id": task.get("storage_destination_id"),
+        "storage_room_id": task.get("storage_room_id"),
+        "target_id": task.get("target_id"), "tool_id": task.get("tool_id"),
+        "target_room_id": task.get("target_room_id"),
+        "duration_minutes": task.get("duration_minutes"),
+        "deadline_minute": task.get("deadline_minute"),
+        "planned_start_minute": task.get("planned_start_minute"),
+        # Preserve the authored event-window start separately from the
+        # dispatch boundary; preparation may begin earlier, but the terminal
+        # work effect must respect the exact compiled window.
+        "earliest_terminal_minute": task.get("earliest_terminal_minute"),
+        "estimated_work_start_minute": task.get("estimated_work_start_minute"),
+        "estimated_finish_minute": task.get("estimated_finish_minute"),
+        "prerequisites": list(task.get("prerequisites", [])),
+        "required_constraint_ids": list(required_ids),
+        "constraint_id": constraint_id, "source_method_id": source_method,
+        "planned_method_id": method, "control_source": control_source,
+        "grant_id": task.get("grant_id"), "projection_id": sealed["projection_id"],
+        "actor_alias": expected_actor,
+        "item_alias": "courier_supply" if kind in {"inspect_supply", "store_item"} else None,
+        "tool_alias": ("station_tool" if kind in {"inspect_supply", "repair_passage"}
+                       else None),
+        "target_alias": ("pickup_to_side_south" if kind == "repair_passage" else
+                         "courier_supply" if kind == "inspect_supply" else None),
+        "destination_alias": "station_storage" if kind in {"inspect_supply", "store_item"} else None,
+        "locked_fragment_hash": locked_hash,
+        "locked_sequence_index": locked_index}
+    expected_grant = sealed["grant_ids"].get(constraint_id)
+    if offer["grant_id"] != expected_grant or not isinstance(expected_grant, str):
+        raise ValueError("station planner omitted the exact native task grant")
+    return [offer]
 
 
 def request_registry():
@@ -734,6 +1189,52 @@ def _remaining_work_lower_bound(actor, commitment, receipts):
     return (0 if item_id in inventory else 1) + 1 + (0 if room_id == destination_id else 1)
 
 
+def _station_planner_commitments(actor, commitments, receipts, active_tool_lease, *,
+                                 tool_id, actor_alias, active_work):
+    """Attach only receipt-backed conditional release estimates to planner rows."""
+    result = []
+    matched_lease = None
+    for source in commitments if isinstance(commitments, list) else []:
+        if not isinstance(source, Mapping):
+            continue
+        row = dict(source)
+        if row.get("status") in {"ACCEPTED", "IN_PROGRESS"}:
+            commitment_id = row.get("commitment_id")
+            lease_matches = bool(
+                isinstance(active_tool_lease, Mapping)
+                and active_tool_lease.get("status") in {"IN_PROGRESS", "BUSY"}
+                and type(active_tool_lease.get("actor_id")) is int
+                and active_tool_lease.get("actor_id") == getattr(actor, "id", None)
+                and active_tool_lease.get("actor_alias") == actor_alias
+                and active_tool_lease.get("commitment_id") == commitment_id
+                and active_tool_lease.get("task_kind") == row.get("task_kind")
+                and type(active_tool_lease.get("due_minute")) is int
+                and type(active_tool_lease.get("tool_id", tool_id)) is int
+                and active_tool_lease.get("tool_id", tool_id) == tool_id
+                and isinstance(active_work, Mapping)
+                and active_work.get("commitment_id") == commitment_id
+                and active_work.get("actor_id") == getattr(actor, "id", None)
+                and active_work.get("task_kind") == row.get("task_kind")
+                and active_work.get("tool_id") == tool_id
+                and active_work.get("target_id") == row.get("target_id")
+                and active_work.get("due_minute") == active_tool_lease.get("due_minute")
+                and row.get("tool_id") == tool_id)
+            if lease_matches:
+                # This is an exact native lease deadline, not a route estimate.
+                row["due_minute"] = active_tool_lease["due_minute"]
+                row["release_time_basis"] = "matching_actor_commitment_tool_lease"
+                matched_lease = {**dict(active_tool_lease), "actor_alias": actor_alias,
+                                 "tool_id": tool_id, "target_id": row.get("target_id")}
+            elif (row.get("source") == "SELF"
+                  and row.get("task_kind") == "routine_route"):
+                remaining = _remaining_work_lower_bound(actor, row, receipts)
+                if type(remaining) is int:
+                    row["remaining_work_minutes"] = remaining
+                    row["release_time_basis"] = "conditional_no_future_failure_estimate"
+        result.append(row)
+    return result, matched_lease
+
+
 def _actor_local_row(actor, note_id, service):
     alias = str(service._attr(actor, "p5_actor_alias", category="native_p5"))
     local_items = [int(item.id) for item in actor.contents]
@@ -880,6 +1381,8 @@ def evidence(scene_id, now):
     typed_events = _typed_events(scene_id, note_id, now,
                                  ledger,
                                  actors, service, all_rows=rows) if note_id is not None else []
+    station_work_events = _station_work_typed_events(ledger, rows, actors, service)
+    typed_events.extend(station_work_events)
     verdicts = _author_verdicts(scene_id, pickup, rows, raw_author, note_id, typed_events, now)
     commitments = []
     decisions = []
@@ -914,7 +1417,176 @@ def evidence(scene_id, now):
             "native_receipts": {alias: [row for row in service._plain_json(service._attr(
                 actor, "native_receipts", default=[])) if row.get("ongoing_task_kind")] for alias, actor in actors.items()},
             "bound_note_id": note_id, "typed_events": typed_events, "real_verdicts": verdicts,
+            "station_work": _work_snapshot(pickup, rows, actors, service),
+            "station_work_receipts": {alias: service._plain_json(service._attr(
+                actor, "station_work_receipts", category="native_p5", default=[])) for alias, actor in actors.items()},
+            "station_store_receipts": {alias: service._plain_json(service._attr(
+                actor, "station_store_receipts", category="native_p5", default=[])) for alias, actor in actors.items()},
             "execution_authority": "shared_P3_actor_callback_and_native_receipts"}
+
+
+def _work_snapshot(pickup, rows, actors, service):
+    content = service._plain_json(service._attr(pickup, "p5_station_content_v1",
+                                               category="native_p5", default={}))
+    by_id = {int(obj.id): obj for obj in rows}
+    tool = by_id.get(content.get("tool_id")) if content else None
+    storage = by_id.get(content.get("storage_id")) if content else None
+    supply = by_id.get(content.get("supply_id")) if content else None
+    exit_obj = by_id.get(content.get("repair_exit_id")) if content else None
+    return {"content_version": content.get("version") if content else None,
+            "registered_ids": content or None,
+            "tool": ({"id": int(tool.id), "room_id": int(tool.location.id) if tool.location else None,
+                      "held_by_actor_id": next((int(actor.id) for actor in actors.values()
+                                                 if tool in actor.contents), None),
+                      "lease": service._plain_json(service._attr(tool, "p5_station_tool_lease", category="native_p5", default={}))}
+                     if tool else None),
+            "storage": ({"id": int(storage.id), "room_id": int(storage.location.id) if storage.location else None,
+                         "stored_item_ids": sorted(int(obj.id) for obj in storage.contents)} if storage else None),
+            "supply": ({"id": int(supply.id), "location_id": int(supply.location.id) if supply.location else None,
+                        "inspection_status": service._attr(supply, "p5_supply_inspection_status", category="native_p5")}
+                       if supply else None),
+            "repair_exit": ({"id": int(exit_obj.id), "source_room_id": int(exit_obj.location.id),
+                             "destination_room_id": int(exit_obj.destination.id),
+                             "key": exit_obj.key,
+                             "traversable": bool(exit_obj.access(next(iter(actors.values())), "traverse", default=True))}
+                            if exit_obj and actors else None),
+            "active_actor_work": {alias: service._plain_json(service._attr(
+                actor, "p5_station_work", category="native_p5", default=None)) for alias, actor in actors.items()}}
+
+
+def _station_work_typed_events(ledger, rows, actors, service):
+    by_id = {int(obj.id): obj for obj in rows}
+    def entity(entity_type, stable_id, label):
+        return {"entity_type": entity_type, "stable_id": str(stable_id), "label": str(label)}
+    receipts = []
+    for alias, actor in actors.items():
+        receipts.extend((alias, row) for row in service._plain_json(service._attr(
+            actor, "station_work_receipts", category="native_p5", default=[])))
+        receipts.extend((alias, row) for row in service._plain_json(service._attr(
+            actor, "station_store_receipts", category="native_p5", default=[])))
+        receipts.extend((alias, row) for row in service._plain_json(service._attr(
+            actor, "native_receipts", default=[]))
+                        if row.get("ongoing_task_kind") in {"lend_tool", "return_tool"})
+    raw_by_receipt = {str(row.get("receipt_id")): row for row in ledger
+                      if row.get("sealed") is True and row.get("receipt_id")}
+    names = {"P5_STATION_SUPPLY_INSPECTED": "p5_station_supply_inspected",
+             "P5_STATION_SUPPLY_STORED": "p5_station_supply_stored",
+             "P5_STATION_PASSAGE_REPAIRED": "p5_station_passage_repaired",
+             "P5_STATION_TOOL_LOANED": "p5_station_tool_loaned",
+             "P5_STATION_TOOL_RETURNED": "p5_station_tool_returned"}
+    events = []
+    for alias, receipt in receipts:
+        if receipt.get("settled") is not True or receipt.get("outcome", "SETTLED") != "SETTLED":
+            continue
+        kind = receipt.get("task_kind", receipt.get("operator"))
+        raw_name = ("P5_STATION_SUPPLY_INSPECTED" if kind == "inspect_supply" else
+                    "P5_STATION_PASSAGE_REPAIRED" if kind == "repair_passage" else
+                    "P5_STATION_SUPPLY_STORED" if kind == "store_item" else
+                    "P5_STATION_TOOL_LOANED" if kind == "lend_tool" else
+                    "P5_STATION_TOOL_RETURNED" if kind == "return_tool" else None)
+        event_name = names.get(raw_name)
+        if event_name is None:
+            continue
+        row = raw_by_receipt.get(str(receipt.get("receipt_id")))
+        if (row is None or row.get("event_type") != raw_name
+                or row.get("event_id") != (f"station:{receipt.get('receipt_id')}"
+                                             if kind in {"lend_tool", "return_tool"}
+                                             else receipt.get("receipt_id"))
+                or row.get("receipt_id") != receipt.get("receipt_id")):
+            continue
+        raw_args = row.get("typed_args", {})
+        receipt_minute = receipt.get("completed_minute", receipt.get("sim_minute"))
+        raw_commitment_id = raw_args.get("commitment_id", raw_args.get("ongoing_commitment_id"))
+        receipt_commitment_id = receipt.get("commitment_id", receipt.get("ongoing_commitment_id"))
+        if (raw_args.get("receipt_id") != receipt.get("receipt_id")
+                or raw_commitment_id != receipt_commitment_id):
+            continue
+        if kind not in {"lend_tool", "return_tool"} and raw_args.get("actor_alias") != alias:
+            continue
+        if (type(receipt_minute) is not int or type(row.get("minute")) is not int
+                or row.get("minute") != receipt_minute):
+            continue
+        if kind in {"lend_tool", "return_tool"}:
+            if (raw_args.get("tool_id") != receipt.get("item_id")
+                    or receipt.get("kind") != "give"
+                    or raw_args.get("returned_minute", receipt_minute) != receipt_minute
+                    or raw_args.get("outcome") not in ({"SETTLED"} if kind == "lend_tool"
+                                                       else {"ON_TIME", "LATE"})):
+                continue
+        elif (raw_args.get("outcome") != "SETTLED"
+              or raw_args.get("target_id") != receipt.get("target_id")
+              or raw_args.get("item_id") != receipt.get("item_id")
+              or raw_args.get("tool_id") != receipt.get("tool_id")
+              or raw_args.get("actor_id") != receipt.get("actor_id")
+              or raw_args.get("actor_alias") != receipt.get("actor_alias")):
+            continue
+        actor_entity = entity("Actor", alias, alias)
+        args = {"actor": actor_entity}
+        if event_name == "p5_station_supply_inspected":
+            item = by_id.get(receipt.get("item_id"))
+            tool = by_id.get(receipt.get("tool_id"))
+            if (item is None or tool is None or receipt.get("actor_alias") != alias
+                    or receipt.get("effect", {}).get("after_status") != "APPROVED"):
+                continue
+            args.update({"item": entity("Item", item.id, item.key),
+                         "tool": entity("Item", tool.id, tool.key)})
+        elif event_name == "p5_station_passage_repaired":
+            tool = by_id.get(receipt.get("tool_id"))
+            exit_obj = by_id.get(receipt.get("target_id"))
+            if (tool is None or exit_obj is None or receipt.get("actor_alias") != alias
+                    or receipt.get("effect", {}).get("after_traversable") is not True):
+                continue
+            args.update({"tool": entity("Item", tool.id, tool.key),
+                         "exit": entity("Exit", exit_obj.id, exit_obj.key)})
+        elif event_name == "p5_station_supply_stored":
+            item = by_id.get(receipt.get("item_id"))
+            storage = by_id.get(receipt.get("storage_id"))
+            if (item is None or storage is None or receipt.get("actor_alias") != alias
+                    or receipt.get("after_container_id") != int(storage.id)
+                    or receipt.get("tool_id") is None):
+                continue
+            args.update({"item": entity("Item", item.id, item.key),
+                         "storage": entity("Item", storage.id, storage.key)})
+        else:
+            tool = by_id.get(receipt.get("item_id"))
+            if (tool is None or not service._attr(tool, "p5_station_tool", category="native_p5")
+                    or receipt.get("kind") != "give"
+                    or receipt.get("item_id") != int(tool.id)):
+                continue
+            recipient_alias = next((peer for peer, peer_obj in actors.items()
+                                    if int(peer_obj.id) == int(receipt.get("recipient_id", -1))), None)
+            commitment_id = receipt.get("ongoing_commitment_id")
+            commitment = next((item for item in service._plain_json(service._attr(
+                actors[alias], "ongoing_commitments", category="native_p5", default=[]))
+                               if item.get("commitment_id") == commitment_id), None)
+            if commitment is None or recipient_alias is None:
+                continue
+            due = commitment.get("due_minute")
+            if (type(due) is not int or not isinstance(raw_args.get("loan_id"), str)
+                    or raw_args.get("loan_id") == ""):
+                continue
+            if event_name == "p5_station_tool_loaned":
+                if kind != "lend_tool":
+                    continue
+                args = {"lender": entity("Actor", alias, alias),
+                        "borrower": entity("Actor", recipient_alias, recipient_alias),
+                        "tool": entity("Item", tool.id, tool.key),
+                        "due_minute": due, "loan_id": raw_args.get("loan_id")}
+            else:
+                if kind != "return_tool" or not isinstance(raw_args.get("outcome"), str):
+                    continue
+                args = {"lender": entity("Actor", recipient_alias, recipient_alias),
+                        "borrower": entity("Actor", alias, alias),
+                        "tool": entity("Item", tool.id, tool.key),
+                        "due_minute": due, "returned_minute": int(row["minute"]),
+                        "outcome": raw_args["outcome"], "loan_id": raw_args.get("loan_id")}
+        events.append({"event_id": row["event_id"], "event_type": event_name, "version": "1",
+                       "provenance": "committed_ledger", "time": int(row["minute"]),
+                       "sequence": int(row["sequence"]), "args": args,
+                       "native_commitment_id": receipt.get("commitment_id"),
+                       "native_receipt_id": receipt.get("receipt_id"),
+                       "native_task_kind": kind})
+    return events
 
 
 def _author_verdicts(scene_id, pickup, rows, raw_author, note_id, typed_events, now):
@@ -932,8 +1604,15 @@ def _author_verdicts(scene_id, pickup, rows, raw_author, note_id, typed_events, 
         entities = dict(DEFAULT_ENTITIES)
         if note_obj is not None:
             entities["note"] = StableEntity("Item", str(note_id), str(note_obj.key))
+        station_profile = native.profile_for(pickup)
+        if station_profile is not None and getattr(station_profile, "game_content", None) == "station_work_v1":
+            entities = _station_entities(rows)
+            if note_obj is not None:
+                entities["note"] = StableEntity("Item", str(note_id), str(note_obj.key))
         bundle = load_bundle(service._plain_json(raw_author["bundle"]),
-                             registry=story_event_registry(), entities=entities)
+                             registry=story_event_registry(game_content=(getattr(station_profile, "game_content", None)
+                                                                        if station_profile else None)),
+                             entities=entities)
         trace = Trace(now=Fraction(now))
         for row in sorted(typed_events, key=lambda item: (item["time"], item["sequence"])):
             args = {key: StableEntity(value["entity_type"], value["stable_id"], value.get("label", ""))
@@ -942,7 +1621,8 @@ def _author_verdicts(scene_id, pickup, rows, raw_author, note_id, typed_events, 
             trace.add_event(Event(row["event_id"], row["event_type"], Fraction(row["time"]),
                                   int(row["sequence"]), args, row["version"], row["provenance"]))
         trace.seal_events_through(Fraction(now))
-        return evaluate_bundle(bundle, trace, registry=story_event_registry())
+        return evaluate_bundle(bundle, trace, registry=story_event_registry(
+            game_content=(getattr(station_profile, "game_content", None) if station_profile else None)))
     except Exception as exc:
         return [{"status": "INDETERMINATE", "reason": f"typed station readback failed: {type(exc).__name__}: {exc}"}]
 
@@ -978,10 +1658,13 @@ def record_activation(scene_id, expected_version, minute):
     pickup, rows = service._scene_objects(scene_id)
     note = next((obj for obj in rows if service._attr(obj, "p4_note_request_id") is not None), None)
     entities = None
+    profile = native.profile_for(pickup)
+    if profile is not None and getattr(profile, "game_content", None) == "station_work_v1":
+        entities = _station_entities(rows)
     if note is not None:
         from tools.native_platform_v0.p5.bundle import DEFAULT_ENTITIES
         from tools.trajectory_constraints_v0.types import StableEntity
-        entities = dict(DEFAULT_ENTITIES)
+        entities = dict(entities or DEFAULT_ENTITIES)
         entities["note"] = StableEntity("Item", str(note.id), str(note.key))
     result = native.activate_author(pickup, expected_version=expected_version, now=minute,
                                     entities=entities)
@@ -1004,10 +1687,13 @@ def record_edit(scene_id, raw_author, expected_version, minute):
     pickup, rows = service._scene_objects(scene_id)
     note = next((obj for obj in rows if service._attr(obj, "p4_note_request_id") is not None), None)
     entities = None
+    profile = native.profile_for(pickup)
+    if profile is not None and getattr(profile, "game_content", None) == "station_work_v1":
+        entities = _station_entities(rows)
     if note is not None:
         from tools.native_platform_v0.p5.bundle import DEFAULT_ENTITIES
         from tools.trajectory_constraints_v0.types import StableEntity
-        entities = dict(DEFAULT_ENTITIES)
+        entities = dict(entities or DEFAULT_ENTITIES)
         entities["note"] = StableEntity("Item", str(note.id), str(note.key))
     prior = evidence(scene_id, int(minute))
     prior_verdicts = (prior or {}).get("real_verdicts", {})

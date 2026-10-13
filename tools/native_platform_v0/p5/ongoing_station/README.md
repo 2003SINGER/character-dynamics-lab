@@ -1,15 +1,70 @@
-# Ongoing station runner
+# Ongoing station
 
-Current work (2026-10-13, after `796510a`): the same package has delivered the
-bounded M1–M5 / E1–E4 history, competing-work, and future plot-point task.
-Status is DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW; implementation
-stops here. The future handover-before-archive edit and deadline negative have
-native evidence; strict matched-history and work-driven method-choice effects
-remain unestablished. No further case or runtime development starts automatically.
-The old T1–T8 evidence below remains historical; it does not certify these new
-conditions. Current run outcomes belong only to
-[`RESULTS`](../../../../02_实验/Mature_Methods_Integration_v1/RESULTS.md).
-No parallel station runtime, new planner, or LLM run is introduced.
+## Current opt-in: `station_work_v1`
+
+`station_work_v1` is a bounded game-content profile on the existing Evennia P5
+world and P4 simulated clock. It registers one capacity-one shared station tool,
+one supply, one storage container, and the existing Pickup → Side south exit as
+the repair target. Tool use creates a native lease over `[started_minute,
+due_minute)`: inspection and repair have registered durations, no effect is
+visible before due, and at due the native callback either validates and settles
+once or records an abort and releases only its matching lease. Inspection marks
+the exact supply approved; that receipt alone is not storage. `station-store`
+uses the existing Evennia object move into the registered container and checks
+inventory/container readback. Repair changes the traversability of the exact
+registered south exit. Neither operation introduces a second clock or action
+loop.
+
+The generated player also has the registered `station-request-loan` command.
+It records a current, co-present A-lender/B-borrower request against the exact
+tool and absolute due minute, using the same scene P4 clock. Requests and later
+loan/return outcomes are not NPC commitments or seeded history. A loan or
+return event requires the existing native give path, actual inventory transfer,
+clocked receipts, and locally witnessed evidence; the due outcome is derived
+from the physical return minute. A failed command or co-presence check remains
+a failed intervention, not a loan event.
+
+The profile reuses actor-local SELF goals, the shared P3 GTPyhop task planner,
+existing pending-action dispatcher, Evennia commands, and receipt settlement.
+AuthorBundle remains the single source of author goals; its station projection
+can constrain result/deadline or a registered locked suffix, with task grants
+bound to each source constraint. Author offers do not replace running SELF
+work, and edits do not erase settled receipts or independent commitments.
+
+The active fixed input is revision 2 of
+[`cases/system-work-suite.json`](cases/system-work-suite.json). It contains
+four conditions: matched GTPyhop and event-driven main episodes, plus early-due
+and tight-due native loan-history captures. The main pair stages the v1
+storage-by-deadline goal, then applies the v2 edit adding the separate
+repair-before-storage order with a locked store-only suffix; the player also
+uses the real get/drop commands on the shared tool. The active edit file is
+[`cases/system-work-v2-order-store-lock.json`](cases/system-work-v2-order-store-lock.json).
+[`cases/system-work-v2-store-lock.json`](cases/system-work-v2-store-lock.json)
+is a rejected draft that changes an existing binding's control mode, and
+[`cases/system-work-v2.json`](cases/system-work-v2.json) is an earlier draft;
+neither is an active case input. The bounded four-condition run is delivered;
+implementation stops here. Current status and next action belong to
+[`TODO`](../../../../00_研究设计/TODO.md), not a second status ledger here. Run outcomes,
+unestablished history treatment, and claims belong only in
+[`Mature Methods RESULTS`](../../../../02_实验/Mature_Methods_Integration_v1/RESULTS.md);
+this README records the current contract, not duplicated run results.
+
+The read-only case preflight is:
+
+```sh
+python -m tools.native_platform_v0.p5.ongoing_station.runner \
+  --case-id system-work-main-gtpyhop \
+  --suite tools/native_platform_v0/p5/ongoing_station/cases/system-work-suite.json
+```
+
+Native execution remains runner/operator-gated with `--execute`.
+
+## Historical: M1–M5 / E1–E4 and T1–T8
+
+The sections below document earlier bounded work and its evidence boundaries.
+They are historical and do not certify the current `station_work_v1` four-case
+episode. Current run outcomes belong only in
+[`Mature Methods RESULTS`](../../../../02_实验/Mature_Methods_Integration_v1/RESULTS.md).
 
 The new `return_stock` self task is reverse logistics, not a general warehouse
 model: it returns a real delivered item to the source room witnessed in that

@@ -8,11 +8,29 @@ from types import SimpleNamespace
 from twisted.test.proto_helpers import StringTransport
 from tools.native_platform_v0.p3.control_service import (P3ControlProtocol, _json_safe,
                                                           _reset_options, start_plugin_services)
-from tools.native_platform_v0.p3.export_evidence import json_safe
+from tools.native_platform_v0.p3.export_evidence import _object_row, json_safe
 from tools.native_platform_v0.p3.mcp_stdio import handle_message
 
 
 class HeadlessSerializationTests(unittest.TestCase):
+    def test_scene_export_includes_only_scene_scoped_exit_lock_and_contents(self):
+        class Locks:
+            def get(self, access_type):
+                self.access_type = access_type
+                return "traverse:all()"
+
+        exit_obj = SimpleNamespace(id=10, db_location_id=1, db_destination_id=2,
+            dbref="#10", db_key="south", db_typeclass_path="typeclasses.exits.Exit",
+            locks=Locks())
+        room = SimpleNamespace(id=1, db_location_id=None, db_destination_id=None,
+            dbref="#1", db_key="Pickup", db_typeclass_path="typeclasses.rooms.Room",
+            locks=Locks())
+        row = _object_row(exit_obj, {}, {1, 2, 10}, {1: [10]})
+        room_row = _object_row(room, {}, {1, 2, 10}, {1: [10]})
+        self.assertEqual(row["exit_traverse_lock"], "traverse:all()")
+        self.assertEqual(row["contents_ids"], [])
+        self.assertEqual(room_row["contents_ids"], [10])
+
     def test_evennia_saver_mapping_and_sequence_shapes_serialize_recursively(self):
         value = UserDict({"events": UserList([UserDict({"kind": "drop", "settled": True})])})
         expected = {"events": [{"kind": "drop", "settled": True}]}

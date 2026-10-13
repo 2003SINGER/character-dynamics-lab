@@ -87,10 +87,16 @@ def _persisted_attributes(obj, categories: set[str]) -> dict[str, dict[str, Any]
     return {category: values for category, values in result.items() if values}
 
 
-def _object_row(obj, attributes: dict[str, dict[str, Any]], scene_object_ids: set[int]) -> dict[str, Any]:
+def _object_row(obj, attributes: dict[str, dict[str, Any]], scene_object_ids: set[int],
+                contents_by_location: dict[int, list[int]] | None = None) -> dict[str, Any]:
     room_id = getattr(obj, "db_location_id", None)
     room_in_scene = room_id in scene_object_ids if room_id is not None else False
     destination_id = getattr(obj, "db_destination_id", None)
+    is_exit = destination_id is not None
+    try:
+        traverse_lock = obj.locks.get("traverse") if is_exit else None
+    except Exception:
+        traverse_lock = None
     return {
         "id": int(obj.id),
         "dbref": str(obj.dbref),
@@ -103,6 +109,8 @@ def _object_row(obj, attributes: dict[str, dict[str, Any]], scene_object_ids: se
             "id": int(destination_id), "dbref": f"#{destination_id}",
             "in_allowlisted_scene": destination_id in scene_object_ids,
         },
+        "exit_traverse_lock": traverse_lock,
+        "contents_ids": sorted((contents_by_location or {}).get(int(obj.id), [])),
         "attributes": attributes,
     }
 
@@ -145,10 +153,15 @@ def collect_scenes(scene_ids: list[str], *, categories: set[str] = EXPORTED_CATE
             raise ValueError(f"no persisted generated objects found for explicit P3 scene ID {scene_id!r}")
 
         object_ids = {int(obj.id) for obj in exact_objects}
+        contents_by_location: dict[int, list[int]] = {}
+        for child in exact_objects:
+            parent_id = getattr(child, "db_location_id", None)
+            if parent_id in object_ids:
+                contents_by_location.setdefault(int(parent_id), []).append(int(child.id))
         rows = []
         for obj in exact_objects:
             attrs = _persisted_attributes(obj, categories)
-            rows.append(_object_row(obj, attrs, object_ids))
+            rows.append(_object_row(obj, attrs, object_ids, contents_by_location))
         exported.append({"scene_id": scene_id, "objects": rows})
 
     return {

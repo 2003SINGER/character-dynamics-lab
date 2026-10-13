@@ -7,6 +7,7 @@ ObjectDB or accepts the world object as a planner input.
 from copy import deepcopy
 from datetime import datetime, timezone
 import threading
+from collections.abc import Mapping
 
 from .planning import freeze, plan_next, plan_patrol, thaw
 
@@ -17,6 +18,10 @@ _SOCIAL_CLIENTS_LOCK = threading.RLock()
 
 def _get(obj, key, default=None):
     return obj.attributes.get(key, category=CATEGORY, default=default)
+
+
+def _station_get(obj, key, default=None):
+    return obj.attributes.get(key, category="native_p5", default=default)
 
 
 def _set(obj, key, value):
@@ -135,6 +140,57 @@ def observe_actor(actor):
         "witnessed": [{"room_id": room.id, "kind": "current_room", "dbref": room.dbref}],
         "retained_witnesses": list(knowledge["objects"].values()),
     }
+    if activity_profile == "p5_story_v0" and _station_get(actor, "p5_station_profile_enabled", False):
+        # Station capabilities are projected only from this actor's room and
+        # inventory. No scene-wide object lookup or peer receipt feed occurs.
+        local_ids = {int(row["id"]) for row in visible_items + inventory}
+        station_tools = []
+        station_supplies = []
+        station_storages = []
+        station_repair_targets = []
+        station_peers = []
+        for obj in (*room.contents, *actor.contents):
+            if int(obj.id) not in local_ids or not obj.access(actor, "view", default=True):
+                continue
+            if _station_get(obj, "p5_station_tool") is True:
+                lease = _station_get(obj, "p5_station_tool_lease", {})
+                loan = _station_get(obj, "p5_station_active_loan")
+                tool_room = room if obj in actor.contents else obj.location
+                station_tools.append({"id": int(obj.id), "room_id": int(tool_room.id) if tool_room else None,
+                                      "visible": obj in room.contents, "held_by_actor_id": int(actor.id) if obj in actor.contents else None,
+                                      "lease_status": lease.get("status"),
+                                      "workbench_room_id": _station_get(obj, "p5_station_workbench_room_id"),
+                                      "loan": deepcopy(loan) if isinstance(loan, Mapping) else None})
+            if _station_get(obj, "p5_supply_inspection_status") is not None:
+                station_supplies.append({"id": int(obj.id), "room_id": int(obj.location.id) if obj.location else None,
+                                         "visible": obj in room.contents, "held_by_actor_id": int(actor.id) if obj in actor.contents else None,
+                                         "inspection_status": _station_get(obj, "p5_supply_inspection_status")})
+            if _station_get(obj, "p5_station_storage") is True:
+                station_storages.append({"id": int(obj.id), "room_id": int(obj.location.id) if obj.location else None,
+                                         "visible": True})
+        for exit_obj in room.exits:
+            if _station_get(exit_obj, "p5_repair_target") is True and exit_obj.access(actor, "view", default=True):
+                station_repair_targets.append({"id": int(exit_obj.id), "room_id": int(room.id),
+                                               "key": str(exit_obj.key),
+                                               "alias": _station_get(exit_obj, "p5_exit_alias"),
+                                               "destination_id": int(exit_obj.destination.id) if exit_obj.destination else None,
+                                               "traversable": bool(exit_obj.access(actor, "traverse", default=True)),
+                                               "last_repair_receipt": thaw(_station_get(
+                                                   exit_obj, "p5_last_repair_receipt"))})
+        for peer in room.contents:
+            if peer is actor or _get(peer, "p3_scene_id") != _get(actor, "p3_scene_id"):
+                continue
+            alias = _station_get(peer, "p5_actor_alias")
+            if alias in {"A", "B"}:
+                station_peers.append({"id": int(peer.id), "alias": alias, "room_id": int(room.id),
+                                      "visible": bool(peer.access(actor, "view", default=True))})
+        observation.update({"station_tools": station_tools, "station_supplies": station_supplies,
+                            "station_storages": station_storages,
+                            "station_repair_targets": station_repair_targets,
+                            "station_peers": station_peers,
+                            "station_task_bindings": thaw(_station_get(actor, "p5_station_task_bindings", [])),
+                            "station_loan_request": thaw(_station_get(actor, "p5_station_loan_request")),
+                            "known_tool_events": thaw(_station_get(actor, "p5_station_known_tool_events", []))})
     if p4_profile:
         observation["known_traversability"] = {
             int(source): {int(destination): bool(value) for destination, value in rows.items()}
@@ -394,6 +450,37 @@ def _dispatch_pending(actor, pending):
             rejection = "registered recipient is not currently visible in the actor's room"
         else:
             command = f"give {target.key} = {recipient.key}"
+    elif operation["operator"] == "store_item" and ongoing_task:
+        target = next((obj for obj in actor.contents if int(obj.id) == int(item_id or -1)), None)
+        storage_id = operation.get("storage_id", ongoing_task.get("storage_destination_id"))
+        if target is None:
+            rejection = "registered supply is not held by the actor"
+        elif type(storage_id) is not int:
+            rejection = "registered station storage id is missing"
+        else:
+            actor.attributes.add("p5_station_last_store_result", None, category="native_p5")
+            command = f"station-store {int(target.id)}"
+    elif operation["operator"] == "use_tool" and ongoing_task:
+        # This registered native operation acquires only the scenario's single
+        # station lease. Effects happen in a later callback after its due minute.
+        from tools.native_platform_v0.p5.ongoing_station.work import start_work
+        from tools.native_platform_v0.p5.ongoing_station.work import next_action_id
+        from tools.native_platform_v0.p3.p4_world import clock_for_actor
+        now_minute = int(clock_for_actor(actor)["now"])
+        action_id = pending.get("operation_id")
+        if not isinstance(action_id, str) or not action_id:
+            action_id = next_action_id(actor, ongoing_task.get("commitment_id"), now_minute)
+        work_task = {**ongoing_task, "action_id": action_id}
+        result = start_work(actor, work_task, now_minute=now_minute,
+                            scene_id=str(get_value(actor, "p3_scene_id")))
+        set_value(actor, "pending_action", None)
+        if result.get("ok"):
+            record(actor, {"kind": "ongoing_station_work_started", **result,
+                           "commitment_id": ongoing_task.get("commitment_id")})
+        else:
+            record(actor, {"kind": "ongoing_station_work_start_rejected", **result,
+                           "commitment_id": ongoing_task.get("commitment_id")})
+        return result
     else:
         rejection = "unsupported primitive"
 
@@ -403,6 +490,11 @@ def _dispatch_pending(actor, pending):
         return
 
     executing = {**pending, "status": "executing", "submitted_command": command}
+    if operation["operator"] == "give" and ongoing_task.get("task_kind") in {"lend_tool", "return_tool"}:
+        recipient_before = next((obj for obj in actor.location.contents
+                                 if obj.id == operation.get("recipient_id")), None) if actor.location else None
+        executing["recipient_before_room_id"] = (
+            int(recipient_before.location.id) if recipient_before and recipient_before.location else None)
     set_value(actor, "pending_action", executing)
     operation_id = pending.get("operation_id")
     actor.ndb.p3_pending_operation_id = operation_id
@@ -448,6 +540,12 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
     elif intent["operator"] == "give":
         settled = bool(dispatch_succeeded and item_id in before_inventory and item_id not in after_inventory
                        and item_id in recipient_inventory)
+    elif intent["operator"] == "store_item":
+        store_result = actor.attributes.get("p5_station_last_store_result", category="native_p5", default={})
+        settled = bool(dispatch_succeeded and store_result.get("settled") is True
+                       and store_result.get("item_id") == item_id
+                       and store_result.get("storage_id") == intent.get("storage_id",
+                                                                            ongoing_task.get("storage_destination_id")))
     else:
         settled = bool(dispatch_succeeded and item_id in before_inventory and
                        after_item_room == intent["room_id"] and item_id not in after_inventory)
@@ -468,6 +566,13 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
         receipt.update({"recipient_id": recipient_id,
                         "recipient_dbref": recipient.dbref if recipient is not None else None,
                         "recipient_inventory_ids": recipient_inventory})
+        if ongoing_task.get("task_kind") in {"lend_tool", "return_tool"}:
+            receipt.update({
+                "recipient_before_room_id": pending.get("recipient_before_room_id"),
+                "recipient_after_room_id": (int(recipient.location.id)
+                                             if recipient is not None and recipient.location else None),
+                "loan_request_id": ongoing_task.get("loan_request_id"),
+            })
     if ongoing_task:
         receipt.update({"ongoing_commitment_id": ongoing_task.get("commitment_id"),
                         "ongoing_task_kind": ongoing_task.get("task_kind")})

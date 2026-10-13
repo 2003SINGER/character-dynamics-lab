@@ -438,6 +438,508 @@ class StoryProcessPlanningTests(unittest.TestCase):
         self.assertEqual(result["task_requests"][0]["source_method_id"], "file_by_B")
         self.assertFalse(result["world_effects_applied"])
 
+    def test_station_work_gtpyhop_enumerates_two_orders_with_shared_tool_and_receipt_constraints(self):
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+
+        def view(actor_id):
+            return {"actor_id": actor_id, "observation": {
+                "room_id": 5, "inventory": [],
+                "visible_items": [{"id": 3, "room_id": 5}],
+                "known_exits": {5: [6], 6: [5]},
+                "exits": [{"key": "east", "destination_id": 6}],
+                "station_tools": [{"id": 1, "room_id": 5, "visible": True,
+                                   "held_by_actor_id": None, "lease_status": "FREE"}],
+                "station_supplies": [{"id": 3, "room_id": 5, "visible": True,
+                                      "inspection_status": "UNINSPECTED"}],
+                "station_repair_targets": [{"id": 4, "room_id": 5, "traversable": False}],
+                "station_storages": [{"id": 2, "room_id": 6, "visible": True}],
+            }}
+
+        state = {"sealed_minute": 0, "horizon": 24, "station_id": "s1",
+                 "projection_id": "projection-1", "constraint_id": "inspect-goal",
+                 "grant_id": "s1:inspect-goal:fixed-native-grant",
+                 "grant_ids": {"inspect-goal": "s1:inspect-goal:fixed-native-grant"},
+                 "station_content": {"tool_id": 1, "storage_id": 2, "supply_id": 3,
+                                     "repair_exit_id": 4, "workbench_room_id": 5,
+                                     "storage_room_id": 6},
+                 "station_tool": {"id": 1, "room_id": 5, "holder_alias": None,
+                                  "lease_status": "FREE"},
+                 "active_tool_lease": None,
+                 "actors": {"A": {"actor_id": 11, "local_view": view(11),
+                                   "commitments": [], "pending_action": None},
+                            "B": {"actor_id": 12, "local_view": view(12),
+                                   "commitments": [], "pending_action": None}},
+                 "typed_trace": {"events": []}, "constraints": [
+                     {"constraint_id": "inspect-goal", "kind": "event_by_deadline",
+                      "source_constraint": {"id": "inspect-goal", "kind": "event_by_deadline",
+                                            "event": "station_supply_inspected", "start": 0,
+                                            "deadline": 3, "hard": True},
+                      "control": {"mode": "result_only",
+                                  "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]}},
+                     {"constraint_id": "repair-goal", "kind": "event_by_deadline",
+                      "source_constraint": {"id": "repair-goal", "kind": "event_by_deadline",
+                                            "event": "station_passage_repaired", "start": 0,
+                                            "deadline": 7, "hard": True},
+                      "control": {"mode": "result_only",
+                                  "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]}},
+                     {"constraint_id": "store-goal", "kind": "event_by_deadline",
+                      "source_constraint": {"id": "store-goal", "kind": "event_by_deadline",
+                                            "event": "station_supply_stored", "start": 0,
+                                            "deadline": 10, "hard": True},
+                      "control": {"mode": "result_only",
+                                  "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]}},
+                 ]}
+        gtn = plan_station_work_order(state)
+        event = plan_station_work_order(state, strategy="event_driven")
+        candidates = {row["method_id"]: row for row in gtn["method_plans"]}
+        self.assertEqual(set(candidates), {"inspect_then_repair", "repair_then_inspect"})
+        self.assertTrue(candidates["inspect_then_repair"]["feasible"])
+        self.assertFalse(candidates["repair_then_inspect"]["feasible"])
+        self.assertEqual(gtn["selected_method"], "inspect_then_repair", repr(gtn))
+        self.assertEqual(event["selected_method"], "inspect_then_repair")
+        self.assertEqual([row["task_kind"] for row in gtn["task_requests"]],
+                         ["inspect_supply", "repair_passage", "store_item"])
+        self.assertEqual(gtn["task_requests"][0]["grant_id"], "s1:inspect-goal:fixed-native-grant")
+        self.assertEqual(gtn["task_requests"][0]["earliest_terminal_minute"], 0)
+        self.assertGreaterEqual(gtn["task_requests"][0]["estimated_work_start_minute"],
+                                gtn["task_requests"][0]["planned_start_minute"])
+        self.assertEqual(candidates["inspect_then_repair"]["resource_capacity"]["capacity"], 1)
+        self.assertFalse(gtn["world_effects_applied"])
+
+    def test_station_work_uses_actual_receipts_to_skip_completed_work(self):
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+        # Start from a no-author candidate state copied from the paired test's
+        # same actor-local fixture; the receipt is committed TypedIR evidence.
+        state = self._station_state_for_work()
+        state["typed_trace"]["events"].append({
+            "event_type": "p5_station_supply_inspected", "provenance": "committed_ledger",
+            "time": 2, "native_receipt_id": "receipt-inspect-1",
+            "native_commitment_id": "commitment-inspect-1",
+            "native_task_kind": "inspect_supply",
+            "args": {"actor": "A", "item": "3", "tool": "1"}})
+        for actor in state["actors"].values():
+            actor["local_view"]["observation"]["station_supplies"][0]["inspection_status"] = "APPROVED"
+        result = plan_station_work_order(state)
+        self.assertTrue(all(row["task_kind"] != "inspect_supply"
+                            for row in result["task_requests"]))
+        self.assertTrue(any(row["satisfied"]["inspect_supply"] for row in result["method_plans"]))
+
+    def test_active_native_work_uses_exact_lease_due_and_is_not_reproposed(self):
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+        state = self._station_state_for_work()
+        state["sealed_minute"] = 2
+        state["station_tool"]["lease_status"] = "BUSY"
+        state["active_tool_lease"] = {
+            "status": "IN_PROGRESS", "commitment_id": "inspect-c1",
+            "task_kind": "inspect_supply", "actor_alias": "A", "tool_id": 1,
+            "target_id": 3, "started_minute": 1, "due_minute": 3}
+        state["actors"]["A"]["commitments"] = [{
+            "commitment_id": "inspect-c1", "task_kind": "inspect_supply",
+            "status": "IN_PROGRESS", "due_minute": None, "tool_id": 1,
+            "target_id": 3}]
+        state["actors"]["B"]["local_view"]["observation"]["station_task_bindings"] = [{
+            "task_kind": "repair_passage", "tool_id": 1, "target_id": 4,
+            "target_room_id": 5}]
+
+        result = plan_station_work_order(state, strategy="event_driven")
+        self.assertEqual(result["selected_method"], "inspect_then_repair", repr(result))
+        self.assertNotIn("A_active_commitment_release_time_unknown",
+                         result["method_plans"][0]["preconditions"])
+        self.assertEqual([row["task_kind"] for row in result["task_requests"]], ["store_item"])
+        self.assertTrue(any(row["task_kind"] == "repair_passage"
+                            for row in result["derived_support_tasks"]))
+        inspect_schedule = next(row for row in result["method_plans"][0]["schedule"]
+                               if row["task_kind"] == "inspect_supply")
+        self.assertEqual(inspect_schedule["finish_minute"], 3)
+        self.assertEqual(result["method_plans"][0]["route_estimates"]["inspect_supply"]["source"],
+                         "exact_active_native_lease")
+
+    def test_conditional_route_release_is_scoped_and_explicitly_not_a_bound(self):
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+        state = self._station_state_for_work()
+        state["actors"]["B"]["commitments"] = [{
+            "commitment_id": "route-b1", "task_kind": "routine_route",
+            "status": "IN_PROGRESS", "remaining_work_minutes": 2,
+            "release_time_basis": "conditional_no_future_failure_estimate"}]
+        result = plan_station_work_order(state, strategy="event_driven")
+        candidate = next(row for row in result["method_plans"]
+                         if row["method_id"] == "inspect_then_repair")
+        forecast = next(row for row in candidate["conditional_release_forecasts"]
+                        if row["commitment_id"] == "route-b1")
+        self.assertEqual(forecast["remaining_work_minutes"], 2)
+        self.assertIn("conditional forecast, not a release upper bound", forecast["assumption"])
+
+        # Once B's repair is already evidenced, B's unrelated route no longer
+        # blocks the only remaining actor/task (A storing the inspected item).
+        completed = self._station_state_for_work()
+        completed["sealed_minute"] = 10
+        completed["typed_trace"]["events"] = [
+            {"event_type": "p5_station_supply_inspected", "provenance": "committed_ledger",
+             "time": 3, "native_receipt_id": "ri", "native_commitment_id": "ci",
+             "native_task_kind": "inspect_supply",
+             "args": {"actor": "A", "item": "3", "tool": "1"}},
+            {"event_type": "p5_station_passage_repaired", "provenance": "committed_ledger",
+             "time": 7, "native_receipt_id": "rr", "native_commitment_id": "cr",
+             "native_task_kind": "repair_passage",
+             "args": {"actor": "B", "tool": "1", "exit": "4"}},
+        ]
+        completed["actors"]["B"]["commitments"] = [{
+            "commitment_id": "route-b2", "task_kind": "routine_route",
+            "status": "IN_PROGRESS"}]
+        completed["actors"]["A"]["local_view"]["observation"]["inventory"] = [{"id": 3}]
+        completed["actors"]["A"]["local_view"]["observation"]["station_supplies"] = [{
+            "id": 3, "room_id": 5, "visible": True,
+            "inspection_status": "APPROVED"}]
+        completed["actors"]["A"]["local_view"]["observation"]["visible_items"] = []
+        next_result = plan_station_work_order(completed, strategy="event_driven")
+        selected = next(row for row in next_result["method_plans"]
+                        if row["method_id"] == "inspect_then_repair")
+        self.assertNotIn("B_active_commitment_release_time_unknown", selected["preconditions"])
+        self.assertTrue(selected["feasible"], repr(selected))
+        self.assertEqual([row["task_kind"] for row in next_result["task_requests"]], ["store_item"])
+
+    def test_all_receipt_backed_work_returns_satisfied_prefix_not_new_offer(self):
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+        state = self._station_state_for_work()
+        state["sealed_minute"] = 15
+        state["typed_trace"]["events"] = [
+            {"event_type": "p5_station_supply_inspected", "provenance": "committed_ledger",
+             "time": 3, "native_receipt_id": "ri", "native_commitment_id": "ci",
+             "native_task_kind": "inspect_supply",
+             "args": {"actor": "A", "item": "3", "tool": "1"}},
+            {"event_type": "p5_station_passage_repaired", "provenance": "committed_ledger",
+             "time": 7, "native_receipt_id": "rr", "native_commitment_id": "cr",
+             "native_task_kind": "repair_passage",
+             "args": {"actor": "B", "tool": "1", "exit": "4"}},
+            {"event_type": "p5_station_supply_stored", "provenance": "committed_ledger",
+             "time": 10, "native_receipt_id": "rs", "native_commitment_id": "cs",
+             "native_task_kind": "store_item",
+             "args": {"actor": "A", "item": "3", "storage": "2"}},
+        ]
+        result = plan_station_work_order(state)
+        self.assertEqual(result["status"], "SATISFIED_PREFIX", repr(result))
+        self.assertIsNone(result["selected_method"])
+        self.assertEqual(result["task_requests"], [])
+        self.assertEqual(result["attempted_methods"], [])
+
+    def test_old_self_store_does_not_retroactively_satisfy_locked_core(self):
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+        state = self._station_state_for_work()
+        state["sealed_minute"] = 15
+        state["typed_trace"]["events"] = [
+            {"event_type": "p5_station_supply_inspected", "provenance": "committed_ledger",
+             "time": 3, "native_receipt_id": "ri", "native_commitment_id": "ci",
+             "native_task_kind": "inspect_supply",
+             "args": {"actor": "A", "item": "3", "tool": "1"}},
+            {"event_type": "p5_station_passage_repaired", "provenance": "committed_ledger",
+             "time": 7, "native_receipt_id": "rr", "native_commitment_id": "cr",
+             "native_task_kind": "repair_passage",
+             "args": {"actor": "B", "tool": "1", "exit": "4"}},
+            {"event_type": "p5_station_supply_stored", "provenance": "committed_ledger",
+             "time": 10, "native_receipt_id": "rs", "native_commitment_id": "cs",
+             "native_task_kind": "store_item",
+             "args": {"actor": "A", "item": "3", "storage": "2"}},
+        ]
+        sequence = [{"actor_alias": "A", "task_kind": "store_item",
+                     "item_ref": "courier_supply", "destination_ref": "station_storage"}]
+        digest = hashlib.sha256(json.dumps(sequence, sort_keys=True,
+                                           separators=(",", ":")).encode()).hexdigest()
+        state["constraints"] = [{
+            "constraint_id": "locked-store", "kind": "event_by_deadline",
+            "source_constraint": {"kind": "event_by_deadline",
+                "event": "station_supply_stored", "start": 0, "deadline": 20,
+                "filters": {"actor": "A", "item": "courier_supply",
+                            "storage": "station_storage"}},
+            "control": {"mode": "locked_fragment", "file_actor": "A",
+                        "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]},
+            "locked_fragment": {"sequence": sequence, "sequence_sha256": digest,
+                "entry_guard": {"task_grant_required": True,
+                                "supply_alias": "courier_supply",
+                                "storage_alias": "station_storage",
+                                "inspection_receipt_required": True},
+                "abort_policy": "ABORT_LOCKED_CORE"},
+        }]
+        result = plan_station_work_order(state, strategy="event_driven")
+        self.assertNotEqual(result["status"], "SATISFIED_PREFIX")
+        self.assertEqual(result["task_requests"], [])
+        self.assertTrue(any("LOCKED_CORE_EXECUTION_UNWITNESSED" in row["preconditions"]
+                            for row in result["method_plans"]))
+        state["actors"]["A"]["commitments"] = [{
+            "commitment_id": "cs", "task_kind": "store_item", "status": "SETTLED",
+            "control_source": "LOCKED_FRAGMENT", "locked_fragment_hash": digest,
+            "locked_sequence_index": 0}]
+        witnessed = plan_station_work_order(state, strategy="event_driven")
+        self.assertEqual(witnessed["status"], "SATISFIED_PREFIX", repr(witnessed))
+        self.assertEqual(witnessed["task_requests"], [])
+
+    def test_store_only_locked_core_preserves_separate_repair_order_offer(self):
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+
+        state = self._station_state_for_work()
+        state["sealed_minute"] = 5
+        state["typed_trace"]["events"].append({
+            "event_type": "p5_station_supply_inspected", "provenance": "committed_ledger",
+            "time": 3, "native_receipt_id": "receipt-inspect-1",
+            "native_commitment_id": "commitment-inspect-1",
+            "native_task_kind": "inspect_supply",
+            "args": {"actor": "A", "item": "3", "tool": "1"}})
+        for actor in state["actors"].values():
+            actor["local_view"]["observation"]["station_supplies"][0]["inspection_status"] = "APPROVED"
+        sequence = [{"actor_alias": "A", "task_kind": "store_item",
+                     "item_ref": "courier_supply", "destination_ref": "station_storage"}]
+        digest = hashlib.sha256(json.dumps(sequence, sort_keys=True,
+                                           separators=(",", ":")).encode()).hexdigest()
+        fragment = {"sequence": sequence, "sequence_sha256": digest,
+                    "entry_guard": {"task_grant_required": True,
+                                    "supply_alias": "courier_supply",
+                                    "storage_alias": "station_storage",
+                                    "inspection_receipt_required": True},
+                    "abort_policy": "ABORT_LOCKED_CORE"}
+        state["constraints"] = [
+            {"constraint_id": "repair-before-storage", "kind": "event_order",
+             "source_constraint": {"kind": "event_order", "id": "repair-before-storage",
+                 "before": {"event": "station_passage_repaired",
+                            "filters": {"actor": "B", "tool": "station_tool",
+                                        "exit": "pickup_to_side_south"}},
+                 "after": {"event": "station_supply_stored",
+                           "filters": {"actor": "A", "item": "courier_supply",
+                                       "storage": "station_storage"}},
+                 "order": "EVENT_KEY", "start": 0, "deadline": 20, "hard": True},
+             "control": {"mode": "locked_fragment", "file_actor": "A",
+                         "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]},
+             "locked_fragment": copy.deepcopy(fragment)},
+            {"constraint_id": "supply-stored-by-horizon", "kind": "event_by_deadline",
+             "source_constraint": {"kind": "event_by_deadline", "id": "supply-stored-by-horizon",
+                 "event": "station_supply_stored", "filters": {"actor": "A",
+                     "item": "courier_supply", "storage": "station_storage"},
+                 "start": 0, "deadline": 20, "hard": True},
+             "control": {"mode": "result_only", "file_actor": None,
+                         "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]}},
+        ]
+        state["grant_ids"] = {
+            "repair-before-storage": "s1:repair-before-storage:fixed-native-grant",
+            "supply-stored-by-horizon": "s1:supply-stored-by-horizon:fixed-native-grant"}
+
+        result = plan_station_work_order(state, strategy="event_driven")
+        feasible = [row for row in result["method_plans"] if row["feasible"]]
+        self.assertTrue(feasible, repr(result))
+        selected = feasible[0]
+        requests = selected["task_requests"]
+        repair = next(row for row in requests if row["task_kind"] == "repair_passage")
+        self.assertIn("repair-before-storage", repair["required_constraint_ids"])
+        self.assertEqual(repair["control_source"], "PLANNER")
+        self.assertNotIn("locked_fragment_sha256", repair)
+        self.assertNotIn("locked_sequence_index", repair)
+        store = next(row for row in requests if row["task_kind"] == "store_item")
+        self.assertEqual(store["control_source"], "LOCKED_FRAGMENT")
+        self.assertEqual(store["locked_fragment_sha256"], digest)
+        self.assertEqual(store["locked_sequence_index"], 0)
+        self.assertEqual(store["constraint_id"], "repair-before-storage")
+        self.assertEqual(store["grant_id"], "s1:repair-before-storage:fixed-native-grant")
+        self.assertEqual(set(store["required_constraint_ids"]),
+                         {"supply-stored-by-horizon", "repair-before-storage"})
+        self.assertNotIn("tool_id", store)
+        self.assertFalse(result["world_effects_applied"])
+
+        completed = copy.deepcopy(state)
+        completed["typed_trace"]["events"].append({
+            "event_type": "p5_station_passage_repaired", "provenance": "committed_ledger",
+            "time": 4, "native_receipt_id": "receipt-repair-1",
+            "native_commitment_id": "commitment-repair-1",
+            "native_task_kind": "repair_passage",
+            "args": {"actor": "B", "tool": "1", "exit": "4"}})
+        # Storage no longer needs the tool after both registered tool tasks
+        # have real receipts; a remote/held/busy tool is not a store guard.
+        completed["station_tool"] = {"id": 1, "room_id": 99, "holder_alias": "B",
+                                     "lease_status": "BUSY"}
+        completed["active_tool_lease"] = {"status": "BUSY", "due_minute": 24}
+        after_repair = plan_station_work_order(completed, strategy="event_driven")
+        feasible_after_repair = [row for row in after_repair["method_plans"] if row["feasible"]]
+        self.assertTrue(feasible_after_repair, repr(after_repair))
+        self.assertEqual([row["task_kind"] for row in after_repair["task_requests"]], ["store_item"])
+        self.assertNotIn("locked_fragment_entry_guard_failed",
+                         feasible_after_repair[0]["preconditions"])
+
+    def test_real_store_lock_plan_adapts_prerequisite_as_planner_and_literal_store_as_locked(self):
+        from types import SimpleNamespace
+        from tools.native_platform_v0.p5.ongoing_station.controller import (
+            _station_work_offers_from_decision,
+        )
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+
+        state = self._station_state_for_work()
+        state["sealed_minute"] = 5
+        state["typed_trace"]["events"] = [{
+            "event_type": "p5_station_supply_inspected", "provenance": "committed_ledger",
+            "time": 3, "native_receipt_id": "receipt-inspect-1",
+            "native_commitment_id": "commitment-inspect-1", "native_task_kind": "inspect_supply",
+            "args": {"actor": "A", "item": "3", "tool": "1"}}]
+        state["actors"]["A"]["local_view"]["observation"]["inventory"] = [{"id": 3}]
+        state["actors"]["A"]["local_view"]["observation"]["station_supplies"] = [{
+            "id": 3, "room_id": 5, "visible": True, "inspection_status": "APPROVED"}]
+        sequence = [{"actor_alias": "A", "task_kind": "store_item",
+                     "item_ref": "courier_supply", "destination_ref": "station_storage"}]
+        digest = hashlib.sha256(json.dumps(sequence, sort_keys=True,
+            separators=(",", ":")).encode()).hexdigest()
+        state["constraints"] = [
+            {"constraint_id": "repair-before-storage", "kind": "event_order",
+             "source_constraint": {"kind": "event_order", "id": "repair-before-storage",
+                 "before": {"event": "station_passage_repaired",
+                            "filters": {"actor": "B", "tool": "station_tool",
+                                        "exit": "pickup_to_side_south"}},
+                 "after": {"event": "station_supply_stored",
+                           "filters": {"actor": "A", "item": "courier_supply",
+                                       "storage": "station_storage"}},
+                 "order": "EVENT_KEY", "start": 0, "deadline": 20, "hard": True},
+             "control": {"mode": "locked_fragment", "file_actor": "A",
+                         "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]},
+             "locked_fragment": {"sequence": sequence, "sequence_sha256": digest,
+                 "entry_guard": {"task_grant_required": True,
+                                 "supply_alias": "courier_supply",
+                                 "storage_alias": "station_storage",
+                                 "inspection_receipt_required": True},
+                 "abort_policy": "ABORT_LOCKED_CORE"}},
+            {"constraint_id": "supply-stored-by-horizon", "kind": "event_by_deadline",
+             "source_constraint": {"kind": "event_by_deadline", "id": "supply-stored-by-horizon",
+                 "event": "station_supply_stored", "filters": {"actor": "A",
+                     "item": "courier_supply", "storage": "station_storage"},
+                 "start": 0, "deadline": 20, "hard": True},
+             "control": {"mode": "result_only", "file_actor": None,
+                         "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]},
+             "locked_fragment": None},
+        ]
+        state["grant_ids"] = {
+            "repair-before-storage": "s1:repair-before-storage:fixed-native-grant",
+            "supply-stored-by-horizon": "s1:supply-stored-by-horizon:fixed-native-grant"}
+        projection = SimpleNamespace(station_id="s1", version=2, source_sha256="a" * 64,
+            bundle_id="system-work-episode-v1", constraints=tuple(state["constraints"]))
+        profile = SimpleNamespace(station_id="s1", version=1)
+        sealed = {"station_id": "s1", "projection_id": "projection-2",
+            "grant_ids": dict(state["grant_ids"]), "station_content": {
+                "tool_id": 1, "storage_id": 2, "supply_id": 3, "repair_exit_id": 4,
+                "workbench_room_id": 5, "storage_room_id": 6},
+            "typed_trace": state["typed_trace"]}
+
+        decision = plan_station_work_order(state, strategy="event_driven")
+        self.assertEqual(decision["status"], "CONDITIONAL_PLAN", repr(decision))
+        plan = next(row for row in decision["method_plans"]
+                    if row["method_id"] == decision["selected_method"])
+        repair = next(row for row in plan["task_requests"]
+                      if row["task_kind"] == "repair_passage")
+        self.assertEqual(repair["control_source"], "PLANNER")
+        self.assertNotIn("locked_fragment_sha256", repair)
+        repair_offer = _station_work_offers_from_decision(
+            decision, projection, profile, sealed, 5)
+        self.assertEqual(len(repair_offer), 1)
+        self.assertEqual(repair_offer[0]["control_source"], "PLANNER")
+        self.assertIsNone(repair_offer[0]["locked_fragment_hash"])
+        order = projection.constraints[0]["source_constraint"]
+        original_before = copy.deepcopy(order["before"])
+        order["before"]["filters"]["actor"] = "A"
+        with self.assertRaisesRegex(ValueError, "registered repair-before-store prerequisite"):
+            _station_work_offers_from_decision(decision, projection, profile, sealed, 5)
+        order["before"] = original_before
+
+        state["typed_trace"]["events"].append({
+            "event_type": "p5_station_passage_repaired", "provenance": "committed_ledger",
+            "time": 7, "native_receipt_id": "receipt-repair-1",
+            "native_commitment_id": "commitment-repair-1", "native_task_kind": "repair_passage",
+            "args": {"actor": "B", "tool": "1", "exit": "4"}})
+        decision = plan_station_work_order(state, strategy="event_driven")
+        store = next(row for row in decision["task_requests"]
+                     if row["task_kind"] == "store_item")
+        self.assertEqual(store["control_source"], "LOCKED_FRAGMENT")
+        self.assertEqual(store["locked_fragment_sha256"], digest)
+        malformed = copy.deepcopy(decision)
+        malformed_plan = next(row for row in malformed["method_plans"]
+                              if row["method_id"] == malformed["selected_method"])
+        next(row for row in malformed_plan["task_requests"]
+             if row["task_kind"] == "store_item").pop("locked_fragment_sha256")
+        with self.assertRaisesRegex(ValueError, "lacks exact sequence provenance"):
+            _station_work_offers_from_decision(malformed, projection, profile, sealed, 7)
+        store_offer = _station_work_offers_from_decision(
+            decision, projection, profile, sealed, 7)
+        self.assertEqual(len(store_offer), 1)
+        self.assertEqual(store_offer[0]["task_kind"], "store_item")
+        self.assertEqual(store_offer[0]["control_source"], "LOCKED_FRAGMENT")
+        self.assertEqual(store_offer[0]["locked_fragment_hash"], digest)
+
+    def test_station_work_does_not_skip_on_wrong_entity_receipt_or_filter(self):
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+        state = self._station_state_for_work()
+        state["typed_trace"]["events"].append({
+            "event_type": "p5_station_supply_inspected", "provenance": "committed_ledger",
+            "time": 2, "native_receipt_id": "receipt-inspect-wrong-item",
+            "native_commitment_id": "commitment-inspect-1",
+            "native_task_kind": "inspect_supply",
+            "args": {"actor": "A", "item": "999", "tool": "1"}})
+        wrong_filter = {
+            "constraint_id": "wrong-item-filter", "kind": "event_by_deadline",
+            "source_constraint": {"kind": "event_by_deadline",
+                "event": "station_supply_inspected", "start": 0, "deadline": 10,
+                "filters": {"actor": "A", "item": "some_other_supply"}},
+            "control": {"mode": "result_only",
+                        "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]}}
+        state["constraints"] = [wrong_filter]
+        result = plan_station_work_order(state)
+        self.assertFalse(result["task_requests"])
+        self.assertTrue(all(not row["feasible"] for row in result["method_plans"]))
+        self.assertTrue(any(row["task_kind"] == "inspect_supply"
+                            for row in result["method_plans"][0]["task_requests"]))
+
+    def test_storage_goal_keeps_repair_as_native_self_support_not_author_requirement(self):
+        from tools.native_platform_v0.p5.story_process.planning import plan_station_work_order
+        state = self._station_state_for_work()
+        state["constraints"] = [{
+            "constraint_id": "storage-goal", "kind": "event_by_deadline",
+            "source_constraint": {"id": "storage-goal", "kind": "event_by_deadline",
+                "event": "station_supply_stored", "start": 0, "deadline": 20,
+                "hard": True, "filters": {"actor": "A", "item": "courier_supply",
+                                            "storage": "station_storage"}},
+            "control": {"mode": "result_only",
+                "allowed_methods": ["inspect_then_repair", "repair_then_inspect"]}},
+        ]
+        state["actors"]["B"]["local_view"]["observation"]["station_task_bindings"] = [{
+            "task_kind": "repair_passage", "tool_id": 1, "target_id": 4,
+            "target_room_id": 5}]
+        result = plan_station_work_order(state)
+        self.assertEqual(result["task_requests"][0]["task_kind"], "inspect_supply")
+        self.assertEqual([row["task_kind"] for row in result["derived_support_tasks"]],
+                         ["repair_passage"])
+        support = result["derived_support_tasks"][0]
+        self.assertEqual(support["source"], "NATIVE_SELF_GOAL")
+        self.assertEqual(support["self_offer_id"], "self:12:repair_passage:4")
+        self.assertFalse(support["required_constraint_ids"])
+
+    def _station_state_for_work(self):
+        # Kept separate so receipt tests cannot accidentally seed planner state
+        # other than the committed event row above.
+        observation = {"room_id": 5, "inventory": [],
+                       "visible_items": [{"id": 3, "room_id": 5}],
+                       "known_exits": {5: [6], 6: [5]},
+                       "exits": [{"key": "east", "destination_id": 6}],
+                       "station_tools": [{"id": 1, "room_id": 5, "visible": True,
+                                          "held_by_actor_id": None, "lease_status": "FREE"}],
+                       "station_supplies": [{"id": 3, "room_id": 5, "visible": True,
+                                             "inspection_status": "UNINSPECTED"}],
+                       "station_repair_targets": [{"id": 4, "room_id": 5, "traversable": False}],
+                       "station_storages": [{"id": 2, "room_id": 6, "visible": True}]}
+        return {"sealed_minute": 1, "horizon": 24, "station_id": "s1",
+                "projection_id": "projection-1", "constraint_id": "inspect-goal",
+                "grant_id": "s1:inspect-goal:fixed-native-grant",
+                "station_content": {"tool_id": 1, "storage_id": 2, "supply_id": 3,
+                                    "repair_exit_id": 4, "workbench_room_id": 5,
+                                    "storage_room_id": 6},
+                "station_tool": {"id": 1, "room_id": 5, "holder_alias": None,
+                                 "lease_status": "FREE"},
+                "active_tool_lease": None,
+                "actors": {alias: {"actor_id": ident,
+                                   "local_view": {"actor_id": ident,
+                                                  "observation": copy.deepcopy(observation)},
+                                   "commitments": [], "pending_action": None}
+                           for alias, ident in (("A", 11), ("B", 12))},
+                "typed_trace": {"events": []}, "constraints": []}
+
 
 if __name__ == "__main__":
     unittest.main()

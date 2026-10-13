@@ -104,6 +104,10 @@ DEFAULT_ENTITIES: Mapping[str, StableEntity] = MappingProxyType({
     "note": StableEntity("Item", "note", "Note"),
     "courier_supply": StableEntity("Item", "courier_supply", "Courier supply"),
     "resident_parcel": StableEntity("Item", "resident_parcel", "Resident parcel"),
+    "station_tool": StableEntity("Item", "station_tool", "Station tool"),
+    "station_storage": StableEntity("Item", "station_storage", "Station storage container"),
+    "pickup": StableEntity("Room", "pickup", "Pickup workbench"),
+    "pickup_to_side_south": StableEntity("Exit", "pickup_to_side_south", "Pickup south passage"),
 })
 
 
@@ -228,12 +232,14 @@ def _filter_args(event: str, filters: Any, entities: Mapping[str, StableEntity],
     args = {}
     for key, value in filters.items():
         expected = schema[key]
-        if expected in ("Actor", "Item"):
+        if expected in ("Actor", "Item", "Room", "Exit"):
             args[key] = _entity(entities, value, expected, f"{where}.filters.{key}")
-        elif expected == "str":
-            if not isinstance(value, str):
+        elif expected in ("str", "int"):
+            if expected == "int" and type(value) is not int:
+                _fail("INVALID_SCHEMA", f"{where}.filters.{key} must be an integer")
+            if expected == "str" and not isinstance(value, str):
                 _fail("INVALID_SCHEMA", f"{where}.filters.{key} must be a string")
-            if event == "note_response" and value not in NOTE_RESPONSES:
+            if event == "note_response" and key == "response" and value not in NOTE_RESPONSES:
                 _fail("UNKNOWN_EVENT_VALUE", f"unsupported note response value {value!r}")
             args[key] = value
     return args

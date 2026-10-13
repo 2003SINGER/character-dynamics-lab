@@ -1,0 +1,54 @@
+{
+  "schema": "ongoing-station-author-v1",
+  "bundle": {
+    "schema": "native-author-bundle-v1",
+    "bundle_id": "system-work-episode-v1",
+    "version": 2,
+    "source": "bounded native work integration episode; corrected immutable binding placement",
+    "constraints": [
+      {
+        "id": "supply-stored-by-horizon",
+        "kind": "event_by_deadline",
+        "event": "station_supply_stored",
+        "filters": {"actor": "A", "item": "courier_supply", "storage": "station_storage"},
+        "start": 1,
+        "deadline": 24,
+        "hard": true
+      },
+      {
+        "id": "repair-before-storage",
+        "kind": "event_order",
+        "before": {"event": "station_passage_repaired", "filters": {"actor": "B", "tool": "station_tool", "exit": "pickup_to_side_south"}},
+        "after": {"event": "station_supply_stored", "filters": {"actor": "A", "item": "courier_supply", "storage": "station_storage"}},
+        "order": "EVENT_KEY",
+        "start": 3,
+        "deadline": 24,
+        "hard": true
+      }
+    ],
+    "branches": [],
+    "permissions": {"world_opportunities": [], "force_npc_response": false,
+      "max_opportunities": 1, "cost_budget": 0}
+  },
+  "bindings": [
+    {
+      "constraint_id": "supply-stored-by-horizon",
+      "control": {"mode": "result_only", "file_actor": null,
+        "allowed_methods": ["inspect_then_repair", "repair_then_inspect"], "source": "SYSTEM"},
+      "locked_fragment": null
+    },
+    {
+      "constraint_id": "repair-before-storage",
+      "control": {"mode": "locked_fragment", "file_actor": null,
+        "allowed_methods": ["inspect_then_repair", "repair_then_inspect"], "source": "SYSTEM"},
+      "locked_fragment": {
+        "sequence": [{"actor_alias": "A", "task_kind": "store_item",
+          "item_ref": "courier_supply", "destination_ref": "station_storage"}],
+        "sequence_sha256": "7dff5c671c5f9d18277788bbf650e81571836bcc085c9e5ee09c52fcf5cb9bd1",
+        "entry_guard": {"task_grant_required": true, "supply_alias": "courier_supply",
+          "storage_alias": "station_storage", "inspection_receipt_required": true},
+        "abort_policy": "ABORT_LOCKED_CORE"
+      }
+    }
+  ]
+}

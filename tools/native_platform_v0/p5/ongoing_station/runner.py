@@ -28,6 +28,10 @@ SOURCE_PATHS = (
     "tools/native_platform_v0/p5/ongoing_station/audit.py",
     "tools/native_platform_v0/p5/ongoing_station/replay.py",
     "tools/native_platform_v0/p5/ongoing_station/cases/suite.json",
+    "tools/native_platform_v0/p5/ongoing_station/cases/system-work-suite.json",
+    "tools/native_platform_v0/p5/ongoing_station/cases/system-work-v1.json",
+    "tools/native_platform_v0/p5/ongoing_station/cases/system-work-v2-store-lock.json",
+    "tools/native_platform_v0/p5/ongoing_station/cases/system-work-v2-order-store-lock.json",
     "tools/native_platform_v0/p5/ongoing_station/cases/m5-e1-e4-v1.json",
     "tools/native_platform_v0/p5/ongoing_station/cases/m5-e1-archive-v1.json",
     "tools/native_platform_v0/p5/ongoing_station/cases/m5-e3-handover-v2.json",
@@ -39,14 +43,20 @@ SOURCE_PATHS = (
     "tools/native_platform_v0/p5/ongoing_station/cases/author-t4-result-only-v2.json",
     "tools/native_platform_v0/p5/tests/test_ongoing_station_runner.py",
     "tools/native_platform_v0/p5/tests/test_ongoing_station_native.py",
+    "tools/native_platform_v0/p5/tests/test_ongoing_station_work.py",
     "tools/native_platform_v0/p5/tests/test_story_process_planning.py",
     "tools/native_platform_v0/p5/tests/test_ongoing_station_actor.py",
+    "tools/native_platform_v0/p5/tests/test_ongoing_station_controller.py",
     "tools/native_platform_v0/p5/tests/test_ongoing_station_model.py",
+    "tools/native_platform_v0/p5/tests/test_system_work_audit.py",
     "tools/native_platform_v0/p5/ongoing_station/model.py",
     "tools/native_platform_v0/p5/ongoing_station/native.py",
     "tools/native_platform_v0/p5/ongoing_station/controller.py",
     "tools/native_platform_v0/p5/ongoing_station/actor.py",
     "tools/native_platform_v0/p5/ongoing_station/goals.py",
+    "tools/native_platform_v0/p5/ongoing_station/commands.py",
+    "tools/native_platform_v0/p5/ongoing_station/work.py",
+    "tools/native_platform_v0/p5/ongoing_station/system_work_audit.py",
     "tools/native_platform_v0/p5/story_process/planning.py",
     "tools/native_platform_v0/p5/story_process/native.py",
     "tools/native_platform_v0/p5/story_process/model.py",
@@ -57,12 +67,14 @@ SOURCE_PATHS = (
     "tools/native_platform_v0/p5/runner.py",
     "tools/native_platform_v0/p3/agency.py",
     "tools/native_platform_v0/p3/planning.py",
+    "tools/native_platform_v0/p3/tests/test_p3_station_task_planning.py",
     "tools/native_platform_v0/p3/p4_world.py",
     "tools/native_platform_v0/p3/p4_social.py",
     "tools/native_platform_v0/p3/scene.py",
     "tools/native_platform_v0/p3/control_service.py",
     "tools/native_platform_v0/p3/mcp_stdio.py",
     "tools/native_platform_v0/p3/export_evidence.py",
+    "tools/native_platform_v0/p3/tests/test_headless_control.py",
     "tools/trajectory_constraints_v0/trace.py",
 )
 
@@ -132,7 +144,8 @@ def _source_manifest(snapshot_root: Path) -> dict[str, Any]:
 
 def load_case(case_id: str, suite_path: Path = SUITE_PATH) -> tuple[dict[str, Any], dict[str, Any]]:
     suite = _read_json(suite_path)
-    if suite.get("schema") != "ongoing-station-case-suite-v1":
+    if suite.get("schema") not in {"ongoing-station-case-suite-v1",
+                                    "ongoing-station-system-work-suite-v1"}:
         raise ValueError("unsupported ongoing-station case suite")
     matches = [row for row in suite.get("cases", []) if row.get("case_id") == case_id]
     if len(matches) != 1:
@@ -147,6 +160,15 @@ def load_case(case_id: str, suite_path: Path = SUITE_PATH) -> tuple[dict[str, An
             raise ValueError("M5 E1-E4 suite must remain within its fixed eight-scene bound")
         if case.get("strategy") not in {"gtpyhop", "event_driven"}:
             raise ValueError("M5 case has an unsupported strategy arm")
+    if suite.get("schema") == "ongoing-station-system-work-suite-v1":
+        if (suite.get("suite_id") != "ongoing-station-system-work-v1"
+                or len(suite.get("cases", [])) != 4
+                or suite.get("run_policy", {}).get("max_scenes") != 4):
+            raise ValueError("station work suite must contain exactly its fixed four native scenes")
+        if case.get("strategy") not in {"gtpyhop", "event_driven"}:
+            raise ValueError("station work case has an unsupported strategy arm")
+        if common.get("ongoing_station", {}).get("game_content") != "station_work_v1":
+            raise ValueError("station work cases require explicit registered station_work_v1 content")
     return suite, case
 
 
@@ -163,6 +185,24 @@ def _compact_step(result: Any) -> dict[str, Any]:
     return {"scene_id": result.get("scene_id"),
             "round": {key: row[key] for key in keep if key in row},
             "omitted_cumulative_fields": ["final"]}
+
+
+def _resolve_case_intervention(row: Mapping[str, Any], scene: Mapping[str, Any]) -> dict[str, Any]:
+    """Resolve a stable case alias to the exact generated-scene item ID."""
+    resolved = dict(row)
+    if resolved.get("kind") == "station_request_tool_loan":
+        if set(resolved) != {"at", "kind", "tool_alias", "lender_alias",
+                             "borrower_alias", "due_minute"}:
+            raise ValueError("station loan case row must name one registered tool alias")
+        if resolved.get("tool_alias") != "station_tool":
+            raise ValueError("station loan request must use the registered station_tool alias")
+        items = scene.get("items") if isinstance(scene.get("items"), Mapping) else {}
+        item = items.get("station_tool")
+        if not isinstance(item, Mapping) or type(item.get("id")) is not int:
+            raise ValueError("reset response omitted the exact registered station tool ID")
+        resolved.pop("tool_alias")
+        resolved["tool_id"] = item["id"]
+    return resolved
 
 
 def _copy_db_artifact(export_meta: Mapping[str, Any], run_dir: Path) -> dict[str, Any]:
@@ -241,6 +281,12 @@ def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
              db_exporter: Callable | None = None, execute: bool = False) -> tuple[dict[str, Any], Path]:
     suite, case = load_case(case_id, suite_path)
     common = suite["common"]
+    from .model import load_profile
+    for author_key in ("author_file", "edit_author_file"):
+        author_file = case.get(author_key)
+        author = (_read_json(suite_path.parent / author_file)
+                  if author_file is not None else common["ongoing_station"].get("author"))
+        load_profile({**common["ongoing_station"], "author": author})
     if not execute:
         raise PermissionError("native scene creation requires the explicit --execute flag")
     rpc = call_rpc or rpc_call
@@ -331,7 +377,7 @@ def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
                         "prefix_artifact": prefix_path.name})
                     summary["pre_edit_stop"] = "objective_already_archived"
                     break
-            at_minute = [row for row in interventions
+            at_minute = [_resolve_case_intervention(row, scene) for row in interventions
                          if isinstance(row, Mapping) and row.get("at") == minute]
             step_args = {"scene_id": scene_id, "rounds": 1}
             if at_minute:
@@ -364,6 +410,7 @@ def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
                             audit_history_prefix,
                             audit_mid_episode_resource, audit_required_story_events,
                             audit_resource_negative, audit_t1)
+        from .system_work_audit import audit_station_episode, audit_station_work
         scene_identity = _read_json(run_dir / "scene-identity.json")
         db_readback = _read_json(run_dir / db_copy["relative_path"])
         audit_kind = case.get("audit", "t1" if author_file is None else "author_pair")
@@ -403,6 +450,30 @@ def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
         elif audit_kind == "handover_deadline_stress":
             assessment = audit_handover_deadline_stress(trace, scene_identity, db_readback,
                 author=station_profile["author"], deadline_minute=8)
+        elif audit_kind == "station_work_episode":
+            assessment = audit_station_episode(
+                trace, db_readback,
+                expected_constraint_statuses=case.get("expected", {}).get(
+                    "constraint_statuses", {}),
+                required_outcomes=tuple(case.get("expected", {}).get(
+                    "required_outcomes", ())))
+        elif audit_kind == "station_work_physical":
+            assessment = audit_station_work(
+                trace, db_readback,
+                required_outcomes=tuple(case.get("expected", {}).get(
+                    "required_outcomes", ())))
+        elif audit_kind == "station_history_capture":
+            physical = audit_station_work(
+                trace, db_readback,
+                required_outcomes=tuple(case.get("expected", {}).get(
+                    "required_outcomes", ())))
+            assessment = {"schema": "ongoing-station-history-capture-v1",
+                "status": "PARTIAL", "pass": False,
+                "history_condition": case.get("history_condition"),
+                "physical_work_audit": physical,
+                "causal_claim_allowed": False,
+                "causal_claim_blocker": "requires paired post-run comparison of receipt-backed local history and the later same request/frontier",
+                "note": "This per-scene capture is not a history-causality result."}
         else:
             raise ValueError(f"unsupported audit kind {audit_kind!r}")
         from .replay import write_replay_once
@@ -439,7 +510,9 @@ def main() -> int:
             load_profile({**suite["common"]["ongoing_station"], "author": preflight_author})
         edit_path = args.suite.parent / case["edit_author_file"] if case.get("edit_author_file") else None
         if edit_path:
-            _read_json(edit_path)
+            from .model import load_profile
+            load_profile({**suite["common"]["ongoing_station"],
+                          "author": _read_json(edit_path)})
         print(json.dumps({"status": "PREFLIGHT_ONLY", "case_id": case["case_id"],
                           "seed": suite["common"]["seed"],
                           "horizon": suite["common"]["horizon"],

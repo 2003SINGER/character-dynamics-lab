@@ -46,8 +46,8 @@ def _nonempty(value: Any, label: str) -> str:
     return value
 
 
-def story_event_registry():
-    """Return the existing P5 TypedIR registry plus this slice's native ledger events."""
+def story_event_registry(*, game_content=None):
+    """Return closed opt-in TypedIR additions for the selected native slice."""
     from tools.native_platform_v0.p5.bundle import p5_registry
     from tools.trajectory_constraints_v0.types import (
         Owner, Registry, RegistryEntry, TimeMode, TypeSpec, ValueKind,
@@ -60,7 +60,31 @@ def story_event_registry():
                       {"actor": "Actor", "item": "Item"}, TypeSpec(ValueKind.EVENT),
                       "ledger_event_v1", ("native_note_archive_receipt",), TimeMode.EVENT),
     )
-    return Registry(p5_registry().entries() + additions)
+    station_additions = ()
+    if game_content is not None:
+        if game_content != "station_work_v1":
+            raise ValueError("unsupported game_content registry selector")
+        station_additions = (
+            RegistryEntry("p5_station_supply_inspected", "1", Owner.LEDGER, "StationSupplyInspected",
+                          {"actor": "Actor", "item": "Item", "tool": "Item"},
+                          TypeSpec(ValueKind.EVENT), "ledger_event_v1", ("native_station_work_receipt",), TimeMode.EVENT),
+            RegistryEntry("p5_station_supply_stored", "1", Owner.LEDGER, "StationSupplyStored",
+                          {"actor": "Actor", "item": "Item", "storage": "Item"},
+                          TypeSpec(ValueKind.EVENT), "ledger_event_v1", ("native_station_store_receipt",), TimeMode.EVENT),
+            RegistryEntry("p5_station_passage_repaired", "1", Owner.LEDGER, "StationPassageRepaired",
+                          {"actor": "Actor", "tool": "Item", "exit": "Exit"},
+                          TypeSpec(ValueKind.EVENT), "ledger_event_v1", ("native_station_work_receipt",), TimeMode.EVENT),
+            RegistryEntry("p5_station_tool_loaned", "1", Owner.LEDGER, "StationToolLoaned",
+                          {"lender": "Actor", "borrower": "Actor", "tool": "Item",
+                           "due_minute": "int", "loan_id": "str"},
+                          TypeSpec(ValueKind.EVENT), "ledger_event_v1", ("native_station_tool_receipt",), TimeMode.EVENT),
+            RegistryEntry("p5_station_tool_returned", "1", Owner.LEDGER, "StationToolReturned",
+                          {"lender": "Actor", "borrower": "Actor", "tool": "Item",
+                           "due_minute": "int", "returned_minute": "int",
+                           "outcome": "str", "loan_id": "str"},
+                          TypeSpec(ValueKind.EVENT), "ledger_event_v1", ("native_station_tool_receipt",), TimeMode.EVENT),
+        )
+    return Registry(p5_registry().entries() + additions + station_additions)
 
 
 def load_request(raw: Mapping[str, Any], *, allow_template: bool = False) -> StoryProcessRequest:

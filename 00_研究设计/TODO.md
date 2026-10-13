@@ -1,10 +1,10 @@
 # TODO｜active research queue
 
-更新时间：2026-10-13。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
+更新时间：2026-10-14。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
 当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。**Planner Adapter Integration v1 已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`，本轮停止代码扩张**；唯一任务/结果 owner 是[RESULTS](../02_实验/Planner_Adapter_Integration_v1/RESULTS.md)。System Baseline v0 仍为历史 `PARTIAL`（M1 `READY_FOR_INDEPENDENT_REVIEW`、M2 `INVALID`），其阶段已停止且不进入 P6；状态和旧证据只见[原 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。P0 Baseline Gate、P0-Integration 与 P0 Author Binding 的既有状态/结果各由自己的 RESULTS 维护；暂停它们的局部扩张，不覆盖历史结果或 P5 shared-supply 失败。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准。
 
-**当前动作：已收到 `b039c87` 外部复核，转向系统级整合的内容与接口准入**。Mature-Methods Integration v1 的 M1–M5 / E1–E4 已交付且仍 PARTIAL，停止便条局部完善和旧 E1/E2 补考。本轮完成复核沉淀与源码能力账，不开启新运行；首条施工候选及算法级边界见[未决问题](未决问题与机制候选.md)末节。先定义有真实后果的活动与共享资源，再按实际冲突选择成熟方法。既有结果只由[唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)记账，限定证据授权不扩及新对话原文；C++、E0、main 不动，不自行 CLOSED。
+**当前停止点：系统集成首轮为 DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW，未 CLOSED**。基于 `5c8a8e5` 完成限定原生内容与四条件开发运行，能力、失败、历史对照未成立及无方法收益证据只见[既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)。本轮停止功能实施，不换条件刷 PASS，不进入 LLM或更大系统。M1–M5 / E1–E4 的历史 PARTIAL 不改写；候选背景见[未决问题末节](未决问题与机制候选.md)。新原文私有；用户已同意公开本轮限定代码、报告、场景轨迹/DB 读回/源码快照/失败及回放，凭证和数据库二进制不公开。C++、E0、main 不动，不自行 CLOSED。
 
 角色动力学的[阶段与过关证据](研究重建审计_2026-10-06.md)与各原生平台历史阶段分别保留；System Baseline v0、Planner Adapter Integration v1、P0/P5 历史检查点与失败结果不被抹除。文档更新不算原生运行通过。
 
@@ -12,7 +12,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| CD-SYSTEM-INTEGRATION | **内容/接口施工入口已明确；新能力未实施** | 首选核定 A 物资验收、B 设施检修与一件共享工具的原生前提/效果/时长/权限；再接有界互斥与未来修复，不先堆算法或新实验矩阵 | [未决问题末节](未决问题与机制候选.md)为唯一候选 owner；一个连续 episode 验证有后果的活动、合法历史消费、多过程冲突、混合作者控制与受影响未来修复。先内容准入，不以文档或调用计数当能力通过 |
+| CD-SYSTEM-INTEGRATION | **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED** | 独立复核原生事件/DB、锁任务接受与结算来源、历史对照准入失败和同输入基线；本轮停止实施，不自动修排序、扩场景或接 LLM | [既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)为唯一运行/失败 owner；[持续站点 README](../tools/native_platform_v0/p5/ongoing_station/README.md)为接口入口。世界目标成功不替代锁执行或历史因果证明；枚举同样成功不宣称方法优势 |
 | MATURE-METHODS-INTEGRATION-V1 | **M1–M5 / E1–E4 已交付；外部复核确认 PARTIAL；未 CLOSED** | 保留 `b039c87`；停止本包实施，不追加规则刷 PASS；下一切口不以便条或某个 Planner 命名 | [唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)；[现行代码契约](../tools/native_platform_v0/p5/ongoing_station/README.md)。E3/E4 有界证据保留，严格 E1/E2 未证实；限定证据已公开，私有原文、旧 C++、E0 预算、main 不动 |
 | PLANNER-ADAPTER-INTEGRATION-V1 | **PARTIAL / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | 审阅实际候选缺失、同域对照和反馈边界；后续仅提出 domain/heuristic 一致性诊断，不自动实施、扩预算、进入 P6 或接 LLM | [唯一 RESULTS](../02_实验/Planner_Adapter_Integration_v1/RESULTS.md)；A1/A2/A4 未证明，不自行 CLOSED；不改历史结果或 F0/F1 |
 | SYSTEM-BASELINE-V0 | **PARTIAL；M1 READY_FOR_INDEPENDENT_REVIEW；M2 INVALID；本阶段停止** | 等待 M1 独立审阅；无 native LLM candidate execution，不进入 P6。任何继续实施或新阶段须另行授权 | [唯一 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)；[M2 证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)及[manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json) |

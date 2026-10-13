@@ -47,6 +47,21 @@ def matching_receipts(commitment, receipts):
                 matched.append(row)
             elif row.get("after_room_id") == commitment.get("destination_id"):
                 matched.append(row)
+        elif kind in {"inspect_supply", "repair_passage"}:
+            if (row.get("task_kind") == kind and row.get("settled") is True
+                    and row.get("outcome") == "SETTLED"
+                    and str(row.get("target_id")) == str(commitment.get("target_id"))
+                    and str(row.get("tool_id")) == str(commitment.get("tool_id"))):
+                matched.append(row)
+        elif kind == "store_item" and operator == "store_item":
+            if (str(row.get("storage_id")) == str(commitment.get("storage_destination_id"))
+                    and row.get("outcome") == "SETTLED"):
+                matched.append(row)
+        elif kind in {"lend_tool", "return_tool"} and operator == "give":
+            if (str(row.get("item_id")) == str(commitment.get("tool_id"))
+                    and str(row.get("recipient_id")) == str(commitment.get("recipient_id"))
+                    and row.get("ongoing_task_kind") == kind):
+                matched.append(row)
     return matched
 
 
@@ -136,10 +151,12 @@ def arbitrate(offers, commitments, local_view, now_minute, busy=False):
         reasons = []
         if not isinstance(offer.get("offer_id"), str) or not offer.get("offer_id"):
             reasons.append("task offer identity is missing")
-        if offer.get("task_kind") not in {"deliver_supply", "archive_note", "handover_note",
-                                           "routine_route", "return_stock"}:
+        supported_tasks = {"deliver_supply", "archive_note", "handover_note", "routine_route",
+                           "return_stock", "inspect_supply", "repair_passage", "store_item",
+                           "lend_tool", "return_tool"}
+        if offer.get("task_kind") not in supported_tasks:
             reasons.append("unsupported task kind")
-        if offer.get("task_kind") != "routine_route":
+        if offer.get("task_kind") in {"deliver_supply", "archive_note", "handover_note", "return_stock"}:
             if offer.get("item_id") is None:
                 reasons.append("exact item binding missing")
             elif str(offer["item_id"]) not in inventory | visible:
@@ -153,6 +170,15 @@ def arbitrate(offers, commitments, local_view, now_minute, busy=False):
         if offer.get("task_kind") in {"archive_note", "handover_note", "deliver_supply",
                                       "return_stock"} and offer.get("destination_id") is None:
             reasons.append("destination binding missing")
+        if offer.get("task_kind") in {"inspect_supply", "repair_passage"}:
+            if offer.get("tool_id") is None or offer.get("target_id") is None:
+                reasons.append("exact registered station tool and target are required")
+        if offer.get("task_kind") == "store_item":
+            if offer.get("item_id") is None or offer.get("storage_destination_id") is None:
+                reasons.append("exact supply and registered storage are required")
+        if offer.get("task_kind") in {"lend_tool", "return_tool"}:
+            if offer.get("tool_id") is None or offer.get("recipient_id") is None:
+                reasons.append("exact tool and recipient are required")
         if offer.get("task_kind") == "handover_note" and offer.get("recipient_id") is None:
             reasons.append("recipient binding missing")
         deadline = offer.get("deadline_minute")
@@ -176,11 +202,14 @@ def arbitrate(offers, commitments, local_view, now_minute, busy=False):
     infinity = 2**63 - 1
     action_task_priority = {"deliver_supply": 0, "archive_note": 0,
                             "handover_note": 0, "return_stock": 0,
+                            "inspect_supply": 0, "repair_passage": 0, "store_item": 0,
+                            "lend_tool": 0, "return_tool": 0,
                             "routine_route": 1}
     selected = min(candidates, key=lambda row: (
         row.get("deadline_minute") if row.get("deadline_minute") is not None else infinity,
         action_task_priority.get(row.get("task_kind"), 2),
-        0 if row.get("source") == "SELF" else 1,
+        (0 if row.get("_authorized_locked_fragment") is True else
+         1 if row.get("source") == "SELF" else 2),
         str(row.get("offer_id", ""))))
     return {"selected": selected, "disposition": "ACCEPTED",
             "reason": "feasible offer selected by deadline then stable source/id ordering",

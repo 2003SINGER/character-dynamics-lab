@@ -12,13 +12,167 @@ from tools.native_platform_v0.p5.ongoing_station.audit import (
 from tools.native_platform_v0.p5.ongoing_station.model import load_profile
 from tools.native_platform_v0.p5.ongoing_station.replay import build_replay, write_replay_once
 from tools.native_platform_v0.p5.ongoing_station.runner import (
-    SUITE_PATH, _allocate_run_dir, _compact_step, _run_player_action_batch,
+    SUITE_PATH, _allocate_run_dir, _compact_step, _resolve_case_intervention, _run_player_action_batch,
     load_case, run_case,
 )
 
 
 class OngoingStationRunnerTests(unittest.TestCase):
     M5_SUITE = SUITE_PATH.parent / "m5-e1-e4-v1.json"
+    SYSTEM_WORK_SUITE = SUITE_PATH.parent / "system-work-suite.json"
+
+    def test_station_planner_release_inputs_are_receipt_backed_and_lease_exact(self):
+        from types import SimpleNamespace
+        from tools.native_platform_v0.p5.ongoing_station.controller import (
+            _station_planner_commitments,
+        )
+
+        actor = SimpleNamespace(id=7)
+        route = {"commitment_id": "route-1", "source": "SELF",
+            "task_kind": "routine_route", "status": "IN_PROGRESS",
+            "route_waypoints": [12, 11], "waypoint_receipts": ["r1", None]}
+        receipts = [{"receipt_id": "r1", "ongoing_commitment_id": "route-1",
+            "ongoing_task_kind": "routine_route", "kind": "move", "settled": True,
+            "after_room_id": 12}]
+        rows, lease = _station_planner_commitments(
+            actor, [route], receipts, {"status": "FREE"}, tool_id=5,
+            actor_alias="A", active_work=None)
+        self.assertEqual(rows[0]["remaining_work_minutes"], 1)
+        self.assertEqual(rows[0]["release_time_basis"],
+                         "conditional_no_future_failure_estimate")
+        self.assertIsNone(lease)
+
+        repair = {"commitment_id": "repair-1", "source": "AUTHOR",
+            "task_kind": "repair_passage", "status": "IN_PROGRESS",
+            "tool_id": 5, "target_id": 9}
+        active_lease = {"status": "BUSY", "actor_id": 7,
+            "actor_alias": "A",
+            "commitment_id": "repair-1", "task_kind": "repair_passage",
+            "due_minute": 8}
+        active_work = {"actor_id": 7, "commitment_id": "repair-1",
+            "task_kind": "repair_passage", "tool_id": 5, "target_id": 9,
+            "due_minute": 8}
+        rows, lease = _station_planner_commitments(
+            actor, [repair], [], active_lease, tool_id=5, actor_alias="A",
+            active_work=active_work)
+        self.assertEqual(rows[0]["due_minute"], 8)
+        self.assertEqual(rows[0]["release_time_basis"],
+                         "matching_actor_commitment_tool_lease")
+        self.assertEqual(lease["commitment_id"], "repair-1")
+        rows, lease = _station_planner_commitments(
+            actor, [repair], [], {**active_lease, "actor_id": 8}, tool_id=5,
+            actor_alias="A", active_work=active_work)
+        self.assertNotIn("due_minute", rows[0])
+        self.assertIsNone(lease)
+
+        malformed = {**route, "waypoint_receipts": []}
+        rows, _ = _station_planner_commitments(
+            actor, [malformed], receipts, {"status": "FREE"}, tool_id=5,
+            actor_alias="A", active_work=None)
+        self.assertNotIn("remaining_work_minutes", rows[0])
+
+    def test_system_work_suite_is_four_bounded_and_pairs_only_change_the_declared_factor(self):
+        suite = json.loads(self.SYSTEM_WORK_SUITE.read_text(encoding="utf-8"))
+        self.assertEqual(suite["suite_id"], "ongoing-station-system-work-v1")
+        self.assertEqual((len(suite["cases"]), suite["run_policy"]["max_scenes"]), (4, 4))
+        cases = {row["case_id"]: row for row in suite["cases"]}
+        main_gt = cases["system-work-main-gtpyhop"]
+        main_event = cases["system-work-main-event-driven"]
+        self.assertNotEqual(main_gt["strategy"], main_event["strategy"])
+        for key in ("author_file", "edit_author_file", "interventions", "audit", "expected"):
+            self.assertEqual(main_gt.get(key), main_event.get(key), key)
+        self.assertEqual([row["at"] for row in main_gt["interventions"]], [2, 3, 6, 8])
+        self.assertEqual(main_gt["interventions"][1]["author_file"],
+                         "system-work-v2-order-store-lock.json")
+        self.assertEqual(main_gt["interventions"][2]["operation"], "get")
+        self.assertEqual(main_gt["interventions"][3]["operation"], "drop")
+
+        early = cases["system-work-history-early-due"]
+        tight = cases["system-work-history-tight-due"]
+        self.assertEqual(early["strategy"], tight["strategy"])
+        for key in ("audit", "history_condition", "expected", "purpose"):
+            if key != "history_condition" and key != "purpose":
+                self.assertEqual(early.get(key), tight.get(key), key)
+        self.assertEqual(early["interventions"][0]["due_minute"], 3)
+        self.assertEqual(tight["interventions"][0]["due_minute"], 2)
+        self.assertEqual(early["interventions"][1], tight["interventions"][1])
+        self.assertEqual(early["interventions"][1]["at"],
+                         suite["history_pair"]["later_request_must_match"]["at"])
+
+    def test_station_work_author_versions_validate_and_store_lock_is_minimal(self):
+        from tools.native_platform_v0.p5.ongoing_station.model import load_profile
+        case_dir = self.SYSTEM_WORK_SUITE.parent
+        for name, version in (("system-work-v1.json", 1),
+                              ("system-work-v2-order-store-lock.json", 2)):
+            author = json.loads((case_dir / name).read_text(encoding="utf-8"))
+            profile = load_profile({"schema": "ongoing-station-profile-v1",
+                "station_id": "test-system-work", "profile_version": 1,
+                "horizon": 24, "game_content": "station_work_v1", "author": author})
+            self.assertEqual(profile.author["bundle"]["version"], version)
+        edited = json.loads((case_dir / "system-work-v2-order-store-lock.json").read_text(
+            encoding="utf-8"))
+        bindings = {row["constraint_id"]: row for row in edited["bindings"]}
+        core = bindings["repair-before-storage"]["locked_fragment"]
+        self.assertEqual(core["sequence"], [{"actor_alias": "A", "task_kind": "store_item",
+            "item_ref": "courier_supply", "destination_ref": "station_storage"}])
+        self.assertEqual(bindings["supply-stored-by-horizon"]["control"]["mode"], "result_only")
+        self.assertIsNone(bindings["supply-stored-by-horizon"]["locked_fragment"])
+        self.assertEqual(bindings["repair-before-storage"]["control"]["mode"], "locked_fragment")
+
+    def test_corrected_future_edit_passes_cas_without_relabeling_existing_control(self):
+        from tools.native_platform_v0.p5.ongoing_station.native import (
+            activate_author, active_projection, edit_author, initialize_station,
+        )
+        from tools.native_platform_v0.p5.ongoing_station.model import station_work_entity_catalog
+
+        case_dir = self.SYSTEM_WORK_SUITE.parent
+        author_v1 = json.loads((case_dir / "system-work-v1.json").read_text(encoding="utf-8"))
+        old_invalid_v2 = json.loads((case_dir / "system-work-v2-store-lock.json").read_text(
+            encoding="utf-8"))
+        corrected_v2 = json.loads((case_dir / "system-work-v2-order-store-lock.json").read_text(
+            encoding="utf-8"))
+
+        class Attributes:
+            def __init__(self):
+                self.values = {}
+            def add(self, key, value, category=None):
+                self.values[(category, key)] = value
+            def get(self, key, category=None, default=None):
+                return self.values.get((category, key), default)
+        class Pickup:
+            def __init__(self):
+                self.attributes = Attributes()
+
+        pickup = Pickup()
+        profile = {"schema": "ongoing-station-profile-v1", "station_id": "cas-test",
+            "profile_version": 1, "horizon": 24, "author": author_v1,
+            "game_content": "station_work_v1"}
+        initialize_station(pickup, {}, profile)
+        entities = station_work_entity_catalog()
+        self.assertEqual(activate_author(pickup, expected_version=1, now=2,
+                                         entities=entities)["status"], "ACTIVATED")
+        rejected = edit_author(pickup, old_invalid_v2, expected_version=1, now=3,
+                               entities=entities)
+        self.assertEqual(rejected["status"], "CONTROL_MODE_IMMUTABLE")
+        updated = edit_author(pickup, corrected_v2, expected_version=1, now=3,
+                              entities=entities)
+        self.assertEqual(updated["status"], "UPDATED")
+        projection = active_projection(pickup, entities=entities)
+        bindings = {row["constraint_id"]: row for row in projection.constraints}
+        self.assertEqual(bindings["supply-stored-by-horizon"]["control"]["mode"],
+                         "result_only")
+        self.assertEqual(bindings["repair-before-storage"]["control"]["mode"],
+                         "locked_fragment")
+
+    def test_station_loan_case_alias_resolves_only_to_exact_reset_registered_tool(self):
+        row = {"at": 1, "kind": "station_request_tool_loan", "tool_alias": "station_tool",
+               "lender_alias": "A", "borrower_alias": "B", "due_minute": 3}
+        scene = {"items": {"station_tool": {"id": 812}}}
+        self.assertEqual(_resolve_case_intervention(row, scene), {
+            "at": 1, "kind": "station_request_tool_loan", "lender_alias": "A",
+            "borrower_alias": "B", "due_minute": 3, "tool_id": 812})
+        with self.assertRaisesRegex(ValueError, "registered station_tool"):
+            _resolve_case_intervention({**row, "tool_alias": "courier_supply"}, scene)
 
     def test_m5_suite_is_bounded_and_strategy_pairs_are_input_matched(self):
         suite = json.loads(self.M5_SUITE.read_text(encoding="utf-8"))

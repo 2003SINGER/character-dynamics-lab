@@ -69,6 +69,99 @@ def _projection_requires_handover(projection):
     return False
 
 
+def _repair_before_storage_constraint(projection):
+    """Find only the registered hard repair-before-storage source constraint."""
+    for row in _projection_value(projection, "constraints", ()) or ():
+        source = row.get("source_constraint", {})
+        if source.get("hard") is not True or source.get("kind") != "event_order":
+            continue
+        before, after = source.get("before", {}), source.get("after", {})
+        if (before.get("event") == "station_passage_repaired"
+                and before.get("filters") == {"actor": "B", "tool": "station_tool",
+                                               "exit": "pickup_to_side_south"}
+                and after.get("event") == "station_supply_stored"
+                and after.get("filters") == {"actor": "A", "item": "courier_supply",
+                                              "storage": "station_storage"}):
+            return row
+    return None
+
+
+def _locally_knows_repair_witness(actor, view, order):
+    """Use the actor's exact local exit observation, retaining only witnessed proof."""
+    observation = view.get("observation", {})
+    for target in observation.get("station_repair_targets", ()):
+        receipt = target.get("last_repair_receipt")
+        if (target.get("alias") == "pickup_to_side_south"
+                and target.get("key") == "south"
+                and target.get("traversable") is True
+                and isinstance(receipt, Mapping)
+                and receipt.get("outcome") == "SETTLED"
+                and receipt.get("actor_alias") == "B"
+                and type(receipt.get("completed_minute")) is int
+                and isinstance(receipt.get("receipt_id"), str)):
+            _station_set(actor, "p5_station_repair_witness", {
+                "constraint_id": order.get("constraint_id"),
+                "receipt_id": receipt["receipt_id"],
+                "target_id": target.get("id"),
+                "completed_minute": receipt["completed_minute"],
+                "outcome": "SETTLED",
+            })
+            return True
+    witness = _station_get(actor, "p5_station_repair_witness")
+    return (isinstance(witness, Mapping)
+            and witness.get("constraint_id") == order.get("constraint_id")
+            and witness.get("outcome") == "SETTLED"
+            and isinstance(witness.get("receipt_id"), str)
+            and type(witness.get("completed_minute")) is int)
+
+
+def _repair_before_storage_constraint(projection):
+    """Return a registered hard station order, if the author requires it."""
+    constraints = _projection_value(projection, "constraints", ()) or ()
+    for row in constraints:
+        source = row.get("source_constraint", {})
+        if source.get("hard") is not True or source.get("kind") != "event_order":
+            continue
+        before, after = source.get("before", {}), source.get("after", {})
+        if (before.get("event") == "station_passage_repaired"
+                and before.get("filters") == {"actor": "B", "tool": "station_tool",
+                                               "exit": "pickup_to_side_south"}
+                and after.get("event") == "station_supply_stored"
+                and after.get("filters") == {"actor": "A", "item": "courier_supply",
+                                              "storage": "station_storage"}):
+            return row
+    return None
+
+
+def _locally_knows_repair_witness(actor, view, order):
+    observation = view.get("observation", {})
+    for target in observation.get("station_repair_targets", ()):
+        receipt = target.get("last_repair_receipt")
+        if (target.get("alias") == "pickup_to_side_south"
+                and target.get("key") == "south"
+                and target.get("traversable") is True
+                and isinstance(receipt, Mapping)
+                and receipt.get("outcome") == "SETTLED"
+                and receipt.get("actor_alias") == "B"
+                and type(receipt.get("completed_minute")) is int
+                and receipt.get("receipt_id")):
+            _station_set(actor, "p5_station_repair_witness", {
+                "constraint_id": order.get("constraint_id"),
+                "receipt_id": receipt["receipt_id"],
+                "target_id": target.get("id"),
+                "completed_minute": receipt["completed_minute"],
+                "observed_minute": observation.get("clock_minute"),
+                "outcome": "SETTLED",
+            })
+            return True
+    witness = _station_get(actor, "p5_station_repair_witness")
+    return (isinstance(witness, Mapping)
+            and witness.get("constraint_id") == order.get("constraint_id")
+            and witness.get("outcome") == "SETTLED"
+            and isinstance(witness.get("receipt_id"), str)
+            and type(witness.get("completed_minute")) is int)
+
+
 def _still_authorized(commitment, projection):
     """Whether this same author-task suffix remains permitted by the new source."""
     constraints = _projection_value(projection, "constraints", ()) or ()
@@ -89,9 +182,23 @@ def _still_authorized(commitment, projection):
                 or type(index) is not int or not 0 <= index < len(sequence)):
             return False
         locked_task = sequence[index]
-        return (locked_task.get("actor_alias") == actor_alias
-                and locked_task.get("task_kind") == task_kind
-                and locked_task.get("item_ref") == "objective.note")
+        if (locked_task.get("actor_alias") != actor_alias
+                or locked_task.get("task_kind") != task_kind):
+            return False
+        item_ref = locked_task.get("item_ref")
+        if item_ref == "objective.note":
+            return str(commitment.get("item_alias", "note")) == "note"
+        if item_ref is not None and str(commitment.get("item_alias")) != str(item_ref):
+            return False
+        tool_ref = locked_task.get("tool_ref")
+        if tool_ref is not None and str(commitment.get("tool_alias")) != str(tool_ref):
+            return False
+        target_ref = locked_task.get("target_ref")
+        if target_ref is not None and str(commitment.get("target_alias")) != str(target_ref):
+            return False
+        destination_ref = locked_task.get("destination_ref")
+        return (destination_ref is None
+                or str(commitment.get("destination_alias")) == str(destination_ref))
     if method not in control.get("allowed_methods", ()):
         return False
     file_actor = control.get("file_actor")
@@ -107,15 +214,80 @@ def _still_authorized(commitment, projection):
         return (method == "return_then_file_by_A" and file_actor in (None, "A")
                 and actor_alias == "B"
                 and commitment.get("recipient_alias") == "A")
+    if task_kind in {"inspect_supply", "repair_passage", "store_item"}:
+        role = {"inspect_supply": "A", "repair_passage": "B", "store_item": "A"}[task_kind]
+        expected_method = ({"inspect_then_repair", "repair_then_inspect"}
+                           if task_kind in {"inspect_supply", "repair_passage"}
+                           else {"inspect_then_repair", "repair_then_inspect"})
+        return (method in control.get("allowed_methods", ()) and method in expected_method
+                and actor_alias == role)
     return False
 
 
 def _same_author_task(commitment, offer):
     fields = ("constraint_id", "source_method_id", "actor_alias", "task_kind", "item_id",
               "destination_id", "recipient_id", "recipient_alias", "rendezvous_destination_id",
-              "locked_fragment_hash", "locked_sequence_index")
+              "tool_id", "target_id", "storage_destination_id", "item_alias", "tool_alias",
+              "target_alias", "destination_alias", "locked_fragment_hash", "locked_sequence_index")
     return commitment.get("source") == "AUTHOR" and offer.get("source") == "AUTHOR" \
         and all(commitment.get(key) == offer.get(key) for key in fields)
+
+
+def _lawful_locked_offer(offer, actor_alias, projection):
+    """Validate a locked offer against the active projected core, not its claims."""
+    if not (offer.get("source") == "AUTHOR"
+            and offer.get("control_source") == "LOCKED_FRAGMENT"
+            and offer.get("source_method_id") == "locked_fragment"
+            and offer.get("actor_alias") == actor_alias
+            and isinstance(offer.get("constraint_id"), str) and bool(offer.get("constraint_id"))
+            and isinstance(offer.get("grant_id"), str) and bool(offer.get("grant_id"))
+            and isinstance(offer.get("projection_id"), str)
+            and isinstance(offer.get("locked_fragment_hash"), str)
+            and len(offer["locked_fragment_hash"]) == 64
+            and type(offer.get("locked_sequence_index")) is int
+            and offer["locked_sequence_index"] >= 0):
+        return False
+    projection_id = _projection_identity(projection)
+    if projection_id is None or offer.get("projection_id") != projection_id:
+        return False
+    constraint = next((row for row in (_projection_value(projection, "constraints", ()) or ())
+                       if row.get("constraint_id") == offer.get("constraint_id")), None)
+    if constraint is None or constraint.get("control", {}).get("mode") != "locked_fragment":
+        return False
+    fragment = constraint.get("locked_fragment") or {}
+    sequence = fragment.get("sequence", ())
+    index = offer["locked_sequence_index"]
+    if (fragment.get("sequence_sha256") != offer.get("locked_fragment_hash")
+            or not 0 <= index < len(sequence)):
+        return False
+    row = sequence[index]
+    if row.get("actor_alias") != actor_alias or row.get("task_kind") != offer.get("task_kind"):
+        return False
+    aliases = (("item_ref", "item_alias"), ("tool_ref", "tool_alias"),
+               ("target_ref", "target_alias"), ("destination_ref", "destination_alias"))
+    for ref_key, alias_key in aliases:
+        expected = row.get(ref_key)
+        if ref_key == "item_ref" and expected == "objective.note":
+            expected = "note"
+        if expected is not None and str(offer.get(alias_key)) != str(expected):
+            return False
+    station_id = _projection_value(projection, "station_id")
+    return offer.get("grant_id") == (
+        f"{station_id}:{offer['constraint_id']}:fixed-native-grant")
+
+
+def _same_task_semantics(left, right):
+    if left.get("task_kind") != right.get("task_kind"):
+        return False
+    kind = left.get("task_kind")
+    fields = {
+        "inspect_supply": ("item_id", "tool_id", "target_id", "storage_destination_id"),
+        "repair_passage": ("tool_id", "target_id"),
+        "store_item": ("item_id", "storage_destination_id"),
+        "lend_tool": ("tool_id", "recipient_id", "recipient_alias"),
+        "return_tool": ("tool_id", "recipient_id", "recipient_alias"),
+    }.get(kind, ("item_id", "tool_id", "target_id", "destination_id", "recipient_id"))
+    return all(left.get(key) == right.get(key) for key in fields)
 
 
 def _local_signature(view):
@@ -131,6 +303,15 @@ def _local_signature(view):
         "retained_witnesses": sorted((str(row.get("id")), row.get("room_id"))
                                       for row in observation.get("retained_witnesses", [])),
         "item_location": observation.get("item_location"),
+        # Station work and witnessed loan facts are part of local O. A lease
+        # release, inspection, repair, or witnessed return can make a suspended
+        # goal retryable even when the actor and ordinary inventory did not move.
+        "station_tools": observation.get("station_tools", []),
+        "station_supplies": observation.get("station_supplies", []),
+        "station_repair_targets": observation.get("station_repair_targets", []),
+        "station_storages": observation.get("station_storages", []),
+        "station_loan_request": observation.get("station_loan_request"),
+        "known_tool_events": observation.get("known_tool_events", []),
     }
     return json.dumps(evidence, sort_keys=True, separators=(",", ":"), default=str)
 
@@ -142,6 +323,110 @@ def _self_offers(actor, view, now_minute, receipts, commitments=()):
     if task_kind not in {"deliver_supply", "archive_note", "handover_note"}:
         task_kind = "deliver_supply" if contract.get("item_id") is not None else None
     offer_rows = []
+    station_bindings = observation.get("station_task_bindings", ())
+    station_content_active = bool(station_bindings)
+    tools = observation.get("station_tools", ())
+    supplies = observation.get("station_supplies", ())
+    repair_targets = observation.get("station_repair_targets", ())
+    storages = observation.get("station_storages", ())
+    for binding in station_bindings:
+        kind = binding.get("task_kind")
+        if kind == "inspect_supply":
+            tool = next((row for row in tools if row.get("id") == binding.get("tool_id")), None)
+            supply = next((row for row in supplies if row.get("id") == binding.get("item_id")), None)
+            if not (tool and supply and tool.get("lease_status") == "FREE"
+                    and tool.get("room_id") == binding.get("target_room_id")
+                    and supply.get("room_id") == binding.get("target_room_id")
+                    and supply.get("inspection_status") != "APPROVED"):
+                continue
+        elif kind == "repair_passage":
+            tool = next((row for row in tools if row.get("id") == binding.get("tool_id")), None)
+            target = next((row for row in repair_targets if row.get("id") == binding.get("target_id")), None)
+            if not (tool and target and tool.get("lease_status") == "FREE"
+                    and tool.get("room_id") == binding.get("target_room_id")
+                    and target.get("room_id") == binding.get("target_room_id")
+                    and target.get("traversable") is False):
+                continue
+        elif kind == "store_item":
+            prior_inspection = next((row for row in receipts
+                                     if row.get("task_kind") == "inspect_supply"
+                                     and row.get("settled") is True and row.get("outcome") == "SETTLED"
+                                     and row.get("item_id") == binding.get("item_id")
+                                     and row.get("effect", {}).get("after_status") == "APPROVED"), None)
+            supply = next((row for row in supplies if row.get("id") == binding.get("item_id")), None)
+            if not prior_inspection:
+                continue
+        else:
+            continue
+        offer = {**deepcopy(dict(binding)), "source": "SELF",
+                 "goal_id": f"self-goal:{actor.id}:{kind}",
+                 "offer_id": f"self:{actor.id}:{kind}:{binding.get('item_id', binding.get('target_id'))}",
+                 "destination_id": binding.get("storage_destination_id"),
+                 "source_offer_id": None, "constraint_id": None,
+                 "prerequisites": []}
+        if kind == "store_item" and prior_inspection:
+            offer["prerequisites"] = [prior_inspection.get("receipt_id")]
+            offer["last_known_item_room"] = prior_inspection.get("work_room_id")
+        if not any(row.get("offer_id") == offer["offer_id"]
+                   or row.get("source_offer_id") == offer["offer_id"] for row in commitments):
+            offer_rows.append(offer)
+    own_alias = _station_get(actor, "p5_actor_alias")
+    request = observation.get("station_loan_request")
+    if (isinstance(request, Mapping) and request.get("settled") is True
+            and request.get("lender_alias") == own_alias
+            and request.get("lender_id") == int(actor.id)
+            and request.get("borrower_alias") in {"A", "B"}
+            and type(request.get("tool_id")) is int
+            and type(request.get("due_minute")) is int
+            and type(request.get("requested_minute")) is int):
+        tool = next((row for row in tools if row.get("id") == request.get("tool_id")), None)
+        borrower = next((row for row in observation.get("station_peers", ())
+                         if row.get("alias") == request.get("borrower_alias")
+                         and row.get("id") == request.get("borrower_id")), None)
+        offer_id = f"self:{actor.id}:lend_tool:{request.get('request_id')}"
+        if (tool is not None and borrower is not None and tool.get("lease_status") == "FREE"
+                and (tool.get("room_id") == observation.get("room_id")
+                     or tool.get("held_by_actor_id") == int(actor.id))
+                and not any(row.get("offer_id") == offer_id
+                            or row.get("source_offer_id") == offer_id for row in commitments)):
+            offer_rows.append({"offer_id": offer_id, "source": "SELF",
+                               "goal_id": f"self-goal:{actor.id}:lend_tool:{request['request_id']}",
+                               "task_kind": "lend_tool", "tool_id": int(request["tool_id"]),
+                               "item_id": int(request["tool_id"]),
+                               "recipient_id": int(request["borrower_id"]),
+                               "recipient_alias": request["borrower_alias"],
+                               "recipient_room_id": int(request["requester_room_id"]),
+                               "due_minute": int(request["due_minute"]),
+                               "loan_request_id": request["request_id"],
+                               "requester_actor_id": int(request["requester_actor_id"]),
+                               "requested_minute": int(request["requested_minute"]),
+                               "deadline_minute": None, "prerequisites": [],
+                               "constraint_id": None})
+    for tool in tools:
+        loan = tool.get("loan") or {}
+        if (tool.get("held_by_actor_id") != int(actor.id)
+                or loan.get("status") != "OUT"
+                or loan.get("borrower_alias") != own_alias):
+            continue
+        lender = next((row for row in observation.get("station_peers", ())
+                       if row.get("visible") is True
+                       and row.get("alias") == loan.get("lender_alias")
+                       and row.get("room_id") == observation.get("room_id")), None)
+        if lender is None:
+            continue
+        offer_id = f"self:{actor.id}:return_tool:{loan.get('loan_id')}"
+        if any(row.get("offer_id") == offer_id or row.get("source_offer_id") == offer_id
+               for row in commitments):
+            continue
+        offer_rows.append({"offer_id": offer_id, "source": "SELF",
+                           "goal_id": f"self-goal:{actor.id}:return_tool:{loan.get('loan_id')}",
+                           "task_kind": "return_tool", "item_id": tool.get("id"),
+                           "tool_id": tool.get("id"), "recipient_id": lender.get("id"),
+                           "recipient_alias": loan.get("lender_alias"),
+                           "recipient_room_id": lender.get("room_id"),
+                           "due_minute": loan.get("due_minute"), "deadline_minute": None,
+                           "constraint_id": None,
+                           "prerequisites": [loan.get("loan_receipt_id")]})
     matching_drop = any(row.get("source") == "SELF" and row.get("status") == "SETTLED"
                         and row.get("task_kind") == task_kind
                         and str(row.get("item_id")) == str(contract.get("item_id"))
@@ -153,7 +438,8 @@ def _self_offers(actor, view, now_minute, receipts, commitments=()):
         and str(row.get("item_id")) == str(contract.get("item_id"))
         and row.get("after_item_room_id") == contract.get("destination_id")
         for row in receipts)
-    if task_kind and not matching_drop and contract.get("item_id") is not None:
+    if (not station_content_active and task_kind and not matching_drop
+            and contract.get("item_id") is not None):
         offer_rows.append({
             "offer_id": f"self:{actor.id}:{task_kind}:{contract['item_id']}:{contract.get('destination_id')}",
             "source": "SELF", "goal_id": f"self-goal:{actor.id}:{task_kind}",
@@ -167,7 +453,7 @@ def _self_offers(actor, view, now_minute, receipts, commitments=()):
     # Reverse logistics is grounded only in this actor's own completed delivery
     # and its matching, settled get receipt. The source room is not a generic
     # storage location; it is the room this actor actually observed the item in.
-    own_deliveries = [row for row in receipts
+    own_deliveries = [] if station_content_active else [row for row in receipts
                       if row.get("settled") is True and row.get("kind") == "drop"
                       and row.get("ongoing_task_kind") == "deliver_supply"
                       and row.get("ongoing_commitment_id") is not None]
@@ -264,6 +550,10 @@ def _commitment_from_offer(offer, now_minute, receipts):
         "constraint_id": offer.get("constraint_id"),
         "actor_alias": offer.get("actor_alias"),
         "recipient_alias": offer.get("recipient_alias"),
+        "recipient_room_id": offer.get("recipient_room_id"),
+        "item_alias": offer.get("item_alias"), "tool_alias": offer.get("tool_alias"),
+        "target_alias": offer.get("target_alias"),
+        "destination_alias": offer.get("destination_alias"),
         "rendezvous_destination_id": offer.get("rendezvous_destination_id"),
         "entry_guard": deepcopy(offer.get("entry_guard")),
         "locked_fragment_hash": offer.get("locked_fragment_hash"),
@@ -273,6 +563,18 @@ def _commitment_from_offer(offer, now_minute, receipts):
         "prerequisites": deepcopy(offer.get("prerequisites", [])),
         "source_delivery_receipt_id": offer.get("source_delivery_receipt_id"),
         "source_get_receipt_id": offer.get("source_get_receipt_id"),
+        "tool_id": offer.get("tool_id"), "target_id": offer.get("target_id"),
+        "target_room_id": offer.get("target_room_id"),
+        "storage_destination_id": offer.get("storage_destination_id"),
+        "storage_room_id": offer.get("storage_room_id"),
+        "duration_minutes": offer.get("duration_minutes"),
+        "due_minute": offer.get("due_minute"),
+        "loan_request_id": offer.get("loan_request_id"),
+        "requester_actor_id": offer.get("requester_actor_id"),
+        "requested_minute": offer.get("requested_minute"),
+        "process_id": offer.get("process_id"), "method_id": offer.get("method_id"),
+        "recipient_alias": offer.get("recipient_alias"),
+        "item_alias": offer.get("item_alias"),
         "receipt_frontier": [row.get("receipt_id") for row in receipts
                              if row.get("receipt_id") is not None],
     }
@@ -289,6 +591,7 @@ def advance_actor(actor, station_projection, offers, now_minute):
     # Evennia SaverList/SaverDict values must be detached recursively before
     # mutation; shallow list copies can silently discard nested attribute edits.
     receipts = thaw(get_value(actor, "native_receipts", []))
+    receipts.extend(thaw(_station_get(actor, "station_work_receipts", [])))
     commitments = thaw(_station_get(actor, "ongoing_commitments", []))
     history = thaw(_station_get(actor, "ongoing_goal_history", []))
     offers = thaw(offers or [])
@@ -338,6 +641,35 @@ def advance_actor(actor, station_projection, offers, now_minute):
                     row["cancellation_projection_id"] = current_projection_id
                     row["reason"] = "unexecuted author task suffix is no longer permitted by the active source"
     observation = view.get("observation", {})
+    request = observation.get("station_loan_request")
+    own_alias = _station_get(actor, "p5_actor_alias")
+    active_commitment = next((row for row in commitments
+                              if row.get("status") in {"ACCEPTED", "IN_PROGRESS"}), None)
+    if (not pending and active_commitment is None and isinstance(request, Mapping)
+            and request.get("settled") is True and request.get("borrower_alias") == own_alias
+            and request.get("borrower_id") == int(actor.id)
+            and type(request.get("due_minute")) is int
+            and now_minute <= request["due_minute"]
+            and request.get("requester_room_id") == observation.get("room_id")):
+        history.append({"minute": now_minute, "event": "BORROW_REQUEST_WAIT",
+                        "request_id": request.get("request_id"),
+                        "lender_alias": request.get("lender_alias"),
+                        "due_minute": request.get("due_minute"),
+                        "reason": "actor locally witnessed a co-present request for this tool"})
+        _station_set(actor, "ongoing_commitments", commitments)
+        _station_set(actor, "ongoing_goal_history", history)
+        decision = {"schema": DECISION_SCHEMA, "actor_id": actor.id, "minute": now_minute,
+                    "author_source": {"station_id": _projection_value(station_projection, "station_id"),
+                                      "version": _projection_value(station_projection, "version"),
+                                      "bundle_hash": _projection_value(
+                                          station_projection, "bundle_hash",
+                                          _projection_value(station_projection, "source_sha256"))},
+                    "goal_candidates": [], "selected_goal": None, "disposition": "WAIT",
+                    "rationale": "waiting at the witnessed request room through the requested due minute",
+                    "commitment": None, "planner": None, "intent": None,
+                    "view": thaw(view), "pending_action_preserved": False}
+        record(actor, {"kind": "ongoing_station_decision", **decision})
+        return decision
     visible_or_held = {str(row.get("id")) for row in
                        (list(observation.get("inventory", ())) + list(observation.get("visible_items", ())))}
     retained = {str(row.get("id")) for row in observation.get("retained_witnesses", ())
@@ -368,6 +700,114 @@ def advance_actor(actor, station_projection, offers, now_minute):
     retryable_suspended_ids = {str(row.get("commitment_id")) for row in suspended
                                if row.get("suspended_observation") != local_signature}
     candidates = list(offers) + _self_offers(actor, view, now_minute, receipts, commitments)
+    repair_order = _repair_before_storage_constraint(station_projection)
+    repair_witnessed = bool(repair_order and _locally_knows_repair_witness(actor, view, repair_order))
+    if repair_order and not repair_witnessed:
+        # A new SELF storage commitment may not race a hard authored repair
+        # prerequisite. Existing commitments are retained and their terminal
+        # store primitive is guarded below; movement/get preparation is intact.
+        candidates = [row for row in candidates if not (
+            row.get("source") == "SELF" and row.get("task_kind") == "store_item")]
+    repair_order = _repair_before_storage_constraint(station_projection)
+    if repair_order and not _locally_knows_repair_witness(actor, view, repair_order):
+        # Do not accept a fresh SELF storage task that could race the authored
+        # physical prerequisite. Existing accepted work is preserved; its
+        # terminal store primitive is separately guarded below.
+        candidates = [row for row in candidates if not (
+            row.get("source") == "SELF" and row.get("task_kind") == "store_item")]
+    actor_alias = _station_get(actor, "p5_actor_alias")
+    safe_candidates = []
+    for candidate in candidates:
+        if candidate.get("control_source") == "LOCKED_FRAGMENT":
+            if not _lawful_locked_offer(candidate, actor_alias, station_projection):
+                history.append({"minute": now_minute, "event": "LOCKED_OFFER_REJECTED",
+                                "offer_id": candidate.get("offer_id"),
+                                "reason": "locked proposal lacks exact actor/source/grant/projection/core identity"})
+                continue
+            candidate["_authorized_locked_fragment"] = True
+        safe_candidates.append(candidate)
+    candidates = safe_candidates
+    # A lender's choice is grounded only in that lender's receipt-time witnessed
+    # return history. Missing history is uncertainty, not permission inferred
+    # from the global ledger or the borrower's current position.
+    known_returns = observation.get("known_tool_events", ())
+    locally_authorized_offers = []
+    for candidate in candidates:
+        if candidate.get("task_kind") != "lend_tool":
+            locally_authorized_offers.append(candidate)
+            continue
+        local_tool = next((row for row in observation.get("station_tools", ())
+                           if str(row.get("id")) == str(candidate.get("tool_id"))), None)
+        if isinstance(local_tool, Mapping) and (local_tool.get("loan") or {}).get("status") == "OUT":
+            history.append({"minute": now_minute, "event": "TOOL_LOAN_OFFER_DEFERRED",
+                            "offer_id": candidate.get("offer_id"),
+                            "reason": "the exact tool is already out on a locally observed loan"})
+            continue
+        matching_history = [row for row in known_returns
+                            if row.get("settled") is True
+                            and str(row.get("tool_id")) == str(candidate.get("tool_id"))
+                            and str(row.get("borrower_alias")) == str(candidate.get("recipient_alias"))
+                            and row.get("event_type") in {"p5_station_tool_loaned",
+                                                           "p5_station_tool_returned"}]
+        latest = max(matching_history,
+                     key=lambda row: int(row.get("witnessed_minute", -1)), default=None)
+        if latest is None:
+            # A first loan may establish the history; capacity-one physical
+            # custody and a due time bound this provisional policy.
+            due_minute = candidate.get("due_minute")
+            if (type(due_minute) is int and due_minute >= now_minute
+                    and (candidate.get("deadline_minute") is None
+                         or due_minute <= candidate["deadline_minute"])):
+                locally_authorized_offers.append(candidate)
+                history.append({"minute": now_minute, "event": "TOOL_LOAN_OFFER_PROVISIONAL",
+                                "offer_id": candidate.get("offer_id"),
+                                "reason": "no prior locally witnessed matching loan history; allow one bounded first loan",
+                                "due_minute": due_minute})
+            else:
+                history.append({"minute": now_minute, "event": "TOOL_LOAN_OFFER_DEFERRED",
+                                "offer_id": candidate.get("offer_id"),
+                                "reason": "first loan has no valid future due minute"})
+        elif latest.get("event_type") == "p5_station_tool_returned" and latest.get("outcome") == "ON_TIME":
+            locally_authorized_offers.append(candidate)
+        else:
+            history.append({"minute": now_minute, "event": "TOOL_LOAN_OFFER_DEFERRED",
+                            "offer_id": candidate.get("offer_id"),
+                            "reason": ("last locally witnessed matching loan return was late"
+                                       if latest.get("event_type") == "p5_station_tool_returned"
+                                       else "a prior matching loan remains unresolved in local receipt history"),
+                            "witnessed_event_id": latest.get("event_id") if latest else None,
+                            "witnessed_receipt_id": latest.get("receipt_id") if latest else None})
+    candidates = locally_authorized_offers
+    # At an actor-free boundary, a currently authorized locked suffix may take
+    # the slot from a matching, not-yet-dispatched SELF commitment. Physical
+    # work and existing P3 pending actions are never interrupted. The SELF
+    # commitment and its receipt frontier remain historical and resumable; the
+    # locked task gets a distinct AUTHOR commitment/receipt identity.
+    yielded_self_ids = []
+    active_work = _station_get(actor, "p5_station_work")
+    if not pending and not (isinstance(active_work, Mapping)
+                            and active_work.get("status") == "IN_PROGRESS"):
+        locked_offers = [row for row in candidates
+                         if row.get("_authorized_locked_fragment") is True]
+        for locked_offer in locked_offers:
+            for commitment_row in commitments:
+                if (commitment_row.get("source") == "SELF"
+                        and commitment_row.get("status") in {"ACCEPTED", "IN_PROGRESS"}
+                        and _same_task_semantics(commitment_row, locked_offer)):
+                    commitment_row["status"] = "SUSPENDED"
+                    commitment_row["updated_minute"] = now_minute
+                    commitment_row["reason"] = "yielded at a free boundary to a matching authorized locked author task"
+                    commitment_row["suspended_observation"] = _local_signature(view)
+                    yielded_self_ids.append(commitment_row.get("commitment_id"))
+                    history.append({"minute": now_minute,
+                                    "event": "SELF_COMMITMENT_YIELDED_TO_LOCKED_AUTHOR",
+                                    "self_commitment_id": commitment_row.get("commitment_id"),
+                                    "offer_id": locked_offer.get("offer_id"),
+                                    "constraint_id": locked_offer.get("constraint_id"),
+                                    "grant_id": locked_offer.get("grant_id"),
+                                    "locked_fragment_hash": locked_offer.get("locked_fragment_hash"),
+                                    "locked_sequence_index": locked_offer.get("locked_sequence_index"),
+                                    "preserved_receipt_ids": list(commitment_row.get("receipt_ids", []))})
     coalesced_ids = set()
     for candidate in candidates:
         prior = next((row for row in commitments
@@ -454,6 +894,8 @@ def advance_actor(actor, station_projection, offers, now_minute):
         local_offer["last_known_item_room"] = observation.get("item_location")
         commitment = _commitment_from_offer(local_offer, now_minute, receipts)
         commitments.append(commitment)
+        if selected.get("_authorized_locked_fragment") is True and yielded_self_ids:
+            commitment["yielded_self_commitment_ids"] = list(yielded_self_ids)
         history.append({"minute": now_minute, "event": "COMMITMENT_ACCEPTED",
                         "commitment_id": commitment["commitment_id"],
                         "source": commitment["source"], "reason": arbitration.get("reason"),
@@ -486,6 +928,33 @@ def advance_actor(actor, station_projection, offers, now_minute):
                                   and intent is not None and intent.get("operator") == "drop")
                                  or (commitment.get("task_kind") == "handover_note"
                                      and intent is not None and intent.get("operator") == "give"))
+            if (repair_order and commitment.get("task_kind") == "store_item"
+                    and intent is not None and intent.get("operator") == "store_item"
+                    and not _locally_knows_repair_witness(actor, view, repair_order)):
+                intent = None
+                commitment["status"] = "IN_PROGRESS"
+                commitment["updated_minute"] = now_minute
+                commitment["reason"] = "waiting for actor-local witness of the registered repair prerequisite"
+                disposition = "WAIT"
+                rationale = "repair-before-storage prerequisite is not yet locally witnessed"
+                history.append({"minute": now_minute,
+                                "event": "STORE_WAITING_FOR_LOCAL_REPAIR_WITNESS",
+                                "commitment_id": commitment.get("commitment_id"),
+                                "constraint_id": repair_order.get("constraint_id"),
+                                "evidence_receipt_ids": list(commitment.get("receipt_ids", []))})
+            if (repair_order and commitment.get("task_kind") == "store_item"
+                    and intent is not None and intent.get("operator") == "store_item"
+                    and not _locally_knows_repair_witness(actor, view, repair_order)):
+                intent = None
+                commitment["status"] = "IN_PROGRESS"
+                commitment["updated_minute"] = now_minute
+                commitment["reason"] = "waiting for actor-local witness of the registered repair prerequisite"
+                disposition = "WAIT"
+                rationale = "repair-before-storage prerequisite is not yet locally witnessed"
+                history.append({"minute": now_minute, "event": "STORE_WAITING_FOR_LOCAL_REPAIR_WITNESS",
+                                "commitment_id": commitment.get("commitment_id"),
+                                "constraint_id": repair_order.get("constraint_id"),
+                                "evidence_receipt_ids": list(commitment.get("receipt_ids", []))})
             if (terminal_operator and type(earliest_terminal) is int
                     and now_minute < earliest_terminal):
                 # Preserve the task and any route/get progress. Only the

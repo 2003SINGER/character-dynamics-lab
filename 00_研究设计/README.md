@@ -1,6 +1,6 @@
 # 研究设计：唯一维护入口
 
-整理日期：2026-10-13
+整理日期：2026-10-14
 
 ## 项目架构定位
 
@@ -14,7 +14,7 @@
 
 **Mature-Methods Integration v1 当前工作包已交付，外部复核确认 PARTIAL，未 CLOSED**。同站点 M1–M5 / E1–E4 结果只见[唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，接口见[持续站点代码说明](../tools/native_platform_v0/p5/ongoing_station/README.md)，执行指针见 [TODO](TODO.md)。严格历史匹配与工作条件驱动的方法取舍未证实；本包实施停止。原 S1–S4、S2 权限拒绝、便条归档与旧 Planner Adapter 的历史 PARTIAL 保留，不扩大旧 Sabre或改写此前结果。
 
-`b039c87` 外部复核已收到，PARTIAL 不变。当前候选施工入口转向 **Character Dynamics System Integration**，不再围绕便条继续补考；真实游戏能力账、共享工具双过程候选、方法选择和停止边界唯一维护于[未决问题末节](未决问题与机制候选.md)，任务状态只见 TODO。本轮仅沉淀与核查，没有新增原生运行。
+`b039c87` 外部复核已收到，历史 PARTIAL 不变。**Character Dynamics System Integration 首轮有界实施已交付**，不再围绕便条继续补考；运行/失败与未证实项归[既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，接口归持续站点 README，当前状态和停止点只见 [TODO](TODO.md)。候选背景见[未决问题末节](未决问题与机制候选.md)，不把候选定义或旧结果当作本轮能力证明。
 
 Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。完整机制说明中已确认的内容是工程语义与模块契约，不是已验证心理规律。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
 

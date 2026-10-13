@@ -223,3 +223,52 @@ GT callback 与 event candidate check **不是同一计量单位**。GT trace �
 复核提出 `return_stock` 内容风险。独立源码核查确认它由自己的 get/drop 回执派生，未找到“配送物送达后应回收”的作者内容契约；过去送达事件不等于持续物资占有。保留旧实现和全部结果，后续若复用须先明确游戏内容，不能把逆向搬运直接称为自然生活。
 
 接下来的候选转向 Character Dynamics System Integration：先补真实活动/共享资源机制，再按实际冲突选择成熟方法，不继续精修同张便条。设计、算法级准入和首条施工候选只见[未决问题末节](../../00_研究设计/未决问题与机制候选.md)，下一动作只见 [TODO](../../00_研究设计/TODO.md)。本次只读核查与文档修改没有新增原生能力、场景或实验结果；新原文私有归档，不沿用上轮限定证据授权公开。
+
+## 2026-10-14 系统工作 episode：最终固定输入复核
+
+本节记录 `system-work-suite.json` 的最终四场，以及此前同一有界开发回合的全部 11 个失败/部分尝试。只包含 scene-scoped simulated DB JSON 与来源快照；服务仍为同一 loopback Evennia/同一数据库。源快照按每场 `identity.json` 记录，不将不同现场快照合并成一个虚构 HEAD。
+
+### 最终四场
+
+| 条件 | Scene / run | 事实结果 | 独立 DB 与回放 |
+|---|---|---|---|
+| 主场 GT | `20261013163433-17a730` / [GT run](runs/story-ongoing-station-system-work-main-gtpyhop-20261013T163433Z-0e5719/) | m1 A 开始 inspection，m3 `p5_station_supply_inspected`；m2 激活 v1，m3 CAS 更新 v2；m6 玩家真实 get tool、m8 drop，B 的 repair 之后才在 m8 开始、m11 以 SELF receipt 完成；m11 发布 A 的 literal locked store offer，m12 因 A 的既有 route commitment 被延期，保留的同一 offer 在 m13 被接受，m15 同一 AUTHOR commitment 的 store receipt 完成。两个 bundle constraints SAT。没有 work-abort receipt；这是工具在工作开始前被拿走并归还，不是运行中断言或部分进度。 | `db-readback.json` SHA-256 `1b160f50df7859f65b610ddab061171afea7ad3a008e08188ca6bcaf4149a84e`；[逐分钟回放](public_evidence/story-process-v1-20261013T165500Z/readable_replays/story-ongoing-station-system-work-main-gtpyhop-20261013T163433Z-0e5719.md) |
+| 同输入 event-driven | `20261013163557-71197e` / [event run](runs/story-ongoing-station-system-work-main-event-driven-20261013T163557Z-d96adb/) | 相同活动/干预顺序；m3 inspection、m11 SELF repair、m13 AUTHOR locked store 接受、m15 storage receipt；两项约束及物理审计通过。与 GT 的归一化 role/task/time 序列相同，没有观察到行为增量或优势。 | `db-readback.json` SHA-256 `836614b70659454b2bc102e0762a0a7a001894dd43bef896dadd374eb1823dd8`；[逐分钟回放](public_evidence/story-process-v1-20261013T165500Z/readable_replays/story-ongoing-station-system-work-main-event-driven-20261013T163557Z-d96adb.md) |
+| history first-request due=3 | `20261013163646-86190d` / [early-due run](runs/story-ongoing-station-system-work-history-early-due-20261013T163646Z-1eb2f4/) | m1 玩家请求有 settled native receipt；A 的 lend 候选 eligible/provisional，但按既有候选排序选了 inspection。之后没有 loan/return 物理 receipt 或 witnessed return event，因此未形成 history treatment。工作链仍真实完成。 | `db-readback.json` SHA-256 `48a254b8cfcc3be8b4de232c2ddc76b9e2996bcbb0e8d9e09db2ab55ebe215ae`；[回放](public_evidence/story-process-v1-20261013T165500Z/readable_replays/story-ongoing-station-system-work-history-early-due-20261013T163646Z-1eb2f4.md) |
+| history first-request due=2 | `20261013163728-594202` / [tight-due run](runs/story-ongoing-station-system-work-history-tight-due-20261013T163728Z-3655a0/) | m1 玩家请求也有 settled receipt；同样由 inspection 候选先行，没有实际 loan/return，故无准时/迟还的历史因果比较。工作链真实完成。 | `db-readback.json` SHA-256 `9791b58f73b42b516f4fdd89c9ae45211dda00baca48d0f83c3eac9fa2c4888f`；[回放](public_evidence/story-process-v1-20261013T165500Z/readable_replays/story-ongoing-station-system-work-history-tight-due-20261013T163728Z-3655a0.md) |
+
+GT literal-store commitment 在 scene 内具有独立 source id、`repair-before-storage` constraint、grant `system-work-v1:repair-before-storage:fixed-native-grant`、projection `system-work-v1:2:47b66b7b5ce3`、sequence index 0 与锁片 hash `7dff5c671c5f9d18277788bbf650e81571836bcc085c9e5ee09c52fcf5cb9bd1`；其 m15 settled receipt 为 `station-store:20261013163433-17a730:8806:8808:15:1`，与 commitment 精确 join。inspect 与 repair 仍是 SELF commitments，不将其倒写成作者锁任务。event-driven 同样完成；两种 selector 选得同一 `inspect_then_repair` 方法并得到相同物理序列，本组有限证据不支持任何一方更优。
+
+History 两场的入口不是未实现或未触发：请求真实结算、local request 被角色看见、lend 候选 eligible；实际排序选择 inspection，两个 due 条件均没生成借还事件。故历史准入/处理变量没有形成，二者只能作为无处理对照，不能声称历史规则通过或失败。
+
+### 保留的同回合失败与部分场景
+
+以下尝试均保留原始目录、minute/最终 trace、输入、source snapshot 和 scoped DB（若当时已成功导出）；最终四场不覆盖它们。
+
+| 结果 | Scene / run | 原因或边界 |
+|---|---|---|
+| Incomplete | `20261013144618-f9fda6` / [run](runs/story-ongoing-station-system-work-main-gtpyhop-20261013T144618Z-5f4bd9/) | P3 planning 未初始化 `item_room` 导致异常；实际封存到 m2。之后修复并加 concrete regression；没有重放故障 minute。 |
+| PARTIAL，世界运行至 24m | `20261013145645-67fa5d` / [run](runs/story-ongoing-station-system-work-main-gtpyhop-20261013T145645Z-4a215b/) | 场景实际运行到 24 分钟；raw `INCOMPLETE` 来自审计器对 `task_kind=None` 的解析异常。旧 draft 修改既有 control mode，CAS 正常拒绝 immutable/mode conflict；不能作为新控制模式通过证据。 |
+| Incomplete | `20261013154128-8691c0` / [run](runs/story-ongoing-station-system-work-main-gtpyhop-20261013T154127Z-2db5fd/) | locked-order prerequisite 被错误按 literal lock 处理，adapter 拒绝任务；后加 producer→adapter 组合测试。 |
+| PASS，但无作者 locked store | `20261013152025-ae10cd` / [run](runs/story-ongoing-station-system-work-main-gtpyhop-20261013T152025Z-138e71/) | 物理/TypedIR 终态有效，但高层长时间 WAIT、没有 AUTHOR commitment；不得用其终态冒充跨层协调成功。 |
+| PASS，但 deferred offer 丢失 | `20261013162100-c6cb25` / [run](runs/story-ongoing-station-system-work-main-gtpyhop-20261013T162100Z-3325fe/) | 场景物理目标完成，但 m12 deferred literal offer 未留到 m13 空闲边界，SELF storage 接手；催生本节有界 adapter 修复与最终复核。 |
+| PASS，同早期 source | `20261013152353-88d84a` / [run](runs/story-ongoing-station-system-work-main-event-driven-20261013T152353Z-5fcc69/) | event-driven 配对前期版本；仅作开发证据。 |
+| PASS，同早期 source | `20261013162302-db99e2` / [run](runs/story-ongoing-station-system-work-main-event-driven-20261013T162302Z-c5752b/) | 配对终态通过，但在 deferred-offer adapter 修复前，不作最终四场替代。 |
+| PARTIAL | `20261013152443-dec19e` / [run](runs/story-ongoing-station-system-work-history-early-due-20261013T152443Z-3fc1ac/) | 初次 history 入口问题，未形成合格 history treatment。 |
+| PARTIAL | `20261013162347-bf658d` / [run](runs/story-ongoing-station-system-work-history-early-due-20261013T162346Z-4d6277/) | 请求已修复并真实结算；但实际候选排序未触发借还，未形成 history treatment。 |
+| PARTIAL | `20261013152516-ac1f7d` / [run](runs/story-ongoing-station-system-work-history-tight-due-20261013T152516Z-16e079/) | 初次 tight-due history 尝试，未形成合格 history treatment。 |
+| PARTIAL | `20261013162438-a43f1f` / [run](runs/story-ongoing-station-system-work-history-tight-due-20261013T162438Z-39ea9a/) | 请求已修复并真实结算；但实际候选排序未触发借还，未形成 history treatment。 |
+
+另外，v2 双任务 locked draft `system-work-v2.json` 与更早的 store-lock draft `system-work-v2-store-lock.json` 均非最终输入；最终条件只使用 `system-work-v2-order-store-lock.json`。未把旧失败输入改名成正例。
+
+### 成本、复现与范围
+
+本轮确认存在两种高层实现路径，但在最终 GT/event 配对中，方法选择、角色活动与物理收据序列一致；因此没有收益或速度优势主张。每个最终主场有 23 个唯一高层 controller evaluation 分钟（按分钟去重；不是原始约束行数）。GT 实际调用 13 次 GTPyhop search、记录 40 行 search trace；event-driven 调用 0 次 GTPyhop search，在 13 个选择阶段记录 26 条方法候选（每阶段两条）。这些记录不计内部重复前提评估。两臂各有 43 条带 actor planner 的局部决策（A=22、B=21），P3 `method_action_visits` 合计各 108。Trace 行数不是独立状态访问数；event candidate evaluation 与 GT search 不是同一种成本单位。墙钟耗时未采集，记为 unknown。
+
+actor-local P3 HTN、单步 dispatcher、Evennia 物理状态与 P4 clock 都是共用基线；增量仅是注册 station 工作内容、两个有限序列方法、当前 AuthorBundle 投影/offer 接缝、局部工作/receipt witness 与审计器。方法并不构成一般生活目标生成、任意任务协调或完整 BDI。工作下界是基于可认证 primitive/receipt 的条件估计，不是保证完成时间；缺路线/失败模型时不伪造 ETA。当前世界不持久化一般 crash-recovery workflow。此次 episode 没有原生 active-work abort，也没有部分工作进度语义；中途合法拿走工具发生在 B repair 开始前，且场景无 work-abort ledger event。历史 pair 因实际排序未触发借还而维持 PARTIAL。
+
+作者建模、实现、runtime 调试和实验运营分别投入工时未知，不以 LOC 替代人时。可复现 suite 路径：`tools/native_platform_v0/p5/ongoing_station/cases/system-work-suite.json`；使用项目 pinned Evennia venv 与 `PYTHONPATH=.:tools:tools/native_platform_v0/bridge`。最终 quartet 同一 controller source hash `1f1328b19cbb5e17afd1f8149ad47c8cf4e923cdd6aa2c4bf72056db75e2ec75`；P5 regression 共 228 项，227 pass、1 configured-Django skip。三次同实例重载的可用 stop/start 日志只读复制入 [完整 lifecycle carrier](runs/story-ongoing-station-lifecycle-all-reloads-20261013T1652Z/)；无 standalone 权限误判或 source-freeze transcript，说明见载体。发布快照之后，`commands.py` 与 `work.py` 仅做 EOF 空白清理，AST 与最终 run 的源码快照一致；逐场快照仍是对应场景的 source authority，未用当前 HEAD 替换。
+
+本节最终公开包索引、归档 SHA 与成员校验见下方新发布入口；允许目录严格为上述 15 个 `story-ongoing-station-system-work-*` 尝试加 lifecycle carrier。排除私有原文、凭证、DB binary 和其他项目。八个更早的 M5/E1–E4 runs 及 S1–S4/E0 均不属于此次新 package allowlist。
+
+本次发布：[归档 `story-process-v1.tar.gz`](public_evidence/story-process-v1-20261013T165500Z/story-process-v1.tar.gz)（SHA-256 `8c6adce4e53061b0ceaef990ac505ec522763e17fadb1e86b2ab4099c33ff5a3`，11,793,391 压缩字节）；[成员索引](public_evidence/story-process-v1-20261013T165500Z/index.json)（16 个 run directories，1,261 个成员，220,680,317 原始字节，逐成员 VERIFIED）；[发布范围补充](public_evidence/story-process-v1-20261013T165500Z/publication-scope.md)。四份最终回放在包外可直接阅读：[GT](public_evidence/story-process-v1-20261013T165500Z/readable_replays/story-ongoing-station-system-work-main-gtpyhop-20261013T163433Z-0e5719.md)、[event-driven](public_evidence/story-process-v1-20261013T165500Z/readable_replays/story-ongoing-station-system-work-main-event-driven-20261013T163557Z-d96adb.md)、[history due=3](public_evidence/story-process-v1-20261013T165500Z/readable_replays/story-ongoing-station-system-work-history-early-due-20261013T163646Z-1eb2f4.md)、[history due=2](public_evidence/story-process-v1-20261013T165500Z/readable_replays/story-ongoing-station-system-work-history-tight-due-20261013T163728Z-3655a0.md)。回放副本与 run 内原件逐字节相同，SHA 列于 [回放索引](public_evidence/story-process-v1-20261013T165500Z/readable_replay_index.json)。旧 `164200Z` 包保持不变。

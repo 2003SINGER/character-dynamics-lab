@@ -127,8 +127,9 @@ def edit_author(pickup, raw_author, *, expected_version, now, completed_ids=(), 
             continue
     from tools.native_platform_v0.p5.bundle import BundleStore, load_bundle
     from tools.native_platform_v0.p5.story_process.model import story_event_registry
-    active_bundle = load_bundle(old_bundle, registry=story_event_registry(), entities=entities)
-    store = BundleStore(active_bundle, registry=story_event_registry(), entities=entities)
+    registry = story_event_registry(game_content=profile.game_content)
+    active_bundle = load_bundle(old_bundle, registry=registry, entities=entities)
+    store = BundleStore(active_bundle, registry=registry, entities=entities)
     try:
         store.replace(new_bundle, expected_version, now=now,
                       completed_constraint_ids=set(completed_ids),

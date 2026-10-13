@@ -1,0 +1,39 @@
+{
+  "schema": "ongoing-station-author-v1",
+  "bundle": {
+    "schema": "native-author-bundle-v1",
+    "bundle_id": "system-work-episode-v1",
+    "version": 1,
+    "source": "bounded native work integration episode",
+    "constraints": [
+      {
+        "id": "supply-stored-by-horizon",
+        "kind": "event_by_deadline",
+        "event": "station_supply_stored",
+        "filters": {"actor": "A", "item": "courier_supply", "storage": "station_storage"},
+        "start": 1,
+        "deadline": 24,
+        "hard": true
+      }
+    ],
+    "branches": [],
+    "permissions": {
+      "world_opportunities": [],
+      "force_npc_response": false,
+      "max_opportunities": 1,
+      "cost_budget": 0
+    }
+  },
+  "bindings": [
+    {
+      "constraint_id": "supply-stored-by-horizon",
+      "control": {
+        "mode": "result_only",
+        "file_actor": null,
+        "allowed_methods": ["inspect_then_repair", "repair_then_inspect"],
+        "source": "SYSTEM"
+      },
+      "locked_fragment": null
+    }
+  ]
+}

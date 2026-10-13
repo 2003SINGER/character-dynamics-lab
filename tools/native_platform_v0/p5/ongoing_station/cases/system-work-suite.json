@@ -1,0 +1,103 @@
+{
+  "schema": "ongoing-station-system-work-suite-v1",
+  "suite_id": "ongoing-station-system-work-v1",
+  "revision": 2,
+  "common": {
+    "seed": 20261013,
+    "horizon": 24,
+    "bundle": "empty-author-bundle-v1.json",
+    "initial_social_preset": "hero_intelligence_30_v0",
+    "director_enabled": false,
+    "shared_supply": false,
+    "initial_main_open": true,
+    "ongoing_station": {
+      "schema": "ongoing-station-profile-v1",
+      "station_id": "system-work-v1",
+      "profile_version": 1,
+      "horizon": 24,
+      "author": null,
+      "game_content": "station_work_v1"
+    }
+  },
+  "cases": [
+    {
+      "case_id": "system-work-main-gtpyhop",
+      "strategy": "gtpyhop",
+      "author_file": "system-work-v1.json",
+      "edit_author_file": "system-work-v2-order-store-lock.json",
+      "interventions": [
+        {"at": 2, "kind": "activate_ongoing_station", "expected_version": 1},
+        {"at": 3, "kind": "edit_ongoing_station_author", "expected_version": 1,
+          "author_file": "system-work-v2-order-store-lock.json"},
+        {"at": 6, "kind": "player_command", "operation": "get", "item_alias": "station_tool"},
+        {"at": 8, "kind": "player_command", "operation": "drop", "item_alias": "station_tool"}
+      ],
+      "audit": "station_work_episode",
+      "expected": {
+        "constraint_statuses": {"supply-stored-by-horizon": "SATISFIED",
+          "repair-before-storage": "SATISFIED"},
+        "required_outcomes": ["inspect_supply", "repair_passage", "store_item"]
+      },
+      "purpose": "One continuous episode: one autonomous prefix minute, staged result-only storage goal, future edit adding a separate repair-before-storage order and store-only locked suffix, then lawful player take/drop of the shared tool. All task acceptance and effects remain native."
+    },
+    {
+      "case_id": "system-work-main-event-driven",
+      "strategy": "event_driven",
+      "author_file": "system-work-v1.json",
+      "edit_author_file": "system-work-v2-order-store-lock.json",
+      "interventions": [
+        {"at": 2, "kind": "activate_ongoing_station", "expected_version": 1},
+        {"at": 3, "kind": "edit_ongoing_station_author", "expected_version": 1,
+          "author_file": "system-work-v2-order-store-lock.json"},
+        {"at": 6, "kind": "player_command", "operation": "get", "item_alias": "station_tool"},
+        {"at": 8, "kind": "player_command", "operation": "drop", "item_alias": "station_tool"}
+      ],
+      "audit": "station_work_episode",
+      "expected": {
+        "constraint_statuses": {"supply-stored-by-horizon": "SATISFIED",
+          "repair-before-storage": "SATISFIED"},
+        "required_outcomes": ["inspect_supply", "repair_passage", "store_item"]
+      },
+      "purpose": "Strong event-driven baseline with identical world, author versions, time windows, interventions, goals, permissions, and capabilities; only the order selector changes."
+    },
+    {
+      "case_id": "system-work-history-early-due",
+      "strategy": "gtpyhop",
+      "interventions": [
+        {"at": 1, "kind": "station_request_tool_loan", "tool_alias": "station_tool",
+          "lender_alias": "A", "borrower_alias": "B", "due_minute": 3},
+        {"at": 6, "kind": "station_request_tool_loan", "tool_alias": "station_tool",
+          "lender_alias": "A", "borrower_alias": "B", "due_minute": 18}
+      ],
+      "audit": "station_history_capture",
+      "history_condition": "first-request-due-3",
+      "expected": {"required_outcomes": ["inspect_supply", "repair_passage"]},
+      "purpose": "Player-authored request timing is a declared prefix input; any loan, give, return, witnessed history, and later NPC decision must be produced by native actor and physical command paths. This arm changes only the first request's due minute relative to the paired late-due arm."
+    },
+    {
+      "case_id": "system-work-history-tight-due",
+      "strategy": "gtpyhop",
+      "interventions": [
+        {"at": 1, "kind": "station_request_tool_loan", "tool_alias": "station_tool",
+          "lender_alias": "A", "borrower_alias": "B", "due_minute": 2},
+        {"at": 6, "kind": "station_request_tool_loan", "tool_alias": "station_tool",
+          "lender_alias": "A", "borrower_alias": "B", "due_minute": 18}
+      ],
+      "audit": "station_history_capture",
+      "history_condition": "first-request-due-2",
+      "expected": {"required_outcomes": ["inspect_supply", "repair_passage"]},
+      "purpose": "Matched actor-history arm. Due minute 2 may or may not produce a late return; only receipt-backed outcome is evidence. No scenario-conditioned refusal is scripted."
+    }
+  ],
+  "history_pair": {
+    "left_case": "system-work-history-early-due",
+    "right_case": "system-work-history-tight-due",
+    "only_input_difference": "first native player loan-request absolute due minute (3 versus 2)",
+    "later_request_must_match": {"at": 6, "lender_alias": "A", "borrower_alias": "B", "due_minute": 18},
+    "causal_claim_requires": "receipt-backed witnessed histories with distinct real outcomes, identical normalized physical/current actor frontiers except known_tool_events, the same later SELF offer, and different subsequent local actor decisions"
+  },
+  "audit_contract": "station-work-and-history-evidence-v1",
+  "run_policy": {"max_scenes": 4, "step_size_minutes": 1,
+    "preserve_failures": true, "no_overwrite": true,
+    "native_execution_requires_cli_flag": "--execute"}
+}
