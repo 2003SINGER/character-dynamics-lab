@@ -1,6 +1,6 @@
 # Character Dynamics Lab｜角色动力学实验室
 
-> 长期目标：研究作者部分约束下，游戏世界中合理、可执行未来的在线规划与控制。LLM × 成熟规划是研究主轴候选，涵盖语义、因果候选、grounded 绑定、层次细化与反馈修复，不要求每层都使用 LLM。详细问题定义由 [F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md) 唯一维护；旧 C++ 的 OHXSP 人物模型是参考实现，不是所有游戏都必须采用的 schema。
+> 长期目标：把作者不同抽象程度、不同控制粒度的创作意图，落实为持续游戏世界中合理、可执行的未来，并随真实反馈调整。LLM × 成熟规划是候选主线；既有游戏能力是执行底座，不是创作上限，剧情组合、语义解释与新内容提案须分别说明如何被接纳。详细问题定义由 [F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md) 唯一维护；旧 C++ 的 OHXSP 人物模型不是所有游戏的必需 schema。
 
 本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`；`webgpt-sync` 是项目 review branch owner。工作分支随任务变化，分支归属以 Git 当前状态为准，不在项目总览中固定本地任务分支。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
 
@@ -12,7 +12,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 2026-10-13 **Mature-Methods Integration v1 的 M1–M5 / E1–E4 有界工作包已交付，状态为 `DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW`**。未来新增交接剧情点与失败负控有原生证据；严格历史匹配、工作条件驱动的方法取舍仍未证实。当前代码入口是[持续站点说明](tools/native_platform_v0/p5/ongoing_station/README.md)，运行、失败与对照只见[唯一 RESULTS](02_实验/Mature_Methods_Integration_v1/RESULTS.md)，下一动作见 [TODO](00_研究设计/TODO.md)。本包实施停止，不自动新增阶段；原 S1–S4、S2 权限拒绝、10-12 便条归档、早期站点及[旧 Planner Adapter 结果](02_实验/Planner_Adapter_Integration_v1/RESULTS.md)保留。
 
-**Character Dynamics System Integration 首轮有界实施与原生运行已交付**：现有站点接入真实共享工具、物资验收/入库与设施检修，接通角色自身过程和作者未来锁；不是旧 E1/E2 补考或便条扩功能。具体通过项、历史对照未成立及全部失败只见[唯一 RESULTS](02_实验/Mature_Methods_Integration_v1/RESULTS.md)，当前状态与停止点见 [TODO](00_研究设计/TODO.md)，接口见[持续站点说明](tools/native_platform_v0/p5/ongoing_station/README.md)。不自动进入 LLM 或更大系统开发。
+**Character Dynamics System Integration 首轮有界实施与原生运行已交付（`bf30d4c`）**：现有站点接入真实共享工具、物资验收/入库与设施检修，接通角色自身过程和作者未来锁；这些是人工新增的限定游戏内容，不是 Planner 自行发明规则或通用剧情生成。具体通过项、历史对照未成立及全部失败只见[唯一 RESULTS](02_实验/Mature_Methods_Integration_v1/RESULTS.md)。2026-10-14 新讨论已落实到现行设计正文；当前状态与下一入口见 [TODO](00_研究设计/TODO.md)，接口见[持续站点说明](tools/native_platform_v0/p5/ongoing_station/README.md)。本轮没有新模型调用或原生实验。
 
 `c228301` 已收到研究主轴方向的外部通过意见；不是新系统能力验收。[有界强近邻机制对照](01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)作为历史审查检查点保留。原始 P0 A/B 与 LLM/embedding/Qwen 比较的暂停边界见[原始 P0 RESULTS](02_实验/Planner_P0_v0/RESULTS.md)。**P0 Baseline Gate 三场景开发比较已完成，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW（未 CLOSED）**；唯一结果入口是 [RESULTS](02_实验/Planner_P0_Baseline_Gate_v0/RESULTS.md)。P0-Integration 的独立有限检查点仍见 [RESULTS](02_实验/Planner_P0_Integration_v0/RESULTS.md)。这不表示完整传统系统、独立 NPC agency 或 P5 shared-supply 问题已完成。CI 只验证离线契约；原生运行证据见各自 RESULTS，exact-head workflow 状态以 GitHub Actions 为准。下一步见 [TODO](00_研究设计/TODO.md)。
 

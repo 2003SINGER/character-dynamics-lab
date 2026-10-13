@@ -2,7 +2,7 @@
 
 日期：2026-10-08。状态：**系统设计与独立参考契约交付；READY_FOR_INDEPENDENT_REVIEW，不是 Pilot 已运行、方法有效或 milestone CLOSED。**
 
-> 2026-10-11 scope note：本页只拥有候选 F2 / TypedIR 与其 reference 契约，不定义游戏规划系统的全局权限原则。当前问题定义见 [F0/F1](CharacterDynamics_FormalProblem_v0.md)：作者部分约束下的游戏世界在线规划与控制。作者介入范围可从零约束延伸到全编排；在授权、合法且可追溯时，允许直接编排角色或世界。NPC 独立性不是高于作者权限的绝对规则。间接 Director 仅是现有 P5 的一种有限模式。所有执行仍须遵守真实规则、结算与知识边界；不得伪造历史或角色隐藏知识。本页的候选 F2 方案不改变既有 TypedIR schema，也不改写 E0–E5 历史协议。
+> 2026-10-11 scope note：本页只拥有候选 F2 / TypedIR 与其 reference 契约，不定义游戏规划系统的全局权限原则。当前问题定义见 [F0/F1](CharacterDynamics_FormalProblem_v0.md)：作者部分约束下的游戏世界在线规划与控制。作者介入范围可从零约束延伸到全编排；在授权、合法且可追溯时，允许直接编排角色或世界。NPC 独立性不是高于作者权限的绝对规则。间接 Director 仅是现有 P5 的一种有限模式。actor-local 推断不得使用角色未合法获知的隐藏事实；明确授权的作者认知/信念设定可经相应接口提交并标为 `AUTHOR`，不得伪装成亲眼观察、自然理解或角色自主决策。所有执行仍须遵守真实规则与结算，不伪造历史。本页的候选 F2 方案不改变既有 TypedIR schema，也不改写 E0–E5 历史协议。
 
 阶段说明：下文 E0–E5 是整体候选计划，不能据此推断整套阶段已获授权。E0 的实际有界验收只查[结果 owner](../02_实验/E0_KeyLedger_v0/RESULTS.md)。用户已授权[E1-0 有限协议](E1_KeyLedger_LocalAgency_Protocol_v0.md)下的 E1-1 最小实现与开发验证，独立开发包已交付；实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)。正式实验与 E1-2 未授权；2026-10-09 用户另行授权的有限世界 Director/角色整合由 [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md)维护，不覆盖本页整套阶段。E1 代码入口见[runner](../tools/e1_keyledger_v0/runner.py)。文中的“E0 待审/待编码”及 reference-only 实施边界保留为其历史阶段描述，不再代表全项目当前授权。
 
@@ -10,9 +10,13 @@
 
 **职责边界补充：**全系统算法无关的 F0/F1 语义定义由唯一 owner [CharacterDynamics_FormalProblem_v0](CharacterDynamics_FormalProblem_v0.md) 维护；该 owner 当前为 DRAFT、未实现。本页只维护作者控制方向的候选 F2、Typed Trajectory Constraint IR 与预实验设计，不能作为完整 Character Dynamics 系统定义。作者意图如何绑定角色/命题、由何 recognizer 或具体事件证据支撑、再映射为可执行约束，属于 F0/F1 的上层语义链；本 Pilot 的 typed IR 只是候选下游接口，不预设作者直接填写底层变量。
 
+2026-10-14 接口边界澄清：本 Pilot 只说明后端控制提案、授权检查、真实执行与 provenance 如何衔接，不缩窄 F0/F1 的作者语义范围。输入具体程度与控制强度、许可范围与实际策略分别描述；具体赋值可走授权 setter，不强行穿过多层规划。当前持续站点 direct 只是受原生合法性约束的作者任务指派，投影只支持有限注册事件/顺序约束，不能泛化成任意对象写值。作者 state 更新记作 `AUTHOR` 来源。语义解释和新增内容可以是上游候选；语义接纳契约见 [F0/F1 §5](CharacterDynamics_FormalProblem_v0.md#5-f1作者意图语义绑定与真正发生的点线)，不在本 Pilot 复制。当前 reference 不接纳动态 operator，也不执行任意生成代码。E0/Pilot reference 的原结果与语义不变；持续站点未形成历史 treatment 的 PARTIAL 仍按其 RESULTS 保留。本澄清不构成新能力或方法优势证据。
+
+下一有限候选聚焦“语义因果方案 → 已有能力绑定/新内容提案 → owner 接纳与原生合法性验证”的契约及反例；不重开已有 loan/borrow 场景，不把无历史 treatment 的缺失补写成已完成实验，也不把此候选当作已授权运行模型或新增规则。
+
 ## 0. 要交付什么，不能声称什么
 
-本 Pilot 研究的是**持续世界约束接口这一候选子问题**：作者可表达未来区域、少数必需事件，也可在其他授权模式下直接安排角色或世界行动。它不把“只改机会、NPC 必须自主”规定为全局原则，也不要求每个项目都采用本页接口。无论何种模式，已经结算的历史不能伪造；角色也不能凭空获得隐藏知识。
+本 Pilot 研究的是**持续世界约束接口这一候选子问题**：作者可表达未来区域、少数必需事件，也可在其他授权模式下直接安排角色或世界行动。它不把“只改机会、NPC 必须自主”规定为全局原则，也不要求每个项目都采用本页接口。无论何种模式，已经结算的历史不能伪造；普通 actor-local 推断不得使用隐藏事实，作者明确授权的认知/信念状态设定则是单独的 `AUTHOR` 来源，不伪装成角色自然获知。当前 Pilot 没有通用认知 override。
 
 | 等级 | 本轮处理 | 验收对象 |
 |---|---|---|
@@ -66,7 +70,7 @@ PlotPoint、Arc、锁定片段等是作者表达的候选形式，不是要求�
 |---|---|---|---|
 | WorldOpportunitySteering | 本 Pilot 覆盖的授权世界机会操作 | 以 `source=director` 伪装新增执行权限 | 操作、合法性、可见传播、机会收缩/资源成本 |
 | NPC autonomous | 本 Pilot 的人物自主比较条件，由自己的 O/S/P/history/eligible A^O 决策 | 把 A* 的动作直接塞给 NPC 就称自主 | 预测分布与实际选择、持续活动、gap |
-| Authorized direct orchestration | 可作为作者授予权限后的直接控制条件；须由真实 executor 合法执行 | 伪装成自主选择、伪造历史结算或注入隐藏知识 | 授权范围、actor/world 指令、结算凭证与 AUTHORED 来源标记 |
+| Authorized direct orchestration | 可作为作者授予权限后的直接控制条件；须由真实 executor 合法执行 | 伪装成自主选择、伪造历史结算或未经明示授权地向角色注入隐藏知识 | 授权范围、actor/world 指令、认知设定的 AUTHOR 标记、结算凭证与来源记录 |
 | Player | 真实玩家操作不可被 Director 保证 | 不经授权屏蔽毁物/离场等自由 | 玩家实际干预、限制及允许分支 |
 | AuthoredOverride / locked sequence | 显式许可的作者 setter 或手写段落 | 假装覆写来自自然 O→X→S；绕过 W 硬合法性 | override ID、条件、setter/model 版本、内容 hash、偏离 |
 
