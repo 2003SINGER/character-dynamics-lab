@@ -28,6 +28,10 @@ SOURCE_PATHS = (
     "tools/native_platform_v0/p5/ongoing_station/audit.py",
     "tools/native_platform_v0/p5/ongoing_station/replay.py",
     "tools/native_platform_v0/p5/ongoing_station/cases/suite.json",
+    "tools/native_platform_v0/p5/ongoing_station/cases/m5-e1-e4-v1.json",
+    "tools/native_platform_v0/p5/ongoing_station/cases/m5-e1-archive-v1.json",
+    "tools/native_platform_v0/p5/ongoing_station/cases/m5-e3-handover-v2.json",
+    "tools/native_platform_v0/p5/ongoing_station/cases/m5-e4-handover-deadline-v1.json",
     "tools/native_platform_v0/p5/ongoing_station/cases/empty-author-bundle-v1.json",
     "tools/native_platform_v0/p5/ongoing_station/cases/author-pair-v1.json",
     "tools/native_platform_v0/p5/ongoing_station/cases/author-pair-v2.json",
@@ -35,6 +39,7 @@ SOURCE_PATHS = (
     "tools/native_platform_v0/p5/ongoing_station/cases/author-t4-result-only-v2.json",
     "tools/native_platform_v0/p5/tests/test_ongoing_station_runner.py",
     "tools/native_platform_v0/p5/tests/test_ongoing_station_native.py",
+    "tools/native_platform_v0/p5/tests/test_story_process_planning.py",
     "tools/native_platform_v0/p5/tests/test_ongoing_station_actor.py",
     "tools/native_platform_v0/p5/tests/test_ongoing_station_model.py",
     "tools/native_platform_v0/p5/ongoing_station/model.py",
@@ -137,6 +142,11 @@ def load_case(case_id: str, suite_path: Path = SUITE_PATH) -> tuple[dict[str, An
             common["ongoing_station"].get("author", False) is not None
             or case.get("expected", {}).get("author", False) is not None):
         raise ValueError("T1 requires a genuinely null ongoing-station author package")
+    if suite.get("suite_id") == "ongoing-station-m5-e1-e4-v1":
+        if len(suite.get("cases", [])) != 8 or suite.get("run_policy", {}).get("max_scenes") != 8:
+            raise ValueError("M5 E1-E4 suite must remain within its fixed eight-scene bound")
+        if case.get("strategy") not in {"gtpyhop", "event_driven"}:
+            raise ValueError("M5 case has an unsupported strategy arm")
     return suite, case
 
 
@@ -170,6 +180,60 @@ def _copy_db_artifact(export_meta: Mapping[str, Any], run_dir: Path) -> dict[str
         raise RuntimeError("copied DB readback hash mismatch")
     return {"relative_path": destination.name, "sha256": digest,
             "bytes": len(raw)}
+
+
+def _run_player_action_batch(scene_id: str, scene: Mapping[str, Any], batch: Mapping[str, Any],
+                             rpc: Callable, run_dir: Path) -> dict[str, Any]:
+    """Execute only registered generated-player commands and preserve each receipt.
+
+    These commands form physical history interventions; they never target an NPC
+    and do not advance the simulation clock or seed actor commitments.
+    """
+    required = {"batch_id", "at_minute", "phase", "actions"}
+    if set(batch) != required or batch.get("phase") not in {"before_step", "after_step"}:
+        raise ValueError("player action batch requires batch_id/at_minute/phase/actions")
+    if not isinstance(batch.get("actions"), list) or not batch["actions"]:
+        raise ValueError("player action batch must contain at least one action")
+    item_map = scene.get("items") if isinstance(scene.get("items"), Mapping) else {}
+    record: dict[str, Any] = {"batch_id": batch["batch_id"],
+        "scene_id": scene_id, "at_minute": batch["at_minute"],
+        "phase": batch["phase"], "actor_role": "player", "actions": [],
+        "clock_effect": "none; actions occur between native minute callbacks"}
+    try:
+        for index, action in enumerate(batch["actions"]):
+            if not isinstance(action, Mapping) or action.get("operation") not in {
+                    "move", "get", "drop"}:
+                raise ValueError("player history actions must be native move/get/drop")
+            operation = action["operation"]
+            args: dict[str, Any] = {"scene_id": scene_id, "actor_role": "player",
+                                    "operation": operation}
+            if operation == "move":
+                if set(action) != {"operation", "direction"}:
+                    raise ValueError("player move requires exactly operation/direction")
+                args["direction"] = action["direction"]
+            else:
+                if set(action) != {"operation", "item_alias"}:
+                    raise ValueError("player get/drop requires exactly operation/item_alias")
+                item = item_map.get(action["item_alias"])
+                if not isinstance(item, Mapping) or type(item.get("id")) is not int:
+                    raise ValueError("player item alias is not a registered generated scene item")
+                args["item_id"] = item["id"]
+            response = rpc("inject_action", args)
+            row = {"action_index": index, "action": dict(action),
+                   "rpc_arguments": args, "receipt": response}
+            record["actions"].append(row)
+            if not isinstance(response, Mapping) or response.get("settled") is not True:
+                raise RuntimeError(f"player history action {index} did not settle")
+        record["status"] = "ALL_ACTIONS_SETTLED"
+    except Exception as exc:
+        record["status"] = "FAILED"
+        record["error"] = {"type": type(exc).__name__, "message": str(exc)[:400]}
+        target = run_dir / f"player-actions-{batch['batch_id']}.json"
+        _write_once(target, record)
+        raise
+    target = run_dir / f"player-actions-{batch['batch_id']}.json"
+    _write_once(target, record)
+    return record
 
 
 def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
@@ -218,12 +282,14 @@ def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
                 "profile": station_profile,
                 "edit_author": edit_author,
                 "interventions": interventions,
+                "player_action_batches": case.get("player_action_batches", []),
                 "seed": common["seed"], "horizon": common["horizon"],
                 "source_manifest": source_manifest,
                 "native_execution": "one P5/Evennia instance; no NPC commands or external actor observations"}
     _write_once(run_dir / "identity.json", identity)
     _write_once(run_dir / "case-input.json", {"reset_args": reset_args,
                                                "interventions": interventions,
+                                               "player_action_batches": case.get("player_action_batches", []),
                                                "expected": case.get("expected")})
     summary: dict[str, Any] = {"case_id": case_id, "status": "INCOMPLETE",
                                "scene_id": None, "steps_recorded": 0,
@@ -240,6 +306,31 @@ def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
         summary["scene_id"] = scene_id
         _write_once(run_dir / "scene-identity.json", scene)
         for minute in range(1, int(common["horizon"]) + 1):
+            for batch in case.get("player_action_batches", []):
+                if batch.get("at_minute") == minute and batch.get("phase") == "before_step":
+                    _run_player_action_batch(scene_id, scene, batch, rpc, run_dir)
+            if case.get("stop_before_edit_if_archive") is True and any(
+                    row.get("kind") == "edit_ongoing_station_author" and row.get("at") == minute
+                    for row in interventions):
+                prefix_minute = int(case.get("capture_prefix_after_minute", minute - 1))
+                prefix_path = run_dir / f"prefix-after-minute-{prefix_minute:02d}.json"
+                pre_edit_trace = _read_json(prefix_path) if prefix_path.is_file() else rpc(
+                    "get_trace", {"scene_id": scene_id})
+                station_prefix = pre_edit_trace.get("ongoing_station", {})
+                station_prefix = station_prefix if isinstance(station_prefix, Mapping) else {}
+                note_id = station_prefix.get("bound_note_id")
+                note_archived = any(row.get("event_type") == "p5_note_archived"
+                    and row.get("args", {}).get("item", {}).get("stable_id") == str(note_id)
+                    for row in station_prefix.get("typed_events", [])
+                    if isinstance(row, Mapping)) if note_id is not None else False
+                if note_archived:
+                    _write_once(run_dir / "pre-edit-stop.json", {
+                        "status": "STOPPED_BEFORE_EDIT",
+                        "reason": "exact objective note was already physically archived before the scheduled future edit",
+                        "note_id": note_id, "edit_minute_not_executed": minute,
+                        "prefix_artifact": prefix_path.name})
+                    summary["pre_edit_stop"] = "objective_already_archived"
+                    break
             at_minute = [row for row in interventions
                          if isinstance(row, Mapping) and row.get("at") == minute]
             step_args = {"scene_id": scene_id, "rounds": 1}
@@ -253,6 +344,12 @@ def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
                 raise
             _write_once(run_dir / f"minute-{minute:02d}.json", compact)
             summary["steps_recorded"] = minute
+            for batch in case.get("player_action_batches", []):
+                if batch.get("at_minute") == minute and batch.get("phase") == "after_step":
+                    _run_player_action_batch(scene_id, scene, batch, rpc, run_dir)
+            if minute == case.get("capture_prefix_after_minute"):
+                prefix = rpc("get_trace", {"scene_id": scene_id})
+                _write_once(run_dir / f"prefix-after-minute-{minute:02d}.json", prefix)
         trace = rpc("get_trace", {"scene_id": scene_id})
         _write_once(run_dir / "final-trace.json", trace)
         if db_exporter is None:
@@ -263,7 +360,10 @@ def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
             raise RuntimeError("DB exporter returned no independent evidence record")
         db_copy = _copy_db_artifact(export_meta, run_dir)
         summary["db_readback"] = db_copy
-        from .audit import audit_actor_deferral, audit_author_pair, audit_resource_negative, audit_t1
+        from .audit import (audit_actor_deferral, audit_author_pair, audit_handover_deadline_stress,
+                            audit_history_prefix,
+                            audit_mid_episode_resource, audit_required_story_events,
+                            audit_resource_negative, audit_t1)
         scene_identity = _read_json(run_dir / "scene-identity.json")
         db_readback = _read_json(run_dir / db_copy["relative_path"])
         audit_kind = case.get("audit", "t1" if author_file is None else "author_pair")
@@ -283,13 +383,36 @@ def run_case(case_id: str, *, suite_path: Path = SUITE_PATH,
         elif audit_kind == "resource_negative":
             assessment = audit_resource_negative(trace, scene_identity, db_readback,
                                                  expected_intervention=interventions[0])
+        elif audit_kind == "history_prefix":
+            prefix_minute = int(case["capture_prefix_after_minute"])
+            prefix_trace = _read_json(run_dir / f"prefix-after-minute-{prefix_minute:02d}.json")
+            assessment = audit_history_prefix(prefix_trace, trace, scene_identity, db_readback,
+                                               history_condition=case["history_condition"])
+        elif audit_kind == "required_story_events":
+            prefix_minute = int(case["capture_prefix_after_minute"])
+            prefix_trace = _read_json(run_dir / f"prefix-after-minute-{prefix_minute:02d}.json")
+            assessment = audit_required_story_events(trace, scene_identity, db_readback,
+                initial_author=station_profile["author"], edit_author=edit_author,
+                edit_minute=int(next(row["at"] for row in interventions
+                                     if row.get("kind") == "edit_ongoing_station_author")),
+                prefix=prefix_trace)
+        elif audit_kind == "mid_episode_resource":
+            assessment = audit_mid_episode_resource(trace, scene_identity, db_readback,
+                expected_intervention=next(row for row in interventions
+                    if row.get("kind") == "player_command"))
+        elif audit_kind == "handover_deadline_stress":
+            assessment = audit_handover_deadline_stress(trace, scene_identity, db_readback,
+                author=station_profile["author"], deadline_minute=8)
         else:
             raise ValueError(f"unsupported audit kind {audit_kind!r}")
         from .replay import write_replay_once
         _write_once(run_dir / "audit.json", assessment)
         write_replay_once(run_dir / "readable-replay.md", trace)
         summary["assessment"] = assessment
-        summary["status"] = "PASS" if assessment.get("pass") is True else "NOT_CERTIFIED"
+        summary["status"] = ("PASS" if assessment.get("pass") is True else
+                             assessment.get("status") if assessment.get("status") in {
+                                 "PARTIAL", "VERIFIED_NEGATIVE"} else
+                             "NOT_CERTIFIED")
     except Exception as exc:
         summary["error"] = {"type": type(exc).__name__, "message": str(exc)[:600]}
         _write_once(run_dir / "failure.json", summary)
@@ -309,10 +432,24 @@ def main() -> int:
     args = parser.parse_args()
     if not args.execute:
         suite, case = load_case(args.case_id, args.suite)
+        author_path = args.suite.parent / case["author_file"] if case.get("author_file") else None
+        preflight_author = _read_json(author_path) if author_path else suite["common"]["ongoing_station"].get("author")
+        if preflight_author is not None:
+            from .model import load_profile
+            load_profile({**suite["common"]["ongoing_station"], "author": preflight_author})
+        edit_path = args.suite.parent / case["edit_author_file"] if case.get("edit_author_file") else None
+        if edit_path:
+            _read_json(edit_path)
         print(json.dumps({"status": "PREFLIGHT_ONLY", "case_id": case["case_id"],
                           "seed": suite["common"]["seed"],
                           "horizon": suite["common"]["horizon"],
-                          "author": suite["common"]["ongoing_station"].get("author")},
+                          "author_bundle_id": (preflight_author.get("bundle", {}).get("bundle_id")
+                                               if isinstance(preflight_author, Mapping) else None),
+                          "author_version": (preflight_author.get("bundle", {}).get("version")
+                                             if isinstance(preflight_author, Mapping) else None),
+                          "strategy": case.get("strategy"),
+                          "interventions": case.get("interventions", []),
+                          "native_execution": False},
                          ensure_ascii=False, indent=2))
         return 0
     summary, run_dir = run_case(args.case_id, suite_path=args.suite,

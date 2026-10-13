@@ -6,16 +6,192 @@ from unittest.mock import patch
 
 from tools.native_platform_v0.p5.ongoing_station.audit import (
     _published_controller_tasks, audit_actor_deferral, audit_author_pair,
+    audit_handover_deadline_stress, audit_history_prefix, audit_required_story_events,
     audit_resource_negative, audit_t1,
 )
 from tools.native_platform_v0.p5.ongoing_station.model import load_profile
 from tools.native_platform_v0.p5.ongoing_station.replay import build_replay, write_replay_once
 from tools.native_platform_v0.p5.ongoing_station.runner import (
-    SUITE_PATH, _allocate_run_dir, _compact_step, load_case, run_case,
+    SUITE_PATH, _allocate_run_dir, _compact_step, _run_player_action_batch,
+    load_case, run_case,
 )
 
 
 class OngoingStationRunnerTests(unittest.TestCase):
+    M5_SUITE = SUITE_PATH.parent / "m5-e1-e4-v1.json"
+
+    def test_m5_suite_is_bounded_and_strategy_pairs_are_input_matched(self):
+        suite = json.loads(self.M5_SUITE.read_text(encoding="utf-8"))
+        self.assertEqual(suite["suite_id"], "ongoing-station-m5-e1-e4-v1")
+        self.assertEqual((len(suite["cases"]), suite["run_policy"]["max_scenes"]), (8, 8))
+        cases = {row["case_id"]: row for row in suite["cases"]}
+        for stem in ("m5-e1-return-stock-prefix", "m5-e1-later-prefix", "m5-e2-e3", "m5-e4-handover-deadline"):
+            left, right = cases[f"{stem}-gtpyhop"], cases[f"{stem}-event-driven"]
+            self.assertNotEqual(left["strategy"], right["strategy"])
+            for key in ("author_file", "edit_author_file", "interventions", "audit",
+                        "capture_prefix_after_minute", "history_condition",
+                        "stop_before_edit_if_archive", "player_action_batches"):
+                self.assertEqual(left.get(key), right.get(key), (stem, key))
+        self.assertEqual(cases["m5-e4-handover-deadline-gtpyhop"]["author_file"],
+                         "m5-e4-handover-deadline-v1.json")
+        self.assertEqual(cases["m5-e4-handover-deadline-gtpyhop"]["interventions"],
+                         cases["m5-e4-handover-deadline-event-driven"]["interventions"])
+
+    def test_e1_historical_player_prefix_is_fixed_physical_action_input(self):
+        suite = json.loads(self.M5_SUITE.read_text(encoding="utf-8"))
+        cases = {row["case_id"]: row for row in suite["cases"]}
+        gt = cases["m5-e1-later-prefix-gtpyhop"]
+        event = cases["m5-e1-later-prefix-event-driven"]
+        self.assertEqual(gt["player_action_batches"], event["player_action_batches"])
+        self.assertEqual([row["at_minute"] for row in gt["player_action_batches"]], [1, 6])
+        operations = [action["operation"] for batch in gt["player_action_batches"]
+                      for action in batch["actions"]]
+        self.assertEqual(set(operations), {"get", "move", "drop"})
+        self.assertEqual(gt["capture_prefix_after_minute"], 9)
+        self.assertEqual(gt["interventions"], [{"at": 9,
+            "kind": "activate_ongoing_station", "expected_version": 1}])
+
+    def test_player_history_batch_uses_only_generated_player_actions_and_keeps_receipts(self):
+        with tempfile.TemporaryDirectory() as temp:
+            calls = []
+            def fake_rpc(operation, args):
+                calls.append((operation, args))
+                return {"settled": True, "receipt_id": f"player:{len(calls)}"}
+            batch = {"batch_id": "physical-prefix", "at_minute": 1,
+                "phase": "before_step", "actions": [
+                    {"operation": "get", "item_alias": "courier_supply"},
+                    {"operation": "move", "direction": "east"}]}
+            scene = {"items": {"courier_supply": {"id": 43}}}
+            result = _run_player_action_batch("scene-1", scene, batch, fake_rpc,
+                                               Path(temp))
+            self.assertEqual(result["status"], "ALL_ACTIONS_SETTLED")
+            self.assertEqual([row[0] for row in calls], ["inject_action", "inject_action"])
+            self.assertEqual(calls[0][1], {"scene_id": "scene-1", "actor_role": "player",
+                "operation": "get", "item_id": 43})
+            saved = json.loads((Path(temp) / "player-actions-physical-prefix.json")
+                               .read_text(encoding="utf-8"))
+            self.assertEqual([row["receipt"]["receipt_id"] for row in saved["actions"]],
+                             ["player:1", "player:2"])
+
+    def test_m5_e3_fixture_adds_real_occurrence_and_order_constraints(self):
+        v1 = json.loads((SUITE_PATH.parent / "m5-e1-archive-v1.json").read_text(encoding="utf-8"))
+        v2 = json.loads((SUITE_PATH.parent / "m5-e3-handover-v2.json").read_text(encoding="utf-8"))
+        self.assertEqual(v2["bundle"]["version"], v1["bundle"]["version"] + 1)
+        self.assertEqual(v2["bundle"]["constraints"][0], v1["bundle"]["constraints"][0])
+        new = v2["bundle"]["constraints"][1:]
+        self.assertEqual({row["kind"] for row in new}, {"event_by_deadline", "event_order"})
+        self.assertEqual(new[0]["filters"], {"actor": "B", "recipient": "A", "item": "note"})
+        self.assertEqual((new[0]["start"], new[0]["deadline"]), (8, 24))
+        self.assertEqual((new[1]["start"], new[1]["deadline"]), (8, 24))
+        self.assertEqual([row["constraint_id"] for row in v2["bindings"]],
+                         [row["id"] for row in v2["bundle"]["constraints"]])
+        from tools.native_platform_v0.p5.ongoing_station.model import (
+            compile_projection, derive_story_requirements,
+        )
+        profile = load_profile({"schema": "ongoing-station-profile-v1",
+            "station_id": "offline-m5", "profile_version": 1, "horizon": 24,
+            "author": v2})
+        projection = compile_projection(profile)
+        archive = next(row for row in projection.constraints
+                       if row["constraint_id"] == "archive-note-by-horizon")
+        required = derive_story_requirements(projection, archive, 7311)
+        self.assertEqual(required["required_handover"]["event_type"], "p5_note_handed_over")
+        self.assertEqual(required["required_handover"]["deadline_minute"], 24)
+
+    def test_e1_prefix_audit_is_explicitly_partial_not_causal_pass(self):
+        prefix = {"scene_id": "s", "complete_through": 5,
+            "actor_evidence": [{"actor_id": 10, "actor_alias": "A",
+                "log": [{"kind": "ongoing_station_decision", "minute": 5,
+                         "view": {"room_id": 1, "inventory_ids": []}}],
+                "native_receipts": []}],
+            "ongoing_station": {"commitments": []}}
+        audit = audit_history_prefix(prefix, {}, {}, {}, history_condition="natural-prefix")
+        self.assertEqual(audit["status"], "PARTIAL")
+        self.assertFalse(audit["pass"])
+        self.assertEqual(audit["comparison_boundary"]["matched_pair_status"],
+                         "NOT_EVALUATED_BY_SINGLE_ARM_AUDIT")
+        self.assertIn("must be read back",
+                      audit["comparison_boundary"]["known_runtime_limit"])
+
+    def test_e3_audit_does_not_accept_planner_proposal_as_physical_handover(self):
+        initial = json.loads((SUITE_PATH.parent / "m5-e1-archive-v1.json").read_text(encoding="utf-8"))
+        edited = json.loads((SUITE_PATH.parent / "m5-e3-handover-v2.json").read_text(encoding="utf-8"))
+        trace = {"scene_id": "s", "ongoing_station": {"bound_note_id": 42,
+            "controller_decisions": [{"minute": 10, "source_version": 2,
+                "decision": {"required_story_events": {"required_handover": {
+                    "event_type": "p5_note_handed_over"}}, "method_plans": [
+                    {"method_id": "file_by_B", "causal_support": {
+                        "missing_required_event_types": ["p5_note_handed_over"]}},
+                    {"method_id": "return_then_file_by_A", "causal_support": {
+                        "supported_event_types": ["p5_note_handed_over", "p5_note_archived"]}}]}}]}}
+        audit = audit_required_story_events(trace, {"actors": {}}, {},
+            initial_author=initial, edit_author=edited, edit_minute=10)
+        self.assertFalse(audit["pass"])
+        self.assertFalse(audit["criteria"]["same_note_B_to_A_handover_physically_precedes_archive"])
+
+    def test_e3_audit_requires_cancellation_only_when_an_old_offer_created_a_commitment(self):
+        initial = json.loads((SUITE_PATH.parent / "m5-e1-archive-v1.json").read_text(encoding="utf-8"))
+        edited = json.loads((SUITE_PATH.parent / "m5-e3-handover-v2.json").read_text(encoding="utf-8"))
+        offer_id = "archive-v1-offer"
+        trace = {"scene_id": "s", "ledger": [], "ongoing_station": {
+            "bound_note_id": 9, "controller_decisions": [{"minute": 7,
+                "source_version": 1, "offer_ids": [offer_id], "decision": {}}],
+            "stale_offer_ids": [offer_id], "commitments": []}}
+        audit = audit_required_story_events(trace, {"actors": {}}, {},
+            initial_author=initial, edit_author=edited, edit_minute=8)
+        self.assertTrue(audit["criteria"]["prior_v1_commitment_suffix_cancelled_if_created"])
+
+        trace["ongoing_station"]["commitments"] = [{"source": "AUTHOR",
+            "source_offer_id": offer_id, "status": "IN_PROGRESS"}]
+        audit = audit_required_story_events(trace, {"actors": {}}, {},
+            initial_author=initial, edit_author=edited, edit_minute=8)
+        self.assertFalse(audit["criteria"]["prior_v1_commitment_suffix_cancelled_if_created"])
+
+    def test_e4_handover_alone_cannot_satisfy_a_violated_order_constraint(self):
+        author = json.loads((SUITE_PATH.parent / "m5-e4-handover-deadline-v1.json")
+                            .read_text(encoding="utf-8"))
+        trace = {"scene_id": "scene-e4", "ledger": [], "ongoing_station": {
+            "bound_note_id": 42,
+            "typed_events": [{"event_type": "p5_note_handed_over", "time": 7,
+                "event_id": "give-1", "provenance": "committed_ledger",
+                "args": {"item": {"stable_id": "42"},
+                    "actor": {"stable_id": "B"}, "recipient": {"stable_id": "A"}}}],
+            "activation_events": [{"minute": 5,
+                "typed_args": {"result": {"status": "ACTIVATED"}}}],
+            "real_verdicts": {"constraints": [
+                {"constraint_id": "handover-occurs-by-minute-8", "status": "SATISFIED"},
+                {"constraint_id": "handover-before-archive-by-minute-8", "status": "VIOLATED"}]},
+            "commitments": [{"source": "SELF", "commitment_id": "route-A"},
+                            {"source": "SELF", "commitment_id": "route-B"}]}}
+        scene = {"actors": {"A": {"id": 10}, "B": {"id": 20}}}
+        db = {"scenes": [{"scene_id": "scene-e4", "objects": [
+            {"id": 10, "attributes": {"native_p3": {"native_receipts": [
+                {"receipt_id": "A-m9", "ongoing_commitment_id": "route-A",
+                 "settled": True, "sim_minute": 9, "kind": "move"}]}}},
+            {"id": 20, "attributes": {"native_p3": {"native_receipts": [
+                {"receipt_id": "B-m9", "ongoing_commitment_id": "route-B",
+                 "settled": True, "sim_minute": 9, "kind": "move"}]}}}]}]}
+        result = audit_handover_deadline_stress(trace, scene, db,
+            author=author, deadline_minute=8)
+        self.assertTrue(result["handover_occurs_by_deadline"])
+        self.assertEqual(result["objective_outcome_by_deadline"], "VIOLATED")
+        self.assertTrue(result["evidence_complete"])
+        self.assertEqual(result["status"], "VERIFIED_NEGATIVE")
+        self.assertFalse(result["pass"])
+
+    def test_e4_requires_exact_nonvacuous_registered_constraint_pair(self):
+        author = json.loads((SUITE_PATH.parent / "m5-e4-handover-deadline-v1.json")
+                            .read_text(encoding="utf-8"))
+        author["bundle"]["constraints"] = [author["bundle"]["constraints"][0]]
+        trace = {"scene_id": "scene-e4", "ongoing_station": {
+            "bound_note_id": 42, "typed_events": [], "activation_events": [],
+            "real_verdicts": {"constraints": []}, "commitments": []}}
+        result = audit_handover_deadline_stress(trace, {"actors": {}},
+            {"scenes": [{"scene_id": "scene-e4", "objects": []}]},
+            author=author, deadline_minute=8)
+        self.assertFalse(result["criteria"]["two_exact_registered_handover_constraints_present"])
+        self.assertEqual(result["objective_outcome_by_deadline"], "INDETERMINATE")
+
     def test_t1_is_author_null_and_fixed_seed_horizon(self):
         suite, case = load_case("t1-no-author-autonomy", SUITE_PATH)
         self.assertIsNone(suite["common"]["ongoing_station"]["author"])

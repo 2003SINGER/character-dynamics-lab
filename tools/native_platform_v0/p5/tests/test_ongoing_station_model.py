@@ -57,10 +57,47 @@ class OngoingStationModelTests(unittest.TestCase):
         with self.assertRaises(BundleError):
             load_bundle(raw)
         value = author()
+        # Response-before-archive is a native domain precondition, not a
+        # mandatory author clause. An archive-only AuthorBundle is valid.
         value["bundle"]["constraints"] = value["bundle"]["constraints"][:1]
         value["bindings"] = value["bindings"][:1]
-        with self.assertRaisesRegex(ValueError, "response-before-archive"):
+        compiled = compile_projection(load_profile(profile(value)))
+        self.assertEqual([row["constraint_id"] for row in compiled.constraints], ["archive-goal"])
+        requirements = __import__(
+            "tools.native_platform_v0.p5.ongoing_station.model", fromlist=["derive_story_requirements"]
+        ).derive_story_requirements(compiled, compiled.constraints[0], 777)
+        self.assertIsNone(requirements["required_handover"])
+        self.assertEqual(requirements["residual_constraints"], [])
+        value["bundle"]["constraints"][0]["hard"] = False
+        with self.assertRaises((BundleError, ValueError)):
             compile_projection(load_profile(profile(value)))
+
+    def test_same_note_handover_occurrence_and_order_compile_as_bound_requirements(self):
+        from tools.native_platform_v0.p5.ongoing_station.model import derive_story_requirements
+        value = author()
+        value["bundle"]["constraints"].append({
+            "id": "handover-occurs", "kind": "event_by_deadline", "event": "note_handed_over",
+            "filters": {"actor": "B", "recipient": "A", "item": "note"},
+            "start": 6, "deadline": 24, "hard": True, "min_count": 1, "max_count": 1})
+        value["bundle"]["constraints"].append({
+            "id": "handover-before-archive", "kind": "event_order",
+            "before": {"event": "note_handed_over",
+                       "filters": {"actor": "B", "recipient": "A", "item": "note"}},
+            "after": {"event": "note_archived", "filters": {"item": "note"}},
+            "order": "EVENT_KEY", "start": 6, "deadline": 24, "hard": True})
+        binding = value["bindings"][0]
+        value["bindings"].extend([
+            {**copy.deepcopy(binding), "constraint_id": "handover-occurs"},
+            {**copy.deepcopy(binding), "constraint_id": "handover-before-archive"},
+        ])
+        compiled = compile_projection(load_profile(profile(value)))
+        archive = next(row for row in compiled.constraints if row["constraint_id"] == "archive-goal")
+        requirements = derive_story_requirements(compiled, archive, 777)
+        self.assertEqual(requirements["required_handover"]["start_minute"], 6)
+        self.assertEqual(requirements["required_handover"]["deadline_minute"], 24)
+        self.assertEqual(requirements["required_handover"]["actor_alias"], "B")
+        self.assertEqual(requirements["required_handover"]["recipient_alias"], "A")
+        self.assertEqual(requirements["residual_constraints"], [])
 
     def test_invalid_locked_core_is_rejected(self):
         value = author()

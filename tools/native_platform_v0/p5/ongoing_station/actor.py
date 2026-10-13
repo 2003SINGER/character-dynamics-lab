@@ -48,6 +48,27 @@ def _has_pending_for_commitment(pending, commitment_id):
     return isinstance(task, Mapping) and str(task.get("commitment_id")) == str(commitment_id)
 
 
+def _projection_requires_handover(projection):
+    """Fail closed when the current AuthorBundle requires this note's handover."""
+    constraints = _projection_value(projection, "constraints", ()) or ()
+    for row in constraints:
+        source = row.get("source_constraint", {})
+        if source.get("hard") is not True:
+            continue
+        if (source.get("kind") == "event_by_deadline"
+                and source.get("event") == "note_handed_over"
+                and source.get("filters", {}).get("item") == "note"
+                and source.get("minimum", 1) >= 1):
+            return True
+        if (source.get("kind") == "event_order"
+                and source.get("before", {}).get("event") == "note_handed_over"
+                and source.get("before", {}).get("filters", {}).get("item") == "note"
+                and source.get("after", {}).get("event") == "note_archived"
+                and source.get("after", {}).get("filters", {}).get("item") == "note"):
+            return True
+    return False
+
+
 def _still_authorized(commitment, projection):
     """Whether this same author-task suffix remains permitted by the new source."""
     constraints = _projection_value(projection, "constraints", ()) or ()
@@ -78,7 +99,7 @@ def _still_authorized(commitment, projection):
         if file_actor is not None and actor_alias != file_actor:
             return False
         if method == "file_by_B":
-            return actor_alias == "B"
+            return actor_alias == "B" and not _projection_requires_handover(projection)
         if method == "return_then_file_by_A":
             return actor_alias == "A"
         return False
@@ -116,6 +137,7 @@ def _local_signature(view):
 
 def _self_offers(actor, view, now_minute, receipts, commitments=()):
     contract = view.get("goal_contract", {})
+    observation = view.get("observation", {})
     task_kind = contract.get("goal")
     if task_kind not in {"deliver_supply", "archive_note", "handover_note"}:
         task_kind = "deliver_supply" if contract.get("item_id") is not None else None
@@ -125,6 +147,12 @@ def _self_offers(actor, view, now_minute, receipts, commitments=()):
                         and str(row.get("item_id")) == str(contract.get("item_id"))
                         and row.get("destination_id") == contract.get("destination_id")
                         for row in commitments)
+    matching_drop = matching_drop or any(
+        row.get("settled") is True and row.get("kind") == "drop"
+        and row.get("ongoing_task_kind") == task_kind
+        and str(row.get("item_id")) == str(contract.get("item_id"))
+        and row.get("after_item_room_id") == contract.get("destination_id")
+        for row in receipts)
     if task_kind and not matching_drop and contract.get("item_id") is not None:
         offer_rows.append({
             "offer_id": f"self:{actor.id}:{task_kind}:{contract['item_id']}:{contract.get('destination_id')}",
@@ -135,6 +163,54 @@ def _self_offers(actor, view, now_minute, receipts, commitments=()):
             "deadline_minute": None, "prerequisites": [], "constraint_id": None,
             "item_key": view.get("observation", {}).get("task_item", {}).get("key"),
             "last_known_item_room": view.get("observation", {}).get("item_location"),
+        })
+    # Reverse logistics is grounded only in this actor's own completed delivery
+    # and its matching, settled get receipt. The source room is not a generic
+    # storage location; it is the room this actor actually observed the item in.
+    own_deliveries = [row for row in receipts
+                      if row.get("settled") is True and row.get("kind") == "drop"
+                      and row.get("ongoing_task_kind") == "deliver_supply"
+                      and row.get("ongoing_commitment_id") is not None]
+    for delivery in reversed(own_deliveries):
+        item_id = delivery.get("item_id")
+        commitment_id = delivery.get("ongoing_commitment_id")
+        source_get = next((row for row in receipts
+                           if row.get("settled") is True and row.get("kind") == "get"
+                           and str(row.get("item_id")) == str(item_id)
+                           and str(row.get("ongoing_commitment_id")) == str(commitment_id)
+                           and isinstance(row.get("before_item_room_id"), int)), None)
+        if source_get is None or item_id is None:
+            continue
+        source_room = source_get["before_item_room_id"]
+        delivered_room = delivery.get("after_item_room_id")
+        if source_room == delivered_room:
+            continue
+        locally_present = any(str(row.get("id")) == str(item_id)
+                              for row in (observation.get("inventory", [])
+                                          + observation.get("visible_items", [])))
+        locally_remembered = any(str(row.get("id")) == str(item_id)
+                                 and row.get("room_id") == delivered_room
+                                 for row in observation.get("retained_witnesses", []))
+        if not (locally_present or locally_remembered):
+            continue
+        offer_id = (f"self:{actor.id}:return_stock:{item_id}:"
+                    f"{delivery.get('receipt_id')}")
+        if any(row.get("offer_id") == offer_id
+               or (row.get("source_offer_id") == offer_id)
+               for row in commitments):
+            continue
+        offer_rows.append({
+            "offer_id": offer_id, "source": "SELF",
+            "goal_id": f"self-goal:{actor.id}:return_stock:{delivery.get('receipt_id')}",
+            "task_kind": "return_stock", "item_id": item_id,
+            "destination_id": source_room, "recipient_id": None,
+            "deadline_minute": None, "prerequisites": [delivery.get("receipt_id"),
+                                                          source_get.get("receipt_id")],
+            "constraint_id": None,
+            "item_key": view.get("observation", {}).get("task_item", {}).get("key"),
+            "last_known_item_room": observation.get("item_location") or delivered_room,
+            "source_delivery_receipt_id": delivery.get("receipt_id"),
+            "source_get_receipt_id": source_get.get("receipt_id"),
         })
     previous_move = next((row for row in reversed(receipts)
                           if row.get("settled") is True and row.get("kind") == "move"
@@ -172,6 +248,8 @@ def _commitment_from_offer(offer, now_minute, receipts):
         "destination_id": offer.get("destination_id"),
         "recipient_id": offer.get("recipient_id"),
         "deadline_minute": offer.get("deadline_minute"),
+        "earliest_terminal_minute": offer.get("earliest_terminal_minute"),
+        "required_story_deadline_minute": offer.get("required_story_deadline_minute"),
         "accepted_minute": now_minute, "updated_minute": now_minute,
         "reason": "accepted from actor-local feasible candidate set",
         "receipt_ids": [], "source_offer_id": offer.get("offer_id"),
@@ -193,6 +271,8 @@ def _commitment_from_offer(offer, now_minute, receipts):
         "accepted_projection_id": offer.get("projection_id"),
         "last_known_item_room": offer.get("last_known_item_room"),
         "prerequisites": deepcopy(offer.get("prerequisites", [])),
+        "source_delivery_receipt_id": offer.get("source_delivery_receipt_id"),
+        "source_get_receipt_id": offer.get("source_get_receipt_id"),
         "receipt_frontier": [row.get("receipt_id") for row in receipts
                              if row.get("receipt_id") is not None],
     }
@@ -224,10 +304,20 @@ def advance_actor(actor, station_projection, offers, now_minute):
                     and row.get("projection_id") != current_projection_id):
                 old_projection_id = row.get("projection_id")
                 if _still_authorized(row, station_projection):
+                    current_offer = next((offer for offer in offers
+                                          if _same_author_task(row, offer)), None)
                     row.setdefault("accepted_projection_id", old_projection_id)
                     row["superseded_projection_id"] = old_projection_id
                     row["projection_id"] = current_projection_id
                     row["authorized_projection_id"] = current_projection_id
+                    prior_window = (row.get("deadline_minute"),
+                                    row.get("earliest_terminal_minute"),
+                                    row.get("required_story_deadline_minute"))
+                    if current_offer is not None:
+                        row["deadline_minute"] = current_offer.get("deadline_minute")
+                        row["earliest_terminal_minute"] = current_offer.get("earliest_terminal_minute")
+                        row["required_story_deadline_minute"] = current_offer.get(
+                            "required_story_deadline_minute")
                     row["updated_minute"] = now_minute
                     row["reason"] = "same author task suffix remains authorized after source edit"
                     history.append({"minute": now_minute, "event": "COMMITMENT_REAUTHORIZED",
@@ -236,6 +326,10 @@ def advance_actor(actor, station_projection, offers, now_minute):
                                     "source_method_id": row.get("source_method_id"),
                                     "superseded_projection_id": old_projection_id,
                                     "authorized_projection_id": current_projection_id,
+                                    "prior_terminal_window": list(prior_window),
+                                    "current_terminal_window": [row.get("deadline_minute"),
+                                                                row.get("earliest_terminal_minute"),
+                                                                row.get("required_story_deadline_minute")],
                                     "evidence_receipt_ids": list(row.get("receipt_ids", []))})
                 elif not _has_pending_for_commitment(pending, row.get("commitment_id")):
                     row["status"] = "CANCELLED_STALE"
@@ -387,6 +481,26 @@ def advance_actor(actor, station_projection, offers, now_minute):
                     "recipient_id": commitment.get("recipient_id")}
             planner = plan_actor_task(view, task)
             intent = planner.get("intent")
+            earliest_terminal = commitment.get("earliest_terminal_minute")
+            terminal_operator = ((commitment.get("task_kind") == "archive_note"
+                                  and intent is not None and intent.get("operator") == "drop")
+                                 or (commitment.get("task_kind") == "handover_note"
+                                     and intent is not None and intent.get("operator") == "give"))
+            if (terminal_operator and type(earliest_terminal) is int
+                    and now_minute < earliest_terminal):
+                # Preserve the task and any route/get progress. Only the
+                # authored terminal event is gated; preparation can proceed.
+                intent = None
+                commitment["status"] = "IN_PROGRESS"
+                commitment["updated_minute"] = now_minute
+                commitment["reason"] = "waiting for authored earliest terminal-event minute"
+                disposition = "WAIT"
+                rationale = "earliest terminal-event window has not opened"
+                history.append({"minute": now_minute,
+                                "event": "COMMITMENT_WAITING_FOR_TERMINAL_WINDOW",
+                                "commitment_id": commitment.get("commitment_id"),
+                                "earliest_terminal_minute": earliest_terminal,
+                                "evidence_receipt_ids": list(commitment.get("receipt_ids", []))})
             if intent is not None and commitment.get("status") in {"ACCEPTED", "SUSPENDED"}:
                 commitment["status"] = "IN_PROGRESS"
                 commitment["updated_minute"] = now_minute

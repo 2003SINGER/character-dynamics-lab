@@ -1,0 +1,21 @@
+{
+  "schema": "ongoing-station-author-v1",
+  "bundle": {
+    "schema": "native-author-bundle-v1",
+    "bundle_id": "ongoing-station-m5-e4-deadline-stress-v1",
+    "version": 1,
+    "source": "M5 bounded E4 legal handover deadline stress",
+    "constraints": [
+      {"id": "archive-note-by-horizon", "kind": "event_by_deadline", "event": "note_archived", "filters": {"item": "note"}, "start": 5, "deadline": 24, "hard": true},
+      {"id": "handover-occurs-by-minute-8", "kind": "event_by_deadline", "event": "note_handed_over", "filters": {"actor": "B", "recipient": "A", "item": "note"}, "start": 5, "deadline": 8, "hard": true},
+      {"id": "handover-before-archive-by-minute-8", "kind": "event_order", "before": {"event": "note_handed_over", "filters": {"actor": "B", "recipient": "A", "item": "note"}}, "after": {"event": "note_archived", "filters": {"item": "note"}}, "order": "EVENT_KEY", "start": 5, "deadline": 8, "hard": true}
+    ],
+    "branches": [],
+    "permissions": {"world_opportunities": [], "force_npc_response": false, "max_opportunities": 1, "cost_budget": 0}
+  },
+  "bindings": [
+    {"constraint_id": "archive-note-by-horizon", "control": {"mode": "result_only", "file_actor": null, "allowed_methods": ["file_by_B", "return_then_file_by_A"], "source": "SYSTEM"}, "locked_fragment": null},
+    {"constraint_id": "handover-occurs-by-minute-8", "control": {"mode": "result_only", "file_actor": null, "allowed_methods": ["file_by_B", "return_then_file_by_A"], "source": "SYSTEM"}, "locked_fragment": null},
+    {"constraint_id": "handover-before-archive-by-minute-8", "control": {"mode": "result_only", "file_actor": null, "allowed_methods": ["file_by_B", "return_then_file_by_A"], "source": "SYSTEM"}, "locked_fragment": null}
+  ]
+}

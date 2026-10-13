@@ -38,7 +38,8 @@ def registry_with_story_events():
 
 def sealed_state(request, *, now=17, outcome="accepted", holder="B", a_present=True,
                  b_present=True, b_willing=True, a_willing=True, archive_minutes=4,
-                 handover_minutes=2, task_status_a="IDLE", task_status_b="IDLE"):
+                 handover_minutes=2, task_status_a="IDLE", task_status_b="IDLE",
+                 remaining_a=0, remaining_b=0):
     note_id = request.objective["note_id"]
     events = []
     response = None
@@ -54,13 +55,17 @@ def sealed_state(request, *, now=17, outcome="accepted", holder="B", a_present=T
         "note": {"item_id": note_id, "location_id": 501, "holder_alias": holder},
         "actors": {
             "A": {"present": a_present, "can_receive_note": True, "willing_to_archive": a_willing,
-                  "locally_observed_item_ids": [note_id], "active_task": None, "task_status": task_status_a},
+                  "locally_observed_item_ids": [note_id], "active_task": None, "task_status": task_status_a,
+                  "remaining_work_minutes": remaining_a},
             "B": {"present": b_present, "can_receive_note": True, "willing_to_archive": b_willing,
-                  "locally_observed_item_ids": [note_id], "active_task": None, "task_status": task_status_b},
+                  "locally_observed_item_ids": [note_id], "active_task": None, "task_status": task_status_b,
+                  "remaining_work_minutes": remaining_b},
         },
         "destinations": {
-            "archive": {"id": 601, "reachable_by": ["A", "B"], "estimated_minutes": archive_minutes},
-            "handover": {"id": 602, "reachable_by": ["A", "B"], "estimated_minutes": handover_minutes},
+            "archive": {"id": 601, "reachable_by": ["A", "B"], "estimated_minutes": archive_minutes,
+                        "estimated_minutes_by_actor": {"A": archive_minutes, "B": archive_minutes}},
+            "handover": {"id": 602, "reachable_by": ["A", "B"], "estimated_minutes": handover_minutes,
+                         "estimated_minutes_by_actor": {"A": handover_minutes, "B": handover_minutes}},
         },
         "task_grant": copy.deepcopy(dict(request.task_control_grant)),
         "current_obligations": [{"kind": "preserve-existing-delivery", "status": "WAITING"}],
@@ -111,6 +116,38 @@ class StoryProcessModelTests(unittest.TestCase):
 class StoryProcessPlanningTests(unittest.TestCase):
     def _request(self, **kwargs):
         return bind_note_id(load_request(raw_request(**kwargs)), 777)
+
+    def test_archive_only_author_bundle_reaches_real_method_search_and_task_offers(self):
+        from tools.native_platform_v0.p5.ongoing_station.controller import _runtime_request
+        from tools.native_platform_v0.p5.ongoing_station.model import (
+            compile_projection, derive_story_requirements, load_profile,
+        )
+        from tools.native_platform_v0.p5.tests.test_ongoing_station_model import author, profile
+
+        authored = author()
+        authored["bundle"]["constraints"] = authored["bundle"]["constraints"][:1]
+        authored["bindings"] = authored["bindings"][:1]
+        station = load_profile(profile(authored))
+        projection = compile_projection(station)
+        constraint = projection.constraints[0]
+        request = load_request(_runtime_request(
+            station, projection, constraint, constraint["control"], "archive-only-scene", 777))
+        requirements = derive_story_requirements(projection, constraint, 777)
+        self.assertIsNone(requirements["required_handover"])
+
+        state = sealed_state(request, now=17, archive_minutes=2, handover_minutes=1)
+        result = plan_story_process(request, state, strategy="gtpyhop",
+                                    required_story_events=requirements)
+        self.assertIn(result["status"], {"TASKS_PROPOSED", "WAITING_OR_BLOCKED"})
+        candidate_ids = {row["method_id"] for row in result["method_plans"]}
+        self.assertTrue({"file_by_B", "return_then_file_by_A"}.issubset(candidate_ids))
+        if result["task_requests"]:
+            for task in result["task_requests"]:
+                self.assertEqual(task["required_story_event_types"], ["p5_note_archived"])
+                self.assertEqual(task["required_constraint_ids"], ["archive-goal"])
+                self.assertLessEqual(task["required_story_deadline_minute"], 24)
+                if task["task_kind"] == "handover_note":
+                    self.assertEqual(task["required_story_deadline_minute"], 24)
 
     def test_event_driven_comparator_has_same_task_authority_and_candidate_policy(self):
         request = self._request()
@@ -193,6 +230,85 @@ class StoryProcessPlanningTests(unittest.TestCase):
         self.assertEqual(result["task_requests"], [])
         self.assertEqual(result["status"], "WAITING_OR_BLOCKED")
         self.assertEqual(result["guards"]["response_event_id"], None)
+
+    def test_new_handover_requirement_changes_method_support_and_monitor_witness(self):
+        request = self._request(mode="result_only")
+        state = sealed_state(request, now=18, archive_minutes=3, handover_minutes=2)
+        required = {"source_bundle_id": "bundle-1", "source_version": 2,
+                    "source_sha256": "a" * 64, "archive_constraint_id": "archive-goal",
+                    "archive_start_minute": 0, "archive_deadline_minute": 24, "note_id": 777,
+                    "required_handover": {
+                        "event_count_constraint_id": "handover-occurs",
+                        "order_constraint_id": "handover-before-archive",
+                        "event_type": "p5_note_handed_over", "actor_alias": "B",
+                        "recipient_alias": "A", "before_event_type": "p5_note_archived",
+                        "start_minute": 18, "deadline_minute": 24},
+                    "residual_constraints": []}
+        result = plan_story_process(request, state, strategy="event_driven",
+                                    required_story_events=required)
+        candidates = {row["method_id"]: row for row in result["method_plans"]}
+        self.assertFalse(candidates["file_by_B"]["feasible"])
+        self.assertIn("p5_note_handed_over",
+                      candidates["file_by_B"]["causal_support"]["missing_required_event_types"])
+        self.assertTrue(candidates["return_then_file_by_A"]["feasible"])
+        self.assertEqual([row["task_kind"] for row in result["task_requests"]],
+                         ["handover_note", "archive_note"])
+        self.assertEqual(result["task_requests"][0]["required_story_event_types"],
+                         ["p5_note_handed_over", "p5_note_archived"])
+        verdicts = {row["constraint_id"]: row["verdicts"]
+                    for row in result["typedir_verdicts"]}
+        self.assertIn("handover-occurs", verdicts)
+        self.assertIn("handover-before-archive", verdicts)
+
+        state["sealed_minute"] = 24
+        state["note"]["holder_alias"] = "A"
+        state["typed_trace"]["events"].extend([
+            {"event_id": "give-1", "event_type": "p5_note_handed_over", "version": "1",
+             "provenance": "committed_ledger", "time": 19, "sequence": 2,
+             "args": {"actor": "B", "recipient": "A", "item": "note"}},
+            {"event_id": "archive-1", "event_type": "p5_note_archived", "version": "1",
+             "provenance": "committed_ledger", "time": 21, "sequence": 3,
+             "args": {"actor": "A", "item": "note"}},
+        ])
+        after = plan_story_process(request, state, strategy="event_driven",
+                                  required_story_events=required)
+        verdicts = {row["constraint_id"]: row["verdicts"]
+                    for row in after["typedir_verdicts"]}
+        self.assertTrue(all(v["verdict"] == "SATISFIED"
+                            for key in ("handover-occurs", "handover-before-archive")
+                            for v in verdicts[key]), repr(verdicts))
+
+    def test_handover_window_not_before_start_and_order_deadline_covers_archive(self):
+        request = self._request(mode="result_only")
+        required = {"source_bundle_id": "bundle-1", "source_version": 2,
+                    "source_sha256": "a" * 64, "archive_constraint_id": "archive-goal",
+                    "archive_start_minute": 0, "archive_deadline_minute": 24, "note_id": 777,
+                    "required_handover": {
+                        "event_count_constraint_id": "handover-occurs",
+                        "order_constraint_id": "handover-before-archive",
+                        "event_type": "p5_note_handed_over", "actor_alias": "B",
+                        "recipient_alias": "A", "before_event_type": "p5_note_archived",
+                        "start_minute": 18, "deadline_minute": 20},
+                    "residual_constraints": []}
+        before = plan_story_process(request, sealed_state(request, now=17),
+                                    strategy="event_driven", required_story_events=required)
+        self.assertEqual(before["task_requests"], [])
+        self.assertTrue(any("waiting_for_authored_handover_window_start" in row["preconditions"]
+                            for row in before["rejected_methods"]))
+        too_late = plan_story_process(request, sealed_state(request, now=18),
+                                      strategy="event_driven", required_story_events=required)
+        self.assertEqual(too_late["task_requests"], [])
+        self.assertTrue(any("absolute_deadline_time_infeasible" in row["preconditions"]
+                            for row in too_late["rejected_methods"]))
+
+    def test_unknown_workload_is_temporary_wait_not_permanent_unreachable(self):
+        request = self._request()
+        state = sealed_state(request, remaining_b=None)
+        result = plan_story_process(request, state, strategy="event_driven")
+        self.assertEqual(result["task_requests"], [])
+        self.assertTrue(any(row["kind"] == "WAITING_FOR_ACTOR_COMMITMENT_FRONTIER"
+                            for row in result["outstanding_obligations"]))
+        self.assertEqual(result["status"], "WAITING_OR_BLOCKED")
 
     def test_rejection_routes_to_return_then_A_only_when_native_conditions_and_time_fit(self):
         request = self._request()

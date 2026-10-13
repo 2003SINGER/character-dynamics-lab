@@ -1,6 +1,6 @@
 # Mature-Methods Integration v1 — bounded native evidence
 
-当前状态：**DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**（2026-10-13；未 CLOSED）。本页新增的 Ongoing Station 结果见下方“2026-10-13 Ongoing Station”章节；此前 2026-10-12 的成熟装配结果仍按历史状态保存。原 S1–S4 与 S2 权限编辑拒绝均为历史结果，不因本次增量而改写。本次结果不构成完整系统通过、性能优势、研究新颖性或机制有效性证据；不自动进入新阶段。
+当前工作包：**M1–M5 / E1–E4 有界实施与原生运行已交付；DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**（2026-10-13，未 CLOSED）。新结果只见本文末尾“历史依赖、跨过程方法与未来剧情点”。严格 E1 历史对照未匹配，E2 未观察到工作条件驱动的方法切换；E3 新剧情点与 E4 失败负控有原生证据。完成本包后停止，不追加规则追求全 PASS。此前装配与早期站点结果保留历史状态，不充当新增条件通过的证据。
 
 > **历史分隔：** 原 S1–S4 内容及 2026-10-12 成熟装配章节维持其原始结果和边界，不应用作本次 Ongoing Station 增量的当前状态。本次新增证据唯一见本文末尾“2026-10-13 Ongoing Station”。
 
@@ -147,3 +147,71 @@ author:null -> SELF offers -> actor-local commitment/history -> same dispatcher/
 Parent 最终复核：实际 trace 与独立 DB 中的 SELF 任务/后续活动、m6 延后、m8 旧承诺撤销、m10 原生归档，以及混合片段 m8 交接/m9 归档均已定向读回；匹配输入和归一执行序列逐项相同。独立重新验证 568 个归档成员、8 份 DB、5 份 v3 审计/源码与 7 份回放副本。最终本机 P5 unittest 运行 139 项：138 PASS、1 skip；P3 53 项与成熟方法工具 34 项通过，不把这些数量相加称为独立语义实验。仓库健康检查退出成功，保留 11 个既有本地依赖体积/历史重复材料告警；旧 E0-H02 预算失败没有调预算或重跑刷绿。
 
 下一步仍只列候选而不自动开新阶段：优先围绕“历史/commitment 怎样影响新目标”和“多个部分作者约束过程如何协调及影响创作劳动”提出可证伪问题；若独立审阅要求，再预注册多 seed、受控可见性/路径变化的同能力复验与墙钟/搜索状态计数。LLM 作者 binding 与 actor-policy 是未来入口而非当前结果。不从这一组固定轨迹推断心理真实性、长期自主性或普遍策略优劣，也不自动扩大权限。
+
+## 2026-10-13 历史依赖、跨过程方法与未来剧情点（M1–M5 / E1–E4）
+
+### 交付与停止点
+
+基线为 `796510ab3b3c0115cca7e71404194dbbcd8ac467`。本包在同一 opt-in 站点增加真实自身活动、作者约束派生输入、局部工作下界及反例审计；没有新引擎、规划器、LLM、心理状态或并行平台。**8 个代表性场景全部封存至第 24 分钟；另保留 1 个第 9 分钟发布失败的实际场景。** 封存完成不等于作者目标全部成功，也不等于四项能力全部通过。每场在同一个权威 Evennia 世界中运行；不同条件各建独立场景，而不是八个条件共用可污染的世界。
+
+| 验收项 | 实际证据 | 判定与限制 |
+|---|---|---|
+| M1 自身活动 | 两名角色自主配送后，以同任务真实 get/drop 记录生成 `return_stock`，再执行巡路 | 有限 reverse logistics 已运行；不是通用生活、仓储或人格机制 |
+| E1 历史对照 | 同作者 offer 下，H1 的 B 在 m10 接受；H2 的 B 以真实未完成 route 延后 | **PARTIAL**：物品、持有者、道路、作者输入对齐，但 NPC 位置与感官未对齐，不能作纯历史因果结论 |
+| E2 工作/位置/期限下的方法取舍 | 编辑前 m5–7，两方法合法；工作下界改变预计成本，但 GT 与 event 都持续选择 B 归档 | **PARTIAL**：未观察到由这些条件单独驱动的合法集合或选择变化；新增交接要求导致的方法变化属于 E3，不挪作 E2 成功 |
+| E3 真正新增未来剧情点 | m8 CAS 新增同便条 B→A occurrence 与 strict-before-archive；m11 give、m13 archive，三条约束 SAT | **限定通过**：原约束和绝对期限 24 保留；m7 前缀不变，旧未派发 offer 撤销；没有已接受 v1 AUTHOR commitment，不能宣称取消了这样的承诺 |
+| E4 失败负控 | 要求交接及交接先于归档的事件对均在 m8 前成立；两臂实际违约，无伪造 give；期限后 SELF 活动继续 | **负控证据已核验，作者目标 VIOLATED**；不是成功剧情，也不是全域不可达证明 |
+| M5 等能力对照 | 同输入、角色策略、方法前提、权限、执行接口；仅高层 selector 为原 GTPyhop 或 event-driven | 所有配对的实际结果一致；没有组合优势或速度优势证据 |
+
+### 八场输入与原生事实
+
+固定 seed `20261013`、horizon `24`、`hero_intelligence_30_v0`、Director 关闭、两份独立配送物品。套件入口是 `tools/native_platform_v0/p5/ongoing_station/cases/m5-e1-e4-v1.json`。开发中调整的输入与源码逐场快照，不宣称预注册或单一 Git HEAD 覆盖全部现场字节。
+
+| 条件 | GT 场景 / run 时间后缀 | Event 场景 / run 时间后缀 | 实际结果 |
+|---|---|---|---|
+| E1 H1 自然配送—回库历史 | `20261013092722-b9b548` / `092722Z-4bed47` | `20261013092948-b5925d` / `092948Z-197ef5` | B m10 接受作者目标，m11 归档；单臂审计仍为 PARTIAL |
+| E1 H2 玩家搬运历史 | `20261013092810-ba8c71` / `092810Z-049525` | `20261013093022-c8eb17` / `093022Z-f58514` | B m10 继续自身路线并延期，m11 接受、m12 归档；不是严格匹配对照 |
+| E2/E3 归档结果→交接+归档 | `20261013093047-bd940f` / `093047Z-f4bac8` | `20261013093328-9ed286` / `093328Z-2501cf` | m8 v2 UPDATED；B give m11，A archive m13，三项 SAT；E2 未通过强判据 |
+| E4 期限 8 交接/order 负控 | `20261013093732-eccd53` / `093732Z-753111` | `20261013094129-825e3b` / `094129Z-ecb7bc` | 交接/order 与归档均 VIOLATED；两角色各有 16 条 m8 后真实 SELF move |
+
+H2 的历史来自现有 P3 `inject_action`，不是 NPC 命令或数据库修改：8 条玩家 move/get/drop 在首次 NPC 回调前把物品移到 Destination；另 6 条在 m6 后将两物品送回 Pickup，**14/14 均有真实 settled command receipt**。它们发生在模拟分钟回调之间、不消耗 NPC 模拟分钟，是本开发场景的外部干预模型，不是人类玩家操作耗时模型。回放与 sidecar 保留其真实 P3 来源；不伪造不存在的 P5 ledger event。
+
+H1 的 m9 封存时，两条巡路已有同 commitment 的完整有序移动收据；存储的 `IN_PROGRESS` 缓存尚未更新，m10 callback 以收据 refresh 后才判 SETTLED。H2 的 m2 巡路因当时局部已知路径不足而暂停，m8 恢复旧路线，m9 又启动新路线。到 m10 行动前，H1 两角色在 Pickup，H2 在 Destination；H1 能看见两个物品，H2 看不见。因此虽同一作者请求下有真实接受/延后差异，**位置与当前感官混杂仍未排除**。过去完整 O、收据数量和记忆时间戳也不被人为删成相同。
+
+E3 GT 的 give 为 `p3:8018:0:31`、archive 为 `p3:8017:0:37`，同一便条 `8027`；event 的对应回执为 `p3:8040:0:31` / `p3:8039:0:37`，同一便条 `8049`。两场绝对 ID 不同，场内实体相同与 `11 < 13` 分别核验；事件 witness 指回对应场景 DB 中的原生收据，不以方法预测作证。编辑保留 archive 起点 5、截止 24，仅新增起点 8、截止 24 的交接 occurrence/order；事后已归档再要求交接的编辑由历史守卫拒绝。
+
+### 实际责任与反馈路径
+
+| Owner | 输入与职责 | 不得替代的事实 |
+|---|---|---|
+| AuthorBundle / BundleStore | 唯一约束源、版本与未来 CAS；保留期限、权限和已提交历史 | 派生支持目标不是新增作者硬约束 |
+| station model/controller | 将注册 occurrence/order 映射成 `required_story_events`，记录源 hash/cid；只读局部工作 primitive 下界 | 下界和 causal support 不保证路线可行或目标发生；未知工作返回 unknown，不暗作零工作 |
+| 原 GTPyhop / event selector | 相同方法前提与能力下，分别搜索/按固定顺序选择；diagnostic guard 不参与预选 | GTP 不被 controller 预先喂唯一答案，也不被包装成全局最优或 STN 求解器 |
+| NPC callback / 原 P3 HTN | 自己合法观察、历史 refresh、保留/接受/延期、细化一个真实 primitive | controller 不额外调用 `observe_actor` 改写感知；角色接受不是世界完成 |
+| Evennia / dispatcher / ledger | 实际移动、取放、交接与验证；append-only 结算 | 预测、任务提案、等待不能写成成功事件 |
+| TypedIR / audit | 实际事件窗口、count/order、receipt/DB 对账 | 区分目标 VIOLATED、证据完整性和测试通过；不把 WAIT/预算不足叫不可达 |
+
+### 成本、公平性与已知失败
+
+| 条件（GT / event） | 高层决策行（两臂各） | GT method callbacks / event candidate evaluations | GT trace 事件 | actor HTN 调用 / visits（两臂各） | settled actor receipts（两臂各） |
+|---|---:|---:|---:|---:|---:|
+| E1 H1 | 16 | 32 / 32 | 64 | 46 / 200 | 46 |
+| E1 H2 | 16 | 32 / 32 | 64 | 44 / 172 | 44 |
+| E2/E3 | 20 | 40 / 40 | 82 | 46 / 196 | 45 |
+| E4 | 20 | 40 / 40 | 80 | 46 / 200 | 46 |
+
+GT callback 与 event candidate check **不是同一计量单位**。GT trace 长度不是搜索节点总数；后者没有暴露，记为未知。Actor 计数只计含实际 `planner.implementation` 的决策；社交消费 callback 与 H2 的 14 条玩家命令另列，不混入 actor HTN 或 actor settled receipt 分母。尚无统一可靠的分段规划墙钟、作者建模/修改/调试工时，均记为未知，不从 LOC 推断节省。配对 runtime 核心逐文件相同；E2/E3 全量快照差异为 audit 与 runner test，E4 另有 runner 字节差异（负控审计接线），不是角色/方法行为变化，不能宣称所有 full manifests identical。
+
+保留失败 `20261013090427-19e3d7`：m9 两名角色已真实执行并封存，随后 archive-only author requirements 中 `required_handover=None` 被 `_task_request` 错误解引用。run 保存 8 条已返回 minute 输出及封存至 9 的失败 trace/DB/服务 traceback；未重做第 9 步，未假称续完。修复 None 分支及真实 compile→derive→planner→offer 接缝回归后，新建上述场景；旧失败字节仍存。
+
+现场 GT E3 初始审计误要求不存在的 v1 AUTHOR commitment 被取消；GT E4 初始审计混淆正例目标与负控证据完整性。**原 summary/audit/回放不覆盖**，保存 hash-bound 离线复核与对应审计源码 carrier；离线修正不改变世界轨迹，也不增加成功场景数。新增适配工作包括 reverse-logistics 任务、注册事件需求/窗口传播、同源投影、真实工作下界、历史编辑守卫、运行/审计工具与正反例测试；两种故事方法和底层算法已存在，不能算成本轮原创。未重开冻结 C++、E0 预算、Sabre 原算法或 Ensemble 规则。
+
+当前结论停在 **PARTIAL**：新增未来剧情点已有完整原生链，但严格历史匹配和由工作/位置/剩余时间驱动的非平凡方法取舍仍未证实。下一步仅待独立审阅，若再研究，应先定义能区分这两项的受控条件与强基线，而非自动加生活规则、训练模型或再开阶段。
+
+### 本包验证与公开入口
+
+最终本机 P5 suite 共 161 项：**160 PASS、1 原环境 skip**；P3 53/53，既有成熟装配/发布测试 34/34。这些是回归测试，不等于八套独立科研实验。仓库健康检查退出成功，11 个既有依赖体积/历史原文重复告警保留，未清理无关文件。原 E0-H02 墙钟波动与历史 CI 失败不通过改预算、断言或重跑刷绿处理。
+
+按用户明确批准的本轮范围，发布 8 场代表、1 场真实失败、1 个重载日志 wrapper：共 682 个归档成员、161,561,009 原始字节、7,747,548 压缩字节。归档 SHA-256 `5339a33612fc731fc18641b1dda566656bdadea447e15c8b69a3f52d7f96f245`，逐成员与本地原件核验为 VERIFIED。包括九份 scene-scoped simulated DB JSON、所有原始输入/轨迹/失败/source snapshots、最终离线审计与源码载体；不含私有原文、凭证、数据库 binary 或其他项目。九份 Markdown 回放亦逐字节核验；原始错误标签不覆盖。
+
+入口：[完整本轮证据包](public_evidence/story-process-v1-20261013T094903Z/story-process-v1.tar.gz) · [682 文件索引](public_evidence/story-process-v1-20261013T094903Z/index.json) · [公开范围与最终审计版本](public_evidence/story-process-v1-20261013T094903Z/publication-scope.md) · [直接阅读回放](public_evidence/story-process-v1-20261013T094903Z/readable_replay_index.md)。历史包仍在原位置，只有本链接属于新的 M1–M5 / E1–E4 工作包。

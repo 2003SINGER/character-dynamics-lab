@@ -19,7 +19,7 @@ _SEALED_KEYS = {"scenario_id", "sealed_minute", "horizon", "request_id", "reques
                 "response", "note", "actors", "destinations", "task_grant",
                 "current_obligations", "typed_trace", "event_registry"}
 _ACTOR_KEYS = {"present", "can_receive_note", "willing_to_archive", "locally_observed_item_ids",
-               "active_task", "task_status"}
+               "active_task", "task_status", "remaining_work_minutes"}
 
 
 def _validate_state(request: StoryProcessRequest, state: Mapping[str, Any]) -> dict[str, Any]:
@@ -66,6 +66,10 @@ def _validate_state(request: StoryProcessRequest, state: Mapping[str, Any]) -> d
             raise ValueError(f"actor {alias} projection requires exact keys {sorted(_ACTOR_KEYS)}")
         if any(type(actor[k]) is not bool for k in ("present", "can_receive_note", "willing_to_archive")):
             raise ValueError(f"actor {alias} eligibility flags must be booleans")
+        if (actor["remaining_work_minutes"] is not None
+                and (type(actor["remaining_work_minutes"]) is not int
+                     or actor["remaining_work_minutes"] < 0)):
+            raise ValueError(f"actor {alias} remaining_work_minutes must be a nonnegative local estimate or null")
         if (not isinstance(actor["locally_observed_item_ids"], list)
                 or any(type(i) is not int or i <= 0 for i in actor["locally_observed_item_ids"])):
             raise ValueError(f"actor {alias} observation must contain exact positive IDs")
@@ -85,11 +89,16 @@ def _validate_state(request: StoryProcessRequest, state: Mapping[str, Any]) -> d
         raise ValueError("registered archive and handover destinations are required")
     for key in ("archive", "handover"):
         row = destinations[key]
-        if (not isinstance(row, Mapping) or set(row) != {"id", "reachable_by", "estimated_minutes"}
+        if (not isinstance(row, Mapping) or set(row) != {"id", "reachable_by", "estimated_minutes",
+                                                         "estimated_minutes_by_actor"}
                 or type(row["id"]) is not int or row["id"] <= 0
                 or not isinstance(row["reachable_by"], list)
                 or any(a not in {"A", "B"} for a in row["reachable_by"])
-                or type(row["estimated_minutes"]) is not int or row["estimated_minutes"] < 0):
+                or type(row["estimated_minutes"]) is not int or row["estimated_minutes"] < 0
+                or not isinstance(row["estimated_minutes_by_actor"], Mapping)
+                or set(row["estimated_minutes_by_actor"]) != {"A", "B"}
+                or any(value is not None and (type(value) is not int or value < 0)
+                       for value in row["estimated_minutes_by_actor"].values())):
             raise ValueError(f"{key} destination needs a registered ID, reachability, and sealed time estimate")
     if not isinstance(s["current_obligations"], list) or not isinstance(s["typed_trace"], Mapping):
         raise ValueError("current obligations and TypedIR trace are required")
@@ -102,7 +111,8 @@ def _validate_state(request: StoryProcessRequest, state: Mapping[str, Any]) -> d
 
 def _task_request(request: StoryProcessRequest, state: Mapping[str, Any], actor: str,
                   kind: str, method: str, prerequisites: list[str] | None = None,
-                  rendezvous_destination_id: int | None = None) -> dict[str, Any]:
+                  rendezvous_destination_id: int | None = None,
+                  required_story_events: Mapping[str, Any] | None = None) -> dict[str, Any]:
     destination_key = "handover" if kind == "handover_note" else "archive"
     dest = state["destinations"][destination_key]
     row = {"request_id": f"{request.request_id}:v{request.version}:{method}:{actor}:{kind}",
@@ -114,14 +124,105 @@ def _task_request(request: StoryProcessRequest, state: Mapping[str, Any], actor:
             "control_source": ("AUTHORED" if request.control["mode"] == "direct" else
                                "LOCKED_FRAGMENT" if request.control["mode"] == "locked_fragment" else "PLANNER"),
             "grant_id": request.task_control_grant["grant_id"]}
+    if required_story_events is not None:
+        required = required_story_events.get("required_handover")
+        row["required_constraint_ids"] = [required_story_events["archive_constraint_id"]]
+        row["required_story_event_types"] = ["p5_note_archived"]
+        row["earliest_terminal_minute"] = (
+            required["start_minute"] if kind == "handover_note" and required
+            else 0 if kind == "handover_note"
+            else required_story_events["archive_start_minute"])
+        row["required_story_deadline_minute"] = (
+            required["deadline_minute"] if kind == "handover_note" and required
+            else request.objective["by_minute"] if kind == "handover_note"
+            else required_story_events["archive_deadline_minute"])
+        if required:
+            row["required_constraint_ids"].extend([
+                required["event_count_constraint_id"], required["order_constraint_id"]])
+            row["required_story_event_types"] = ["p5_note_handed_over", "p5_note_archived"]
+            row["required_story_deadline_minute"] = required["deadline_minute"]
     if rendezvous_destination_id is not None:
         row["rendezvous_destination_id"] = rendezvous_destination_id
     return row
 
 
-def _method_preconditions(method: str, request: StoryProcessRequest, s: Mapping[str, Any]) -> tuple[bool, list[str], list[dict[str, Any]]]:
+def _validate_story_requirements(request: StoryProcessRequest,
+                                 requirements: Mapping[str, Any] | None) -> dict[str, Any] | None:
+    if requirements is None:
+        return None
+    if (not isinstance(requirements, Mapping)
+            or set(requirements) != {"source_bundle_id", "source_version", "source_sha256",
+                                     "archive_constraint_id", "archive_start_minute",
+                                     "archive_deadline_minute", "note_id",
+                                     "required_handover", "residual_constraints"}
+            or not isinstance(requirements["source_bundle_id"], str)
+            or not requirements["source_bundle_id"]
+            or type(requirements["source_version"]) is not int or requirements["source_version"] < 1
+            or not isinstance(requirements["source_sha256"], str)
+            or len(requirements["source_sha256"]) != 64
+            or not isinstance(requirements["archive_constraint_id"], str)
+            or not requirements["archive_constraint_id"]
+            or type(requirements["archive_start_minute"]) is not int
+            or not 0 <= requirements["archive_start_minute"] <= request.objective["by_minute"]
+            or type(requirements["archive_deadline_minute"]) is not int
+            or requirements["archive_deadline_minute"] != request.objective["by_minute"]
+            or requirements["archive_start_minute"] > requirements["archive_deadline_minute"]
+            or requirements["note_id"] != request.objective["note_id"]
+            or not isinstance(requirements["residual_constraints"], list)):
+        raise ValueError("required_story_events must be bound to the current AuthorBundle, archive goal, deadline, and exact note")
+    for row in requirements["residual_constraints"]:
+        if (not isinstance(row, Mapping)
+                or set(row) != {"constraint_id", "kind", "source_constraint_sha256"}
+                or not all(isinstance(row[key], str) and row[key]
+                           for key in ("constraint_id", "kind", "source_constraint_sha256"))):
+            raise ValueError("residual authored constraints must remain explicitly identified")
+    handover = requirements["required_handover"]
+    if handover is not None:
+        keys = {"event_count_constraint_id", "order_constraint_id", "event_type", "actor_alias",
+                "recipient_alias", "before_event_type", "start_minute", "deadline_minute"}
+        if (not isinstance(handover, Mapping) or set(handover) != keys
+                or not all(isinstance(handover[key], str) and handover[key]
+                           for key in ("event_count_constraint_id", "order_constraint_id"))
+                or handover["event_count_constraint_id"] == handover["order_constraint_id"]
+                or handover["event_type"] != "p5_note_handed_over"
+                or handover["actor_alias"] != "B" or handover["recipient_alias"] != "A"
+                or handover["before_event_type"] != "p5_note_archived"
+                or type(handover["deadline_minute"]) is not int
+                or type(handover["start_minute"]) is not int
+                or not 0 <= handover["start_minute"] <= handover["deadline_minute"]
+                or not requirements["archive_start_minute"] <= handover["start_minute"]
+                or not 1 <= handover["deadline_minute"] <= requirements["archive_deadline_minute"]):
+            raise ValueError("required handover must be the registered same-note B→A event strictly before archive")
+    return deepcopy(dict(requirements))
+
+
+def _causal_support(method: str, requirements: Mapping[str, Any] | None) -> dict[str, Any]:
+    required = ["p5_note_archived"]
+    if requirements and requirements.get("required_handover"):
+        required = ["p5_note_handed_over", "p5_note_archived"]
+    supported = ({"p5_note_archived"} if method == "file_by_B" else
+                 {"p5_note_handed_over", "p5_note_archived"})
+    missing = [event for event in required if event not in supported]
+    if requirements and requirements.get("residual_constraints"):
+        missing.extend(f"unmapped_constraint:{row['constraint_id']}"
+                       for row in requirements["residual_constraints"])
+    return {"supported_event_types": sorted(supported),
+            "required_event_types": required,
+            "missing_required_event_types": missing}
+
+
+def _method_preconditions(method: str, request: StoryProcessRequest, s: Mapping[str, Any],
+                          required_story_events: Mapping[str, Any] | None = None) -> tuple[bool, list[str], list[dict[str, Any]]]:
     reasons: list[str] = []
     tasks: list[dict[str, Any]] = []
+    support = _causal_support(method, required_story_events)
+    if support["missing_required_event_types"]:
+        reasons.append("method_lacks_causal_support_for_required_story_event:" +
+                       ",".join(support["missing_required_event_types"]))
+    handover_requirement = (required_story_events or {}).get("required_handover")
+    if (method == "return_then_file_by_A" and handover_requirement
+            and s["sealed_minute"] < handover_requirement["start_minute"]):
+        reasons.append("waiting_for_authored_handover_window_start")
     mode, control = request.control["mode"], request.control
     allowed = set(control["allowed_methods"])
     if method not in allowed:
@@ -146,11 +247,14 @@ def _method_preconditions(method: str, request: StoryProcessRequest, s: Mapping[
             reasons.append("archive_location_not_reachable_by_B")
         if _actor_busy(s["actors"]["B"]):
             reasons.append("B_has_an_unsettled_native_task_that_retains_priority")
+        if s["actors"]["B"]["remaining_work_minutes"] is None:
+            reasons.append("B_remaining_commitment_work_is_unknown")
         if _task_rejected(s["actors"]["B"], "archive_note"):
             reasons.append("B_previously_rejected_this_local_task")
         if request.objective["note_id"] not in s["actors"]["B"]["locally_observed_item_ids"]:
             reasons.append("B_has_not_locally_observed_exact_note")
-        tasks = [_task_request(request, s, "B", "archive_note", method)]
+        tasks = [_task_request(request, s, "B", "archive_note", method,
+                               required_story_events=required_story_events)]
     elif method == "return_then_file_by_A":
         a, b = s["actors"]["A"], s["actors"]["B"]
         if not a["present"] or not a["can_receive_note"]:
@@ -168,22 +272,33 @@ def _method_preconditions(method: str, request: StoryProcessRequest, s: Mapping[
             reasons.append("archive_location_not_reachable_by_A")
         if any(_actor_busy(s["actors"][actor]) for actor in ("A", "B")):
             reasons.append("required_actor_has_an_unsettled_native_task_that_retains_priority")
+        if any(s["actors"][actor]["remaining_work_minutes"] is None for actor in ("A", "B")):
+            reasons.append("required_actor_remaining_commitment_work_is_unknown")
         if (_task_rejected(s["actors"]["B"], "handover_note")
                 or _task_rejected(s["actors"]["A"], "archive_note")):
             reasons.append("an_actor_previously_rejected_a_required_local_task")
         if request.objective["note_id"] not in b["locally_observed_item_ids"]:
             reasons.append("B_has_not_locally_observed_exact_note_for_handover")
-        tasks = [_task_request(request, s, "B", "handover_note", method),
+        tasks = [_task_request(request, s, "B", "handover_note", method,
+                               required_story_events=required_story_events),
                  _task_request(request, s, "A", "archive_note", method,
                                prerequisites=["committed_native_handover_receipt_for_exact_note_at_rendezvous",
                                               "A_locally_observes_exact_note", "native_actor_accepts_task"],
-                               rendezvous_destination_id=s["destinations"]["handover"]["id"])]
+                               rendezvous_destination_id=s["destinations"]["handover"]["id"],
+                               required_story_events=required_story_events)]
     else:
         reasons.append("unknown_method")
-    cost = sum(s["destinations"]["handover" if row["task_kind"] == "handover_note" else "archive"]["estimated_minutes"]
-               for row in tasks)
-    if s["sealed_minute"] + cost > request.objective["by_minute"]:
+    timing = _timing_budget(request, s, tasks)
+    effective_deadline = min(request.objective["by_minute"],
+                             handover_requirement["deadline_minute"]
+                             if handover_requirement else request.objective["by_minute"])
+    if timing["projected_finish_minute"] > effective_deadline:
         reasons.append("absolute_deadline_time_infeasible")
+    if required_story_events and required_story_events.get("required_handover"):
+        handover_deadline = required_story_events["required_handover"]["deadline_minute"]
+        handover_finish = s["sealed_minute"] + timing["handover_completion_offset_minutes"]
+        if handover_finish > handover_deadline:
+            reasons.append("absolute_handover_deadline_time_infeasible")
     return not reasons, reasons, tasks
 
 
@@ -198,12 +313,40 @@ def _task_rejected(actor: Mapping[str, Any], task_kind: str) -> bool:
 
 
 def _timing_budget(request: StoryProcessRequest, s: Mapping[str, Any], tasks: list[dict[str, Any]]) -> dict[str, int | bool]:
-    cost = sum(s["destinations"]["handover" if row["task_kind"] == "handover_note" else "archive"]["estimated_minutes"]
-               for row in tasks)
+    route = 0
+    handover_offset = 0
+    for row in tasks:
+        key = "handover" if row["task_kind"] == "handover_note" else "archive"
+        destination = s["destinations"][key]
+        actor = row["actor_alias"]
+        per_actor = destination.get("estimated_minutes_by_actor", {})
+        minutes = per_actor.get(actor, destination["estimated_minutes"])
+        if row["task_kind"] == "handover_note":
+            # Both participants must reach the registered rendezvous before the
+            # give can occur; this remains a route lower-bound, not a guarantee.
+            minutes = max(per_actor.get("A", minutes), per_actor.get("B", minutes))
+        route += minutes
+        if row["task_kind"] == "handover_note":
+            handover_offset = route
+    if tasks and tasks[0]["source_method_id"] == "file_by_B":
+        workload = s["actors"]["B"]["remaining_work_minutes"] or 0
+    elif tasks:
+        workload = max(s["actors"][alias]["remaining_work_minutes"] or 0 for alias in ("A", "B"))
+    else:
+        workload = 0
+    cost = route + workload
+    if handover_offset:
+        handover_offset += workload
     finish = s["sealed_minute"] + cost
     return {"estimated_task_minutes": cost, "sealed_minute": s["sealed_minute"],
+            "route_task_minutes": route, "remaining_work_lower_bound_minutes": workload,
+            "remaining_work_basis": "receipt-verified actor-local primitive lower bound; null means unknown; not a route-feasibility proof",
+            "handover_completion_offset_minutes": handover_offset,
             "projected_finish_minute": finish,
             "absolute_deadline_minute": request.objective["by_minute"],
+            "effective_story_deadline_minute": min(
+                request.objective["by_minute"],
+                tasks[0].get("required_story_deadline_minute", request.objective["by_minute"])) if tasks else request.objective["by_minute"],
             "remaining_minutes": max(0, request.objective["by_minute"] - s["sealed_minute"]),
             "deadline_fit": finish <= request.objective["by_minute"]}
 
@@ -218,6 +361,22 @@ def _preserved_obligations(s: Mapping[str, Any]) -> list[dict[str, Any]]:
                          "item_id": task["item_id"], "status": task["status"],
                          "preserved": True})
     return rows
+
+
+def _temporary_method_wait(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    transient = {"B_has_an_unsettled_native_task_that_retains_priority",
+                 "required_actor_has_an_unsettled_native_task_that_retains_priority",
+                 "B_remaining_commitment_work_is_unknown",
+                 "required_actor_remaining_commitment_work_is_unknown",
+                 "waiting_for_authored_handover_window_start"}
+    waits = []
+    for row in candidates:
+        blockers = [reason for reason in row.get("preconditions", ()) if reason in transient]
+        if blockers:
+            waits.append({"kind": "WAITING_FOR_ACTOR_COMMITMENT_FRONTIER",
+                          "method_id": row.get("method_id"),
+                          "temporary_blockers": blockers})
+    return waits
 
 
 def _locked_tasks(request: StoryProcessRequest, s: Mapping[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
@@ -245,7 +404,8 @@ def _locked_tasks(request: StoryProcessRequest, s: Mapping[str, Any]) -> tuple[l
     return rows, []
 
 
-def _typedir_monitor(request: StoryProcessRequest, s: Mapping[str, Any]) -> list[dict[str, Any]]:
+def _typedir_monitor(request: StoryProcessRequest, s: Mapping[str, Any],
+                     required_story_events: Mapping[str, Any] | None = None) -> list[dict[str, Any]]:
     """Evaluate the existing typed event registry over the sealed ledger trace."""
     from tools.trajectory_constraints_v0.ast import EventCount, EventOrder, StrictOrder, Window
     from tools.trajectory_constraints_v0.trace import Event, Trace
@@ -276,7 +436,8 @@ def _typedir_monitor(request: StoryProcessRequest, s: Mapping[str, Any]) -> list
     actor_filter = {"actor": aliases[next(iter(permitted_actors))]} if len(permitted_actors) == 1 else {}
     constraints = [
         EventCount("story-note-archive-by-deadline", "p5_note_archived", "1",
-                   Window(0, request.objective["by_minute"]),
+                   Window(required_story_events["archive_start_minute"] if required_story_events else 0,
+                          request.objective["by_minute"]),
                    minimum=1, maximum=1, event_filter={"item": note, **actor_filter}),
         EventOrder("story-response-before-archive", "p5_note_response", "1",
                    "p5_note_archived", "1", StrictOrder.EVENT_KEY,
@@ -287,6 +448,19 @@ def _typedir_monitor(request: StoryProcessRequest, s: Mapping[str, Any]) -> list
                    Window(0, request.objective["by_minute"]), minimum=0, maximum=1,
                    event_filter={"item": note}),
     ]
+    if required_story_events and required_story_events.get("required_handover"):
+        required = required_story_events["required_handover"]
+        handover_window = Window(required["start_minute"], required["deadline_minute"])
+        constraints.extend([
+            EventCount(required["event_count_constraint_id"], "p5_note_handed_over", "1",
+                       handover_window, minimum=1, maximum=1,
+                       event_filter={"actor": aliases["B"], "recipient": aliases["A"], "item": note}),
+            EventOrder(required["order_constraint_id"], "p5_note_handed_over", "1",
+                       "p5_note_archived", "1", StrictOrder.EVENT_KEY,
+                       handover_window,
+                       before_filter={"actor": aliases["B"], "recipient": aliases["A"], "item": note},
+                       after_filter={"item": note}),
+        ])
     result = []
     for constraint in constraints:
         try:
@@ -325,7 +499,8 @@ def _event_actor_alias(event: Mapping[str, Any]) -> str | None:
     return None
 
 
-def _event_baseline(request: StoryProcessRequest, s: Mapping[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+def _event_baseline(request: StoryProcessRequest, s: Mapping[str, Any],
+                    required_story_events: Mapping[str, Any] | None = None) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     """Deterministic strong event dispatcher over exactly the same legal method set."""
     if s["response"] is None or request.control["mode"] == "zero":
         return [], [], [{"kind": "WAITING_FOR_NATIVE_RESPONSE" if s["response"] is None else "NO_TASK_AUTHORIZED"}]
@@ -333,8 +508,10 @@ def _event_baseline(request: StoryProcessRequest, s: Mapping[str, Any]) -> tuple
     rejected = []
     candidates = []
     for method in ("file_by_B", "return_then_file_by_A"):
-        ok, guards, tasks = _method_preconditions(method, request, s)
-        row = {"method_id": method, "feasible": ok, "preconditions": guards, "task_requests": tasks}
+        ok, guards, tasks = _method_preconditions(method, request, s, required_story_events)
+        row = {"method_id": method, "feasible": ok, "preconditions": guards,
+               "causal_support": _causal_support(method, required_story_events),
+               "task_requests": tasks}
         row["resource_time"] = _timing_budget(request, s, tasks)
         candidates.append(row)
         (feasible if ok else rejected).append(row)
@@ -345,20 +522,23 @@ def _event_baseline(request: StoryProcessRequest, s: Mapping[str, Any]) -> tuple
     return (list(chosen["task_requests"]) if chosen else []), candidates, rejected
 
 
-def plan_story_process(request: StoryProcessRequest, sealed_state: Mapping[str, Any], *, strategy: str = "gtpyhop") -> dict[str, Any]:
+def plan_story_process(request: StoryProcessRequest, sealed_state: Mapping[str, Any], *, strategy: str = "gtpyhop",
+                       required_story_events: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Plan task requests from a sealed state; never applies world effects."""
     s = _validate_state(request, sealed_state)
+    required_story_events = _validate_story_requirements(request, required_story_events)
     if strategy not in {"gtpyhop", "event_driven"}:
         raise ValueError("strategy must be gtpyhop or event_driven")
     # Report the same-state alternative guards independently of search.  This is
     # diagnostic evidence only: it must not preselect, order, or feed the planner.
     alternative_guard_diagnostics = []
     for method in ("file_by_B", "return_then_file_by_A"):
-        feasible, guards, tasks = _method_preconditions(method, request, s)
+        feasible, guards, tasks = _method_preconditions(method, request, s, required_story_events)
         alternative_guard_diagnostics.append({
             "method_id": method,
             "feasible": feasible,
             "preconditions": guards,
+            "causal_support": _causal_support(method, required_story_events),
             "resource_time": _timing_budget(request, s, tasks),
             "diagnostic_only": True,
             "used_to_select_method": False,
@@ -382,11 +562,14 @@ def plan_story_process(request: StoryProcessRequest, sealed_state: Mapping[str, 
                             "request_ids": [r["request_id"] for r in reqs]})
         status = "LOCKED_ABORTED" if reasons else "TASKS_PROPOSED"
     elif strategy == "event_driven":
-        reqs, candidates, rejected = _event_baseline(request, s)
+        reqs, candidates, rejected = _event_baseline(request, s, required_story_events)
         attempts, decomposition = deepcopy(candidates), deepcopy(reqs)
         outstanding = _preserved_obligations(s)
         if not reqs:
-            outstanding.append({"kind": "WAITING_FOR_NATIVE_RESPONSE" if s["response"] is None else "NO_FEASIBLE_METHOD"})
+            waits = _temporary_method_wait(candidates)
+            outstanding.extend(waits)
+            if not waits:
+                outstanding.append({"kind": "WAITING_FOR_NATIVE_RESPONSE" if s["response"] is None else "NO_FEASIBLE_METHOD"})
         status = "TASKS_PROPOSED" if reqs else "WAITING_OR_BLOCKED"
     else:
         try:
@@ -413,16 +596,18 @@ def plan_story_process(request: StoryProcessRequest, sealed_state: Mapping[str, 
         method_attempts = []
 
         def file_by_B(world):
-            ok, guards, tasks = _method_preconditions("file_by_B", world.request, world.sealed)
+            ok, guards, tasks = _method_preconditions("file_by_B", world.request, world.sealed, required_story_events)
             method_attempts.append({"method_id": "file_by_B", "feasible": ok,
                                     "preconditions": guards, "decomposition": deepcopy(tasks),
+                                    "causal_support": _causal_support("file_by_B", required_story_events),
                                     "resource_time": _timing_budget(world.request, world.sealed, tasks)})
             return [("emit_task", tasks[0])] if ok else None
 
         def return_then_file_by_A(world):
-            ok, guards, tasks = _method_preconditions("return_then_file_by_A", world.request, world.sealed)
+            ok, guards, tasks = _method_preconditions("return_then_file_by_A", world.request, world.sealed, required_story_events)
             method_attempts.append({"method_id": "return_then_file_by_A", "feasible": ok,
                                     "preconditions": guards, "decomposition": deepcopy(tasks),
+                                    "causal_support": _causal_support("return_then_file_by_A", required_story_events),
                                     "resource_time": _timing_budget(world.request, world.sealed, tasks)})
             return [("emit_task", tasks[0]), ("emit_task", tasks[1])] if ok else None
 
@@ -452,12 +637,15 @@ def plan_story_process(request: StoryProcessRequest, sealed_state: Mapping[str, 
         if not search.success:
             reqs = []
             outstanding = _preserved_obligations(s)
+            outstanding.extend(_temporary_method_wait(method_attempts))
             active = [row for row in outstanding if row.get("kind") == "actor_story_task"
                       and row.get("status") in {"ACCEPTED", "IN_PROGRESS"}]
             if active:
                 outstanding.append({"kind": "WAITING_FOR_ACTIVE_NATIVE_TASK",
                                     "request_ids": [row["request_id"] for row in active],
                                     "reason": "existing actor task retains priority; planner emitted no replacement"})
+            elif _temporary_method_wait(method_attempts):
+                pass
             else:
                 outstanding.append({"kind": "GTPYHOP_SEARCH_NO_PLAN",
                                     "reason": "no legal method decomposition found in sealed state"})
@@ -474,9 +662,11 @@ def plan_story_process(request: StoryProcessRequest, sealed_state: Mapping[str, 
         decomposition = deepcopy(reqs)
         candidates = [{"method_id": row["method_id"], "feasible": row["feasible"],
                        "preconditions": row["preconditions"],
+                       "causal_support": row.get("causal_support"),
                        "decomposition": row.get("decomposition", [])} for row in attempts]
         rejected = [row for row in candidates if not row["feasible"]]
-        status = "TASKS_PROPOSED" if reqs else ("WAITING_OR_BLOCKED" if s["response"] is not None else "WAITING_FOR_RESPONSE")
+        status = "TASKS_PROPOSED" if reqs else (
+            "WAITING_OR_BLOCKED" if s["response"] is not None else "WAITING_FOR_RESPONSE")
         extra_trace = planner_trace
 
     # Guard all proposed work with the fixed immutable scenario grant.
@@ -485,12 +675,13 @@ def plan_story_process(request: StoryProcessRequest, sealed_state: Mapping[str, 
                 or task["task_kind"] not in request.task_control_grant["task_kinds"]
                 or task["grant_id"] != request.task_control_grant["grant_id"]):
             raise ValueError("planner proposed a task outside the fixed scenario grant")
-    typedir = _typedir_monitor(request, s)
+    typedir = _typedir_monitor(request, s, required_story_events)
     fb = {"new_committed_event_ids": sorted(e["event_id"] for e in s["typed_trace"]["events"]
                                                if isinstance(e, Mapping) and e.get("provenance") == "committed_ledger"),
           "sealed_minute": s["sealed_minute"], "request_version": request.version}
     return {"schema": SCHEMA, "status": status, "strategy": strategy,
             "controller_mode": mode, "sealed_minute": s["sealed_minute"],
+            "required_story_events": deepcopy(required_story_events),
             "target_version": request.version, "selected_method":
                 (reqs[0]["source_method_id"] if reqs else None),
             "method_plans": candidates, "rejected_methods": rejected,

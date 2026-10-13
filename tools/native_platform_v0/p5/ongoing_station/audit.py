@@ -11,6 +11,424 @@ def _rows(value: Any) -> list[dict[str, Any]]:
     return [dict(row) for row in value if isinstance(row, Mapping)] if isinstance(value, list) else []
 
 
+def _frontier_minute(trace: Mapping[str, Any]) -> int | None:
+    value = trace.get("complete_through")
+    if type(value) is int:
+        return value
+    if isinstance(value, Mapping):
+        for key in ("events", "minute", "sealed_minute"):
+            if type(value.get(key)) is int:
+                return value[key]
+    return None
+
+
+def audit_history_prefix(prefix: Mapping[str, Any], final_trace: Mapping[str, Any],
+                         scene: Mapping[str, Any], db: Mapping[str, Any], *,
+                         history_condition: str) -> dict[str, Any]:
+    """Describe a real request-publication frontier and the next actor decisions.
+
+    The captured frontier can be post-activation/post-seal while still preceding
+    actor consumption of its newly published projection. This single-run report
+    does not compare history conditions or certify a causal effect.
+    """
+    del scene, db  # identity-aware cross-run normalization belongs to pair audit
+    actors = _rows(prefix.get("actor_evidence"))
+    station = prefix.get("ongoing_station", {})
+    station = station if isinstance(station, Mapping) else {}
+    commitments = _rows(station.get("commitments"))
+    receipts_by_actor = {row.get("actor_id"): _rows(row.get("native_receipts")) for row in actors}
+    observations = []
+    prefix_minute = _frontier_minute(prefix)
+    final_actors = {row.get("actor_id"): row for row in _rows(final_trace.get("actor_evidence"))}
+    for actor in actors:
+        actor_id = actor.get("actor_id")
+        decisions = [row for row in _rows(actor.get("log"))
+                     if row.get("kind") == "ongoing_station_decision"]
+        latest = decisions[-1] if decisions else None
+        view = latest.get("view") if isinstance(latest, Mapping) else None
+        actor_commitments = [row for row in commitments if row.get("actor_id") == actor_id]
+        later_actor = final_actors.get(actor_id, {})
+        next_decision = next((row for row in _rows(later_actor.get("log"))
+            if row.get("kind") == "ongoing_station_decision"
+            and type(prefix_minute) is int and row.get("minute") == prefix_minute + 1), None)
+        observations.append({"actor_id": actor_id,
+            "actor_alias": actor.get("actor_alias"),
+            "latest_decision_source": (f"actor_evidence[{len(observations)}].log[{len(decisions)-1}]"
+                                        if latest else None),
+            "latest_decision": latest,
+            "first_post_frontier_decision_source": (
+                f"final_trace.actor_evidence[{len(observations)}].log[minute={prefix_minute + 1}]"
+                if next_decision else None),
+            "first_post_frontier_decision": next_decision,
+            "observed_view": view,
+            "commitments": actor_commitments,
+            "settled_receipt_ids": [row.get("receipt_id") for row in receipts_by_actor.get(actor_id, [])
+                                     if row.get("settled") is True]})
+    return {"schema": "ongoing-station-history-prefix-audit-v1",
+        "status": "PARTIAL", "pass": False,
+        "history_condition_label": history_condition,
+        "prefix_scene_id": prefix.get("scene_id"),
+        "prefix_frontier": prefix.get("complete_through"),
+        "activation_events_at_or_before_frontier": [row for row in _rows(station.get("activation_events"))
+            if type(prefix_minute) is int and row.get("minute", 2**63) <= prefix_minute],
+        "published_projection_history": _rows(station.get("projection_history")),
+        "pending_author_offers_at_frontier": _rows(station.get("pending_offers")),
+        "observations": observations,
+        "comparison_boundary": {
+            "frontier_semantics": "single scene only; activation/projection publication may be complete while actor callback has not consumed that published version",
+            "known_runtime_limit": "one scene cannot establish the between-history contrast; recorded player commands and receipt-backed actor history may define a paired treatment, but exact physical/observation matching must be read back",
+            "matched_pair_status": "NOT_EVALUATED_BY_SINGLE_ARM_AUDIT",
+            "required_pair_readback": ["actor-local observed view", "item holder/location",
+                "active commitments", "settled history receipt IDs", "sealed minute/frontier",
+                "first decision after frontier"],
+            "causal_claim": "not certified by this single-arm prefix; compare normalized matched frontiers and next decisions across the fixed pair"}}
+
+
+def audit_required_story_events(trace: Mapping[str, Any], scene: Mapping[str, Any],
+                                db: Mapping[str, Any], *,
+                                initial_author: Mapping[str, Any],
+                                edit_author: Mapping[str, Any],
+                                edit_minute: int,
+                                prefix: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """Check E3 source-CAS, method support, and same-note physical event ordering."""
+    station = trace.get("ongoing_station", {})
+    station = station if isinstance(station, Mapping) else {}
+    typed = _rows(station.get("typed_events"))
+    note_id = station.get("bound_note_id")
+    note_key = str(note_id) if note_id is not None else None
+    events = [row for row in typed if row.get("args", {}).get("item", {}).get("stable_id") == note_key]
+    handovers = [row for row in events if row.get("event_type") == "p5_note_handed_over"
+                 and row.get("args", {}).get("actor", {}).get("stable_id") == "B"
+                 and row.get("args", {}).get("recipient", {}).get("stable_id") == "A"]
+    archives = [row for row in events if row.get("event_type") == "p5_note_archived"]
+    handover = next((row for row in handovers for archive in archives
+        if (row.get("time", 2**63) < archive.get("time", -1)
+            or (row.get("time") == archive.get("time")
+                and row.get("sequence", 2**63) < archive.get("sequence", -1)))), None)
+    archive = next((row for row in archives if handover and
+        (row.get("time", -1) > handover.get("time", 2**63)
+         or (row.get("time") == handover.get("time")
+             and row.get("sequence", -1) > handover.get("sequence", 2**63)))), None)
+    controller_rows = _rows(station.get("controller_decisions"))
+    v1 = [row for row in controller_rows if row.get("source_version") == 1
+          and row.get("minute", 0) < edit_minute]
+    v2 = [row for row in controller_rows if row.get("source_version") == 2
+          and row.get("minute", 0) >= edit_minute]
+    v1_feasible_sets = []
+    for row in v1:
+        decision = row.get("decision", {})
+        plans = (_rows(decision.get("alternative_guard_diagnostics"))
+                 or _rows(decision.get("method_plans")))
+        archived_already = any(event.get("event_type") == "p5_note_archived"
+            and event.get("args", {}).get("item", {}).get("stable_id") == note_key
+            and event.get("time", 2**63) < edit_minute for event in typed)
+        feasible = frozenset(plan.get("method_id") for plan in plans
+                             if plan.get("feasible") is True) if not archived_already else frozenset()
+        guards = {plan.get("method_id"): sorted(plan.get("preconditions", [])) for plan in plans}
+        if plans and not archived_already:
+            v1_feasible_sets.append({"minute": row.get("minute"),
+                "sealed_frontier": row.get("sealed_frontier"),
+                "feasible_methods": sorted(value for value in feasible if value),
+                "method_guards": guards})
+    changed_feasibility = any(left["feasible_methods"] != right["feasible_methods"]
+        for index, left in enumerate(v1_feasible_sets)
+        for right in v1_feasible_sets[index + 1:]
+        if left.get("minute") != right.get("minute"))
+    relevant = ("busy", "reachable", "remaining_work", "deadline", "visible", "present")
+    changed_condition = any(
+        any(token in reason for token in relevant)
+        for index, left in enumerate(v1_feasible_sets)
+        for right in v1_feasible_sets[index + 1:]
+        if left.get("minute") != right.get("minute")
+        for method in set(left["method_guards"]) | set(right["method_guards"])
+        for reason in (set(left["method_guards"].get(method, []))
+                       ^ set(right["method_guards"].get(method, []))))
+    required_v2 = [row.get("decision", {}).get("required_story_events")
+                   for row in v2 if isinstance(row.get("decision"), Mapping)
+                   and row.get("decision", {}).get("required_story_events")]
+    methods = [method for row in v2
+               for method in _rows(row.get("decision", {}).get("method_plans"))]
+    v1_offer_ids = {str(offer_id) for row in v1 for offer_id in row.get("offer_ids", [])}
+    stale_offer_ids = {str(value) for value in station.get("stale_offer_ids", [])}
+    cancelled_suffixes = [row for row in _rows(station.get("commitments"))
+        if row.get("source") == "AUTHOR" and row.get("status") == "CANCELLED_STALE"
+        and str(row.get("source_offer_id")) in v1_offer_ids]
+    v1_author_commitments = [row for row in _rows(station.get("commitments"))
+        if row.get("source") == "AUTHOR"
+        and str(row.get("source_offer_id")) in v1_offer_ids]
+    old_suffix_handled = all(row.get("status") in {
+        "CANCELLED_STALE", "SETTLED", "DECLINED", "EXPIRED"}
+        for row in v1_author_commitments)
+    file_b_unsupported = any(method.get("method_id") == "file_by_B"
+        and "p5_note_handed_over" in method.get("causal_support", {}).get("missing_required_event_types", [])
+        for method in methods)
+    return_then_supported = any(method.get("method_id") == "return_then_file_by_A"
+        and {"p5_note_handed_over", "p5_note_archived"}.issubset(
+            set(method.get("causal_support", {}).get("supported_event_types", [])))
+        for method in methods)
+    constraints_v1 = initial_author.get("bundle", {}).get("constraints", [])
+    constraints_v2 = edit_author.get("bundle", {}).get("constraints", [])
+    original_preserved = (isinstance(constraints_v1, list) and isinstance(constraints_v2, list)
+                          and all(row in constraints_v2 for row in constraints_v1))
+    archive_v1 = next((row for row in constraints_v1 if row.get("id") == "archive-note-by-horizon"), {})
+    archive_v2 = next((row for row in constraints_v2 if row.get("id") == "archive-note-by-horizon"), {})
+    edit_row = next((row for row in _event_rows(trace, "P5_INTERVENTION")
+        if row.get("minute") == edit_minute
+        and row.get("typed_args", {}).get("kind") == "ongoing_station_author_edit"), None)
+    edit_result = edit_row.get("typed_args", {}).get("settlement", {}) if edit_row else {}
+    prefix_minute = _frontier_minute(prefix) if isinstance(prefix, Mapping) else None
+    prefix_ledger = _rows(prefix.get("ledger")) if isinstance(prefix, Mapping) else []
+    final_prefix_ledger = [row for row in _rows(trace.get("ledger"))
+        if type(prefix_minute) is int and type(row.get("minute")) is int
+        and row["minute"] <= prefix_minute]
+    ledger_prefix_preserved = bool(prefix_ledger and
+        json.dumps(prefix_ledger, sort_keys=True, separators=(",", ":"))
+        == json.dumps(final_prefix_ledger, sort_keys=True, separators=(",", ":")))
+    receipt_prefix_preserved = True
+    if isinstance(prefix, Mapping):
+        final_actors = {row.get("actor_id"): row for row in _rows(trace.get("actor_evidence"))}
+        for old_actor in _rows(prefix.get("actor_evidence")):
+            actor = final_actors.get(old_actor.get("actor_id"), {})
+            old_receipts = [row for row in _rows(old_actor.get("native_receipts"))
+                if type(row.get("sim_minute")) is int and row["sim_minute"] <= prefix_minute]
+            final_receipts = [row for row in _rows(actor.get("native_receipts"))
+                if type(row.get("sim_minute")) is int and row["sim_minute"] <= prefix_minute]
+            receipt_prefix_preserved &= json.dumps(old_receipts, sort_keys=True,
+                separators=(",", ":")) == json.dumps(final_receipts, sort_keys=True, separators=(",", ":"))
+    verdicts = station.get("real_verdicts", {})
+    verdicts = (_rows(verdicts.get("constraints")) if isinstance(verdicts, Mapping)
+                else _rows(verdicts))
+    verdict_status = {row.get("constraint_id", row.get("goal_id")): row.get("status")
+                      for row in verdicts}
+    final_digest = _source_digest(edit_author)
+    receipts = []
+    actors = scene.get("actors", {}) if isinstance(scene.get("actors"), Mapping) else {}
+    for alias in ("A", "B"):
+        actor_id = actors.get(alias, {}).get("id") if isinstance(actors.get(alias), Mapping) else None
+        if type(actor_id) is int:
+            native_receipts, _, _ = _actor_native_state(db, actor_id, trace.get("scene_id"))
+            receipts.extend(native_receipts)
+    ledger_rows = _rows(trace.get("ledger"))
+    def source_receipt_id(event_row):
+        ledger_row = next((row for row in ledger_rows
+            if row.get("event_id") == event_row.get("event_id")), {})
+        args = ledger_row.get("typed_args", {})
+        return args.get("receipt_id") if isinstance(args, Mapping) else None
+    physical = bool(handover and archive and handover.get("provenance") == "committed_ledger"
+        and archive.get("provenance") == "committed_ledger"
+        and handover.get("native_commitment_id") and archive.get("native_commitment_id")
+        and any(row.get("receipt_id") == source_receipt_id(handover)
+                and row.get("settled") is True and row.get("kind") == "give"
+                and row.get("item_id") == note_id for row in receipts)
+        and any(row.get("receipt_id") == source_receipt_id(archive)
+                and row.get("settled") is True and row.get("kind") == "drop"
+                and row.get("item_id") == note_id for row in receipts))
+    criteria = {
+        "v1_controller_evaluated_before_edit": bool(v1),
+        "v2_controller_evaluated_after_edit": bool(v2),
+        "v2_requirement_projects_new_handover": any(
+            isinstance(row, Mapping) and row.get("required_handover", {}).get("event_type") == "p5_note_handed_over"
+            for row in required_v2),
+        "original_archive_constraint_preserved": original_preserved,
+        "absolute_archive_deadline_unchanged": archive_v1.get("deadline") == archive_v2.get("deadline"),
+        "author_edit_committed_version_two": bool(edit_row
+            and edit_result.get("status") == "UPDATED" and edit_result.get("version") == 2
+            and edit_result.get("source_sha256") == final_digest),
+        "sealed_prefix_ledger_and_receipts_unchanged": ledger_prefix_preserved and receipt_prefix_preserved,
+        "prior_v1_offer_invalidated_if_published": (not v1_offer_ids
+            or bool(v1_offer_ids & stale_offer_ids)),
+        "prior_v1_commitment_suffix_cancelled_if_created": old_suffix_handled,
+        "file_by_B_causal_support_rejected": file_b_unsupported,
+        "return_method_supports_handover_and_archive": return_then_supported,
+        "same_note_B_to_A_handover_physically_precedes_archive": physical,
+        "all_three_typed_constraints_satisfied": all(verdict_status.get(cid) == "SATISFIED"
+            for cid in ("archive-note-by-horizon", "handover-occurs-before-archive",
+                        "handover-before-archive"))}
+    e2_criteria = {
+        "goal_unarchived_before_edit": not any(event.get("event_type") == "p5_note_archived"
+            and event.get("args", {}).get("item", {}).get("stable_id") == note_key
+            and event.get("time", 2**63) < edit_minute for event in typed),
+        "real_pre_edit_method_feasibility_changes_with_sealed_state": changed_feasibility,
+        "changed_feasibility_has_work_location_or_deadline_guard_evidence": changed_condition}
+    e3_pass = all(criteria.values())
+    passed = e3_pass and all(e2_criteria.values())
+    status = "PASS" if passed else "PARTIAL" if e3_pass else "NOT_CERTIFIED"
+    return {"schema": "ongoing-station-required-story-events-audit-v1",
+        "status": status, "pass": passed, "criteria": criteria,
+        "e2_criteria": e2_criteria,
+        "note_id": note_id, "edit_minute": edit_minute,
+        "handover_event": handover, "archive_event": archive,
+        "edit_result": edit_result, "typed_constraint_verdicts": verdicts,
+        "v1_decision_count": len(v1), "v2_decision_count": len(v2),
+        "v2_requirements": required_v2,
+        "pre_edit_method_feasibility": v1_feasible_sets,
+        "prior_v1_offer_ids": sorted(v1_offer_ids),
+        "stale_offer_ids": sorted(stale_offer_ids),
+        "cancelled_old_suffixes": cancelled_suffixes,
+        "physical_receipt_ids": [row.get("receipt_id") for row in receipts if row.get("settled") is True]}
+
+
+def audit_mid_episode_resource(trace: Mapping[str, Any], scene: Mapping[str, Any],
+                               db: Mapping[str, Any], *,
+                               expected_intervention: Mapping[str, Any]) -> dict[str, Any]:
+    """Audit an in-episode player get; legality is read from receipt, never assumed."""
+    minute = expected_intervention.get("at")
+    events = [row for row in _event_rows(trace, "P5_INTERVENTION")
+              if row.get("minute") == minute
+              and row.get("typed_args", {}).get("kind") == "player_native_command"]
+    event = events[0] if events else None
+    receipt = event.get("typed_args", {}).get("command_receipt", {}) if event else {}
+    db_scene = _scene_db(db, trace.get("scene_id"))
+    objects = db_scene.get("objects", []) if isinstance(db_scene, Mapping) else []
+    item_alias = expected_intervention.get("item_alias")
+    item = next((row for row in objects if isinstance(row, Mapping)
+        and row.get("attributes", {}).get("native_p5", {}).get("p5_item_alias") == item_alias), None)
+    player = next((row for row in objects if isinstance(row, Mapping)
+        and row.get("attributes", {}).get("native_p3", {}).get("p3_control_role") == "player"), None)
+    player_id = player.get("id") if isinstance(player, Mapping) else None
+    player_inventory = player.get("contents_ids", player.get("inventory_ids", [])) if isinstance(player, Mapping) else []
+    if not player_inventory and isinstance(player, Mapping):
+        player_attrs = player.get("attributes", {})
+        p3 = player_attrs.get("native_p3", {}) if isinstance(player_attrs, Mapping) else {}
+        player_inventory = p3.get("inventory_ids", []) if isinstance(p3, Mapping) else []
+    actor_ids = {alias: row.get("id") for alias, row in scene.get("actors", {}).items()
+                 if isinstance(scene.get("actors"), Mapping) and isinstance(row, Mapping)}
+    actor_receipts: dict[str, list[dict[str, Any]]] = {}
+    for alias in ("A", "B"):
+        actor_receipts[alias] = (_actor_native_state(db, actor_ids[alias], trace.get("scene_id"))[0]
+                                 if type(actor_ids.get(alias)) is int else [])
+    item_id = item.get("id") if isinstance(item, Mapping) else None
+    prior = [row for rows in actor_receipts.values() for row in rows
+             if row.get("settled") is True and row.get("item_id") == item_id
+             and type(row.get("sim_minute")) is int and row["sim_minute"] < minute]
+    later_unrelated = [row for rows in actor_receipts.values() for row in rows
+        if row.get("settled") is True and row.get("item_id") != item_id
+        and type(row.get("sim_minute")) is int and row["sim_minute"] > minute]
+    final_inventory = (receipt.get("after_inventory_ids", []) if receipt else [])
+    criteria = {
+        "intervention_occurs_after_native_episode_prefix": bool(prior),
+        "real_player_command_receipt_at_scheduled_minute": bool(receipt
+            and receipt.get("actor_alias") == "player"
+            and receipt.get("operation") == expected_intervention.get("operation")
+            and receipt.get("provenance") == "native_player_command"
+            and receipt.get("settled") is True),
+        "item_finally_held_by_player": bool(item_id in final_inventory
+            or item_id in player_inventory
+            or (isinstance(item, Mapping)
+                and item.get("location", {}).get("id") == player_id)),
+        "unrelated_native_activity_continues_after_intervention": bool(later_unrelated),
+        "independent_scene_database_readback": isinstance(db_scene, Mapping)}
+    passed = all(criteria.values())
+    return {"schema": "ongoing-station-mid-episode-resource-audit-v1",
+        "status": "PASS" if passed else "NOT_CERTIFIED", "pass": passed,
+        "criteria": criteria, "intervention_minute": minute,
+        "command_receipt": receipt, "prior_item_receipt_ids": [row.get("receipt_id") for row in prior],
+        "later_unrelated_receipt_ids": [row.get("receipt_id") for row in later_unrelated],
+        "boundary": "A rejected or inaccessible player get remains a negative result; no state change is inferred."}
+
+
+def audit_handover_deadline_stress(trace: Mapping[str, Any], scene: Mapping[str, Any],
+                                   db: Mapping[str, Any], *, author: Mapping[str, Any],
+                                   deadline_minute: int) -> dict[str, Any]:
+    """Record the real outcome of a deadline-bounded legal handover episode."""
+    station = trace.get("ongoing_station", {})
+    station = station if isinstance(station, Mapping) else {}
+    typed = _rows(station.get("typed_events"))
+    note_id = station.get("bound_note_id")
+    key = str(note_id) if note_id is not None else None
+    handovers = [row for row in typed if row.get("event_type") == "p5_note_handed_over"
+        and row.get("args", {}).get("item", {}).get("stable_id") == key
+        and row.get("args", {}).get("actor", {}).get("stable_id") == "B"
+        and row.get("args", {}).get("recipient", {}).get("stable_id") == "A"]
+    qualifying_handover = next((row for row in handovers
+        if type(row.get("time")) in (int, float) and row["time"] <= deadline_minute), None)
+    verdict_value = station.get("real_verdicts")
+    verdict_rows = (_rows(verdict_value.get("constraints"))
+                    if isinstance(verdict_value, Mapping) else _rows(verdict_value))
+    required_ids = {"handover-occurs-by-minute-8", "handover-before-archive-by-minute-8"}
+    expected_ids = {row.get("id") for row in author.get("bundle", {}).get("constraints", [])
+                    if row.get("id") in required_ids}
+    observed_verdicts = [row for row in verdict_rows if row.get("constraint_id") in expected_ids
+                         or row.get("goal_id") in expected_ids]
+    statuses = {row.get("status") for row in observed_verdicts}
+    actors = scene.get("actors", {}) if isinstance(scene.get("actors"), Mapping) else {}
+    self_ids = {row.get("commitment_id") for row in _rows(station.get("commitments"))
+                if row.get("source") == "SELF"}
+    later_self_receipts = []
+    for alias in ("A", "B"):
+        actor_id = actors.get(alias, {}).get("id") if isinstance(actors.get(alias), Mapping) else None
+        if type(actor_id) is not int:
+            continue
+        receipts, _, _ = _actor_native_state(db, actor_id, trace.get("scene_id"))
+        later_self_receipts.extend(row for row in receipts
+            if row.get("settled") is True and type(row.get("sim_minute")) is int
+            and row["sim_minute"] > deadline_minute
+            and row.get("ongoing_commitment_id") in self_ids)
+    activation = any(row.get("minute") == 5
+        and row.get("typed_args", {}).get("result", {}).get("status") == "ACTIVATED"
+        for row in _rows(station.get("activation_events")))
+    handover_verdict = next((row.get("status") for row in observed_verdicts
+        if row.get("constraint_id", row.get("goal_id")) == "handover-occurs-by-minute-8"), None)
+    order_verdict = next((row.get("status") for row in observed_verdicts
+        if row.get("constraint_id", row.get("goal_id")) == "handover-before-archive-by-minute-8"), None)
+    criteria = {"author_activated_at_minute_5": activation,
+        "both_registered_handover_constraints_have_real_verdicts": expected_ids.issubset(
+            {row.get("constraint_id", row.get("goal_id")) for row in observed_verdicts}),
+        "independent_native_activity_continues_after_deadline": bool(later_self_receipts),
+        "episode_trace_and_scene_db_are_bound": isinstance(trace.get("scene_id"), str)
+            and isinstance(_scene_db(db, trace.get("scene_id")), Mapping)}
+    ledger_rows = _rows(trace.get("ledger"))
+    source_event = next((row for row in ledger_rows
+                         if qualifying_handover and row.get("event_id") == qualifying_handover.get("event_id")), {})
+    source_args = source_event.get("typed_args", {})
+    source_receipt_id = source_args.get("receipt_id") if isinstance(source_args, Mapping) else None
+    physical_handover = bool(qualifying_handover
+        and qualifying_handover.get("provenance") == "committed_ledger"
+        and qualifying_handover.get("native_commitment_id")
+        and any(receipt.get("receipt_id") == source_receipt_id
+            and receipt.get("settled") is True and receipt.get("kind") == "give"
+            and receipt.get("item_id") == note_id for alias in ("A", "B")
+            for receipt in (_actor_native_state(db, actors.get(alias, {}).get("id"),
+                            trace.get("scene_id"))[0]
+                            if type(actors.get(alias, {}).get("id")) is int else [])))
+    both_handover_constraints_satisfied = (
+        expected_ids == required_ids and handover_verdict == "SATISFIED"
+        and order_verdict == "SATISFIED")
+    if any(value in {"VIOLATED", "UNSATISFIED"} for value in statuses):
+        outcome = "VIOLATED"
+    elif both_handover_constraints_satisfied and physical_handover:
+        outcome = "SATISFIED"
+    else:
+        outcome = "INDETERMINATE"
+    criteria["two_exact_registered_handover_constraints_present"] = expected_ids == required_ids
+    criteria["both_handover_constraints_satisfied"] = both_handover_constraints_satisfied
+    criteria["physical_handover_receipt_witnessed"] = physical_handover
+    common_evidence = (criteria["author_activated_at_minute_5"]
+        and criteria["both_registered_handover_constraints_have_real_verdicts"]
+        and criteria["two_exact_registered_handover_constraints_present"]
+        and criteria["independent_native_activity_continues_after_deadline"]
+        and criteria["episode_trace_and_scene_db_are_bound"])
+    evidence_complete = bool(common_evidence and (
+        (outcome == "SATISFIED" and both_handover_constraints_satisfied and physical_handover)
+        or (outcome == "VIOLATED" and any(row.get("status") == "VIOLATED"
+                                          for row in observed_verdicts))))
+    return {"schema": "ongoing-station-handover-deadline-audit-v1",
+        "status": ("SATISFIED" if evidence_complete and outcome == "SATISFIED"
+                   else "VERIFIED_NEGATIVE" if evidence_complete and outcome == "VIOLATED"
+                   else "NOT_CERTIFIED"),
+        "pass": evidence_complete and outcome == "SATISFIED", "criteria": criteria,
+        "evidence_complete": evidence_complete,
+        "objective_outcome_by_deadline": outcome,
+        "negative_feasibility_observed": outcome == "VIOLATED",
+        "note_id": note_id, "deadline_minute": deadline_minute,
+        "handover_occurs_by_deadline": bool(qualifying_handover),
+        "qualifying_handover": qualifying_handover,
+        "physical_handover_receipt_witnessed": physical_handover,
+        "typed_verdicts": observed_verdicts,
+        "post_deadline_native_receipt_ids": [row.get("receipt_id") for row in later_self_receipts],
+        "boundary": "SATISFIED requires both registered handover/order verdicts plus a physical same-note receipt; a violated order remains VIOLATED even when a handover occurred; proposals do not count as events."}
+
+
 def _scene_db(db: Mapping[str, Any], scene_id: str) -> Mapping[str, Any] | None:
     scenes = db.get("scenes", [])
     if not isinstance(scenes, list):

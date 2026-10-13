@@ -236,7 +236,8 @@ def plan_actor_task(local_view, task, max_visits=500, wall_seconds=0.25):
     if not isinstance(task, Mapping):
         return {"status": "BLOCKED", "reason": "task binding must be a mapping", "intent": None, "plan": []}
     kind = task.get("task_kind")
-    allowed = {"deliver_supply", "archive_note", "handover_note", "routine_route"}
+    allowed = {"deliver_supply", "archive_note", "handover_note", "routine_route",
+               "return_stock"}
     if kind not in allowed:
         return {"status": "NO_PLAN", "reason": "unsupported actor task kind",
                 "intent": None, "plan": [], "task_kind": kind}
@@ -392,7 +393,8 @@ def plan_actor_task(local_view, task, max_visits=500, wall_seconds=0.25):
     state.handed_over = False
     state.recipient = None
     state.arrived = False
-    task_args = ((kind, state.item, state.destination) if kind in {"deliver_supply", "archive_note"}
+    task_args = ((kind, state.item, state.destination)
+                 if kind in {"deliver_supply", "archive_note", "return_stock"}
                  else (state.item, task.get("recipient_id"), state.destination)
                  if kind == "handover_note" else (state.destination,))
     with _LOCK, redirect_stdout(StringIO()):

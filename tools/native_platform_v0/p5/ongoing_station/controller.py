@@ -139,6 +139,7 @@ def author_offers(scene_id, minute):
     if projection is None or response is None:
         return _projection_view(projection, profile), []
     from tools.native_platform_v0.p5.story_process.model import default_actor_postresponse, load_request
+    from tools.native_platform_v0.p5.ongoing_station.model import derive_story_requirements
     from tools.native_platform_v0.p5.story_process.planning import plan_story_process
     actor_objects = {str(service._attr(obj, "p5_actor_alias", category="native_p5")): obj
                      for obj in rows if service._attr(obj, "p5_actor_alias", category="native_p5") in {"A", "B"}}
@@ -199,6 +200,8 @@ def author_offers(scene_id, minute):
         deadline = int(source["deadline"])
         raw = _runtime_request(profile, projection, constraint, binding, scene_id, note_id)
         request = load_request(raw)
+        story_requirements = (derive_story_requirements(projection, constraint, note_id)
+                              if archive_goal else None)
         state = {"scenario_id": scene_id, "sealed_minute": minute,
                  "horizon": min(profile.horizon, 24), "request_id": request.request_id,
                  "request_version": request.version, "response": _response_projection(response, note_id),
@@ -209,7 +212,8 @@ def author_offers(scene_id, minute):
                                                             actor_objects, service, all_rows=rows)},
                  "event_registry": request_registry()}
         strategy = service._attr(pickup, "p5_ongoing_station_strategy", category="native_p5", default="gtpyhop")
-        decision = plan_story_process(request, state, strategy=strategy)
+        decision = plan_story_process(request, state, strategy=strategy,
+                                      required_story_events=story_requirements)
         if archive_goal and locked_method and not locked_process:
             locked_binding = next(row for row in locked_process_constraints
                                   if _locked_core_method(row["locked_fragment"]) == locked_method)
@@ -293,9 +297,12 @@ def author_offers(scene_id, minute):
             elif prior_method == "return_then_file_by_A" and not (archive_goal and locked_method):
                 typed_events = _typed_events(scene_id, note_id, minute, ledger, actor_objects,
                                              service, all_rows=rows)
-                handed_over = any(_is_b_to_a_handover(event, note_id) for event in typed_events)
+                handover_requirement = story_requirements.get("required_handover") if story_requirements else None
+                handed_over = _verified_handover_in_window(
+                    typed_events, note_id, handover_requirement)
                 continuation = _continuation_archive_task(
-                    request, constraint, note_id, destinations, prior_method, handed_over)
+                    request, constraint, note_id, destinations, prior_method, handed_over,
+                    required_story_events=story_requirements)
                 task_rows = [continuation] if continuation else []
             else:
                 task_rows = []
@@ -307,12 +314,22 @@ def author_offers(scene_id, minute):
                 bound_recipient = _recipient_id(row, recipient_alias, actor_objects)
                 if recipient_id != bound_recipient:
                     raise ValueError("handover recipient binding is absent, self-directed, or stale")
+            handover_req = (story_requirements or {}).get("required_handover")
+            task_deadline = (handover_req["deadline_minute"]
+                             if row["task_kind"] == "handover_note" and handover_req else deadline)
+            task_start = (handover_req["start_minute"]
+                          if row["task_kind"] == "handover_note" and handover_req
+                          else (story_requirements or {}).get("archive_start_minute", 0))
             offers.append({"offer_id": row["request_id"], "source": "AUTHOR",
                            "goal_id": constraint["constraint_id"],
                            "task_kind": row["task_kind"], "item_id": row["item_id"],
                            "destination_id": row["destination_id"],
                            "recipient_id": recipient_id,
-                           "deadline_minute": deadline, "prerequisites": list(row["prerequisites"]),
+                           "deadline_minute": task_deadline, "earliest_terminal_minute": task_start,
+                           "prerequisites": list(row["prerequisites"]),
+                           "required_constraint_ids": list(row.get("required_constraint_ids", [])),
+                           "required_story_event_types": list(row.get("required_story_event_types", [])),
+                           "required_story_deadline_minute": row.get("required_story_deadline_minute"),
                            "constraint_id": constraint["constraint_id"], "item_key": note_obj.key,
                            "source_method_id": row["source_method_id"],
                            "control_source": row["control_source"], "grant_id": row["grant_id"],
@@ -360,6 +377,19 @@ def _is_b_to_a_handover(event, note_id):
             and args.get("actor", {}).get("stable_id") == "B"
             and args.get("recipient", {}).get("stable_id") == "A"
             and args.get("item", {}).get("stable_id") == str(note_id))
+
+
+def _verified_handover_in_window(typed_events, note_id, requirement):
+    """Require exact authenticated same-note B→A evidence inside authored window."""
+    for event in typed_events or ():
+        if not _is_b_to_a_handover(event, note_id):
+            continue
+        minute = event.get("time")
+        if type(minute) is not int:
+            continue
+        if requirement is None or requirement["start_minute"] <= minute <= requirement["deadline_minute"]:
+            return True
+    return False
 
 
 def _locked_core_method(fragment):
@@ -484,7 +514,7 @@ def _locked_receipt_matches(event, request, constraint_id, sequence_index):
 
 
 def _continuation_archive_task(request, constraint, note_id, destinations,
-                               prior_method, verified_handover):
+                               prior_method, verified_handover, required_story_events=None):
     """Return the second method step only after exact give evidence exists."""
     control = request.control
     if (not verified_handover or prior_method != "return_then_file_by_A"
@@ -493,9 +523,12 @@ def _continuation_archive_task(request, constraint, note_id, destinations,
         return None
     archive_id = (f"{request.request_id}:v{request.version}:"
                   "return_then_file_by_A:A:archive_note")
+    handover = (required_story_events or {}).get("required_handover")
     return {"request_id": archive_id, "actor_alias": "A", "task_kind": "archive_note",
             "item_id": note_id, "destination_id": destinations["archive"]["id"],
             "recipient_id": None, "deadline_minute": request.objective["by_minute"],
+            "earliest_terminal_minute": (required_story_events or {}).get("archive_start_minute", 0),
+            "required_story_deadline_minute": (handover or {}).get("deadline_minute"),
             "prerequisites": ["committed_native_handover_receipt_for_exact_note_at_rendezvous",
                               "A_locally_observes_exact_note", "native_actor_accepts_task"],
             "source_method_id": prior_method,
@@ -543,7 +576,8 @@ def _cancel_stale_planned_pending(actor, actor_alias, stale_ids, minute, service
             "source_offer_id": source_offer, "status": "CANCELLED_STALE"}
 
 
-def _still_authorized_after_edit(task, constraint, *, destinations=None, actor_ids=None):
+def _still_authorized_after_edit(task, constraint, *, destinations=None, actor_ids=None,
+                                requires_handover=False):
     if not constraint:
         return False
     control = constraint.get("control", {})
@@ -569,6 +603,8 @@ def _still_authorized_after_edit(task, constraint, *, destinations=None, actor_i
     if method not in control.get("allowed_methods", []):
         return False
     if kind == "archive_note":
+        if requires_handover and method == "file_by_B":
+            return False
         expected_actor = "B" if method == "file_by_B" else "A"
         allowed = (actor == expected_actor and control.get("file_actor") in (None, actor)
                    and task.get("destination_id") == (destinations or {}).get("archive"))
@@ -635,6 +671,69 @@ def _note_state(note, actors):
             "holder_alias": holder}
 
 
+def _remaining_work_lower_bound(actor, commitment, receipts):
+    """Count only locally evidenced, unavoidable task primitives.
+
+    This is a lower bound, not a route-feasibility proof: movement contributes
+    at most one primitive when the actor is not already at the destination.
+    Unknown item location or malformed route evidence remains unknown.
+    """
+    task_kind = commitment.get("task_kind")
+    commitment_id = commitment.get("commitment_id")
+    if not commitment_id:
+        return None
+    own = [row for row in receipts if row.get("settled") is True
+           and str(row.get("ongoing_commitment_id")) == str(commitment_id)
+           and row.get("ongoing_task_kind") == task_kind]
+    if task_kind == "routine_route":
+        waypoints = commitment.get("route_waypoints")
+        waypoint_receipts = commitment.get("waypoint_receipts")
+        if (not isinstance(waypoints, (list, tuple))
+                or not isinstance(waypoint_receipts, (list, tuple))
+                or len(waypoints) != len(waypoint_receipts)):
+            return None
+        # The commitment's waypoint_receipts can lag one callback: the just-
+        # settled P3 command is visible in the sealed receipt frontier before
+        # the next actor callback copies its ID into that field. Count only an
+        # ordered prefix of exact-commitment native move receipts.
+        own_moves = [row for row in own if row.get("kind") == "move"
+                     and row.get("receipt_id") is not None]
+        completed_prefix = 0
+        for receipt in own_moves:
+            if completed_prefix >= len(waypoints):
+                return 0
+            if receipt.get("after_room_id") != waypoints[completed_prefix]:
+                return None
+            completed_prefix += 1
+        return len(waypoints) - completed_prefix
+
+    if task_kind not in {"deliver_supply", "return_stock"}:
+        return None
+    item_id = commitment.get("item_id")
+    destination_id = commitment.get("destination_id")
+    if type(item_id) is not int or type(destination_id) is not int:
+        return None
+    completed_drop = any(row.get("kind") == "drop"
+                         and str(row.get("item_id")) == str(item_id)
+                         and row.get("after_item_room_id") == destination_id
+                         for row in own)
+    if completed_drop:
+        return 0
+
+    inventory = {int(item.id) for item in getattr(actor, "contents", ())
+                 if getattr(item, "id", None) is not None}
+    local_room_items = getattr(getattr(actor, "location", None), "contents", ())
+    visible_here = any(getattr(item, "id", None) == item_id
+                       and item.access(actor, "view", default=True)
+                       for item in local_room_items)
+    # Without the exact item in inventory or visible in this room, navigation
+    # to a remembered/global location is not established by this local projection.
+    if item_id not in inventory and not visible_here:
+        return None
+    room_id = getattr(getattr(actor, "location", None), "id", None)
+    return (0 if item_id in inventory else 1) + 1 + (0 if room_id == destination_id else 1)
+
+
 def _actor_local_row(actor, note_id, service):
     alias = str(service._attr(actor, "p5_actor_alias", category="native_p5"))
     local_items = [int(item.id) for item in actor.contents]
@@ -644,6 +743,14 @@ def _actor_local_row(actor, note_id, service):
     current = next((row for row in reversed(commitments)
                     if row.get("status") in {"ACCEPTED", "IN_PROGRESS", "SUSPENDED"}), None)
     pending = service._attr(actor, "pending_action")
+    receipts = service._plain_json(service._attr(actor, "native_receipts", default=[]))
+    remaining_work = 0
+    if current is not None:
+        if current.get("source") == "SELF" and current.get("task_kind") in {
+                "routine_route", "deliver_supply", "return_stock"}:
+            remaining_work = _remaining_work_lower_bound(actor, current, receipts)
+        else:
+            remaining_work = None
     status = ("IN_PROGRESS" if pending else
               current["status"] if current and current.get("source") == "AUTHOR" else "IDLE")
     if status == "SUSPENDED":
@@ -663,7 +770,8 @@ def _actor_local_row(actor, note_id, service):
         status = "REJECTED"
     return {"present": actor.location is not None, "can_receive_note": actor.location is not None,
             "willing_to_archive": True, "locally_observed_item_ids": sorted(set(local_items)),
-            "active_task": active, "task_status": status}
+            "active_task": active, "task_status": status,
+            "remaining_work_minutes": remaining_work}
 
 
 def _current_obligations(actors, service):
@@ -907,12 +1015,31 @@ def record_edit(scene_id, raw_author, expected_version, minute):
                        if isinstance(prior_verdicts, Mapping) else [])
     completed = {row["constraint_id"] for row in constraint_rows if row.get("status") == "SATISFIED"}
     evidenced = {row["constraint_id"] for row in constraint_rows if row.get("witness") is not None}
-    result = native.edit_author(pickup, raw_author, expected_version=expected_version,
-                                now=minute, completed_ids=completed,
-                                evidenced_ids=evidenced, entities=entities)
+    try:
+        proposed = native.validate_author(raw_author)
+        proposed_handover = any(row.get("kind") == "event_by_deadline"
+                                and row.get("event") == "note_handed_over"
+                                and row.get("filters", {}).get("item") == "note"
+                                for row in proposed["bundle"]["constraints"])
+    except (TypeError, ValueError):
+        # Let the canonical edit validator return its ordinary malformed-input
+        # response; this preflight only adds the historical-event guard.
+        proposed_handover = False
+    prior_typed = (prior or {}).get("typed_events", [])
+    if proposed_handover and note is not None and _has_verified_archive_for_note(prior_typed, int(note.id)):
+        result = {"ok": False, "status": "HISTORICAL_CONSTRAINT_IMMUTABLE",
+                  "reason": "same-note archive is already a committed native event; a later handover cannot be added retroactively"}
+    else:
+        result = native.edit_author(pickup, raw_author, expected_version=expected_version,
+                                    now=minute, completed_ids=completed,
+                                    evidenced_ids=evidenced, entities=entities)
     if result.get("ok") is True:
         new_projection = native.active_projection(pickup, entities=entities)
         new_constraints = {row["constraint_id"]: row for row in new_projection.constraints} if new_projection else {}
+        required_handover = bool(new_projection and any(
+            row.get("source_constraint", {}).get("kind") == "event_by_deadline"
+            and row.get("source_constraint", {}).get("event") == "note_handed_over"
+            for row in new_projection.constraints))
         meta = native.meta_for(pickup)
         current_offers = list(meta.get("task_offers", []))
         stale_ids = [row.get("offer_id") for row in current_offers
@@ -937,7 +1064,8 @@ def record_edit(scene_id, raw_author, expected_version, minute):
             if row.get("source") == "AUTHOR" and row.get("offer_id")
             and not _still_authorized_after_edit(
                 row, new_constraints.get(row.get("constraint_id")),
-                destinations=destination_ids, actor_ids=actor_ids)
+                destinations=destination_ids, actor_ids=actor_ids,
+                requires_handover=required_handover)
         }
         for obj in rows:
             alias = str(service._attr(obj, "p5_actor_alias", category="native_p5"))
@@ -953,7 +1081,8 @@ def record_edit(scene_id, raw_author, expected_version, minute):
                 candidate = {**commitment, "actor_alias": commitment.get("actor_alias", alias)}
                 if not _still_authorized_after_edit(
                         candidate, new_constraints.get(commitment.get("constraint_id")),
-                        destinations=destination_ids, actor_ids=actor_ids):
+                        destinations=destination_ids, actor_ids=actor_ids,
+                        requires_handover=required_handover):
                     source_offer = commitment.get("source_offer_id", commitment.get("commitment_id"))
                     if source_offer:
                         invalidated_ids.add(source_offer)
@@ -985,6 +1114,19 @@ def record_edit(scene_id, raw_author, expected_version, minute):
                             "typed_args": {"result": result, "expected_version": expected_version},
                             "sealed": True})
     return result
+
+
+def _has_verified_archive_for_note(typed_events, note_id):
+    """Evidence input is already filtered to real native receipts by _typed_events."""
+    for row in typed_events or ():
+        if not isinstance(row, Mapping) or row.get("event_type") != "p5_note_archived" \
+                or row.get("provenance") != "committed_ledger":
+            continue
+        item = row.get("args", {}).get("item")
+        item_id = item.get("stable_id") if isinstance(item, Mapping) else item
+        if str(item_id) == str(note_id):
+            return True
+    return False
 
 
 __all__ = ["initialize", "actor_callback", "publish_after_seal", "author_offers",

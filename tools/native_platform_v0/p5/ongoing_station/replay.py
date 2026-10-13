@@ -19,6 +19,7 @@ def build_replay(trace: Mapping[str, Any]) -> str:
     ledger = _rows(trace.get("ledger", []))
     actors = _rows(trace.get("actor_evidence", []))
     decisions = _rows(station.get("actor_goal_decisions", []))
+    controller_decisions = _rows(station.get("controller_decisions", []))
     if not decisions:
         decisions = [entry for actor in actors for entry in _rows(actor.get("log", []))
                      if entry.get("kind") == "ongoing_station_decision"]
@@ -26,7 +27,11 @@ def build_replay(trace: Mapping[str, Any]) -> str:
     # The sealed ledger has its own sequence. Preserve actor-log and receipt order
     # within each actor, but do not synthesize a total order across those streams.
     by_minute: dict[int, dict[str, list[tuple[int, Mapping[str, Any]]]]] = defaultdict(
-        lambda: {"ledger": [], "decisions": [], "receipts": []})
+        lambda: {"ledger": [], "decisions": [], "receipts": [], "controller": []})
+    for index, decision in enumerate(controller_decisions):
+        minute = decision.get("minute")
+        if type(minute) is int:
+            by_minute[minute]["controller"].append((index, decision))
     callback_event_ids: dict[tuple[int, str], str] = {}
     for index, event in enumerate(ledger):
         minute = event.get("minute")
@@ -135,6 +140,33 @@ def build_replay(trace: Mapping[str, Any]) -> str:
                 if callback:
                     details.append(f"callback_event=`{callback}`")
                 lines.append(f"- NPC `{alias}`: " + "; ".join(details))
+            lines.append("")
+
+        if group["controller"]:
+            lines.extend(["### Author/controller evaluation", ""])
+            for source_index, row in group["controller"]:
+                decision = row.get("decision", {})
+                decision = decision if isinstance(decision, Mapping) else {}
+                selected = decision.get("selected_method", decision.get("search_selected_method", "none"))
+                requirements = decision.get("required_story_events")
+                lines.append(f"- source `ongoing_station.controller_decisions[{source_index}]`; "
+                    f"constraint `{row.get('constraint_id', 'unknown')}`, "
+                    f"author version `{row.get('source_version', 'unknown')}`, "
+                    f"status `{decision.get('status', 'not-recorded')}`, selected method `{selected}`.")
+                if isinstance(requirements, Mapping):
+                    handover = requirements.get("required_handover")
+                    lines.append("  - Projected source bundle/version: "
+                        f"`{requirements.get('source_bundle_id', 'unknown')}` / "
+                        f"`{requirements.get('source_version', 'unknown')}`; required handover: "
+                        f"`{handover.get('event_type', 'none') if isinstance(handover, Mapping) else 'none'}`; "
+                        f"deadline `{requirements.get('archive_deadline_minute', 'unknown')}`.")
+                for method in _rows(decision.get("method_plans")):
+                    support = method.get("causal_support", {})
+                    support = support if isinstance(support, Mapping) else {}
+                    lines.append(f"  - method `{method.get('method_id', 'unknown')}` feasible="
+                        f"`{method.get('feasible', 'not-recorded')}`; causal support="
+                        f"`{support.get('supported_event_types', [])}`; missing="
+                        f"`{support.get('missing_required_event_types', [])}`.")
             lines.append("")
 
         if group["receipts"]:

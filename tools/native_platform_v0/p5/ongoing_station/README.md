@@ -1,5 +1,25 @@
 # Ongoing station runner
 
+Current work (2026-10-13, after `796510a`): the same package has delivered the
+bounded M1–M5 / E1–E4 history, competing-work, and future plot-point task.
+Status is DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW; implementation
+stops here. The future handover-before-archive edit and deadline negative have
+native evidence; strict matched-history and work-driven method-choice effects
+remain unestablished. No further case or runtime development starts automatically.
+The old T1–T8 evidence below remains historical; it does not certify these new
+conditions. Current run outcomes belong only to
+[`RESULTS`](../../../../02_实验/Mature_Methods_Integration_v1/RESULTS.md).
+No parallel station runtime, new planner, or LLM run is introduced.
+
+The new `return_stock` self task is reverse logistics, not a general warehouse
+model: it returns a real delivered item to the source room witnessed in that
+same actor task's settled get receipt. It shares the existing actor-local P3
+HTN and get/move/drop settlement path. The author-side extension derives
+same-note handover occurrence/order requirements from `AuthorBundle`; method
+causal support is a prediction, never evidence that the event occurred.
+Current sensory observations must be compared separately from receipt/history
+memory. A physically unmatched E1 pair cannot establish a causal history effect.
+
 This package contains the fixed case inputs, one-scene runner, evidence audit,
 and readable replay for the opt-in P5 ongoing-station profile. The runner uses
 the existing authenticated P3 control service, one-minute `step_world` calls,
@@ -115,14 +135,15 @@ BDI architecture. Other new work is the strict author binding/projection,
 future-version CAS, actor-local commitment arbitration/history, typed native
 readback, and their integration and tests.
 
-Current source footprint (not net-new LOC, effort, or a performance measure):
+Historical T1–T8 checkpoint footprint (not the current M1–M5 footprint,
+net-new LOC, effort, or a performance measure):
 the five core station modules `actor/controller/goals/model/native` total 1,960
 lines; runner/audit/replay total 1,144; the four focused station test modules
 total 1,489. These counts exclude the P3/P5 service and dispatcher integration,
 shared story-process planner, case data, and documentation. They include schema
 validation, provenance, and evidence-boundary checks as well as behavior.
 
-## 2026-10-13 execution and source provenance
+## Earlier T1–T8 execution and source provenance (2026-10-13)
 
 The saved T4 prefix is important to interpreting the result. At minute 6, B's
 result-only `PLANNER` handover offer was deferred against a live SELF

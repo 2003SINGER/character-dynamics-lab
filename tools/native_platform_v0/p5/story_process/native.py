@@ -378,15 +378,21 @@ def _registered_destinations(scene_id, actors, archive):
     handover_id = int(a.location.id) if a and a.location else -1
     handover_routes = {alias: distance(actor, handover_id) if handover_id > 0 else None
                        for alias, actor in actors.items()}
+    archive_costs = {alias: (steps + 1 if steps is not None else None)
+                     for alias, steps in archive_routes.items()}
+    handover_costs = {alias: (steps + 1 if steps is not None else None)
+                      for alias, steps in handover_routes.items()}
     return {"archive": {"id": archive_id,
                         "reachable_by": sorted(alias for alias, steps in archive_routes.items()
                                                 if steps is not None),
                         "estimated_minutes": max((steps for steps in archive_routes.values()
-                                                   if steps is not None), default=0) + 1},
+                                                   if steps is not None), default=0) + 1,
+                        "estimated_minutes_by_actor": archive_costs},
             "handover": {"id": handover_id,
                          "reachable_by": sorted(alias for alias, steps in handover_routes.items()
                                                  if steps is not None),
-                         "estimated_minutes": (handover_routes.get("B") or 0) + 1}}
+                         "estimated_minutes": (handover_routes.get("B") or 0) + 1,
+                         "estimated_minutes_by_actor": handover_costs}}
 
 
 __all__ = ["initialize_story_process", "build_sealed_state", "apply_story_decision", "edit_story_request"]

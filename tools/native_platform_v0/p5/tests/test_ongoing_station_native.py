@@ -1,3 +1,4 @@
+import copy
 import unittest
 from unittest.mock import patch
 
@@ -24,6 +25,42 @@ class Obj:
 
 
 class OngoingStationNativeTests(unittest.TestCase):
+    def test_workload_estimate_uses_only_receipt_and_local_primitive_lower_bounds(self):
+        from types import SimpleNamespace
+        from tools.native_platform_v0.p5.ongoing_station.controller import _remaining_work_lower_bound
+
+        item = SimpleNamespace(id=71)
+        actor = SimpleNamespace(id=10, contents=[item], location=SimpleNamespace(id=1, contents=[]))
+        commitment = {"commitment_id": "self-1", "task_kind": "return_stock",
+                      "item_id": 71, "destination_id": 3}
+        self.assertEqual(_remaining_work_lower_bound(actor, commitment, []), 2)
+        self.assertEqual(_remaining_work_lower_bound(actor, commitment, [{
+            "receipt_id": "drop-1", "settled": True, "kind": "drop", "item_id": 71,
+            "after_item_room_id": 3, "ongoing_commitment_id": "self-1",
+            "ongoing_task_kind": "return_stock"}]), 0)
+
+        actor.contents = []
+        visible_item = SimpleNamespace(id=71, access=lambda *_args, **_kwargs: True)
+        actor.location.contents = [visible_item]
+        self.assertEqual(_remaining_work_lower_bound(actor, commitment, []), 3)
+        actor.location.contents = []
+        self.assertIsNone(_remaining_work_lower_bound(actor, commitment, []))
+
+        route = {"commitment_id": "route-1", "task_kind": "routine_route",
+                 "route_waypoints": [2, 1], "waypoint_receipts": ["move-1", None]}
+        route_receipts = [{"receipt_id": "move-1", "settled": True, "kind": "move",
+                           "after_room_id": 2, "ongoing_commitment_id": "route-1",
+                           "ongoing_task_kind": "routine_route"}]
+        self.assertEqual(_remaining_work_lower_bound(actor, route, route_receipts), 1)
+        route_receipts.append({"receipt_id": "move-2", "settled": True, "kind": "move",
+                               "after_room_id": 1, "ongoing_commitment_id": "route-1",
+                               "ongoing_task_kind": "routine_route"})
+        # The second native receipt is sealed, but waypoint_receipts still
+        # contains None until the next actor callback refreshes the commitment.
+        self.assertEqual(_remaining_work_lower_bound(actor, route, route_receipts), 0)
+        out_of_order = {**route, "waypoint_receipts": [None, "move-2"]}
+        self.assertIsNone(_remaining_work_lower_bound(actor, out_of_order, [route_receipts[1]]))
+
     def test_note_binding_uses_real_social_request_receipt_and_request_bound_note(self):
         from tools.native_platform_v0.p5.ongoing_station.controller import _note_binding
 
@@ -63,6 +100,43 @@ class OngoingStationNativeTests(unittest.TestCase):
             self.assertEqual(actor.attributes.get("ongoing_commitments", category="native_p5"), [])
             self.assertEqual(actor.attributes.get("ongoing_goal_history", category="native_p5"), [])
             self.assertIsNone(actor.attributes.get("ongoing_task_offer", category="native_p5"))
+
+    def test_online_edit_can_add_registered_same_note_handover_pair_future_only(self):
+        from tools.native_platform_v0.p5.ongoing_station.model import derive_story_requirements
+        from tools.native_platform_v0.p5.ongoing_station.native import active_projection, activate_author, edit_author
+        from tools.native_platform_v0.p5.tests.test_ongoing_station_model import author
+
+        author_v1 = author()
+        author_v1["bundle"]["constraints"] = author_v1["bundle"]["constraints"][:1]
+        author_v1["bindings"] = author_v1["bindings"][:1]
+        station = profile(author_v1)
+        pickup = Obj()
+        initialize_station(pickup, {}, station)
+        self.assertTrue(activate_author(pickup, expected_version=1, now=5)["ok"])
+        author_v2 = copy.deepcopy(author_v1)
+        author_v2["bundle"]["version"] = 2
+        author_v2["bundle"]["constraints"].extend([
+            {"id": "handover-occurs", "kind": "event_by_deadline", "event": "note_handed_over",
+             "filters": {"actor": "B", "recipient": "A", "item": "note"},
+             "start": 6, "deadline": 24, "hard": True, "min_count": 1, "max_count": 1},
+            {"id": "handover-before-archive", "kind": "event_order",
+             "before": {"event": "note_handed_over",
+                        "filters": {"actor": "B", "recipient": "A", "item": "note"}},
+             "after": {"event": "note_archived", "filters": {"item": "note"}},
+             "order": "EVENT_KEY", "start": 6, "deadline": 24, "hard": True},
+        ])
+        base_binding = author_v2["bindings"][0]
+        author_v2["bindings"].extend([
+            {**copy.deepcopy(base_binding), "constraint_id": "handover-occurs"},
+            {**copy.deepcopy(base_binding), "constraint_id": "handover-before-archive"},
+        ])
+        updated = edit_author(pickup, author_v2, expected_version=1, now=6)
+        self.assertEqual(updated["status"], "UPDATED")
+        projection = active_projection(pickup)
+        archive = next(row for row in projection.constraints if row["constraint_id"] == "archive-goal")
+        required = derive_story_requirements(projection, archive, 71)
+        self.assertEqual(required["required_handover"]["start_minute"], 6)
+        self.assertEqual(required["required_handover"]["deadline_minute"], 24)
 
     def test_invalid_station_profile_rejected_before_evennia_or_scene_creation(self):
         from tools.native_platform_v0.p5.service import reset_p5_scenario
@@ -117,6 +191,7 @@ class OngoingStationNativeTests(unittest.TestCase):
     def test_handover_binds_distinct_registered_recipient_and_needs_real_give(self):
         from tools.native_platform_v0.p5.ongoing_station.controller import (
             _is_b_to_a_handover, _recipient_id, _typed_events,
+            _verified_handover_in_window,
         )
         from tools.native_platform_v0.p5 import service
 
@@ -142,6 +217,12 @@ class OngoingStationNativeTests(unittest.TestCase):
                                service, all_rows=[actor_a, actor_b])
         self.assertEqual(len(events), 1)
         self.assertTrue(_is_b_to_a_handover(events[0], 71))
+        requirement = {"start_minute": 10, "deadline_minute": 20}
+        self.assertTrue(_verified_handover_in_window([{**events[0], "time": 12}], 71, requirement))
+        self.assertFalse(_verified_handover_in_window(
+            [{**events[0], "time": 9}], 71, requirement))
+        self.assertFalse(_verified_handover_in_window(
+            [{**events[0], "time": 21}], 71, requirement))
         actor_b.attributes.add("native_receipts", [], category="native_p3")
         self.assertEqual(_typed_events("scene-1", 71, 2, ledger, {"A": actor_a, "B": actor_b},
                                        service, all_rows=[actor_a, actor_b]), [])
@@ -206,6 +287,14 @@ class OngoingStationNativeTests(unittest.TestCase):
                 self.assertEqual(actor.attributes.get("pending_action", category="native_p3")["status"],
                                  "executing")
                 record.assert_not_called()
+
+    def test_historical_archive_guard_requires_exact_committed_note_event(self):
+        from tools.native_platform_v0.p5.ongoing_station.controller import _has_verified_archive_for_note
+        row = {"event_type": "p5_note_archived", "provenance": "committed_ledger",
+               "args": {"item": {"entity_type": "Item", "stable_id": "71"}}}
+        self.assertTrue(_has_verified_archive_for_note([row], 71))
+        self.assertFalse(_has_verified_archive_for_note([row], 72))
+        self.assertFalse(_has_verified_archive_for_note([{**row, "provenance": "planned"}], 71))
 
     def test_locked_core_binding_has_independent_method_and_receipt_gated_sequence(self):
         from types import SimpleNamespace
@@ -443,6 +532,11 @@ class OngoingStationNativeTests(unittest.TestCase):
                      "source_method_id": "file_by_B", "destination_id": 90}
         self.assertTrue(_still_authorized_after_edit(b_archive, binding,
                                                      destinations=destinations, actor_ids=actors))
+        # Adding an authored same-note handover count/order pair changes causal
+        # support even if the archive constraint's binding itself is unchanged.
+        self.assertFalse(_still_authorized_after_edit(
+            b_archive, binding, destinations=destinations, actor_ids=actors,
+            requires_handover=True))
         edited_for_a = {**binding, "control": {**binding["control"], "file_actor": "A"}}
         self.assertFalse(_still_authorized_after_edit(b_archive, edited_for_a,
                                                       destinations=destinations, actor_ids=actors))

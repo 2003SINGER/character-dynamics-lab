@@ -150,8 +150,19 @@ def compile_projection(profile: StationProfile, *, entities=None) -> AuthorProje
                       and row.get("before", {}).get("filters", {}).get("item") == "note"
                       and row.get("after", {}).get("event") == "note_archived"
                       and row.get("after", {}).get("filters", {}).get("item") == "note"]
-    if not archive_goals or not response_order:
-        raise ValueError("station AuthorBundle must author same-note archive-by-deadline and response-before-archive constraints")
+    if len(archive_goals) != 1:
+        raise ValueError("station AuthorBundle must author exactly one same-note archive-by-deadline goal")
+    archive = archive_goals[0]
+    if (archive.get("hard") is not True or type(archive.get("deadline")) is not int
+            or not 1 <= archive["deadline"] <= profile.horizon
+            or type(archive.get("start")) is not int
+            or not 0 <= archive["start"] <= archive["deadline"]):
+        raise ValueError("station archive goal must be a hard absolute-deadline constraint inside the profile horizon")
+    # A native response is a domain precondition, not an additional author goal.
+    # If the bundle does author the old response-before-archive order, retain and
+    # monitor it; do not require authors to duplicate that domain fact.
+    if len(response_order) > 1:
+        raise ValueError("station AuthorBundle supports at most one response-before-archive constraint")
     projection_constraints = []
     for goal in bundle.goals:
         binding = binding_map[goal.constraint_id]
@@ -169,6 +180,84 @@ def compile_projection(profile: StationProfile, *, entities=None) -> AuthorProje
                             _hash(_plain(profile.author)), tuple(projection_constraints), binding_map)
 
 
+def derive_story_requirements(projection: AuthorProjection, archive_constraint: Mapping[str, Any],
+                              note_id: int) -> dict[str, Any]:
+    """Project the narrow same-note handover occurrence/order pair for M4.
+
+    The AuthorBundle remains the source of truth. This projection is planner input,
+    not another editable goal schema.
+    """
+    if not isinstance(projection, AuthorProjection) or type(note_id) is not int or note_id <= 0:
+        raise ValueError("a bound author projection and exact native note ID are required")
+    archive_source = archive_constraint.get("source_constraint", {})
+    if (archive_source.get("kind") != "event_by_deadline"
+            or archive_source.get("event") != "note_archived"
+            or archive_source.get("filters", {}).get("item") != "note"):
+        raise ValueError("story requirements must be anchored to the registered same-note archive goal")
+    archive_deadline = archive_source.get("deadline")
+    archive_start = archive_source.get("start")
+    if (type(archive_deadline) is not int or not 1 <= archive_deadline <= 24
+            or type(archive_start) is not int or not 0 <= archive_start <= archive_deadline):
+        raise ValueError("archive deadline must be an absolute native scenario minute")
+
+    sources = [row.get("source_constraint", {}) for row in projection.constraints]
+    handovers = [row for row in sources if row.get("kind") == "event_by_deadline"
+                 and row.get("event") == "note_handed_over"
+                 and row.get("filters", {}).get("item") == "note"]
+    orders = [row for row in sources if row.get("kind") == "event_order"
+              and row.get("before", {}).get("event") == "note_handed_over"
+              and row.get("after", {}).get("event") == "note_archived"
+              and row.get("before", {}).get("filters", {}).get("item") == "note"
+              and row.get("after", {}).get("filters", {}).get("item") == "note"]
+    if len(handovers) != len(orders) or len(handovers) > 1:
+        raise ValueError("a handover plot point requires one registered occurrence goal and one strict before-archive constraint")
+    handover = None
+    if handovers:
+        count = handovers[0]
+        order = orders[0]
+        expected_handover_filter = {"actor": "B", "recipient": "A", "item": "note"}
+        order_window = order.get("start"), order.get("deadline")
+        if (count.get("filters") != expected_handover_filter
+                or order.get("before", {}).get("filters") != expected_handover_filter
+                or order.get("after", {}).get("filters") != {"item": "note"}
+                or order.get("order") != "EVENT_KEY"
+                or type(count.get("start")) is not int or type(count.get("deadline")) is not int
+                or order_window != (count.get("start"), count.get("deadline"))
+                or count.get("deadline") > archive_deadline
+                or count.get("hard") is not True or order.get("hard") is not True):
+            raise ValueError("handover requirements must force B→A of the same note strictly before archive within the goal deadline")
+        handover_row = next(row for row in projection.constraints
+                            if row.get("source_constraint") == count)
+        order_row = next(row for row in projection.constraints
+                         if row.get("source_constraint") == order)
+        handover = {"event_count_constraint_id": handover_row["constraint_id"],
+                    "order_constraint_id": order_row["constraint_id"],
+                    "event_type": "p5_note_handed_over", "actor_alias": "B",
+                    "recipient_alias": "A", "before_event_type": "p5_note_archived",
+                    "start_minute": int(count["start"]),
+                    "deadline_minute": int(count["deadline"])}
+    recognized_ids = {archive_constraint["constraint_id"]}
+    for row in projection.constraints:
+        source = row.get("source_constraint", {})
+        if (source.get("kind") == "event_order"
+                and source.get("before", {}).get("event") == "note_response"
+                and source.get("before", {}).get("filters", {}).get("item") == "note"
+                and source.get("after", {}).get("event") == "note_archived"
+                and source.get("after", {}).get("filters", {}).get("item") == "note"):
+            recognized_ids.add(row["constraint_id"])
+    if handovers:
+        recognized_ids.update((handover["event_count_constraint_id"], handover["order_constraint_id"]))
+    residual = [{"constraint_id": row["constraint_id"], "kind": row["kind"],
+                 "source_constraint_sha256": row["source_constraint_sha256"]}
+                for row in projection.constraints if row["constraint_id"] not in recognized_ids]
+    return {"source_bundle_id": projection.bundle_id, "source_version": projection.version,
+            "source_sha256": projection.source_sha256,
+            "archive_constraint_id": archive_constraint["constraint_id"],
+            "archive_start_minute": archive_start,
+            "archive_deadline_minute": archive_deadline, "note_id": note_id,
+            "required_handover": handover, "residual_constraints": residual}
+
+
 def _plain(value):
     if isinstance(value, Mapping):
         return {str(k): _plain(v) for k, v in value.items()}
@@ -178,4 +267,4 @@ def _plain(value):
 
 
 __all__ = ["PROFILE_SCHEMA", "AUTHOR_SCHEMA", "StationProfile", "AuthorProjection",
-           "load_profile", "validate_author", "compile_projection"]
+           "load_profile", "validate_author", "compile_projection", "derive_story_requirements"]

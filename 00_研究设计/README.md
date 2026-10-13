@@ -12,7 +12,7 @@
 
 2026-10-12 **System Baseline v0 当前为 `PARTIAL`**：M1 `READY_FOR_INDEPENDENT_REVIEW`，M2 `INVALID`，没有 native LLM candidate execution；本阶段停止，不进入 P6。P0 局部扩张暂停。状态与运行事实只由 [System Baseline v0 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md) 维护，唯一执行指针见 [TODO](TODO.md)；M2 原始调用证据见[证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)及其[manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json)。
 
-**Planner Adapter Integration v1 的历史 PARTIAL 保留**。Mature-Methods Integration v1 原 S1–S4 结果与 S2 权限编辑拒绝不变；同阶段“真实便条回应后归档”有界增量已完成开发运行，状态为 `DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW`。设计契约见[故事过程代码说明](../tools/native_platform_v0/p5/story_process/README.md)，运行事实只见[唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，执行指针见 [TODO](TODO.md)。不扩大旧 Sabre 或改写此前结果。
+**Mature-Methods Integration v1 当前工作包已交付，PARTIAL，待独立审阅**。同站点 M1–M5 / E1–E4 结果只见[唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，接口见[持续站点代码说明](../tools/native_platform_v0/p5/ongoing_station/README.md)，执行指针见 [TODO](TODO.md)。严格历史匹配与工作条件驱动的方法取舍未证实；本包实施停止，不自动新增阶段。原 S1–S4、S2 权限拒绝、便条归档与旧 Planner Adapter 的历史 PARTIAL 保留，不扩大旧 Sabre或改写此前结果。
 
 Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。完整机制说明中已确认的内容是工程语义与模块契约，不是已验证心理规律。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
 

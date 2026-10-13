@@ -32,7 +32,7 @@ def matching_receipts(commitment, receipts):
         if item_id is not None and str(row.get("item_id")) != str(item_id):
             continue
         operator = row.get("kind")
-        if kind in ("deliver_supply", "archive_note") and operator == "drop":
+        if kind in ("deliver_supply", "archive_note", "return_stock") and operator == "drop":
             if row.get("after_item_room_id") == commitment.get("destination_id"):
                 matched.append(row)
         elif kind == "handover_note" and operator == "give":
@@ -136,7 +136,8 @@ def arbitrate(offers, commitments, local_view, now_minute, busy=False):
         reasons = []
         if not isinstance(offer.get("offer_id"), str) or not offer.get("offer_id"):
             reasons.append("task offer identity is missing")
-        if offer.get("task_kind") not in {"deliver_supply", "archive_note", "handover_note", "routine_route"}:
+        if offer.get("task_kind") not in {"deliver_supply", "archive_note", "handover_note",
+                                           "routine_route", "return_stock"}:
             reasons.append("unsupported task kind")
         if offer.get("task_kind") != "routine_route":
             if offer.get("item_id") is None:
@@ -149,7 +150,8 @@ def arbitrate(offers, commitments, local_view, now_minute, busy=False):
                                  for row in observation.get("retained_witnesses", ()))
                 if not remembered:
                     reasons.append("item unavailable in actor-local observation/history")
-        if offer.get("task_kind") in {"archive_note", "handover_note", "deliver_supply"} and offer.get("destination_id") is None:
+        if offer.get("task_kind") in {"archive_note", "handover_note", "deliver_supply",
+                                      "return_stock"} and offer.get("destination_id") is None:
             reasons.append("destination binding missing")
         if offer.get("task_kind") == "handover_note" and offer.get("recipient_id") is None:
             reasons.append("recipient binding missing")
@@ -168,11 +170,16 @@ def arbitrate(offers, commitments, local_view, now_minute, busy=False):
         return {"selected": None, "disposition": "WAIT", "reason": "no locally feasible offer",
                 "candidates": rejected}
 
-    # Stable, explainable ordering: earliest deadline, then SELF before AUTHOR
-    # only for equal deadlines, then stable offer id. No hidden utility score.
+    # Stable, explainable ordering: earliest deadline, then an already assigned
+    # item task before discretionary routine activity, then SELF before AUTHOR
+    # only for equal class/deadline, then stable offer id. No hidden utility score.
     infinity = 2**63 - 1
+    action_task_priority = {"deliver_supply": 0, "archive_note": 0,
+                            "handover_note": 0, "return_stock": 0,
+                            "routine_route": 1}
     selected = min(candidates, key=lambda row: (
         row.get("deadline_minute") if row.get("deadline_minute") is not None else infinity,
+        action_task_priority.get(row.get("task_kind"), 2),
         0 if row.get("source") == "SELF" else 1,
         str(row.get("offer_id", ""))))
     return {"selected": selected, "disposition": "ACCEPTED",

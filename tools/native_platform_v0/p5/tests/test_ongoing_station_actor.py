@@ -6,7 +6,9 @@ from tools.native_platform_v0.p3.agency import _dispatch_pending
 from tools.native_platform_v0.p3.planning import thaw
 from tools.native_platform_v0.p3.planning import plan_actor_task
 from tools.native_platform_v0.p5.ongoing_station.goals import arbitrate, refresh_commitment
-from tools.native_platform_v0.p5.ongoing_station.actor import advance_actor, _local_signature
+from tools.native_platform_v0.p5.ongoing_station.actor import (
+    _local_signature, _still_authorized, advance_actor,
+)
 
 
 def local_view(room_id=1, held=False, item_room=1):
@@ -105,6 +107,49 @@ class OngoingStationActorTests(unittest.TestCase):
         })
         self.assertEqual(at_handover["intent"], {"operator": "give", "item_id": 10,
                                                   "recipient_id": 22})
+
+    def test_return_stock_uses_same_exact_item_htn_and_original_source(self):
+        result = plan_actor_task(local_view(room_id=2, item_room=2), {
+            "goal_id": "return-stock-1", "task_kind": "return_stock", "item_id": 10,
+            "destination_id": 1, "last_known_item_room": 2,
+        })
+        self.assertEqual(result["status"], "SOLVED")
+        self.assertEqual(result["intent"], {"operator": "get", "item_id": 10})
+        self.assertEqual(result["shared_method_domain"], "p3-ongoing-actor-local")
+
+    def test_return_stock_offer_requires_own_delivery_and_matching_source_get_receipts(self):
+        actor = Actor()
+        actor.attributes.add("native_receipts", [
+            {"receipt_id": "get-1", "kind": "get", "item_id": 10,
+             "before_item_room_id": 1, "settled": True,
+             "ongoing_task_kind": "deliver_supply", "ongoing_commitment_id": "delivery-1"},
+            {"receipt_id": "drop-1", "kind": "drop", "item_id": 10,
+             "after_item_room_id": 2, "settled": True,
+             "ongoing_task_kind": "deliver_supply", "ongoing_commitment_id": "delivery-1"},
+        ], category="native_p3")
+        view = local_view(room_id=2, item_room=2)
+        with patch("tools.native_platform_v0.p5.ongoing_station.actor.observe_actor",
+                   return_value=view):
+            result = advance_actor(actor, None, [], 5)
+        self.assertEqual(result["commitment"]["task_kind"], "return_stock")
+        self.assertEqual(result["commitment"]["destination_id"], 1)
+        self.assertEqual(result["commitment"]["source_get_receipt_id"], "get-1")
+        self.assertEqual(result["commitment"]["source_delivery_receipt_id"], "drop-1")
+
+        actor2 = Actor()
+        actor2.attributes.add("native_receipts", [
+            {"receipt_id": "get-other", "kind": "get", "item_id": 10,
+             "before_item_room_id": 1, "settled": True,
+             "ongoing_task_kind": "deliver_supply", "ongoing_commitment_id": "other-delivery"},
+            {"receipt_id": "drop-1", "kind": "drop", "item_id": 10,
+             "after_item_room_id": 2, "settled": True,
+             "ongoing_task_kind": "deliver_supply", "ongoing_commitment_id": "delivery-1"},
+        ], category="native_p3")
+        with patch("tools.native_platform_v0.p5.ongoing_station.actor.observe_actor",
+                   return_value=view):
+            result = advance_actor(actor2, None, [], 5)
+        rows = actor2.attributes.get("ongoing_commitments", category="native_p5") or []
+        self.assertFalse(any(row.get("task_kind") == "return_stock" for row in rows))
 
     def test_routine_route_is_a_real_route_task_not_an_item_operation(self):
         result = plan_actor_task(local_view(), {
@@ -293,13 +338,15 @@ class OngoingStationActorTests(unittest.TestCase):
                       "actor_alias": "A", "recipient_alias": None, "recipient_id": None,
                       "constraint_id": "archive-by-note", "source_method_id": "return_then_file_by_A",
                       "projection_id": "station:1:oldhashprefix", "accepted_projection_id": "station:1:oldhashprefix",
+                      "deadline_minute": 24, "earliest_terminal_minute": 5,
                       "receipt_frontier": ["prior"], "receipt_ids": ["prior"]}
         actor.attributes.add("ongoing_commitments", [commitment], category="native_p5")
         offer = {"offer_id": "archive-v2-A", "source": "AUTHOR", "goal_id": "archive-goal",
                  "task_kind": "archive_note", "item_id": 10, "destination_id": 2,
                  "actor_alias": "A", "recipient_alias": None, "recipient_id": None,
                  "constraint_id": "archive-by-note", "source_method_id": "return_then_file_by_A",
-                 "control_source": "PLANNER", "projection_id": "station:2:new-source-h"}
+                 "control_source": "PLANNER", "projection_id": "station:2:new-source-h",
+                 "deadline_minute": 23, "earliest_terminal_minute": 6}
         projection = {"station_id": "station", "version": 2, "bundle_hash": "new-source-hash",
                       "constraints": [{"constraint_id": "archive-by-note",
                           "control": {"mode": "process", "file_actor": "A",
@@ -316,6 +363,8 @@ class OngoingStationActorTests(unittest.TestCase):
         self.assertEqual(row["receipt_ids"], ["prior"])
         self.assertEqual(row["projection_id"], "station:2:new-source-h")
         self.assertEqual(row["accepted_projection_id"], "station:1:oldhashprefix")
+        self.assertEqual(row["deadline_minute"], 23)
+        self.assertEqual(row["earliest_terminal_minute"], 6)
         self.assertEqual(row["replacement_offer_id"], "archive-v2-A")
         self.assertEqual(result["selected_goal"], "archive-v1-A")
         self.assertEqual(result["intent"]["operator"], "drop")
@@ -372,6 +421,67 @@ class OngoingStationActorTests(unittest.TestCase):
         self.assertEqual(by_id["locked-v1-B"]["receipt_ids"], ["move-lock"])
         self.assertEqual(by_id["self-route"]["status"], "IN_PROGRESS")
         self.assertEqual(by_id["self-route"]["receipt_ids"], ["self-move"])
+
+    def test_new_hard_handover_requirement_invalidates_old_file_by_b_author_suffix(self):
+        commitment = {"constraint_id": "archive", "source_method_id": "file_by_B",
+                      "actor_alias": "B", "task_kind": "archive_note"}
+        projection = {"constraints": [{
+            "constraint_id": "archive", "control": {
+                "mode": "result_only", "allowed_methods": ["file_by_B", "return_then_file_by_A"]},
+            "source_constraint": {"kind": "event_by_deadline", "event": "note_handed_over",
+                                  "hard": True, "minimum": 1,
+                                  "filters": {"item": "note"}}}]}
+        self.assertFalse(_still_authorized(commitment, projection))
+
+    def test_archive_waits_for_authored_start_but_can_travel_before_it(self):
+        actor = Actor()
+        offer = {"offer_id": "archive-window", "source": "AUTHOR",
+                 "goal_id": "archive", "task_kind": "archive_note", "item_id": 10,
+                 "destination_id": 2, "deadline_minute": 20,
+                 "earliest_terminal_minute": 10}
+        held_at_origin = local_view(held=True, item_room=None)
+        with patch("tools.native_platform_v0.p5.ongoing_station.actor.observe_actor",
+                   return_value=held_at_origin):
+            travel = advance_actor(actor, None, [offer], 8)
+        self.assertEqual(travel["intent"]["operator"], "move")
+        self.assertEqual(travel["commitment"]["deadline_minute"], 20)
+        self.assertEqual(travel["commitment"]["earliest_terminal_minute"], 10)
+
+        at_archive = local_view(room_id=2, held=True, item_room=None)
+        at_archive["observation"]["exits"] = [{"key": "west", "destination_id": 1}]
+        with patch("tools.native_platform_v0.p5.ongoing_station.actor.observe_actor",
+                   return_value=at_archive):
+            waiting = advance_actor(actor, None, [], 9)
+        self.assertIsNone(waiting["intent"])
+        self.assertEqual(waiting["disposition"], "WAIT")
+        self.assertEqual(waiting["commitment"]["status"], "IN_PROGRESS")
+        self.assertNotIn("suspended_observation", waiting["commitment"])
+
+        with patch("tools.native_platform_v0.p5.ongoing_station.actor.observe_actor",
+                   return_value=at_archive):
+            ready = advance_actor(actor, None, [], 10)
+        self.assertEqual(ready["intent"]["operator"], "drop")
+        self.assertEqual(ready["commitment"]["status"], "IN_PROGRESS")
+
+    def test_handover_waits_for_its_count_window_without_suspending(self):
+        actor = Actor()
+        offer = {"offer_id": "handover-window", "source": "AUTHOR",
+                 "goal_id": "archive", "task_kind": "handover_note", "item_id": 10,
+                 "destination_id": 2, "recipient_id": 22, "recipient_alias": "A",
+                 "deadline_minute": 12, "earliest_terminal_minute": 10}
+        view = local_view(room_id=2, held=True, item_room=None)
+        with patch("tools.native_platform_v0.p5.ongoing_station.actor.observe_actor",
+                   return_value=view):
+            waiting = advance_actor(actor, None, [offer], 9)
+        self.assertIsNone(waiting["intent"])
+        self.assertEqual(waiting["commitment"]["status"], "IN_PROGRESS")
+        self.assertEqual(waiting["commitment"]["deadline_minute"], 12)
+        self.assertEqual(waiting["commitment"]["earliest_terminal_minute"], 10)
+
+        with patch("tools.native_platform_v0.p5.ongoing_station.actor.observe_actor",
+                   return_value=view):
+            ready = advance_actor(actor, None, [], 10)
+        self.assertEqual(ready["intent"]["operator"], "give")
 
     def test_suspended_commitment_does_not_lock_slot_and_author_deferral_is_explained(self):
         view = local_view(item_room=None)
