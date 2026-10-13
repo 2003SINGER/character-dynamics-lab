@@ -323,7 +323,7 @@ class P3Control:
 
     def reset_p5_scenario(self, args):
         allowed = {"bundle", "initial_social_preset", "horizon", "seed", "director_enabled",
-                   "shared_supply", "initial_main_open", "story_process", "story_strategy"}
+                   "shared_supply", "initial_main_open", "story_process", "story_strategy", "ongoing_station"}
         if set(args) - allowed or "bundle" not in args:
             raise ValueError("reset_p5_scenario requires bundle and only registered P5 options")
         if self.created_scenes >= MAX_SCENES_PER_PROCESS:
@@ -338,7 +338,7 @@ class P3Control:
     def run_p5_scenario(self, args):
         allowed = {"bundle", "initial_social_preset", "horizon", "interventions", "edits",
                    "director_enabled", "seed", "shared_supply", "initial_main_open",
-                   "story_process", "story_strategy"}
+                   "story_process", "story_strategy", "ongoing_station"}
         if set(args) - allowed or not {"bundle", "initial_social_preset", "horizon"}.issubset(args):
             raise ValueError("run_p5_scenario requires bundle, initial_social_preset, horizon")
         if self.created_scenes >= MAX_SCENES_PER_PROCESS:

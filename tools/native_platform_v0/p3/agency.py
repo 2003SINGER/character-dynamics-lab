@@ -328,7 +328,8 @@ def _dispatch_pending(actor, pending):
     """Run one native command and settle only from the resulting Evennia state."""
     operation = pending["intent"]
     view = thaw(pending["view"])
-    item_id = view["goal_contract"].get("item_id")
+    ongoing_task = pending.get("ongoing_task") or {}
+    item_id = ongoing_task.get("item_id", view["goal_contract"].get("item_id"))
     before_room = actor.location.id if actor.location else None
     before_inventory = [obj.id for obj in actor.contents]
     before_item_room = before_room if item_id is not None and _visible_item_in_room(actor, item_id) else None
@@ -346,6 +347,8 @@ def _dispatch_pending(actor, pending):
         if target is None:
             profile = view.get("activity_contract", {}).get("profile")
             prior_item = view.get("observation", {}).get("task_item", {})
+            if ongoing_task.get("item_key"):
+                prior_item = {**prior_item, "key": ongoing_task["item_key"]}
             is_recovery_profile = profile == "delivery_patrol_recovery_v0"
             is_native_scene_profile = profile in ("p4_story_v0", "p5_story_v0")
             allows_native_missing_get = is_recovery_profile or is_native_scene_profile
@@ -379,6 +382,18 @@ def _dispatch_pending(actor, pending):
             rejection = "actor is not at the observed destination room"
         else:
             command = f"drop {target.key}"
+    elif operation["operator"] == "give" and ongoing_task:
+        target = next((obj for obj in actor.contents if obj.id == item_id), None)
+        recipient_id = operation.get("recipient_id")
+        recipient = next((obj for obj in actor.location.contents
+                          if obj.id == recipient_id and obj is not actor
+                          and obj.access(actor, "view", default=True)), None) if actor.location else None
+        if target is None:
+            rejection = "committed handover item is not in the actor's inventory"
+        elif recipient is None:
+            rejection = "registered recipient is not currently visible in the actor's room"
+        else:
+            command = f"give {target.key} = {recipient.key}"
     else:
         rejection = "unsupported primitive"
 
@@ -417,14 +432,22 @@ def _dispatch_pending(actor, pending):
 def _settle_pending(actor, pending, before_room, before_inventory, before_item_room, failure, detail,
                     dispatch_succeeded):
     intent = pending["intent"]
-    item_id = pending["view"]["goal_contract"].get("item_id")
+    ongoing_task = pending.get("ongoing_task") or {}
+    item_id = ongoing_task.get("item_id", pending["view"]["goal_contract"].get("item_id"))
     after_room = actor.location.id if actor.location else None
     after_inventory = [obj.id for obj in actor.contents]
+    recipient_id = intent.get("recipient_id") if intent.get("operator") == "give" else None
+    recipient = next((obj for obj in actor.location.contents if obj.id == recipient_id), None) \
+        if recipient_id is not None and actor.location else None
+    recipient_inventory = [obj.id for obj in recipient.contents] if recipient is not None else []
     after_item_room = after_room if item_id is not None and _visible_item_in_room(actor, item_id) else None
     if intent["operator"] == "move":
         settled = bool(dispatch_succeeded and after_room == intent["destination_id"] and before_room != after_room)
     elif intent["operator"] == "get":
         settled = bool(dispatch_succeeded and item_id in after_inventory and item_id not in before_inventory)
+    elif intent["operator"] == "give":
+        settled = bool(dispatch_succeeded and item_id in before_inventory and item_id not in after_inventory
+                       and item_id in recipient_inventory)
     else:
         settled = bool(dispatch_succeeded and item_id in before_inventory and
                        after_item_room == intent["room_id"] and item_id not in after_inventory)
@@ -441,6 +464,13 @@ def _settle_pending(actor, pending, before_room, before_inventory, before_item_r
                "submitted_command": pending.get("submitted_command"),
                "before_inventory_ids": before_inventory, "after_inventory_ids": after_inventory,
                "dispatch_succeeded": dispatch_succeeded, "settled": settled}
+    if intent["operator"] == "give":
+        receipt.update({"recipient_id": recipient_id,
+                        "recipient_dbref": recipient.dbref if recipient is not None else None,
+                        "recipient_inventory_ids": recipient_inventory})
+    if ongoing_task:
+        receipt.update({"ongoing_commitment_id": ongoing_task.get("commitment_id"),
+                        "ongoing_task_kind": ongoing_task.get("task_kind")})
     profile = get_value(actor, "activity_profile", "legacy_delivery_v0")
     if profile in ("p4_story_v0", "p5_story_v0"):
         # P4 has an explicit simulated clock. Keep this annotation P4-only so old

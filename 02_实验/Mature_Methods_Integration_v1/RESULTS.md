@@ -1,8 +1,8 @@
 # Mature-Methods Integration v1 — bounded native evidence
 
-状态：**DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**（2026-10-12；未 CLOSED）。原 S1–S4 与 S2 权限编辑拒绝仍是历史结果；同阶段新增的“真实便条回应后归档”有界增量已完成开发运行，现待独立审阅。该增量不改变旧结果，也不构成完整系统通过、性能优势、研究新颖性或机制有效性证据；不自动进入新阶段。
+当前状态：**DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**（2026-10-13；未 CLOSED）。本页新增的 Ongoing Station 结果见下方“2026-10-13 Ongoing Station”章节；此前 2026-10-12 的成熟装配结果仍按历史状态保存。原 S1–S4 与 S2 权限编辑拒绝均为历史结果，不因本次增量而改写。本次结果不构成完整系统通过、性能优势、研究新颖性或机制有效性证据；不自动进入新阶段。
 
-> **历史分隔：** 下方原 S1–S4 内容维持其原始结果和边界，不应用作本次 story-process 增量的当前状态。新增增量的唯一结果见本文末尾“2026-10-12 Story-process 增量”。
+> **历史分隔：** 原 S1–S4 内容及 2026-10-12 成熟装配章节维持其原始结果和边界，不应用作本次 Ongoing Station 增量的当前状态。本次新增证据唯一见本文末尾“2026-10-13 Ongoing Station”。
 
 ## 范围与可复核证据
 
@@ -74,3 +74,76 @@
 运行成本账本另分记 controller decisions、原 GTPyhop 实际 method callbacks、仅诊断用途的替代 guard 检查、原生 P4 ledger/角色回执及 sealed minute；墙钟记录排除 service lifecycle，只作描述。源代码在修复和续跑期间发生变化，且对照同样成功，因此不做算法性能排序或总成功率包装。专项复核记录：P5 为 85 项中 84 PASS、1 skip；成熟方法集成 34 项；P3 为 53 项通过。它们是开发验收，不等于整个系统 CLOSED。
 
 此增量仅支持该有限实例的原生行为和失败反馈证据，不证明通用调度、方法优势、研究新颖性、玩家可信度或系统完整性。原 S1–S4 / S2 权限编辑拒绝仍按历史边界解释；当前成熟方法集成总体仍为 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**，未 CLOSED。
+
+## 2026-10-13 Ongoing Station：原生自主承诺、作者约束与事件基线
+
+### 状态与范围
+
+状态：**DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**，不标为 CLOSED。下述只引用本次 9 个明确 allowlist 目录（8 个原生 scene 运行 + 1 个同 DB service lifecycle 记录）；不改写旧 S1–S4、权限规则或旧 E0 预算。用户已明确授权公开本次限定证据，原始对话/private attachment 未收入发布包。能力结论来自本轮实际运行；远端版本与 CI 以 `webgpt-sync` 和 GitHub Actions 的实际读回为准，不预先宣称全仓 CI 通过。
+
+固定 case suite SHA-256 为 `105377a780e719cd4c8655ddc954bbb96c5c7ffbd47092f787f3f6ec65c929c6`；作者包 SHA-256 为 `b008047ca1fcd956f69f0d95ef491c0303cb3035d87e0296c771b7458f491e50`。固定物理期限 24 分钟，配对场景使用相同 initial preset、seed、资源和动作权限；GT 与 event-driven 唯一实验控制差异是 planner strategy。最终代表条件是 T1 无作者、T2/T5/T7 同场混合约束的 GT/event 配对、T4 有真实角色承诺的作者 offer 与 future edit、T6 玩家持有真实物资的负例。另保留一条更早 T1 probe 和两条作者 native adapter 修复前失败 scene；它们不是额外通过条件。
+
+### T1–T8 覆盖与实际轨迹
+
+| 项 | 固定要求与本次可验结果 | 场景/证据状态 |
+|---|---|---|
+| T1 | `author:null` 时 A、B 均从自己的本地 P3 view 选择 self-goal；每角色 23 个 station decisions，11 个 self commitments，其中 10 个由独立 DB native receipt settle，之后又选择并 dispatch/pending 一个不同 self-goal。这里的 10 是已结算承诺数，不是 10 条物理 receipt。 | 最终 T1 PASS，scene `20261013032814-4ee796`；`runs/story-ongoing-station-t1-no-author-autonomy-20261013T032814Z-9059b4/`。更早 probe scene `20261013022923-d8fca2` 保留但不计代表条件。 |
+| T2 | 作者只约束同一真实 note 的按期归档结果，不指定 NPC 必须接受。通过 sealed request/response 绑定精确 note；结果方法与锁定片段分开绑定，后续 edit 只改未来 filer。 | 修复后 GT scene `20261013033249-9c2415`，offline audit v3 PASS；event scene `20261013033640-1dcd15`，PASS。run dirs 分别为 `story-ongoing-station-t2-t7-author-gtpyhop-20261013T033249Z-2f5e13`、`story-ongoing-station-t2-t7-author-event-driven-20261013T033640Z-195726`。 |
+| T3 | 给/交接实际接受 P3/Evennia 可见性校验与物理反馈。GT 场景中 B 在 m7 尝试 locked handover 时 A 尚不可见，故出现真实 `WORLD_VALIDATION_REJECTED` settlement 记录；不是成功 receipt，也没有让 A 停止自己的 route。A 完成路线后 B 于 m8 成功 give，A 于 m9 archive；真实 note/locked 目标均 SAT。 | 与 T2/T5/T7 共用 GT scene `20261013033249-9c2415`，Event scene `20261013033640-1dcd15` 也按同一玩法得到 SAT。准确失败尝试可从两场的 `final-trace.json`、分钟增量和 scoped DB 回放；不可把失败尝试删成“直接成功”。 |
+| T4 | 作者 offer 到达时，B 的真实 `routine_route` 承诺仍在进行；m6 `AUTHOR_OFFER_DEFERRED` 引用其 live commitment 和路线 receipt `p3:7525:0:13`。m7 handover 有实际失败执行记录 `p3:7525:0:19`，`settled=false`、`dispatch_succeeded=false`、`WORLD_VALIDATION_REJECTED`（A 不可见），所以结论是“无成功物理 give”，不是“没有 receipt”。m8 合法 CAS 将 filer A 改 B，edit response 的 `invalidated_offer_ids` 指向旧请求；旧未执行 handover suffix 记为 `CANCELLED_STALE`。此前 SELF 路线前缀留存；B 于 m10 以 `p3:7525:0:28` 归档。没有脚本化拒绝，也没有声称打断已在执行中的世界动作。 | 原始 `summary.json` 是 NOT_CERTIFIED（客户端旧断言错误要求 m7 movement、并读取空的汇总 stale ID）；用保存的 native response/history/receipt 与同一 DB 离线重审为 v3 PASS，15/15 条件。scene `20261013033716-ea2579`；`story-ongoing-station-t4-live-actor-deferral-20261013T033716Z-806402/`。summary 与 v2 审计原样保留。 |
+| T5 | 同一个作者 envelope 同时含结果 constraint 与独立 locked core：v1 结果约束 filer=B，使 `file_by_B` 可行，但锁片 B handover→A archive 要求 `return_then_file_by_A`，二者不兼容，因此 controller 记录冲突且不发布 actor task；m6 CAS 只把 filer 改 A，deadline=24、grant、locked sequence/hash 不变。v2 结果搜索与 lock intersection 兼容，真实交接和归档 receipts 依次通过。 | 同 T2 配对两 scene。GT final audit v3 16/16 PASS；Event 16/16 PASS。T5 的 v1 “冲突 projection superseded”不夸大成取消已发布/已运行的 NPC task；当时没有这种 offer。 |
+| T6 | 玩家在 m1 通过注册 `get courier_supply` 真正拿走物资并持有至 m24。A 的 delivery target 仍配置但没有被假称已接受/中断的 commitment；A 明确因 item 不可用未执行目标。B 仍用原生 receipt 完成独立 delivery 和两段 route。此为 NPC callback 前发生的初始资源持有负例，不是中途扰动。 | PASS，scene `20261013033010-0b39f5`；`story-ongoing-station-t6-player-holds-courier-supply-20261013T033010Z-af18a2/`。player command receipt 与最终 item holder 由 scoped DB 核验。 |
+| T7 | “认真 event”对照共用同一 profile、result/lock guards、授权与真实反馈；只改 strategy。两对 `case-input.json` 去掉 strategy 后 reset inputs 与 interventions 相同，按角色/minute/operator/status 规范化后的全部 native execution 序列 diff=0。 | GT 与 Event 都达到同一目标；本次未发现行为增量，不支持 GT 优于 event-driven。两臂 native code controller/actor 相同，但完整 source-set hash 因离线 audit/test 文件变化而不同，故也不包装成字节级同源码对照。 |
+| T8 | 每场保留完整 final trace、每分钟增量、scene identity、独立 scoped DB JSON、源码快照和可读回放。可读回放是叙事索引，不替代 ledger/DB；对不同证据流不伪造跨流总序。 | 最终发布目录邻接的 `readable_replays/` 有 7 个 byte-identical Markdown 副本及 hash index；早期 T1 probe 的同名文件实际是 JSON-encoded malformed Markdown，原件仍在包内但不伪装成可读回放，index 明确记录排除原因。 |
+
+两个修复前 matched-arm scene 都实际运行了 SOCIAL_REQUEST/SOCIAL_RESPONSE；它们的失败原因不是“没有世界便条”，而是 adapter 用不存在的 receipt `item_id` 绑定 note，加上 `_author_verdicts` 的局部 `service` import NameError，致 controller/TypedIR 读回错误。scene `20261013032840-334a92`（GT）与 `20261013032922-1ed505`（Event）和原 `NOT_CERTIFIED` summaries 均保留，不以成功重跑覆盖。T1/T6 与最终 episode 的原 `summary.json` 不改写；GT/T4 的审计纠正写在新的 v2/v3 offline audit sidecar。
+
+### 原生与规划成本边界
+
+配对 trace 各有 **40 次 controller evaluation**：20 次 `result_only`、20 次 `locked_fragment`。只有 GT arm 的 20 次 result-only evaluation 调用高层 GTPyhop；其 `attempted_methods` 记录 60 个候选尝试，search trace 共 81 行。Event arm 的 20 次 result-only 是 event policy evaluation；锁定分支不调用高层 GTPyhop，全场高层 search trace 为 0。81/0 是搜索 trace 行数，不是访问过的独立状态数或运行时间。两场共同有 46 次 actor-local P3 GTPyhop planner 调用、合计 186 次 `method_action_visits`；这些执行辅助开销两臂相同。每场 ledger 另有 24 个 P5 director decisions、48 个 NPC callbacks 和 24 个时间推进事件；它们是共享游戏运行成本，不应混作高层搜索调用。墙钟配对时间未采集/不作比较。
+
+独立 actor DB 的两臂各有 45 条 settled native P3 primitive receipts：39 `move`、3 `drop`、2 `get`、1 成功 `give`。这是输出动作回执数，不是规划节点或总动作尝试数；例如失败的 m7 give 单独保留在 execution-settlement log，未计入成功 receipts。
+
+| 层 | 本次新写 / 本次复用 | 成本或限制 |
+|---|---|---|
+| 游戏内容 | 新 author bundle bindings、结果目标、锁片序列、A/B 本地 self-goals 与路线/资源约束；没有预置首次拒绝规则或脚本化 NPC 动作。 | 证据只覆盖固定内容、seed 与 24 分钟期限。 |
+| 高层方法知识 | 新 `file_by_B`、`return_then_file_by_A` 与等待真实回应的方法候选；新 locked/result intersection 与 controller offer mapping。 | GT 搜索与 event candidate policy 最终选择一致；未观测到方法优势。 |
+| Actor 任务适配 | 新 station-specific `deliver_supply`、`routine_route`、`archive_note`、`handover_note` commitments 与本地 arbitration/history。 | 复用 P3 GTPyhop 2.0.2、`observe_actor`、known-exit route helper、move/get/drop dispatcher；`give` 仍受 native recipient visibility 验证。 |
+| Evidence/audit | 新 actor/callback/TypedIR receipt binding、未来 edit CAS、五份 offline audit v3 与 replay 索引。 | 两个旧 adapter failure 保留；原 GT/T4 `NOT_CERTIFIED` 原文保留并由 hash-bound offline audit 复核，不伪装成当时runner summary PASS。 |
+
+### 适配债、成本全账与研究边界
+
+本实现的内容和方法边界仍然很窄：固定的 author goal、`file_by_B` / `return_then_file_by_A` 两种归档方法，以及基于本地 commitment/history 的优先级，都是本项目为该 profile 新写的领域内容；它们不是通用目标生成器，也不是完整 BDI 架构。跨约束锁片适配器只验证已注册的 constraint、grant、hash、sequence index、真实前缀 receipt 与当前可行 suffix；它不是通用 HTN/STN 或任意过程组合器。交接 rendezvous 按 sealed view 中的实际位置绑定；当前没有通用资源规划器、通用时间约束网络或跨场景路径协商。
+
+运行中的 station/commitment 状态由现有持久对象和可读回历史承载，但本实验没有验证进程崩溃后的恢复、重复投递幂等性或跨版本迁移，不能称作 crash recovery。玩家资源命令与 Evennia 校验是真实物理边界；高层/角色方法仍只提出一个 primitive，不能越过 dispatcher 或替代世界校验。T4 的 m7 give 是有 settlement 记录的失败尝试，而不是成功 receipt；T5 v1 也只是 projection conflict，没有已发布的 actor task 可供取消。
+
+成本应拆成运行成本、实现内容和人类劳动，不能相互换算。上文的 controller evaluation、GTP callback/search trace、actor-local P3 calls/visits、native settled receipts、NPC callbacks、时间推进和墙钟缺测，分别是本次运行可计量项；它们不是开发工时。README 中的模块行数只是当前文件 footprint，不等于新增 LOC、建模时间或效率收益。内容建模、方法设计、适配、调试、证据整理及作者劳动的小时数没有可靠记录，故记为**未知**，不从代码行数推断节省或总成本。实际修复/诊断类别包括 note producer 字段与局部 import、edit projection reconcile、locked-prefix suffix continuation、audit 对真实嵌套 trace shape 的解析；这些是开发期间的代码/审计问题，不应都计作原生场景失败。两条 pre-fix author scenes 是真实保留的失败运行；测试夹具修正和离线 parser 回归不是 live failure。
+
+后续仅保留研究候选，不启动新阶段：其一，既有目标历史与 commitment 如何影响新目标选择；其二，多个过程并存、作者只给部分约束时如何协调，以及对作者创作劳动有什么影响。LLM 可能的两个插入点仍是作者文本到受限 binding、以及角色本地观察/历史到候选目标解释；两者都需要单独设计与评估，当前没有自动接入或运行。
+
+数据流如下；controller 只规划/发布可拒绝的 future offer，最终完成来自本地角色回调、原 dispatcher 和物理 receipt：
+
+```text
+AuthorBundle + registered bindings
+  -> sealed-note/request binding + controller method/lock evaluation
+  -> eligible future offer / future-version CAS edit
+  -> actor-local P3 observe_actor + commitment arbitration + shared HTN intent
+  -> existing pending-action dispatcher + Evennia validation
+  -> settled native receipt -> actor history / TypedIR verdict / next sealed decision
+
+author:null -> SELF offers -> actor-local commitment/history -> same dispatcher/receipt path
+```
+
+### 源身份、审计与发布
+
+每场存自己的 working-tree byte-set SHA，不能把所有实验简化成一个 Git HEAD：最终 T1、T6 和两条 adapter-fix 前失败场的 file-set hash 为 `43941d01c13d43c70c4aeaddbb1504235dc3a3895eb165613555d99dc6561b23`；修复后的 GT scene 为 `6275afc73cd642bd834c8efb7dc0abd7378e34f21aa89d8d6323e6053028d3da`；Event 与 T4 为 `85fb9d752350a62c774900521614c19aaf1bd7d31602afd9d26cd421e07aee84`。GT→Event source-set 差异仅 `ongoing_station/audit.py` 与对应 runner test；runtime controller/actor hash相同。所有改过的文件 bytes 都在每场 `source-snapshot/` 中。
+
+最终统一复核使用 `audit.py` SHA-256 `9fe219389efa210929312ee5d8ccd926eb7b1812274eb6c40a361b05ce04b480`（40,612 bytes），完整字节载于 GT run 的 `audit-source-v3.py`。5 个 `offline-audit-recheck-v3.json` 分别绑定实际 trace SHA、原始 DB readback SHA、case input SHA、scene identity SHA、source file-set SHA；v3 sidecar 自身哈希为：T1 `c5ac3d8f1338b1ce0ef42baa8e150e44f034abfb1222c8a23ec0ab38c7b22e73`，GT `335a70605dec1dfd97248f6e5d1f9ab6f55273b1c4f18e24a0886f7ed37ac4a0`，Event `a84e577e9e79eeb447654950b3a6445a88060660351095b818906e92ecb4ecef`，T4 `c15b0906823bd48a0fc283363d010b0dcf2c723f5af95819885ea354f6fe964d`，T6 `bdaa7e1997f011231c197ca60f229bb21446d32a3408081a99a7b5711103fee3`。修复前故障和先前 v2 sidecar 不覆盖。
+
+最终包目录为 `public_evidence/story-process-v1-20261013T040000Z/`；其中 `story-process-v1.tar.gz` 有 568 个逐成员校验文件、压缩前 141,997,708 bytes、压缩后 6,175,869 bytes，归档 SHA-256 `69246b239667199cf89b206a528862dbcde9fa3eb241e8d4ad04cafd00e17fba`。既有 publisher 专项安全测试 5/5 通过，最终 tar 按 index 对 568 个原件逐项校验为 VERIFIED。目录的 `index.json` 是逐文件 hash 成员索引，`publication-scope.md` 特别澄清其 8 个原始 DB payload 是用户许可且敏感扫描通过的**scene-scoped simulated JSON**，不含全账户/unscoped DB、数据库 binary、凭证或 private 原文；其存在不应与 publisher 的通用 “raw DB exports” exclusion label 混读。相邻 `readable_replays/` 有 7 个最终/诊断 Markdown 原文逐字节副本，其来源与 SHA 见 `readable_replay_index.json`（SHA-256 `b78e0533cb3d4c81f8c1033e4f7383077c1606a8494c7364f9aea73822fbe868`）。此前 03:45 本机包缺 v3 source carrier，仅作被 supersede 的历史本地包，不作最终链接。
+
+审阅入口：[完整原始证据包](public_evidence/story-process-v1-20261013T040000Z/story-process-v1.tar.gz) · [逐文件索引](public_evidence/story-process-v1-20261013T040000Z/index.json) · [回放索引](public_evidence/story-process-v1-20261013T040000Z/readable_replay_index.json) · [直接阅读 T4 过程](public_evidence/story-process-v1-20261013T040000Z/readable_replays/story-ongoing-station-t4-live-actor-deferral-20261013T033716Z-806402.md)。
+
+Parent 最终复核：实际 trace 与独立 DB 中的 SELF 任务/后续活动、m6 延后、m8 旧承诺撤销、m10 原生归档，以及混合片段 m8 交接/m9 归档均已定向读回；匹配输入和归一执行序列逐项相同。独立重新验证 568 个归档成员、8 份 DB、5 份 v3 审计/源码与 7 份回放副本。最终本机 P5 unittest 运行 139 项：138 PASS、1 skip；P3 53 项与成熟方法工具 34 项通过，不把这些数量相加称为独立语义实验。仓库健康检查退出成功，保留 11 个既有本地依赖体积/历史重复材料告警；旧 E0-H02 预算失败没有调预算或重跑刷绿。
+
+下一步仍只列候选而不自动开新阶段：优先围绕“历史/commitment 怎样影响新目标”和“多个部分作者约束过程如何协调及影响创作劳动”提出可证伪问题；若独立审阅要求，再预注册多 seed、受控可见性/路径变化的同能力复验与墙钟/搜索状态计数。LLM 作者 binding 与 actor-policy 是未来入口而非当前结果。不从这一组固定轨迹推断心理真实性、长期自主性或普遍策略优劣，也不自动扩大权限。

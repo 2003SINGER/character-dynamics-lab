@@ -1,0 +1,7 @@
+# Publication scope note
+
+This release contains exactly the nine explicitly allowlisted run directories recorded in `index.json`: eight scene-run directories and one service-lifecycle directory. It includes eight raw `db-readback.json` files, each an independently exported, scene-scoped simulated-world JSON record (scene objects, actor/item state, and that scene's ledger); their exact member paths and SHA-256 hashes are in the index. These are not whole-account, unscoped, or binary databases. No database binary, credentials, token, private attachment, private original dialogue, or material from another project is included.
+
+Every `db-readback.json` passed the existing publisher's credential-like content scanner before packaging. The generated index's generic exclusion-policy text says “raw DB exports”; for this release, that phrase refers to broad/database-file exports and is not an accurate description of the explicitly scoped JSON members included here. This note records the scope of this release without rewriting the immutable archive or its generated index.
+
+The archive also contains the exact final audit source bytes and five non-overwriting offline audit rechecks. The early T1 probe's malformed JSON-encoded `readable-replay.md` remains in its original run member for provenance but is deliberately not copied into the adjacent direct Markdown replay directory; that exclusion is recorded in `readable_replay_index.json`.

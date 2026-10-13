@@ -135,11 +135,26 @@ def _candidate_guard_matches(guard, *, scene_id, bundle_version, now,
 
 def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_reject_v0",
                       horizon=24, seed=0, director_enabled=True, shared_supply=False,
-                      initial_main_open=True, story_process=None, story_strategy="gtpyhop"):
+                      initial_main_open=True, story_process=None, story_strategy="gtpyhop",
+                      ongoing_station=None):
     """Create a fresh P5 scene without reusing or overwriting any generated objects."""
     if initial_social_preset not in SOCIAL_PRESETS:
         raise ValueError("initial_social_preset is not a registered native preset")
-    if type(horizon) is not int or not 1 <= horizon <= MAX_HORIZON:
+    station_profile = None
+    if ongoing_station is not None:
+        try:
+            from tools.native_platform_v0.p5.ongoing_station.model import load_profile, compile_projection
+            station_profile = load_profile(ongoing_station)
+            compile_projection(station_profile, entities=_entities())
+            if story_process is not None:
+                raise ValueError("ongoing_station cannot be combined with legacy story_process")
+            if horizon not in (24, station_profile.horizon):
+                raise ValueError("explicit horizon must match ongoing_station.horizon")
+            horizon = station_profile.horizon
+        except (TypeError, ValueError, BundleError) as exc:
+            return {"ok": False, "scene_created": False,
+                    "error": {"code": "INVALID_ONGOING_STATION", "details": {"reason": str(exc)}}}
+    if type(horizon) is not int or not 1 <= horizon <= (48 if station_profile else MAX_HORIZON):
         raise ValueError("P5 horizon must be an integer in [1,24]")
     if type(seed) is not int or not 0 <= seed <= 2**31 - 1:
         raise ValueError("P5 seed must be an integer in [0,2147483647]")
@@ -147,6 +162,8 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
         raise ValueError("P5 director, shared_supply, and initial_main_open must be booleans")
     if story_process is not None and story_strategy not in {"gtpyhop", "event_driven"}:
         raise ValueError("story_strategy must be gtpyhop or event_driven")
+    if ongoing_station is not None and story_strategy not in {"gtpyhop", "event_driven"}:
+        raise ValueError("ongoing station strategy must be gtpyhop or event_driven")
     entities = _stable_entities()
     try:
         # Validate external author input before importing Evennia factories or
@@ -228,6 +245,7 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
         _set(scene["return_parcel"], "p5_item_alias", "resident_parcel")
     _set(pickup, "p5_scene_id", scene_id, category="native_p3")
     _set(pickup, "p5_side_room_id", int(side.id))
+    _set(pickup, "p5_station_archive_room_id", int(destination.id))
     _set(pickup, "p5_active_bundle", _plain_json(active.raw))
     _set(pickup, "p5_entities", entities)
     _set(pickup, "p5_bundle_archive", [])
@@ -271,6 +289,11 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
         for actor in actors.values():
             _set(actor, "p5_story_postresponse_policy", _plain_json(story_request.actor_postresponse))
             _set(actor, "p5_story_deadline", int(story_request.objective["by_minute"]))
+    if station_profile is not None:
+        from tools.native_platform_v0.p5.ongoing_station.controller import initialize, publish_after_seal
+        initialize(pickup, actors, ongoing_station)
+        _set(pickup, "p5_ongoing_station_strategy", story_strategy)
+        publish_after_seal(scene_id, 0)
     return {"scene_id": scene_id, "seed": seed, "horizon": horizon, "now": 0,
             "preset": initial_social_preset, "director_enabled": director_enabled,
             "shared_supply": shared_supply,
@@ -284,7 +307,12 @@ def reset_p5_scenario(*, owner, bundle, initial_social_preset="native_default_re
             "pending_actions": {alias: None for alias in actors},
             **({"story_process": {"strategy": story_strategy,
                                   "note_binding": "native_note_pending"}}
-               if story_process is not None else {})}
+               if story_process is not None else {}),
+            **({"ongoing_station": {"station_id": station_profile.station_id,
+                                      "profile_version": station_profile.version,
+                                      "horizon": station_profile.horizon,
+                                      "author_status": "STAGED_INACTIVE" if station_profile.author else "ABSENT"}}
+               if station_profile is not None else {})}
 
 
 def edit_author_bundle(scene_id, raw_bundle, expected_version):
@@ -479,6 +507,46 @@ def _complete_minute(scene_id, minute):
                for obj in rows if _attr(obj, "activity_profile") == world.PROFILE}
     if set(aliases) != {"A", "B"}:
         raise ValueError("P5 minute cannot complete without both actor callbacks")
+    station_meta = _attr(pickup, "p5_ongoing_station_meta", category="native_p5")
+    if isinstance(station_meta, Mapping):
+        station_meta = _plain_json(station_meta)
+        seen = set(station_meta.get("projected_receipt_ids", []))
+        actor_by_id = {int(actor.id): alias for alias, actor in aliases.items()}
+        for alias, actor in aliases.items():
+            for receipt in _plain_json(_attr(actor, "native_receipts", default=[])):
+                receipt_id = receipt.get("receipt_id")
+                if (not receipt_id or receipt_id in seen or receipt.get("settled") is not True
+                        or receipt.get("ongoing_task_kind") not in {"archive_note", "handover_note"}):
+                    continue
+                task_kind = receipt["ongoing_task_kind"]
+                item_id = receipt.get("item_id")
+                if type(item_id) is not int:
+                    continue
+                commitments = _plain_json(_attr(actor, "ongoing_commitments", category="native_p5", default=[]))
+                commitment = next((row for row in commitments
+                                   if row.get("commitment_id") == receipt.get("ongoing_commitment_id")), {})
+                destination_id = commitment.get("destination_id")
+                event_type = ("P5_ONGOING_STATION_NOTE_ARCHIVED" if task_kind == "archive_note"
+                              and receipt.get("kind") == "drop"
+                              and receipt.get("after_item_room_id") == destination_id
+                              else "P5_ONGOING_STATION_NOTE_HANDED_OVER" if task_kind == "handover_note"
+                              and receipt.get("kind") == "give"
+                              and item_id in receipt.get("recipient_inventory_ids", []) else None)
+                if event_type is None:
+                    continue
+                recipient_id = receipt.get("recipient_id")
+                recipient_alias = actor_by_id.get(recipient_id) if recipient_id is not None else None
+                append_event(scene_id, {"event_type": event_type,
+                                        "event_id": f"station-receipt:{receipt_id}",
+                                        "typed_args": {"receipt_id": receipt_id,
+                                                       "commitment_id": receipt.get("ongoing_commitment_id"),
+                                                       "task_kind": task_kind, "actor_alias": alias,
+                                                       "recipient_alias": recipient_alias,
+                                                       "item_id": item_id, "settled": True},
+                                        "sealed": True})
+                seen.add(receipt_id)
+        station_meta["projected_receipt_ids"] = sorted(seen)
+        _set(pickup, "p5_ongoing_station_meta", station_meta)
     snapshots = world.capture_snapshot(scene_id, minute)
     callback_event_ids = [f"p5:{_attr(pickup, 'scenario_seed', default=0)}:{alias}:{minute}:callback"
                           for alias in ("A", "B")]
@@ -596,6 +664,20 @@ def _apply_intervention(scene_id, row, bundle):
         result = edit_story_request(scene_id, row["request"], row["expected_version"])
         provenance = "author_story_process_edit"
         command_receipt = None
+    elif row.get("kind") == "activate_ongoing_station":
+        if set(row) != {"at", "kind", "expected_version"}:
+            raise ValueError("activate_ongoing_station requires at/kind/expected_version")
+        from tools.native_platform_v0.p5.ongoing_station.controller import record_activation
+        result = record_activation(scene_id, row["expected_version"], int(row["at"]))
+        provenance = "ongoing_station_author_activation"
+        command_receipt = None
+    elif row.get("kind") == "edit_ongoing_station_author":
+        if set(row) != {"at", "kind", "expected_version", "author"}:
+            raise ValueError("edit_ongoing_station_author requires at/kind/expected_version/author")
+        from tools.native_platform_v0.p5.ongoing_station.controller import record_edit
+        result = record_edit(scene_id, row["author"], row["expected_version"], int(row["at"]))
+        provenance = "ongoing_station_author_edit"
+        command_receipt = None
     else:
         raise ValueError("unknown P5 intervention kind")
     pickup, _ = _scene_objects(scene_id)
@@ -622,6 +704,9 @@ def _round_deferred(scene_id, intervention=None, edit=None):
         if _attr(pickup, "p5_story_request", category="native_p5") is not None:
             from tools.native_platform_v0.p5.story_process.actor import step_story_aware_actor
             actor_callback = step_story_aware_actor
+        elif _attr(pickup, "p5_ongoing_station_profile", category="native_p5") is not None:
+            from tools.native_platform_v0.p5.ongoing_station.controller import actor_callback as station_callback
+            actor_callback = station_callback
         clock = advance_clock(scene_id)
         minute = int(clock["now"])
         edit_result = None
@@ -645,7 +730,12 @@ def _round_deferred(scene_id, intervention=None, edit=None):
             actor = actors[alias]
             log_before = list(_attr(actor, "log", default=[]))
             receipt_before = list(_attr(actor, "native_receipts", default=[]))
-            callback_result = yield d.maybeDeferred(actor_callback, actor)
+            # Preserve any existing P3 planned/executing primitive first. The
+            # ongoing station arbitrates only when the native action slot is free.
+            callback = (step_actor if actor_callback.__name__ == "actor_callback"
+                        and isinstance(_attr(actor, "pending_action", category="native_p3"), Mapping)
+                        else actor_callback)
+            callback_result = yield d.maybeDeferred(callback, actor)
             log_after = list(_attr(actor, "log", default=[]))
             receipt_after = list(_attr(actor, "native_receipts", default=[]))
             actor_rows.append({"actor_alias": alias, "callback_result_type": type(callback_result).__name__,
@@ -653,6 +743,10 @@ def _round_deferred(scene_id, intervention=None, edit=None):
                                "native_receipts": receipt_after[len(receipt_before):],
                                "snapshot": _snapshot_actor(actor)})
         completed = _complete_minute(scene_id, minute)
+        station_result = None
+        if _attr(pickup, "p5_ongoing_station_profile", category="native_p5") is not None:
+            from tools.native_platform_v0.p5.ongoing_station.controller import publish_after_seal
+            station_result = publish_after_seal(scene_id, minute)
         story_result = None
         if _attr(pickup, "p5_story_request", category="native_p5") is not None:
             from tools.native_platform_v0.p5.story_process.native import build_sealed_state, apply_story_decision
@@ -683,6 +777,7 @@ def _round_deferred(scene_id, intervention=None, edit=None):
         defer.returnValue({"minute": minute, "edits": [edit_result] if edit_result else [],
                            "interventions": [] if intervention_result is None else [intervention_result],
                            **({"story_process": story_result} if story_result is not None else {}),
+                           **({"ongoing_station": station_result} if station_result is not None else {}),
                            "director": director, "actor_steps": actor_rows,
                            "snapshot": completed["snapshot"], "minute_complete": True,
                            "event_complete": completed["event_complete"],
@@ -756,6 +851,10 @@ def _evidence(scene_id, bundle):
                           "controller_authored_npc_commands": int(raw_story.get(
                               "controller_authored_npc_commands", 0)),
                           "execution_authority": "native_actor_callback_only"}
+    station_evidence = None
+    if _attr(pickup, "p5_ongoing_station_profile", category="native_p5") is not None:
+        from tools.native_platform_v0.p5.ongoing_station.controller import evidence as station_evidence_for
+        station_evidence = station_evidence_for(scene_id, now)
     return {"evidence_schema": "p5-live-trace-v1",
             "source": "native_platform_v0.p5.service._evidence",
             "prefix_status": "SEALED_COMPLETE" if prefix_sealed else "INCOMPLETE",
@@ -774,6 +873,7 @@ def _evidence(scene_id, bundle):
             "controller_authored_npc_commands": (story_evidence["controller_authored_npc_commands"]
                                                   if story_evidence else 0),
             **({"story_process": story_evidence} if story_evidence is not None else {}),
+            **({"ongoing_station": station_evidence} if station_evidence is not None else {}),
             "verdicts": verdicts, "typed_trace": world.serialize_typed_trace(trace),
             "ledger": list(_attr(pickup, "p4_ledger", default=[])),
             "world_snapshots": list(_attr(pickup, "p5_world_snapshots", category="native_p5", default=[])),
@@ -832,14 +932,15 @@ def step_world(scene_id, rounds=1, *, interventions=(), edits=()):
 
 def run_p5_scenario(*, owner, bundle, initial_social_preset, horizon, interventions=(), edits=(),
                     director_enabled=True, seed=0, shared_supply=False, initial_main_open=True,
-                    story_process=None, story_strategy="gtpyhop"):
+                    story_process=None, story_strategy="gtpyhop", ongoing_station=None):
     from twisted.internet import defer
 
     created = reset_p5_scenario(owner=owner, bundle=bundle,
                                 initial_social_preset=initial_social_preset, horizon=horizon,
                                 seed=seed, director_enabled=director_enabled,
                                 shared_supply=shared_supply, initial_main_open=initial_main_open,
-                                story_process=story_process, story_strategy=story_strategy)
+                                story_process=story_process, story_strategy=story_strategy,
+                                ongoing_station=ongoing_station)
     if isinstance(created, Mapping) and created.get("ok") is False:
         return dict(created)
     @defer.inlineCallbacks

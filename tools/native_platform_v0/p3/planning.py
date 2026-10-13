@@ -223,3 +223,219 @@ def plan_patrol(local_view, rejected_exits=()):
             "candidate_exits": [{"key": edge["key"], "destination_id": edge["destination_id"]}
                                 for edge in exits],
             "selection_rule": "local_visible_exit_stable_order_v0"}
+
+
+def plan_actor_task(local_view, task, max_visits=500, wall_seconds=0.25):
+    """Plan one primitive for an opt-in ongoing-station task using P3 HTN routes.
+
+    The task is an authorized actor-local binding, not world state. Navigation and
+    item acquisition use the same P3 delivery HTN and ``_path`` implementation;
+    only task-specific terminal operators (give/return leg) are added here.
+    This function is prediction-only and never dispatches a world action.
+    """
+    if not isinstance(task, Mapping):
+        return {"status": "BLOCKED", "reason": "task binding must be a mapping", "intent": None, "plan": []}
+    kind = task.get("task_kind")
+    allowed = {"deliver_supply", "archive_note", "handover_note", "routine_route"}
+    if kind not in allowed:
+        return {"status": "NO_PLAN", "reason": "unsupported actor task kind",
+                "intent": None, "plan": [], "task_kind": kind}
+    view = thaw(local_view)
+    observation = view.get("observation", {})
+    item_id, destination_id = task.get("item_id"), task.get("destination_id")
+    route_waypoints = task.get("route_waypoints") if kind == "routine_route" else None
+    waypoint_receipts = task.get("waypoint_receipts", []) if kind == "routine_route" else []
+    if route_waypoints is not None:
+        if not isinstance(route_waypoints, (list, tuple)) or not route_waypoints:
+            return {"status": "BLOCKED", "reason": "route waypoints must be a non-empty sequence",
+                    "intent": None, "plan": []}
+        if len(waypoint_receipts) != len(route_waypoints):
+            return {"status": "BLOCKED", "reason": "route receipt progress does not match waypoint sequence",
+                    "intent": None, "plan": []}
+        next_waypoint = next((index for index, receipt_id in enumerate(waypoint_receipts)
+                              if receipt_id is None), None)
+        if next_waypoint is None:
+            return {"status": "SOLVED", "reason": "all route waypoints have settled receipts",
+                    "intent": None, "plan": [], "task_kind": kind,
+                    "task_id": task.get("goal_id"), "prediction_only": True}
+        destination_id = route_waypoints[next_waypoint]
+    if destination_id is None:
+        return {"status": "BLOCKED", "reason": "task destination is unbound", "intent": None, "plan": []}
+    if kind != "routine_route" and item_id is None:
+        return {"status": "BLOCKED", "reason": "task item is unbound", "intent": None, "plan": []}
+    if kind == "handover_note" and task.get("recipient_id") is None:
+        return {"status": "BLOCKED", "reason": "handover recipient is unbound", "intent": None, "plan": []}
+
+    graph = {int(room): tuple(int(n) for n in neighbors)
+             for room, neighbors in observation.get("known_exits", {}).items()}
+    known_traversability = observation.get("known_traversability", {})
+    if known_traversability:
+        # Preserve an initial attempt from stale/unknown topology, but never
+        # schedule a locally witnessed blocked edge again until observation
+        # changes. This is actor-local evidence, not global route knowledge.
+        graph = {room: tuple(neighbor for neighbor in neighbors
+                             if known_traversability.get(room, {}).get(neighbor) is not False)
+                 for room, neighbors in graph.items()}
+    held = any(str(row.get("id")) == str(item_id) for row in observation.get("inventory", ()))
+    item_room = (observation.get("room_id") if any(
+        str(row.get("id")) == str(item_id) for row in observation.get("visible_items", ()))
+        else None if held else task.get("last_known_item_room"))
+    if kind != "routine_route" and not held and item_room is None:
+        return {"status": "BLOCKED", "reason": "item is unavailable in actor-local observation/history",
+                "intent": None, "plan": [], "task_kind": kind}
+
+    started = time.monotonic()
+    visits = 0
+    exhausted = False
+    os.environ.setdefault("GTPYHOP_QUIET", "true")
+    try:
+        import gtpyhop as g
+        import gtpyhop.main as main
+    except ImportError as exc:
+        raise RuntimeError("P3 requires the pinned gtpyhop-core==2.0.2 dependency") from exc
+
+    def budget():
+        nonlocal visits, exhausted
+        visits += 1
+        if visits > max_visits or time.monotonic() - started >= wall_seconds:
+            exhausted = True
+            return False
+        return True
+
+    def move_to(world, room_id):
+        if not budget() or room_id not in graph.get(world.room, ()):
+            return False
+        world.room = room_id
+        return world
+
+    def get_item(world, exact_item):
+        if not budget() or world.item != exact_item or world.item_room != world.room or world.held:
+            return False
+        world.held, world.item_room = True, None
+        return world
+
+    def drop_item(world, exact_item, room_id):
+        if not budget() or not world.held or world.item != exact_item or world.room != room_id:
+            return False
+        world.held, world.item_room, world.delivered = False, room_id, True
+        return world
+
+    def give_item(world, exact_item, recipient_id, room_id):
+        if not budget() or not world.held or world.item != exact_item or world.room != room_id:
+            return False
+        world.held, world.handed_over = False, True
+        world.recipient = recipient_id
+        return world
+
+    def travel_to(world, room_id):
+        if not budget():
+            return False
+        path = _path(graph, world.room, room_id)
+        if path is None:
+            return None
+        return [] if not path else [("move_to", path[0]), ("travel_to", room_id)]
+
+    def perform_delivery(world, task_kind, exact_item, room_id):
+        if not budget():
+            return False
+        if world.delivered:
+            return []
+        if world.held:
+            if world.room != room_id:
+                return [("travel_to", room_id), ("perform_delivery", task_kind, exact_item, room_id)]
+            return [("drop_item", exact_item, room_id)]
+        if world.item_room is None:
+            return None
+        path = _path(graph, world.room, world.item_room)
+        if path is None:
+            return None
+        if world.room != world.item_room:
+            return [("travel_to", world.item_room), ("perform_delivery", task_kind, exact_item, room_id)]
+        return [("get_item", exact_item), ("perform_delivery", task_kind, exact_item, room_id)]
+
+    def perform_handover(world, exact_item, recipient_id, room_id):
+        if not budget():
+            return False
+        if world.handed_over:
+            return []
+        if world.held:
+            if world.room != room_id:
+                return [("travel_to", room_id),
+                        ("perform_handover", exact_item, recipient_id, room_id)]
+            return [("give_item", exact_item, recipient_id, room_id)]
+        if world.item_room is None:
+            return None
+        path = _path(graph, world.room, world.item_room)
+        if path is None:
+            return None
+        if world.room != world.item_room:
+            return [("travel_to", world.item_room),
+                    ("perform_handover", exact_item, recipient_id, room_id)]
+        return [("get_item", exact_item),
+                ("perform_handover", exact_item, recipient_id, room_id)]
+
+    def perform_route(world, room_id):
+        if not budget():
+            return False
+        if world.room == room_id:
+            world.arrived = True
+            return []
+        return [("travel_to", room_id)]
+
+    state = g.State("p3-ongoing-actor-local")
+    state.room = int(observation["room_id"])
+    state.item = str(item_id) if item_id is not None else None
+    state.item_room = int(item_room) if item_room is not None else None
+    state.destination = int(destination_id)
+    state.held = held
+    state.delivered = False
+    state.handed_over = False
+    state.recipient = None
+    state.arrived = False
+    task_args = ((kind, state.item, state.destination) if kind in {"deliver_supply", "archive_note"}
+                 else (state.item, task.get("recipient_id"), state.destination)
+                 if kind == "handover_note" else (state.destination,))
+    with _LOCK, redirect_stdout(StringIO()):
+        previous = main.current_domain
+        try:
+            domain = g.Domain("p3-ongoing-actor-local")
+            g.declare_actions(move_to, get_item, drop_item, give_item)
+            g.declare_task_methods("travel_to", travel_to)
+            g.declare_task_methods("perform_delivery", perform_delivery)
+            g.declare_task_methods("perform_handover", perform_handover)
+            g.declare_task_methods("perform_route", perform_route)
+            task_name = "perform_route" if kind == "routine_route" else \
+                "perform_handover" if kind == "handover_note" else "perform_delivery"
+            with g.PlannerSession(domain=domain, strategy="iterative_dfs_backtracking", verbose=0,
+                                  structured_logging=False) as session:
+                result = session.find_plan(state, [(task_name, *task_args)],
+                                           timeout_ms=max(1, int(wall_seconds * 1000)))
+        finally:
+            main.current_domain = previous
+    if exhausted or time.monotonic() - started >= wall_seconds:
+        return {"status": "BUDGET", "reason": "method/action cap or wall watchdog", "intent": None,
+                "plan": [], "method_action_visits": visits, "task_kind": kind}
+    if not result.success:
+        return {"status": "NO_PLAN", "reason": "no locally known route or required item is available",
+                "intent": None, "plan": [], "method_action_visits": visits, "task_kind": kind}
+    steps = []
+    for step in result.plan:
+        op = step[0]
+        if op == "move_to":
+            edge = next((row for row in observation.get("exits", ())
+                         if int(row.get("destination_id", -1)) == int(step[1])), None)
+            steps.append({"operator": "move", "exit_key": edge.get("key") if edge else None,
+                          "destination_id": int(step[1])})
+        elif op == "get_item":
+            steps.append({"operator": "get", "item_id": item_id})
+        elif op == "drop_item":
+            steps.append({"operator": "drop", "item_id": item_id, "room_id": int(step[2])})
+        elif op == "give_item":
+            steps.append({"operator": "give", "item_id": item_id,
+                          "recipient_id": task.get("recipient_id")})
+    return {"status": "SOLVED", "reason": "shared actor-local GTPyhop task method",
+            "intent": steps[0] if steps else None, "plan": steps,
+            "method_action_visits": visits, "implementation": "gtpyhop-core-2.0.2",
+            "prediction_only": True, "task_kind": kind, "task_id": task.get("goal_id"),
+            "shared_method_domain": "p3-ongoing-actor-local",
+            "route_waypoint_index": (next_waypoint if route_waypoints is not None else None)}

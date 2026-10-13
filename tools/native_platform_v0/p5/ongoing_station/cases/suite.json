@@ -1,0 +1,158 @@
+{
+  "schema": "ongoing-station-case-suite-v1",
+  "suite_id": "ongoing-station-native-v1",
+  "revision": 1,
+  "common": {
+    "seed": 20261013,
+    "horizon": 24,
+    "bundle": "empty-author-bundle-v1.json",
+    "initial_social_preset": "hero_intelligence_30_v0",
+    "director_enabled": false,
+    "shared_supply": false,
+    "initial_main_open": true,
+    "ongoing_station": {
+      "schema": "ongoing-station-profile-v1",
+      "station_id": "ongoing-station-v1",
+      "profile_version": 1,
+      "horizon": 24,
+      "author": null
+    }
+  },
+  "cases": [
+    {
+      "case_id": "t1-no-author-autonomy",
+      "strategy": "gtpyhop",
+      "requirement_ids": ["T1", "T8"],
+      "purpose": "No additional author constraints or interventions; observe both NPCs' native self-goal and post-completion routine decisions.",
+      "expected": {
+        "author": null,
+        "actor_aliases": ["A", "B"],
+        "required_transition": "SELF goal commitment accepted/in-progress -> settled native receipt -> later SELF goal selection",
+        "npc_commands_from_runner": false,
+        "external_actor_observation": false
+      }
+    },
+    {
+      "case_id": "t2-t7-author-gtpyhop",
+      "strategy": "gtpyhop",
+      "author_file": "author-pair-v1.json",
+      "edit_author_file": "author-pair-v2.json",
+      "interventions": [
+        {"at": 5, "kind": "activate_ongoing_station", "expected_version": 1},
+        {"at": 6, "kind": "edit_ongoing_station_author", "expected_version": 1,
+         "author_file": "author-pair-v2.json"}
+      ],
+      "requirement_ids": ["T2", "T5", "T7", "T8"],
+      "purpose": "Matched high-level planning arm: the v1 result-only actor-B policy conflicts with the registered locked B-to-A sequence; a future-only CAS at minute 6 changes filer to A, resolving conflict without changing the locked core or deadline.",
+      "expected": {
+        "author_source_version": 1,
+        "edit_source_version": 2,
+        "activation_minute": 5,
+        "edit_minute": 6,
+        "activation_before_author_goal_dispatch": true,
+        "v1_result_locked_conflict_is_recorded": true,
+        "v2_change": "archive constraint filer B to A only",
+        "locked_sequence_sha256_immutable": "d9caf31749490bbf195d68c2f45444381b272a934d2feca785f1150dfb118edc",
+        "archive_deadline": 24,
+        "actor_task_acceptance_is_not_forced": true,
+        "required_physical_outcome": "v2-compatible locked B handover then A archive of same note after sealed response before minute 24",
+        "strategy": "gtpyhop"
+      }
+    },
+    {
+      "case_id": "t2-t7-author-event-driven",
+      "strategy": "event_driven",
+      "author_file": "author-pair-v1.json",
+      "edit_author_file": "author-pair-v2.json",
+      "interventions": [
+        {"at": 5, "kind": "activate_ongoing_station", "expected_version": 1},
+        {"at": 6, "kind": "edit_ongoing_station_author", "expected_version": 1,
+         "author_file": "author-pair-v2.json"}
+      ],
+      "requirement_ids": ["T2", "T5", "T7", "T8"],
+      "purpose": "Matched event-driven baseline with the same v1 conflict, minute-6 filer edit, locked core, world, actor policy, and horizon as the GTPyhop arm.",
+      "expected": {
+        "author_source_version": 1,
+        "edit_source_version": 2,
+        "activation_minute": 5,
+        "edit_minute": 6,
+        "activation_before_author_goal_dispatch": true,
+        "v1_result_locked_conflict_is_recorded": true,
+        "v2_change": "archive constraint filer B to A only",
+        "locked_sequence_sha256_immutable": "d9caf31749490bbf195d68c2f45444381b272a934d2feca785f1150dfb118edc",
+        "archive_deadline": 24,
+        "actor_task_acceptance_is_not_forced": true,
+        "required_physical_outcome": "v2-compatible locked B handover then A archive of same note after sealed response before minute 24",
+        "strategy": "event_driven"
+      }
+    },
+    {
+      "case_id": "t4-live-actor-deferral",
+      "strategy": "gtpyhop",
+      "audit": "actor_deferral",
+      "author_file": "author-t4-result-only-v1.json",
+      "edit_author_file": "author-t4-result-only-v2.json",
+      "interventions": [
+        {"at": 5, "kind": "activate_ongoing_station", "expected_version": 1},
+        {"at": 8, "kind": "edit_ongoing_station_author", "expected_version": 1,
+         "author_file": "author-t4-result-only-v2.json"}
+      ],
+      "requirement_ids": ["T3", "T4", "T8"],
+      "purpose": "Separate result-only offer case: v1 assigns the B-handover/A-archive method while the actors are on their real two-leg route. Record A/B actor-local deferral at minute 6, preserve B's minute-7 move, then CAS filer A to B at minute 8 so the still-undispatched handover suffix is cancelled and a future B-file method is selected.",
+      "expected": {
+        "activation_minute": 5,
+        "future_edit_minute": 8,
+        "future_edit_change": "archive filer A to B only",
+        "old_undispatched_commitment_must_cancel": true,
+        "offer_reaches_actor_after_seal": true,
+        "required_history_event": "AUTHOR_OFFER_DEFERRED",
+        "required_blocker_status": "IN_PROGRESS",
+        "strategy": "gtpyhop"
+      }
+    },
+    {
+      "case_id": "t6-player-holds-courier-supply",
+      "strategy": "gtpyhop",
+      "audit": "resource_negative",
+      "interventions": [
+        {"at": 1, "kind": "player_command", "operation": "get", "item_alias": "courier_supply"}
+      ],
+      "requirement_ids": ["T6", "T8"],
+      "purpose": "Real player command takes the supply before NPC callbacks at minute 1 and holds it through the horizon. This is an initial resource-held negative, not a midstream interruption; audit A's unmet delivery and B's independent physical progress.",
+      "expected": {
+        "player_item_alias": "courier_supply",
+        "player_operation": "get",
+        "minute": 1,
+        "hold_through_minute": 24,
+        "A_goal_remains_unmet": true,
+        "B_independent_work_and_later_routine_receipts": true
+      }
+    }
+  ],
+  "future_matched_pair_contract": {
+    "case_ids": ["t2-t7-author-gtpyhop", "t2-t7-author-event-driven"],
+    "not_yet_runnable": false,
+    "match_fields": ["seed", "initial_world", "actor_tasks", "commitments", "permissions", "author_envelope_v1_and_v2", "activation_condition", "player_interventions", "edit_schedule", "horizon"],
+    "only_treatment_difference": "strategy",
+    "coverage": ["T2", "T5", "T7", "T8"],
+    "gate": "The pair is matched on all listed inputs; each arm is one unique scene and failures are retained."
+  },
+  "acceptance_contract": {
+    "T1": "Runnable control only: author is null; each NPC's self-goal is selected by its own callback, physically settled by native receipt, and followed by a distinct self-goal with a matching receipt or exact pending native execution.",
+    "T2": "In both matched author runs, author activates after the fixed autonomous prefix; v1 result search and the independent locked binding are evidenced separately, and v2's same-note locked task offer is sealed and receipt-backed rather than scripted.",
+    "T3": "A real actor commitment/deadline conflict must produce a recorded deferral or refusal and later strategy adaptation; do not encode first-rejection behavior in a preset.",
+    "T4": "A separate result-only offer must reach an actor with a live routine commitment; actor-local history records the real defer and blocker. A legal minute-8 CAS changes filer A to B; verify the still-undispatched RETURN suffix is cancelled and the prior minute-7 move receipt remains.",
+    "T5": "The matched mixed-binding episode records result-method/lock conflict, then a legal filer edit resolves it. Verify source versions, immutable locked hash, stale projection identity, exact lock provenance and unchanged sealed prefix; the v1 conflict published no offer, so do not claim an NPC-task cancellation.",
+    "T6": "At minute 1, use only the real generated-player get command for courier_supply and hold it through the horizon. Verify command receipt and final holder, A's still-configured but unfulfilled delivery target, and B's unrelated two-leg native route receipts.",
+    "T7": "Compare high-level GT planning with an event-driven baseline under identical author input, world, actor policy, permissions, interventions, and horizon. Report matched outcomes and costs without assuming GT superiority; reference the existing P5 regression suite separately.",
+    "T8": "Emit a chronological readable replay from saved decisions, sealed ledger rows, receipts, and version/offer events, retaining stable evidence IDs and labeling absent evidence rather than inferring it.",
+    "hold_until": "All author projection, actor decision, mixed-binding provenance, and intervention readback fields are frozen and focused tests pass"
+  },
+  "run_policy": {
+    "max_scenes": 5,
+    "step_size_minutes": 1,
+    "preserve_failures": true,
+    "no_overwrite": true,
+    "native_execution_requires_cli_flag": "--execute"
+  }
+}

@@ -199,14 +199,28 @@ def _entity(entities: Mapping[str, StableEntity], alias: Any, expected: str, whe
     return value
 
 
-def _filter_args(event: str, filters: Any, entities: Mapping[str, StableEntity], where: str) -> dict[str, Any]:
+def _event_entry(event: str, registry: Registry, where: str):
+    """Resolve a closed author-facing alias against the caller's registry.
+
+    The base P5 registry remains unchanged. Opt-in applications may pass a
+    registry with additional typed ledger events, which become bundle language
+    only for that explicit compilation.
+    """
+    if not isinstance(event, str):
+        _fail("SEMANTIC_GAP", f"event {event!r} is not registered in P5", path=where)
+    aliases = {entry.observable_id.removeprefix("p5_"): entry
+               for entry in registry.entries() if entry.observable_id.startswith("p5_")}
+    entry = aliases.get(event)
+    if entry is None or entry.value.kind.value != "EVENT":
+        _fail("SEMANTIC_GAP", f"event {event!r} is not registered in P5", path=where)
+    return entry
+
+
+def _filter_args(event: str, filters: Any, entities: Mapping[str, StableEntity], where: str,
+                 registry: Registry) -> dict[str, Any]:
     if not isinstance(filters, dict):
         _fail("INVALID_SCHEMA", f"{where}.filters must be an object", path=where)
-    schemas = {
-        "note_response": {"actor": "Actor", "recipient": "Actor", "item": "Item", "response": "str"},
-        "delivery_settled": {"actor": "Actor", "item": "Item"},
-    }
-    schema = schemas[event]
+    schema = dict(_event_entry(event, registry, where).args)
     extra = set(filters) - set(schema)
     if extra:
         _fail("UNKNOWN_EVENT_ARGUMENT", f"{where} has unregistered event filter(s)",
@@ -245,29 +259,28 @@ def _parse_goal(raw: Any, registry: Registry, entities: Mapping[str, StableEntit
         data = _keys(raw, {"id", "kind", "event", "filters", "start", "deadline", "hard"},
                      {"min_count", "max_count"}, f"constraints.{goal_id}")
         event = data["event"]
-        if not isinstance(event, str) or event not in {"note_response", "delivery_settled"}:
-            _fail("SEMANTIC_GAP", f"event {event!r} is not registered in P5", constraint_id=goal_id)
+        entry = _event_entry(event, registry, f"constraints.{goal_id}.event")
         start, deadline = _window(data, f"constraints.{goal_id}")
         minimum = _int(data.get("min_count", 1), f"constraints.{goal_id}.min_count", 0, 1000)
         maximum = data.get("max_count")
         if maximum is not None:
             maximum = _int(maximum, f"constraints.{goal_id}.max_count", minimum, 1000)
-        args = _filter_args(event, data["filters"], entities, f"constraints.{goal_id}")
-        node = EventCount(goal_id, "p5_note_response" if event == "note_response" else "p5_delivery_settled",
-                          P5_LEDGER_VERSION, Window(Fraction(start), Fraction(deadline)),
+        args = _filter_args(event, data["filters"], entities, f"constraints.{goal_id}", registry)
+        node = EventCount(goal_id, entry.observable_id,
+                          entry.version, Window(Fraction(start), Fraction(deadline)),
                           minimum=minimum, maximum=maximum, event_filter=args,
                           anchor=Anchor(AnchorKind.SCENARIO_START), hard=hard)
     elif kind == "event_order":
         data = _keys(raw, {"id", "kind", "before", "after", "order", "start", "deadline", "hard"},
                      set(), f"constraints.{goal_id}")
         start, deadline = _window(data, f"constraints.{goal_id}")
-        before = _event_selector(data["before"], entities, f"constraints.{goal_id}.before")
-        after = _event_selector(data["after"], entities, f"constraints.{goal_id}.after")
+        before = _event_selector(data["before"], entities, f"constraints.{goal_id}.before", registry)
+        after = _event_selector(data["after"], entities, f"constraints.{goal_id}.after", registry)
         try:
             order = StrictOrder(data["order"])
         except (ValueError, TypeError):
             _fail("INVALID_SCHEMA", f"constraint {goal_id} order must be EVENT_KEY or PHYSICAL_TIME")
-        node = EventOrder(goal_id, before[0], P5_LEDGER_VERSION, after[0], P5_LEDGER_VERSION,
+        node = EventOrder(goal_id, before[0], before[2], after[0], after[2],
                           order, Window(Fraction(start), Fraction(deadline)),
                           anchor=Anchor(AnchorKind.SCENARIO_START), before_filter=before[1],
                           after_filter=after[1], hard=hard)
@@ -310,13 +323,13 @@ def _parse_goal(raw: Any, registry: Registry, entities: Mapping[str, StableEntit
                         MappingProxyType(dict(raw)))
 
 
-def _event_selector(raw: Any, entities: Mapping[str, StableEntity], where: str):
+def _event_selector(raw: Any, entities: Mapping[str, StableEntity], where: str,
+                    registry: Registry):
     data = _keys(raw, {"event", "filters"}, set(), where)
     event = data["event"]
-    if not isinstance(event, str) or event not in {"note_response", "delivery_settled"}:
-        _fail("SEMANTIC_GAP", f"event {event!r} is not registered in P5", path=where)
-    return ("p5_note_response" if event == "note_response" else "p5_delivery_settled",
-            _filter_args(event, data["filters"], entities, where))
+    entry = _event_entry(event, registry, where)
+    return (entry.observable_id, _filter_args(event, data["filters"], entities, where, registry),
+            entry.version)
 
 
 def _parse_branches(raw: Any) -> tuple[StoryBranch, ...]:

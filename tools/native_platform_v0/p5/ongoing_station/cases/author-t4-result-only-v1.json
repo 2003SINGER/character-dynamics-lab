@@ -1,0 +1,33 @@
+{
+  "schema": "ongoing-station-author-v1",
+  "bundle": {
+    "schema": "native-author-bundle-v1",
+    "bundle_id": "ongoing-station-t4-result-only-v1",
+    "version": 1,
+    "source": "fixed-ongoing-station-t4-live-deferral",
+    "constraints": [
+      {"id": "archive-note-by-horizon", "kind": "event_by_deadline",
+       "event": "note_archived", "filters": {"item": "note"},
+       "start": 5, "deadline": 24, "hard": true},
+      {"id": "respond-before-archive", "kind": "event_order",
+       "before": {"event": "note_response", "filters": {"item": "note"}},
+       "after": {"event": "note_archived", "filters": {"item": "note"}},
+       "order": "EVENT_KEY", "start": 0, "deadline": 24, "hard": true}
+    ],
+    "branches": [],
+    "permissions": {"world_opportunities": [], "force_npc_response": false,
+                     "max_opportunities": 1, "cost_budget": 0}
+  },
+  "bindings": [
+    {"constraint_id": "archive-note-by-horizon",
+     "control": {"mode": "result_only", "file_actor": "A",
+                 "allowed_methods": ["file_by_B", "return_then_file_by_A"],
+                 "source": "SYSTEM"},
+     "locked_fragment": null},
+    {"constraint_id": "respond-before-archive",
+     "control": {"mode": "result_only", "file_actor": null,
+                 "allowed_methods": ["file_by_B", "return_then_file_by_A"],
+                 "source": "SYSTEM"},
+     "locked_fragment": null}
+  ]
+}

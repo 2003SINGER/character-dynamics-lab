@@ -29,6 +29,25 @@ class BundleTests(unittest.TestCase):
         self.assertEqual(bundle.constraints[0].event_type, "p5_note_response")
         self.assertEqual(len(bundle.branches), 2)
 
+    def test_station_registry_adds_archive_events_without_changing_default_allowlist(self):
+        from tools.native_platform_v0.p5.story_process.model import story_event_registry
+        raw = sample()
+        raw["constraints"] = [
+            {"id": "archive", "kind": "event_by_deadline", "event": "note_archived",
+             "filters": {"actor": "A", "item": "note"}, "start": 0,
+             "deadline": 24, "hard": True},
+            {"id": "after-response", "kind": "event_order",
+             "before": {"event": "note_response", "filters": {"item": "note"}},
+             "after": {"event": "note_archived", "filters": {"item": "note"}},
+             "order": "EVENT_KEY", "start": 0, "deadline": 24, "hard": True},
+        ]
+        with self.assertRaises(BundleError):
+            load_bundle(raw)
+        compiled = load_bundle(raw, registry=story_event_registry())
+        self.assertEqual(compiled.constraints[0].event_type, "p5_note_archived")
+        self.assertEqual(compiled.constraints[1].after_type, "p5_note_archived")
+        self.assertEqual(compiled.constraints[0].event_filter["item"].stable_id, "note")
+
     def test_json_text_with_long_single_line_is_not_treated_as_path(self):
         import json
         bundle = load_bundle(json.dumps(sample()))

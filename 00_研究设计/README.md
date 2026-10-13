@@ -1,6 +1,6 @@
 # 研究设计：唯一维护入口
 
-整理日期：2026-10-12
+整理日期：2026-10-13
 
 ## 项目架构定位
 
@@ -30,7 +30,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [2026-10-11 Author Binding 讨论决策与差异记录](2026-10-11_P0_Author_Binding_Discussion.md) | 本轮六项设计原则、候选机制、已有覆盖/差异、未决条件与反例的短期决策记录 | 第二套系统定义、实现状态或实验结果 |
 | [P0 Author Binding v0 唯一 RESULTS](../02_实验/Planner_P0_Author_Binding_v0/RESULTS.md) | 固定 P0 约束绑定的唯一实现/验证结果 owner | 通用编译器、全系统完成或方法有效性主张 |
 | [System Baseline v0 唯一 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md) | 历史 M0–M3 单一系统集成任务的运行证据与状态 owner（PARTIAL） | 已完成系统能力的推断、独立审阅结论或下一阶段授权 |
-| [Mature-Methods Integration v1 唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md) | 当前授权的分层成熟方法装配、S1–S4 有界原生验收与强对照的状态/结果 owner | 整个系统已完成、原创算法或自动进入后续阶段 |
+| [Mature-Methods Integration v1 唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md) | 原 S1–S4、便条增量及持续自主站点的运行/失败/对照 owner；现行接口见[持续站点代码说明](../tools/native_platform_v0/p5/ongoing_station/README.md) | 整个系统已完成、原创算法或自动进入后续阶段 |
 | [E0 Key Ledger Protocol v0](E0_KeyLedger_Protocol_v0.md) | 唯一有限钥匙账本 E0 执行定义与 fixture/search/monitor acceptance protocol；PROTOCOL_FROZEN / E0-KeyLedger-v0；实现与逐例验收状态见 [E0 实验入口](../02_实验/E0_KeyLedger_v0/README.md) | F0/F1 总设计、Pilot Monitor/reference 契约、未验收的实现能力或实验结果 |
 | [E1 局部信息与独立角色协议 v0](E1_KeyLedger_LocalAgency_Protocol_v0.md) | E1-0 有限域与协议；E1-1 独立开发包已交付。实际状态与证据只查唯一结果 owner：[RESULTS](../02_实验/E1_KeyLedger_LocalAgency_v0/RESULTS.md)；代码入口：[runner](../tools/e1_keyledger_v0/runner.py) | E0 冻结规则；将开发验证写成正式实验、新颖性声明；自动授权正式实验/E1-2 |
 | [NPC System Integration v0](../02_实验/NPC_System_Integration_v0/RESULTS.md) | 新授权应用 vertical slice 的唯一开发结果；实现与协议见[代码 README](../tools/npc_system_v0/README.md) | 全系统正式语义、冻结 E1 结果、心理验证或玩家评价 |
