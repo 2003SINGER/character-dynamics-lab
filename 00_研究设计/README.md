@@ -12,7 +12,9 @@
 
 2026-10-12 **System Baseline v0 当前为 `PARTIAL`**：M1 `READY_FOR_INDEPENDENT_REVIEW`，M2 `INVALID`，没有 native LLM candidate execution；本阶段停止，不进入 P6。P0 局部扩张暂停。状态与运行事实只由 [System Baseline v0 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md) 维护，唯一执行指针见 [TODO](TODO.md)；M2 原始调用证据见[证据包](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.tar.gz)及其[manifest](../02_实验/System_Baseline_v0/public_evidence/llm-binding-20261012.manifest.json)。
 
-**Mature-Methods Integration v1 当前工作包已交付，PARTIAL，待独立审阅**。同站点 M1–M5 / E1–E4 结果只见[唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，接口见[持续站点代码说明](../tools/native_platform_v0/p5/ongoing_station/README.md)，执行指针见 [TODO](TODO.md)。严格历史匹配与工作条件驱动的方法取舍未证实；本包实施停止，不自动新增阶段。原 S1–S4、S2 权限拒绝、便条归档与旧 Planner Adapter 的历史 PARTIAL 保留，不扩大旧 Sabre或改写此前结果。
+**Mature-Methods Integration v1 当前工作包已交付，外部复核确认 PARTIAL，未 CLOSED**。同站点 M1–M5 / E1–E4 结果只见[唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，接口见[持续站点代码说明](../tools/native_platform_v0/p5/ongoing_station/README.md)，执行指针见 [TODO](TODO.md)。严格历史匹配与工作条件驱动的方法取舍未证实；本包实施停止。原 S1–S4、S2 权限拒绝、便条归档与旧 Planner Adapter 的历史 PARTIAL 保留，不扩大旧 Sabre或改写此前结果。
+
+`b039c87` 外部复核已收到，PARTIAL 不变。当前候选施工入口转向 **Character Dynamics System Integration**，不再围绕便条继续补考；真实游戏能力账、共享工具双过程候选、方法选择和停止边界唯一维护于[未决问题末节](未决问题与机制候选.md)，任务状态只见 TODO。本轮仅沉淀与核查，没有新增原生运行。
 
 Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。完整机制说明中已确认的内容是工程语义与模块契约，不是已验证心理规律。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
 
@@ -47,7 +49,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 | [TODO](TODO.md) | 下一动作、依赖、验收、完成状态 | 长篇机制论证 |
 | [后置机制候选｜AU 考古](后置机制候选_AU考古.md) | 保存暂不进入主线的 AU 候选及升格条件 | 当前 runtime、Paper-0 主张与主线 TODO |
 | [当前实现进度](当前实现进度.md) | 代码版本、实际能力、未实现项、验证证据 | 从目标设计推断完成 |
-| **[System Vision v0](Character_Dynamics_System_Vision_v0.md)** | Runtime Kernel / Dynamics Model / Evaluator / Optimizer / Applications 的边界、runtime 三流模型与长期研究版图 | 把 Kernel 冻结误写为全系统完成；把候选方向误写为已承诺任务或研究缺口 |
+| **[System Vision v0](Character_Dynamics_System_Vision_v0.md)** | 持续世界/角色过程与作者控制的架构视图、长期研究版图；另保留旧 C++ 五模块/三流边界 | 把 Kernel 冻结误写为全系统完成；把候选方向误写为已承诺任务或研究缺口 |
 | **[Runtime Scheduler v1](Runtime_Scheduler_v1.md)** | 已冻结的统一时间、RunningAction、DecisionGate 与 outcome contract | 新研究目标或 batch/evaluator 迁移授权 |
 | **[Runtime Closure Matrix](Runtime_Closure_Acceptance_Matrix.md)** | Runtime / Engine v1 closure 的 gate 与可执行证据 | 心理机制或科研有效性结论 |
 | [Runtime Semantic Audit Matrix](Runtime_Semantic_Audit_Matrix.md) | runtime channel 的 W/O/X/S 消费边界 | 增加新 runtime 功能 |
@@ -84,7 +86,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 
-当前问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)；完整长期研究版图见 [System Vision](Character_Dynamics_System_Vision_v0.md#长期研究版图)。LLM × 成熟规划是主轴候选，可服务语义、因果候选、grounded 绑定、层次细化与反馈修复；不要求每层都用 LLM。层次、联合或混合候选组织尚未冻结。A/B 与 Q1–Q3 仅是此前基线讨论和有限实例；不代表完整研究任务或已确认 gap。[Pilot](AuthorialTrajectoryPilotV0.md)只维护 TypedIR/reference 候选契约。[强近邻机制对照](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)保留。当前执行指针是 Mature-Methods Integration v1；具体任务与下一动作只见[TODO](TODO.md)，交付状态只见对应唯一 RESULTS，不自动生成后续 stage。现有 P5 Director 仍是有限间接模式，不定义全局作者权限。
+当前问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)；完整长期研究版图见 [System Vision](Character_Dynamics_System_Vision_v0.md#长期研究版图)。LLM × 成熟规划是主轴候选，可服务语义、因果候选、grounded 绑定、层次细化与反馈修复；不要求每层都用 LLM。层次、联合或混合候选组织尚未冻结。A/B 与 Q1–Q3 仅是此前基线讨论和有限实例；不代表完整研究任务或已确认 gap。[Pilot](AuthorialTrajectoryPilotV0.md)只维护 TypedIR/reference 候选契约。[强近邻机制对照](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)保留。当前下一施工入口是系统级整合的游戏内容/接口准入；任务与下一动作只见[TODO](TODO.md)，Mature-Methods Integration v1 已有交付只见其 RESULTS。现有 P5 Director 仍是有限间接模式，不定义全局作者权限。
 
 例如本次三项想法分别落位：分段逆映射保留原话于问题 Q01；低耦合的确定边界在完整机制 §8，未落实方案在 Q03；Object/Scene/W 动作职责在完整机制 §4，具体实现缺口在 Q05。TODO 只链接并安排验证，不再复制三遍原理。
 

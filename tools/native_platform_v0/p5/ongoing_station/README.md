@@ -13,7 +13,12 @@ No parallel station runtime, new planner, or LLM run is introduced.
 
 The new `return_stock` self task is reverse logistics, not a general warehouse
 model: it returns a real delivered item to the source room witnessed in that
-same actor task's settled get receipt. It shares the existing actor-local P3
+same actor task's settled get receipt. This is an implementation-generated
+task, not an authored rule that delivered supplies should be reclaimed. A past
+delivery event is not continued destination ownership; later content must define
+reclaimable items, permission and triggers explicitly before reusing this task
+as meaningful work. The old development traces and runtime remain unchanged.
+It shares the existing actor-local P3
 HTN and get/move/drop settlement path. The author-side extension derives
 same-note handover occurrence/order requirements from `AuthorBundle`; method
 causal support is a prediction, never evidence that the event occurred.
