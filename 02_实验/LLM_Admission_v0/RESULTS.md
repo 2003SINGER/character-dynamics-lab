@@ -55,7 +55,7 @@
 - 注入接缝测试传不同于人工E的Goal并截获UCS实际对象；拒绝候选测试确保不会调用原生执行器。mock测试不算真实episode。
 - 最终离线检查：**36/36**（11新准入 + 9 B0 + 16 P1）；[原始测试日志](parent_unit_tests_final.log)。冻结4个核心文件SHA从90ee524读取后固化断言，CI无需旧Git历史。
 - 初次证据抽取漏识别`phase=final_answer`、本地任务正文加密和测试替身不完整曾导致工具检查失败；均属于父级记录工具/测试问题，**没有产生新的模型调用**。排查原记录保留私有，不用其替代最终证据。
-- CI只验证离线契约，不重新调用Luna、不下载游戏、不证明任务执行成功。exact-head流水线以[Actions](https://github.com/2003SINGER/character-dynamics-lab/actions/workflows/runtime-regression.yml)为准，提交时不预先声称全绿。
+- 实现提交`5a816b8b6e113cc37c91d8fc6bed79f4c28f80b1`的[exact-head CI 38551688718](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38551688718)已完成：6/7 jobs成功，包含新准入/B0/P1；唯一失败仍为旧E0-H02 `BUDGET != UNREACHABLE`。完整限定[job状态](implementation_ci.json)与[失败原文](implementation_ci_failed.log)保留；本轮没有E0代码差异，不扩大它的2秒预算、不重命名结果刷绿。CI只验证离线契约，不重新调用Luna、不下载游戏、不证明任务执行成功。后续证据文档提交的流水线另由[Actions](https://github.com/2003SINGER/character-dynamics-lab/actions/workflows/runtime-regression.yml)查看，不将旧run冒充新HEAD结果。
 - 全部完整对话私有归档，原附件核验后放可恢复废纸篓。原版源码/资源/二进制不推送，沿用[Open Adventure NOTICE](../OpenAdventure_Native_v0/THIRD_PARTY_NOTICE.md)。原有无关dirty不入本提交。
 
 ## 回答本轮八个问题及科研判断
