@@ -1,0 +1,24 @@
+{
+  "record_type": "bounded_pty_feasibility_probe",
+  "date": "2026-10-14",
+  "game_revision": "e6160529e70a8c7a06b9a5f190d69aa35c4c62f5",
+  "transport": "PTY, TERM=dumb, no -o",
+  "purpose": "Check whether the pinned native input prompt is observable without sleeps or a new game protocol.",
+  "first_probe": {
+    "inputs_sent_in_order": ["n\\n", "quit\\n"],
+    "captured_tool_output": [
+      "initial_prompt_seen True bytes 60 prefix b'\\r\\nWelcome to Adventure!!  Would you like instructions?\\r\\n\\r\\n> '",
+      "next_prompt_seen True bytes 165 tail b'n\\r\\n\\r\\nYou are standing at the end of a road before a small brick building.\\r\\nAround you is a forest.  A small stream flows out of the building and\\r\\ndown a gully.\\r\\n\\r\\n> ' poll None",
+      "termination None tail b'quit\\r\\n\\r\\nDo you really want to quit now?\\r\\n\\r\\n> '",
+      "process exit was not captured by this probe"
+    ],
+    "later_process_check": "Parent observed no live advent process; this does not establish the missing exit code."
+  },
+  "clean_confirmation_probe": {
+    "inputs_sent_in_order": ["n\\n", "quit\\n", "yes\\n"],
+    "captured_tool_output": "prompt_suffixes [True, True, True], quit_confirmation True, termination_exit 0, final_tail b' using 1 turn.\\r\\n\\r\\nYou are obviously a rank amateur.  Better luck next time.\\r\\n\\r\\nTo achieve the next higher rating, you need 14 more points.\\r\\n'",
+    "exit_code": 0,
+    "stdout_was_saved_as_raw_bytes": false
+  },
+  "interpretation": "Exact native prompt suffixes arrived after startup, ordinary play, and quit confirmation. The first probe's missing exit status remains unknown."
+}

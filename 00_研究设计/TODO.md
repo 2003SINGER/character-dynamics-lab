@@ -12,8 +12,11 @@
 
 ## SYSTEM / APPLICATION TRACK
 
+2026-10-14 新授权只进入 **Open Adventure P1 在线闭环**：先查原生输入边界，可靠才做逐次输入和反馈决策；不可行则保留阻碍，不自动换游戏或堆终端协议。此前原版构建/整局回放结果保留。P2 固定规则的传统/LLM 比较只登记候选，需后续明确授权，本轮不实施。
+
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| OPEN-ADVENTURE-ONLINE-P1 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | 同进程逐次输入、反馈分支和精确回放已交付；先审阅[唯一 RESULTS](../02_实验/OpenAdventure_Online_P1_v0/RESULTS.md)，再明确 P2 的共同规则/目标、传统基线与预算。本轮不接模型/规划器，不新增游戏或扩终端框架 | 程序18输入/12非启动seed退出输入、父级澄清核验18输入，两序列初始/逐步字节匹配；16/16离线测试，真实失败及关闭修正保留。游戏不改、不猜tick、不把exit0当目标完成；旧C++/E0/main不动，不自行 CLOSED |
 | EXTERNAL-GAME-NATIVE | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | 原版 Open Adventure 构建、功能测试与三个短回放已交付；独立清理只移除被覆盖定义。先读[唯一 RESULTS](../02_实验/OpenAdventure_Native_v0/RESULTS.md)再决定固定规则因果候选还是原生社会机制审查；不自动追加第二游戏、模型或扩规则 | [独立维护记录](../02_实验/Mature_Methods_Integration_v1/MAINTENANCE_20261014.md)及回归；原版源码/玩法不变、真实输入/输出与版本/哈希、可见性/缺项可审查。旧 PARTIAL、C++、E0、历史 RESULTS、main 不动，不自行 CLOSED |
 | CD-SYSTEM-INTEGRATION | **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED** | 保留首轮实现供独立复核，该检查点施工已停止；未来可先比较受限游戏中的语义/因果候选，再检验真实执行与空白泛化，LLM 职责按实际缺口选择，也可不调用。未来 A/B/C 不是三个立即执行的任务 | [既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)为唯一运行/失败 owner；[F0/F1](CharacterDynamics_FormalProblem_v0.md)定候选接口语义，[未决问题](未决问题与机制候选.md)定比较/泛化准入。先区分可绑定、可组合、需扩展，不让模型首轮编完整 Bundle；新目标、新场景、新游戏分别报告，来源未核的外部环境不作为正式 benchmark |
 | MATURE-METHODS-INTEGRATION-V1 | **M1–M5 / E1–E4 已交付；外部复核确认 PARTIAL；未 CLOSED** | 保留 `b039c87`；停止本包实施，不追加规则刷 PASS；下一切口不以便条或某个 Planner 命名 | [唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)；[现行代码契约](../tools/native_platform_v0/p5/ongoing_station/README.md)。E3/E4 有界证据保留，严格 E1/E2 未证实；限定证据已公开，私有原文、旧 C++、E0 预算、main 不动 |

@@ -22,6 +22,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 | 文件 | 唯一职责 | 不在这里维护 |
 |---|---|---|
+| [Open Adventure Online P1 RESULTS](../02_实验/OpenAdventure_Online_P1_v0/RESULTS.md) | 原版同进程逐次输入、反馈程序分支、实际回放与异常/关闭修正的结果 owner | LLM/规划器效果、通用状态/作者 DSL、任意 NPC 自主性 |
 | [Open Adventure Native v0 RESULTS](../02_实验/OpenAdventure_Native_v0/RESULTS.md) | 外部完整游戏原规则构建、命令回放、源码机制审查与缺项的结果 owner | 通用游戏系统、Planner/LLM 效果或新增 NPC 机制 |
 | **[项目现状速览（通俗版）](项目现状速览_通俗版.md)** | **大白话入口**：在做什么、走到哪、有没有走偏、待拍板事项 | 新论证；术语定义 |
 | **[研究重建审计](研究重建审计_2026-10-06.md)** | **唯一综合审计**：确证失败、证据强度、科学距离与重建顺序 | 易变 TODO 与逐项代码进度 |

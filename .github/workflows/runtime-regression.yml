@@ -18,7 +18,7 @@ jobs:
       - name: Thin episode runner contracts only (no game download or build)
         env:
           PYTHONDONTWRITEBYTECODE: "1"
-        run: python -B -m unittest tools.open_adventure_v0.tests.test_runner -v
+        run: python -B -m unittest tools.open_adventure_v0.tests.test_runner tools.open_adventure_v0.tests.test_session -v
   trajectory-constraint-contract:
     runs-on: ubuntu-latest
     permissions:
