@@ -239,7 +239,7 @@ class OpenAdventureSession:
             "input_boundary_reached": boundary, "terminated": terminated,
             "exit_code": code, "timed_out": timed_out, "error": error,
         })
-        if boundary or terminated:
+        if boundary or (terminated and not timed_out):
             self._raw_observation = raw
             self._observation = result.observation
         if not boundary:

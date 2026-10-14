@@ -4,7 +4,7 @@
 
 ## 实际交付与 G1–G8 验收
 
-父代理核读代码并独立运行，最终[程序 smoke 结果](current_policy_smoke.json)为同一原版进程 **18 次输入 / 12 次非启动、seed 或退出回答的游戏输入**，其中包含一次原生语法拒绝；不把这些计数称为 resolved actions 或游戏 ticks。初始观察及全部 18 段原始字节均与重新执行相同输入的 replay 一致。[离线回归日志](unit_tests.log)：新 session 8 项 + 旧 runner 8 项，共 **16/16**。CI 仅跑离线契约；exact-head 状态见 GitHub Actions，不替代本地原版证据。
+父代理核读代码并独立运行，最终[程序 smoke 结果](current_policy_smoke_final.json)为同一原版进程 **18 次输入 / 12 次非启动、seed 或退出回答的游戏输入**，其中包含一次原生语法拒绝；不把这些计数称为 resolved actions 或游戏 ticks。初始观察及全部 18 段原始字节均与重新执行相同输入的 replay 一致。[离线回归日志](unit_tests_final.log)：新 session 8 项 + 旧 runner 8 项，共 **16/16**。CI 仅跑离线契约；exact-head 状态见 GitHub Actions，不替代本地原版证据。
 
 | Gate | 实际依据 | 结论 |
 |---|---|---|
@@ -19,8 +19,8 @@
 
 最终程序首次/重复运行：
 
-- [首次逐步记录](runs/66f9b188877c4f8ba2b880b4ac684c40-20261014T023846Z-4e46e0/events.jsonl)
-- [明确标为 replay 的记录](runs/1e37aa06e2844f56bf45505052abdfe9-20261014T023846Z-fc0f3c/events.jsonl)
+- [首次逐步记录](runs/626c93eb9a9046b0b16c4dc0a5aafaa1-20261014T042735Z-e18d43/events.jsonl)
+- [明确标为 replay 的记录](runs/2fe7b0a1b68f4e1dbc8b08da9334b100-20261014T042735Z-c0eddf/events.jsonl)
 - 父级独立的澄清/恢复核验：[18 次输入](runs/parent-clarification-recovery-20261014T023728Z-1f1d4d/events.jsonl)与[精确重放](runs/4cece48d595944ebb676dcd9182f9677-20261014T023728Z-85b048/events.jsonl)。两条是同一物品/输入边界切片的不同核验，不是更多规划场景。
 
 `reset` 创建新进程；单个 Session 实例只启动一次，新 episode/replay 使用新实例。`observe` 只取缓存，不读进程或推进世界，结束后也保留最后完整输出。超时部分字节保存在日志，不被升级为新的完整观察。PTY 合并 stdout/stderr 为玩家终端流，本接口不假称分别识别两者。POSIX PTY 路径已在本机 macOS 验证，Windows 原生路径未验证。
@@ -32,7 +32,9 @@
 3. [父级失败尝试](runs/ec3db2d94da6424a9bf9fda8bc907248-20261014T023224Z-f41530/events.jsonl)停在第6输入：库存显示 `Brass lantern`，父级脚本错误检查 `lamp` 导致断言失败，这是核验脚本的别名错误，不是物品没拿到。随后调用 close 时整个执行入口返回 143，末尾 close 未写出；不能把这段说成完整成功。与共享进程组中的原生终端信号处理有关的具体机制未完整跟踪。
 4. 修正为子进程 `start_new_session=True`，只隔离进程/信号生命周期，不改原游戏。原生[仍等待输入时的关闭探针](runs/19f63f816c444d9482a3ec108bb2cf65-20261014T023607Z-aaedc9/events.jsonl)已返回调用方并回收子进程，exit -15、source/binary 不变；-15 是 Adapter 清理，不是正常通关。离线 SID/回收断言及上方新版真实 episode 均通过。
 
-最终 reset 记录 Adapter 源码 SHA、配置版本与基础 Git revision；程序首段另记录 policy 源码 SHA。实验在提交前运行，base revision 是 `354d7ba`，不是交付 commit；以实际代码 hash 对应交付源码，不能把旧 base revision 当新代码未修改。未保存早期单测失败的完整 stdout：实现过程曾有临时目录权限错误及退出状态竞态（已修）；这是保留的诊断描述，不冒充原始日志。
+5. 提交 `6a0b29f` 后的最终 G8 核验补上“超时同时子进程 exit 0”的缓存保护：部分输出仍写日志，但不能替换上一次完整观察，也不能继续提交输入。确定性回归明确强制这个组合。修正后重新运行本页上方原生 smoke 与 16 项测试；[修正前 smoke](current_policy_smoke.json)及[旧测试日志](unit_tests.log)保留，不覆盖。
+
+最终 reset 记录 Adapter 源码 SHA、配置版本与基础 Git revision；程序首段另记录 policy 源码 SHA。早期实验 base revision 是 `354d7ba`，最终修正后实验 base revision 是 `6a0b29f`，均不是尚未生成的交付 commit；以实际代码 hash 对应交付源码，不能把旧 base revision 当新代码未修改。未保存早期单测失败的完整 stdout：实现过程曾有临时目录权限错误及退出状态竞态（已修）；这是保留的诊断描述，不冒充原始日志。
 
 ## 边界与职责
 

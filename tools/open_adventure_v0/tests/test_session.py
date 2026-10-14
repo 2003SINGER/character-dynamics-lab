@@ -145,10 +145,17 @@ class OnlineSessionTests(unittest.TestCase):
                 ]):
                     initial = session.reset()
                     self.assertIn("fake startup", initial)
-                    result = session.step("look", controller="test", decision_source="timeout")
+                    # The transport times out with partial bytes just as the child
+                    # exits 0. That exit must not promote partial text to a cache.
+                    with patch.object(session._process, "poll", side_effect=[None, 0]):
+                        result = session.step("look", controller="test", decision_source="timeout")
                     self.assertTrue(result.timed_out)
+                    self.assertTrue(result.terminated)
+                    self.assertEqual(result.exit_code, 0)
                     self.assertEqual(result.raw_output, b"partial output")
                     self.assertEqual(session.observe(), initial)
+                    with self.assertRaises(RuntimeError):
+                        session.step("look", controller="test", decision_source="after-timeout")
                 session.close()
                 records = [json.loads(line) for line in session.log_path.read_text().splitlines()]
                 step_row = next(row for row in records if row["event"] == "step")
