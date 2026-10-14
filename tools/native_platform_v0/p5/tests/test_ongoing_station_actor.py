@@ -1,5 +1,7 @@
+import ast
 import unittest
 from copy import deepcopy
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -125,6 +127,14 @@ class GivingActor(Thing):
 
 
 class OngoingStationActorTests(unittest.TestCase):
+    def test_station_repair_helpers_have_one_effective_definition(self):
+        actor_source = (Path(__file__).parent.parent / "ongoing_station" / "actor.py").read_text()
+        module = ast.parse(actor_source)
+        names = [node.name for node in module.body if isinstance(node, ast.FunctionDef)]
+        for helper in ("_repair_before_storage_constraint", "_locally_knows_repair_witness"):
+            with self.subTest(helper=helper):
+                self.assertEqual(names.count(helper), 1)
+
     def test_hard_repair_order_defers_new_self_store_and_gates_only_terminal_store(self):
         actor = Actor()
         actor.attributes.add("p5_actor_alias", "A", category="native_p5")

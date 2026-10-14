@@ -195,6 +195,23 @@ BDI architecture. Other new work is the strict author binding/projection,
 future-version CAS, actor-local commitment arbitration/history, typed native
 readback, and their integration and tests.
 
+## Responsibility map and station-specific boundary
+
+| Owner | Concrete code and responsibility | Scope and provenance |
+|---|---|---|
+| Evennia runtime | Native rooms, objects, exits, attributes, command validation, persistence, and world-side callbacks | Engine facilities; they do not supply this station's inspection, repair, storage, or loan rules. |
+| Station game content | `ongoing_station/work.py`: `initialize_content`, `request_tool_loan`, `start_work`, `_finish_effect`, `store_supply`, `advance_work` | Handwritten profile rules: exact tool lease, durations, receipt/effect settlement, supply approval, passage traversal, storage, and loan outcomes. These are game content, not planner discoveries. |
+| P3 actor and task layer | `p3/agency.py` observation/dispatch and `p3/planning.py` task planning, using the pinned GTPyhop 2.0.2 runtime/DFS | Existing runtime and primitive execution seam are reused; station work task decompositions and local route use are project code. World validation remains authoritative. |
+| Station actor policy | `ongoing_station/actor.py`: `_self_offers`, `_repair_before_storage_constraint`, `_locally_knows_repair_witness`, `_still_authorized`, `advance_actor` | Handwritten actor-local candidate generation, commitment arbitration, witness retention, and author-permission checks. It contains explicit profile bindings including A/B, `station_tool`, `pickup_to_side_south`, `courier_supply`, and `station_storage`; these are not generic NPC interfaces. |
+| Author control | `model.py` (`validate_author`, `compile_projection`), `native.py` activation/edit, and `controller.py` offer generation and future-edit reconciliation | `AuthorBundle` constraints and registered grants are the source of authored goals/permissions. Controller offers are proposals; they do not execute world actions or create receipts. |
+| Story-process planning | `story_process/planning.py`: general note-method planning plus the station-specific `_station_*` helpers and `plan_station_work_order` | Handwritten station compatibility, task requests, durations, method candidates, and ordering logic are domain additions layered alongside the reused GTPyhop runtime. They are not Evennia mechanics or generic planner capability. |
+| Audit and evidence | `ongoing_station/audit.py`, `system_work_audit.py`, and the P5 audit modules | Readback and evidence checks classify actual receipts, state, and author verdicts; audits do not choose actions or authorize execution. |
+
+The exact repair-before-storage predicate and local repair witness intentionally
+remain station-specific. The actor reads only its local observation and retained
+witness; a matching author constraint does not make this predicate a general
+planner rule. No cross-game adapter is implied by these interfaces.
+
 Historical T1–T8 checkpoint footprint (not the current M1–M5 footprint,
 net-new LOC, effort, or a performance measure):
 the five core station modules `actor/controller/goals/model/native` total 1,960

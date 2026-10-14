@@ -70,52 +70,6 @@ def _projection_requires_handover(projection):
 
 
 def _repair_before_storage_constraint(projection):
-    """Find only the registered hard repair-before-storage source constraint."""
-    for row in _projection_value(projection, "constraints", ()) or ():
-        source = row.get("source_constraint", {})
-        if source.get("hard") is not True or source.get("kind") != "event_order":
-            continue
-        before, after = source.get("before", {}), source.get("after", {})
-        if (before.get("event") == "station_passage_repaired"
-                and before.get("filters") == {"actor": "B", "tool": "station_tool",
-                                               "exit": "pickup_to_side_south"}
-                and after.get("event") == "station_supply_stored"
-                and after.get("filters") == {"actor": "A", "item": "courier_supply",
-                                              "storage": "station_storage"}):
-            return row
-    return None
-
-
-def _locally_knows_repair_witness(actor, view, order):
-    """Use the actor's exact local exit observation, retaining only witnessed proof."""
-    observation = view.get("observation", {})
-    for target in observation.get("station_repair_targets", ()):
-        receipt = target.get("last_repair_receipt")
-        if (target.get("alias") == "pickup_to_side_south"
-                and target.get("key") == "south"
-                and target.get("traversable") is True
-                and isinstance(receipt, Mapping)
-                and receipt.get("outcome") == "SETTLED"
-                and receipt.get("actor_alias") == "B"
-                and type(receipt.get("completed_minute")) is int
-                and isinstance(receipt.get("receipt_id"), str)):
-            _station_set(actor, "p5_station_repair_witness", {
-                "constraint_id": order.get("constraint_id"),
-                "receipt_id": receipt["receipt_id"],
-                "target_id": target.get("id"),
-                "completed_minute": receipt["completed_minute"],
-                "outcome": "SETTLED",
-            })
-            return True
-    witness = _station_get(actor, "p5_station_repair_witness")
-    return (isinstance(witness, Mapping)
-            and witness.get("constraint_id") == order.get("constraint_id")
-            and witness.get("outcome") == "SETTLED"
-            and isinstance(witness.get("receipt_id"), str)
-            and type(witness.get("completed_minute")) is int)
-
-
-def _repair_before_storage_constraint(projection):
     """Return a registered hard station order, if the author requires it."""
     constraints = _projection_value(projection, "constraints", ()) or ()
     for row in constraints:
