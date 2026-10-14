@@ -1,0 +1,104 @@
+e0-keyledger-contract	E0 unit contracts	﻿2026-10-14T16:36:55.8821380Z ##[group]Run set -o pipefail
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.8821967Z ^[[36;1mset -o pipefail^[[0m
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.8822389Z ^[[36;1mmkdir -p runs/e0_keyledger_v0/ci^[[0m
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.8823608Z ^[[36;1mpython -B -m unittest discover -s tools/e0_keyledger_v0/tests -v 2>&1 | tee runs/e0_keyledger_v0/ci/unit-tests.log^[[0m
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9252309Z shell: /usr/bin/bash -e {0}
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9252671Z env:
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9253032Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9253862Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9254435Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9254936Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9255442Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9255915Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9256297Z   PYTHONDONTWRITEBYTECODE: 1
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9256646Z   PYTHONPATH: tools
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:55.9256873Z ##[endgroup]
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1352003Z test_advance_return_matches_legacy_snapshot_for_idle_actor_and_mid_r (test_executor.ExecutorBoundaryTests.test_advance_return_matches_legacy_snapshot_for_idle_actor_and_mid_r) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1356110Z test_checkpoint_copier_falls_back_for_non_json_values_and_subclasses (test_executor.ExecutorBoundaryTests.test_checkpoint_copier_falls_back_for_non_json_values_and_subclasses) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1640739Z test_checkpoint_copier_matches_deepcopy_for_all_fixtures_and_real_histories (test_executor.ExecutorBoundaryTests.test_checkpoint_copier_matches_deepcopy_for_all_fixtures_and_real_histories) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1642365Z test_checkpoint_copier_preserves_container_aliases_and_cycles (test_executor.ExecutorBoundaryTests.test_checkpoint_copier_preserves_container_aliases_and_cycles) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1674644Z test_malformed_idle_is_rejected_without_world_change (test_executor.ExecutorBoundaryTests.test_malformed_idle_is_rejected_without_world_change) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1685575Z test_settlement_revalidates_resources_and_releases_reservation (test_executor.ExecutorBoundaryTests.test_settlement_revalidates_resources_and_releases_reservation) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1734197Z test_terminal_receipt_deltas_are_frozen_across_later_actions_and_restore (test_executor.ExecutorBoundaryTests.test_terminal_receipt_deltas_are_frozen_across_later_actions_and_restore) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1741275Z test_u01_canonical_checkpoint_and_monitor_bridge_agree (test_executor.ExecutorBoundaryTests.test_u01_canonical_checkpoint_and_monitor_bridge_agree) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1752748Z test_valid_idle_forecast_matches_explicit_empty_observation_delta (test_executor.ExecutorBoundaryTests.test_valid_idle_forecast_matches_explicit_empty_observation_delta) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1756123Z test_counterfeit_event_without_receipt_is_rejected (test_monitor_bridge.MonitorBridgeTests.test_counterfeit_event_without_receipt_is_rejected) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1790438Z test_e0_window_uses_t2_as_scenario_start (test_monitor_bridge.MonitorBridgeTests.test_e0_window_uses_t2_as_scenario_start) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1826538Z test_event_goal_is_pending_then_satisfied_from_receipt_backed_event (test_monitor_bridge.MonitorBridgeTests.test_event_goal_is_pending_then_satisfied_from_receipt_backed_event) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1858979Z test_event_payload_cannot_be_changed_while_reusing_receipt_event_id (test_monitor_bridge.MonitorBridgeTests.test_event_payload_cannot_be_changed_while_reusing_receipt_event_id) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1907571Z test_holding_state_and_event_goal_are_separate (test_monitor_bridge.MonitorBridgeTests.test_holding_state_and_event_goal_are_separate) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1912860Z test_key1_tombstone_prefix_uses_receipt_grounded_item (test_monitor_bridge.MonitorBridgeTests.test_key1_tombstone_prefix_uses_receipt_grounded_item) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1923910Z test_missing_past_seal_is_indeterminate (test_monitor_bridge.MonitorBridgeTests.test_missing_past_seal_is_indeterminate) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1939496Z test_reordered_event_ledger_is_not_sorted_into_validity (test_monitor_bridge.MonitorBridgeTests.test_reordered_event_ledger_is_not_sorted_into_validity) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1942727Z test_reordered_seal_ledger_including_pre_horizon_rows_is_rejected (test_monitor_bridge.MonitorBridgeTests.test_reordered_seal_ledger_including_pre_horizon_rows_is_rejected) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.1958080Z test_cap_one_counts_start_and_preserves_frontier (test_oracle.OracleAcceptanceTests.test_cap_one_counts_start_and_preserves_frontier) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.2840203Z test_deadline_seven_includes_t7_event (test_oracle.OracleAcceptanceTests.test_deadline_seven_includes_t7_event) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.3158302Z test_deadline_six_has_no_goal (test_oracle.OracleAcceptanceTests.test_deadline_six_has_no_goal) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.7238720Z test_decline_pin_has_no_goal (test_oracle.OracleAcceptanceTests.test_decline_pin_has_no_goal) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.7242269Z test_future_minutes_do_not_fill_a_missing_seal_prefix (test_oracle.OracleAcceptanceTests.test_future_minutes_do_not_fill_a_missing_seal_prefix) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.7256442Z test_goal_shaped_event_without_take_receipt_is_not_a_witness (test_oracle.OracleAcceptanceTests.test_goal_shaped_event_without_take_receipt_is_not_a_witness) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:57.7272988Z test_information_knowledge_and_copresence_are_preconditions (test_oracle.OracleAcceptanceTests.test_information_knowledge_and_copresence_are_preconditions) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:36:58.9617857Z test_initial_holding_is_not_goal_event (test_oracle.OracleAcceptanceTests.test_initial_holding_is_not_goal_event) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:00.7458965Z test_joint_reply_has_accept_path (test_oracle.OracleAcceptanceTests.test_joint_reply_has_accept_path) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:01.6466052Z test_key1_tombstone_has_no_goal (test_oracle.OracleAcceptanceTests.test_key1_tombstone_has_no_goal) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:03.1564792Z test_normal_accept_goal_is_at_t7 (test_oracle.OracleAcceptanceTests.test_normal_accept_goal_is_at_t7) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:03.1732811Z test_oracle_resumes_mid_unlock_and_executor_replays_path (test_oracle.OracleAcceptanceTests.test_oracle_resumes_mid_unlock_and_executor_replays_path) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:03.3012115Z test_t5_checkpoint_includes_right_endpoint_t10 (test_oracle.OracleAcceptanceTests.test_t5_checkpoint_includes_right_endpoint_t10) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:04.2129167Z test_three_minute_unlock_keeps_forced_boundaries (test_oracle.OracleAcceptanceTests.test_three_minute_unlock_keeps_forced_boundaries) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:04.2154001Z test_transcribed_settlement_events_have_frozen_signatures (test_oracle.OracleAcceptanceTests.test_transcribed_settlement_events_have_frozen_signatures) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:04.2157213Z test_witness_requires_exact_receipt_payload_and_contiguous_seal (test_oracle.OracleAcceptanceTests.test_witness_requires_exact_receipt_payload_and_contiguous_seal) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:04.2209904Z test_c01_test_pass_is_separate_from_budget_search_status (test_runner.RunnerContractTests.test_c01_test_pass_is_separate_from_budget_search_status) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:07.4842240Z test_h02_keeps_state_and_event_outcomes_distinct (test_runner.RunnerContractTests.test_h02_keeps_state_and_event_outcomes_distinct) ... FAIL
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2147376Z test_p02_checks_every_boundary_and_reservation (test_runner.RunnerContractTests.test_p02_checks_every_boundary_and_reservation) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2374911Z test_x01_has_valid_match_and_detects_both_prediction_mutations (test_runner.RunnerContractTests.test_x01_has_valid_match_and_detects_both_prediction_mutations) ... ok
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2376634Z 
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2376951Z ======================================================================
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2378709Z FAIL: test_h02_keeps_state_and_event_outcomes_distinct (test_runner.RunnerContractTests.test_h02_keeps_state_and_event_outcomes_distinct)
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2381145Z ----------------------------------------------------------------------
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2382144Z Traceback (most recent call last):
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2389792Z   File "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/tests/test_runner.py", line 31, in test_h02_keeps_state_and_event_outcomes_distinct
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2391169Z     self.assertEqual(result["fixture_test_result"], "PASS", result["errors"])
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2391777Z AssertionError: 'FAIL' != 'PASS'
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2392124Z - FAIL
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2392385Z + PASS
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2395907Z  : [{'type': 'AssertionError', 'message': 'planner status BUDGET != UNREACHABLE', 'traceback': 'Traceback (most recent call last):\n  File "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/runner.py", line 683, in run_case\n    _check_search(case_id, planner, oracle, expected)\n  File "/home/runner/work/character-dynamics-lab/character-dynamics-lab/tools/e0_keyledger_v0/runner.py", line 320, in _check_search\n    raise AssertionError(f"planner status {planner.get(\'solve_status\')} != {expected_planner}")\nAssertionError: planner status BUDGET != UNREACHABLE\n'}]
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2398387Z 
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2398564Z ----------------------------------------------------------------------
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2398956Z Ran 38 tests in 12.111s
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2399108Z 
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2399206Z FAILED (failures=1)
+e0-keyledger-contract	E0 unit contracts	2026-10-14T16:37:09.2540429Z ##[error]Process completed with exit code 1.
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	﻿2026-10-14T16:37:09.2619530Z ##[group]Run python -B -m tools.e0_keyledger_v0.runner --case all --run-id ci-38599507367-1 --output-root runs/e0_keyledger_v0/ci
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2620462Z ^[[36;1mpython -B -m tools.e0_keyledger_v0.runner --case all --run-id ci-38599507367-1 --output-root runs/e0_keyledger_v0/ci^[[0m
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2688539Z shell: /usr/bin/bash -e {0}
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2688812Z env:
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2689273Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2689735Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2690200Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2690600Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2690995Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2691398Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2691774Z   PYTHONDONTWRITEBYTECODE: 1
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2692037Z   PYTHONPATH: tools
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:09.2692292Z ##[endgroup]
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6398507Z {
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6399342Z   "run_dir": "runs/e0_keyledger_v0/ci/20261014T163725Z_all_ci-38599507367-1",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6400179Z   "fixture_test_result": "FAIL",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6400710Z   "fixture_results": {
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6401170Z     "E0-P01": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6401735Z     "E0-N01": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6402228Z     "E0-B01": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6402679Z     "E0-B02": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6403087Z     "E0-B03": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6403821Z     "E0-H01": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6404144Z     "E0-N02": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6404435Z     "E0-H02": "FAIL",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6404716Z     "E0-X01": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6404999Z     "E0-X02": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6405283Z     "E0-P02": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6405564Z     "E0-U01": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6405844Z     "E0-C01": "PASS",
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6406124Z     "E0-F01": "PASS"
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6406418Z   }
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6406657Z }
+e0-keyledger-contract	Run all frozen E0 fixtures under protocol budgets	2026-10-14T16:37:26.6552607Z ##[error]Process completed with exit code 1.

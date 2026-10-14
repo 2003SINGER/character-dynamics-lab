@@ -6,6 +6,8 @@
 
 逐项当前证据自审见[completion audit](completion_audit.json)，原版完整命令/字节的可读读回见[native readback](native_readback.txt)；读回不是第二次replay运行。
 
+可读读回只规范化CRLF及行末空白，原始字节仍完整保留在events.jsonl的base64回执中，不将派生文本冒充字节级原件。
+
 ## G1–G6证据
 
 | Gate | 结果 | 直接证据及范围 |
@@ -59,6 +61,8 @@ AUTHOR与PLANNER的最终状态/witness见native_plan_lifecycle；[GAME规则当
 少量确定性测试覆盖：撤销只影响所属未执行Planner依赖；换路线不能撤销作者建桥；真实过去witness不消失；已死亡即FAIL；未结束无死亡PENDING；缺失/损坏/未seal日志UNKNOWN；先到岸后建桥FAIL；look描述有桥不等于创建事件；缺能力与待验证不同。**桥过岸后消失**用明确标为synthetic的离线回执验证：新时间监测PASS，旧E verifier FAIL。未在真实episode追加消桥动作，不冒称第二条原版实验。
 
 最终离线回归 **48/48（12本轮 + 原36）**；[原始日志](parent_tests_final.log)。[6条已保存合成反例](offline_examples/results.json)及相应synthetic.jsonl可独立读回，原生episode数均0。CI增加的也是离线契约，无真实搜索、游戏下载/运行或模型调用。
+
+实现提交`81d5faa4de314f1337fdb08676f5f870ec58060f`的[exact-head CI 38599507367](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38599507367)为6/7 jobs成功，本轮诊断+B0/P1专项通过；唯一失败为旧E0。限定[job结果](implementation_ci.json)与[失败原文](implementation_ci_failed.log)保存，不修改E0规则/预算/预期以刷绿。后续证据文档提交的CI另以对应HEAD的Actions为准，不把此run冒充新的提交结果。
 
 ## 实施中的失败与范围
 
