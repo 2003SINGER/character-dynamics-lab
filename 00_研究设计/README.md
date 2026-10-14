@@ -4,7 +4,9 @@
 
 ## 项目架构定位
 
-2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，不自动调用模型或启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
+2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
+
+**LLM-Admission v0（同日后续授权）已交付并停止，READY_FOR_INDEPENDENT_REVIEW**：完成三次真实Luna-in-Codex调用，标为`AGENT_CONFOUNDED`；E未通过固定绑定验收，不补答案、不运行原版任务，G缺口分析保留。请求、原样输出、身份/工具审计和时间语义分歧仅由[唯一 RESULTS](../02_实验/LLM_Admission_v0/RESULTS.md)维护。不是正式B1/B2对照或模型优势证据。
 
 当前有限原生平台实例使用 **Evennia 与 Ensemble**；它们仍是现有执行与社会机制资产，但不定义所有游戏的通用结构。P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 均保留各自历史 owner。P5 Author Bundle 集成状态为 **READY_FOR_INDEPENDENT_REVIEW**（未 CLOSED）；唯一状态/结果见 [P5 README](../02_实验/Native_Platform_P5_v0/README.md) / [RESULTS](../02_实验/Native_Platform_P5_v0/RESULTS.md)，核心 API 见[代码 README](../tools/native_platform_v0/p5/README.md)。P5 只新增有限、条件性的作者机会 AND/OR 候选枚举；不等于完整 DM，11/12 结构检查通过不代表整套目标均满足。
 

@@ -4,7 +4,7 @@
 
 当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。**Planner Adapter Integration v1 已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`，本轮停止代码扩张**；唯一任务/结果 owner 是[RESULTS](../02_实验/Planner_Adapter_Integration_v1/RESULTS.md)。System Baseline v0 仍为历史 `PARTIAL`（M1 `READY_FOR_INDEPENDENT_REVIEW`、M2 `INVALID`），其阶段已停止且不进入 P6；状态和旧证据只见[原 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。P0 Baseline Gate、P0-Integration 与 P0 Author Binding 的既有状态/结果各由自己的 RESULTS 维护；暂停它们的局部扩张，不覆盖历史结果或 P5 shared-supply 失败。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准。
 
-**实现检查点：系统集成首轮在 `bf30d4c` 交付 DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW，未 CLOSED**。限定原生内容与四条件开发运行的能力、失败、历史对照未成立及无方法收益证据只见[既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，不换条件刷 PASS。2026-10-14 的 `872292c` / `8ca0a45` 仅设计修订；同日后续实施授权见下段。本轮先完成 Open Adventure B0 传统基线；B1/B2 模型对照已明确暂缓，不会因 B0 结束而自动启动。M1–M5 / E1–E4 的历史 PARTIAL 不改写。新对话原文仅私有归档；公开限本轮代码、报告、文本回放与测试证据，不包括私有对话、第三方完整源码/资产/二进制。C++、E0、main 不动，不自行 CLOSED。
+**实现检查点：系统集成首轮在 `bf30d4c` 交付 DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW，未 CLOSED**。限定原生内容与四条件开发运行的能力、失败、历史对照未成立及无方法收益证据只见[既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，不换条件刷 PASS。2026-10-14 的 `872292c` / `8ca0a45` 仅设计修订；同日后续实施授权见下段。B0传统基线已完成；随后授权的LLM-Admission见下方独立owner。正式B1/B2模型对照仍暂缓，不会因准入调用而自动扩大比较。M1–M5 / E1–E4 的历史 PARTIAL 不改写。新对话原文仅私有归档；公开限本轮代码、报告、文本回放与测试证据，不包括私有对话、第三方完整源码/资产/二进制。C++、E0、main 不动，不自行 CLOSED。
 
 **2026-10-14 新实施授权：**上方“只更新设计”描述 `872292c` / `8ca0a45` 检查点，不再限制本轮获授权的局部代码债清理与首个外部完整游戏接入。只用 Open Adventure 1.22，先保持上游原规则通过测试与回放，再审查原生 NPC/历史状态；最多三个短场景。不移植 P5 人物策略，不改外部规则，不增加新游戏或调用 LLM。旧 System Integration 的 PARTIAL 与失败不重写。
 
@@ -16,6 +16,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| LLM-ADMISSION-V0 | **DEVELOPMENT / AGENT_CONFOUNDED / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | 独立审阅真实调用、E的时间语义/残留义务分歧及G缺口分析；不重试、不补答案、不运行拒绝候选，不恢复正式B1/B2 | [唯一 RESULTS](../02_实验/LLM_Admission_v0/RESULTS.md)；[固定协议](../02_实验/LLM_Admission_v0/PROTOCOL.md)。1 probe + E/G各1次；原样输出及运行时证据保留，不自行 CLOSED |
 | OPEN-ADVENTURE-PLANNING-B0 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | B0 传统基线交付；独立复核[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。三方法整体比较仍为 `PARTIAL`；B1/B2 `DEFERRED_BY_USER`，不自动启动 | [PROTOCOL](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)；结果、失败、预算和成本仅由 RESULTS owner 维护；无 LLM 调用；P1 为独立有限检查点，旧 C++/E0/main 不动，不自行 CLOSED |
 | OPEN-ADVENTURE-ONLINE-P1 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；独立有限检查点已接受** | 保留同进程逐次输入、反馈分支和精确回放结果；P1 继续作为有限接口检查点，不宣称全系统 CLOSED。主要实现和结果证据仅见[唯一 RESULTS](../02_实验/OpenAdventure_Online_P1_v0/RESULTS.md) | 最终程序18次输入/12次非启动、seed 或退出回答的游戏输入；初始观察及18段原始输出精确匹配；16/16离线测试。P1 不代表规划能力或全系统完成 |
 | EXTERNAL-GAME-NATIVE | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | 原版 Open Adventure 构建、功能测试与三个短回放已交付；独立清理只移除被覆盖定义。固定规则传统准入由上方 B0 项推进；原生社会机制审查可另行讨论，不自动追加第二游戏、模型或扩规则 | [独立维护记录](../02_实验/Mature_Methods_Integration_v1/MAINTENANCE_20261014.md)及回归；原版源码/玩法不变、真实输入/输出与版本/哈希、可见性/缺项可审查。旧 PARTIAL、C++、E0、历史 RESULTS、main 不动，不自行 CLOSED |

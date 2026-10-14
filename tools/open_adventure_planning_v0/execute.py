@@ -100,7 +100,10 @@ def _run_unsupported(goal_id: str) -> dict[str, Any]:
             "native_inputs": 0, "search_calls": 0, "model_calls": "NOT_RUN"}
 
 
-def run_episode(goal_id: str, *, scenario: str, execute_native: bool) -> dict[str, Any]:
+def run_episode(goal_id: str, *, scenario: str, execute_native: bool,
+                external_goal: Goal | None = None,
+                external_goal_text: str | None = None,
+                runs_root: Path | None = None) -> dict[str, Any]:
     if goal_id == "G":
         return _run_unsupported(goal_id)
     if goal_id not in GOALS:
@@ -113,12 +116,13 @@ def run_episode(goal_id: str, *, scenario: str, execute_native: bool) -> dict[st
         raise ValueError("negative control is defined only for D")
 
     episode_id = f"oa-b0-{goal_id}-{scenario}-{uuid.uuid4().hex[:10]}"
-    session = OpenAdventureSession(runs_root=RUNS_ROOT, timeout=P1_TIMEOUT_SECONDS)
+    session = OpenAdventureSession(runs_root=RUNS_ROOT if runs_root is None else runs_root,
+                                   timeout=P1_TIMEOUT_SECONDS)
     task_inputs = 0
     search_calls = 0
     total_search_seconds = 0.0
     decision_path: Path | None = None
-    frozen_goal = GOALS[goal_id]
+    frozen_goal = GOALS[goal_id] if external_goal is None else external_goal
     state = initial_state()
     status = "RUNNING"
     buffered_injection: list[StepResult] = []
@@ -130,7 +134,9 @@ def run_episode(goal_id: str, *, scenario: str, execute_native: bool) -> dict[st
         first = session.reset({
             "experiment_config_version": "open-adventure-planning-b0-v0",
             "episode_id": episode_id, "goal_id": goal_id,
-            "goal_text": GOAL_TEXT[goal_id], "goal_predicate_sha256": _goal_hash(frozen_goal),
+            "goal_text": GOAL_TEXT[goal_id] if external_goal_text is None else external_goal_text,
+            "goal_origin": "frozen_manual_binding" if external_goal is None else "external_validated_candidate",
+            "goal_predicate_sha256": _goal_hash(frozen_goal),
             "controller": "B0 forward uniform-cost search, h=0",
             "domain_label": "finite source-derived model; STATIC_MODEL_ASSUMPTION initial map/object positions",
             "model_calls": "NOT_RUN", "rng_seed": SEED,

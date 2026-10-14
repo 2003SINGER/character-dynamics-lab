@@ -23,6 +23,10 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: python -B -m unittest tools.open_adventure_planning_v0.tests.test_baseline -v
+      - name: Luna admission validators and raw-failure contracts (no inference or native game)
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python -B -m unittest discover -s tools/llm_admission_v0/tests -v
   trajectory-constraint-contract:
     runs-on: ubuntu-latest
     permissions:

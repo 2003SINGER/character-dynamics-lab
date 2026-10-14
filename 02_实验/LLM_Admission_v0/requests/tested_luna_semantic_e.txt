@@ -1,0 +1,67 @@
+You are the tested inference subject in LLM-Admission v0, NOT a coding assistant. This is your only inference request. Do not call any tools, read files, browse, inspect workspace, spawn agents, send messages, or use other task history. Use only the packet below. Return one JSON object, no markdown, commands, plan, commentary or code. The controller will not repair your answer or supply missing predicates. Your native tools and automatically injected Codex instructions cannot be disabled, so this is explicitly Luna-in-Codex / AGENT_CONFOUNDED, not a bare-model benchmark.
+
+COMMON INFORMATION PACKET v0 (same rules/priors as frozen B0, NOT goal-specific filtering). Game Open Adventure 1.22, pinned source e6160529e70a8c7a06b9a5f190d69aa35c4c62f5. Finite model only: rooms START,BUILDING,VALLEY,SLIT,GRATE,BELOWGRATE,COBBLE,DEBRIS,AWKWARD,BIRDCHAMBER,PITTOP,MISTHALL,EASTBANK,WESTBANK; objects keys,lamp,rod; CARRIED is an object location, not a room. Explorer is player. Fissure east/west banks are EASTBANK/WESTBANK; lamp means brass lantern; keys means set of keys; rod means black rod. State atoms are arrays: ["at","player",ROOM], ["at",OBJECT,ROOM-or-"CARRIED"], ["carrying",OBJECT], ["lamp_on"], ["lamp_off"], ["grate_open"], ["grate_closed"], ["bridge"], ["unbridged"]. No other registered State atoms. Static initial model priors: at(player,START),at(keys,BUILDING),at(lamp,BUILDING),at(rod,DEBRIS),lamp_off,grate_closed,unbridged. These are STATIC_MODEL_ASSUMPTION, not a live hidden-state query. Native feedback, not prediction, updates actual observed state. Unit-cost STRIPS: all positive preconditions present, all negative absent; delete effects removed, add effects added; other facts persist.
+
+All movement rows below are source|comma-separated input aliases|destination. Each alias is a separate primitive, identical rule for that row. Each requires at(player,source), adds at(player,destination), deletes at(player,source). Additional conditions: GRATE->BELOWGRATE and BELOWGRATE->GRATE require grate_open; DEBRIS/AWKWARD/BIRDCHAMBER/PITTOP->GRATE require grate_open. DARK_ROOMS={DEBRIS,AWKWARD,BIRDCHAMBER,PITTOP,MISTHALL,EASTBANK,WESTBANK}; any move from OR to a dark room requires lamp_on AND carrying(lamp) (conservative MODEL_POLICY_SAFETY, not native game prohibition). EASTBANK/WESTBANK 'over' requires bridge. All 45 rows/174 aliases retained:
+START|enter,build,house,inwar,insid,in,east,e|BUILDING
+START|downs,gully,strea,south,s,d,downw,down,desce|VALLEY
+START|depre|GRATE
+BUILDING|out,outsi,exit,leave,outdo,west,w|START
+VALLEY|upstr,build,house,north,n|START
+VALLEY|downs,south,s,d,downw,down,desce|SLIT
+VALLEY|depre|GRATE
+SLIT|build,house|START
+SLIT|upstr,north,n|VALLEY
+SLIT|downs,bed,south,s,depre|GRATE
+GRATE|build,house|START
+GRATE|upstr,gully,north,n|SLIT
+GRATE|enter,inwar,insid,in,d,downw,down,desce|BELOWGRATE
+BELOWGRATE|out,outsi,exit,leave,upwar,up,u,above,ascen|GRATE
+BELOWGRATE|crawl,cobbl,inwar,insid,in,west,w|COBBLE
+BELOWGRATE|pit|PITTOP
+BELOWGRATE|debri|DEBRIS
+COBBLE|out,outsi,exit,leave,surfa,east,e|BELOWGRATE
+COBBLE|inwar,insid,in,dark,west,w,debri|DEBRIS
+COBBLE|pit|PITTOP
+DEBRIS|depre|GRATE
+DEBRIS|entra|BELOWGRATE
+DEBRIS|crawl,cobbl,passa,tunne,low,east,e|COBBLE
+DEBRIS|canyo,inwar,insid,in,upwar,up,u,above,ascen,west,w|AWKWARD
+DEBRIS|pit|PITTOP
+AWKWARD|depre|GRATE
+AWKWARD|entra|BELOWGRATE
+AWKWARD|d,downw,down,desce,east,e,debri|DEBRIS
+AWKWARD|inwar,insid,in,upwar,up,u,above,ascen,west,w|BIRDCHAMBER
+AWKWARD|pit|PITTOP
+BIRDCHAMBER|depre|GRATE
+BIRDCHAMBER|entra|BELOWGRATE
+BIRDCHAMBER|debri|DEBRIS
+BIRDCHAMBER|canyo,east,e|AWKWARD
+BIRDCHAMBER|passa,tunne,pit,west,w|PITTOP
+PITTOP|depre|GRATE
+PITTOP|entra|BELOWGRATE
+PITTOP|debri|DEBRIS
+PITTOP|passa,tunne,east,e|BIRDCHAMBER
+PITTOP|d,downw,down,desce|MISTHALL
+MISTHALL|forwa,conti,onwar,hall,west,w|EASTBANK
+MISTHALL|upwar,up,u,above,ascen|PITTOP
+EASTBANK|hall,east,e|MISTHALL
+EASTBANK|over|WESTBANK
+WESTBANK|over|EASTBANK
+
+Remaining action families, exhaustively grounded (152 primitives; total326):
+- take for EACH room R and EACH object O: pre at(player,R),at(O,R); negative carrying(O); add carrying(O),at(O,CARRIED); delete at(O,R); command 'take O'.
+- drop for EACH R,O: pre at(player,R),carrying(O); add at(O,R); delete carrying(O),at(O,CARRIED); command 'drop O'.
+- lamp_on for EACH room R, and separately lamp-here variant carrying(lamp) OR at(lamp,R): pre at(player,R),that variant; negative lamp_on; add lamp_on; delete lamp_off; command 'on lamp'. lamp_off same two variants each R: pre at(player,R),that variant,lamp_on; add lamp_off; delete lamp_on; command 'off lamp'.
+- unlock/lock at EACH R in {GRATE,BELOWGRATE}, separately key-here variants carrying(keys) OR at(keys,R): pre at(player,R),that variant,grate_closed for unlock or grate_open for lock; add grate_open/delete grate_closed for unlock; add grate_closed/delete grate_open for lock; command 'unlock grate' or 'lock grate'.
+- wave_rod at EACH R in {EASTBANK,WESTBANK}: pre at(player,R),carrying(rod),unbridged; add bridge/delete unbridged; second distinct variant pre at(player,R),carrying(rod),bridge; add unbridged/delete bridge. Both command 'wave rod'. These are exclusive toggles, not a magical one-way bridge command.
+
+Registered capability_sources IDs: movement=upstream/adventure.yaml:382-398,414-425,461-659,768-784; items=upstream/actions.c:303-425,483,623-715;upstream/adventure.yaml:3277-3320; lamp=upstream/actions.c:655-695,919-956;upstream/adventure.yaml:3285-3296; grate=upstream/actions.c:998-1049;upstream/adventure.yaml:488-524,3297-3309; rod=upstream/actions.c:1360-1400;upstream/adventure.yaml:641-659,768-784,3389-3402; native_output_verifier=committed complete native output, independent trajectory no-death verifier. Use these short IDs, not invented source paths. Trajectory-obligation vocabulary: no_death_ever (hard; checked from complete committed native output, not a static State atom or proof from planner). Other trajectory semantics must be reported as unresolved, not invented predicates.
+
+Native-process audit shared with B0: dwarves have seen/loc/oldloc plus global dflag; those drive randomized pursuit, blocking, attacks. Pirate audited encounter consumes current treasure/lamp/world progress, transfers treasure, resets pirate location/seen. Source scope upstream/main.c:231-474,1199-1247 and upstream/advent.h:179-245. These are audited producer/consumer paths, not proof about every unaudited native mechanism. Hidden current NPC positions/flags, PRNG cursor, exact lamp-energy/closing state are NOT supplied. Outside-region routes, other items and random NPC evolution are not fully modeled. No hidden truth, successful plan, walkthrough, GOALS mapping, or past result is provided. You may propose absent capability requirements, but cannot execute or certify unaudited rules.
+
+Fresh player-visible history (only setup, seed20261014; shared input budget80, per-search10000expansions/10seconds,total120seconds): opening 'Welcome to Adventure!! Would you like instructions?' input n returned: 'You are standing at the end of a road before a small brick building. Around you is a forest. A small stream flows out of the building and down a gully.' Input 'seed 20261014' acknowledged seed; current visible observation 'You\'re in front of building.' Thus player at START is observed; all object/map priors remain unconfirmed in this episode.
+
+OUTPUT CONTRACT: one JSON object with schema='oa-author-binding-v0', author_text, status (your judgment), goal={required:[atom arrays],forbidden:[atom arrays]} or null if unresolved, trajectory_obligations:[{kind,hard,requirement_text,evidence_source}], bindings:[{requirement_text,capability_sources:[registered short IDs],target_atoms:[atom arrays],explanation}], assumptions:[strings], residual_obligations:[{requirement_text,hard,reason}], missing_capabilities:[objects]. Use only legitimate given predicates for an executable goal; no goal_id. Distinguish author final-state requirements from trajectory obligations and intermediate subgoals. Do not promote an implementation route or temporary object possession to an extra final hard author constraint. Unsupported hard requirements stay hard and unresolved. Do not claim native execution already occurred.
+
+THIS REQUEST: Bind exactly the following author intent using the supplied rule catalog (not a preselected answer): 让探险者建立裂隙晶桥，安全抵达西岸，最后仍持有钥匙与点亮的灯，并且整个过程中不能死亡。
