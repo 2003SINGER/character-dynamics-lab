@@ -1,0 +1,391 @@
+{
+  "normal": {
+    "origin": "SYNTHETIC_OFFLINE_ONLY",
+    "native_episodes": 0,
+    "temporal": {
+      "status": "PASS",
+      "obligations": {
+        "author-arrive-west": "PASS",
+        "author-keys": "PASS",
+        "author-lamp": "PASS",
+        "author-lamp-on": "PASS",
+        "author-build-bridge": "PASS",
+        "author-build-before-arrival": "PASS",
+        "author-no-death": "PASS"
+      },
+      "ledger_complete": true,
+      "sealed_interval": true,
+      "sequence_contiguous": true,
+      "bridge_created_sequences": [
+        2
+      ],
+      "west_arrival_sequences": [
+        3,
+        4
+      ],
+      "uncertain_bridge_feedback_sequences": [],
+      "death_witnesses": [],
+      "last_look": {
+        "sequence": 4,
+        "room": "WESTBANK"
+      },
+      "last_inventory": {
+        "sequence": 5,
+        "items": [
+          "keys",
+          "lamp"
+        ]
+      },
+      "fresh_final_audit": true,
+      "lamp_on_feedback": true,
+      "lamp_feedback_sequence": 1,
+      "complete_native_sequences": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "source": "native committed output only; no predictions/hidden state",
+      "event_source": "upstream/actions.c:1360-1400; adventure.yaml:3399-3402",
+      "survival_scope": "observed sealed execution interval and registered native death markers, not future immunity"
+    },
+    "old_E_verifier": {
+      "status": "PASS",
+      "facts": {
+        "final_look_room": "WESTBANK",
+        "latest_room": "WESTBANK",
+        "latest_inventory_keys": true,
+        "latest_inventory_lamp": true,
+        "lamp_on": true,
+        "bridge_seen_in_ledger": true,
+        "bridge_seen_in_final_look": true,
+        "death_observed": false,
+        "fresh_final_look_then_inventory": true
+      },
+      "source": "complete native output ledger"
+    }
+  },
+  "vanished_after_crossing": {
+    "origin": "SYNTHETIC_OFFLINE_ONLY",
+    "native_episodes": 0,
+    "temporal": {
+      "status": "PASS",
+      "obligations": {
+        "author-arrive-west": "PASS",
+        "author-keys": "PASS",
+        "author-lamp": "PASS",
+        "author-lamp-on": "PASS",
+        "author-build-bridge": "PASS",
+        "author-build-before-arrival": "PASS",
+        "author-no-death": "PASS"
+      },
+      "ledger_complete": true,
+      "sealed_interval": true,
+      "sequence_contiguous": true,
+      "bridge_created_sequences": [
+        2
+      ],
+      "west_arrival_sequences": [
+        3,
+        5
+      ],
+      "uncertain_bridge_feedback_sequences": [],
+      "death_witnesses": [],
+      "last_look": {
+        "sequence": 5,
+        "room": "WESTBANK"
+      },
+      "last_inventory": {
+        "sequence": 6,
+        "items": [
+          "keys",
+          "lamp"
+        ]
+      },
+      "fresh_final_audit": true,
+      "lamp_on_feedback": true,
+      "lamp_feedback_sequence": 1,
+      "complete_native_sequences": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "source": "native committed output only; no predictions/hidden state",
+      "event_source": "upstream/actions.c:1360-1400; adventure.yaml:3399-3402",
+      "survival_scope": "observed sealed execution interval and registered native death markers, not future immunity"
+    },
+    "old_E_verifier": {
+      "status": "FAIL",
+      "facts": {
+        "final_look_room": "WESTBANK",
+        "latest_room": "WESTBANK",
+        "latest_inventory_keys": true,
+        "latest_inventory_lamp": true,
+        "lamp_on": true,
+        "bridge_seen_in_ledger": false,
+        "bridge_seen_in_final_look": false,
+        "death_observed": false,
+        "fresh_final_look_then_inventory": true
+      },
+      "source": "complete native output ledger"
+    }
+  },
+  "unfinished": {
+    "origin": "SYNTHETIC_OFFLINE_ONLY",
+    "native_episodes": 0,
+    "temporal": {
+      "status": "PENDING",
+      "obligations": {
+        "author-arrive-west": "PENDING",
+        "author-keys": "PENDING",
+        "author-lamp": "PENDING",
+        "author-lamp-on": "PENDING",
+        "author-build-bridge": "PASS",
+        "author-build-before-arrival": "PASS",
+        "author-no-death": "PENDING"
+      },
+      "ledger_complete": true,
+      "sealed_interval": false,
+      "sequence_contiguous": true,
+      "bridge_created_sequences": [
+        2
+      ],
+      "west_arrival_sequences": [
+        3,
+        4
+      ],
+      "uncertain_bridge_feedback_sequences": [],
+      "death_witnesses": [],
+      "last_look": {
+        "sequence": 4,
+        "room": "WESTBANK"
+      },
+      "last_inventory": {
+        "sequence": 5,
+        "items": [
+          "keys",
+          "lamp"
+        ]
+      },
+      "fresh_final_audit": false,
+      "lamp_on_feedback": true,
+      "lamp_feedback_sequence": 1,
+      "complete_native_sequences": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "source": "native committed output only; no predictions/hidden state",
+      "event_source": "upstream/actions.c:1360-1400; adventure.yaml:3399-3402",
+      "survival_scope": "observed sealed execution interval and registered native death markers, not future immunity"
+    },
+    "old_E_verifier": "NOT_APPLICABLE_UNFINISHED"
+  },
+  "ambiguous_bridge": {
+    "origin": "SYNTHETIC_OFFLINE_ONLY",
+    "native_episodes": 0,
+    "temporal": {
+      "status": "UNKNOWN",
+      "obligations": {
+        "author-arrive-west": "PASS",
+        "author-keys": "PASS",
+        "author-lamp": "PASS",
+        "author-lamp-on": "PASS",
+        "author-build-bridge": "UNKNOWN",
+        "author-build-before-arrival": "UNKNOWN",
+        "author-no-death": "PASS"
+      },
+      "ledger_complete": true,
+      "sealed_interval": true,
+      "sequence_contiguous": true,
+      "bridge_created_sequences": [],
+      "west_arrival_sequences": [
+        3,
+        4
+      ],
+      "uncertain_bridge_feedback_sequences": [
+        2
+      ],
+      "death_witnesses": [],
+      "last_look": {
+        "sequence": 4,
+        "room": "WESTBANK"
+      },
+      "last_inventory": {
+        "sequence": 5,
+        "items": [
+          "keys",
+          "lamp"
+        ]
+      },
+      "fresh_final_audit": true,
+      "lamp_on_feedback": true,
+      "lamp_feedback_sequence": 1,
+      "complete_native_sequences": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "source": "native committed output only; no predictions/hidden state",
+      "event_source": "upstream/actions.c:1360-1400; adventure.yaml:3399-3402",
+      "survival_scope": "observed sealed execution interval and registered native death markers, not future immunity"
+    },
+    "old_E_verifier": {
+      "status": "PASS",
+      "facts": {
+        "final_look_room": "WESTBANK",
+        "latest_room": "WESTBANK",
+        "latest_inventory_keys": true,
+        "latest_inventory_lamp": true,
+        "lamp_on": true,
+        "bridge_seen_in_ledger": true,
+        "bridge_seen_in_final_look": true,
+        "death_observed": false,
+        "fresh_final_look_then_inventory": true
+      },
+      "source": "complete native output ledger"
+    }
+  },
+  "missing_receipt": {
+    "origin": "SYNTHETIC_OFFLINE_ONLY",
+    "native_episodes": 0,
+    "temporal": {
+      "status": "UNKNOWN",
+      "obligations": {
+        "author-arrive-west": "UNKNOWN",
+        "author-keys": "UNKNOWN",
+        "author-lamp": "UNKNOWN",
+        "author-lamp-on": "UNKNOWN",
+        "author-build-bridge": "UNKNOWN",
+        "author-build-before-arrival": "UNKNOWN",
+        "author-no-death": "UNKNOWN"
+      },
+      "ledger_complete": false,
+      "sealed_interval": true,
+      "sequence_contiguous": false,
+      "bridge_created_sequences": [],
+      "west_arrival_sequences": [
+        3,
+        4
+      ],
+      "uncertain_bridge_feedback_sequences": [],
+      "death_witnesses": [],
+      "last_look": {
+        "sequence": 4,
+        "room": "WESTBANK"
+      },
+      "last_inventory": {
+        "sequence": 5,
+        "items": [
+          "keys",
+          "lamp"
+        ]
+      },
+      "fresh_final_audit": false,
+      "lamp_on_feedback": true,
+      "lamp_feedback_sequence": 1,
+      "complete_native_sequences": [],
+      "source": "native committed output only; no predictions/hidden state",
+      "event_source": "upstream/actions.c:1360-1400; adventure.yaml:3399-3402",
+      "survival_scope": "observed sealed execution interval and registered native death markers, not future immunity"
+    },
+    "old_E_verifier": {
+      "status": "PASS",
+      "facts": {
+        "final_look_room": "WESTBANK",
+        "latest_room": "WESTBANK",
+        "latest_inventory_keys": true,
+        "latest_inventory_lamp": true,
+        "lamp_on": true,
+        "bridge_seen_in_ledger": true,
+        "bridge_seen_in_final_look": true,
+        "death_observed": false,
+        "fresh_final_look_then_inventory": true
+      },
+      "source": "complete native output ledger"
+    }
+  },
+  "died_then_alive": {
+    "origin": "SYNTHETIC_OFFLINE_ONLY",
+    "native_episodes": 0,
+    "temporal": {
+      "status": "FAIL",
+      "obligations": {
+        "author-arrive-west": "PASS",
+        "author-keys": "PASS",
+        "author-lamp": "PASS",
+        "author-lamp-on": "PASS",
+        "author-build-bridge": "PASS",
+        "author-build-before-arrival": "PASS",
+        "author-no-death": "FAIL"
+      },
+      "ledger_complete": true,
+      "sealed_interval": true,
+      "sequence_contiguous": true,
+      "bridge_created_sequences": [
+        2
+      ],
+      "west_arrival_sequences": [
+        3,
+        4
+      ],
+      "uncertain_bridge_feedback_sequences": [],
+      "death_witnesses": [
+        {
+          "sequence": 1,
+          "marker": "oh dear, you seem to have gotten yourself killed"
+        },
+        {
+          "sequence": 1,
+          "marker": "reincarnat"
+        },
+        {
+          "sequence": 1,
+          "marker": "gotten yourself killed"
+        }
+      ],
+      "last_look": {
+        "sequence": 4,
+        "room": "WESTBANK"
+      },
+      "last_inventory": {
+        "sequence": 5,
+        "items": [
+          "keys",
+          "lamp"
+        ]
+      },
+      "fresh_final_audit": true,
+      "lamp_on_feedback": true,
+      "lamp_feedback_sequence": 1,
+      "complete_native_sequences": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "source": "native committed output only; no predictions/hidden state",
+      "event_source": "upstream/actions.c:1360-1400; adventure.yaml:3399-3402",
+      "survival_scope": "observed sealed execution interval and registered native death markers, not future immunity"
+    },
+    "old_E_verifier": {
+      "status": "FAIL",
+      "reason": "native_death_or_reincarnation",
+      "evidence": "oh dear, you seem to have gotten yourself killed"
+    }
+  }
+}

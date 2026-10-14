@@ -27,6 +27,10 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: python -B -m unittest discover -s tools/llm_admission_v0/tests -v
+      - name: Author temporal diagnostic contracts (offline synthetic receipts; no new search or game)
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python -B -m unittest discover -s tools/author_constraint_diagnostic_v0/tests -v
   trajectory-constraint-contract:
     runs-on: ubuntu-latest
     permissions:

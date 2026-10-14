@@ -20,6 +20,8 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 **LLM-Admission v0（同日后续授权）已交付并停止，READY_FOR_INDEPENDENT_REVIEW**：完成三次真实Luna-in-Codex调用，标为`AGENT_CONFOUNDED`；E未通过固定绑定验收，不补答案、不运行原版任务，G缺口分析保留。请求、原样输出、身份/工具审计和时间语义分歧仅由[唯一 RESULTS](02_实验/LLM_Admission_v0/RESULTS.md)维护。不是正式B1/B2对照或模型优势证据。
 
+**Author Constraint Diagnostic v0（2026-10-15）已交付并停止，READY_FOR_INDEPENDENT_REVIEW**：原四原子未补全，经冻结搜索与一次原版执行通过明确的作者时间语义；原Admission FAIL保留。本轮零模型调用，结果、归属反例和局限仅见[唯一 RESULTS](02_实验/Author_Constraint_Diagnostic_v0/RESULTS.md)，不自动恢复B1/B2或扩展平台。
+
 `c228301` 已收到研究主轴方向的外部通过意见；不是新系统能力验收。[有界强近邻机制对照](01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)作为历史审查检查点保留。原始 P0 A/B 与 LLM/embedding/Qwen 比较的暂停边界见[原始 P0 RESULTS](02_实验/Planner_P0_v0/RESULTS.md)。**P0 Baseline Gate 三场景开发比较已完成，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW（未 CLOSED）**；唯一结果入口是 [RESULTS](02_实验/Planner_P0_Baseline_Gate_v0/RESULTS.md)。P0-Integration 的独立有限检查点仍见 [RESULTS](02_实验/Planner_P0_Integration_v0/RESULTS.md)。这不表示完整传统系统、独立 NPC agency 或 P5 shared-supply 问题已完成。CI 只验证离线契约；原生运行证据见各自 RESULTS，exact-head workflow 状态以 GitHub Actions 为准。下一步见 [TODO](00_研究设计/TODO.md)。
 
 ## 从这里进入

@@ -1,0 +1,60 @@
+{
+  "G1": {
+    "status": "PASS",
+    "goal_hash": "0f64a442084f48b277550714a422b88e99f8ab8760d0a54f94bf31b541440d45",
+    "native_search_count": 15
+  },
+  "G2": {
+    "status": "PASS",
+    "offline_actual_searches": 1,
+    "expansions": 3951
+  },
+  "G3": {
+    "status": "PASS",
+    "native_episodes": 1,
+    "model_projection_vs_reconciled_projection_all_15_equal": true,
+    "projection_scope": "observed finite model, not full hidden game state"
+  },
+  "G4": {
+    "status": "PASS",
+    "all_author_obligations": {
+      "author-arrive-west": "PASS",
+      "author-keys": "PASS",
+      "author-lamp": "PASS",
+      "author-lamp-on": "PASS",
+      "author-build-bridge": "PASS",
+      "author-build-before-arrival": "PASS",
+      "author-no-death": "PASS"
+    },
+    "creation": [
+      16
+    ],
+    "arrival": [
+      17,
+      18
+    ],
+    "evidence": "existing native byte ledger re-read; no new episode"
+  },
+  "G5": {
+    "status": "PASS",
+    "evidence": [
+      "parent_tests_final.log:48/48,12 scoped contracts",
+      "execution/native_plan_lifecycle.json"
+    ],
+    "scope": "source/withdrawal/history contract and retrospective trace, not generic online director",
+    "preserved_author_count": 7,
+    "protected_historical_dependencies": 35,
+    "withdrawn_future_dependencies": 291,
+    "test_log_sha256": "91c748222908d9658f631394611ef31f1531684042b1257a2995e020e954d9c2"
+  },
+  "G6": {
+    "status": "PASS",
+    "protected_files": 80,
+    "old_admission": "FAIL",
+    "native_source_unchanged": true,
+    "binary_unchanged": true
+  },
+  "model_inference_calls_this_round": 0,
+  "status": "READY_FOR_INDEPENDENT_REVIEW",
+  "audit_origin": "CONTROLLER_SELF_AUDIT_NOT_INDEPENDENT_HUMAN_REVIEW"
+}

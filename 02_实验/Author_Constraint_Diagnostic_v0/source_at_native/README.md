@@ -1,0 +1,3 @@
+# 原版运行所用的新诊断源码
+
+该副本复制于唯一原版运行结束后、补充歧义反馈UNKNOWN检查之前；不伪称事前签名或独立运行时源码抓取。run.py、contracts.py、monitor.py对应当次诊断使用的文件版本。原native/temporal证据保持原样；后续monitor保守修订只读回既有账本，结果见上层post_review_temporal.json，未再次搜索或启动游戏。

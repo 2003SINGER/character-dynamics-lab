@@ -1,6 +1,6 @@
 # TODO｜active research queue
 
-更新时间：2026-10-14。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
+更新时间：2026-10-15。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
 当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。**Planner Adapter Integration v1 已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`，本轮停止代码扩张**；唯一任务/结果 owner 是[RESULTS](../02_实验/Planner_Adapter_Integration_v1/RESULTS.md)。System Baseline v0 仍为历史 `PARTIAL`（M1 `READY_FOR_INDEPENDENT_REVIEW`、M2 `INVALID`），其阶段已停止且不进入 P6；状态和旧证据只见[原 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。P0 Baseline Gate、P0-Integration 与 P0 Author Binding 的既有状态/结果各由自己的 RESULTS 维护；暂停它们的局部扩张，不覆盖历史结果或 P5 shared-supply 失败。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准。
 
@@ -16,6 +16,7 @@
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| AUTHOR-CONSTRAINT-DIAGNOSTIC-V0 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | 独立审阅原候选四原子经因果规划/原版完成作者时间语义的证据，及AUTHOR/PLANNER撤销/历史界限；不扩实验或恢复模型比较 | [唯一 RESULTS](../02_实验/Author_Constraint_Diagnostic_v0/RESULTS.md)；[冻结诊断协议](../02_实验/Author_Constraint_Diagnostic_v0/PROTOCOL.md)。旧Admission FAIL不改，零模型调用，不自行 CLOSED |
 | LLM-ADMISSION-V0 | **DEVELOPMENT / AGENT_CONFOUNDED / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | 独立审阅真实调用、E的时间语义/残留义务分歧及G缺口分析；不重试、不补答案、不运行拒绝候选，不恢复正式B1/B2 | [唯一 RESULTS](../02_实验/LLM_Admission_v0/RESULTS.md)；[固定协议](../02_实验/LLM_Admission_v0/PROTOCOL.md)。1 probe + E/G各1次；原样输出及运行时证据保留，不自行 CLOSED |
 | OPEN-ADVENTURE-PLANNING-B0 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | B0 传统基线交付；独立复核[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。三方法整体比较仍为 `PARTIAL`；B1/B2 `DEFERRED_BY_USER`，不自动启动 | [PROTOCOL](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)；结果、失败、预算和成本仅由 RESULTS owner 维护；无 LLM 调用；P1 为独立有限检查点，旧 C++/E0/main 不动，不自行 CLOSED |
 | OPEN-ADVENTURE-ONLINE-P1 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；独立有限检查点已接受** | 保留同进程逐次输入、反馈分支和精确回放结果；P1 继续作为有限接口检查点，不宣称全系统 CLOSED。主要实现和结果证据仅见[唯一 RESULTS](../02_实验/OpenAdventure_Online_P1_v0/RESULTS.md) | 最终程序18次输入/12次非启动、seed 或退出回答的游戏输入；初始观察及18段原始输出精确匹配；16/16离线测试。P1 不代表规划能力或全系统完成 |

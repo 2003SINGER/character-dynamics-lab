@@ -8,6 +8,8 @@
 
 **LLM-Admission v0（同日后续授权）已交付并停止，READY_FOR_INDEPENDENT_REVIEW**：完成三次真实Luna-in-Codex调用，标为`AGENT_CONFOUNDED`；E未通过固定绑定验收，不补答案、不运行原版任务，G缺口分析保留。请求、原样输出、身份/工具审计和时间语义分歧仅由[唯一 RESULTS](LLM_Admission_v0/RESULTS.md)维护。不是正式B1/B2对照或模型优势证据。
 
+**Author Constraint Diagnostic v0（2026-10-15）已交付并停止，READY_FOR_INDEPENDENT_REVIEW**：原四原子未补全，经冻结搜索与一次原版执行通过明确的作者时间语义；原Admission FAIL保留。本轮零模型调用，结果、归属反例和局限仅见[唯一 RESULTS](Author_Constraint_Diagnostic_v0/RESULTS.md)，不自动恢复B1/B2或扩展平台。
+
 2026-10-14 最新有限交付：[Open Adventure Native v0 RESULTS](OpenAdventure_Native_v0/RESULTS.md)，原规则构建与三个命令回放，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；[站点独立清理](Mature_Methods_Integration_v1/MAINTENANCE_20261014.md)不改变旧行为或实验结论。源码/资产/二进制仅留项目 `_local_data`，公开限定输入、输出、版本/哈希及测试日志；本轮停止，不接模型或新增游戏。
 
 当前交付入口：[Mature-Methods Integration v1 RESULTS](Mature_Methods_Integration_v1/RESULTS.md)，DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW。S1–S4 有界原生配对已运行；最低闭环、物资反馈和安全负例有证据，权限编辑后的重选未实际验证。结果、原始失败和公开哈希证据仅由该 owner 维护；本轮停止。System Baseline v0 与 Planner Adapter Integration v1 的历史 PARTIAL 保留。
