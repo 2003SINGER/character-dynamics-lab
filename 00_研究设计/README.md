@@ -14,7 +14,7 @@
 
 **Mature-Methods Integration v1 当前工作包已交付，外部复核确认 PARTIAL，未 CLOSED**。同站点 M1–M5 / E1–E4 结果只见[唯一 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，接口见[持续站点代码说明](../tools/native_platform_v0/p5/ongoing_station/README.md)，执行指针见 [TODO](TODO.md)。严格历史匹配与工作条件驱动的方法取舍未证实；本包实施停止。原 S1–S4、S2 权限拒绝、便条归档与旧 Planner Adapter 的历史 PARTIAL 保留，不扩大旧 Sabre或改写此前结果。
 
-`b039c87` 外部复核已收到，历史 PARTIAL 不变。**Character Dynamics System Integration 首轮在 `bf30d4c` 交付**；运行/失败与未证实项归[既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，接口归持续站点 README。2026-10-14 作者语义与生成式控制讨论已吸收进现行 owner 正文，不再新增总纲；具体机制与准入反例见[未决问题](未决问题与机制候选.md)，状态与下一动作只见 [TODO](TODO.md)。设计修订不新增实现或实验结果。
+`b039c87` 外部复核已收到，历史 PARTIAL 不变。**Character Dynamics System Integration 首轮在 `bf30d4c` 交付**；运行/失败与未证实项归[既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，接口归持续站点 README。2026-10-14 作者语义讨论的设计检查点保留；同日新授权的局部清理与原版 Open Adventure 接入，分别由[维护记录](../02_实验/Mature_Methods_Integration_v1/MAINTENANCE_20261014.md)和[新 RESULTS](../02_实验/OpenAdventure_Native_v0/RESULTS.md)维护，不改旧结果、不新增总纲。具体机制与准入反例见[未决问题](未决问题与机制候选.md)，状态与下一动作只见 [TODO](TODO.md)。
 
 Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执行、观察边界、验证、gate 与 trace。完整机制说明中已确认的内容是工程语义与模块契约，不是已验证心理规律。Dynamics Model 不等于 Runtime：C++ `ReferenceRuleDynamicsV0` 是冻结的工程基线，不是科学真理；Demo Living 手写 dynamics 只属于 application/demo，不能作为已训练规律。Paper-0 正式验证仍 blocked，但方法开发正在重建，不再把 M2 当作所有开发学习的唯一入口。详情见[Runtime / Dynamics / Demo 架构边界](Architecture_Boundary_Runtime_Dynamics_Demo_v1.md)与[研究重建审计](研究重建审计_2026-10-06.md)。
 
@@ -22,6 +22,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 | 文件 | 唯一职责 | 不在这里维护 |
 |---|---|---|
+| [Open Adventure Native v0 RESULTS](../02_实验/OpenAdventure_Native_v0/RESULTS.md) | 外部完整游戏原规则构建、命令回放、源码机制审查与缺项的结果 owner | 通用游戏系统、Planner/LLM 效果或新增 NPC 机制 |
 | **[项目现状速览（通俗版）](项目现状速览_通俗版.md)** | **大白话入口**：在做什么、走到哪、有没有走偏、待拍板事项 | 新论证；术语定义 |
 | **[研究重建审计](研究重建审计_2026-10-06.md)** | **唯一综合审计**：确证失败、证据强度、科学距离与重建顺序 | 易变 TODO 与逐项代码进度 |
 | [完整机制说明 v0](完整机制说明_v0.md) | 已确认的 W/O/X/S/P/D/A 工程语义、任务承诺、场景/动作、时间、低耦合及消融约束 | 心理规律已验证的声明；未采纳公式、代码完成清单 |

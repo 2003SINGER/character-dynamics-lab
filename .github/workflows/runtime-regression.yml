@@ -6,6 +6,19 @@ on:
   pull_request:
 
 jobs:
+  open-adventure-runner-contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Thin episode runner contracts only (no game download or build)
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python -B -m unittest tools.open_adventure_v0.tests.test_runner -v
   trajectory-constraint-contract:
     runs-on: ubuntu-latest
     permissions:

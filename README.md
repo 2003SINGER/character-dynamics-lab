@@ -12,7 +12,9 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 2026-10-13 **Mature-Methods Integration v1 的 M1–M5 / E1–E4 有界工作包已交付，状态为 `DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW`**。未来新增交接剧情点与失败负控有原生证据；严格历史匹配、工作条件驱动的方法取舍仍未证实。当前代码入口是[持续站点说明](tools/native_platform_v0/p5/ongoing_station/README.md)，运行、失败与对照只见[唯一 RESULTS](02_实验/Mature_Methods_Integration_v1/RESULTS.md)，下一动作见 [TODO](00_研究设计/TODO.md)。本包实施停止，不自动新增阶段；原 S1–S4、S2 权限拒绝、10-12 便条归档、早期站点及[旧 Planner Adapter 结果](02_实验/Planner_Adapter_Integration_v1/RESULTS.md)保留。
 
-**Character Dynamics System Integration 首轮有界实施与原生运行已交付（`bf30d4c`）**：现有站点接入真实共享工具、物资验收/入库与设施检修，接通角色自身过程和作者未来锁；这些是人工新增的限定游戏内容，不是 Planner 自行发明规则或通用剧情生成。具体通过项、历史对照未成立及全部失败只见[唯一 RESULTS](02_实验/Mature_Methods_Integration_v1/RESULTS.md)。2026-10-14 新讨论已落实到现行设计正文；当前状态与下一入口见 [TODO](00_研究设计/TODO.md)，接口见[持续站点说明](tools/native_platform_v0/p5/ongoing_station/README.md)。本轮没有新模型调用或原生实验。
+**Character Dynamics System Integration 首轮有界实施与原生运行已交付（`bf30d4c`）**：现有站点接入真实共享工具、物资验收/入库与设施检修，接通角色自身过程和作者未来锁；这些是人工新增的限定游戏内容，不是 Evennia 自带玩法、Planner 自行发明规则或通用剧情生成。具体通过项、历史对照未成立及全部失败只见[唯一 RESULTS](02_实验/Mature_Methods_Integration_v1/RESULTS.md)。2026-10-14 的 `872292c` / `8ca0a45` 只修订设计；后续新增实施授权与当前状态见 [TODO](00_研究设计/TODO.md)，接口见[持续站点说明](tools/native_platform_v0/p5/ongoing_station/README.md)。
+
+**2026-10-14 首个外部完整游戏：Open Adventure 1.22 已原样构建并完成三个原生短回放，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW。**它与 Evennia 手写站点是不同用途的资产：前者已有完整玩法/NPC，后者是引擎上的项目测试内容。原规则不改；目前只接整局命令回放，不接 Planner/LLM 或隐藏状态 API。[唯一结果与能力缺口](02_实验/OpenAdventure_Native_v0/RESULTS.md)记录官方测试、原始输出与原生机制；[薄入口](tools/open_adventure_v0/README.md)提供复现。旧站点重复定义的独立清理见[维护记录](02_实验/Mature_Methods_Integration_v1/MAINTENANCE_20261014.md)，旧 PARTIAL 不升级。
 
 `c228301` 已收到研究主轴方向的外部通过意见；不是新系统能力验收。[有界强近邻机制对照](01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)作为历史审查检查点保留。原始 P0 A/B 与 LLM/embedding/Qwen 比较的暂停边界见[原始 P0 RESULTS](02_实验/Planner_P0_v0/RESULTS.md)。**P0 Baseline Gate 三场景开发比较已完成，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW（未 CLOSED）**；唯一结果入口是 [RESULTS](02_实验/Planner_P0_Baseline_Gate_v0/RESULTS.md)。P0-Integration 的独立有限检查点仍见 [RESULTS](02_实验/Planner_P0_Integration_v0/RESULTS.md)。这不表示完整传统系统、独立 NPC agency 或 P5 shared-supply 问题已完成。CI 只验证离线契约；原生运行证据见各自 RESULTS，exact-head workflow 状态以 GitHub Actions 为准。下一步见 [TODO](00_研究设计/TODO.md)。
 
@@ -24,6 +26,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 | 要找什么 | 唯一维护位置 |
 |---|---|
+| 原版完整文字游戏、原生 NPC/因果机制与三条短回放 | [Open Adventure RESULTS](02_实验/OpenAdventure_Native_v0/RESULTS.md)；[命令回放入口](tools/open_adventure_v0/README.md)。不是新规划器实验 |
 | System Vision 中的长期研究版图与研究支线 ownership | [系统愿景](00_研究设计/Character_Dynamics_System_Vision_v0.md#长期研究版图)；现行问题定义见 F0/F1 |
 | Runtime / Engine v1 的冻结边界与可执行验收 | [Runtime Scheduler](00_研究设计/Runtime_Scheduler_v1.md)；[Closure Matrix](00_研究设计/Runtime_Closure_Acceptance_Matrix.md) |
 | 第一个可展示 Demo（单人房间 Runtime Visualizer v0） | [Demo README](Demo%20codex-generated/demo/single_room_v0/README.md)；构建后生成 Deadline / Stale Phone / Commitment traces |
