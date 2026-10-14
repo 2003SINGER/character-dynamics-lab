@@ -19,6 +19,10 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: python -B -m unittest tools.open_adventure_v0.tests.test_runner tools.open_adventure_v0.tests.test_session -v
+      - name: Finite B0 search and independent native-evidence contracts (offline only)
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python -B -m unittest tools.open_adventure_planning_v0.tests.test_baseline -v
   trajectory-constraint-contract:
     runs-on: ubuntu-latest
     permissions:

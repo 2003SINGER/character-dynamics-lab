@@ -20,12 +20,7 @@ For replay, pass the recorded ordered command entries to `replay(...)`. Its resu
 
 `tools/open_adventure_v0/smoke_policy.py` is labeled an interface smoke policy. It enters the nearby building, records a native parser rejection, takes the lamp, and repeats `take lamp`. Only after the game returns “You are already carrying it!” does the policy choose `drop lamp`; a different visible response selects `inventory`. It checks the inventory after dropping and taking the lamp again, then leaves. It also answers `no` to the native quit question, continues with `look`, and later quits with `yes`. This is a bounded adapter smoke, not a planning result or walkthrough.
 
-The real episode and exact replay are in:
-
-- `runs/c1b9277a484b4541af8b31d35b61dc7b-20261014T022458Z-d02795/`
-- `runs/f647c7ac0111409e9f27cdad4525b1d7-20261014T022458Z-aff450/`
-
-Both logs contain 17 native inputs, including 11 meaningful game commands, and the step output bytes plus initial observation matched on replay. Both recorded tracked-source and executable hash checks passed. The smoke reached the native parser retry prompt, the duplicate-item rejection, inventory changes after dropping and retaking the lamp, the `quit`/`no` continuation, and a clean `quit`/`yes` exit. Process exit is reported separately from game progress; this episode did not attempt a broader game objective.
+The early worker's 17-input episode and replay are historical; see the [single P1 RESULTS owner](RESULTS.md) for the final evidence and earlier-version boundary. Final implementation evidence is the parent-verified 18-input program smoke (12 game inputs), exact initial/step-byte replay, and 16/16 offline tests. The final raw run directories are `runs/626c93eb9a9046b0b16c4dc0a5aafaa1-20261014T042735Z-e18d43/` and `runs/2fe7b0a1b68f4e1dbc8b08da9334b100-20261014T042735Z-c0eddf/`; the independent clarification/recovery slice is also indexed in RESULTS. This implementation page explains the adapter; RESULTS owns run facts, failures, and acceptance status.
 
 The preliminary prompt feasibility probes are summarized in `runs/pty-feasibility-probe-initial/record.json`. The first probe's exit code was not captured; a later process check found no live `advent`, but that does not recover the missing exit status. A second probe explicitly sent `yes` and captured exit code 0. Full byte-level replay evidence is available in the two adapter run directories above.
 
