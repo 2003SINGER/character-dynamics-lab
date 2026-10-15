@@ -98,4 +98,8 @@ H4 修复前后作者进度哈希相同：`31d0d4ccdf0572b33d6547c917f13328062a0
 
 实现与证据提交为 `c18fed9`。2026-10-15 用户已明确确认“同意公开本轮限定证据”：包括本轮代码、报告及189份限定任务/搜索/语义调用/游戏运行/失败修复证据；不包括私人对话原文、完整Codex会话、凭证、游戏源码/二进制和其他项目文件。原文仍仅私有归档，main 不操作。
 
-公开授权已解除等待；推送后核对 exact-head CI，不引用旧 HEAD 的 CI 当作本轮通过，不改旧 E0 预算、预期或历史失败刷绿。
+公开授权已解除等待，代码、报告与189份限定证据已发布至 `webgpt-sync@02a663f891a8a7008d75861d64bacf6d50cf6fe8`。
+
+该 exact-head 的 [runtime-regression #38665545595](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/38665545595) 已完成：**6/7 作业 success，整体 failure**。新增作者义务测试所在的 open-adventure-runner-contract、完整 C++ regression、public-evidence-integrity、其余三作业均通过。唯一失败仍为旧 E0-H02：`planner status BUDGET != UNREACHABLE`。没有改预算、断言或删除失败测试。
+
+原始 [CI 状态](ci_02a663f.json)及[失败日志](ci_02a663f_failed.log)保留。后续文档提交只登记这些结果，不将此运行冒称为另一个提交的 CI，也不把局部通过说成全仓全绿。
