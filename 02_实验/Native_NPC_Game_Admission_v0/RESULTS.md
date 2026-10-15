@@ -1,5 +1,7 @@
 # Mature Native NPC Game Admission v0 — RESULTS
 
+> 历史范围提示（2026-10-16）：下文保留 2026-10-15 三候选、原生 AI 不变的准入任务及未实跑事实，不扩大为所有研究路线的门槛。当前 [F0/F1](../../00_研究设计/CharacterDynamics_FormalProblem_v0.md) 允许角色 Planner 承担自驱动、在规划层使用高层语义；本报告的原生 producer/persistence/consumer 要求适用于其“原游戏持久状态影响行为”主张，不要求 Planner 内的合法经历与解释都成为引擎心理变量。新讨论未解除安装/接口缺口，也未授权改游戏 AI 或重跑本包。
+
 日期：2026-10-15。P0 状态：**DOCUMENTARY_ADMISSION / READY_FOR_INDEPENDENT_REVIEW**。P0 只完成文献/源码层准入审查；**当前环境没有获准入 P1 的游戏（NO_GO_THIS_ENVIRONMENT）**。P1 `NOT_RUN`；P2 未定义；P3–P5 未启动。没有新增游戏 AI、模拟器或适配器，没有下载安装、启动游戏或新模型调用。
 
 起始代码检查点：feature branch `codex/open-adventure-online-20261014`，HEAD `f6be3d0a5e08e61148c48959e780cdd66a4aee07`；不是本报告提交后的 HEAD。网络恢复后 fresh-fetch 已确认远端 `webgpt-sync` 仍为该提交。应用目录、默认 Steam 安装库及项目外部游戏目录未发现三候选安装；这不证明其他设备或路径不存在安装，也不推断 Sims 的账号许可。公开报告不包含 Steam 原配置、账号信息或其他游戏清单。工作树原有更改未触碰。该报告不改写既有实验结果。

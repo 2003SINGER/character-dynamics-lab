@@ -1,6 +1,6 @@
 # Character Dynamics Lab｜角色动力学实验室
 
-> 长期目标：把作者不同抽象程度、不同控制粒度的创作意图，落实为持续游戏世界中合理、可执行的未来，并随真实反馈调整。LLM × 成熟规划是候选主线；既有游戏能力是执行底座，不是创作上限，剧情组合、语义解释与新内容提案须分别说明如何被接纳。详细问题定义由 [F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md) 唯一维护；旧 C++ 的 OHXSP 人物模型不是所有游戏的必需 schema。
+> 长期目标：把作者不同抽象程度、不同控制粒度的创作意图，落实为持续游戏世界中合理、可执行的未来，并随真实反馈调整。角色自己的 Planner 可以承担自驱动；规划层可使用高层语义，不要求每个概念都成为游戏变量。角色与作者规划的目标、信息和控制来源须区分，实际动作仍由游戏结算。详细定义由 [F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md) 唯一维护；旧 C++ 的 OHXSP 不是通用必需 schema，LLM × 成熟规划是待验证路线。
 
 本机唯一 canonical checkout 位于 `/Users/2003singer/Workspace/Research/character-dynamics-lab`；`webgpt-sync` 是项目 review branch owner。工作分支随任务变化，分支归属以 Git 当前状态为准，不在项目总览中固定本地任务分支。实验条件、run ID 与本地原始产物按路径分别保留；迁移映射和 Git 历史说明见[本地工作区布局](02_实验/Local_Workspace_Layout.md)。
 
@@ -26,7 +26,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 ## 从这里进入
 
-2026-10-15 当前检查点为[成熟原生 NPC 游戏准入](02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)：只核查 RimWorld、The Sims 4、CDDA；未准入或运行新游戏的 Director-OFF 基线。此前[部分作者约束与事件规划](02_实验/Author_Obligation_Planning_v0/RESULTS.md)作为已交付的有限开发证据保留，不重启桥任务；各包事实与缺口由各自 RESULTS 维护。
+2026-10-16 当前工作是文档澄清，不是新系统实施：[F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md)定义角色 Planner 与语义分工；[载体候选](00_研究设计/未决问题与机制候选.md#2026-10-16角色规划与载体选择的待决问题)只登记低成本 RPG／文字开放世界等待核线索，不默认建房/建村、不安装游戏。[上轮三候选准入](02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)仍无 P1 实跑；[作者义务规划](02_实验/Author_Obligation_Planning_v0/RESULTS.md)保留原开发结果。下一动作只见 [TODO](00_研究设计/TODO.md)。
 
 2026-10-09 新授权已撤销“仅外围维护”：按用户目标 TXT 开发的 [NPC System Integration v0](tools/npc_system_v0/README.md) 已贯通有限作者点/线、受限世界规划、独立演员状态/承诺、GOAP/HTN 与真实执行/监测。它是 E1 之上的 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 应用样机，不改冻结 C++ Kernel，也不是完整系统、LLM 高层规划或研究收益。具体能力与限制见[唯一结果](02_实验/NPC_System_Integration_v0/RESULTS.md)；旧语义草案中的未开工叙述按其记录日期理解，当前授权看 [TODO](00_研究设计/TODO.md)。
 

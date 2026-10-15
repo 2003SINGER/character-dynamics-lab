@@ -1,6 +1,6 @@
 # TODO｜active research queue
 
-更新时间：2026-10-15。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
+更新时间：2026-10-16。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
 当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。**Planner Adapter Integration v1 已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`，本轮停止代码扩张**；唯一任务/结果 owner 是[RESULTS](../02_实验/Planner_Adapter_Integration_v1/RESULTS.md)。System Baseline v0 仍为历史 `PARTIAL`（M1 `READY_FOR_INDEPENDENT_REVIEW`、M2 `INVALID`），其阶段已停止且不进入 P6；状态和旧证据只见[原 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。P0 Baseline Gate、P0-Integration 与 P0 Author Binding 的既有状态/结果各由自己的 RESULTS 维护；暂停它们的局部扩张，不覆盖历史结果或 P5 shared-supply 失败。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准。
 
@@ -12,10 +12,11 @@
 
 ## SYSTEM / APPLICATION TRACK
 
-本轮授权当前扩展为：完成外部成熟原生 NPC 游戏的 P0 documentary admission；候选限 RimWorld（优先调查）、The Sims 4、CDDA，依据官方材料与固定源码明确支持点、缺口和本机条件。P0 结论为 `DOCUMENTARY_ADMISSION / READY_FOR_INDEPENDENT_REVIEW`；当前无满足安装、授权、固定版本和合法原生读取条件的 P1 游戏（`NO_GO_THIS_ENVIRONMENT`），P1 `NOT_RUN`，P2 未定义，P3–P5 不启动。不得把旧 Evennia 驿站当成熟游戏替代，不改游戏 AI/规则，不下载或启动游戏。详细比较及最小未来入口见[唯一 RESULTS](../02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)。
+本轮授权是**沉淀讨论并维护现有文档**：修正角色 Planner、自驱动与语义落点的定义，调整载体选择标准和前台路由。原生游戏准入的既有结论按其历史范围保留，不把“原游戏必须预先实现全部社会记忆”当长期前提。本轮不编写 Planner/游戏适配器，不安装或启动游戏，不核查新候选的技术事实、不调用实验模型，不进入 P1–P5；原始对话私有归档。定义由 F0/F1、应用视图由 System Vision、候选由未决问题分别维护，不新增总纲。
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| DOCS-PLANNER-SEMANTICS | **文档修订 / READY_FOR_INDEPENDENT_REVIEW；非新实现** | 本轮维护与核验后停止；后续如选载体，先有界核一个候选的角色决策接入、执行事实与反复实验成本，另行授权，不自动施工 | [F0/F1](CharacterDynamics_FormalProblem_v0.md)定义角色/作者规划与语义边界；[System Vision](Character_Dynamics_System_Vision_v0.md)说明应用路线；[待核候选](未决问题与机制候选.md#2026-10-16角色规划与载体选择的待决问题)保留问题及原生/新增分账；历史运行证据不改、不自行 CLOSED |
 | NATIVE-NPC-GAME-ADMISSION-V0 | **P0 DOCUMENTARY_ADMISSION / READY_FOR_INDEPENDENT_REVIEW；无 P1 游戏准入** | 独立审阅三候选来源、状态链及 P1 stop criteria；本轮停止，不启动 P1/P2/P3+，不改历史成果 | [唯一 RESULTS](../02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)；RimWorld 是优先调查候选而非选定版本；CDDA 是 LIMITED_SOURCE_FIT/暂不选择，不作全局 NO-GO；本机未确认 Sims/DLC |
 | AUTHOR-OBLIGATION-PLANNING-V0 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED；限定证据已公开** | 已推 webgpt-sync 并核验对应 CI，失败与局限见唯一 owner；本轮停止，供独立审阅，不自动新增游戏、正式 B1/B2 或通用 Director | [唯一 RESULTS](../02_实验/Author_Obligation_Planning_v0/RESULTS.md)；[固定协议](../02_实验/Author_Obligation_Planning_v0/PROTOCOL.md)；[代码入口](../tools/author_obligation_planning_v0/README.md) |
 
