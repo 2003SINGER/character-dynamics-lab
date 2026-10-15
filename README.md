@@ -26,7 +26,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 ## 从这里进入
 
-2026-10-15 最新工作包为[部分作者约束与事件规划](02_实验/Author_Obligation_Planning_v0/RESULTS.md)：作者过程进入有限搜索、原版执行与在线编辑；其运行、预算失败和修复证据仅由该 RESULTS 维护。旧 Admission 与桥诊断保持原结论，不是完整 NPC / Director 或正式 B1/B2。
+2026-10-15 当前检查点为[成熟原生 NPC 游戏准入](02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)：只核查 RimWorld、The Sims 4、CDDA；未准入或运行新游戏的 Director-OFF 基线。此前[部分作者约束与事件规划](02_实验/Author_Obligation_Planning_v0/RESULTS.md)作为已交付的有限开发证据保留，不重启桥任务；各包事实与缺口由各自 RESULTS 维护。
 
 2026-10-09 新授权已撤销“仅外围维护”：按用户目标 TXT 开发的 [NPC System Integration v0](tools/npc_system_v0/README.md) 已贯通有限作者点/线、受限世界规划、独立演员状态/承诺、GOAP/HTN 与真实执行/监测。它是 E1 之上的 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 应用样机，不改冻结 C++ Kernel，也不是完整系统、LLM 高层规划或研究收益。具体能力与限制见[唯一结果](02_实验/NPC_System_Integration_v0/RESULTS.md)；旧语义草案中的未开工叙述按其记录日期理解，当前授权看 [TODO](00_研究设计/TODO.md)。
 

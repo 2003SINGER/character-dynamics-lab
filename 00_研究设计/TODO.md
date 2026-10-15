@@ -12,10 +12,11 @@
 
 ## SYSTEM / APPLICATION TRACK
 
-本轮授权来自 2026-10-15 新审阅及用户在对话中的明确扩展：不再围绕西岸单例，检验未指定自由度、独立历史义务与在线修改。只做 Open Adventure 既有子域，不扩大平台。
+本轮授权当前扩展为：完成外部成熟原生 NPC 游戏的 P0 documentary admission；候选限 RimWorld（优先调查）、The Sims 4、CDDA，依据官方材料与固定源码明确支持点、缺口和本机条件。P0 结论为 `DOCUMENTARY_ADMISSION / READY_FOR_INDEPENDENT_REVIEW`；当前无满足安装、授权、固定版本和合法原生读取条件的 P1 游戏（`NO_GO_THIS_ENVIRONMENT`），P1 `NOT_RUN`，P2 未定义，P3–P5 不启动。不得把旧 Evennia 驿站当成熟游戏替代，不改游戏 AI/规则，不下载或启动游戏。详细比较及最小未来入口见[唯一 RESULTS](../02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)。
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| NATIVE-NPC-GAME-ADMISSION-V0 | **P0 DOCUMENTARY_ADMISSION / READY_FOR_INDEPENDENT_REVIEW；无 P1 游戏准入** | 独立审阅三候选来源、状态链及 P1 stop criteria；本轮停止，不启动 P1/P2/P3+，不改历史成果 | [唯一 RESULTS](../02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)；RimWorld 是优先调查候选而非选定版本；CDDA 是 LIMITED_SOURCE_FIT/暂不选择，不作全局 NO-GO；本机未确认 Sims/DLC |
 | AUTHOR-OBLIGATION-PLANNING-V0 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED；限定证据已公开** | 已推 webgpt-sync 并核验对应 CI，失败与局限见唯一 owner；本轮停止，供独立审阅，不自动新增游戏、正式 B1/B2 或通用 Director | [唯一 RESULTS](../02_实验/Author_Obligation_Planning_v0/RESULTS.md)；[固定协议](../02_实验/Author_Obligation_Planning_v0/PROTOCOL.md)；[代码入口](../tools/author_obligation_planning_v0/README.md) |
 
 2026-10-14 Open Adventure B0 已按[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)完成并停止，本检查点为 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`。D clean、最终反馈修复与 E 冻结目标通过预设判据；G 按协议返回 `UNSUPPORTED_SEMANTICS`。首次反馈负控的 `MODEL_MISMATCH` 原始失败保留，修正运行不覆盖它。运行细节、成本与测试数字只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。三方法比较整体仍为 `PARTIAL`；B1/B2 `DEFERRED_BY_USER`，不自动调用模型或启动新游戏。P1 保留独立有限检查点，不升级为全系统 CLOSED。

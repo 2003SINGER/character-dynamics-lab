@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-最新工作包：[Author Obligation Planning v0](Author_Obligation_Planning_v0/RESULTS.md)。32 份作者任务的实际绑定/搜索、预选原版运行、在线编辑和 H4 失败/修复记录仅由该 RESULTS 维护。旧结果不升级、不覆盖。
+当前工作包：[成熟原生 NPC 游戏准入](Native_NPC_Game_Admission_v0/RESULTS.md)。本包是三候选的来源与环境准入审查，不是新游戏实跑；P1 尚未准入。此前 [Author Obligation Planning v0](Author_Obligation_Planning_v0/RESULTS.md)的绑定/搜索、原版运行、在线编辑及失败/修复证据保留，旧结果不升级、不覆盖。
 
 同日后续 [Open Adventure Online P1 RESULTS](OpenAdventure_Online_P1_v0/RESULTS.md) 已交付原版逐次交互、真实反馈分支与精确重放，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW，作为独立有限接口检查点保留；不代表全系统 CLOSED。**Open Adventure Planning B0 传统准入与实验**已交付 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止；协议见[PROTOCOL](OpenAdventure_Planning_B0_v0/PROTOCOL.md)，运行、失败与成本只见[唯一 RESULTS](OpenAdventure_Planning_B0_v0/RESULTS.md)。整体三方法比较为 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏；保留下面的整局 Native v0 原证据。
 
