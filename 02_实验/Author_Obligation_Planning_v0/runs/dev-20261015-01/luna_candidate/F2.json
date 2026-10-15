@@ -1,0 +1,67 @@
+{
+  "dynamic_scope": null,
+  "id": "F2",
+  "input_origin": "luna_candidate",
+  "raw_candidate": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ],
+        [
+          "bridge"
+        ]
+      ]
+    },
+    "id": "F2",
+    "obligations": [
+      {
+        "event": "create_bridge",
+        "type": "never"
+      }
+    ],
+    "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge without ever creating the bridge; do not die at any point.",
+    "version": "1"
+  },
+  "result": {
+    "duplicate_states": 104606,
+    "elapsed_seconds": 0.4931002500234172,
+    "expansions": 10000,
+    "final_progress": {
+      "complete": true,
+      "death_seen": false,
+      "event_counts": [],
+      "eventually_satisfied": [],
+      "history_events_used": 0,
+      "history_source_ids": [],
+      "ordered_cursors": [],
+      "violations": []
+    },
+    "frontier_peak": 5304,
+    "generated": 119947,
+    "history_events_used": 0,
+    "history_source_ids": [],
+    "plan": [],
+    "reason": "expansion_limit",
+    "status": "BUDGET",
+    "task_id": "F2",
+    "task_version": "1"
+  },
+  "semantic_reference_match": true,
+  "status": "BUDGET"
+}

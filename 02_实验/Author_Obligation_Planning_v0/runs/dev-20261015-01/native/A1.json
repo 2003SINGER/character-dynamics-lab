@@ -1,0 +1,75 @@
+{
+  "author_verdict": "NOT_RUN_IN_CONTROLLER",
+  "controller_status": "PLANNER_GOAL_REACHED_UNVERIFIED",
+  "decision_trace": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-A1-clean-e04f72ac08-20261015T010315Z-02fda8/author_obligation_trace.jsonl",
+  "edit_log": [],
+  "failure": null,
+  "final_audit_status": "COMPLETE",
+  "final_author_history": [],
+  "final_task": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ],
+        [
+          "unbridged"
+        ]
+      ]
+    },
+    "id": "A1",
+    "obligations": [],
+    "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and unbridged with no bridge history requirement; do not die at any point.",
+    "version": "1"
+  },
+  "h4_intervention": null,
+  "independent_verifier": {
+    "bridge": false,
+    "events": [],
+    "evidence_owner": "raw native receipts only; no planner/progress import",
+    "fresh_final_audit": true,
+    "inventory": [
+      "keys",
+      "lamp"
+    ],
+    "lamp_on": true,
+    "last_room": "EASTBANK",
+    "ledger_complete": true,
+    "obligations": {
+      "always:no_death": "PASS",
+      "final:required:at/player/EASTBANK": "PASS",
+      "final:required:carrying/keys": "PASS",
+      "final:required:carrying/lamp": "PASS",
+      "final:required:lamp_on": "PASS",
+      "final:required:unbridged": "PASS"
+    },
+    "room_witness_sequence": 14,
+    "sealed": true,
+    "status": "PASS",
+    "unknown_feedback": []
+  },
+  "model_calls": "NOT_RUN",
+  "native_ledger": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-A1-clean-e04f72ac08-20261015T010315Z-02fda8/events.jsonl",
+  "native_task_inputs_including_h4_and_refresh": 13,
+  "run_dir": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-A1-clean-e04f72ac08-20261015T010315Z-02fda8",
+  "search_calls": 12,
+  "search_seconds": 0.2494757060194388,
+  "search_status": "FOUND",
+  "task_id": "A1",
+  "verification_status": "NOT_RUN_IN_CONTROLLER"
+}

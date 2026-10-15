@@ -1,0 +1,597 @@
+{
+  "dynamic_scope": null,
+  "id": "B2",
+  "input_origin": "manual_reference",
+  "raw_candidate": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "bridge"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ]
+      ]
+    },
+    "id": "B2",
+    "obligations": [
+      {
+        "event": "create_bridge",
+        "type": "eventually"
+      }
+    ],
+    "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge and actually create the bridge at least once; do not die at any point.",
+    "version": "1"
+  },
+  "result": {
+    "duplicate_states": 26152,
+    "elapsed_seconds": 0.12021575000835583,
+    "expansions": 2460,
+    "final_progress": {
+      "complete": true,
+      "death_seen": false,
+      "event_counts": [],
+      "eventually_satisfied": [
+        true
+      ],
+      "history_events_used": 0,
+      "history_source_ids": [],
+      "ordered_cursors": [],
+      "violations": []
+    },
+    "frontier_peak": 1490,
+    "generated": 30101,
+    "history_events_used": 0,
+    "history_source_ids": [],
+    "plan": [
+      {
+        "add_effects": [
+          [
+            "at",
+            "player",
+            "BUILDING"
+          ]
+        ],
+        "args": [
+          "START",
+          "enter",
+          "BUILDING"
+        ],
+        "command": "enter",
+        "delete_effects": [
+          [
+            "at",
+            "player",
+            "START"
+          ]
+        ],
+        "name": "move",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "START"
+          ]
+        ],
+        "source": "upstream/adventure.yaml:382-398,414-425,461-659,768-784"
+      },
+      {
+        "add_effects": [
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "at",
+            "keys",
+            "CARRIED"
+          ]
+        ],
+        "args": [
+          "BUILDING",
+          "keys"
+        ],
+        "command": "take keys",
+        "delete_effects": [
+          [
+            "at",
+            "keys",
+            "BUILDING"
+          ]
+        ],
+        "name": "take",
+        "negative_preconditions": [
+          [
+            "carrying",
+            "keys"
+          ]
+        ],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "BUILDING"
+          ],
+          [
+            "at",
+            "keys",
+            "BUILDING"
+          ]
+        ],
+        "source": "upstream/actions.c:303-425,483,623-715; upstream/adventure.yaml:3277-3320"
+      },
+      {
+        "add_effects": [
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "at",
+            "lamp",
+            "CARRIED"
+          ]
+        ],
+        "args": [
+          "BUILDING",
+          "lamp"
+        ],
+        "command": "take lamp",
+        "delete_effects": [
+          [
+            "at",
+            "lamp",
+            "BUILDING"
+          ]
+        ],
+        "name": "take",
+        "negative_preconditions": [
+          [
+            "carrying",
+            "lamp"
+          ]
+        ],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "BUILDING"
+          ],
+          [
+            "at",
+            "lamp",
+            "BUILDING"
+          ]
+        ],
+        "source": "upstream/actions.c:303-425,483,623-715; upstream/adventure.yaml:3277-3320"
+      },
+      {
+        "add_effects": [
+          [
+            "at",
+            "player",
+            "START"
+          ]
+        ],
+        "args": [
+          "BUILDING",
+          "out",
+          "START"
+        ],
+        "command": "out",
+        "delete_effects": [
+          [
+            "at",
+            "player",
+            "BUILDING"
+          ]
+        ],
+        "name": "move",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "BUILDING"
+          ]
+        ],
+        "source": "upstream/adventure.yaml:382-398,414-425,461-659,768-784"
+      },
+      {
+        "add_effects": [
+          [
+            "at",
+            "player",
+            "GRATE"
+          ]
+        ],
+        "args": [
+          "START",
+          "depre",
+          "GRATE"
+        ],
+        "command": "depre",
+        "delete_effects": [
+          [
+            "at",
+            "player",
+            "START"
+          ]
+        ],
+        "name": "move",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "START"
+          ]
+        ],
+        "source": "upstream/adventure.yaml:382-398,414-425,461-659,768-784"
+      },
+      {
+        "add_effects": [
+          [
+            "lamp_on"
+          ]
+        ],
+        "args": [
+          "GRATE",
+          "carrying",
+          "lamp"
+        ],
+        "command": "on lamp",
+        "delete_effects": [
+          [
+            "lamp_off"
+          ]
+        ],
+        "name": "lamp_on",
+        "negative_preconditions": [
+          [
+            "lamp_on"
+          ]
+        ],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "GRATE"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ]
+        ],
+        "source": "upstream/actions.c:655-695,919-956; upstream/adventure.yaml:3285-3296"
+      },
+      {
+        "add_effects": [
+          [
+            "grate_open"
+          ]
+        ],
+        "args": [
+          "GRATE",
+          "carrying",
+          "keys"
+        ],
+        "command": "unlock grate",
+        "delete_effects": [
+          [
+            "grate_closed"
+          ]
+        ],
+        "name": "unlock",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "GRATE"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "grate_closed"
+          ]
+        ],
+        "source": "upstream/actions.c:998-1049; upstream/adventure.yaml:488-524,3297-3309"
+      },
+      {
+        "add_effects": [
+          [
+            "at",
+            "player",
+            "BELOWGRATE"
+          ]
+        ],
+        "args": [
+          "GRATE",
+          "enter",
+          "BELOWGRATE"
+        ],
+        "command": "enter",
+        "delete_effects": [
+          [
+            "at",
+            "player",
+            "GRATE"
+          ]
+        ],
+        "name": "move",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "GRATE"
+          ],
+          [
+            "grate_open"
+          ]
+        ],
+        "source": "upstream/adventure.yaml:382-398,414-425,461-659,768-784"
+      },
+      {
+        "add_effects": [
+          [
+            "at",
+            "player",
+            "DEBRIS"
+          ]
+        ],
+        "args": [
+          "BELOWGRATE",
+          "debri",
+          "DEBRIS"
+        ],
+        "command": "debri",
+        "delete_effects": [
+          [
+            "at",
+            "player",
+            "BELOWGRATE"
+          ]
+        ],
+        "name": "move",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "BELOWGRATE"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ]
+        ],
+        "source": "upstream/adventure.yaml:382-398,414-425,461-659,768-784"
+      },
+      {
+        "add_effects": [
+          [
+            "carrying",
+            "rod"
+          ],
+          [
+            "at",
+            "rod",
+            "CARRIED"
+          ]
+        ],
+        "args": [
+          "DEBRIS",
+          "rod"
+        ],
+        "command": "take rod",
+        "delete_effects": [
+          [
+            "at",
+            "rod",
+            "DEBRIS"
+          ]
+        ],
+        "name": "take",
+        "negative_preconditions": [
+          [
+            "carrying",
+            "rod"
+          ]
+        ],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "DEBRIS"
+          ],
+          [
+            "at",
+            "rod",
+            "DEBRIS"
+          ]
+        ],
+        "source": "upstream/actions.c:303-425,483,623-715; upstream/adventure.yaml:3277-3320"
+      },
+      {
+        "add_effects": [
+          [
+            "at",
+            "player",
+            "PITTOP"
+          ]
+        ],
+        "args": [
+          "DEBRIS",
+          "pit",
+          "PITTOP"
+        ],
+        "command": "pit",
+        "delete_effects": [
+          [
+            "at",
+            "player",
+            "DEBRIS"
+          ]
+        ],
+        "name": "move",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "DEBRIS"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ]
+        ],
+        "source": "upstream/adventure.yaml:382-398,414-425,461-659,768-784"
+      },
+      {
+        "add_effects": [
+          [
+            "at",
+            "player",
+            "MISTHALL"
+          ]
+        ],
+        "args": [
+          "PITTOP",
+          "d",
+          "MISTHALL"
+        ],
+        "command": "d",
+        "delete_effects": [
+          [
+            "at",
+            "player",
+            "PITTOP"
+          ]
+        ],
+        "name": "move",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "PITTOP"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ]
+        ],
+        "source": "upstream/adventure.yaml:382-398,414-425,461-659,768-784"
+      },
+      {
+        "add_effects": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ]
+        ],
+        "args": [
+          "MISTHALL",
+          "forwa",
+          "EASTBANK"
+        ],
+        "command": "forwa",
+        "delete_effects": [
+          [
+            "at",
+            "player",
+            "MISTHALL"
+          ]
+        ],
+        "name": "move",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "MISTHALL"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ]
+        ],
+        "source": "upstream/adventure.yaml:382-398,414-425,461-659,768-784"
+      },
+      {
+        "add_effects": [
+          [
+            "bridge"
+          ]
+        ],
+        "args": [
+          "EASTBANK",
+          "unbridged"
+        ],
+        "command": "wave rod",
+        "delete_effects": [
+          [
+            "unbridged"
+          ]
+        ],
+        "name": "wave_rod",
+        "negative_preconditions": [],
+        "preconditions": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "rod"
+          ],
+          [
+            "unbridged"
+          ]
+        ],
+        "source": "upstream/actions.c:1360-1400; upstream/adventure.yaml:641-659,768-784,3389-3402"
+      }
+    ],
+    "reason": null,
+    "status": "FOUND",
+    "task_id": "B2",
+    "task_version": "1"
+  },
+  "semantic_reference_match": true,
+  "status": "FOUND"
+}

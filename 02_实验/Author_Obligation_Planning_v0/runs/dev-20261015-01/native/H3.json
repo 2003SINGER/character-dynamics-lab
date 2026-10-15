@@ -1,0 +1,89 @@
+{
+  "author_verdict": "NOT_RUN_IN_CONTROLLER",
+  "controller_status": "CONFLICT_PROVED_IN_FINITE_MODEL",
+  "decision_trace": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-H3-clean-c22f9de3ff-20261015T010339Z-c49728/author_obligation_trace.jsonl",
+  "edit_log": [
+    {
+      "from_version": "1",
+      "sequence": 15,
+      "to_version": "2",
+      "trigger": "immediately_before_build"
+    }
+  ],
+  "failure": "finite-model static conflict certificate; native monitor verdict remains independent",
+  "final_audit_status": "COMPLETE",
+  "final_author_history": [],
+  "final_task": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "bridge"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ]
+      ]
+    },
+    "id": "H3",
+    "obligations": [
+      {
+        "event": "create_bridge",
+        "type": "never"
+      }
+    ],
+    "text": "H3 revised before build: never create a bridge over the whole interval; do not die at any point.",
+    "version": "2"
+  },
+  "h4_intervention": null,
+  "independent_verifier": {
+    "bridge": false,
+    "events": [],
+    "evidence_owner": "raw native receipts only; no planner/progress import",
+    "fresh_final_audit": true,
+    "inventory": [
+      "keys",
+      "lamp",
+      "rod"
+    ],
+    "lamp_on": true,
+    "last_room": "EASTBANK",
+    "ledger_complete": true,
+    "obligations": {
+      "always:no_death": "PASS",
+      "final:required:at/player/EASTBANK": "PASS",
+      "final:required:bridge": "FAIL",
+      "final:required:carrying/keys": "PASS",
+      "final:required:carrying/lamp": "PASS",
+      "final:required:lamp_on": "PASS",
+      "history:0": "PASS"
+    },
+    "room_witness_sequence": 16,
+    "sealed": true,
+    "status": "FAIL",
+    "unknown_feedback": []
+  },
+  "model_calls": "NOT_RUN",
+  "native_ledger": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-H3-clean-c22f9de3ff-20261015T010339Z-c49728/events.jsonl",
+  "native_task_inputs_including_h4_and_refresh": 15,
+  "run_dir": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-H3-clean-c22f9de3ff-20261015T010339Z-c49728",
+  "search_calls": 13,
+  "search_seconds": 1.0928698319476098,
+  "search_status": "CONFLICT_PROVED_IN_FINITE_MODEL",
+  "task_id": "H3",
+  "verification_status": "NOT_RUN_IN_CONTROLLER"
+}

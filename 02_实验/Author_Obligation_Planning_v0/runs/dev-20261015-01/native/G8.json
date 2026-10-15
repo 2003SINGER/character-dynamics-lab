@@ -1,0 +1,94 @@
+{
+  "author_verdict": "NOT_RUN_IN_CONTROLLER",
+  "controller_status": "PLANNER_GOAL_REACHED_UNVERIFIED",
+  "decision_trace": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-G8-clean-4ea662dd42-20261015T010329Z-77c98e/author_obligation_trace.jsonl",
+  "edit_log": [],
+  "failure": null,
+  "final_audit_status": "COMPLETE",
+  "final_author_history": [
+    {
+      "name": "create_bridge",
+      "sequence": 16,
+      "source_id": "native-step-16-sha256-f1ed3e4caaa1e6744291e3f9923a07fa0dda5ba8a10ffb18a393dea94efa1e99"
+    },
+    {
+      "name": "arrive_west",
+      "sequence": 17,
+      "source_id": "native-step-17-sha256-6ae490ed6ece8749fc8f6d524f7a53f26b485d2954734ebea758212e7581dc70"
+    }
+  ],
+  "final_task": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [
+        [
+          "carrying",
+          "rod"
+        ]
+      ],
+      "required": [
+        [
+          "at",
+          "player",
+          "WESTBANK"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ]
+      ]
+    },
+    "id": "G8",
+    "obligations": [],
+    "text": "Finish west not carrying the rod, carrying the lit lamp; keys and bridge unrestricted; do not die at any point.",
+    "version": "1"
+  },
+  "h4_intervention": null,
+  "independent_verifier": {
+    "bridge": true,
+    "events": [
+      {
+        "evidence": "native creation",
+        "name": "create_bridge",
+        "sequence": 16
+      },
+      {
+        "evidence": "native room",
+        "name": "arrive_west",
+        "sequence": 17
+      }
+    ],
+    "evidence_owner": "raw native receipts only; no planner/progress import",
+    "fresh_final_audit": true,
+    "inventory": [
+      "keys",
+      "lamp"
+    ],
+    "lamp_on": true,
+    "last_room": "WESTBANK",
+    "ledger_complete": true,
+    "obligations": {
+      "always:no_death": "PASS",
+      "final:forbidden:carrying/rod": "PASS",
+      "final:required:at/player/WESTBANK": "PASS",
+      "final:required:carrying/lamp": "PASS",
+      "final:required:lamp_on": "PASS"
+    },
+    "room_witness_sequence": 19,
+    "sealed": true,
+    "status": "PASS",
+    "unknown_feedback": []
+  },
+  "model_calls": "NOT_RUN",
+  "native_ledger": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-G8-clean-4ea662dd42-20261015T010329Z-77c98e/events.jsonl",
+  "native_task_inputs_including_h4_and_refresh": 18,
+  "run_dir": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-G8-clean-4ea662dd42-20261015T010329Z-77c98e",
+  "search_calls": 17,
+  "search_seconds": 3.3571127878967673,
+  "search_status": "FOUND",
+  "task_id": "G8",
+  "verification_status": "NOT_RUN_IN_CONTROLLER"
+}

@@ -26,6 +26,8 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 ## 从这里进入
 
+2026-10-15 最新工作包为[部分作者约束与事件规划](02_实验/Author_Obligation_Planning_v0/RESULTS.md)：作者过程进入有限搜索、原版执行与在线编辑；其运行、预算失败和修复证据仅由该 RESULTS 维护。旧 Admission 与桥诊断保持原结论，不是完整 NPC / Director 或正式 B1/B2。
+
 2026-10-09 新授权已撤销“仅外围维护”：按用户目标 TXT 开发的 [NPC System Integration v0](tools/npc_system_v0/README.md) 已贯通有限作者点/线、受限世界规划、独立演员状态/承诺、GOAP/HTN 与真实执行/监测。它是 E1 之上的 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 应用样机，不改冻结 C++ Kernel，也不是完整系统、LLM 高层规划或研究收益。具体能力与限制见[唯一结果](02_实验/NPC_System_Integration_v0/RESULTS.md)；旧语义草案中的未开工叙述按其记录日期理解，当前授权看 [TODO](00_研究设计/TODO.md)。
 
 先看[五分钟现状](00_研究设计/项目现状速览_通俗版.md)，再查[已有结果与复用边界](00_研究设计/研究重建审计_2026-10-06.md#现有结果的成熟度与复用账本截至-2026-10-08)。研究问题与执行语义读[F0/F1草案](00_研究设计/CharacterDynamics_FormalProblem_v0.md)，原算法读[算法积木](01_文献/算法积木/README.md)；不要把候选设计、工程通过和实验结论混成一种进度。

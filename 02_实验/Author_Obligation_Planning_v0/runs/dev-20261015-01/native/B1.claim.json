@@ -1,0 +1,39 @@
+{
+  "attempt": 1,
+  "input": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ],
+        [
+          "unbridged"
+        ]
+      ]
+    },
+    "id": "B1",
+    "obligations": [
+      {
+        "event": "create_bridge",
+        "type": "eventually"
+      }
+    ],
+    "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and unbridged and actually create the bridge at least once; do not die at any point.",
+    "version": "1"
+  }
+}

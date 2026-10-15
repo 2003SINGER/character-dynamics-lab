@@ -1,0 +1,39 @@
+{
+  "attempt": 1,
+  "input": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ],
+        [
+          "bridge"
+        ]
+      ]
+    },
+    "id": "H4",
+    "obligations": [
+      {
+        "event": "create_bridge",
+        "type": "eventually"
+      }
+    ],
+    "text": "Finish EASTBANK carrying keys and the lit lamp with the bridge present; actually create the bridge at least once; preserve this requirement through the true-execution rejection and feedback negative control; do not die at any point.",
+    "version": "1"
+  }
+}

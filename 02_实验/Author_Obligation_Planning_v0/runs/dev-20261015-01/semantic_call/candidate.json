@@ -1,0 +1,1062 @@
+{
+  "tasks": [
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "unbridged"
+          ]
+        ]
+      },
+      "id": "A1",
+      "obligations": [],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and unbridged with no bridge history requirement; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "bridge"
+          ]
+        ]
+      },
+      "id": "A2",
+      "obligations": [],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge with no bridge history requirement; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "A3",
+      "obligations": [],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on with no bridge history requirement; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "unbridged"
+          ]
+        ]
+      },
+      "id": "B1",
+      "obligations": [
+        {
+          "event": "create_bridge",
+          "type": "eventually"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and unbridged and actually create the bridge at least once; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "bridge"
+          ]
+        ]
+      },
+      "id": "B2",
+      "obligations": [
+        {
+          "event": "create_bridge",
+          "type": "eventually"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge and actually create the bridge at least once; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "B3",
+      "obligations": [
+        {
+          "event": "create_bridge",
+          "type": "eventually"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and actually create the bridge at least once; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "unbridged"
+          ]
+        ]
+      },
+      "id": "C1",
+      "obligations": [
+        {
+          "events": [
+            "arrive_west",
+            "return_east"
+          ],
+          "type": "in_order"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and unbridged after visiting WESTBANK and then returning to EASTBANK; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "bridge"
+          ]
+        ]
+      },
+      "id": "C2",
+      "obligations": [
+        {
+          "events": [
+            "arrive_west",
+            "return_east"
+          ],
+          "type": "in_order"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge after visiting WESTBANK and then returning to EASTBANK; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "C3",
+      "obligations": [
+        {
+          "events": [
+            "arrive_west",
+            "return_east"
+          ],
+          "type": "in_order"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on after visiting WESTBANK and then returning to EASTBANK; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "unbridged"
+          ]
+        ]
+      },
+      "id": "D1",
+      "obligations": [
+        {
+          "event": "arrive_west",
+          "type": "never"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and unbridged without ever visiting WESTBANK; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "bridge"
+          ]
+        ]
+      },
+      "id": "D2",
+      "obligations": [
+        {
+          "event": "arrive_west",
+          "type": "never"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge without ever visiting WESTBANK; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "D3",
+      "obligations": [
+        {
+          "event": "arrive_west",
+          "type": "never"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on without ever visiting WESTBANK; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "unbridged"
+          ]
+        ]
+      },
+      "id": "E1",
+      "obligations": [
+        {
+          "events": [
+            "create_bridge",
+            "destroy_bridge"
+          ],
+          "type": "in_order"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and unbridged after creating and then destroying the bridge in that order; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "bridge"
+          ]
+        ]
+      },
+      "id": "E2",
+      "obligations": [
+        {
+          "events": [
+            "create_bridge",
+            "destroy_bridge"
+          ],
+          "type": "in_order"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge after creating and then destroying the bridge in that order; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "E3",
+      "obligations": [
+        {
+          "events": [
+            "create_bridge",
+            "destroy_bridge"
+          ],
+          "type": "in_order"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on after creating and then destroying the bridge in that order; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "unbridged"
+          ]
+        ]
+      },
+      "id": "F1",
+      "obligations": [
+        {
+          "event": "create_bridge",
+          "type": "never"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and unbridged without ever creating the bridge; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "bridge"
+          ]
+        ]
+      },
+      "id": "F2",
+      "obligations": [
+        {
+          "event": "create_bridge",
+          "type": "never"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge without ever creating the bridge; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "F3",
+      "obligations": [
+        {
+          "event": "create_bridge",
+          "type": "never"
+        }
+      ],
+      "text": "Finish at EASTBANK carrying keys and lamp with the lamp on without ever creating the bridge; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "bridge"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "G1",
+      "obligations": [],
+      "text": "Finish east with a bridge, carrying the lamp, lamp on; keys unrestricted; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "unbridged"
+          ],
+          [
+            "carrying",
+            "keys"
+          ]
+        ]
+      },
+      "id": "G2",
+      "obligations": [],
+      "text": "Finish east unbridged carrying keys; lamp unrestricted; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [
+          [
+            "carrying",
+            "keys"
+          ]
+        ],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "bridge"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "G3",
+      "obligations": [],
+      "text": "Finish east with a bridge, not carrying keys, carrying the lit lamp; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "WESTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "G4",
+      "obligations": [],
+      "text": "Finish west carrying keys and the lit lamp; bridge unrestricted; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "WESTBANK"
+          ],
+          [
+            "unbridged"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "G5",
+      "obligations": [],
+      "text": "Finish west unbridged carrying keys and the lit lamp; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_off"
+          ]
+        ]
+      },
+      "id": "G6",
+      "obligations": [],
+      "text": "Finish east carrying keys and lamp with the lamp off; bridge unrestricted; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "unbridged"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "rod"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "G7",
+      "obligations": [],
+      "text": "Finish east unbridged carrying keys, rod, and the lit lamp; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [
+          [
+            "carrying",
+            "rod"
+          ]
+        ],
+        "required": [
+          [
+            "at",
+            "player",
+            "WESTBANK"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "G8",
+      "obligations": [],
+      "text": "Finish west not carrying the rod, carrying the lit lamp; keys and bridge unrestricted; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "G9",
+      "obligations": [
+        {
+          "events": [
+            "arrive_west",
+            "return_east"
+          ],
+          "type": "in_order"
+        }
+      ],
+      "text": "Finish east carrying the lit lamp after arriving west and returning east; keys and bridge unrestricted; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "bridge"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "G10",
+      "obligations": [
+        {
+          "event": "create_bridge",
+          "maximum": 1,
+          "type": "max_count"
+        }
+      ],
+      "text": "Finish east with a bridge and the lit lamp, keys unrestricted, creating at most one bridge; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "bridge"
+          ]
+        ]
+      },
+      "id": "H1",
+      "obligations": [],
+      "text": "Begin with A2; after a successful rod pickup, author revises the goal to A1; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ]
+        ]
+      },
+      "id": "H2",
+      "obligations": [],
+      "text": "Begin with A3; after first arriving east, author adds west then return-east history; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "bridge"
+          ]
+        ]
+      },
+      "id": "H3",
+      "obligations": [],
+      "text": "Begin with A2; immediately before building, author adds whole-interval never-create; do not die at any point.",
+      "version": "1"
+    },
+    {
+      "always_no_death": true,
+      "goal": {
+        "forbidden": [],
+        "required": [
+          [
+            "at",
+            "player",
+            "EASTBANK"
+          ],
+          [
+            "carrying",
+            "keys"
+          ],
+          [
+            "carrying",
+            "lamp"
+          ],
+          [
+            "lamp_on"
+          ],
+          [
+            "bridge"
+          ]
+        ]
+      },
+      "id": "H4",
+      "obligations": [
+        {
+          "event": "create_bridge",
+          "type": "eventually"
+        }
+      ],
+      "text": "Finish EASTBANK carrying keys and the lit lamp with the bridge present; actually create the bridge at least once; preserve this requirement through the true-execution rejection and feedback negative control; do not die at any point.",
+      "version": "1"
+    }
+  ]
+}

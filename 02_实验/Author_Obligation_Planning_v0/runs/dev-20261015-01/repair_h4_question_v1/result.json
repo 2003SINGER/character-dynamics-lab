@@ -1,0 +1,112 @@
+{
+  "author_verdict": "NOT_RUN_IN_CONTROLLER",
+  "controller_status": "PLANNER_GOAL_REACHED_UNVERIFIED",
+  "decision_trace": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/repair_h4_question_v1/native_runs/oa-author-obligation-H4-h4_feedback_delay-2197ac-20261015T010813Z-c0a219/author_obligation_trace.jsonl",
+  "edit_log": [],
+  "failure": null,
+  "final_audit_status": "COMPLETE",
+  "final_author_history": [
+    {
+      "name": "create_bridge",
+      "sequence": 30,
+      "source_id": "native-step-30-sha256-f1ed3e4caaa1e6744291e3f9923a07fa0dda5ba8a10ffb18a393dea94efa1e99"
+    }
+  ],
+  "final_task": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "bridge"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ]
+      ]
+    },
+    "id": "H4",
+    "obligations": [
+      {
+        "event": "create_bridge",
+        "type": "eventually"
+      }
+    ],
+    "text": "Finish EASTBANK carrying keys and the lit lamp with the bridge present; actually create the bridge at least once; preserve this requirement through the true-execution rejection and feedback negative control; do not die at any point.",
+    "version": "1"
+  },
+  "h4_intervention": {
+    "actual_failure_recorded": true,
+    "actual_rejection": true,
+    "history_not_delivered_before_unlock": true,
+    "injected_commands": [
+      "build",
+      "in",
+      "drop keys",
+      "out",
+      "depre"
+    ],
+    "inputs_charged": 9,
+    "kind": "controller_visible_feedback_delay_negative_control",
+    "location_basis": "frozen B0 native command sequence from GRATE",
+    "post_author_progress_sha256": "31d0d4ccdf0572b33d6547c917f13328062a060083c68088024dd40e3f97ccef",
+    "pre_author_progress_sha256": "31d0d4ccdf0572b33d6547c917f13328062a060083c68088024dd40e3f97ccef",
+    "unlock_complete": true,
+    "unlock_sequence": 14
+  },
+  "independent_verifier": {
+    "bridge": true,
+    "events": [
+      {
+        "evidence": "native creation",
+        "name": "create_bridge",
+        "sequence": 30
+      }
+    ],
+    "evidence_owner": "raw native receipts only; no planner/progress import",
+    "fresh_final_audit": true,
+    "inventory": [
+      "keys",
+      "lamp",
+      "rod"
+    ],
+    "lamp_on": true,
+    "last_room": "EASTBANK",
+    "ledger_complete": true,
+    "obligations": {
+      "always:no_death": "PASS",
+      "final:required:at/player/EASTBANK": "PASS",
+      "final:required:bridge": "PASS",
+      "final:required:carrying/keys": "PASS",
+      "final:required:carrying/lamp": "PASS",
+      "final:required:lamp_on": "PASS",
+      "history:0": "PASS"
+    },
+    "room_witness_sequence": 31,
+    "sealed": true,
+    "status": "PASS",
+    "unknown_feedback": []
+  },
+  "model_calls": "NOT_RUN",
+  "native_ledger": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/repair_h4_question_v1/native_runs/oa-author-obligation-H4-h4_feedback_delay-2197ac-20261015T010813Z-c0a219/events.jsonl",
+  "native_task_inputs_including_h4_and_refresh": 30,
+  "run_dir": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/repair_h4_question_v1/native_runs/oa-author-obligation-H4-h4_feedback_delay-2197ac-20261015T010813Z-c0a219",
+  "search_calls": 21,
+  "search_seconds": 1.8220360808772966,
+  "search_status": "FOUND",
+  "task_id": "H4",
+  "verification_status": "NOT_RUN_IN_CONTROLLER"
+}

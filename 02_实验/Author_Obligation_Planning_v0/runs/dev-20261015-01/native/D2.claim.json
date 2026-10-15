@@ -1,0 +1,39 @@
+{
+  "attempt": 1,
+  "input": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ],
+        [
+          "bridge"
+        ]
+      ]
+    },
+    "id": "D2",
+    "obligations": [
+      {
+        "event": "arrive_west",
+        "type": "never"
+      }
+    ],
+    "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge without ever visiting WESTBANK; do not die at any point.",
+    "version": "1"
+  }
+}

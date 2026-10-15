@@ -1,0 +1,120 @@
+{
+  "author_verdict": "NOT_RUN_IN_CONTROLLER",
+  "controller_status": "PLANNER_GOAL_REACHED_UNVERIFIED",
+  "decision_trace": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-H2-clean-ed5c5bca69-20261015T010337Z-ae654d/author_obligation_trace.jsonl",
+  "edit_log": [
+    {
+      "from_version": "1",
+      "sequence": 13,
+      "to_version": "2",
+      "trigger": "after_first_arrive_east"
+    }
+  ],
+  "failure": null,
+  "final_audit_status": "COMPLETE",
+  "final_author_history": [
+    {
+      "name": "create_bridge",
+      "sequence": 21,
+      "source_id": "native-step-21-sha256-f1ed3e4caaa1e6744291e3f9923a07fa0dda5ba8a10ffb18a393dea94efa1e99"
+    },
+    {
+      "name": "arrive_west",
+      "sequence": 22,
+      "source_id": "native-step-22-sha256-6ae490ed6ece8749fc8f6d524f7a53f26b485d2954734ebea758212e7581dc70"
+    },
+    {
+      "name": "return_east",
+      "sequence": 23,
+      "source_id": "native-step-23-sha256-b5033f351d2fe45314bd6db2b5b315efd3ec3a31752727aa7580c6ad8581ce3c"
+    }
+  ],
+  "final_task": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ]
+      ]
+    },
+    "id": "H2",
+    "obligations": [
+      {
+        "events": [
+          "arrive_west",
+          "return_east"
+        ],
+        "type": "in_order"
+      }
+    ],
+    "text": "H2 revised after first east arrival: visit WESTBANK then return to EASTBANK; do not die at any point.",
+    "version": "2"
+  },
+  "h4_intervention": null,
+  "independent_verifier": {
+    "bridge": true,
+    "events": [
+      {
+        "evidence": "native creation",
+        "name": "create_bridge",
+        "sequence": 21
+      },
+      {
+        "evidence": "native room",
+        "name": "arrive_west",
+        "sequence": 22
+      },
+      {
+        "evidence": "native room",
+        "name": "return_east",
+        "sequence": 23
+      }
+    ],
+    "evidence_owner": "raw native receipts only; no planner/progress import",
+    "fresh_final_audit": true,
+    "inventory": [
+      "keys",
+      "lamp",
+      "rod"
+    ],
+    "lamp_on": true,
+    "last_room": "EASTBANK",
+    "ledger_complete": true,
+    "obligations": {
+      "always:no_death": "PASS",
+      "final:required:at/player/EASTBANK": "PASS",
+      "final:required:carrying/keys": "PASS",
+      "final:required:carrying/lamp": "PASS",
+      "final:required:lamp_on": "PASS",
+      "history:0": "PASS"
+    },
+    "room_witness_sequence": 24,
+    "sealed": true,
+    "status": "PASS",
+    "unknown_feedback": []
+  },
+  "model_calls": "NOT_RUN",
+  "native_ledger": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-H2-clean-ed5c5bca69-20261015T010337Z-ae654d/events.jsonl",
+  "native_task_inputs_including_h4_and_refresh": 23,
+  "run_dir": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-H2-clean-ed5c5bca69-20261015T010337Z-ae654d",
+  "search_calls": 22,
+  "search_seconds": 1.8586190430214629,
+  "search_status": "FOUND",
+  "task_id": "H2",
+  "verification_status": "NOT_RUN_IN_CONTROLLER"
+}

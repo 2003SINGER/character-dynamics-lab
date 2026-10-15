@@ -1,0 +1,72 @@
+{
+  "dynamic_scope": null,
+  "id": "C1",
+  "input_origin": "luna_candidate",
+  "raw_candidate": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ],
+        [
+          "unbridged"
+        ]
+      ]
+    },
+    "id": "C1",
+    "obligations": [
+      {
+        "events": [
+          "arrive_west",
+          "return_east"
+        ],
+        "type": "in_order"
+      }
+    ],
+    "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and unbridged after visiting WESTBANK and then returning to EASTBANK; do not die at any point.",
+    "version": "1"
+  },
+  "result": {
+    "duplicate_states": 103826,
+    "elapsed_seconds": 0.48795275000156835,
+    "expansions": 10000,
+    "final_progress": {
+      "complete": false,
+      "death_seen": false,
+      "event_counts": [],
+      "eventually_satisfied": [],
+      "history_events_used": 0,
+      "history_source_ids": [],
+      "ordered_cursors": [
+        0
+      ],
+      "violations": []
+    },
+    "frontier_peak": 5461,
+    "generated": 119276,
+    "history_events_used": 0,
+    "history_source_ids": [],
+    "plan": [],
+    "reason": "expansion_limit",
+    "status": "BUDGET",
+    "task_id": "C1",
+    "task_version": "1"
+  },
+  "semantic_reference_match": true,
+  "status": "BUDGET"
+}

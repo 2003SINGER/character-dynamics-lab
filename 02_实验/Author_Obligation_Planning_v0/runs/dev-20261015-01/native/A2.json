@@ -1,0 +1,88 @@
+{
+  "author_verdict": "NOT_RUN_IN_CONTROLLER",
+  "controller_status": "PLANNER_GOAL_REACHED_UNVERIFIED",
+  "decision_trace": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-A2-clean-46a1e994d0-20261015T010315Z-32847d/author_obligation_trace.jsonl",
+  "edit_log": [],
+  "failure": null,
+  "final_audit_status": "COMPLETE",
+  "final_author_history": [
+    {
+      "name": "create_bridge",
+      "sequence": 16,
+      "source_id": "native-step-16-sha256-f1ed3e4caaa1e6744291e3f9923a07fa0dda5ba8a10ffb18a393dea94efa1e99"
+    }
+  ],
+  "final_task": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "bridge"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ]
+      ]
+    },
+    "id": "A2",
+    "obligations": [],
+    "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge with no bridge history requirement; do not die at any point.",
+    "version": "1"
+  },
+  "h4_intervention": null,
+  "independent_verifier": {
+    "bridge": true,
+    "events": [
+      {
+        "evidence": "native creation",
+        "name": "create_bridge",
+        "sequence": 16
+      }
+    ],
+    "evidence_owner": "raw native receipts only; no planner/progress import",
+    "fresh_final_audit": true,
+    "inventory": [
+      "keys",
+      "lamp",
+      "rod"
+    ],
+    "lamp_on": true,
+    "last_room": "EASTBANK",
+    "ledger_complete": true,
+    "obligations": {
+      "always:no_death": "PASS",
+      "final:required:at/player/EASTBANK": "PASS",
+      "final:required:bridge": "PASS",
+      "final:required:carrying/keys": "PASS",
+      "final:required:carrying/lamp": "PASS",
+      "final:required:lamp_on": "PASS"
+    },
+    "room_witness_sequence": 17,
+    "sealed": true,
+    "status": "PASS",
+    "unknown_feedback": []
+  },
+  "model_calls": "NOT_RUN",
+  "native_ledger": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-A2-clean-46a1e994d0-20261015T010315Z-32847d/events.jsonl",
+  "native_task_inputs_including_h4_and_refresh": 16,
+  "run_dir": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-A2-clean-46a1e994d0-20261015T010315Z-32847d",
+  "search_calls": 15,
+  "search_seconds": 1.161044167878572,
+  "search_status": "FOUND",
+  "task_id": "A2",
+  "verification_status": "NOT_RUN_IN_CONTROLLER"
+}

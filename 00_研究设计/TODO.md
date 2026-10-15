@@ -12,6 +12,12 @@
 
 ## SYSTEM / APPLICATION TRACK
 
+本轮授权来自 2026-10-15 新审阅及用户在对话中的明确扩展：不再围绕西岸单例，检验未指定自由度、独立历史义务与在线修改。只做 Open Adventure 既有子域，不扩大平台。
+
+| ID | 状态 | 下一动作 | 验收 / owner |
+|---|---|---|---|
+| AUTHOR-OBLIGATION-PLANNING-V0 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED** | 本轮有界实现、运行和修复验收后停止；独立审阅实际约束链与保留失败，不自动新增游戏、正式 B1/B2 或通用 Director | [唯一 RESULTS](../02_实验/Author_Obligation_Planning_v0/RESULTS.md)；[固定协议](../02_实验/Author_Obligation_Planning_v0/PROTOCOL.md)；[代码入口](../tools/author_obligation_planning_v0/README.md) |
+
 2026-10-14 Open Adventure B0 已按[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)完成并停止，本检查点为 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`。D clean、最终反馈修复与 E 冻结目标通过预设判据；G 按协议返回 `UNSUPPORTED_SEMANTICS`。首次反馈负控的 `MODEL_MISMATCH` 原始失败保留，修正运行不覆盖它。运行细节、成本与测试数字只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。三方法比较整体仍为 `PARTIAL`；B1/B2 `DEFERRED_BY_USER`，不自动调用模型或启动新游戏。P1 保留独立有限检查点，不升级为全系统 CLOSED。
 
 | ID | 状态 | 下一动作 | 验收 / owner |

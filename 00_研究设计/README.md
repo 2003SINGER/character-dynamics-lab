@@ -4,6 +4,8 @@
 
 ## 项目架构定位
 
+2026-10-15 最新有限工作包：[Author Obligation Planning v0 RESULTS](../02_实验/Author_Obligation_Planning_v0/RESULTS.md)，实际能力、预算失败、在线编辑与原版反馈修复只查该 owner；不是通用作者理解或完整角色系统。当前动作见 [TODO](TODO.md)。
+
 2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
 
 **LLM-Admission v0（同日后续授权）已交付并停止，READY_FOR_INDEPENDENT_REVIEW**：完成三次真实Luna-in-Codex调用，标为`AGENT_CONFOUNDED`；E未通过固定绑定验收，不补答案、不运行原版任务，G缺口分析保留。请求、原样输出、身份/工具审计和时间语义分歧仅由[唯一 RESULTS](../02_实验/LLM_Admission_v0/RESULTS.md)维护。不是正式B1/B2对照或模型优势证据。

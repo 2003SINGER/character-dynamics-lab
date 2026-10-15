@@ -1,0 +1,71 @@
+{
+  "author_verdict": "NOT_RUN_IN_CONTROLLER",
+  "controller_status": "PLANNER_GOAL_REACHED_UNVERIFIED",
+  "decision_trace": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-G6-clean-2c8cb06210-20261015T010329Z-ddc593/author_obligation_trace.jsonl",
+  "edit_log": [],
+  "failure": null,
+  "final_audit_status": "COMPLETE",
+  "final_author_history": [],
+  "final_task": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_off"
+        ]
+      ]
+    },
+    "id": "G6",
+    "obligations": [],
+    "text": "Finish east carrying keys and lamp with the lamp off; bridge unrestricted; do not die at any point.",
+    "version": "1"
+  },
+  "h4_intervention": null,
+  "independent_verifier": {
+    "bridge": null,
+    "events": [],
+    "evidence_owner": "raw native receipts only; no planner/progress import",
+    "fresh_final_audit": true,
+    "inventory": [
+      "keys",
+      "lamp"
+    ],
+    "lamp_on": false,
+    "last_room": "EASTBANK",
+    "ledger_complete": true,
+    "obligations": {
+      "always:no_death": "PASS",
+      "final:required:at/player/EASTBANK": "PASS",
+      "final:required:carrying/keys": "PASS",
+      "final:required:carrying/lamp": "PASS",
+      "final:required:lamp_off": "PASS"
+    },
+    "room_witness_sequence": 13,
+    "sealed": true,
+    "status": "PASS",
+    "unknown_feedback": []
+  },
+  "model_calls": "NOT_RUN",
+  "native_ledger": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-G6-clean-2c8cb06210-20261015T010329Z-ddc593/events.jsonl",
+  "native_task_inputs_including_h4_and_refresh": 14,
+  "run_dir": "02_实验/Author_Obligation_Planning_v0/runs/dev-20261015-01/native_runs/oa-author-obligation-G6-clean-2c8cb06210-20261015T010329Z-ddc593",
+  "search_calls": 13,
+  "search_seconds": 0.38943949982058257,
+  "search_status": "FOUND",
+  "task_id": "G6",
+  "verification_status": "NOT_RUN_IN_CONTROLLER"
+}

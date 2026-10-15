@@ -1,0 +1,42 @@
+{
+  "attempt": 1,
+  "input": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "keys"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ],
+        [
+          "bridge"
+        ]
+      ]
+    },
+    "id": "E2",
+    "obligations": [
+      {
+        "events": [
+          "create_bridge",
+          "destroy_bridge"
+        ],
+        "type": "in_order"
+      }
+    ],
+    "text": "Finish at EASTBANK carrying keys and lamp with the lamp on and bridge after creating and then destroying the bridge in that order; do not die at any point.",
+    "version": "1"
+  }
+}

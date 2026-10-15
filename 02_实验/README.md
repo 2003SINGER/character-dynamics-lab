@@ -4,6 +4,8 @@
 
 ## 当前状态与结果复用
 
+最新工作包：[Author Obligation Planning v0](Author_Obligation_Planning_v0/RESULTS.md)。32 份作者任务的实际绑定/搜索、预选原版运行、在线编辑和 H4 失败/修复记录仅由该 RESULTS 维护。旧结果不升级、不覆盖。
+
 同日后续 [Open Adventure Online P1 RESULTS](OpenAdventure_Online_P1_v0/RESULTS.md) 已交付原版逐次交互、真实反馈分支与精确重放，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW，作为独立有限接口检查点保留；不代表全系统 CLOSED。**Open Adventure Planning B0 传统准入与实验**已交付 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止；协议见[PROTOCOL](OpenAdventure_Planning_B0_v0/PROTOCOL.md)，运行、失败与成本只见[唯一 RESULTS](OpenAdventure_Planning_B0_v0/RESULTS.md)。整体三方法比较为 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏；保留下面的整局 Native v0 原证据。
 
 **LLM-Admission v0（同日后续授权）已交付并停止，READY_FOR_INDEPENDENT_REVIEW**：完成三次真实Luna-in-Codex调用，标为`AGENT_CONFOUNDED`；E未通过固定绑定验收，不补答案、不运行原版任务，G缺口分析保留。请求、原样输出、身份/工具审计和时间语义分歧仅由[唯一 RESULTS](LLM_Admission_v0/RESULTS.md)维护。不是正式B1/B2对照或模型优势证据。

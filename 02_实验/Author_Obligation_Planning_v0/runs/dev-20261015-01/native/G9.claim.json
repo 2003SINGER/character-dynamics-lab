@@ -1,0 +1,35 @@
+{
+  "attempt": 1,
+  "input": {
+    "always_no_death": true,
+    "goal": {
+      "forbidden": [],
+      "required": [
+        [
+          "at",
+          "player",
+          "EASTBANK"
+        ],
+        [
+          "carrying",
+          "lamp"
+        ],
+        [
+          "lamp_on"
+        ]
+      ]
+    },
+    "id": "G9",
+    "obligations": [
+      {
+        "events": [
+          "arrive_west",
+          "return_east"
+        ],
+        "type": "in_order"
+      }
+    ],
+    "text": "Finish east carrying the lit lamp after arriving west and returning east; keys and bridge unrestricted; do not die at any point.",
+    "version": "1"
+  }
+}
