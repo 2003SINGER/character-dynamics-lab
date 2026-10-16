@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-16 [OpenXRay 原生 NPC 决策接入准入](OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)已交付源码结论，`READY_FOR_INDEPENDENT_REVIEW`；原版验证 `BLOCKED`，未产生运行证据。[前轮载体审查](Classic_RPG_Carrier_Selection_v0/RESULTS.md)、[成熟原生 NPC 游戏准入](Native_NPC_Game_Admission_v0/RESULTS.md)与[作者义务规划](Author_Obligation_Planning_v0/RESULTS.md)保留，不覆盖失败或升级既有证据。下一动作见[TODO](../00_研究设计/TODO.md)，不自动开发备选或完整 Planner。
+2026-10-16 当前为 [Veloren v0.18.0 原生世界纵向验证](Veloren_Vertical_Slice_v0/RESULTS.md)：阶段1官方安装包下载受阻，原版未运行，不产生 NPC/目标接入/作者节点成功声明。[OpenXRay 源码结论](OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)及此前选材、运行和失败证据保留，不覆盖或升级；OpenXRay/RimWorld 接入探索暂时冻结。下一动作只见 [TODO](../00_研究设计/TODO.md)，不返回泛化选材。
 
 同日后续 [Open Adventure Online P1 RESULTS](OpenAdventure_Online_P1_v0/RESULTS.md) 已交付原版逐次交互、真实反馈分支与精确重放，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW，作为独立有限接口检查点保留；不代表全系统 CLOSED。**Open Adventure Planning B0 传统准入与实验**已交付 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止；协议见[PROTOCOL](OpenAdventure_Planning_B0_v0/PROTOCOL.md)，运行、失败与成本只见[唯一 RESULTS](OpenAdventure_Planning_B0_v0/RESULTS.md)。整体三方法比较为 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏；保留下面的整局 Native v0 原证据。
 

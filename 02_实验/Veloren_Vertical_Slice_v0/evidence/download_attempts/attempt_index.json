@@ -1,0 +1,129 @@
+{
+  "purpose": "Record the bounded official Veloren 0.18.0 macOS ARM64 artifact retrieval attempt. No archive was completed, extracted, or run.",
+  "source": {
+    "official_download_page": "https://veloren.net/download-other/",
+    "artifact_job": "https://gitlab.com/veloren/veloren/-/jobs/12844032174/artifacts/download?file_type=archive",
+    "artifact_bytes_reported_by_official_response": 404762532,
+    "artifact_etag": "24008865246bda4dbd9fa86d3e0e19b1"
+  },
+  "safety_and_outcome": {
+    "repository_runtime_root": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0",
+    "download_limit_bytes": 1073741824,
+    "unique_bytes_received": 68713092,
+    "unique_fraction_of_artifact": 0.1696,
+    "segments_merged": false,
+    "archive_integrity_checked": false,
+    "game_started": false,
+    "reason_stopped": "The bounded transfer window ended with incomplete ranges and repeated connection timeouts/resets."
+  },
+  "ranges": [
+    {
+      "name": "seg01",
+      "requested_range": "19279413-115650192",
+      "expected_bytes": 96370780,
+      "response_content_range": "19279413-115650192/404762532",
+      "etag": "24008865246bda4dbd9fa86d3e0e19b1",
+      "file": "_local_data/external_games/veloren_0_18_0/segment-01.bin",
+      "file_bytes": 21538889,
+      "sha256": "059641b1be1f14e96cd320a5a13221121a7028368b3655811150de9d17baa482",
+      "exit_code": 28,
+      "started_utc": "2026-10-16T09:29:06.475823Z",
+      "elapsed_seconds": 300.039884,
+      "stderr_copy": "20261016T092906Z-seg01.curl-stderr.txt",
+      "metrics_copy": "20261016T092906Z-seg01.metrics.txt",
+      "headers_local_only": "_local_data/external_games/veloren_0_18_0/evidence/download_attempts/seg01.headers.txt"
+    },
+    {
+      "name": "seg02",
+      "requested_range": "115650193-212020972",
+      "expected_bytes": 96370780,
+      "response_content_range": "115650193-212020972/404762532",
+      "etag": "24008865246bda4dbd9fa86d3e0e19b1",
+      "file": "_local_data/external_games/veloren_0_18_0/segment-02.bin",
+      "file_bytes": 15583989,
+      "sha256": "a131968306e246bbc69d1f3442c20f99efb9b2cc347c54267eddd3f88fd317a4",
+      "exit_code": 28,
+      "started_utc": "2026-10-16T09:29:02.243718Z",
+      "elapsed_seconds": 300.024659,
+      "stderr_copy": "20261016T092902Z-seg02.curl-stderr.txt",
+      "metrics_copy": "20261016T092902Z-seg02.metrics.txt",
+      "headers_local_only": "_local_data/external_games/veloren_0_18_0/evidence/download_attempts/seg02.headers.txt"
+    },
+    {
+      "name": "seg03-initial",
+      "requested_range": "212020973-308391752",
+      "expected_bytes": 96370780,
+      "response_content_range": "212020973-308391752/404762532",
+      "etag": "24008865246bda4dbd9fa86d3e0e19b1",
+      "file": "_local_data/external_games/veloren_0_18_0/segment-03.bin",
+      "file_bytes": 161077,
+      "sha256": "8ae537469c1e70a00b44358b074a94f13775f4689b6f98b00a0b51d65627cb4c",
+      "exit_code": 56,
+      "started_utc": "2026-10-16T09:29:05.174627Z",
+      "elapsed_seconds": 70.449614,
+      "stderr_copy": "20261016T092905Z-seg03.curl-stderr.txt",
+      "metrics_copy": "20261016T092905Z-seg03.metrics.txt",
+      "headers_local_only": "_local_data/external_games/veloren_0_18_0/evidence/download_attempts/seg03.headers.txt"
+    },
+    {
+      "name": "seg04",
+      "requested_range": "308391753-404762531",
+      "expected_bytes": 96370779,
+      "response_content_range": "308391753-404762531/404762532",
+      "etag": "24008865246bda4dbd9fa86d3e0e19b1",
+      "file": "_local_data/external_games/veloren_0_18_0/segment-04.bin",
+      "file_bytes": 12149724,
+      "sha256": "48eea48e8e56a62507ab87cbcd04caf2f68f115b4f313801f843a1b317dcefc1",
+      "exit_code": 28,
+      "started_utc": "2026-10-16T09:29:02.518196Z",
+      "elapsed_seconds": 300.062968,
+      "stderr_copy": "20261016T092902Z-seg04.curl-stderr.txt",
+      "metrics_copy": "20261016T092902Z-seg04.metrics.txt",
+      "headers_local_only": "_local_data/external_games/veloren_0_18_0/evidence/download_attempts/seg04.headers.txt"
+    },
+    {
+      "name": "seg03-resume-misdirected",
+      "requested_range": "212020973-308391752",
+      "server_content_range": "161077-404762531/404762532",
+      "etag": "24008865246bda4dbd9fa86d3e0e19b1",
+      "file": "_local_data/external_games/veloren_0_18_0/segment-03.bin",
+      "additional_file_bytes": 0,
+      "exit_code": 56,
+      "started_utc": "2026-10-16T09:32:44.872181Z",
+      "elapsed_seconds": 1.910000,
+      "stderr_copy": "20261016T093244Z-seg03-resume.curl-stderr.txt",
+      "metrics_copy": "20261016T093244Z-seg03-resume.metrics.txt",
+      "headers_local_only": "_local_data/external_games/veloren_0_18_0/evidence/download_attempts/seg03-resume.headers.txt",
+      "note": "Curl continue-at combined with the requested range produced a different range; the max-filesize guard rejected it before writing bytes."
+    },
+    {
+      "name": "seg03-retry-overlap",
+      "requested_range": "212020973-308391752",
+      "expected_bytes": 96370780,
+      "response_content_range": "212020973-308391752/404762532",
+      "etag": "24008865246bda4dbd9fa86d3e0e19b1",
+      "file": "_local_data/external_games/veloren_0_18_0/segment-03-retry.bin",
+      "file_bytes": 14284,
+      "sha256": "909a732ee5b3308fddfc76f31c44364599fedeb630b788069b4638703feb759e",
+      "exit_code": 56,
+      "started_utc": "2026-10-16T09:34:08.880643Z",
+      "elapsed_seconds": 3.166364,
+      "stderr_copy": "20261016T093408Z-seg03-retry.curl-stderr.txt",
+      "metrics_copy": "20261016T093408Z-seg03-retry.metrics.txt",
+      "headers_local_only": "_local_data/external_games/veloren_0_18_0/evidence/download_attempts/seg03-retry.headers.txt",
+      "note": "Starts at the same range offset as seg03-initial; its bytes overlap the first 14284 bytes of that partial and are excluded from unique_bytes_received."
+    }
+  ],
+  "early_attempt_boundary": {
+    "evidence_status": "Tool-output transcript only; no raw log files were saved for these early attempts.",
+    "events": [
+      "Official artifact HEAD through the HTTP proxy reached the GitLab redirects but the CDN connection timed out after 30 seconds.",
+      "Anonymous GitLab job metadata API returned HTTP 401.",
+      "Official artifact download through the HTTP proxy timed out after 238.803 seconds with 0 artifact bytes.",
+      "An official direct download attempt timed out after 239.114 seconds with 19279413 of 404762532 bytes received; this is the local zip partial whose SHA-256 is a27ce46afd494f6bb9702946417a167ec023e31a96e90338a78f54f880449a67.",
+      "Official direct HEAD succeeded and reported 404762532 bytes, application/zip, and the artifact ETag recorded above.",
+      "A 1 MiB SOCKS5 range probe reached the CDN redirect but timed out after 59.268 seconds with 0 artifact bytes."
+    ]
+  },
+  "privacy": "Response headers containing signed redirect query strings remain only under the ignored local runtime directory and are intentionally not copied here."
+}
