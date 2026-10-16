@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-16 当前仅维护[问题定义与文档](../00_研究设计/TODO.md)，没有新增实验、候选实跑或模型对照。[成熟原生 NPC 游戏准入](Native_NPC_Game_Admission_v0/RESULTS.md)保留上轮三候选未实跑事实，不构成所有角色 Planner 路线的永久门槛；[Author Obligation Planning v0](Author_Obligation_Planning_v0/RESULTS.md)的绑定/搜索、原版运行、在线编辑及失败/修复证据不升级、不覆盖。
+2026-10-16 后续授权的[经典 RPG 三候选 P0 选型](Classic_RPG_Carrier_Selection_v0/RESULTS.md)已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`；这是材料与固定源码审查，无新游戏实跑或模型对照，完成后停止。[成熟原生 NPC 游戏准入](Native_NPC_Game_Admission_v0/RESULTS.md)保留上轮三候选未实跑事实，不构成所有角色 Planner 路线的永久门槛；[Author Obligation Planning v0](Author_Obligation_Planning_v0/RESULTS.md)的既有证据不升级、不覆盖。P1仅有方案，下一动作见[TODO](../00_研究设计/TODO.md)。
 
 同日后续 [Open Adventure Online P1 RESULTS](OpenAdventure_Online_P1_v0/RESULTS.md) 已交付原版逐次交互、真实反馈分支与精确重放，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW，作为独立有限接口检查点保留；不代表全系统 CLOSED。**Open Adventure Planning B0 传统准入与实验**已交付 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止；协议见[PROTOCOL](OpenAdventure_Planning_B0_v0/PROTOCOL.md)，运行、失败与成本只见[唯一 RESULTS](OpenAdventure_Planning_B0_v0/RESULTS.md)。整体三方法比较为 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏；保留下面的整局 Native v0 原证据。
 
