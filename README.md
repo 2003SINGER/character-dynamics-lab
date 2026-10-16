@@ -26,7 +26,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 ## 从这里进入
 
-2026-10-16 当前工作转为 [Veloren v0.18.0 原生世界纵向验证](02_实验/Veloren_Vertical_Slice_v0/RESULTS.md)：先取得未改原版运行与 NPC 基线，当前官方安装包下载受阻，`NATIVE_RUN=NOT_RUN`，不以源码调查代替实验。[OpenXRay 源码交付](02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)与[前轮选材证据](02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)保留，OpenXRay/RimWorld 接入探索暂时冻结；下一动作只见 [TODO](00_研究设计/TODO.md)，不动 [F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md)及旧实验。
+2026-10-16 当前工作为 [Veloren v0.18.0 原生世界纵向验证](02_实验/Veloren_Vertical_Slice_v0/RESULTS.md)：官方 client 与单人 world 已启动，状态为 `ENVIRONMENT_PREPARED`；NPC 程序采集 `NOT_ESTABLISHED`，外部目标闭环 `NOT_RUN`。用户已撤销 GUI baseline 路径，授权有限 server 源码观测与 typedgoal 程序闭环；不使用 GUI、作者节点或 LLM。实施状态仅见 [TODO](00_研究设计/TODO.md) 与唯一 RESULTS；OpenXRay/RimWorld 探索冻结，F0/F1及旧实验不动。
 
 2026-10-09 新授权已撤销“仅外围维护”：按用户目标 TXT 开发的 [NPC System Integration v0](tools/npc_system_v0/README.md) 已贯通有限作者点/线、受限世界规划、独立演员状态/承诺、GOAP/HTN 与真实执行/监测。它是 E1 之上的 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 应用样机，不改冻结 C++ Kernel，也不是完整系统、LLM 高层规划或研究收益。具体能力与限制见[唯一结果](02_实验/NPC_System_Integration_v0/RESULTS.md)；旧语义草案中的未开工叙述按其记录日期理解，当前授权看 [TODO](00_研究设计/TODO.md)。
 

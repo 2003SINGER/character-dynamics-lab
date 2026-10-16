@@ -1,0 +1,823 @@
+diff --git a/common/src/rtsim.rs b/common/src/rtsim.rs
+index a7f2dab..99aca9b 100644
+--- a/common/src/rtsim.rs
++++ b/common/src/rtsim.rs
+@@ -243,6 +243,8 @@ impl Default for Personality {
+ pub struct RtSimController {
+     pub activity: Option<NpcActivity>,
+     pub actions: VecDeque<NpcAction>,
++    /// Optional correlation kept positionally aligned with `actions`.
++    pub action_request_ids: VecDeque<Option<String>>,
+     pub personality: Personality,
+     pub heading_to: Option<String>,
+     // TODO: Maybe this should allow for looking at a specific entity target?
+@@ -250,6 +252,17 @@ pub struct RtSimController {
+ }
+ 
+ impl RtSimController {
++    pub fn push_action(&mut self, action: NpcAction, request_id: Option<String>) {
++        self.actions.push_back(action);
++        self.action_request_ids.push_back(request_id);
++    }
++
++    pub fn pop_action(&mut self) -> Option<(NpcAction, Option<String>)> {
++        let action = self.actions.pop_front()?;
++        let request_id = self.action_request_ids.pop_front().unwrap_or(None);
++        Some((action, request_id))
++    }
++
+     pub fn with_destination(pos: Vec3<f32>) -> Self {
+         Self {
+             activity: Some(NpcActivity::Goto(pos, 0.5)),
+@@ -258,6 +271,29 @@ impl RtSimController {
+     }
+ }
+ 
++#[cfg(test)]
++mod rtsim_controller_correlation_tests {
++    use super::{Content, NpcAction, RtSimController};
++
++    #[test]
++    fn native_say_before_external_say_keeps_request_id_on_its_own_action() {
++        let mut controller = RtSimController::default();
++        controller.push_action(
++            NpcAction::Say(None, Content::localized("npc-speech-villager")),
++            None,
++        );
++        controller.push_action(
++            NpcAction::Say(None, Content::localized("npc-speech-villager")),
++            Some("external-2".to_owned()),
++        );
++
++        let (_, first_id) = controller.pop_action().expect("native action");
++        let (_, second_id) = controller.pop_action().expect("external action");
++        assert_eq!(first_id, None);
++        assert_eq!(second_id.as_deref(), Some("external-2"));
++    }
++}
++
+ #[derive(Clone, Copy, Debug)]
+ pub enum NpcActivity {
+     /// (travel_to, speed_factor)
+diff --git a/rtsim/src/data/npc.rs b/rtsim/src/data/npc.rs
+index ff630db..9ca9a75 100644
+--- a/rtsim/src/data/npc.rs
++++ b/rtsim/src/data/npc.rs
+@@ -64,12 +64,28 @@ pub struct PathingMemory {
+ pub struct Controller {
+     pub actions: Vec<NpcAction>,
+     pub activity: Option<NpcActivity>,
++    /// Optional lease for a validated external TalkToNpc request. This is
++    /// runtime-only and is never serialized with rtsim data.
++    pub external_talk: Option<ExternalTalkLease>,
+     pub new_home: Option<Option<SiteId>>,
+     pub look_dir: Option<Dir>,
+     pub job: Option<Job>,
+     pub quests_to_create: Vec<(QuestId, Quest)>,
+ }
+ 
++#[derive(Clone, Debug)]
++pub struct ExternalTalkLease {
++    pub request_id: String,
++    pub target: Actor,
++    pub expires_at: Time,
++    pub cancelled: bool,
++    pub outcome: Option<&'static str>,
++    /// Set when the external TalkToNpc action is installed in the Brain.
++    pub started: bool,
++    /// Index of a Say produced during the current brain tick only.
++    pub action_index: Option<usize>,
++}
++
+ impl Controller {
+     /// Reset the controller to a neutral state before the start of the next
+     /// brain tick.
+@@ -77,6 +93,9 @@ impl Controller {
+         self.activity = None;
+         self.look_dir = None;
+         self.job = npc.job.clone();
++        if let Some(lease) = &mut self.external_talk {
++            lease.action_index = None;
++        }
+     }
+ 
+     pub fn do_idle(&mut self) { self.activity = None; }
+@@ -120,7 +139,15 @@ impl Controller {
+     }
+ 
+     pub fn say(&mut self, target: impl Into<Option<Actor>>, content: comp::Content) {
+-        self.actions.push(NpcAction::Say(target.into(), content));
++        let target = target.into();
++        if let Some(lease) = &mut self.external_talk
++            && lease.started
++            && lease.outcome.is_none()
++            && target == Some(lease.target)
++        {
++            lease.action_index = Some(self.actions.len());
++        }
++        self.actions.push(NpcAction::Say(target, content));
+     }
+ 
+     pub fn attack(&mut self, target: impl Into<Actor>) {
+@@ -255,6 +282,38 @@ impl Controller {
+     }
+ }
+ 
++#[cfg(test)]
++mod external_talk_tests {
++    use super::*;
++
++    #[test]
++    fn request_speech_index_is_stamped_after_prior_actions_are_drained() {
++        let target = Actor::Npc(NpcId::default());
++        let mut controller = Controller::default();
++        controller.actions.push(NpcAction::Say(
++            Some(target),
++            comp::Content::localized("npc-speech-test"),
++        ));
++        controller.external_talk = Some(ExternalTalkLease {
++            request_id: "test-request".into(),
++            target,
++            expires_at: Time(10.0),
++            cancelled: false,
++            outcome: None,
++            started: true,
++            action_index: None,
++        });
++
++        // Reproduces a long-running talk action whose older queued intent was
++        // consumed before the native action emits its request-correlated Say.
++        controller.actions.clear();
++        controller.say(Some(target), comp::Content::localized("npc-speech-test"));
++
++        assert_eq!(controller.external_talk.as_ref().unwrap().action_index, Some(0));
++        assert!(matches!(controller.actions.first(), Some(NpcAction::Say(Some(actor), _)) if *actor == target));
++    }
++}
++
+ // Represents an ongoing dialogue with another actor.
+ #[derive(Copy, Clone)]
+ pub struct DialogueSession {
+diff --git a/rtsim/src/rule/npc_ai/mod.rs b/rtsim/src/rule/npc_ai/mod.rs
+index f4a7851..e646d60 100644
+--- a/rtsim/src/rule/npc_ai/mod.rs
++++ b/rtsim/src/rule/npc_ai/mod.rs
+@@ -1482,6 +1482,67 @@ fn react_to_events<S: State>(ctx: &mut NpcCtx, _: &mut S) -> Option<impl Action<
+         .map(Action::boxed)
+         .or_else(|| check_for_enemies(ctx).map(Action::boxed))
+         .or_else(|| quest::check_for_timeouts(ctx).map(Action::boxed))
++        .or_else(|| external_talk::<S>(ctx).map(Action::boxed))
++}
++
++/// Runs a validated external TalkToNpc request through the existing native
++/// talk action. The lease is independent of Brain lifetime and resettable
++/// controller activity. Native danger, cancellation, and expiry terminate the
++/// lease via StopIf, which calls the wrapped action's native `on_cancel`.
++fn external_talk<S: State>(ctx: &mut NpcCtx) -> Option<impl Action<S> + use<S>> {
++    let lease = ctx.controller.external_talk.as_mut()?;
++    if lease.outcome.is_some() {
++        return None;
++    }
++    lease.started = true;
++    let target = lease.target;
++
++    Some(
++        talk_to::<S>(target)
++            .then(just(move |ctx, _| {
++                if let Some(lease) = &mut ctx.controller.external_talk {
++                    lease.outcome = Some(if lease.action_index.is_some() {
++                        "native_intent_queued"
++                    } else {
++                        "native_talk_completed_without_speech"
++                    });
++                }
++            }))
++            .stop_if(|ctx: &mut NpcCtx| {
++                let reason = if let Some(lease) = &ctx.controller.external_talk {
++                    if lease.cancelled {
++                        Some("cancelled")
++                    } else if ctx.time.0 >= lease.expires_at.0 {
++                        Some("expired")
++                    } else {
++                        None
++                    }
++                } else {
++                    Some("lease_missing")
++                }
++                .or_else(|| (!ctx.inbox.is_empty()).then_some("native_inbox_interrupt"))
++                .or_else(|| {
++                    check_for_enemies::<S>(ctx).map(|_| "native_danger_interrupt")
++                })
++                .or_else(|| {
++                    ctx.data
++                        .quests
++                        .related_to(ctx.npc_id)
++                        .filter_map(|id| ctx.data.quests.get(id))
++                        .any(|quest| quest.timeout.is_some_and(|timeout| ctx.time > timeout))
++                        .then_some("native_quest_timeout_interrupt")
++                });
++
++                if let Some(reason) = reason {
++                    if let Some(lease) = &mut ctx.controller.external_talk {
++                        lease.outcome = Some(reason);
++                    }
++                    true
++                } else {
++                    false
++                }
++            }),
++    )
+ }
+ 
+ fn humanoid() -> impl Action<DefaultState> {
+diff --git a/server-cli/src/main.rs b/server-cli/src/main.rs
+index f710528..3bd166e 100644
+--- a/server-cli/src/main.rs
++++ b/server-cli/src/main.rs
+@@ -220,6 +220,24 @@ fn main() -> io::Result<()> {
+     )
+     .expect("Failed to create server instance!");
+ 
++    #[cfg(feature = "worldgen")]
++    if let Ok(selected_uids) = std::env::var("VELOREN_NATIVE_PERSISTER_NPC_UIDS") {
++        let view_distance = std::env::var("VELOREN_NATIVE_PERSISTER_VIEW_DISTANCE")
++            .ok()
++            .and_then(|value| value.parse::<u32>().ok())
++            .filter(|distance| (1..=8).contains(distance))
++            .unwrap_or(2);
++        for raw_uid in selected_uids.split(',').filter(|uid| !uid.trim().is_empty()).take(2) {
++            match raw_uid.trim().parse::<u64>() {
++                Ok(uid) => match server.create_persister_at_npc_uid(uid, view_distance) {
++                    Some(pos) => info!(uid, ?pos, view_distance, "Loaded test chunks around existing civilised NPC"),
++                    None => info!(uid, "Ignored unknown, dead, or non-civilised native NPC UID"),
++                },
++                Err(_) => info!(raw_uid, "Ignored invalid native NPC UID in persister selection"),
++            }
++        }
++    }
++
+     let registry = Arc::clone(server.metrics_registry());
+     let chat = server.chat_cache().clone();
+     let metrics_shutdown = Arc::new(Notify::new());
+diff --git a/server/src/lib.rs b/server/src/lib.rs
+index 8aa5988..892ef67 100644
+--- a/server/src/lib.rs
++++ b/server/src/lib.rs
+@@ -1521,6 +1521,25 @@ impl Server {
+             .build();
+     }
+ 
++    /// Test-only chunk loading around an existing live civilised rtsim NPC.
++    /// This does not alter the NPC or player position.
++    #[cfg(feature = "worldgen")]
++    pub fn create_persister_at_npc_uid(
++        &mut self,
++        npc_uid: u64,
++        view_distance: u32,
++    ) -> Option<Vec3<f32>> {
++        let pos = self
++            .state
++            .ecs()
++            .read_resource::<rtsim::RtSim>()
++            .live_civilised_npc_position(npc_uid)?;
++        self.state
++            .create_persister(comp::Pos(pos), view_distance, &self.world, &self.index)
++            .build();
++        Some(pos)
++    }
++
+     /// Used by benchmarking code.
+     pub fn chunks_pending(&mut self) -> bool {
+         self.state_mut()
+diff --git a/server/src/rtsim/mod.rs b/server/src/rtsim/mod.rs
+index 817eb1b..74c4e4d 100644
+--- a/server/src/rtsim/mod.rs
++++ b/server/src/rtsim/mod.rs
+@@ -6,7 +6,7 @@ use atomicwrites::{AtomicFile, OverwriteBehavior};
+ use common::{
+     grid::Grid,
+     mounting::VolumePos,
+-    rtsim::{Actor, NpcId, RtSimEntity, TerrainResource, WorldSettings},
++    rtsim::{Actor, NpcId, Role, RtSimEntity, TerrainResource, WorldSettings},
+     terrain::{CoordinateConversions, SpriteKind},
+ };
+ use common_ecs::{System, dispatch};
+@@ -20,9 +20,11 @@ use rtsim::{
+ };
+ use specs::DispatcherBuilder;
+ use std::{
++    collections::{HashMap, HashSet},
+     fs::{self, File},
+-    io,
++    io::{self, Write},
+     path::PathBuf,
++    sync::{Mutex, OnceLock},
+     thread::{self, JoinHandle},
+     time::Instant,
+ };
+@@ -35,9 +37,43 @@ pub struct RtSim {
+     last_saved: Option<Instant>,
+     state: RtState,
+     save_thread: Option<(Sender<Data>, JoinHandle<()>)>,
++    external_request_path: Option<PathBuf>,
++    external_request_offset: u64,
++    seen_external_requests: HashMap<String, String>,
++    external_observe: bool,
++    external_observe_uids: HashSet<u64>,
++    last_external_observation: Option<Instant>,
++    last_external_catalog: Option<Instant>,
++}
++
++/// Append a structured event only when the opt-in telemetry path is set.
++pub(crate) fn external_telemetry(event: serde_json::Value) {
++    let Some(path) = std::env::var_os("VELOREN_NATIVE_EVENTS").map(PathBuf::from) else {
++        return;
++    };
++    static TELEMETRY_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
++    let Ok(_guard) = TELEMETRY_LOCK.get_or_init(|| Mutex::new(())).lock() else {
++        return;
++    };
++    if let Ok(mut file) = File::options().create(true).append(true).open(path) {
++        if serde_json::to_writer(&mut file, &event).is_ok() {
++            let _ = file.write_all(b"\n");
++        }
++    }
+ }
+ 
+ impl RtSim {
++    pub fn live_civilised_npc_position(&self, uid: u64) -> Option<Vec3<f32>> {
++        self.state
++            .data()
++            .npcs
++            .values()
++            .find(|npc| {
++                npc.uid == uid && !npc.is_dead() && matches!(&npc.role, Role::Civilised(_))
++            })
++            .map(|npc| npc.wpos)
++    }
++
+     pub fn new(
+         settings: &WorldSettings,
+         index: IndexRef,
+@@ -128,6 +164,22 @@ impl RtSim {
+             ))),
+             file_path,
+             save_thread: None,
++            external_request_path: if std::env::var_os("VELOREN_NATIVE_EVENTS").is_some() {
++                std::env::var_os("VELOREN_NATIVE_REQUESTS").map(PathBuf::from)
++            } else {
++                None
++            },
++            external_request_offset: 0,
++            seen_external_requests: HashMap::new(),
++            external_observe: std::env::var("VELOREN_NATIVE_OBSERVE").is_ok_and(|v| v == "1")
++                && std::env::var_os("VELOREN_NATIVE_EVENTS").is_some(),
++            external_observe_uids: std::env::var("VELOREN_NATIVE_OBSERVE_UIDS")
++                .unwrap_or_default()
++                .split(',')
++                .filter_map(|uid| uid.trim().parse::<u64>().ok())
++                .collect(),
++            last_external_observation: None,
++            last_external_catalog: None,
+         };
+ 
+         rule::start_rules(&mut this.state);
+diff --git a/server/src/rtsim/tick.rs b/server/src/rtsim/tick.rs
+index 4ca0ba9..6b1b55f 100644
+--- a/server/src/rtsim/tick.rs
++++ b/server/src/rtsim/tick.rs
+@@ -10,7 +10,7 @@ use common::{
+     event::{CreateNpcEvent, CreateShipEvent, DeleteEvent, EventBus, NpcBuilder},
+     generation::{BodyBuilder, EntityConfig, EntityInfo},
+     resources::{DeltaTime, Time, TimeOfDay},
+-    rtsim::{Actor, NpcId, RtSimEntity},
++    rtsim::{Actor, NpcId, Role, RtSimEntity},
+     slowjob::SlowJobPool,
+     terrain::CoordinateConversions,
+     trade::{Good, SiteInformation},
+@@ -21,20 +21,223 @@ use common::{
+ use common_ecs::{Job, Origin, Phase, System};
+ use rand::Rng;
+ use rtsim::{
+-    ai::NpcSystemData,
++    ai::{Action, NpcSystemData},
+     data::{
+         Npc, Sites,
+-        npc::{Profession, SimulationMode},
++        npc::{ExternalTalkLease, Profession, SimulationMode},
+     },
+ };
+ use specs::{Entities, Join, LendJoin, Read, ReadExpect, ReadStorage, WriteExpect, WriteStorage};
+ use std::{
++    collections::HashMap,
++    io::{Read as IoRead, Seek, SeekFrom},
+     ops::Range,
+     sync::{Arc, Mutex},
+     time::Duration,
+ };
+ use tracing::error;
+ 
++fn reject_external_request(request_id: Option<&str>, reason: &str) {
++    crate::rtsim::external_telemetry(serde_json::json!({
++        "event": "request_rejected",
++        "request_id": request_id,
++        "reason": reason,
++    }));
++}
++
++fn valid_external_source_ttl(source: &str, ttl: f64) -> bool {
++    !source.is_empty() && source.len() <= 128 && ttl.is_finite() && (0.1..=60.0).contains(&ttl)
++}
++
++fn external_request_conflicts(seen: &HashMap<String, String>, id: &str, payload: &str) -> bool {
++    seen.get(id).is_some_and(|previous| previous != payload)
++}
++
++fn process_external_requests(rtsim: &mut RtSim, now: Time) {
++    let Some(path) = rtsim.external_request_path.clone() else {
++        return;
++    };
++    let Ok(mut file) = std::fs::File::open(path) else {
++        return;
++    };
++    let Ok(file_len) = file.metadata().map(|metadata| metadata.len()) else {
++        return;
++    };
++    if file_len < rtsim.external_request_offset {
++        rtsim.external_request_offset = 0;
++    }
++    if file.seek(SeekFrom::Start(rtsim.external_request_offset)).is_err() {
++        return;
++    }
++    let mut bytes = Vec::new();
++    if file.take(1_000_001).read_to_end(&mut bytes).is_err() {
++        return;
++    }
++    if bytes.len() > 1_000_000 {
++        reject_external_request(None, "request_file_over_1MiB");
++        rtsim.external_request_offset = file_len;
++        return;
++    }
++    let contents = String::from_utf8_lossy(&bytes);
++    let Some(complete_end) = contents.rfind('\n').map(|index| index + 1) else {
++        return;
++    };
++    rtsim.external_request_offset += complete_end as u64;
++
++    for line in contents[..complete_end].lines().filter(|line| !line.trim().is_empty()) {
++        let value: serde_json::Value = match serde_json::from_str(line) {
++            Ok(value) => value,
++            Err(_) => {
++                reject_external_request(None, "invalid_jsonl");
++                continue;
++            },
++        };
++
++        if let Some(cancel_id) = value.get("cancel_request_id").and_then(|v| v.as_str()) {
++            let mut result = "not_found";
++            for npc in rtsim.state.data_mut().npcs.values_mut() {
++                if let Some(lease) = &mut npc.controller.external_talk
++                    && lease.request_id == cancel_id
++                {
++                    if lease.cancelled {
++                        result = "cancel_already_requested";
++                    } else if lease.outcome.is_some() {
++                        result = "cancel_too_late_native_intent_already_queued";
++                    } else {
++                        lease.cancelled = true;
++                        result = "cancel_requested";
++                    }
++                    break;
++                }
++            }
++            crate::rtsim::external_telemetry(serde_json::json!({
++                "event": result,
++                "request_id": cancel_id,
++                "time": now.0,
++            }));
++            continue;
++        }
++
++        let request_id = value.get("request_id").and_then(|v| v.as_str());
++        let Some(request_id) = request_id.filter(|id| !id.is_empty() && id.len() <= 128) else {
++            reject_external_request(None, "missing_or_invalid_request_id");
++            continue;
++        };
++        let canonical = value.to_string();
++        if rtsim.seen_external_requests.contains_key(request_id) {
++            if external_request_conflicts(&rtsim.seen_external_requests, request_id, &canonical) {
++                let conflict_key = format!("conflict:{request_id}");
++                if !rtsim.seen_external_requests.contains_key(&conflict_key) {
++                    rtsim.seen_external_requests.insert(conflict_key, String::new());
++                    reject_external_request(Some(request_id), "request_id_conflict");
++                }
++            }
++            continue;
++        }
++        if rtsim.seen_external_requests.len() >= 4096 {
++            reject_external_request(Some(request_id), "request_id_capacity_reached");
++            continue;
++        }
++        rtsim.seen_external_requests.insert(request_id.to_owned(), canonical);
++
++        let Some(kind) = value.get("kind").and_then(|v| v.as_str()) else {
++            reject_external_request(Some(request_id), "missing_kind");
++            continue;
++        };
++        if kind != "TalkToNpc" {
++            reject_external_request(Some(request_id), "unsupported_kind");
++            continue;
++        }
++        let source = value.get("source").and_then(|v| v.as_str()).unwrap_or("");
++        let ttl = value.get("ttl").and_then(|v| v.as_f64()).unwrap_or(f64::NAN);
++        let Some(npc_uid) = value.get("npc_uid").and_then(|v| v.as_u64()) else {
++            reject_external_request(Some(request_id), "invalid_npc_uid");
++            continue;
++        };
++        let Some(target_uid) = value.get("target_uid").and_then(|v| v.as_u64()) else {
++            reject_external_request(Some(request_id), "invalid_target_uid");
++            continue;
++        };
++        if !valid_external_source_ttl(source, ttl) {
++            reject_external_request(Some(request_id), "invalid_source_or_ttl");
++            continue;
++        }
++
++        let mut data = rtsim.state.data_mut();
++        let from = data.npcs.iter().find_map(|(id, npc)| (npc.uid == npc_uid).then_some(id));
++        let to = data.npcs.iter().find_map(|(id, npc)| (npc.uid == target_uid).then_some(id));
++        let (Some(from), Some(to)) = (from, to) else {
++            reject_external_request(Some(request_id), "npc_or_target_not_found");
++            continue;
++        };
++        let sender = &data.npcs[from];
++        let target = &data.npcs[to];
++        if from == to
++            || sender.is_dead()
++            || target.is_dead()
++            || !matches!(&sender.role, Role::Civilised(_))
++            || !matches!(&target.role, Role::Civilised(_))
++            || !matches!(sender.mode, SimulationMode::Loaded)
++            || !matches!(target.mode, SimulationMode::Loaded)
++            || sender.wpos.xy().distance(target.wpos.xy()) > 8.0
++        {
++            reject_external_request(Some(request_id), "pair_not_live_loaded_civilised_nearby");
++            continue;
++        }
++        if sender
++            .controller
++            .external_talk
++            .as_ref()
++            .is_some_and(|lease| lease.outcome.is_none())
++        {
++            reject_external_request(Some(request_id), "npc_has_active_external_lease");
++            continue;
++        }
++
++        data.npcs[from].controller.external_talk = Some(ExternalTalkLease {
++            request_id: request_id.to_owned(),
++            target: Actor::Npc(to),
++            expires_at: now.add_seconds(ttl),
++            cancelled: false,
++            outcome: None,
++            started: false,
++            action_index: None,
++        });
++        crate::rtsim::external_telemetry(serde_json::json!({
++            "event": "request_accepted",
++            "request_id": request_id,
++            "npc_uid": npc_uid,
++            "source": source,
++            "target_uid": target_uid,
++            "kind": kind,
++            "time": now.0,
++        }));
++    }
++}
++
++#[cfg(test)]
++mod native_request_tests {
++    use super::{external_request_conflicts, valid_external_source_ttl};
++    use std::collections::HashMap;
++
++    #[test]
++    fn ttl_and_source_bounds_are_enforced() {
++        assert!(valid_external_source_ttl("test-harness", 20.0));
++        assert!(!valid_external_source_ttl("", 20.0));
++        assert!(!valid_external_source_ttl("test-harness", 0.0));
++        assert!(!valid_external_source_ttl("test-harness", 60.1));
++        assert!(!valid_external_source_ttl("test-harness", f64::NAN));
++    }
++
++    #[test]
++    fn request_id_replay_is_distinct_from_conflicting_reuse() {
++        let seen = HashMap::from([("request-1".to_owned(), "same-payload".to_owned())]);
++        assert!(!external_request_conflicts(&seen, "request-1", "same-payload"));
++        assert!(external_request_conflicts(&seen, "request-1", "changed-payload"));
++        assert!(!external_request_conflicts(&seen, "request-2", "new-payload"));
++    }
++}
++
+ pub fn trader_loadout(
+     loadout_builder: LoadoutBuilder,
+     economy: Option<&SiteInformation>,
+@@ -442,6 +645,8 @@ impl<'a> System<'a> for Sys {
+         let rtsim = &mut *rtsim;
+         let calendar_data = (*time_of_day, (*calendar).clone());
+ 
++        process_external_requests(rtsim, *time);
++
+         // Set up rtsim inputs
+         {
+             let mut data = rtsim.state.data_mut();
+@@ -483,6 +688,116 @@ impl<'a> System<'a> for Sys {
+             dt.0,
+         );
+ 
++        if rtsim.external_request_path.is_some() {
++            for (_, npc) in rtsim.state.data().npcs.iter() {
++                if let Some(lease) = &npc.controller.external_talk {
++                    let mut brain = Vec::new();
++                    if let Some(brain_action) = npc.brain.as_ref() {
++                        brain_action.action.backtrace(&mut brain);
++                    }
++                    crate::rtsim::external_telemetry(serde_json::json!({
++                        "event": "rtsim_brain_tick",
++                        "request_id": lease.request_id,
++                        "npc_uid": npc.uid,
++                        "time": time.0,
++                        "time_of_day": time_of_day.0,
++                        "mode": if matches!(npc.mode, SimulationMode::Loaded) { "loaded" } else { "simulated" },
++                        "brain_backtrace": brain,
++                        "controller_activity": format!("{:?}", npc.controller.activity),
++                        "controller_intents": format!("{:?}", npc.controller.actions),
++                        "lease_outcome": lease.outcome,
++                    }));
++                }
++            }
++        }
++
++        if rtsim.external_observe {
++            let now = std::time::Instant::now();
++            if rtsim
++                .last_external_catalog
++                .is_none_or(|last| last.elapsed() >= Duration::from_secs(10))
++            {
++                rtsim.last_external_catalog = Some(now);
++                let catalog = rtsim
++                    .state
++                    .data()
++                    .npcs
++                    .iter()
++                    .filter(|(_, npc)| {
++                        !npc.is_dead() && matches!(&npc.role, Role::Civilised(_))
++                    })
++                    .take(24)
++                    .map(|(_, npc)| {
++                        serde_json::json!({
++                            "npc_uid": npc.uid,
++                            "profession": format!("{:?}", npc.profession()),
++                            "position": [npc.wpos.x, npc.wpos.y, npc.wpos.z],
++                            "mode": if matches!(npc.mode, SimulationMode::Loaded) { "loaded" } else { "simulated" },
++                            "health_fraction": npc.health_fraction,
++                        })
++                    })
++                    .collect::<Vec<_>>();
++                crate::rtsim::external_telemetry(serde_json::json!({
++                    "event": "native_npc_catalog",
++                    "time": time.0,
++                    "time_of_day": time_of_day.0,
++                    "limit": 24,
++                    "npcs": catalog,
++                }));
++            }
++
++            if rtsim
++                .last_external_observation
++                .is_none_or(|last| last.elapsed() >= Duration::from_secs(1))
++            {
++                rtsim.last_external_observation = Some(now);
++                for npc_uid in rtsim.external_observe_uids.iter().copied() {
++                    let found = rtsim
++                        .state
++                        .data()
++                        .npcs
++                        .iter()
++                        .find(|(_, npc)| npc.uid == npc_uid);
++                    let Some((npc_id, npc)) = found else {
++                        crate::rtsim::external_telemetry(serde_json::json!({
++                            "event": "observation_uid_unavailable",
++                            "npc_uid": npc_uid,
++                            "time": time.0,
++                        }));
++                        continue;
++                    };
++                    let mut brain = Vec::new();
++                    if let Some(brain_action) = npc.brain.as_ref() {
++                        brain_action.action.backtrace(&mut brain);
++                    }
++                    let actual_world_state = (&entities, &positions, &rtsim_entities, (&agents).maybe())
++                        .join()
++                        .find(|(_, _, entity_id, _)| **entity_id == npc_id)
++                        .map(|(_, pos, _, agent)| {
++                            serde_json::json!({
++                                "ecs_position": [pos.0.x, pos.0.y, pos.0.z],
++                                "agent_behavior": agent.map(|agent| format!("{:?}", agent.behavior)),
++                                "agent_target": agent.and_then(|agent| agent.target.as_ref()).map(|target| format!("{:?}", target)),
++                            })
++                        });
++                    crate::rtsim::external_telemetry(serde_json::json!({
++                        "event": "native_npc_baseline",
++                        "npc_uid": npc.uid,
++                        "time": time.0,
++                        "time_of_day": time_of_day.0,
++                        "profession": format!("{:?}", npc.profession()),
++                        "position": [npc.wpos.x, npc.wpos.y, npc.wpos.z],
++                        "mode": if matches!(npc.mode, SimulationMode::Loaded) { "loaded" } else { "simulated" },
++                        "health_fraction": npc.health_fraction,
++                        "brain_backtrace": brain,
++                        "controller_activity": format!("{:?}", npc.controller.activity),
++                        "controller_intents": format!("{:?}", npc.controller.actions),
++                        "actual_world_state": actual_world_state,
++                    }));
++                }
++            }
++        }
++
+         // Perform a save if required
+         if rtsim
+             .last_saved
+@@ -625,10 +940,34 @@ impl<'a> System<'a> for Sys {
+                             agent.rtsim_controller.personality = npc.personality;
+                             agent.rtsim_controller.look_dir = npc.controller.look_dir;
+                             agent.rtsim_controller.activity = npc.controller.activity;
+-                            agent
+-                                .rtsim_controller
+-                                .actions
+-                                .extend(std::mem::take(&mut npc.controller.actions));
++                            let lease = npc
++                                .controller
++                                .external_talk
++                                .as_ref()
++                                .filter(|lease| {
++                                    lease.outcome == Some("native_intent_queued")
++                                        && npc.controller.actions.iter().any(|action| {
++                                            matches!(action, common::rtsim::NpcAction::Say(_, _))
++                                        })
++                                })
++                                .and_then(|lease| {
++                                    lease.action_index.map(|index| {
++                                        (lease.request_id.clone(), lease.target, index)
++                                    })
++                                });
++                            for (index, action) in
++                                std::mem::take(&mut npc.controller.actions).into_iter().enumerate()
++                            {
++                                let request_id = lease.as_ref().and_then(|(request_id, target, action_index)| {
++                                    matches!(
++                                        &action,
++                                        common::rtsim::NpcAction::Say(Some(actor), _)
++                                            if actor == target && index == *action_index
++                                    )
++                                    .then(|| request_id.clone())
++                                });
++                                agent.rtsim_controller.push_action(action, request_id);
++                            }
+                             if let Some(rtsim_outbox) = &mut agent.rtsim_outbox {
+                                 npc.inbox.append(rtsim_outbox);
+                             }
+diff --git a/server/src/sys/agent/behavior_tree/mod.rs b/server/src/sys/agent/behavior_tree/mod.rs
+index a1fe73b..24ca56b 100644
+--- a/server/src/sys/agent/behavior_tree/mod.rs
++++ b/server/src/sys/agent/behavior_tree/mod.rs
+@@ -597,7 +597,7 @@ fn set_owner_if_no_target(bdata: &mut BehaviorData) -> bool {
+ 
+ /// Handle action requests from rtsim, such as talking to NPCs or attacking
+ fn handle_rtsim_actions(bdata: &mut BehaviorData) -> bool {
+-    if let Some(action) = bdata.agent.rtsim_controller.actions.pop_front() {
++    if let Some((action, external_request_id)) = bdata.agent.rtsim_controller.pop_action() {
+         match action {
+             NpcAction::Say(target, msg) => {
+                 if bdata.agent.allowed_to_speak() {
+@@ -629,6 +629,21 @@ fn handle_rtsim_actions(bdata: &mut BehaviorData) -> bool {
+                     }
+                     bdata.controller.push_utterance(UtteranceKind::Greeting);
+                     bdata.agent_data.chat_npc(msg, bdata.emitters);
++                    if let Some(request_id) = external_request_id {
++                        crate::rtsim::external_telemetry(serde_json::json!({
++                            "event": "native_speech_emitted",
++                            "request_id": request_id,
++                            "time": bdata.read_data.time.0,
++                            "scope": "native_chat_event_emitted_not_recipient_acceptance",
++                        }));
++                    }
++                } else if let Some(request_id) = external_request_id {
++                    crate::rtsim::external_telemetry(serde_json::json!({
++                        "event": "speech_blocked",
++                        "request_id": request_id,
++                        "time": bdata.read_data.time.0,
++                        "scope": "native_allowed_to_speak_rejected",
++                    }));
+                 }
+             },
+             NpcAction::Attack(target) => {

@@ -1,0 +1,22 @@
+Offline evidence: Python native_talk.py file-only unittest
+
+Command:
+  python3 tools/veloren_native_v0/test_native_talk.py -v
+
+Exit code: 0
+
+Captured stdout/stderr:
+test_appends_typed_request_and_cancel_lines (__main__.NativeTalkCliTests.test_appends_typed_request_and_cancel_lines) ... ok
+test_events_filters_by_request_id (__main__.NativeTalkCliTests.test_events_filters_by_request_id) ... ok
+test_follow_waits_for_newline_when_row_is_appended_in_parts (__main__.NativeTalkCliTests.test_follow_waits_for_newline_when_row_is_appended_in_parts) ... ok
+test_non_follow_labels_unterminated_tail_incomplete (__main__.NativeTalkCliTests.test_non_follow_labels_unterminated_tail_incomplete) ... ok
+test_rejects_invalid_ttl_and_self_target_without_appending (__main__.NativeTalkCliTests.test_rejects_invalid_ttl_and_self_target_without_appending) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.063s
+
+OK
+
+Scope: the tests use temporary JSONL files to verify CLI validation, request
+and cancellation append, filtered event reading, and split-line follow behavior.
+No Veloren process, world, NPC, save, or game result was involved.

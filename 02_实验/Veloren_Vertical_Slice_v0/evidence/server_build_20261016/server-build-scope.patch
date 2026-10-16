@@ -1,0 +1,36 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -1,31 +1,7 @@
+ [workspace]
+ resolver = "2"
+-members = [
+-    "client",
+-    "client/i18n",
+-    "common",
+-    "common/assets",
+-    "common/base",
+-    "common/dynlib",
+-    "common/ecs",
+-    "common/frontend",
+-    "common/i18n",
+-    "common/net",
+-    "common/query_server",
+-    "common/state",
+-    "common/systems",
+-    "network",
+-    "network/protocol",
+-    "rtsim",
+-    "server",
+-    "server/agent",
+-    "server-cli",
+-    "voxygen",
+-    "voxygen/anim",
+-    "voxygen/egui",
+-    "voxygen/i18n-helpers",
+-    "world",
+-]
++members = ["server-cli"]
++default-members = ["server-cli"]
+ 
+ ### PACKAGE ###
+ [workspace.package]

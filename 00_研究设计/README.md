@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-2026-10-16 当前执行入口是 [Veloren 原生世界纵向验证](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md)，须先通过未改原版 NPC 基线，未通过不做目标接入或作者节点。[OpenXRay 源码交付](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)与[前轮载体审查](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)保留，用户已暂时冻结 OpenXRay/RimWorld 探索。[F0/F1](CharacterDynamics_FormalProblem_v0.md)与[System Vision](Character_Dynamics_System_Vision_v0.md)的定义不因更换实例改写；当前动作只见 [TODO](TODO.md)。
+2026-10-16 当前执行入口是 [Veloren 原生世界纵向验证](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md)：环境准备已完成，可推进最薄 server 程序观测与 typedgoal 接口验证；NPC baseline 仍须由内部 JSONL 建立，GUI 不能替代，未达成不宣称 PASS，且不启用作者节点或 LLM。[OpenXRay 源码交付](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)与[前轮载体审查](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)保留，用户已暂时冻结 OpenXRay/RimWorld 探索。[F0/F1](CharacterDynamics_FormalProblem_v0.md)与[System Vision](Character_Dynamics_System_Vision_v0.md)的定义不因更换实例改写；当前动作只见 [TODO](TODO.md)。
 
 2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
 

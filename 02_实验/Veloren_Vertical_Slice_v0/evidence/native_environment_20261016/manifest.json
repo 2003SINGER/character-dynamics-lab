@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-16",
+  "scope": "environment preparation only; no NPC baseline or control-loop result",
+  "official_artifact": {
+    "bytes": 404762532,
+    "sha256": "4fbd5cf1794e149ec9bad38dcbf34d1a9b4e1eda428e8be0a28f12eacec29afc",
+    "binary_sha256": "70572f61dbde6395f3bb737d0031ebb5c1907e0567cf82b2a33d77481b24ec28",
+    "build_commit": "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248",
+    "source": "official GitLab v0.18.0 artifact; not GitHub tag b2f1060",
+    "app_wrapper": "binary copy with linked assets; signature and quarantine unchanged"
+  },
+  "interpretation": {
+    "version_probe": "exit -9; stdout and stderr are 0 bytes; cause unknown",
+    "native_a": "native launch evidence",
+    "native_app_a": "app wrapper launch and single-player world generation evidence",
+    "npc_baseline": "NOT_ESTABLISHED",
+    "current_game_process": "not running; reason unknown",
+    "screenshots_found": [],
+    "screenshot_note": "No native F4 screenshot found in Veloren userdata."
+  },
+  "files": [
+    {
+      "path": "native_runs/version.record.json",
+      "source_relpath": "_local_data/external_games/veloren_0_18_0/evidence/native_runs/20261016T112205Z-version.record.json",
+      "source_bytes": 598,
+      "source_sha256": "378c7d781b52674cac8fb1de12e36f2048232c7f47d3530d4adda71553abece2",
+      "output_bytes": 508,
+      "output_sha256": "1fcb78d9e0c5d41f1bdffbbd95e403fe43c9b8b9ea0682e9ef6b246f03c6f86f",
+      "redacted_local_paths": true
+    },
+    {
+      "path": "native_runs/version.stdout.log",
+      "source_relpath": "_local_data/external_games/veloren_0_18_0/evidence/native_runs/20261016T112205Z-version.stdout.log",
+      "source_bytes": 0,
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redacted_local_paths": false
+    },
+    {
+      "path": "native_runs/version.stderr.log",
+      "source_relpath": "_local_data/external_games/veloren_0_18_0/evidence/native_runs/20261016T112205Z-version.stderr.log",
+      "source_bytes": 0,
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redacted_local_paths": false
+    },
+    {
+      "path": "native_runs/native-a/client.stdout.log",
+      "source_relpath": "_local_data/external_games/veloren_0_18_0/evidence/native_runs/native-a-20261016T112300Z/client.stdout.log",
+      "source_bytes": 1340,
+      "source_sha256": "a95221c15c61b0c84000b778739352f96021a46ac90c6a28a6492f393d5f9bab",
+      "output_bytes": 1340,
+      "output_sha256": "a95221c15c61b0c84000b778739352f96021a46ac90c6a28a6492f393d5f9bab",
+      "redacted_local_paths": false
+    },
+    {
+      "path": "native_runs/native-a/client.stderr.log",
+      "source_relpath": "_local_data/external_games/veloren_0_18_0/evidence/native_runs/native-a-20261016T112300Z/client.stderr.log",
+      "source_bytes": 0,
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redacted_local_paths": false
+    },
+    {
+      "path": "native_runs/native-app-a/client.stdout.log",
+      "source_relpath": "_local_data/external_games/veloren_0_18_0/evidence/native_runs/native-app-a-20261016T113700Z/client.stdout.log",
+      "source_bytes": 22575,
+      "source_sha256": "654f342f4c1bff3bb68d180455db4ba1fd43830325e7ba0bf7767109f72e05ca",
+      "output_bytes": 22215,
+      "output_sha256": "429ab8deadd8c448391f5e382c849783a55197b27f447c681d09fef32f22a536",
+      "redacted_local_paths": true
+    },
+    {
+      "path": "native_runs/native-app-a/client.stderr.log",
+      "source_relpath": "_local_data/external_games/veloren_0_18_0/evidence/native_runs/native-app-a-20261016T113700Z/client.stderr.log",
+      "source_bytes": 0,
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output_bytes": 0,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redacted_local_paths": false
+    },
+    {
+      "path": "userdata/world/meta.ron",
+      "source_relpath": "_local_data/external_games/veloren_0_18_0/userdata/native-app-a-20261016T113700Z/singleplayer_worlds/world-2026-10-16-19_40_34_666/meta.ron",
+      "source_bytes": 116,
+      "source_sha256": "89bfb52eec17668df287fb3aae855a3b339ac429d8fabd0cd834c3cd17efd70e",
+      "output_bytes": 116,
+      "output_sha256": "89bfb52eec17668df287fb3aae855a3b339ac429d8fabd0cd834c3cd17efd70e",
+      "redacted_local_paths": false
+    },
+    {
+      "path": "userdata/native-app-a/voxygen/settings.ron",
+      "source_relpath": "_local_data/external_games/veloren_0_18_0/userdata/native-app-a-20261016T113700Z/voxygen/settings.ron",
+      "source_bytes": 7108,
+      "source_sha256": "e2bc69c344ab41b24c0f3f5d14ffe966e3756ab81147af6a95ea8a0a3463efb1",
+      "output_bytes": 7103,
+      "output_sha256": "f998d0d7dbef1cdc9fa21d3725b2906ab451a457da6bedd956e20d7b639b9a82",
+      "redacted_local_paths": true
+    }
+  ],
+  "excluded": [
+    "account profile",
+    "database/WAL/SHM",
+    "map.bin",
+    "RTSim data",
+    "binaries",
+    "assets",
+    "source",
+    "download_attempts"
+  ]
+}

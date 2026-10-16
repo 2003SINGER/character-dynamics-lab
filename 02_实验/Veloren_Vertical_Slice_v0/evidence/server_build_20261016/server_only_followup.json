@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "scope": "Server-only build isolation and dependency-fetch diagnostics; no Rust compilation or native NPC run",
+  "source_commit": "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248",
+  "current_interface_patch_sha256": "b9edac2224a558ef9e681be873a00bc23faa2623aa173c5b72fdc8499b802b57",
+  "source_directory": "$PROJECT/_local_data/external_games/veloren_0_18_0/source_git_1d12f35e",
+  "build_copy": "$PROJECT/_local_data/external_games/veloren_0_18_0/source_build_serveronly",
+  "build_scope_patch": {
+    "path": "server-build-scope.patch",
+    "sha256": "d0279ca7d3abae1ff708809178dfebb660a17692a9f8845ddbc2b0425a826ce3",
+    "meaning": "Only root workspace members/default-members are restricted to server-cli in a separate copy. Upstream path dependencies remain. Original Cargo.toml unchanged; all dependency versions and both lockfiles unchanged.",
+    "both_lockfile_sha256": "cc0d0eb5561e6463aeac5bc7a1ed50a3256a3a041210bf1e2cec9a0c9ae5348f",
+    "validation": "Parent independently compared both lock hashes, checked the 8-file interface patch can reverse-apply, and checked the build-scope patch can apply to the fixed original source."
+  },
+  "common_command": "cargo check --locked -p veloren-server-cli --no-default-features --features worldgen,persistent_world --jobs 2",
+  "common_environment": {
+    "CARGO_HOME": "$LOCAL_ROOT/rust-local/cargo-home",
+    "RUSTUP_HOME": "$LOCAL_ROOT/rust-local/rustup-home",
+    "CARGO_TARGET_DIR": "$LOCAL_ROOT/source-target",
+    "RUSTFLAGS": "-C debuginfo=0",
+    "toolchain": "nightly-2025-09-08-aarch64-apple-darwin"
+  },
+  "attempts": [
+    {
+      "id": "server-only-offline",
+      "arguments_added": "--offline",
+      "exit_code": 101,
+      "result": "Missing cansi registry metadata; no longer resolving client-only conrod_core. Offline diagnostic only.",
+      "stdout_file": "server-only-offline.stdout",
+      "stderr_file": "server-only-offline.stderr",
+      "source_stderr_sha256": "944b45983d9db82703ab1ce749ef74d97e5edfeaeda23fda0007aff57d49462f",
+      "output_stderr_sha256": "a845051f0bd69ddb23b69e1a7ddc23ec8681f304ace373a5194780c96f9e19f1",
+      "redaction": "Local canonical project prefix replaced with $PROJECT; original preserved under ignored local data."
+    },
+    {
+      "id": "server-only-proxy-online",
+      "exit_code": 130,
+      "observed_elapsed_seconds_before_interrupt": 288,
+      "network_overrides": "Process-local Cargo/Git proxy http://127.0.0.1:10081; HTTP multiplexing false, timeout 30, retries 0.",
+      "result": "Manually interrupted; stderr only Updating crates.io index. No cache mtime growth during this attempt. Not a Cargo timeout or compiler failure.",
+      "stdout_file": "server-only-online-interrupted.stdout",
+      "stderr_file": "server-only-online-interrupted.stderr",
+      "stderr_sha256": "d8ffa7e3f4701a51662537e5de16ab791de679a9a0d1af4adea4061c5e3475cf"
+    },
+    {
+      "id": "server-only-direct-online",
+      "arguments_added": "-vv",
+      "network_overrides": "Process-local direct transport: Cargo HTTP proxy and HTTP(S)/ALL_PROXY cleared; Git http.proxy empty; HTTP multiplexing false, timeout 30, retries 0.",
+      "exit_code": null,
+      "exit_code_note": "Not captured. Worker session 65326 was no longer available when parent attempted to recover its result; do not infer 101 from stderr.",
+      "elapsed_seconds": null,
+      "result": "Cargo emitted error: failed to get rusqlite; index.crates.io/ru/sq/rusqlite could not resolve host (curl error 6). No compiler output.",
+      "stdout_file": "server-only-direct-check.stdout",
+      "stderr_file": "server-only-direct-check.stderr",
+      "source_stderr_bytes": 462,
+      "source_stderr_sha256": "97b800ac43ba9c442648161e1d6cf02c462ee1636d52ac152d8f9ea085b758b8",
+      "output_stderr_bytes": 411,
+      "output_stderr_sha256": "84c5650262e9ffe8428e7e6c22ec76c4f738fbbe268a997a2ecc30bf7f54dd42",
+      "redaction": "Local canonical project prefix replaced with $PROJECT; original preserved under ignored local data."
+    }
+  ],
+  "specific_url_diagnostics": {
+    "url": "https://index.crates.io/ca/ns/cansi",
+    "proxy": {
+      "exit_code": 28,
+      "http_code": "000",
+      "bytes": 0,
+      "seconds": 10.000721,
+      "error": "SSL connection timeout",
+      "metrics_file": "cansi-index.metrics",
+      "metrics_sha256": "82420219166d81079578a865853ef6e0cf4d25f9bc26bf539b6922a67aadb718",
+      "stderr_file": "cansi-index.stderr",
+      "stderr_sha256": "2d4a033283d9a669f5a9d073665c1a087a87bb61341e1811a0e068f1efa0425f"
+    },
+    "direct": {
+      "exit_code": 0,
+      "http_code": "200",
+      "bytes": 3443,
+      "seconds": 2.026976,
+      "metrics_file": "cansi-index-direct.metrics",
+      "metrics_sha256": "51917db18a5746898f7d7cd2dc448654578a829f548fb968422651d0e0142c4a",
+      "stderr_file": "cansi-index-direct.stderr",
+      "note": "One successful curl request does not establish reliable Cargo registry access. Body and full HTTP headers stay local."
+    }
+  },
+  "final_state": {
+    "classification": "DEPENDENCY_FETCH_BLOCKED",
+    "rust_compiler_reached": false,
+    "server_binary_built": false,
+    "native_baseline_run": false,
+    "external_request_run": false,
+    "http_trace_started": false,
+    "active_cargo_rustc_veloren_processes_at_parent_final_check": 0,
+    "latest_observed_available_disk_gib_approx": 14,
+    "global_configuration_changed": false,
+    "no_more_build_or_network_retries_in_this_work_package": true
+  }
+}

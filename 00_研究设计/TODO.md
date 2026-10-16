@@ -12,12 +12,12 @@
 
 ## SYSTEM / APPLICATION TRACK
 
-2026-10-16 最新授权转为 **Veloren v0.18.0 原生世界纵向验证**：先运行未改原版并取得持续 NPC 基线；未通过不实施目标接入或作者节点。OpenXRay 与 RimWorld 接入探索由用户暂时冻结，不再选游戏；旧源码、失败和结果保留，不重写 F0/F1、冻结 Runtime 或历史实验。
+2026-10-16 当前授权为 **Veloren v0.18.0 有限原生验证**：官方 client 与 singleplayer world 已启动，状态 `ENVIRONMENT_PREPARED`；NPC 程序采集 `NOT_ESTABLISHED`，外部目标闭环 `NOT_RUN`。用户撤销 GUI baseline 路径，授权最薄 server 源码观测及 typedgoal 程序闭环；禁止 GUI、作者节点、LLM。OpenXRay/RimWorld 探索冻结；旧源码与下载失败作为历史保留，不改 F0/F1、冻结 Runtime 或历史实验。
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| VELOREN-VERTICAL-SLICE-V0 | **阶段1：官方下载受阻；NATIVE_RUN=NOT_RUN** | 保留下载断点与失败记录；完整官方 ARM64 包可用后，从原版单人运行和 NPC 基线恢复，不以源码替代实跑，不自动跨过关卡 | [唯一 RESULTS](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md)；A 未建立、B/C 未运行；不自行 CLOSED，不扩选材 |
-| OPENXRAY-NPC-DECISION-ADMISSION-V0 | **接入探索 DEFERRED_BY_USER；原源码交付保留** | 用户决定先试 Veloren；不恢复 CoP 数据/接口调查、不自动开发 C++ 桥或 RimWorld | [原 RESULTS](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)；原版验证 BLOCKED 与 NATIVE_RUN=NOT_RUN 不改 |
+| VELOREN-VERTICAL-SLICE-V0 | **DEPENDENCY_FETCH_BLOCKED；NPC_PROGRAM_COLLECTION=NOT_ESTABLISHED；EXTERNAL_TARGET_LOOP=NOT_RUN** | 固定 nightly 已安装；有限 `TalkToNpc` 补丁及 Python 调用器已落地，文件测试 5/5；Cargo 获取官方索引时 DNS 失败，尚未编译。恢复依赖访问后完成 server 编译与真实 NPC baseline/请求/结束后活动验收；不启用 `Gather`、GUI、作者节点或 LLM | [唯一 RESULTS](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md)；保留原始构建失败与环境证据；不是等待试玩，不自行 CLOSED，不扩选材 |
+| OPENXRAY-NPC-DECISION-ADMISSION-V0 | **接入探索 DEFERRED_BY_USER；原源码交付保留** | 用户决定先试 Veloren；不恢复 CoP 数据/接口调查、不自动开发 C++ 桥或 RimWorld | [原 RESULTS](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)；OpenXRay 自身历史准入状态仍由该 RESULTS 维护，与当前 Veloren 环境状态分开 |
 | CLASSIC-RPG-CARRIER-SELECTION-V0 | **此前检查点：源码补审 PARTIAL / READY_FOR_INDEPENDENT_REVIEW；无实跑** | 选材与前轮源码证据保留；本次决策接入裁决及后续条件转由上行工作包维护，不继续泛化选材 | [选材 RESULTS](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)；Exult旧优先级已撤回，源码事实/旧评分保留历史；不自行 CLOSED |
 | DOCS-PLANNER-SEMANTICS | **文档修订 / READY_FOR_INDEPENDENT_REVIEW；非新实现** | 定义修订检查点保留；后续已授权的三候选材料选型见上行，不因该文档检查点自动安装或开发 | [F0/F1](CharacterDynamics_FormalProblem_v0.md)定义角色/作者规划与语义边界；[System Vision](Character_Dynamics_System_Vision_v0.md)说明应用路线；[待核候选](未决问题与机制候选.md#2026-10-16角色规划与载体选择的待决问题)保留问题及原生/新增分账；历史运行证据不改、不自行 CLOSED |
 | NATIVE-NPC-GAME-ADMISSION-V0 | **P0 DOCUMENTARY_ADMISSION / READY_FOR_INDEPENDENT_REVIEW；无 P1 游戏准入** | 独立审阅三候选来源、状态链及 P1 stop criteria；本轮停止，不启动 P1/P2/P3+，不改历史成果 | [唯一 RESULTS](../02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)；RimWorld 是优先调查候选而非选定版本；CDDA 是 LIMITED_SOURCE_FIT/暂不选择，不作全局 NO-GO；本机未确认 Sims/DLC |
