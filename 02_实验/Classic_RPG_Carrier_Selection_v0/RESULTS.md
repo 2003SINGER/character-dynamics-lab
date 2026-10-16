@@ -1,8 +1,83 @@
 # Classic RPG Research Carrier Selection v0｜P0
 
-日期：2026-10-16。仓库审查基线：`b326d55ba34541c1b0959eac2debfd48f4c44c81`。
+## 当前裁决：可复用行为与 OpenXRay 控制交接源码审查
 
-**材料选型结论：PARTIAL / READY_FOR_INDEPENDENT_REVIEW，未 CLOSED。条件性首选：Ultima VII: The Black Gate + Exult；备选：Gothic II: Night of the Raven + OpenGothic；2006 原版 Oblivion 暂缓。**三者均未安装、构建或运行，`NATIVE_RUN = NOT_RUN`；没有候选获得完整游戏接入准入。本轮到此停止，不自动进入 P1。
+2026-10-16 后续授权；项目基线 `551bc6e525cb84c7dbf16e184b202efdd87fbb06`。**SOURCE_REVIEW_DELIVERED / PARTIAL / READY_FOR_INDEPENDENT_REVIEW，未 CLOSED；NATIVE_RUN = NOT_RUN。**用户已确认**没有合法 Call of Pripyat 数据，先完成源码审查**。本轮据此停止于源码与原版实例待核，不安装、运行或开发适配器，不用替代关卡补空项。
+
+**选材准则已修正：原游戏应提供可复用行为、前提和真实效果；角色/作者 Planner 负责组织新的行动过程。不要求游戏预先编好完整因果剧情。**Exult 的服务链仍是真实机制证据，但不足以决定研究首选；其工程优先级撤回。当前优先技术调查对象是 **Call of Pripyat 1.6.02 + OpenXRay**，**RimWorld 仅保留强备选**，不是第二个已启动的审查。下面旧三候选分数不用于本轮新排名，也不把其他游戏判为不适合研究。
+
+本轮只做最终任务的三件事：查控制链、查目标接管/交还、核实是否具备原版实例材料。附件中的论文载体表、Radiant AI 考据及其他新增游戏只是讨论背景，未在本轮重新逐篇核验，不当作已核事实或继续扩大调查清单。两名 Luna 分查源码，父级复核关键 getter、operator 切换、smart-terrain移动与脚本依赖；这些是代理内部复读，不是外部独立验收。
+
+### A. 固定版本、许可与材料
+
+上游固定为 [OpenXRay/xray-16 `c62d9d343981d50f6ed176412b85d94c61b578b5`](https://github.com/OpenXRay/xray-16/tree/c62d9d343981d50f6ed176412b85d94c61b578b5)，本轮读取的 `dev` HEAD，**不是稳定发行版**。官网称支持 **CoP 1.6.02**，不支持 Legends of the Zone/Enhanced Edition；本轮不混 Anomaly、Call of Chernobyl 或其他Mod内容。项目称支持macOS及ARM64，不等于已验证当前Mac上的这个组合；开发分支也可能损坏。[R1–R2](SOURCE_INDEX.md#openxray)
+
+`License.txt`将 OpenXRay 的修改/新增代码列为MIT，同时说明引擎衍生于GSC原引擎并要求遵循GSC EULA/内容指南；**不能将整个游戏、原始引擎与商业数据统称纯MIT**。本轮只读公开源码；少量副本在项目被Git忽略的 `_local_data/external_games/openxray_control_review_20261016/`，不发布代码副本、游戏资产或私人原文。[R1]
+
+### B. 实际控制链：不是一条可以随意改写的“总任务队列”
+
+| 层 / 已核路径 | 谁决定什么 | 外部角色规划的边界 |
+|---|---|---|
+| ALife更新：`CALifeUpdateManager::update → update_switch / update_scheduled` | 遍历对象在线/离线切换与scheduled registry，不在该函数里选择剧情目标。[R3] | 不能把控制全局ALife更新器当作“给某NPC一个任务”。 |
+| Smart-terrain任务：`CStalkerPropertyEvaluatorSmartTerrainTask::evaluate` | 从ALife registry找对应server实体，调用`brain().select_task()`后检查`m_smart_terrain_id`。基类实现已分配terrain时直接返回；无分配、允许选任务且到选择间隔时，才按enabled/suitable选terrain并register NPC。**此evaluator可能触发任务选择，不是纯只读测量。**[R4,R13] | 不能说每次evaluate都会重派；但改一个位置或布尔值仍不等于取得任务控制权。 |
+| 任务位置：`CALifeSmartTerrainTask` | 从patrol point解析game vertex、level vertex与position；它不是完整派工器。[R5] | 已有导航能力可复用，不应把此类误称自主任务生成。 |
+| NPC顶层：`CStalkerPlanner::setup/add_evaluators/add_actions` | 默认目标为内部`PuzzleSolved=true`；根据Alive、Enemy、Danger、Anomaly、Items等条件选择死亡、ALife、战斗、避险、异常区子规划器或拾取动作。[R6] | 内部`PuzzleSolved`不是作者剧情完成证据。交给这个内置求解器的目标必须绑定其可解释条件，不能直接塞自由文本；不要求外部高层语义全部变为原生变量。 |
+| ALife子规划器 | 区分无ALife、smart-terrain任务，以及无smart任务时的`SolveZonePuzzle`动作；后者常规实现仅设移动/姿态/武器等，本轮未核到实际解谜结算。operator效果是搜索模型声明，不是已经改变世界。[R4,R7] | **候选接入点是既有ALife/task选择边界**，保留顶层危险/战斗门控；具体原版脚本接缝尚未准入。 |
+| Native任务执行：`CStalkerActionSmartTerrain::execute` | 每次重新从server实体brain取得task，再写game/level path和目标位置；不可达时可请求最近可达位置，缺task有断言。[R7] | 仅从外部调用movement setter，可能被这个仍在执行的动作后续覆盖。setter不是任务层接管。 |
+| 实际结算 | 原生事件消费者及库存/移动等系统决定世界是否改变；搜索effect、发事件、到达意图都不是成功回执。[R8] | 保留原规则，不为了作者要求补虚假交付、改库存或瞬移。 |
+
+### C. 可复用动作与真实效果：已具体核到什么
+
+**拾取不依赖某条专用剧情，但仍有条件与对象选择限制。**`GatherItems`的符号前提为Alive且无Enemy/Anomaly/Danger并有Items，效果声明为Items=false。实际Items evaluator读取的是该NPC的`memory().item().selected()`，**不是全地图有物品就可任取**。[R4,R6]
+
+`CStalkerActionGatherItems::execute`使用已选物品的level vertex/位置设置移动和视线；初始化里对特定ignored-touch状态会生成take event。`generate_take_event`发出`GE_OWNERSHIP_TAKE`后，`CAI_Stalker::OnEvent`还会找实际对象并检查`inventory().CanTakeItem`：通过才更新parent、`inventory().Take`及后续处理，拒绝则发ownership reject。[R8] **这是“现成选择条件→原生执行意图→原生校验/结算”的机制证据，不是某位CoP实名NPC已实测拾取。**NPC不再选中物品也不自动证明该物品已由它取得。
+
+**原生事件接口也不是任意动作的合法授权：**本轮没有审完`CanTakeItem`内部所有条件，不能推定它重查距离、视线、所有权等全部前提。后续必须走原生选择/接近/触发路径；不能由外部随意伪发ownership事件，绕过过程后再称角色合法完成。这与“函数名叫GiveItem并不保证真的面对面交付”是同一审查原则。
+
+可组织空间因此不是零：上层可以尝试组织已有任务位置、移动、感知支持的拾取以及原生危险/战斗反应；但下列能力本轮**未证实**：任意物品的参数化拾取、NPC间交易/交涉、任意角色代做玩家任务、不同故事方案的可达性、通用关系/承诺变化。没有为了补齐它们新增动作。
+
+### D. 接管与交还：源码回答到哪一步
+
+**取得live NPC planner的Lua路径确实存在**，并非只有可构造的泛接口：[R9]
+
+`npc:motivation_action_manager()` → `script_action_planner` → 对对象进行`CAI_Stalker`类型检查 → 返回`&manager->brain()`；再经`set_goal_world_state`包装调用`set_target_state`。非Stalker对象走错误/空指针路径，不能扩大为全部游戏对象通用控制。
+
+这只证明**进程内脚本可触及现有NPC规划器**。本轮未确认现成外部RPC、认证请求、异步回执协议或安全的目标租约。`add_action`是注册operator，`setup`会绑定/重置规划器，不是“无损获得一次目标控制权”。**随意改root目标可能改变原有战斗/危险行为选择，当前不建议直接这样接管。**也不通过删除安全前提或换成常真evaluator刷成功。
+
+| 情况 | 固定源码能确认的行为 | 仍不能确认的部分 |
+|---|---|---|
+| 改目标后新解首operator不变 | 下一次update/solve后继续execute原operator，不重新initialize。[R10] | 同一operator内部如何接受新任务参数、旧进度是否有效，要看具体动作。 |
+| 新解首operator变化 | finalize旧operator → 更新current id → initialize新operator → execute。[R10] | 这不是自动暂停栈；没有证据证明原巡逻进度被保存、之后会精确续跑。 |
+| 交回ALife且terrain分配仍在 | `select_task`不会因再次调用就重新选terrain；原生task动作会重新向当前terrain取得task。[R7,R13] | 保留terrain ID不代表保留某个scheme/巡逻的精确进度；原task是否仍有效、由谁撤销仍受内容与生命周期影响。 |
+| 无合法解 | 可见内部失败/日志与`THROW(!solution().empty())`，另有空解return分支；没有正常的typed拒绝/失败回执接口。[R10] | 具体build断言处理和游戏表现未运行验证；不能称“自动回原任务”或完整不可达证明。 |
+| 切换逻辑scheme | 上游随附`xr_logic.script`会deactivate旧scheme、更新section并激活新scheme；其save/load保存section/配置与scheme自定义数据。[R11] | 保存section不等于保存任意动作精确进度；随附脚本也不等于商业原版该NPC实际配置。 |
+| 切离线/再上线 | switch manager的路径涉及server对象、销毁/重建在线表示、子物件过滤与ID处理；并非同一个live planner对象一直逐帧运行。[R3] | 原任务、临时目标、观察记忆及当前动作跨切换怎样恢复，不能仅凭此manager断言。 |
+
+还需分清：`reset_action_queue`清的是`CScriptEntity`的脚本动作队列，**不是**上表GOAP求解器的operator序列。[R12] 不把clear、reset queue或setup当作安全的“归还控制”方案。
+
+**当前建议只是可检验接缝，不是已实现设计：**优先核实际NPC的ALife/task提供者与脚本scheme如何协调，用它组织原生动作；保留顶层紧急反应。目标失败/撤回后应重新验证原生任务是否仍合法，再由原机制继续选择，不能保证回到原路径。是否确有一个足够薄的入口仍为 `HANDOFF_NOT_ADMITTED`，暂不施工。
+
+### E. 观察与原版数据缺口
+
+`memory_visible_objects / memory_sound_objects / memory_hit_objects`给出了主体感知缓存入口；ALife全局registry、smart-terrain分配和对象组织元数据则是诊断世界信息。缓存本身也可能含过时对象，不能把它直接包装成已验证的角色O。对象销毁/重建后需重新解析身份，不长期保留裸指针。[R3,R12]
+
+固定上游树**有**公开的`res/gamedata/scripts/xr_logic.script`，不能说脚本全缺；但其中调用`xr_gulag.get_npc_smart/getJob`，并依赖`xr_conditions`/`xr_effects`中的函数。固定树的scripts目录不含对应脚本，缺函数时有abort路径。这是本轮源码树的具体边界，**不是对完整商业安装包或原版游戏能力的否定**。[R11]
+
+用户已明确无合法数据。常见Mac应用/Steam目录、appid41700 manifest、官方推荐的本地数据路径也未发现安装；该检查不是全盘搜索或所有权判断。本轮**没有确认具体原版NPC、活动地点、原始配置、可交互物件/存档**，也不以Squad名、类名或Mod示例填补。`CONTENT_INSTANCE = UNKNOWN`、`OBSERVATION_CONTROL_LOOP = NOT_RUN`，加载/推进/采样/重开/存档成本全部 `NOT_MEASURED`。
+
+### F. 决定与停止点
+
+本轮确实推进了源码准入：**native planner及live Lua getter有定位；原生拾取有实际校验/接受/拒绝路径；任务、movement、scheme、GOAP队列的边界被拆清。**它比“引擎有API”更具体，但不等于外部上层目标已经能安全接管或恢复。
+
+保持 **OpenXRay为优先待准入对象，RimWorld为未启动备选**；不根据附件里未经本轮复核的排名宣称其他游戏落败。Exult旧证据保留，但不再因原版已有一条完整服务流程而优先开工。
+
+**下一次原版验证首先缺的是合法CoP 1.6.02数据。**具备后仍须确认构建与实际接缝，只验证一个既有Stalker、一个现成动作：无外控基线 → 只读感知/状态 → 一次受限上层选择 → 原生成功或拒绝 → 解除选择后原任务重新评估，并在独立恢复/干扰运行中检查后果。先查原版实际scheme/task绑定；无法保留危险/战斗门控、只能改世界结果或必须重写原生动作，就停止该接入路线，记录原因后再决定是否转备选。当前用户仅授权源码审查，**不自动执行这项验证、不购买、不下载数据、不继续写Adapter。**
+
+公开只提交本页增量、[来源索引](SOURCE_INDEX.md#openxray)与必要路由；原文私有归档，旧实验、C++、游戏规则与main不动。下面保留`551bc6e`的三候选历史调查，不把过去的条件性推荐伪写成从未发生。
+
+## 历史快照：551bc6e 三候选 P0
+
+以下为2026-10-16首轮调查，仓库基线`b326d55ba34541c1b0959eac2debfd48f4c44c81`。当时结论为PARTIAL、条件性首选Exult/备选OpenGothic；**该工程优先级已被上方当前裁决替代**，源码事实与未实跑记录保留。以下“下一阶段/P1”是当时方案，不是当前授权。
 
 ## 1. 问题、方法与边界
 

@@ -26,7 +26,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 ## 从这里进入
 
-2026-10-16 后续授权的[经典 RPG 三候选 P0 选型](02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`，仅材料/固定源码审查，没有安装或运行游戏，P1仅有方案。[F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md)仍定义角色 Planner 与语义分工；[上轮三候选准入](02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)与[作者义务规划](02_实验/Author_Obligation_Planning_v0/RESULTS.md)保留原结果。下一动作只见 [TODO](00_研究设计/TODO.md)。
+2026-10-16 后续[载体选型与OpenXRay控制交接源码审查](02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`：改查可重组的原生能力，而非要求游戏预写完整因果剧情；旧三候选判断保留历史，当前源码结论与缺口只见该报告。用户确认无合法CoP数据，本轮停止，未安装/运行游戏或开发Adapter。[F0/F1](00_研究设计/CharacterDynamics_FormalProblem_v0.md)与旧实验不改；下一动作只见 [TODO](00_研究设计/TODO.md)。
 
 2026-10-09 新授权已撤销“仅外围维护”：按用户目标 TXT 开发的 [NPC System Integration v0](tools/npc_system_v0/README.md) 已贯通有限作者点/线、受限世界规划、独立演员状态/承诺、GOAP/HTN 与真实执行/监测。它是 E1 之上的 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 应用样机，不改冻结 C++ Kernel，也不是完整系统、LLM 高层规划或研究收益。具体能力与限制见[唯一结果](02_实验/NPC_System_Integration_v0/RESULTS.md)；旧语义草案中的未开工叙述按其记录日期理解，当前授权看 [TODO](00_研究设计/TODO.md)。
 

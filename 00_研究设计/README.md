@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-2026-10-16 当前只做文档维护：[F0/F1](CharacterDynamics_FormalProblem_v0.md)拥有角色 Planner、自驱动及语义/事实边界；[System Vision](Character_Dynamics_System_Vision_v0.md)拥有应用视图；[未决问题](未决问题与机制候选.md#2026-10-16角色规划与载体选择的待决问题)拥有载体待核线索。旧[三候选准入](../02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)与[作者义务开发结果](../02_实验/Author_Obligation_Planning_v0/RESULTS.md)保留原事实，不能据本次定义调整推断新游戏已运行。当前动作只见 [TODO](TODO.md)。
+2026-10-16 后续授权的[载体选型与OpenXRay控制交接源码审查](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)已交付并停止，无游戏实跑。[F0/F1](CharacterDynamics_FormalProblem_v0.md)仍拥有角色/作者规划定义，[System Vision](Character_Dynamics_System_Vision_v0.md)拥有应用视图，[未决问题](未决问题与机制候选.md#2026-10-16角色规划与载体选择的待决问题)拥有候选边界；新源码证据不等于完整游戏准入，旧实验保留。当前动作只见 [TODO](TODO.md)。
 
 2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
 
