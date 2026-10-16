@@ -12,11 +12,12 @@
 
 ## SYSTEM / APPLICATION TRACK
 
-2026-10-16 最新授权为**OpenXRay角色目标接管/交还的源码审查**，已交付后停止；用户确认没有合法CoP数据，不安装/运行游戏、不写Adapter或Planner、不调用模型、不造替代关卡。选材看可重组能力与真实效果，不再要求原版预写完整因果剧情；当前与历史结论均由下方唯一RESULTS分层维护，不覆盖旧实验或重写F0/F1。
+2026-10-16 最新授权的 **OpenXRay 原生 NPC 决策接入准入**完成源码审查后停止；有条件的最小原版实验因无合法 CoP 数据及未验证接缝而未实施。三种入口、原生能力与 G1/G2/G3 只由下方新 RESULTS 维护，不调用模型、不造替代世界、不重写 F0/F1 或冻结代码。
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| CLASSIC-RPG-CARRIER-SELECTION-V0 | **源码补审 PARTIAL / READY_FOR_INDEPENDENT_REVIEW；无原版数据/实跑** | 已停止泛化选材，完成OpenXRay控制链/接管边界核查；独立审阅后，后续实例验证仍需合法数据及明确授权，不自动施工。旧P0材料交付获接受，不等于载体完整准入 | [唯一 RESULTS当前裁决](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md#当前裁决可复用行为与-openxray-控制交接源码审查)；Exult旧优先级已撤回，源码事实/旧评分保留历史；不自行 CLOSED |
+| OPENXRAY-NPC-DECISION-ADMISSION-V0 | **SOURCE_REVIEW_DELIVERED / READY_FOR_INDEPENDENT_REVIEW；原版验证 BLOCKED** | 独立审阅接入裁决；具备合法 CoP 1.6.02 数据后，先确认一个原版 NPC 的既有任务/脚本入口，再按本工作包已授权的单 NPC 最小验证检查。当前停止，不自动开发完整 Planner、C++ 桥或 RimWorld | [唯一 RESULTS](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)；源码可触达不等于安全交接；NATIVE_RUN=NOT_RUN，不自行 CLOSED |
+| CLASSIC-RPG-CARRIER-SELECTION-V0 | **此前检查点：源码补审 PARTIAL / READY_FOR_INDEPENDENT_REVIEW；无实跑** | 选材与前轮源码证据保留；本次决策接入裁决及后续条件转由上行工作包维护，不继续泛化选材 | [选材 RESULTS](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)；Exult旧优先级已撤回，源码事实/旧评分保留历史；不自行 CLOSED |
 | DOCS-PLANNER-SEMANTICS | **文档修订 / READY_FOR_INDEPENDENT_REVIEW；非新实现** | 定义修订检查点保留；后续已授权的三候选材料选型见上行，不因该文档检查点自动安装或开发 | [F0/F1](CharacterDynamics_FormalProblem_v0.md)定义角色/作者规划与语义边界；[System Vision](Character_Dynamics_System_Vision_v0.md)说明应用路线；[待核候选](未决问题与机制候选.md#2026-10-16角色规划与载体选择的待决问题)保留问题及原生/新增分账；历史运行证据不改、不自行 CLOSED |
 | NATIVE-NPC-GAME-ADMISSION-V0 | **P0 DOCUMENTARY_ADMISSION / READY_FOR_INDEPENDENT_REVIEW；无 P1 游戏准入** | 独立审阅三候选来源、状态链及 P1 stop criteria；本轮停止，不启动 P1/P2/P3+，不改历史成果 | [唯一 RESULTS](../02_实验/Native_NPC_Game_Admission_v0/RESULTS.md)；RimWorld 是优先调查候选而非选定版本；CDDA 是 LIMITED_SOURCE_FIT/暂不选择，不作全局 NO-GO；本机未确认 Sims/DLC |
 | AUTHOR-OBLIGATION-PLANNING-V0 | **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW；未 CLOSED；限定证据已公开** | 已推 webgpt-sync 并核验对应 CI，失败与局限见唯一 owner；本轮停止，供独立审阅，不自动新增游戏、正式 B1/B2 或通用 Director | [唯一 RESULTS](../02_实验/Author_Obligation_Planning_v0/RESULTS.md)；[固定协议](../02_实验/Author_Obligation_Planning_v0/PROTOCOL.md)；[代码入口](../tools/author_obligation_planning_v0/README.md) |

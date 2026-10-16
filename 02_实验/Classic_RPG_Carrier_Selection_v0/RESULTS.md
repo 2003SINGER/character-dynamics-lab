@@ -1,5 +1,7 @@
 # Classic RPG Research Carrier Selection v0｜P0
 
+> 后续工作包：[OpenXRay 原生 NPC 决策接入准入](../OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)拥有本次三路入口比较及 G1/G2/G3 裁决。下文是前一轮选材/源码检查点，保留其来源、限制和历史，不作为原版运行证据。
+
 ## 当前裁决：可复用行为与 OpenXRay 控制交接源码审查
 
 2026-10-16 后续授权；项目基线 `551bc6e525cb84c7dbf16e184b202efdd87fbb06`。**SOURCE_REVIEW_DELIVERED / PARTIAL / READY_FOR_INDEPENDENT_REVIEW，未 CLOSED；NATIVE_RUN = NOT_RUN。**用户已确认**没有合法 Call of Pripyat 数据，先完成源码审查**。本轮据此停止于源码与原版实例待核，不安装、运行或开发适配器，不用替代关卡补空项。
