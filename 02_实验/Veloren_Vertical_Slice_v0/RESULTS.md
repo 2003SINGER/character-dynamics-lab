@@ -1,8 +1,11 @@
 # Veloren Vertical Slice v0 — 阶段结果
 
-日期：2026-10-16  
-固定源码版本：Veloren `v0.18.0`，commit `b2f1060df37ba4eb2eb001ac1b115beaf404f656`  
-项目起点：`webgpt-sync@91ebd876cef823e8f8b69c07a0d1af941b6b5b56`，远端与本地一致。  
+日期：2026-10-16
+
+固定源码版本：Veloren `v0.18.0`，commit `b2f1060df37ba4eb2eb001ac1b115beaf404f656`
+
+项目起点：`webgpt-sync@91ebd876cef823e8f8b69c07a0d1af941b6b5b56`，远端与本地一致。
+
 当前状态：`BLOCKED_DOWNLOAD / READY_FOR_INDEPENDENT_REVIEW`；`NATIVE_RUN=NOT_RUN`，未 CLOSED。
 
 ## 当前结论
