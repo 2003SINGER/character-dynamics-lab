@@ -1,0 +1,81 @@
+{
+  "evidence_kind": "server build and Rust test evidence; curated public copy",
+  "created_local_date": "2026-10-17",
+  "source_repository": "Veloren official GitLab source snapshot",
+  "source_commit": "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248",
+  "current_patch_sha256": "1ccf5c1db8d164743838b1bcb67a73adea88dd7a180f64c45b4c204c48097936",
+  "toolchain": "nightly-2025-09-08-aarch64-apple-darwin",
+  "cargo_lock_sha256": "cc0d0eb5561e6463aeac5bc7a1ed50a3256a3a041210bf1e2cec9a0c9ae5348f",
+  "cargo_lock_modified": false,
+  "raw_attempt_index": {
+    "filename": "attempt_index.json (ignored local evidence; not copied because it contains local absolute paths)",
+    "size_bytes": 25535,
+    "sha256": "d250c9ede54f94365e342e9ff51ec9497fd63a453d1458481ca649ac64396ab1"
+  },
+  "excluded_raw_metadata": [
+    {"filename": "D run_manifest.json (ignored local metadata; not copied because it contains private world/configuration paths and identifiers)", "size_bytes": 4343, "sha256": "02fdfc65dc206aaaa4179653b4e29fe9bf3dbed56554dcaf232685eaffec8c80"},
+    {"filename": "native-talk-probe-auto-d-20261017T110500+0800.stdout (ignored raw helper output; absolute local paths redacted in public transcript)", "size_bytes": 1947, "sha256": "cf7fc6d098248b917c821d41e51913a21b1dbecf8fa06e7fb8f815a4ee8439ae"},
+    {"filename": "native-talk-probe-auto-d-20261017T110500+0800.stderr", "size_bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+  ],
+  "status_notes": [
+    "The raw attempt index associates run05 cargo check exit 0 with patch f3545b19fab29e977c459c002d8231f649d0dec8d43cff0e78d71d0ec0013bd0, not the current patch 1ccf5c1.",
+    "Final focused tests associated with current patch 1ccf5c1: veloren-common 1 passed, veloren-rtsim 6 passed, veloren-server 5 passed (12 total).",
+    "The broader 136-passed/18-ignored selected-suite run belongs to earlier patch e480a5e6b78734d2fbc67c21a7e2e4fc1f1a3a3d32a87dcb124df05d826c5a23; it is not relabeled as current-patch results.",
+    "server-build-final.stderr contains a Cargo Finished line after 4m54s, but this build has no run record in the raw attempt index at the time of this bundle. It is marked RUN_COMPLETE_INDEX_PENDING; no exit status or patch attribution is asserted.",
+    "The stable no-request native baseline, zero-input C run, and single harness-controlled D run are included as separate verbatim event/server-log bundles and bounded readbacks. D is PARTIAL: cancel completed before native action; positive request reached native_talk_completed_without_speech, with no agent effect or NPC task PASS. B was not started."
+  ],
+  "native_baseline_readback": {
+    "status": "frozen raw logs; matched to frozen raw attempt index",
+    "binary_sha256": "2760baacf42ad8b403f9ee94c721503ff0e7521f40f20d865e9a8b331ea7ab28",
+    "started_local": "2026-10-17T10:45:23+0800",
+    "finished_local": "2026-10-17T10:49:25+0800",
+    "exit_code": 0,
+    "patch_sha256": "1ccf5c1db8d164743838b1bcb67a73adea88dd7a180f64c45b4c204c48097936",
+    "runner_report": "SIGUSR1 with configured 120-second grace; raw attempt index records exit 0",
+    "simulation_clock_seconds": {"first": 0.033333333, "last": 230.47741516700054, "span": 230.44408183400053},
+    "wall_clock_duration": "not inferred; index start/finish are retained as the run record",
+    "event_counts": {"native_npc_catalog": 24, "native_npc_baseline": 454},
+    "sampled_npc_uids": [434, 465],
+    "sampled_modes": {"loaded": 147, "simulated": 307},
+    "loaded_talkable_pair_counts_by_catalog_time": [0, 58, 59, 52, 33, 20, 22, 15, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "interpretation_boundary": "Simulated-pair hints are not loaded speak-gated pairs. Both sampled NPCs perform native pirate hideout travel and later change from loaded to simulated. All sampled controller intent arrays are empty; no request path was set."
+  },
+  "published_files": [
+    {"path": "full-workspace-rsproxy-check-run03-finalpatch.stdout", "size_bytes": 82, "sha256": "d771d5fa0dc08f298e4323167faf87f4676a572766fe71786df79646253341c4", "source": "raw stdout copied verbatim"},
+    {"path": "full-workspace-rsproxy-check-run04-frozen.stdout", "size_bytes": 82, "sha256": "d771d5fa0dc08f298e4323167faf87f4676a572766fe71786df79646253341c4", "source": "raw stdout copied verbatim"},
+    {"path": "targeted-rust-tests-run03-with-assets.stdout", "size_bytes": 11835, "sha256": "1c74917b9cfc1888eb32840f27913f7d1115b81bad2fbae05ac54cc0f4a58647", "source": "raw stdout copied verbatim; patch e480a5e6; exit 0 per raw index"},
+    {"path": "test-common-focused.stdout", "size_bytes": 234, "sha256": "17a227d16578a09ea48f819541a383f84804e39f8caac511eabff7cf5cad3b5d", "source": "raw stdout copied verbatim; patch e480a5e6; 1 passed"},
+    {"path": "test-rtsim-focused-final.stdout", "size_bytes": 722, "sha256": "8d842369a58adbd4fac21a4cecb0a6df53e052b146825dd6dcfc05fe5495a92c", "source": "raw stdout copied verbatim; patch 1ccf5c1; 6 passed"},
+    {"path": "test-server-focused-final.stdout", "size_bytes": 605, "sha256": "22ba3ad80527e56fa37acf877310b89eec63dca000eb393574424053b9b83305", "source": "raw stdout copied verbatim; patch 1ccf5c1; 5 passed"},
+    {"path": "diagnostic_excerpts.md", "size_bytes": 3466, "sha256": "2f3c4a84689940b10bc6006f456612d76beb82e58a06a0b7d2d380df2ff19710", "source": "curated minimal diagnostics; not a verbatim raw log"},
+    {"path": "native-events-baseline-plugins-20261017T105000+0800.jsonl", "size_bytes": 319766, "sha256": "7e77f06eaecf503218387933750c87dfaa0fe16f00e774836c01e9d634f33979", "source": "frozen raw event JSONL copied verbatim; includes loaded and simulated tail"},
+    {"path": "native-baseline-plugins-20261017T105000+0800.stdout", "size_bytes": 1752, "sha256": "c91c34ade22cc9dffb8568c61a16c7289eaf9059a3ea7e0060850de79b08c8ff", "source": "frozen raw stdout copied verbatim; includes plugin-assets missing-file error"},
+    {"path": "native-baseline-plugins-20261017T105000+0800.stderr", "size_bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "source": "frozen empty raw stderr copied verbatim"},
+    {"path": "native_baseline_readback.md", "size_bytes": 2492, "sha256": "db2679847ba02e76aff66e580e95a95429c34487e0d9275ea1d69f01ca8b0938", "source": "bounded independent readback summary matched to frozen run index"},
+    {"path": "native-baseline-20261017T103000+0800.stdout", "size_bytes": 1578, "sha256": "4dd18922999e44fe541fcd35d8af95387f493ef830ed88f9ac76bbfa829d5bf9", "source": "raw no-plugins startup panic stdout copied verbatim"},
+    {"path": "native-baseline-20261017T103000+0800.stderr", "size_bytes": 225, "sha256": "7c2e279b5dd9db4211d9e816e406788736167b4e58af7abd695dfb6b56a99b87", "source": "raw no-plugins startup panic stderr copied verbatim"},
+    {"path": "native-events-baseline-20261017T103000+0800.jsonl", "size_bytes": 1989, "sha256": "27c5ab610ecec5e95e310591c5e6ad1726b86541300c65f0120eb95ef1601644", "source": "raw no-plugins startup panic events copied verbatim"},
+    {"path": "native-events-request-c-20261017T110000+0800.jsonl", "size_bytes": 323460, "sha256": "b2088f1b906564cbdc1b459fb1b32a8c595b4c1608915b3a67c4180a1344ca4e", "source": "raw zero-input C observation events copied verbatim"},
+    {"path": "native-request-c-20261017T110000+0800.stdout", "size_bytes": 1840, "sha256": "11b90a8bbe4010529893ebea14936efe7a5db3e61ecf865747a72560eff6b80e", "source": "raw zero-input C server stdout copied verbatim"},
+    {"path": "native-request-c-20261017T110000+0800.stderr", "size_bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "source": "raw empty C server stderr copied verbatim"},
+    {"path": "native-requests-c-zero-input-20261017T110000+0800.jsonl", "size_bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "source": "raw empty C request transcript copied verbatim"},
+    {"path": "native_request_C_readback.md", "size_bytes": 700, "sha256": "6b9f5ac2f848cb71645da7030550fc13165b28545a4e98587199db253fb8a0d8", "source": "bounded readback of zero-input C run"},
+    {"path": "native-events-auto-d-20261017T110500+0800.jsonl", "size_bytes": 258200, "sha256": "58a461e65550a887e4e90e053667e04ca8686c9364d06f6e02d0a296dfc01665", "source": "frozen D raw event JSONL copied verbatim"},
+    {"path": "native-server-auto-d-20261017T110500+0800.stdout", "size_bytes": 1752, "sha256": "ca2ef74b98918d6dada6635f00a0f89f09ff07d17d1bde1e7cc43dd58bafc09e", "source": "frozen D raw server stdout copied verbatim; plugin-assets error retained"},
+    {"path": "native-server-auto-d-20261017T110500+0800.stderr", "size_bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "source": "frozen D empty server stderr copied verbatim"},
+    {"path": "native-requests-auto-d-20261017T110500+0800.jsonl", "size_bytes": 323, "sha256": "150ea06ccde00d6bcc9444e933c7006be62ce91fa44a157d3db3f77b2cf8fe0d", "source": "D final request/cancel/positive transcript copied verbatim"},
+    {"path": "native-talk-probe-auto-d-20261017T110500+0800.stdout.redacted.jsonl", "size_bytes": 1689, "sha256": "2c2a213e23229831cf9c2e7441abb461996b8ffa2c3c6304f1a44c4eb4e74683", "source": "D helper transcript with only local file paths replaced by published basenames; raw stdout size/hash retained in ignored index"},
+    {"path": "native_run_D_config.json", "size_bytes": 3037, "sha256": "2ee0a6a0b929541f8cd3e052ab290733bb71ab0345a076b17bbc8423d692c999", "source": "limited configuration/provenance summary including actual non-personal world seed/day length and initial map/rtsim hashes; excludes database contents, assets and absolute paths"},
+    {"path": "native_run_D_readback.md", "size_bytes": 3031, "sha256": "14838738b67e3cf1d065fe10f9eb339e1f8e38b31c6e78547f80f72033664e2b", "source": "bounded six-item runtime readback; PARTIAL only"},
+    {"path": "test-common-focused-final-1cc-cwdfix.stdout", "size_bytes": 234, "sha256": "17a227d16578a09ea48f819541a383f84804e39f8caac511eabff7cf5cad3b5d", "source": "raw final-patch focused common test stdout; 1 passed"}
+  ],
+  "large_or_sensitive_raw_logs_not_copied": [
+    {"filename": "full-workspace-rsproxy-check-run02.stderr", "size_bytes": 11650163, "sha256": "a1328c7a93cdfbc2b875607aa31fb98a0e52c82bc39cd6b67205669a373c1ce2", "excerpt": "E0277 compile diagnostic only", "exit_code": 101, "patch_sha256": "37f5932fdf3abf2564314f897032b14f2a8b187697d529d1b65b4ef282c695ca"},
+    {"filename": "full-workspace-rsproxy-check-run03-finalpatch.stderr", "size_bytes": 2732256, "sha256": "b3078a9649fa5f88cf61b717b57a347b664a79a85609ed62f958f9a3633aaed5", "excerpt": "E0308 compile diagnostic only", "exit_code": 101, "patch_sha256": "f866e8362fc10342d0331b00f9fcb0171ab13b5b1cc8feaa8c903520f0c6fb59"},
+    {"filename": "full-workspace-rsproxy-check-run04-frozen.stderr", "size_bytes": 2595252, "sha256": "d09164b3461ba3ab3eccf8d680412a738eba81a4c5b2ee4e6730ff408e24ea7e", "excerpt": "E0716 compile diagnostic only", "exit_code": 101, "patch_sha256": "fcf91c8eb584827d5e867645c0feb279eb7ccb77c48e09380fa52f2f3d37b70f"},
+    {"filename": "full-workspace-rsproxy-check-run05.stderr", "size_bytes": 2553833, "sha256": "0508c6aea3afb5abbd69c1c18c11a2417d607446169cd5eb9d19eb816189c36a", "excerpt": "Cargo Finished line only", "exit_code": 0, "patch_sha256": "f3545b19fab29e977c459c002d8231f649d0dec8d43cff0e78d71d0ec0013bd0"},
+    {"filename": "targeted-rust-tests.stderr", "size_bytes": 179465, "sha256": "cf68d47968679b572bb1e1a3873952bb0b4b9089434a06dbe293ebf7d738672f", "excerpt": "E0433 HashSet diagnostic only; tests did not execute", "exit_code": 101, "patch_sha256": "f3545b19fab29e977c459c002d8231f649d0dec8d43cff0e78d71d0ec0013bd0"},
+    {"filename": "server-build-final.stderr", "size_bytes": 16022, "sha256": "fa6a09de1e3afbe7bed83d3a36d9f6e4493cb3b7952d05977eb2ba99e9e35cf7", "excerpt": "Cargo Finished line; run record pending", "status": "RUN_COMPLETE_INDEX_PENDING"}
+  ],
+  "privacy_and_scope": "No authentication headers, signed URLs, user/account data, absolute local paths, raw HTTP traces, binaries, game assets, databases, or full upstream source are published. D helper raw stdout remains local because it contains absolute paths; a path-redacted transcript is published. Raw originals are unchanged."
+}

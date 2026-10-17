@@ -1,0 +1,3 @@
+# Zero-input observation C
+
+Run C submitted no requests: the request file remained empty (0 bytes, SHA-256 of empty content), and the event trace contains no request lifecycle events. It is retained as an observation-only run, not as a negative NPC response. The run did observe NPC 434 and 465 close together while both were loaded and speak-capable (about 2.29 m at game time 26.476); at the next inspected sample around 48.988 they were about 29.1 m apart, and NPC 465 later became simulated. The close-pair interval was missed by manual polling latency; no stale pair was used and no request outcome is claimed. The complete raw events and server stdout/stderr are preserved alongside this note.

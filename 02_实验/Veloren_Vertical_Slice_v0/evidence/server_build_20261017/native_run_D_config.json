@@ -1,0 +1,52 @@
+{
+  "run_id": "native-server-auto-d-20261017T110500+0800",
+  "classification": "PARTIAL",
+  "source": {
+    "repository": "official Veloren GitLab v0.18.0 source",
+    "commit": "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248",
+    "patch_sha256": "1ccf5c1db8d164743838b1bcb67a73adea88dd7a180f64c45b4c204c48097936",
+    "binary_sha256": "2760baacf42ad8b403f9ee94c721503ff0e7521f40f20d865e9a8b331ea7ab28",
+    "cargo_lock_sha256": "cc0d0eb5561e6463aeac5bc7a1ed50a3256a3a041210bf1e2cec9a0c9ae5348f",
+    "runner_script": "tools/veloren_native_v0/run_talk_probe.py",
+    "runner_script_sha256": "db90f0ae1198a8da2a26fbfb9ca0cb585a208c791079bd16084a6f549941ac7a"
+  },
+  "settings_hashes": {
+    "server_settings_sha256": "ac12994c235a6ee2eb473db1d4eeac4417bc658e84c906d46c5d4516c6c476f0",
+    "cli_settings_sha256": "d8e4fc34c0d0a174ec078a6b77637b113839886703d896bcdce6b5f0a0a09e0f"
+  },
+  "world_inputs": {
+    "world_seed": 130626853,
+    "day_length_minutes": 30.0,
+    "map_bin_sha256": "2560ecb22feccc642aaf75addfaf22e3066defe8668ca052770ef902a2c5e2da",
+    "rtsim_data_sha256_before_run": "e200ca46e0ce9a8fb2e75a37ecf66c7a705f861f1b1cc02e494715f0b029a623",
+    "reproduction_boundary": "The isolated original save and game assets remain local, not published. These non-personal parameters and hashes identify the actual run input; the seed alone does not reconstruct the saved NPC history."
+  },
+  "scope": {
+    "network": "TCP/web loopback with ephemeral ports; query disabled; no public-server connection or client",
+    "native_persister_uids": [434, 465],
+    "observed_uids": [445, 465],
+    "events_enabled": true,
+    "no_gui": true,
+    "world": "fresh isolated copy of the established single-player world; source world unchanged; no game assets or database contents published"
+  },
+  "input": {
+    "initial_bytes": 0,
+    "initial_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final_bytes": 323,
+    "final_sha256": "150ea06ccde00d6bcc9444e933c7006be62ce91fa44a157d3db3f77b2cf8fe0d",
+    "protocol": "One atomic two-record request+cancel append; wait for exact cancelled_before_native_action terminal; then one positive TalkToNpc TTL 60; no retries or further inputs."
+  },
+  "run_control": {
+    "started_local": "2026-10-17T11:06:52.798995+0800",
+    "finished_local_exact": null,
+    "shutdown": "SIGUSR1 to the exact server PID; run-specific CLI grace 1 second; supervisor reported server exit 0",
+    "game_simulation_time_last_event": 165.30137808300034,
+    "positive_event_time": 11.471950749999996,
+    "no_wall_duration_inference": true
+  },
+  "outcome": {
+    "cancel": "accepted then cancelled_before_native_action, one terminal event, no correlated speech/agent action",
+    "positive": "accepted then native_talk_completed_without_speech, one terminal event; driver logged no agent effect through TTL+20 and started a 20-second post-request observation",
+    "not_claimed": ["NPC refusal", "speech success", "recipient acceptance", "specific RNG draw", "A PASS", "B start"]
+  }
+}

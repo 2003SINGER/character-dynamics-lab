@@ -1,0 +1,11 @@
+{"harness":"probe_started","events":"native-events-auto-d-20261017T110500+0800.jsonl","requests":"native-requests-auto-d-20261017T110500+0800.jsonl","npc_uid":445,"target_uid":465,"cancel_id":"cd-native-cancel-20261017-1105","request_id":"cd-native-positive-20261017-1105","input_file_initially_empty":true,"server_control":"none"}
+{"harness":"pair_window_started","npc_uid":445,"target_uid":465,"game_time":1.076630333}
+{"harness":"pair_window_passed","seconds":5.0,"npc_uid":445,"target_uid":465,"game_time":6.187047915999997}
+{"harness":"input_transcript_negative_atomic_append","records":[{"request_id":"cd-native-cancel-20261017-1105","npc_uid":445,"target_uid":465,"source":"native-probe","ttl":60.0,"kind":"TalkToNpc"},{"cancel_request_id":"cd-native-cancel-20261017-1105"}],"os_write_calls":1,"bytes":188,"server_events_not_modified":true}
+{"harness":"cancel_control_terminal","clean":true,"reason":"cancelled_before_native_action"}
+{"harness":"pair_window_started","npc_uid":445,"target_uid":465,"game_time":6.187047915999997}
+{"harness":"pair_window_passed","seconds":5.0,"npc_uid":445,"target_uid":465,"game_time":11.323655457999996}
+{"harness":"input_transcript_positive_append","record":{"request_id":"cd-native-positive-20261017-1105","npc_uid":445,"target_uid":465,"source":"native-probe","ttl":60.0,"kind":"TalkToNpc"},"os_write_calls":1,"bytes":135,"server_events_not_modified":true}
+{"harness":"positive_wait_ttl_plus_20_timeout","agent_effect":false,"brain_terminal":true}
+{"harness":"post_request_observation_started","seconds":20.0}
+{"harness":"probe_finished_not_game_verdict","positive_agent_effect":false,"brain_terminal":true,"no_recipient_acceptance_claim":true}

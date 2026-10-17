@@ -1,14 +1,45 @@
 # Veloren Vertical Slice v0 — 阶段结果
 
-日期：2026-10-16
+记录范围：2026-10-16—17；本轮结果日期：2026-10-17。
 
 官方 binary 来源：Veloren v0.18.0 GitLab macOS ARM64 build，commit `1d12f35edd6cdbfc1fb921c167cdd7beeeffe248`。旧 `source_audit/` 的 GitHub `b2f1060df37ba4eb2eb001ac1b115beaf404f656` 仅作历史源码线索，不代表与 binary 同版。
 
-项目起点：`webgpt-sync@91ebd876cef823e8f8b69c07a0d1af941b6b5b56`，远端与本地一致。
+10-16 环境阶段起点：`webgpt-sync@91ebd876cef823e8f8b69c07a0d1af941b6b5b56`，当时远端与本地一致。本轮从 `72a37c9` 继续。
 
-当前状态：`ENVIRONMENT_PREPARED`；`INTERFACE_IMPLEMENTATION=UNCOMPILED / DEPENDENCY_FETCH_BLOCKED`；`NPC_PROGRAM_COLLECTION=NOT_ESTABLISHED`；`EXTERNAL_TARGET_LOOP=NOT_RUN`。本轮已交付有限 server 接口补丁与文件调用器，但服务器依赖获取失败，尚未进入 Rust 编译；不作原生运行通过或 CLOSED 声明。
+当前状态：**`READY_FOR_INDEPENDENT_REVIEW / A=PARTIAL / B=NOT_STARTED_A_GATE`**。修改版服务器、真实 headless NPC 基线与取消负控已建立；唯一正请求进入 Brain，但终态为 `native_talk_completed_without_speech`，未观测到 Agent 发言或阻止事件。不能称完整接口 PASS、规划通过或 CLOSED。本轮有界执行在此停止，不以重试或改种子刷成功。下列 10-16 记录保留为历史检查点。
 
-## 当前结论
+## 2026-10-17 本轮授权与实际结果
+
+本轮从 `72a37c940f09d3983a5747be33d8509f958b588f` 继续。完整审查已存 ignored `_local_data/source_archive/2026-10-17_veloren_review/`，原文 SHA-256 为 `b34a84c4f73ff7d419dd911be85b340c1b2f6df170272ef685962ad128391077`，不公开原文。A 先完成三项风险修正与原生运行；B 只在 A 关键能力实际证明后开始，不预写世界成功结果。
+
+已核实：原 server-only workspace 缩减会要求 Cargo 更新锁文件，因此放弃该构建范围适配；在独立构建副本恢复官方完整 workspace 清单，仍只编译 server-cli package，不启动或编译客户端。采用隔离可信 crates.io 镜像解析依赖，原 Cargo.lock 不变，真实编译错误已修；这与 10-16 的依赖 DNS 失败是不同结果。
+
+最终补丁的第一次 server build 实际 exit 0，但无 `plugins` 的调试构建在首 tick 因 `RequestPluginsEvent` 缺少已注册处理器而 exit 134。原生事件总线检查没有关闭，也没有添加空处理器；仅启用原版已有的 `plugins` feature 重建，实际 exit 0，binary SHA-256 `2760baacf42ad8b403f9ee94c721503ff0e7521f40f20d865e9a8b331ea7ab28`。两次构建和首轮崩溃均保留，不把后一次结果覆盖到前一次。
+
+无请求基线已正常结束：454 条真实 NPC 采样及 24 条 catalog，覆盖仿真时钟约 230.44 秒。UID 434 / 465 从 simulated 转为 Loaded，原生 Brain 为 `walk to pirate hideout`，Controller 为 `Goto`，ECS 位置连续变化，之后重新进入离屏模拟；不把 simulated hints 当成 Loaded 交谈对象。原样轨迹和短读回见 [baseline readback](evidence/server_build_20261017/native_baseline_readback.md)。stdout 中缺少可选 plugins assets 目录的错误原样保留，服务器随后继续运行。仿真时长不冒充精确墙钟时长。
+
+随后零请求发现运行暴露了人工轮询延迟：445 / 465 曾处于约 2.29 米近距，提交前已相距约 29.1 米，因此未发出请求，不记为 NPC 拒绝。正向试验改用实时文件 harness，在同进程无请求前缀及新鲜三维距离门限成立后提交一次取消负控及唯一正向请求；不改 NPC、种子、原生随机分支或游戏能力。
+
+最终自动控制运行 D 的原始 JSONL 共 348 条：17 条 catalog、326 条 NPC 采样、2 条 `request_accepted`、1 条 `cancel_requested`、2 条 Brain 终态。两个 ID 均只接受和结算一次，没有 `native_speech_emitted`、`speech_blocked` 或活动请求的持续采样。轨迹约 258 KB、165.27 秒仿真时间，低于默认遥测预算；不能把缺少 Agent 事件解释成日志限额耗尽。
+
+| A 的固定验收项 | 本次证据与裁决 |
+|---|---|
+| 修改版服务器真实编译运行 | PASS；最终 patch `1ccf5c1…`、原锁不变、plugins build exit 0 |
+| 无请求的程序化原生基线 | PASS；434/465 的 native Brain、Controller、ECS 轨迹及加载/离屏转换 |
+| 请求进入原生行为选择 | PASS；445→465，正请求 `cd-native-positive-20261017-1105` 于 t=11.47195075 接受并由原生 Talk 返回无发言终态，不仅是文件写入 |
+| Agent 实际处理结果或明确拒绝 | **未证明**；无 Say 排队/发言/阻止记录。不能把无发言终态改写成 Agent 拒绝，也未记录具体 RNG 抽样 |
+| 外控结束后的原生行为 | PASS（有限观察）；两个 NPC 继续原有藏身处旅行/等待与位置变化，未重写历史或设置完成状态；不是长期稳定性证明 |
+| 有效负控，不伪造成功/归因 | PASS（本次取消范围）；`cd-native-cancel-20261017-1105` 于 t=6.257583541 接受、取消并终止为 `cancelled_before_native_action`，同 ID 无动作或 Agent 效果。普通/外部 Say 交错另有 Rust 测试，不冒充本次实机并发社交证据 |
+
+完整限定证据见[逐文件清单](evidence/server_build_20261017/manifest.json)；最终 D 的[独立读回](evidence/server_build_20261017/native_run_D_readback.md)、[原样服务器事件](evidence/server_build_20261017/native-events-auto-d-20261017T110500+0800.jsonl)、[原样请求输入](evidence/server_build_20261017/native-requests-auto-d-20261017T110500+0800.jsonl)与[配置/源码版本](evidence/server_build_20261017/native_run_D_config.json)均可直接复查。Cargo 大型 HTTP trace 只公开标明来源哈希的有限诊断摘录；真实服务器 JSONL 不删减，游戏资产、DB 二进制和私人原文不公开。
+
+执行脚本 `run_talk_probe.py` 只追加真实请求、读取服务器事件；负控两行由一次 OS write 提交，终态确认后再提交唯一正请求。它固定等待 TTL+20 秒及额外 20 秒后续观察，`exit 0` 只表示流程结束，不代表游戏成功。两名原 NPC 均保留自身任务；正请求之后，445 后续到达原生等待活动，465 仍有原生旅行轨迹。后续插件版 B/C/D 服务器均通过 SIGUSR1 正常退出，首轮无插件启动的 exit 134 另行保留；未继续 GUI、作者节点、LLM 或工作包 B。
+
+**B 的回答：本轮没有开始规划新行动过程或验证作者约束。**A 的 Agent 边界尚未通过，因此不提前运行 B，也不把 B 判为平台 `UNSUPPORTED`。若后续继续验证 Agent，须先固定有限重复采样或分支观测方案，保留本次无发言结果；不将“重试到说话”为隐含验收策略。
+
+聚焦测试实际执行：common 动作队列 1/1、rtsim 请求/归因/取消/过期 6/6、server 去重/筛选/终态 5/5 均通过。最终补丁 SHA-256 为 `1ccf5c1db8d164743838b1bcb67a73adea88dd7a180f64c45b4c204c48097936`（9 个 Rust 文件）。`mismatched_request_id_is_not_attached_to_say` 只测归因隔离，不宣称测试了完整 Agent 发言拒绝。初次广测未指定资源目录，common 52 pass / 48 资源缺失 fail；指定现有官方 assets 后广测 exit 0，另行保留其结果，不用它代替聚焦测试。为保留磁盘安全空间，已仅清除本轮 target 下约 3.44 GiB 可再生成的 incremental cache，依赖、测试产物、日志、存档均保留；后续 build 使用过程内 `CARGO_INCREMENTAL=0`，不修改原生玩法规则或锁文件。
+
+## 2026-10-16 环境与接口检查点（历史）
 
 官方 macOS ARM64 ZIP 已完整取得并校验（404,762,532 bytes；SHA-256 `4fbd5cf1794e149ec9bad38dcbf34d1a9b4e1eda428e8be0a28f12eacec29afc`）；binary SHA-256 为 `70572f61dbde6395f3bb737d0031ebb5c1907e0567cf82b2a33d77481b24ec28`。官方 client 已启动并由单人 server 生成 world，故当前仅记 `ENVIRONMENT_PREPARED`。`.app` 是官方 binary 的逐字节本地包装并链接 assets；签名与 quarantine 未更改。
 
@@ -63,7 +94,7 @@ GUI baseline 路径已由用户撤销，本轮没有继续操作玩家、菜单�
 - per-process userdata 环境变量：[`common/base/src/userdata_dir.rs`](https://github.com/veloren/veloren/blob/b2f1060df37ba4eb2eb001ac1b115beaf404f656/common/base/src/userdata_dir.rs#L4-L5) 及 Rust 行 28–32。SHA-256：`71f35850b529c7dcb1adee4b071c1870ecce21fa20b33ccf5d31a8c29aefc84b`。
 - 原生 RTSim controller 每次 brain tick 前重置 `activity`、`look_dir`，并恢复 job：[`rtsim/src/data/npc.rs`](https://github.com/veloren/veloren/blob/b2f1060df37ba4eb2eb001ac1b115beaf404f656/rtsim/src/data/npc.rs#L73-L80)。AI tick 调用前的 reset 位于 [`rtsim/src/rule/npc_ai/mod.rs`](https://github.com/veloren/veloren/blob/b2f1060df37ba4eb2eb001ac1b115beaf404f656/rtsim/src/rule/npc_ai/mod.rs#L162-L186)。这说明“提前写 activity”可能被原生 reset 清除；并非目标接入已实现或已验证。
 
-## 本轮程序接口实现与核验
+## 2026-10-16 程序接口实现与核验（历史）
 
 本轮项目基线为 `b44a26895f15cca0d79b942ab9f3058ead3984eb`。取得官方同版稀疏源码（约 24 MiB，不下载 LFS/assets），在项目 ignored 目录安装固定 `nightly-2025-09-08`：`rustc 1.91.0-nightly (12eb345e5 2025-09-07)`。没有安装虚拟机，也没有更改全局 Rust、Git、代理或安全设置。
 
@@ -84,7 +115,7 @@ GUI baseline 路径已由用户撤销，本轮没有继续操作玩家、菜单�
 
 已运行的 [5 项 Python CLI 测试](../../tools/veloren_native_v0/offline_evidence/python_cli_unittest.txt)仅覆盖参数拒绝、request/cancel 追加、按 ID 读事件及分段 JSONL 尾行。父代理独立复跑 5/5，通过；没有启动游戏或制造游戏结果。新增 Rust 测试尚未运行。
 
-## 本轮真实阻断：依赖获取，非 NPC 运行失败
+## 2026-10-16 阻断：依赖获取，非 NPC 运行失败（历史）
 
 完整记录见 [构建尝试索引](evidence/server_build_20261016/attempt_index.json)与同目录原始输出。早期数次在索引获取阶段被人工停止；不能称为 Cargo 超时、编译失败或游戏拒绝。
 
@@ -94,7 +125,7 @@ GUI baseline 路径已由用户撤销，本轮没有继续操作玩家、菜单�
 
 原单人 world 已复制到独立 userdata 并核对输入哈希，配置仅监听 loopback，固定原 seed/map；原存档不覆盖。游戏资产、数据库、地图、RTSim 数据及上游源码仍不入 Git；公开仅含限定日志、哈希和补丁。
 
-## 当前授权与下一步
+## 2026-10-16 停止状态与当时的下一步（历史）
 
 本轮停在 `DEPENDENCY_FETCH_BLOCKED`，不是等待用户试玩或再次允许打开游戏。下一步先恢复官方 Cargo 索引/依赖访问，再对现有补丁编译、运行真实只读 baseline，读取真实 NPC ID 后才提交请求。只有同一请求的 Brain、Controller、原生效果与结束后活动记录可支持闭环验收。
 

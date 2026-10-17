@@ -1,0 +1,206 @@
+
+running 100 tests
+test comp::agent::tests::behavior_basic ... ok
+test cmd::tests::verify_cmd_list_sorted ... ok
+test comp::agent::tests::with_aggro_no_warn ... ok
+test comp::agent::tests::enable_flee ... ok
+test comp::buff::tests::test_queueable_buff_delay_start ... ok
+test comp::agent::tests::set_no_flee ... ok
+test comp::buff::tests::test_queueable_buff_long_delay ... ok
+test comp::buff::tests::test_queueable_buffs_three ... ok
+test comp::health::tests::test_change_by_damage_contributor_pruning ... ok
+test comp::health::tests::test_change_by_multiple_damage_from_same_damage_contributor ... ok
+test comp::health::tests::test_change_by_negative_health_change_adds_to_damage_contributors ... ok
+test comp::health::tests::test_change_by_positive_health_change_does_not_add_damage_contributor ... ok
+test cmd::tests::test_loading_skill_presets ... ok
+test comp::inventory::item::tests::test_item_i18n ... ok
+test comp::body::ship::figuredata::test_ship_manifest_entries ... ok
+test comp::inventory::loadout::tests::test_slot_range_for_equip_slot ... ok
+test comp::inventory::loadout::tests::test_slot_range_for_equip_slot_no_item ... ok
+test comp::inventory::loadout::tests::test_slot_range_for_equip_slot_item_without_slots ... ok
+test comp::inventory::loadout::tests::test_get_slot_to_equip_into_second_bag_slot_free ... ok
+test comp::inventory::loadout::tests::test_get_slot_to_equip_into_no_bag_slots_free ... ok
+test comp::inventory::loadout_builder::tests::test_loadout_presets ... ok
+test comp::inventory::loadout_builder::tests::test_valid_assets ... ok
+test comp::inventory::loadout_builder::tests::test_loadout_species ... ok
+test comp::inventory::test::backpack_crash ... ok
+test comp::inventory::test::can_swap_equipped_bag_into_empty_inv_slot_0_free_slots ... ok
+test comp::inventory::test::can_swap_equipped_bag_into_empty_inv_slot_1_free_slot ... ok
+test comp::inventory::test::can_swap_equipped_bag_into_empty_inv_slot_provided_by_equipped_bag ... ok
+test comp::inventory::test::can_swap_equipped_bag_into_only_empty_slot_provided_by_itself_should_return_true ... ok
+test comp::inventory::test::equip_equipping_smaller_bag_from_last_slot_of_big_bag ... ok
+test comp::inventory::test::equip_one_bag_equipped_equip_second_bag ... ok
+test comp::inventory::test::equip_replace_already_equipped_item ... ok
+test comp::inventory::test::free_after_swap_equipped_item_has_less_slots ... ok
+test comp::inventory::test::free_after_swap_equipped_item_has_more_slots ... ok
+test comp::inventory::test::free_after_swap_equipped_item_with_slots_swapped_with_empty_inv_slot ... ok
+test comp::inventory::test::free_after_swap_inv_item_with_slots_swapped_with_empty_equip_slot ... ok
+test comp::inventory::test::free_after_swap_inv_item_without_slots_swapped_with_empty_equip_slot ... ok
+test comp::inventory::test::free_slots_minus_equipped_item ... ok
+test comp::inventory::test::free_slots_minus_equipped_item_items_only_present_in_equipped_bag_slots ... ok
+test comp::inventory::test::get_slot_range_for_equip_slot ... ok
+test comp::inventory::test::push_all_empty ... ok
+test comp::inventory::test::push_all_full ... ok
+test comp::inventory::test::push_all_unique_empty ... ok
+test comp::inventory::test::push_full ... ok
+test comp::inventory::test::push_unique_all_full ... ok
+test comp::inventory::test::unequip_items_both_hands ... ok
+test comp::inventory::test::unequip_unequipping_bag_into_its_own_slot_with_no_other_free_slots_returns_one_item ... ok
+test comp::inventory::recipe_book::tests::recipes_reachable ... ok
+test comp::inventory::loadout_builder::tests::validate_all_loadout_assets ... ok
+test comp::inventory::item::tests::test_assets_items ... ok
+test comp::inventory::recipe_book::tests::validate_recipes ... ok
+test comp::ori::tests::from_to_dir ... ok
+test comp::ori::tests::orthogonal_dirs ... ok
+test comp::skillset::test::check_cyclic_skill_deps ... ok
+test comp::ori::tests::to_horizontal ... ok
+test figure::mat_cell::test::met_cell_size ... ok
+test lottery::tests::test_distribute_many ... ok
+test comp::inventory::item::tests::test_all_items ... ok
+test recipe::tests::complete_recipe_book_valid_key_check ... ok
+test rtsim::rtsim_controller_correlation_tests::native_say_before_external_say_keeps_request_id_on_its_own_action ... ok
+test comp::inventory::item::tests::ensure_item_localization ... ok
+test slowjob::tests::actually_runs_1 ... ok
+test slowjob::tests::actually_runs_2 ... ok
+test comp::ori::tests::angle_between ... ok
+test slowjob::tests::can_spawn ... ok
+test skillset_builder::tests::test_all_skillset_assets ... ok
+test slowjob::tests::correct_spawn_doesnt_panic ... ok
+test slowjob::tests::limit_queue ... ok
+test comp::inventory::trade_pricing::tests::test_prices2 ... ok
+test slowjob::tests::multiple_queue_3 ... ok
+test slowjob::tests::multiple_queue_4 ... ok
+test slowjob::tests::multiple_queue_5 ... ok
+test cmd::tests::test_load_kits ... ok
+test slowjob::tests::multiple_queue ... ok
+test slowjob::tests::simple_queue ... ok
+test slowjob::tests::simple_queue_2 ... ok
+test slowjob::tests::try_run_works ... ok
+test slowjob::tests::multiple_queue_6 ... ok
+test slowjob::tests::try_run_exhausted ... ok
+test slowjob::tests::unconfigured - should panic ... ok
+test spiral::tests::empty_spiral_ring ... ok
+test lottery::tests::test_loot_tables ... ok
+test spiral::tests::minimum_spiral_ring ... ok
+test spiral::tests::print_spiral_ring ... ok
+test terrain::biome::test_biome_difficulty ... ok
+test terrain::sprite::tests::sprite_containers_are_collectible ... ok
+test terrain::sprite::tests::sprite_attr ... ok
+test terrain::sprite::tests::sprite_conv_kind ... ok
+test util::find_dist::tests::cylinder_vs_cube ... ok
+test util::find_dist::tests::zero_size_cylinder ... ok
+test util::lines::tests::test_almost_parallel_lines ... ok
+test util::lines::tests::test_coincident_lines ... ok
+test util::lines::tests::test_intersecting_line ... ok
+test util::lines::tests::test_parallel_lines ... ok
+test slowjob::tests::roundrobin ... ok
+test comp::inventory::trade_pricing::tests::test_prices1 ... ok
+test generation::tests::test_all_entity_assets ... ok
+test terrain::structure::tests::test_structure_manifests ... ok
+test slowjob::tests::actually_waits ... ok
+test slowjob::tests::verify_metrics ... ok
+test slowjob::tests::verify_that_spawn_doesnt_block_par_iter ... ok
+
+test result: ok. 100 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.18s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test ai::test_discrete_chance ... ok
+test data::npc::external_talk_tests::mismatched_request_id_cannot_pass_the_native_speech_gate ... ok
+test data::npc::external_talk_tests::ordinary_say_to_same_target_is_never_correlated ... ok
+test data::npc::external_talk_tests::queued_native_say_remains_separate_from_external_action_id ... ok
+test data::npc::external_talk_tests::retaining_messages_reindexes_only_the_explicit_external_action ... ok
+test data::npc::external_talk_tests::removing_simulated_says_drops_provenance_before_later_native_say ... ok
+test data::npc::external_talk_tests::unstarted_lease_cancel_and_expiry_set_distinct_terminal_outcomes ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 15 tests
+test events::inventory_manip::tests::pickup_distance_within_range ... ok
+test events::inventory_manip::tests::pickup_distance_not_within_range ... ok
+test persistence::json_models::tests::test_default_item_properties ... ok
+test rtsim::tick::native_request_tests::native_terminal_event_is_bookkept_once_per_request_id ... ok
+test rtsim::tick::native_request_tests::pair_catalog_finds_loaded_talkers_after_the_first_twenty_four ... ok
+test rtsim::tick::native_request_tests::request_id_replay_is_distinct_from_conflicting_reuse ... ok
+test rtsim::tick::native_request_tests::simulated_neighbors_are_hints_not_loaded_talk_pairs ... ok
+test rtsim::tick::native_request_tests::ttl_and_source_bounds_are_enforced ... ok
+test events::trade::tests::commit_trade_with_overflow ... ok
+test events::trade::tests::commit_trade_with_inventory_overflow_success ... ok
+test events::trade::tests::commit_trade_with_stackable_item_test ... ok
+test events::trade::tests::commit_trade_with_full_inventory_test ... ok
+test events::trade::tests::commit_trade_with_empty_inventory_test ... ok
+test events::trade::tests::commit_trade_with_inventory_overflow_failure ... ok
+test events::trade::tests::commit_trade_with_both_full_inventories_test ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+
+running 16 tests
+test common/src/comp/ori.rs - comp::ori::Ori::global_to_local (line 111) ... ok
+test common/src/comp/ori.rs - comp::ori::Ori::local_to_global (line 133) ... ok
+test common/src/comp/ori.rs - comp::ori::Ori::rotated (line 70) ... ok
+test common/src/event.rs - event::event_emitters (line 675) ... ok
+test common/src/terrain/sprite/mod.rs - terrain::sprite::StructureSprite (line 68) ... ignored
+test common/src/terrain/sprite/mod.rs - terrain::sprite::StructureSprite (line 78) ... ignored
+test common/src/comp/ori.rs - comp::ori::Ori::prerotated (line 91) ... ok
+test common/src/comp/ori.rs - comp::ori::Ori::uprighted (line 275) ... ok
+test common/src/typed.rs - typed::ElimCase (line 108) ... ok
+test common/src/terrain/mod.rs - terrain::TerrainChunkSize::blocks (line 58) ... ok
+test common/src/terrain/mod.rs - terrain::TerrainChunkSize::center_wpos (line 68) ... ok
+test common/src/slowjob.rs - slowjob::SlowJobPool (line 35) ... ok
+test common/src/util/macros.rs - util::macros::match_some (line 4) ... ok
+test common/src/typed.rs - typed::ElimCase (line 86) ... ok
+test common/src/generation.rs - generation::EntityConfig (line 103) ... ok
+test common/src/comp/inventory/loadout_builder.rs - comp::inventory::loadout_builder::LoadoutBuilder (line 1040) ... ok
+
+test result: ok. 14 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+running 1 test
+test common/src/terrain/block.rs - terrain::block::Block (line 123) ... ignored
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 1.93s; merged doctests compilation took 1.46s
+
+running 14 tests
+test rtsim/src/ai/mod.rs - ai::Action::and_then (line 193) ... ignored
+test rtsim/src/ai/mod.rs - ai::Action::boxed (line 307) ... ignored
+test rtsim/src/ai/mod.rs - ai::Action::debug (line 376) ... ignored
+test rtsim/src/ai/mod.rs - ai::Action::interrupt_with (line 260) ... ignored
+test rtsim/src/ai/mod.rs - ai::Action::map_state (line 356) ... ignored
+test rtsim/src/ai/mod.rs - ai::Action::repeat (line 216) ... ignored
+test rtsim/src/ai/mod.rs - ai::Action::stop_if (line 232) ... ignored
+test rtsim/src/ai/mod.rs - ai::Action::then (line 171) ... ignored
+test rtsim/src/ai/mod.rs - ai::Action::with_state (line 336) ... ignored
+test rtsim/src/ai/mod.rs - ai::finish (line 639) ... ignored
+test rtsim/src/ai/mod.rs - ai::just (line 603) ... ignored
+test rtsim/src/ai/mod.rs - ai::now (line 509) ... ignored
+test rtsim/src/ai/mod.rs - ai::seq (line 1036) ... ignored
+test rtsim/src/data/sentiment.rs - data::sentiment::Sentiments::decay (line 74) ... ignored
+
+test result: ok. 0 passed; 0 failed; 14 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test rtsim/src/ai/mod.rs - ai::choose (line 751) ... ignored
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.49s; merged doctests compilation took 0.11s
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
