@@ -4,9 +4,61 @@
 
 官方 binary 来源：Veloren v0.18.0 GitLab macOS ARM64 build，commit `1d12f35edd6cdbfc1fb921c167cdd7beeeffe248`。旧 `source_audit/` 的 GitHub `b2f1060df37ba4eb2eb001ac1b115beaf404f656` 仅作历史源码线索，不代表与 binary 同版。
 
-10-16 环境阶段起点：`webgpt-sync@91ebd876cef823e8f8b69c07a0d1af941b6b5b56`，当时远端与本地一致。本轮从 `72a37c9` 继续。
+10-16 环境阶段起点：`webgpt-sync@91ebd876cef823e8f8b69c07a0d1af941b6b5b56`；先前接口运行从 `72a37c9` 继续。本轮最终有界验证起点为 `2abdbe4`。
 
-当前状态：**`READY_FOR_INDEPENDENT_REVIEW / A=PARTIAL / A-Closure=BLOCKED_CANCEL_ADMISSION / B=NOT_STARTED_A_GATE`**。本轮诊断补丁已构建并测试，两个真实服务器均正常退出；取消负控请求被权威服务器拒绝，因此没有提交任何正向请求，Agent 边界仍未证明。已达到本轮停止条件，不继续修补、重启或进入 B，不自行 CLOSED。`3a82cd0` 的历史部分通过及无发言结果不改写。
+当前状态：**`READY_FOR_INDEPENDENT_REVIEW / A=PASS_BY_NATIVE_TRACE / CANCEL_PASS / A_FROZEN / B=NOT_STARTED`**。一次正向请求已通过 Brain→Say→Agent，并由原始轨迹确认原生活动继续；这不是接收方接受对话、长期自治或 Character Dynamics 规划成功。运行器的续行标记存在假阴性，原样保留并在下文解释。A 的本轮代码与结果停止扩展，不自行 `CLOSED`，不自动进入 B。`2abdbe4` 及更早失败保持原样。
+
+## 最终接口验证：运行前固定方案
+
+本轮起点 `webgpt-sync@2abdbe4713cbc8c2757c7412747f0e9322aae639`。官方源码仍为 `1d12f35edd6cdbfc1fb921c167cdd7beeeffe248`；原文私有归档于 `_local_data/source_archive/2026-10-17_veloren_final_interface_review/`，SHA-256 `caef184dd191fa7cd2855348140f70dfdf3b61562eec867341c63187dbcd487c`。不创建 A-Closure-v2 等新阶段；本节只记录本次参数，旧方案和旧结果在后文保留。
+
+| 项目 | 固定规定 |
+|---|---|
+| 代码范围 | 文件 harness/测试；服务端仅在原复合 guard 失败分支读取同一 snapshot，记录时间、UID、存在/存活/Civilised/Loaded、原 RTSim XY 距离、8m门限及失败子条件；原 guard 表达式、顺序及唯一权威拒绝不变 |
+| 保护边界 | 不改 smalltalk/RNG/Say/Agent/归因传递，不增加角色能力、状态机或世界规则；冻结 C++、F0/F1、main 和旧实验不动 |
+| 版本与资源 | 沿用原 nightly、锁文件、官方完整 workspace 与现有资产；绝对 canonical target、`worldgen,persistent_world,plugins`、jobs=2。磁盘≥6GiB，不清理历史证据或另建依赖环境 |
+| 世界与运行 | 原存档的新独立副本，seed=130626853、day length=30min、原生 persister 434/465、固定观察445/465加既有catalog候选采样；headless/loopback，不操作玩家或GUI |
+| 启动上限 | 优先一个连续服务器，硬上限2次；不因合法拒绝、RNG、无候选或正向未闭环重启。仅首次尚未进入游戏/尚未提交时的明确环境启动问题，可经父级确认使用剩余启动预算 |
+| 无外控前缀 | 同一服务器先取得至少3个不同游戏时刻的状态快照，跨至少2墙钟秒，能读到原生Brain/Controller/实际位置；候选历史同时采集，不另串行等待5秒 |
+| 启动/候选等待 | 首有效状态等待≤120墙钟秒；每个候选窗≤60秒，耗尽记录 `NO_ELIGIBLE_PAIR` 后停止本轮，不降低资格或换世界刷候选 |
+| 两次观测 | 每个NPC只保留最近两条真实、游戏时间严格递增的ECS样本；重复轮询同一记录不增加样本数。每一对中的两NPC游戏时间偏差≤0.1秒；最新样本距读取/提交≤1墙钟秒，并核对游戏时钟新鲜度 |
+| 候选安全余量 | 最新实际3D距离≤5m，前次≤6m；按游戏时间计算相对分离速度≤0.5m/s。双方alive/Loaded/原生SPEAK可用、sender无活动lease；服务器8m RTSim XY接受条件完全不变 |
+| 选择顺序 | 445→465仅在实际满足新标准时优先；否则只从已公布的真实Loaded候选中按实际3D距离、sender UID、target UID确定性排序。不得传送、停住NPC或改目的地 |
+| 取消回归 | 最多1次Talk+cancel原子追加；分别报告 `CANCEL_PASS / CANCEL_REJECTED_AT_ADMISSION / CANCEL_INCORRECT_RESULT / CANCEL_NOT_OBSERVED`。合法入口拒绝不是取消通过或取消实现错误，不阻断独立正向请求；not_found不冒充成功 |
+| 安全停止 | 真实已接受的取消出现关联Say/Agent效果、错误归因、非法状态/规则绕过或已证实的接入错误时立即停；全程检查已知取消ID的后续事件，不只检查当前正向ID |
+| 正向预算 | 最多6次实际提交，包括拒绝、early_cut、过滤和未成功请求；新request ID、严格核对输入前缀，TTL=60秒、反馈≤80墙钟秒。`request_rejected`立即结束该请求等待，不等不存在的Brain终态 |
+| 后续观测与停止 | 每条正向结束后20秒原生活动观察；首次 accepted→原生分支→真实Say/queued→同ID Agent入队→emitted/blocked 且原生活动继续，停止剩余提交。预算/候选窗/资源耗尽也停；不在运行中改代码 |
+| 遥测与证据 | 沿用已有日志配置：50,000条、64MiB、1,800墙钟秒、单条64KiB；记录实际使用和完整输入/事件/stdout/stderr/退出。记录真实启动、首状态与停止信号时间，不从mtime猜精确时刻 |
+| 独立裁决 | A按PASS/PARTIAL/FAIL/BLOCKED判定，取消单独列状态；不凭Python退出码判成功，不由聊天推关系/承诺/知识变化。本轮完成后停止，不自动进入 B 或新增动作接口 |
+
+补丁、harness、测试及参数将在聚焦检查通过后、首个正式服务器启动前以独立冻结证据记录精确哈希；不把可变 RESULTS 全文件哈希当作不可变协议快照。原生能力核实只归本次[能力证据表](evidence/final_interface_20261017/native_capabilities.md)，按源码声明、完整执行路径、真实运行及持久效果分别记账，最后仅提出2–3个后续候选组合，不开发场景。
+
+## 最终接口验证：实际结果与停止
+
+仅启动 **1 次**服务器，原存档六项输入不变；使用独立副本、原种子与原生执行。实际启动为 **2026-10-17 18:59:20.657 +08:00**，首个有效 Loaded 样本观测于 18:59:31.426；18:59:56.375 发送 SIGUSR1，18:59:57.539 正常结束。server/probe/supervisor 均 exit 0，父级已确认本轮三个 PID 退出。目录中的 `185724` 是准备副本的时间，不是服务器启动时间。
+
+| request_id | 服务端准入 | Talk 分支 / Say | Agent 交接 / 结果 | 原生活动 / 裁决 |
+|---|---|---|---|---|
+| `cd-final-20261017T185920+0800-cancel` | t=4.302985208 accepted，同刻 cancel_requested | `cancelled_before_native_action`；没有关联 Say | 全部后续原始事件中均无该 ID 的交接或 Agent 效果 | **CANCEL_PASS**；不冒充正向成功 |
+| `cd-final-20261017T185920+0800-positive-001` | t=4.411445499 accepted | 同 ID `npc_smalltalk / continue`；t=5.892343458 `native_intent_queued` | 同刻真实 Say→agent_queue；t=5.929873749 `native_speech_emitted` | 原始续行证据满足下述既定条件，父级判 **A=PASS（有限接口范围）** |
+
+只提交 **1/最多6 次正向请求**，另有1次取消回归；请求文件共3行/355 bytes。无拒绝、early_cut 或 filtering 事件，故新增只读复合拒绝诊断本轮未被触发，不能宣称其拒绝分支已获实机覆盖。无 GUI、玩家操纵、传送、LLM、作者节点或新游戏能力。
+
+**续行判读的原始数据与运行器标记必须分开。** 冻结运行器输出 `native_continuation_proven=false / complete_chain_proven=false`，并从 `probe_stopped_at_agent_handoff_boundary` 分支停止。原因是 `post_request_continuation()` 将同一个持续更新的 `samples[uid]` 字典反复放入列表，最终 first/last 都指向 t=25.462540666，形成分析器别名假阴性。该标记、代码与日志均未事后改写，也未为刷标记再次运行。
+
+依据运行前即确定的“真实 Agent 结果后观察原生行为”标准，父级直接重读 append-only 原始事件：发言后20游戏秒内，445有 **20条**不同时间样本（t=6.191312166→25.462540666），全部 alive、无外部 lease；Brain 回到 `walk to pirate hideout`，Controller 为原生 Goto。ECS位置从 `[9107.46484375,28122.400390625,138.0935516357422]` 到 `[9119.7421875,28102.9296875,138.0540771484375]`，真实位移 **23.0183m**。这证明有限观察窗内恢复旅行，不证明长期稳定、存档重载或接收方接受。A 的裁决以该预定标准和原始轨迹为依据，不以 Python flag 或退出码为依据；运行器假阴性作为冻结工具的已知限制保留，不开启下一轮 Talk 修补。
+
+事件总计 **185条/168,103 bytes**，远低于50,000条/64MiB；运行36.885秒，未触及1,800秒上限，结束剩余磁盘6.47GiB。supervisor 的 `telemetry_records_observed=176` 是其最后一次轮询读数，不是最终文件条数；最终文件在正常退出后独立完整读取。旧 world、冻结代码、protocol、supervisor 哈希在运行后复核均未变化。
+
+本次真实构建通过，受影响的 Rust `native_request_tests` **5/5**；最终 Python **25/25（20 harness + 5 CLI）**，父级另行独立复跑通过。先前的14项 Rust结果仍属于旧补丁，不改称本次14项。两次 Cargo 调用准备错误（参数引号、工作目录）与随后成功编译均保留，不计作服务器启动。最终补丁 `4174287ddd467804e7efbfe7bb6868736475597f0225067c2030aaa17c709610`；binary `70e01a9f21dcabec68401ab6eccb130f8b38cca4568da4740a46fc53b7a77ff1`；harness `6cbbf5605d84ce716510402dd6b22400dc84382629885d8103fcef6f8ca09333`。原锁不变。
+
+独立冻结记录 SHA-256 `2800e5e74dfe5d0a7afe7ec6cfa762cab0e1c0cf06f260cc23f37ce817107e4e`；原始事件 `69407514a19a9468f695a1cfafe29e8580806d3092358d2093b842325a944258`；请求输入 `60bf196ff49b99e09c29a23cdc09bc8191826ea626a94cae3b10e4ab187b9818`。本轮限定证据[清单](evidence/final_interface_20261017/manifest.json)包含20项/219,769 bytes（不含清单自身），清单 SHA-256 `95d85c6d9b671862121467473a0a413a3c5ce2f7a7826254a87ac01608762f94`；父级复核全部大小/哈希及原始事件、输入、server日志逐字节相等。[独立读回](evidence/final_interface_20261017/native_run_readback.md)同意有限 A PASS 与取消 PASS。旧轮证据不覆盖。当前运行规定以上方固定方案及该目录冻结参数为准，工具 README 中旧 A-Closure 的5秒等待、取消强前置描述不再代表本轮方案。
+
+**停止决定：A 的有限接口结果冻结，B 未开始。** 原生能力表确认：旅行已有实跑；本次新增的是发送侧 Say→Agent 路径，不是完整社会交换；NPC Gather 在 Loaded 路径仅 Dance 占位、离屏无资源结算。交易、雇佣/任务、事件报告与情感状态有源码因果路径，但本轮未运行。下一次若获授权，应先依据能力表选择有真实世界后果的多步研究实例，而非默认逐个新增动作接口。
+
+## 2abdbe4 历史检查点：取消准入阻断
+
+该检查点状态为 `READY_FOR_INDEPENDENT_REVIEW / A=PARTIAL / A-Closure=BLOCKED_CANCEL_ADMISSION / B=NOT_STARTED_A_GATE`。两个真实服务器正常退出，取消负控在入口被拒，0次正向提交。以下是当时冻结的方案与结果，不是本次新方案。
 
 ## 2026-10-17 A-Closure：运行前固定边界
 

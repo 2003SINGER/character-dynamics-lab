@@ -877,7 +877,7 @@ index 817eb1b7fd2fd785c30a8820135a0dcc5037b3b7..a6c2f1fe54b0b59b27cd4931054c5c7b
  
          rule::start_rules(&mut this.state);
 diff --git a/server/src/rtsim/tick.rs b/server/src/rtsim/tick.rs
-index 4ca0ba9622e490eae1ddcd351c8462b05238faa5..b3a5e7eb1596661f5b9a1ce56edcf99e5933518f 100644
+index 4ca0ba9622e490eae1ddcd351c8462b05238faa5..e741a2dbedb5a0b6b5dd5c836d014f09f7aa7eab 100644
 --- a/server/src/rtsim/tick.rs
 +++ b/server/src/rtsim/tick.rs
 @@ -10,7 +10,7 @@ use common::{
@@ -889,7 +889,7 @@ index 4ca0ba9622e490eae1ddcd351c8462b05238faa5..b3a5e7eb1596661f5b9a1ce56edcf99e
      slowjob::SlowJobPool,
      terrain::CoordinateConversions,
      trade::{Good, SiteInformation},
-@@ -21,20 +21,326 @@ use common::{
+@@ -21,20 +21,373 @@ use common::{
  use common_ecs::{Job, Origin, Phase, System};
  use rand::Rng;
  use rtsim::{
@@ -1096,6 +1096,53 @@ index 4ca0ba9622e490eae1ddcd351c8462b05238faa5..b3a5e7eb1596661f5b9a1ce56edcf99e
 +            || !matches!(target.mode, SimulationMode::Loaded)
 +            || sender.wpos.xy().distance(target.wpos.xy()) > 8.0
 +        {
++            // This event is explanatory only. The authoritative admission guard above
++            // remains the sole source of the decision and is intentionally unchanged.
++            let distance_xy = sender.wpos.xy().distance(target.wpos.xy());
++            let mut failed_conditions = Vec::new();
++            if from == to {
++                failed_conditions.push("same_npc");
++            }
++            if sender.is_dead() {
++                failed_conditions.push("sender_dead");
++            }
++            if target.is_dead() {
++                failed_conditions.push("target_dead");
++            }
++            if !matches!(&sender.role, Role::Civilised(_)) {
++                failed_conditions.push("sender_not_civilised");
++            }
++            if !matches!(&target.role, Role::Civilised(_)) {
++                failed_conditions.push("target_not_civilised");
++            }
++            if !matches!(sender.mode, SimulationMode::Loaded) {
++                failed_conditions.push("sender_not_loaded");
++            }
++            if !matches!(target.mode, SimulationMode::Loaded) {
++                failed_conditions.push("target_not_loaded");
++            }
++            if distance_xy > 8.0 {
++                failed_conditions.push("distance_xy_over_8m");
++            }
++            crate::rtsim::external_telemetry(serde_json::json!({
++                "event": "pair_not_live_loaded_civilised_nearby_diagnostic",
++                "request_id": request_id,
++                "time": now.0,
++                "sender_uid": npc_uid,
++                "target_uid": target_uid,
++                "sender_exists": true,
++                "target_exists": true,
++                "same_npc": from == to,
++                "sender_alive": !sender.is_dead(),
++                "target_alive": !target.is_dead(),
++                "sender_civilised": matches!(&sender.role, Role::Civilised(_)),
++                "target_civilised": matches!(&target.role, Role::Civilised(_)),
++                "sender_loaded": matches!(sender.mode, SimulationMode::Loaded),
++                "target_loaded": matches!(target.mode, SimulationMode::Loaded),
++                "rtsim_distance_xy": distance_xy,
++                "distance_threshold": 8.0,
++                "failed_conditions": failed_conditions,
++            }));
 +            reject_external_request(Some(request_id), "pair_not_live_loaded_civilised_nearby");
 +            continue;
 +        }
@@ -1218,7 +1265,7 @@ index 4ca0ba9622e490eae1ddcd351c8462b05238faa5..b3a5e7eb1596661f5b9a1ce56edcf99e
  pub fn trader_loadout(
      loadout_builder: LoadoutBuilder,
      economy: Option<&SiteInformation>,
-@@ -442,6 +748,16 @@ impl<'a> System<'a> for Sys {
+@@ -442,6 +795,16 @@ impl<'a> System<'a> for Sys {
          let rtsim = &mut *rtsim;
          let calendar_data = (*time_of_day, (*calendar).clone());
  
@@ -1235,7 +1282,7 @@ index 4ca0ba9622e490eae1ddcd351c8462b05238faa5..b3a5e7eb1596661f5b9a1ce56edcf99e
          // Set up rtsim inputs
          {
              let mut data = rtsim.state.data_mut();
-@@ -483,6 +799,243 @@ impl<'a> System<'a> for Sys {
+@@ -483,6 +846,243 @@ impl<'a> System<'a> for Sys {
              dt.0,
          );
  
@@ -1479,7 +1526,7 @@ index 4ca0ba9622e490eae1ddcd351c8462b05238faa5..b3a5e7eb1596661f5b9a1ce56edcf99e
          // Perform a save if required
          if rtsim
              .last_saved
-@@ -625,10 +1178,31 @@ impl<'a> System<'a> for Sys {
+@@ -625,10 +1225,31 @@ impl<'a> System<'a> for Sys {
                              agent.rtsim_controller.personality = npc.personality;
                              agent.rtsim_controller.look_dir = npc.controller.look_dir;
                              agent.rtsim_controller.activity = npc.controller.activity;
