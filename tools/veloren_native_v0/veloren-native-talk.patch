@@ -1,5 +1,5 @@
 diff --git a/common/src/rtsim.rs b/common/src/rtsim.rs
-index a7f2dab..99aca9b 100644
+index a7f2dab3dffcb7df287316112ad5168a8dd1eda7..99aca9b9f770338969648ab0abdc16bc68f1e150 100644
 --- a/common/src/rtsim.rs
 +++ b/common/src/rtsim.rs
 @@ -243,6 +243,8 @@ impl Default for Personality {
@@ -60,16 +60,18 @@ index a7f2dab..99aca9b 100644
  pub enum NpcActivity {
      /// (travel_to, speed_factor)
 diff --git a/rtsim/src/data/npc.rs b/rtsim/src/data/npc.rs
-index ff630db..68d5990 100644
+index ff630db89248484fb5886d348dc788c076d476f5..a3b9cb563488f0a7e5f54f46721ae1f238f6be45 100644
 --- a/rtsim/src/data/npc.rs
 +++ b/rtsim/src/data/npc.rs
-@@ -63,14 +63,69 @@ pub struct PathingMemory {
+@@ -63,14 +63,128 @@ pub struct PathingMemory {
  #[derive(Default)]
  pub struct Controller {
      pub actions: Vec<NpcAction>,
 +    /// Request provenance is attached only by explicit external talk actions.
 +    /// Keys are indices in `actions` until the server transfers that batch.
 +    pub external_action_request_ids: HashMap<usize, String>,
++    /// Request-scoped Say actions removed by the native simulation filter.
++    pub external_action_drops: Vec<ExternalActionDrop>,
      pub activity: Option<NpcActivity>,
 +    /// Optional lease for a validated external TalkToNpc request. This is
 +    /// runtime-only and is never serialized with rtsim data.
@@ -88,9 +90,31 @@ index ff630db..68d5990 100644
 +    pub cancelled: bool,
 +    pub started: bool,
 +    pub outcome: Option<&'static str>,
++    /// Route and native small-talk branch selected for this request, if reached.
++    pub branch_route: Option<&'static str>,
++    pub smalltalk_early_cut: Option<bool>,
++    pub branch_reported: bool,
++}
++
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct ExternalActionDrop {
++    pub request_id: String,
++    pub reason: &'static str,
 +}
 +
 +impl ExternalTalkLease {
++    pub fn take_branch_diagnostic(&mut self) -> Option<(&'static str, Option<&'static str>)> {
++        if self.branch_reported {
++            return None;
++        }
++        let route = self.branch_route?;
++        self.branch_reported = true;
++        let decision = self.smalltalk_early_cut.map(|early_cut| {
++            if early_cut { "early_cut" } else { "continue" }
++        });
++        Some((route, decision))
++    }
++
 +    pub fn settle_unstarted(&mut self, now: Time) -> Option<&'static str> {
 +        if self.outcome.is_none() && !self.started {
 +            if self.cancelled {
@@ -104,11 +128,37 @@ index ff630db..68d5990 100644
 +}
 +
  impl Controller {
++    pub fn record_external_talk_branch(
++        &mut self,
++        request_id: &str,
++        route: &'static str,
++        early_cut: Option<bool>,
++    ) {
++        if let Some(lease) = self
++            .external_talk
++            .as_mut()
++            .filter(|lease| lease.request_id == request_id && lease.outcome.is_none())
++            && lease.branch_route.is_none()
++        {
++            lease.branch_route = Some(route);
++            lease.smalltalk_early_cut = early_cut;
++        }
++    }
++
 +    /// Retain queued actions while keeping request provenance attached to the
 +    /// same action after indices shift.
 +    pub fn retain_actions(&mut self, mut keep: impl FnMut(&NpcAction) -> bool) {
++        self.retain_actions_with_reason(|action| {
++            if keep(action) { Ok(()) } else { Err("native_action_filter") }
++        });
++    }
++
++    pub fn retain_actions_with_reason(
++        &mut self,
++        mut keep: impl FnMut(&NpcAction) -> Result<(), &'static str>,
++    ) {
 +        if self.external_action_request_ids.is_empty() {
-+            self.actions.retain(keep);
++            self.actions.retain(|action| keep(action).is_ok());
 +            return;
 +        }
 +
@@ -117,12 +167,21 @@ index ff630db..68d5990 100644
 +        let mut retained_request_ids = HashMap::new();
 +
 +        for (old_index, action) in std::mem::take(&mut self.actions).into_iter().enumerate() {
-+            if keep(&action) {
++            let decision = keep(&action);
++            if decision.is_ok() {
 +                let new_index = retained_actions.len();
 +                retained_actions.push(action);
 +                if let Some(request_id) = old_request_ids.get(&old_index) {
 +                    retained_request_ids.insert(new_index, request_id.clone());
 +                }
++            } else if matches!(&action, NpcAction::Say(_, _))
++                && let (Some(request_id), Err(reason)) =
++                    (old_request_ids.get(&old_index), decision)
++            {
++                self.external_action_drops.push(ExternalActionDrop {
++                    request_id: request_id.clone(),
++                    reason,
++                });
 +            }
 +        }
 +
@@ -133,7 +192,7 @@ index ff630db..68d5990 100644
      /// Reset the controller to a neutral state before the start of the next
      /// brain tick.
      pub fn reset(&mut self, npc: &Npc) {
-@@ -120,7 +175,28 @@ impl Controller {
+@@ -120,7 +234,28 @@ impl Controller {
      }
  
      pub fn say(&mut self, target: impl Into<Option<Actor>>, content: comp::Content) {
@@ -163,7 +222,7 @@ index ff630db..68d5990 100644
      }
  
      pub fn attack(&mut self, target: impl Into<Actor>) {
-@@ -255,6 +331,169 @@ impl Controller {
+@@ -255,6 +390,251 @@ impl Controller {
      }
  }
  
@@ -182,6 +241,9 @@ index ff630db..68d5990 100644
 +            cancelled: false,
 +            started: true,
 +            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
 +        });
 +
 +        controller.say(Some(target), comp::Content::localized("npc-speech-native-before"));
@@ -212,6 +274,9 @@ index ff630db..68d5990 100644
 +            cancelled: false,
 +            started: true,
 +            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
 +        });
 +        controller.say(Some(target), comp::Content::localized("npc-speech-test"));
 +        controller.say_with_request(
@@ -237,6 +302,9 @@ index ff630db..68d5990 100644
 +            cancelled: false,
 +            started: true,
 +            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
 +        });
 +        controller.say_with_request(
 +            Some(target),
@@ -266,6 +334,9 @@ index ff630db..68d5990 100644
 +            cancelled: false,
 +            started: true,
 +            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
 +        });
 +        controller.say_with_request(
 +            Some(target),
@@ -294,6 +365,9 @@ index ff630db..68d5990 100644
 +            cancelled: false,
 +            started: true,
 +            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
 +        });
 +        controller.say_with_request(
 +            Some(target),
@@ -306,6 +380,67 @@ index ff630db..68d5990 100644
 +    }
 +
 +    #[test]
++    fn branch_diagnostic_is_bound_to_matching_lease_and_reported_once() {
++        let target = Actor::Npc(NpcId::default());
++        let mut controller = Controller::default();
++        controller.external_talk = Some(ExternalTalkLease {
++            request_id: "expected-request".into(),
++            target,
++            expires_at: Time(10.0),
++            cancelled: false,
++            started: true,
++            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
++        });
++
++        controller.record_external_talk_branch("other-request", "npc_smalltalk", Some(true));
++        assert!(controller.external_talk.as_ref().unwrap().branch_route.is_none());
++        controller.record_external_talk_branch("expected-request", "npc_smalltalk", Some(true));
++        controller.record_external_talk_branch("expected-request", "character_dialogue", None);
++        let lease = controller.external_talk.as_mut().unwrap();
++        assert_eq!(lease.branch_route, Some("npc_smalltalk"));
++        assert_eq!(lease.take_branch_diagnostic(), Some(("npc_smalltalk", Some("early_cut"))));
++        assert_eq!(lease.take_branch_diagnostic(), None);
++    }
++
++    #[test]
++    fn native_filter_records_only_the_dropped_request_say_and_reason() {
++        let target = Actor::Npc(NpcId::default());
++        let mut controller = Controller::default();
++        controller.send_msg(target, NpcMsg::RequestHire);
++        controller.external_talk = Some(ExternalTalkLease {
++            request_id: "external-request".into(),
++            target,
++            expires_at: Time(10.0),
++            cancelled: false,
++            started: true,
++            outcome: None,
++            branch_route: Some("npc_smalltalk"),
++            smalltalk_early_cut: Some(false),
++            branch_reported: false,
++        });
++        controller.say_with_request(
++            Some(target),
++            comp::Content::localized("npc-speech-external"),
++            Some("external-request"),
++        );
++        controller.say(Some(target), comp::Content::localized("npc-speech-native"));
++
++        controller.retain_actions_with_reason(|action| match action {
++            NpcAction::Msg { .. } => Err("simulate_npcs_msg_consumed_in_rtsim"),
++            NpcAction::Say(_, _) => Err("simulate_npcs_unloaded_mode_filter"),
++            _ => Ok(()),
++        });
++
++        assert_eq!(controller.external_action_drops.len(), 1);
++        assert_eq!(controller.external_action_drops[0].request_id, "external-request");
++        assert_eq!(controller.external_action_drops[0].reason, "simulate_npcs_unloaded_mode_filter");
++        assert!(controller.actions.is_empty());
++    }
++
++    #[test]
 +    fn unstarted_lease_cancel_and_expiry_set_distinct_terminal_outcomes() {
 +        let target = Actor::Npc(NpcId::default());
 +        let mut cancelled = ExternalTalkLease {
@@ -315,6 +450,9 @@ index ff630db..68d5990 100644
 +            cancelled: true,
 +            started: false,
 +            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
 +        };
 +        let mut expired = ExternalTalkLease {
 +            request_id: "expired".into(),
@@ -323,6 +461,9 @@ index ff630db..68d5990 100644
 +            cancelled: false,
 +            started: false,
 +            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
 +        };
 +        assert_eq!(cancelled.settle_unstarted(Time(0.5)), Some("cancelled_before_native_action"));
 +        assert_eq!(expired.settle_unstarted(Time(1.0)), Some("expired_before_native_action"));
@@ -334,10 +475,10 @@ index ff630db..68d5990 100644
  #[derive(Copy, Clone)]
  pub struct DialogueSession {
 diff --git a/rtsim/src/rule/npc_ai/mod.rs b/rtsim/src/rule/npc_ai/mod.rs
-index f4a7851..b56d877 100644
+index f4a7851325da78f22b5b13406c188ee655753c71..39dd8882d65fce538922bc052a2200be7a3a07eb 100644
 --- a/rtsim/src/rule/npc_ai/mod.rs
 +++ b/rtsim/src/rule/npc_ai/mod.rs
-@@ -215,18 +215,29 @@ fn idle<S: State>() -> impl Action<S> + Clone {
+@@ -215,18 +215,43 @@ fn idle<S: State>() -> impl Action<S> + Clone {
      just(|ctx, _| ctx.controller.do_idle()).debug(|| "idle")
  }
  
@@ -352,6 +493,13 @@ index f4a7851..b56d877 100644
 +) -> impl Action<S> + use<S> {
      now(move |ctx, _| {
          if ctx.sentiments.toward(tgt).is(Sentiment::ENEMY) {
++            if let Some(request_id) = request_id.as_deref() {
++                ctx.controller.record_external_talk_branch(
++                    request_id,
++                    "enemy_rejection",
++                    None,
++                );
++            }
 +            let request_id = request_id.clone();
              just(move |ctx, _| {
 -                ctx.controller
@@ -364,6 +512,13 @@ index f4a7851..b56d877 100644
              })
              .boxed()
          } else if matches!(tgt, Actor::Character(_)) {
++            if let Some(request_id) = request_id.as_deref() {
++                ctx.controller.record_external_talk_branch(
++                    request_id,
++                    "character_dialogue",
++                    None,
++                );
++            }
              do_dialogue(tgt, move |session| dialogue::general(tgt, session)).boxed()
          } else {
 -            smalltalk_to(tgt).boxed()
@@ -371,7 +526,7 @@ index f4a7851..b56d877 100644
          }
      })
  }
-@@ -253,7 +264,14 @@ fn tell_site_content(ctx: &NpcCtx, site: SiteId) -> Option<Content> {
+@@ -253,9 +278,24 @@ fn tell_site_content(ctx: &NpcCtx, site: SiteId) -> Option<Content> {
      }
  }
  
@@ -385,9 +540,20 @@ index f4a7851..b56d877 100644
 +    request_id: Option<String>,
 +) -> impl Action<S> + use<S> {
      now(move |ctx, _| {
-         if matches!(tgt, Actor::Npc(_)) && ctx.rng.random_bool(0.2) {
+-        if matches!(tgt, Actor::Npc(_)) && ctx.rng.random_bool(0.2) {
++        let early_cut = matches!(tgt, Actor::Npc(_)) && ctx.rng.random_bool(0.2);
++        if let Some(request_id) = request_id.as_deref() {
++            ctx.controller.record_external_talk_branch(
++                request_id,
++                "npc_smalltalk",
++                Some(early_cut),
++            );
++        }
++        if early_cut {
              // Cut off the conversation sometimes to avoid infinite conversations (but only
-@@ -314,10 +332,14 @@ fn smalltalk_to<S: State>(tgt: Actor) -> impl Action<S> {
+             // if the target is an NPC!) TODO: Don't special case this, have
+             // some sort of 'bored of conversation' system
+@@ -314,10 +354,14 @@ fn smalltalk_to<S: State>(tgt: Actor) -> impl Action<S> {
              } else {
                  1.5
              };
@@ -403,7 +569,7 @@ index f4a7851..b56d877 100644
                  .boxed()
          }
      })
-@@ -1482,6 +1504,67 @@ fn react_to_events<S: State>(ctx: &mut NpcCtx, _: &mut S) -> Option<impl Action<
+@@ -1482,6 +1526,67 @@ fn react_to_events<S: State>(ctx: &mut NpcCtx, _: &mut S) -> Option<impl Action<
          .map(Action::boxed)
          .or_else(|| check_for_enemies(ctx).map(Action::boxed))
          .or_else(|| quest::check_for_timeouts(ctx).map(Action::boxed))
@@ -472,7 +638,7 @@ index f4a7851..b56d877 100644
  
  fn humanoid() -> impl Action<DefaultState> {
 diff --git a/rtsim/src/rule/simulate_npcs.rs b/rtsim/src/rule/simulate_npcs.rs
-index f1f072c..e108526 100644
+index f1f072c930237aa7db809e748bbdd20e4f7d026a..99175245ae622453c59f287ea6d95730a23c8e92 100644
 --- a/rtsim/src/rule/simulate_npcs.rs
 +++ b/rtsim/src/rule/simulate_npcs.rs
 @@ -118,7 +118,7 @@ fn on_tick(ctx: EventCtx<SimulateNpcs, OnTick>) {
@@ -480,12 +646,30 @@ index f1f072c..e108526 100644
  
      for (npc_id, npc) in data.npcs.npcs.iter_mut().filter(|(_, npc)| !npc.is_dead()) {
 -        npc.controller.actions.retain(|action| match action {
-+        npc.controller.retain_actions(|action| match action {
++        npc.controller.retain_actions_with_reason(|action| match action {
              // NPC-to-NPC messages never leave rtsim
              NpcAction::Msg { to, msg } => {
                  if let Actor::Npc(to) = to {
+@@ -129,11 +129,15 @@ fn on_tick(ctx: EventCtx<SimulateNpcs, OnTick>) {
+                 } else {
+                     // TODO: Send to players?
+                 }
+-                false
++                Err("simulate_npcs_msg_consumed_in_rtsim")
+             },
+             // All other cases are handled by the game when loaded
+             NpcAction::Say(_, _) | NpcAction::Attack(_) | NpcAction::Dialogue(_, _) => {
+-                matches!(npc.mode, SimulationMode::Loaded)
++                if matches!(npc.mode, SimulationMode::Loaded) {
++                    Ok(())
++                } else {
++                    Err("simulate_npcs_unloaded_mode_filter")
++                }
+             },
+         });
+ 
 diff --git a/server-cli/src/main.rs b/server-cli/src/main.rs
-index f710528..3bd166e 100644
+index f71052847cada09bd11b5d2f0ad7a0f115f70e46..3bd166ee004770918a2e1ab63c70a1a8c562d294 100644
 --- a/server-cli/src/main.rs
 +++ b/server-cli/src/main.rs
 @@ -220,6 +220,24 @@ fn main() -> io::Result<()> {
@@ -514,7 +698,7 @@ index f710528..3bd166e 100644
      let chat = server.chat_cache().clone();
      let metrics_shutdown = Arc::new(Notify::new());
 diff --git a/server/src/lib.rs b/server/src/lib.rs
-index 8aa5988..892ef67 100644
+index 8aa598818e6e243991624898532c736e62e8f7c3..892ef67b07d5785c274580b1772f181061c542fa 100644
 --- a/server/src/lib.rs
 +++ b/server/src/lib.rs
 @@ -1521,6 +1521,25 @@ impl Server {
@@ -544,7 +728,7 @@ index 8aa5988..892ef67 100644
      pub fn chunks_pending(&mut self) -> bool {
          self.state_mut()
 diff --git a/server/src/rtsim/mod.rs b/server/src/rtsim/mod.rs
-index 817eb1b..8b71328 100644
+index 817eb1b7fd2fd785c30a8820135a0dcc5037b3b7..a6c2f1fe54b0b59b27cd4931054c5c7b4781de3e 100644
 --- a/server/src/rtsim/mod.rs
 +++ b/server/src/rtsim/mod.rs
 @@ -6,7 +6,7 @@ use atomicwrites::{AtomicFile, OverwriteBehavior};
@@ -569,7 +753,7 @@ index 817eb1b..8b71328 100644
      thread::{self, JoinHandle},
      time::Instant,
  };
-@@ -35,9 +37,95 @@ pub struct RtSim {
+@@ -35,9 +37,96 @@ pub struct RtSim {
      last_saved: Option<Instant>,
      state: RtState,
      save_thread: Option<(Sender<Data>, JoinHandle<()>)>,
@@ -579,6 +763,7 @@ index 817eb1b..8b71328 100644
 +    terminal_external_requests: HashSet<String>,
 +    external_observe: bool,
 +    external_observe_uids: HashSet<u64>,
++    external_catalog_observe_uids: HashSet<u64>,
 +    last_external_observation: Option<Instant>,
 +    last_external_catalog: Option<Instant>,
 +    last_external_request_observation: Option<Instant>,
@@ -665,7 +850,7 @@ index 817eb1b..8b71328 100644
      pub fn new(
          settings: &WorldSettings,
          index: IndexRef,
-@@ -128,6 +216,24 @@ impl RtSim {
+@@ -128,6 +217,25 @@ impl RtSim {
              ))),
              file_path,
              save_thread: None,
@@ -684,6 +869,7 @@ index 817eb1b..8b71328 100644
 +                .split(',')
 +                .filter_map(|uid| uid.trim().parse::<u64>().ok())
 +                .collect(),
++            external_catalog_observe_uids: HashSet::new(),
 +            last_external_observation: None,
 +            last_external_catalog: None,
 +            last_external_request_observation: None,
@@ -691,7 +877,7 @@ index 817eb1b..8b71328 100644
  
          rule::start_rules(&mut this.state);
 diff --git a/server/src/rtsim/tick.rs b/server/src/rtsim/tick.rs
-index 4ca0ba9..3dfd7ed 100644
+index 4ca0ba9622e490eae1ddcd351c8462b05238faa5..b3a5e7eb1596661f5b9a1ce56edcf99e5933518f 100644
 --- a/server/src/rtsim/tick.rs
 +++ b/server/src/rtsim/tick.rs
 @@ -10,7 +10,7 @@ use common::{
@@ -703,7 +889,7 @@ index 4ca0ba9..3dfd7ed 100644
      slowjob::SlowJobPool,
      terrain::CoordinateConversions,
      trade::{Good, SiteInformation},
-@@ -21,20 +21,323 @@ use common::{
+@@ -21,20 +21,326 @@ use common::{
  use common_ecs::{Job, Origin, Phase, System};
  use rand::Rng;
  use rtsim::{
@@ -944,6 +1130,9 @@ index 4ca0ba9..3dfd7ed 100644
 +            cancelled: false,
 +            started: false,
 +            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
 +        });
 +        crate::rtsim::external_telemetry(serde_json::json!({
 +            "event": "request_accepted",
@@ -1029,7 +1218,7 @@ index 4ca0ba9..3dfd7ed 100644
  pub fn trader_loadout(
      loadout_builder: LoadoutBuilder,
      economy: Option<&SiteInformation>,
-@@ -442,6 +745,16 @@ impl<'a> System<'a> for Sys {
+@@ -442,6 +748,16 @@ impl<'a> System<'a> for Sys {
          let rtsim = &mut *rtsim;
          let calendar_data = (*time_of_day, (*calendar).clone());
  
@@ -1046,10 +1235,33 @@ index 4ca0ba9..3dfd7ed 100644
          // Set up rtsim inputs
          {
              let mut data = rtsim.state.data_mut();
-@@ -483,6 +796,180 @@ impl<'a> System<'a> for Sys {
+@@ -483,6 +799,243 @@ impl<'a> System<'a> for Sys {
              dt.0,
          );
  
++        if rtsim.external_request_path.is_some() {
++            let mut filtered_events = Vec::new();
++            {
++                let mut data = rtsim.state.data_mut();
++                for npc in data.npcs.values_mut() {
++                    for dropped in std::mem::take(&mut npc.controller.external_action_drops) {
++                        filtered_events.push(serde_json::json!({
++                            "event": "native_action_filtered",
++                            "request_id": dropped.request_id,
++                            "npc_uid": npc.uid,
++                            "time": time.0,
++                            "action": "Say",
++                            "location": "rtsim::rule::simulate_npcs",
++                            "reason": dropped.reason,
++                        }));
++                    }
++                }
++            }
++            for event in filtered_events {
++                crate::rtsim::external_telemetry(event);
++            }
++        }
++
 +        if rtsim.external_request_path.is_some() {
 +            let now = std::time::Instant::now();
 +            let sample_active_requests = rtsim
@@ -1059,8 +1271,22 @@ index 4ca0ba9..3dfd7ed 100644
 +                rtsim.last_external_request_observation = Some(now);
 +            }
 +            let mut request_events = Vec::new();
-+            for (_, npc) in rtsim.state.data().npcs.iter() {
-+                if let Some(lease) = &npc.controller.external_talk {
++            {
++                let mut data = rtsim.state.data_mut();
++                for npc in data.npcs.values_mut() {
++                    let Some(lease) = &mut npc.controller.external_talk else {
++                        continue;
++                    };
++                    if let Some((route, decision)) = lease.take_branch_diagnostic() {
++                        request_events.push(serde_json::json!({
++                            "event": "native_talk_branch",
++                            "request_id": lease.request_id,
++                            "npc_uid": npc.uid,
++                            "time": time.0,
++                            "route": route,
++                            "decision": decision,
++                        }));
++                    }
 +                    if let Some(outcome) = lease.outcome {
 +                        if mark_external_terminal(
 +                            &mut rtsim.terminal_external_requests,
@@ -1072,6 +1298,10 @@ index 4ca0ba9..3dfd7ed 100644
 +                                "npc_uid": npc.uid,
 +                                "time": time.0,
 +                                "outcome": outcome,
++                                "route": lease.branch_route,
++                                "smalltalk_decision": lease.smalltalk_early_cut.map(|early_cut| {
++                                    if early_cut { "early_cut" } else { "continue" }
++                                }),
 +                            }));
 +                        }
 +                        continue;
@@ -1097,6 +1327,8 @@ index 4ca0ba9..3dfd7ed 100644
 +                        "lease_cancelled": lease.cancelled,
 +                        "lease_expires_at": lease.expires_at.0,
 +                        "lease_outcome": lease.outcome,
++                        "route": lease.branch_route,
++                        "smalltalk_early_cut": lease.smalltalk_early_cut,
 +                    }));
 +                }
 +            }
@@ -1133,6 +1365,13 @@ index 4ca0ba9..3dfd7ed 100644
 +                    })
 +                    .collect::<Vec<_>>();
 +                let (loaded_pairs, simulated_pairs) = select_nearby_talk_pairs(&candidates);
++                rtsim.external_catalog_observe_uids = loaded_pairs
++                    .iter()
++                    .take(8)
++                    .flat_map(|(from, to, _)| {
++                        [civilised[*from].1.uid, civilised[*to].1.uid]
++                    })
++                    .collect();
 +                let pair_json = |distance: f32, from: &Npc, to: &Npc| {
 +                    serde_json::json!({
 +                        "distance": distance,
@@ -1181,7 +1420,17 @@ index 4ca0ba9..3dfd7ed 100644
 +                .is_none_or(|last| last.elapsed() >= Duration::from_secs(1))
 +            {
 +                rtsim.last_external_observation = Some(now);
-+                for npc_uid in rtsim.external_observe_uids.iter().copied() {
++                let mut observe_uids = rtsim.external_observe_uids.iter().copied().collect::<Vec<_>>();
++                observe_uids.extend(
++                    rtsim
++                        .external_catalog_observe_uids
++                        .iter()
++                        .copied()
++                        .filter(|uid| !rtsim.external_observe_uids.contains(uid))
++                        .take(16),
++                );
++                observe_uids.sort_unstable();
++                for npc_uid in observe_uids {
 +                    let data = rtsim.state.data();
 +                    let found = data.npcs.iter().find(|(_, npc)| npc.uid == npc_uid);
 +                    let Some((npc_id, npc)) = found else {
@@ -1204,6 +1453,7 @@ index 4ca0ba9..3dfd7ed 100644
 +                                "ecs_position": [pos.0.x, pos.0.y, pos.0.z],
 +                                "agent_behavior": agent.map(|agent| format!("{:?}", agent.behavior)),
 +                                "agent_target": agent.and_then(|agent| agent.target.as_ref()).map(|target| format!("{:?}", target)),
++                                "agent_allowed_to_speak": agent.map(|agent| agent.allowed_to_speak()),
 +                            })
 +                        });
 +                    crate::rtsim::external_telemetry(serde_json::json!({
@@ -1212,6 +1462,8 @@ index 4ca0ba9..3dfd7ed 100644
 +                        "time": time.0,
 +                        "time_of_day": time_of_day.0,
 +                        "profession": format!("{:?}", npc.profession()),
++                        "alive": !npc.is_dead(),
++                        "external_lease_active": npc.controller.external_talk.as_ref().is_some_and(|lease| lease.outcome.is_none()),
 +                        "position": [npc.wpos.x, npc.wpos.y, npc.wpos.z],
 +                        "mode": if matches!(npc.mode, SimulationMode::Loaded) { "loaded" } else { "simulated" },
 +                        "health_fraction": npc.health_fraction,
@@ -1227,7 +1479,7 @@ index 4ca0ba9..3dfd7ed 100644
          // Perform a save if required
          if rtsim
              .last_saved
-@@ -625,10 +1112,19 @@ impl<'a> System<'a> for Sys {
+@@ -625,10 +1178,31 @@ impl<'a> System<'a> for Sys {
                              agent.rtsim_controller.personality = npc.personality;
                              agent.rtsim_controller.look_dir = npc.controller.look_dir;
                              agent.rtsim_controller.activity = npc.controller.activity;
@@ -1246,13 +1498,25 @@ index 4ca0ba9..3dfd7ed 100644
 +                                )
 +                                .then(|| request_ids.get(&index).cloned())
 +                                .flatten();
-+                                agent.rtsim_controller.push_action(action, request_id);
++                                agent
++                                    .rtsim_controller
++                                    .push_action(action, request_id.clone());
++                                if let Some(request_id) = request_id {
++                                    crate::rtsim::external_telemetry(serde_json::json!({
++                                        "event": "native_action_handoff",
++                                        "request_id": request_id,
++                                        "npc_uid": npc.uid,
++                                        "time": time.0,
++                                        "action": "Say",
++                                        "destination": "agent_queue",
++                                    }));
++                                }
 +                            }
                              if let Some(rtsim_outbox) = &mut agent.rtsim_outbox {
                                  npc.inbox.append(rtsim_outbox);
                              }
 diff --git a/server/src/sys/agent/behavior_tree/mod.rs b/server/src/sys/agent/behavior_tree/mod.rs
-index a1fe73b..24ca56b 100644
+index a1fe73b28f5276edaf3e42060e06002b923edfec..24ca56bca75c33f98f74d91063045a4113365b47 100644
 --- a/server/src/sys/agent/behavior_tree/mod.rs
 +++ b/server/src/sys/agent/behavior_tree/mod.rs
 @@ -597,7 +597,7 @@ fn set_owner_if_no_target(bdata: &mut BehaviorData) -> bool {

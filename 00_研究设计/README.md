@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-2026-10-17 当前检查点是 [Veloren 原生接口工作包 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md)：**PARTIAL，工作包 B 未启动**。修改版服务器、程序化基线、取消与唯一正向请求的实际结果只查该 RESULTS，不以接口文件测试代替原生验收。[OpenXRay 源码交付](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)与[前轮载体审查](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)保留；不重开选材、GUI 或 LLM，不改 F0/F1。下一动作只见 [TODO](TODO.md)。
+2026-10-17 当前检查点是 [Veloren 原生接口工作包 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md)：**仍为 PARTIAL，A-Closure 因取消准入拒绝停止，B 未启动**。新诊断补丁、构建测试及实际运行与历史 Brain 证据分别由该 RESULTS 维护，不以文件测试代替原生验收。[OpenXRay 源码交付](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)与[前轮载体审查](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)保留；不追加运行、重开选材、GUI 或 LLM，不改 F0/F1。下一动作只见 [TODO](TODO.md)。
 
 2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
 

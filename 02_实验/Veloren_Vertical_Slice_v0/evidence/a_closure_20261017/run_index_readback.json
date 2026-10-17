@@ -1,0 +1,92 @@
+{
+  "artifact_kind": "redacted_independent_run_index_readback",
+  "raw_index_sha256": "e4e798bcd01bc81b45749fbb042a0ef9894215921b5270ab86b87aa0c5dee5f3",
+  "phase": "A-Closure",
+  "overall_A": "PARTIAL",
+  "A_Closure": "BLOCKED at cancellation-control admission gate",
+  "B_started": false,
+  "run_budget": {
+    "server_launches_used": 2,
+    "positive_submissions": 0,
+    "cancel_attempts": 1,
+    "cancel_gate_passed": false,
+    "retries_or_third_launch": false,
+    "telemetry_limits_hit": false
+  },
+  "baseline_run": {
+    "run_id": "native-a-closure-baseline-20261017T124900+0800",
+    "server_exit_code": 0,
+    "server_stdout_sha256": "7af1a8f1fbbb743adcec77909b1ac89030723258d5117c44756d8516fe81806e",
+    "server_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "events_sha256": "78bb39f3b4c0f6f0dc74040bfa980efeda3adfb973ac8ac55ee2d516674f2df4",
+    "events_bytes": 688685,
+    "events_lines": 742,
+    "event_counts": {
+      "native_npc_catalog": 9,
+      "native_npc_baseline": 733
+    },
+    "simulation_time_start": 0.033333333,
+    "simulation_time_end": 82.57943529099991,
+    "simulation_time_delta": 82.54610195799991,
+    "target_baseline_window_seconds": 60,
+    "actual_wall_sample_duration": null,
+    "wall_timing_note": "First stdout 2026-10-17T12:51:18.553+0800; last log/event write about 12:52:49+0800; approx 91s observation span is not exact sample duration. Signal timestamp not captured.",
+    "loaded_baseline_rows": 693,
+    "alive_rows": 733,
+    "loaded_speak_rows": 693
+  },
+  "request_run": {
+    "run_id": "native-a-closure-request-20261017T124900+0800",
+    "server_exit_code": 0,
+    "controller_exit_code": 130,
+    "controller_termination": "Operator Ctrl-C after the parent-directed stop on failed cancel admission; not automatic abort.",
+    "server_start_local_approx": "2026-10-17T12:53:26+0800",
+    "stop_signal_local": null,
+    "event_counts": {
+      "native_npc_catalog": 9,
+      "native_npc_baseline": 662,
+      "request_rejected": 1,
+      "not_found": 1
+    },
+    "events_sha256": "4792b0c2ed759c03580db014ab772937cc464036e0d6fc17cfff56dc16e21986",
+    "events_bytes": 619866,
+    "events_lines": 673,
+    "simulation_time_start": 0.033333333,
+    "simulation_time_end": 80.206367916,
+    "input_file_sha256": "28e225186bbdb5ce5b8139421d85daaa7879a624e6c08dd9da698ea843b93e91",
+    "input_file_bytes": 198,
+    "input_records": [
+      {
+        "request_id": "cd-a-closure-cancel-20261017-1249",
+        "npc_uid": 445,
+        "target_uid": 465,
+        "source": "native-a-closure",
+        "ttl": 60.0,
+        "kind": "TalkToNpc"
+      },
+      {
+        "cancel_request_id": "cd-a-closure-cancel-20261017-1249"
+      }
+    ],
+    "candidate_pass": {
+      "npc_uid": 445,
+      "target_uid": 465,
+      "game_time": 5.195206791000003,
+      "stable_seconds_reported": 5.0,
+      "distance_3d": 7.4199928182302894,
+      "selection": "preferred"
+    },
+    "cancel_control": {
+      "request_rejection": "pair_not_live_loaded_civilised_nearby",
+      "not_found_game_time": 6.194890416000003,
+      "post_rejection_sample_distance_3d": 8.67,
+      "both_loaded_alive_speak_allowed_in_sample": true,
+      "cancel_terminal_proven": false,
+      "positive_submissions": 0,
+      "interpretation": "The sampled distance is consistent with crossing the 8m threshold before server processing; the composite guard event has no timestamp or failed-subcondition detail, so exact cause is unproven."
+    },
+    "positive_request_id": "cd-a-closure-positive-20261017-1249",
+    "positive_request_submitted": false,
+    "agent_or_rng_result": "not observed; no positive request was submitted"
+  }
+}

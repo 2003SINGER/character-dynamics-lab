@@ -12,11 +12,11 @@
 
 ## SYSTEM / APPLICATION TRACK
 
-2026-10-17 **Veloren v0.18.0 工作包 A 已有界运行并交付 PARTIAL，B 未启动**。原生后台基线成立，唯一正请求入 Brain 后无发言，Agent 边界尚未证明；不重试刷成功。A 关键接口实测通过后才准入 B 的能力核实、场景冻结与规划。GUI 与 LLM 不启用，OpenXRay/RimWorld 探索冻结；不改 F0/F1、冻结 Runtime、main 或历史实验。
+2026-10-17 **Veloren A-Closure 已有界停止，A 总体仍 PARTIAL，B 未启动**。只读诊断、构建与聚焦测试已交付；取消负控被权威服务器拒绝，前置不成立，正向提交为0。两个启动预算已用，不再重启、改资格或追加输入。完整协议、失败、偏差与逐请求裁决只归下方 RESULTS；下一动作是独立审阅与路线决定，不自动开发 B。GUI 与 LLM 不启用，OpenXRay/RimWorld 探索冻结；不改 F0/F1、冻结 Runtime、main 或历史实验。
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| VELOREN-VERTICAL-SLICE-V0 | **READY_FOR_INDEPENDENT_REVIEW；A=PARTIAL；B=NOT_STARTED_A_GATE** | 独审原始请求、终态、负控与原生轨迹。Agent 尚无处理证据；如继续，应先固定有限重复采样或分支观测方案，不把重试到说话当隐含策略。本轮已停，不自动做 B、加行为或换游戏 | [唯一 RESULTS](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md)；构建、12 项最终补丁聚焦测试、实际运行及全部失败均按版本保留。无发言不等同拒绝，不推断 RNG draw；不是等待试玩，不自行 CLOSED |
+| VELOREN-VERTICAL-SLICE-V0 | **READY_FOR_INDEPENDENT_REVIEW；A=PARTIAL；A-Closure=BLOCKED_CANCEL_ADMISSION；B=NOT_STARTED_A_GATE** | 独审两段真实轨迹、取消准入拒绝与脚本反馈局限；决定是否另行调整资格/反馈协议。本轮停止，不补试、不改原生分支，不开发 B、加行为或换游戏 | [唯一 RESULTS](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md#a-closure-实际结果与停止裁决)；新旧补丁、请求及全部失败分开保留。0正向不冒充6次；Agent仍未证明，不自行 CLOSED |
 | OPENXRAY-NPC-DECISION-ADMISSION-V0 | **接入探索 DEFERRED_BY_USER；原源码交付保留** | 用户决定先试 Veloren；不恢复 CoP 数据/接口调查、不自动开发 C++ 桥或 RimWorld | [原 RESULTS](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)；OpenXRay 自身历史准入状态仍由该 RESULTS 维护，与当前 Veloren 环境状态分开 |
 | CLASSIC-RPG-CARRIER-SELECTION-V0 | **此前检查点：源码补审 PARTIAL / READY_FOR_INDEPENDENT_REVIEW；无实跑** | 选材与前轮源码证据保留；本次决策接入裁决及后续条件转由上行工作包维护，不继续泛化选材 | [选材 RESULTS](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)；Exult旧优先级已撤回，源码事实/旧评分保留历史；不自行 CLOSED |
 | DOCS-PLANNER-SEMANTICS | **文档修订 / READY_FOR_INDEPENDENT_REVIEW；非新实现** | 定义修订检查点保留；后续已授权的三候选材料选型见上行，不因该文档检查点自动安装或开发 | [F0/F1](CharacterDynamics_FormalProblem_v0.md)定义角色/作者规划与语义边界；[System Vision](Character_Dynamics_System_Vision_v0.md)说明应用路线；[待核候选](未决问题与机制候选.md#2026-10-16角色规划与载体选择的待决问题)保留问题及原生/新增分账；历史运行证据不改、不自行 CLOSED |

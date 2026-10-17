@@ -1,0 +1,8 @@
+# Harness transcript and termination
+
+Path-redacted transcript copies are provided as `controller.stdout.redacted.jsonl` and `controller.stderr.redacted.txt`; the private absolute project path was replaced with `<WORKSPACE>`. Original raw stdout SHA-256 `ef89153e19f39604a614b40f3aadf5ee53986651b27860b4d64df78f5b2c8370` (1,494 B); original raw stderr SHA-256 `43ac5ae73e7eaa951fe3bce583a843676208cd404e0d6fc17cfff56dc16e21986` (814 B). Redacted-copy hashes are in `manifest.json`.
+
+- Startup: preferred NPC/target were 445→465; one negative-control ID and one planned positive ID were configured; maximum positive submissions was 6; request input was initially empty; no server control channel.
+- Gate: first observed native baseline at game time `0.033333333`, catalog had 0 loaded talkable pairs. The harness then selected the preferred pair; its candidate passed at game time `5.195206791` with measured ECS 3D distance `7.419992818 m`, after a reported 5.0 seconds stable.
+- Input: one atomic OS write, 198 bytes, with exactly one typed `TalkToNpc` negative-control record and its cancel record. The server later emitted `request_rejected` and `not_found`; it did not emit the required pre-action cancellation terminal.
+- Stop: controller session 24457 exited 130 with Python `KeyboardInterrupt` while waiting for the required negative-control terminal. This was an operator Ctrl-C after the gate rejection, not successful cancel, automatic helper abort, or 80-second positive timeout. No positive line was appended. The server itself was separately stopped via SIGUSR1 to its exact PID and exited 0.

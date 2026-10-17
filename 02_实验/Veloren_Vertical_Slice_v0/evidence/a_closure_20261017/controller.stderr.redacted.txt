@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "<WORKSPACE>/tools/veloren_native_v0/run_talk_probe.py", line 534, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "<WORKSPACE>/tools/veloren_native_v0/run_talk_probe.py", line 527, in main
+    return run(args)
+           ^^^^^^^^^
+  File "<WORKSPACE>/tools/veloren_native_v0/run_talk_probe.py", line 407, in run
+    negative_events = collect_request_events(
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "<WORKSPACE>/tools/veloren_native_v0/run_talk_probe.py", line 315, in collect_request_events
+    time.sleep(POLL_SECONDS)
+KeyboardInterrupt

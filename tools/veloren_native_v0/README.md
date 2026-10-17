@@ -4,17 +4,18 @@ This experimental local patch targets the official Veloren GitLab source commit
 `1d12f35edd6cdbfc1fb921c167cdd7beeeffe248` (`v0.18.0`). It changes nine Rust
 files and does not alter dependency versions or `Cargo.lock`. The upstream
 source remains under `GPL-3.0-or-later`; this is not an upstream release.
-Patch SHA-256: `1ccf5c1db8d164743838b1bcb67a73adea88dd7a180f64c45b4c204c48097936`.
+Patch SHA-256: `19caffe6962c6b5e094fd1344c2b84b8eb5a737943a8d0ac865d9c0b39708cf8`.
 Changed paths: `common/src/rtsim.rs`; `rtsim/src/data/npc.rs`,
 `rtsim/src/rule/npc_ai/mod.rs`, `rtsim/src/rule/simulate_npcs.rs`;
 `server-cli/src/main.rs`; `server/src/lib.rs`, `server/src/rtsim/mod.rs`,
 `server/src/rtsim/tick.rs`, `server/src/sys/agent/behavior_tree/mod.rs`.
 
 Current verification (2026-10-17): `SERVER_BUILD=PASS`, native baseline
-established, and **work package A = PARTIAL**. The sole positive request entered
-the native Brain but completed without speech; no Agent speech/blocked result
-was observed. Work package B has not started. Rust checks and focused tests are
-reported with their actual patch versions, not relabeled as one final run. See
+established, and **work package A = PARTIAL**. The bounded A-Closure run stopped
+when its cancel-control request was rejected at world admission; no positive
+request was submitted. The earlier Brain/no-speech result remains historical,
+not new Agent evidence. Work package B has not started. Rust checks and focused
+tests are reported with their actual patch versions. See
 [RESULTS.md](../../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) for the
 experiment status and evidence boundary.
 
@@ -62,16 +63,29 @@ retry with a new seed or claim that the request guarantees speech. Likewise,
 chat event; it does not prove recipient delivery, acceptance, or a completed
 conversation. Native speech gating and world validation remain authoritative.
 
+A-Closure records the existing single short-circuited random draw in a local
+boolean; it does not draw again or change its branch. Request-scoped
+`native_talk_branch` distinguishes the native route and `early_cut`/`continue`.
+`native_action_handoff` is emitted only after the tagged Say is actually pushed
+to the Agent queue. `native_action_filtered` records an actual native rtsim
+filter and its reason, not an inferred Agent refusal. The Agent speech logic
+is unchanged from the previous patch. These diagnostics are runtime-only.
+
 Only `TalkToNpc` is supported. Both UIDs must resolve to distinct, alive,
-civilised, Loaded NPCs no more than 8 world units apart. Request polling is
+civilised, Loaded NPCs no more than 8 XY world units apart in the historical
+server admission guard added by this experimental patch, not an NPC social
+decision or Agent speech result. The A-Closure harness additionally requires fresh
+actual ECS **3D** distance ≤8; the XY guard alone is not that proof. Request polling is
 disabled unless both paths are set:
 
 - `VELOREN_NATIVE_REQUESTS=/absolute/path/requests.jsonl`
 - `VELOREN_NATIVE_EVENTS=/absolute/path/events.jsonl`
 - `VELOREN_NATIVE_OBSERVE=1` enables bounded catalog and baseline telemetry;
   observation is off by default.
-- `VELOREN_NATIVE_OBSERVE_UIDS=uid1,uid2` selects up to two real NPCs for 1 Hz
-  baseline samples.
+- `VELOREN_NATIVE_OBSERVE_UIDS=uid1,uid2` selects fixed real NPCs for 1 Hz
+  baseline samples. A-Closure also samples at most 16 distinct UIDs cached from
+  the existing catalog's eight Loaded pairs, with alive, active-lease and native
+  `agent_allowed_to_speak` fields. This does not move or spawn NPCs.
 - `VELOREN_NATIVE_PERSISTER_NPC_UIDS=uid1,uid2` optionally loads chunks around
   those existing NPC positions through Veloren's native persister; it does not
   move NPCs or players.
@@ -105,29 +119,35 @@ The file-only helper's standard-library tests are run with
 `python3 tools/veloren_native_v0/test_native_talk.py -v`; saved output is in
 `offline_evidence/python_cli_unittest.txt`. They do not run Veloren.
 
-For a tightly gated one-time control/probe, prepare an existing empty request
-file and configure the server to use it. Run this helper before or during the
-native run; it can wait while the events file is not yet present. It never
-launches or stops the server. It waits for a
-fresh 5-second Loaded/speaking pair window, appends the cancellation request and
-same-ID cancel in one OS write, and will not send the unique positive request
-unless the server reports exactly `cancelled_before_native_action` with no
-same-ID intent or Agent effect. This is the fixed native event outcome for a
-request cancelled before its Brain action starts; the harness does not infer
-it from a generic cancellation label. It then requires a newly qualified pair
-before the single positive append. Output is a separate harness transcript,
-not server events or a game verdict.
+For the bounded control/probe, prepare an existing empty request file and a new
+or empty event file. Start the helper before the server. It never launches or
+stops Veloren. It waits at most 120 seconds for the first baseline, then uses
+60-second candidate windows requiring five continuous seconds of fresh,
+living, Loaded, native-speaking, 3D-nearby samples with no active sender lease.
+The preferred pair is used when eligible; fallback is restricted to published
+catalog pairs sorted by fresh 3D distance and UID. One atomic two-line cancel
+control must reach exactly `cancelled_before_native_action`, with no tagged
+intent, handoff or Agent effect, before any positive submission.
+
+`--max-positive` defaults to one and is hard-capped at six actual submissions;
+rejected and no-speech attempts count. Each uses a new ID and verified input
+prefix, up to 80 seconds of feedback and 20 seconds of subsequent observation.
+An unclosed feedback window stops the run. The first Agent effect also stops
+further requests after its continuation check; missing evidence is not repaired
+by retrying. Output is a separate harness transcript, not server events or a
+game verdict. The exact two-launch A-Closure protocol is in RESULTS.
 
 ```sh
 python3 tools/veloren_native_v0/run_talk_probe.py \
   --events /absolute/path/events.jsonl \
   --requests /absolute/path/empty-requests.jsonl \
   --npc-uid 445 --target-uid 465 --source native-probe \
-  --cancel-id probe-cancel-001 --request-id probe-positive-001
+  --cancel-id probe-cancel-001 --request-id probe-positive --max-positive 6
 ```
 
-The four standard-library probe tests use temporary files only:
-`python3 tools/veloren_native_v0/test_run_talk_probe.py -v`.
+The ten standard-library probe tests use temporary files only. Run both file
+interfaces (15 tests, no game):
+`python3 -B -m unittest discover -s tools/veloren_native_v0 -p 'test*.py' -v`.
 
 ## Reproducing the Rust checks
 
@@ -180,27 +200,30 @@ debug-info disk use; it does not change the source manifest or lockfile. The
 successful runtime-feature build produced the binary recorded in local build
 evidence. Do not omit `plugins` when reproducing the headless run.
 
-The recorded focused suite totals 12 tests (common 1, rtsim 6, server 5).
-Full-workspace check/test/build evidence is under the ignored local
+The A-Closure focused suite totals 14 passing tests (common 1, rtsim 8, server 5).
+The preceding `1ccf5c1…` patch had 12; those historical results are not relabeled.
+Package-selected checks/build in the official full workspace are recorded under
+the ignored local
 `_local_data/external_games/veloren_0_18_0/evidence/server_build_20261017/`;
 the source archive and game data are not committed.
 
 ## Native run conclusion
 
-`A=PARTIAL`; `B=NOT_STARTED_A_GATE`. The patched server built, the original-world
-baseline was observed, and one real negative-control input reached the exact
-`cancelled_before_native_action` terminal with no same-ID intent or Agent effect.
-The single positive request was accepted and entered the native Brain; its
-terminal outcome was `native_talk_completed_without_speech`. No
-`native_speech_emitted` or `speech_blocked` event was observed for that request.
-This is a valid no-speech outcome, not evidence of rejection. The static native
-small-talk rule has a random idle branch, but this run did not record an RNG
-draw, so that branch is not asserted as the cause.
+`A=PARTIAL`; `A-Closure=BLOCKED_CANCEL_ADMISSION`; `B=NOT_STARTED_A_GATE`.
+The new patch built and passed 14 Rust / 15 file-interface tests. Two isolated
+servers ran and exited normally. The new cancel-control input was rejected as
+`pair_not_live_loaded_civilised_nearby`, followed by `not_found`, so cancellation
+was not exercised. There were **zero positive submissions**. Fresh pre-submit
+ECS samples met the protocol, while a later sample exceeded its distance
+limit; the composite rejection does not identify the precise failed guard.
+The controller was manually interrupted under the stop rule (exit 130), not
+an automatic abort or success. No code was changed during the runs.
 
-The run demonstrates the build, baseline, request/cancel input path, and native
-Brain continuation only. Agent handling beyond the observed event boundary is
-not proven; the raw trace and final event counts remain subject to review in
-[RESULTS.md](../../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) and its linked
-manifest. The harness exited 0 because its observation workflow ended; that
-exit code is not a game-success verdict. Do not retry, change the seed, or
-promote this partial result to an A pass. B remains gated on A acceptance.
+The prior `3a82cd0` run remains a separate partial result: it had a valid cancel
+and one Brain terminal without speech, with no observed RNG draw or Agent
+result. This round does not explain that historical no-speech outcome. The new
+branch/handoff diagnostics were not reached by a positive request. No Agent,
+relationship, recipient-acceptance or planning success is claimed. All inputs,
+deviations and evidence are owned by
+[RESULTS.md](../../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md). Both permitted
+launches were used; this work package has stopped without retries or B work.
