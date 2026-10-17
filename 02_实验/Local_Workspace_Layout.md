@@ -38,3 +38,16 @@
 ```
 
 其余外部模型缓存路径保持原值。迁移不修改冻结 artifact，不启动模型或新实验；项目当前暂停边界继续有效。
+
+## 2026-10-17：可重新下载的原始数据缓存清理
+
+用户明确授权删除可重新下载的数据集缓存。本次仅删除下列已核对本地哈希、且官方文件地址 HTTP HEAD 返回200的原始下载及解压文件；项目生成的 replay、标注、QA、失败记录和运行证据保留。上文迁移时的完整保留记录不表示这些外部下载必须永久占用磁盘。
+
+| 数据集 | 本次删除 | 恢复来源与内容校验 |
+|---|---|---|
+| LIGHT | `outputs/external_assets_2026-09-06/LIGHT/light_data.pkl`，145,780,274 bytes | [官方原始文件](https://parl.ai/downloads/light/light-dialog-processed-small7.pkl)；下载后保存为原本的 `light_data.pkl`，SHA-256 `7c83cf49818586db9999ea67a4a6ad087afbd91c26ed629a9f00e21d0b84058f`。原生构建脚本 `light_dialog_build.py` 亦记录该URL和哈希 |
+| ClubFloyd | `outputs/external_assets_2026-09-06/ClubFloyd/lm_data.zip`（14,772,785 bytes）及 `raw/cleaned_corpora/` 中426份原始文件（119,341,355 bytes） | [固定commit的原始ZIP](https://raw.githubusercontent.com/princeton-nlp/calm-textgame/3c111c0102c27e258f596ace18540db22f97f1da/calm/lm_data.zip)；SHA-256 `cbd6cea0a97b2bfde73a357b3795ebba0578266d3b2ecd15fb67232d6236a3db`。恢复ZIP并解压至该数据集的 `raw/` 后再跑adapter |
+
+合计428个文件、279,894,414 bytes。ClubFloyd原始文件与ZIP成员逐项完整SHA-256/长度一致，且没有未打包的额外raw文件；父级在删除前重新校验全部待删文件与未跟踪状态。完整本地清单在 `_local_data/maintenance/dataset_cleanup_20261017/`，不含数据正文。
+
+此前 PowerWash 的16份重复解压CSV已清理，见[专用说明](T0g_PowerWash/README.md)。其原始ZIP本轮仍保留：OSF下载/API当前返回503，未以“曾经能下载”冒充当前可恢复。OPeRA来源核验超时、其余来源未充分确认的缓存也未删除。此处记录的是缓存可用性，不改变历史实验结果或数据许可。

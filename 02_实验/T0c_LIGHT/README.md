@@ -4,6 +4,8 @@
 
 原始资产位于被 Git 忽略的 `outputs/external_assets_2026-09-06/LIGHT/`，与 ClubFloyd 和 runtime 分离。来源为 ParlAI LIGHT 的 `light-dialog-processed-small7.pkl`，文件 SHA-256 记录在 manifest 中。
 
+2026-10-17 已按用户授权清理可重新下载的原始 `light_data.pkl` 缓存；replay、标注、QA和结果未删。重新读取原始数据前，按[缓存恢复登记](../Local_Workspace_Layout.md)下载并核验SHA-256；不能将缓存缺失解释为历史实验未运行。
+
 ## 已完成
 
 - 审计前 50 个 episode：41 个含至少一个非空 physical action，共 140 个 physical action turns；606 个 turn 提供 `available_actions`。

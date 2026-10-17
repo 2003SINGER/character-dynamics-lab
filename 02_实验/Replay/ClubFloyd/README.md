@@ -4,8 +4,8 @@
 
 ## 当前切片
 
-- 原始包：`outputs/external_assets_2026-09-06/ClubFloyd/lm_data.zip`（本地忽略目录）
-- 原始解压目录：`.../raw/cleaned_corpora/`
+- 原始包的恢复位置：`outputs/external_assets_2026-09-06/ClubFloyd/lm_data.zip`（本地忽略目录；2026-10-17已清理可重下载缓存）
+- 原始解压目录的恢复位置：`.../raw/cleaned_corpora/`（426个原始文件已清理；开发切片、全量replay和审核产物保留）
 - 开发切片：`outputs/external_assets_2026-09-06/ClubFloyd/clubfloyd_dev_30.replay.json`（本地忽略目录）
 - 生成器：`../clubfloyd_adapter.py`
 - 结果：30 条 trajectory、30,388 个 observed steps；已通过 ReplayRecord v0 validator。
@@ -16,6 +16,8 @@
 源文件是 `[STATE] ... [ACTION] ...` 的回放文本。每一对只复制为 `source_O` 与 `source_action_A_star`；`W`、persona、state label、candidate sets、event 和 timestamp 保留为 `null`。没有加入 LLM 推断，也没有把游戏响应重写成角色内部状态。`source_step_context` 保留同一对原文，便于审计。
 
 ## 复现
+
+先按[缓存恢复登记](../../Local_Workspace_Layout.md)取得固定commit的原始ZIP、核验SHA-256并恢复解压文件；下列命令需要该原始输入，现有实验结果不受本次缓存清理影响。
 
 ```powershell
 py -3 02_实验/Replay/clubfloyd_adapter.py `
