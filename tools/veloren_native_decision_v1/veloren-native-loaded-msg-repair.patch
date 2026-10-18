@@ -1,0 +1,915 @@
+--- a/rtsim/src/data/npc.rs
++++ b/rtsim/src/data/npc.rs
+@@ -66,6 +66,11 @@
+     /// Request provenance is attached only by explicit external talk actions.
+     /// Keys are indices in `actions` until the server transfers that batch.
+     pub external_action_request_ids: HashMap<usize, String>,
++    /// Request provenance for the exact native recruitment Msg action.
++    /// Indices refer to `actions` and are remapped whenever actions are retained.
++    pub native_recruit_action_provenance: HashMap<usize, NativeRecruitMessageProvenance>,
++    /// Runtime-only delivery/consumption/effect receipts drained by the server.
++    pub native_recruit_receipts: Vec<NativeRecruitReceipt>,
+     /// Request-scoped Say actions removed by the native simulation filter.
+     pub external_action_drops: Vec<ExternalActionDrop>,
+     pub activity: Option<NpcActivity>,
+@@ -112,8 +117,45 @@
+     pub started_reported: bool,
+     pub message_sent: bool,
+     pub message_reported: bool,
++    pub hire_input_consumed: bool,
++    pub hire_effect_applied: bool,
++    pub hire_until: Option<Time>,
+ }
+ 
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub struct NativeRecruitMessageProvenance {
++    pub request_id: String,
++    pub source_uid: u64,
++    pub target_uid: u64,
++    pub decision_source: String,
++}
++
++#[derive(Clone, Debug)]
++pub struct NpcInboxEntry {
++    pub input: NpcInput,
++    pub native_recruit: Option<NativeRecruitMessageProvenance>,
++}
++
++impl NpcInboxEntry {
++    pub fn native(input: NpcInput) -> Self {
++        Self { input, native_recruit: None }
++    }
++}
++
++#[derive(Clone, Debug)]
++pub struct NativeRecruitReceipt {
++    pub event: &'static str,
++    pub provenance: NativeRecruitMessageProvenance,
++    pub time: Time,
++    pub hire_until: Option<Time>,
++}
++
++#[derive(Default)]
++pub struct LoadedActionHandoff {
++    pub agent_actions: Vec<(NpcAction, Option<String>)>,
++    pub retained_messages: Vec<NativeRecruitMessageProvenance>,
++}
++
+ impl ExternalTalkLease {
+     pub fn take_branch_diagnostic(&mut self) -> Option<(&'static str, Option<&'static str>)> {
+         if self.branch_reported {
+@@ -169,23 +211,40 @@
+         &mut self,
+         mut keep: impl FnMut(&NpcAction) -> Result<(), &'static str>,
+     ) {
+-        if self.external_action_request_ids.is_empty() {
+-            self.actions.retain(|action| keep(action).is_ok());
++        self.retain_actions_with_provenance(|action, _| keep(action));
++    }
++
++    pub fn retain_actions_with_provenance(
++        &mut self,
++        mut keep: impl FnMut(
++            &NpcAction,
++            Option<&NativeRecruitMessageProvenance>,
++        ) -> Result<(), &'static str>,
++    ) {
++        if self.external_action_request_ids.is_empty()
++            && self.native_recruit_action_provenance.is_empty()
++        {
++            self.actions.retain(|action| keep(action, None).is_ok());
+             return;
+         }
+ 
+         let old_request_ids = std::mem::take(&mut self.external_action_request_ids);
++        let old_recruit_provenance = std::mem::take(&mut self.native_recruit_action_provenance);
+         let mut retained_actions = Vec::with_capacity(self.actions.len());
+         let mut retained_request_ids = HashMap::new();
++        let mut retained_recruit_provenance = HashMap::new();
+ 
+         for (old_index, action) in std::mem::take(&mut self.actions).into_iter().enumerate() {
+-            let decision = keep(&action);
++            let decision = keep(&action, old_recruit_provenance.get(&old_index));
+             if decision.is_ok() {
+                 let new_index = retained_actions.len();
+                 retained_actions.push(action);
+                 if let Some(request_id) = old_request_ids.get(&old_index) {
+                     retained_request_ids.insert(new_index, request_id.clone());
+                 }
++                if let Some(provenance) = old_recruit_provenance.get(&old_index) {
++                    retained_recruit_provenance.insert(new_index, provenance.clone());
++                }
+             } else if matches!(&action, NpcAction::Say(_, _))
+                 && let (Some(request_id), Err(reason)) =
+                     (old_request_ids.get(&old_index), decision)
+@@ -194,11 +253,47 @@
+                     request_id: request_id.clone(),
+                     reason,
+                 });
++            }
++        }
++
++        self.actions = retained_actions;
++        self.external_action_request_ids = retained_request_ids;
++        self.native_recruit_action_provenance = retained_recruit_provenance;
++    }
++
++    /// Move non-message actions to the Loaded Agent while retaining RTSim Msgs
++    /// for the next SimulateNpcs pass. Correlations follow original action indices.
++    pub fn take_loaded_agent_actions(&mut self) -> LoadedActionHandoff {
++        let old_request_ids = std::mem::take(&mut self.external_action_request_ids);
++        let old_provenance = std::mem::take(&mut self.native_recruit_action_provenance);
++        let mut handoff = LoadedActionHandoff::default();
++        let mut retained_actions = Vec::new();
++        let mut retained_request_ids = HashMap::new();
++        let mut retained_provenance = HashMap::new();
++
++        for (old_index, action) in std::mem::take(&mut self.actions).into_iter().enumerate() {
++            if matches!(&action, NpcAction::Msg { .. }) {
++                let new_index = retained_actions.len();
++                if let Some(provenance) = old_provenance.get(&old_index) {
++                    handoff.retained_messages.push(provenance.clone());
++                    retained_provenance.insert(new_index, provenance.clone());
++                }
++                if let Some(request_id) = old_request_ids.get(&old_index) {
++                    retained_request_ids.insert(new_index, request_id.clone());
++                }
++                retained_actions.push(action);
++            } else {
++                handoff.agent_actions.push((
++                    action,
++                    old_request_ids.get(&old_index).cloned(),
++                ));
+             }
+         }
+ 
+         self.actions = retained_actions;
+         self.external_action_request_ids = retained_request_ids;
++        self.native_recruit_action_provenance = retained_provenance;
++        handoff
+     }
+ 
+     /// Reset the controller to a neutral state before the start of the next
+@@ -299,7 +394,21 @@
+     }
+ 
+     pub fn send_msg(&mut self, to: impl Into<Actor>, msg: NpcMsg) {
++        self.send_msg_with_native_recruit_provenance(to, msg, None);
++    }
++
++    pub fn send_msg_with_native_recruit_provenance(
++        &mut self,
++        to: impl Into<Actor>,
++        msg: NpcMsg,
++        provenance: Option<NativeRecruitMessageProvenance>,
++    ) {
++        let action_index = self.actions.len();
+         self.actions.push(NpcAction::Msg { to: to.into(), msg });
++        if let Some(provenance) = provenance {
++            self.native_recruit_action_provenance
++                .insert(action_index, provenance);
++        }
+     }
+ 
+     /// Start a new dialogue.
+@@ -411,6 +520,57 @@
+     use super::*;
+ 
+     #[test]
++    fn native_loaded_msg_handoff_keeps_message_and_say_ids_by_original_index() {
++        let mut controller = Controller::default();
++        controller.actions = vec![
++            NpcAction::Say(None, comp::Content::localized("first")),
++            NpcAction::Msg {
++                to: Actor::Npc(NpcId::default()),
++                msg: NpcMsg::RequestHire,
++            },
++            NpcAction::Say(None, comp::Content::localized("second")),
++        ];
++        controller.external_action_request_ids.insert(0, "say-first".into());
++        controller.external_action_request_ids.insert(2, "say-second".into());
++        let provenance = NativeRecruitMessageProvenance {
++            request_id: "recruit-1".into(),
++            source_uid: 476,
++            target_uid: 442,
++            decision_source: "test".into(),
++        };
++        controller.native_recruit_action_provenance.insert(1, provenance.clone());
++
++        let handoff = controller.take_loaded_agent_actions();
++        assert_eq!(handoff.agent_actions.len(), 2);
++        assert_eq!(handoff.agent_actions[0].1.as_deref(), Some("say-first"));
++        assert_eq!(handoff.agent_actions[1].1.as_deref(), Some("say-second"));
++        assert!(matches!(controller.actions.as_slice(), [NpcAction::Msg { .. }]));
++        assert_eq!(controller.native_recruit_action_provenance.get(&0), Some(&provenance));
++
++        let mut delivered = Vec::new();
++        controller.retain_actions_with_provenance(|action, action_provenance| match action {
++            NpcAction::Msg { to: Actor::Npc(receiver), msg } => {
++                delivered.push((*receiver, msg.clone(), action_provenance.cloned()));
++                Err("simulate_npcs_msg_consumed_in_rtsim")
++            },
++            _ => Ok(()),
++        });
++        assert_eq!(delivered.len(), 1);
++        assert_eq!(delivered[0].2.as_ref(), Some(&provenance));
++        assert!(controller.actions.is_empty());
++        assert!(controller.native_recruit_action_provenance.is_empty());
++
++        controller.retain_actions_with_provenance(|action, action_provenance| match action {
++            NpcAction::Msg { to: Actor::Npc(receiver), msg } => {
++                delivered.push((*receiver, msg.clone(), action_provenance.cloned()));
++                Err("simulate_npcs_msg_consumed_in_rtsim")
++            },
++            _ => Ok(()),
++        });
++        assert_eq!(delivered.len(), 1, "consumed message must not be delivered twice");
++    }
++
++    #[test]
+     fn ordinary_say_to_same_target_is_never_correlated() {
+         let target = Actor::Npc(NpcId::default());
+         let mut controller = Controller::default();
+@@ -698,7 +858,7 @@
+     #[serde(skip)]
+     pub controller: Controller,
+     #[serde(skip)]
+-    pub inbox: VecDeque<NpcInput>,
++    pub inbox: VecDeque<NpcInboxEntry>,
+ 
+     /// Whether the NPC is in simulated or loaded mode (when rtsim is run on the
+     /// server, loaded corresponds to being within a loaded chunk). When in
+--- a/rtsim/src/ai/mod.rs
++++ b/rtsim/src/ai/mod.rs
+@@ -5,12 +5,11 @@
+ 
+ use crate::data::{
+     Data, ReportId, Sentiments,
+-    npc::{Controller, Npc, NpcId},
++    npc::{Controller, Npc, NpcId, NpcInboxEntry},
+ };
+ use common::{
+     comp::{self, gizmos::RtsimGizmos},
+     resources::{Time, TimeOfDay},
+-    rtsim::NpcInput,
+     shared_server_config::ServerConstants,
+     uid::IdMaps,
+     weather::WeatherGrid,
+@@ -69,7 +68,7 @@
+     pub npc_id: NpcId,
+     pub npc: &'a Npc,
+     pub controller: &'a mut Controller,
+-    pub inbox: &'a mut VecDeque<NpcInput>, // TODO: Allow more inbox items
++    pub inbox: &'a mut VecDeque<NpcInboxEntry>, // TODO: Allow more inbox items
+     pub sentiments: &'a mut Sentiments,
+     pub known_reports: &'a mut HashSet<ReportId>,
+     pub gizmos: Option<&'a mut Vec<comp::gizmos::Gizmos>>,
+--- a/rtsim/src/rule/report.rs
++++ b/rtsim/src/rule/report.rs
+@@ -1,6 +1,6 @@
+ use crate::{
+     RtState, Rule, RuleError,
+-    data::{Report, report::ReportKind},
++    data::{Report, npc::NpcInboxEntry, report::ReportKind},
+     event::{EventCtx, OnDeath, OnTheft},
+ };
+ use common::rtsim::NpcInput;
+@@ -40,7 +40,7 @@
+             // data structure in their own time.
+             for npc_id in nearby {
+                 if let Some(npc) = data.npcs.get_mut(npc_id) {
+-                    npc.inbox.push_back(NpcInput::Report(report));
++                    npc.inbox.push_back(NpcInboxEntry::native(NpcInput::Report(report)));
+                 }
+             }
+         }
+@@ -68,7 +68,7 @@
+ 
+         for npc_id in nearby {
+             if let Some(npc) = data.npcs.get_mut(npc_id) {
+-                npc.inbox.push_back(NpcInput::Report(report));
++                npc.inbox.push_back(NpcInboxEntry::native(NpcInput::Report(report)));
+             }
+         }
+     }
+--- a/rtsim/src/rule/sync_npcs.rs
++++ b/rtsim/src/rule/sync_npcs.rs
+@@ -1,5 +1,6 @@
+ use crate::{
+     RtState, Rule, RuleError,
++    data::npc::NpcInboxEntry,
+     event::{EventCtx, OnDeath, OnHealthChange, OnSetup, OnTick},
+ };
+ use common::{
+@@ -122,7 +123,7 @@
+                     .iter()
+                     .copied()
+                     .filter(|report| !npc.known_reports.contains(report))
+-                    .map(NpcInput::Report),
++                    .map(|report| NpcInboxEntry::native(NpcInput::Report(report))),
+             );
+         }
+ 
+--- a/rtsim/src/rule/simulate_npcs.rs
++++ b/rtsim/src/rule/simulate_npcs.rs
+@@ -1,6 +1,6 @@
+ use crate::{
+     RtState, Rule, RuleError,
+-    data::{Sentiment, npc::SimulationMode},
++    data::{Sentiment, npc::{Controller, NativeRecruitReceipt, NpcInboxEntry, SimulationMode}},
+     event::{EventCtx, OnHealthChange, OnHelped, OnMountVolume, OnTick},
+ };
+ use common::{
+@@ -14,7 +14,126 @@
+ use vek::{Clamp, Vec2};
+ 
+ pub struct SimulateNpcs;
++
++fn collect_npc_inputs(
++    controller: &mut Controller,
++    sender_id: crate::data::npc::NpcId,
++    sender_uid: u64,
++    mode: SimulationMode,
++) -> Vec<(crate::data::npc::NpcId, NpcInboxEntry)> {
++    let mut inputs = Vec::new();
++    controller.retain_actions_with_provenance(|action, provenance| match action {
++        NpcAction::Msg { to, msg } => {
++            if let Actor::Npc(target_id) = to {
++                let provenance = provenance
++                    .filter(|provenance| provenance.source_uid == sender_uid)
++                    .cloned();
++                inputs.push((
++                    *target_id,
++                    NpcInboxEntry {
++                        input: NpcInput::Msg {
++                            from: sender_id.into(),
++                            msg: msg.clone(),
++                        },
++                        native_recruit: provenance,
++                    },
++                ));
++            } else {
++                // TODO: Send to players?
++            }
++            Err("simulate_npcs_msg_consumed_in_rtsim")
++        },
++        NpcAction::Say(_, _) | NpcAction::Attack(_) | NpcAction::Dialogue(_, _) => {
++            if matches!(mode, SimulationMode::Loaded) {
++                Ok(())
++            } else {
++                Err("simulate_npcs_unloaded_mode_filter")
++            }
++        },
++    });
++    inputs
++}
++
++#[cfg(test)]
++mod native_loaded_msg_tests {
++    use super::*;
++    use common::rtsim::{NpcId, NpcMsg};
++    use crate::data::npc::NativeRecruitMessageProvenance;
++
++    fn provenance() -> NativeRecruitMessageProvenance {
++        NativeRecruitMessageProvenance {
++            request_id: "native-loaded-msg-test".into(),
++            source_uid: 476,
++            target_uid: 442,
++            decision_source: "test".into(),
++        }
++    }
++
++    #[test]
++    fn native_loaded_msg_is_collected_once_with_exact_provenance() {
++        let sender = NpcId::default();
++        let receiver = NpcId::default();
++        let expected = provenance();
++        let mut controller = Controller::default();
++        controller.send_msg_with_native_recruit_provenance(
++            Actor::Npc(receiver),
++            NpcMsg::RequestHire,
++            Some(expected.clone()),
++        );
++
++        let inbox = collect_npc_inputs(&mut controller, sender, 476, SimulationMode::Loaded);
++        assert_eq!(inbox.len(), 1);
++        assert_eq!(inbox[0].0, receiver);
++        assert!(matches!(&inbox[0].1.input, NpcInput::Msg { msg: NpcMsg::RequestHire, .. }));
++        assert_eq!(inbox[0].1.native_recruit.as_ref(), Some(&expected));
++        assert!(controller.actions.is_empty());
++        assert!(collect_npc_inputs(&mut controller, sender, 476, SimulationMode::Loaded).is_empty());
++    }
++
++    #[test]
++    fn native_loaded_msg_with_mismatched_sender_uid_routes_unattributed() {
++        let sender = NpcId::default();
++        let receiver = NpcId::default();
++        let mut controller = Controller::default();
++        let mut mismatched = provenance();
++        mismatched.source_uid = 477;
++        controller.send_msg_with_native_recruit_provenance(
++            Actor::Npc(receiver),
++            NpcMsg::RequestHire,
++            Some(mismatched),
++        );
+ 
++        let inbox = collect_npc_inputs(&mut controller, sender, 476, SimulationMode::Loaded);
++        assert_eq!(inbox.len(), 1, "the native message route is unchanged");
++        assert!(inbox[0].1.native_recruit.is_none(), "bad metadata is not attributed");
++    }
++
++    #[test]
++    fn simulated_mode_keeps_native_msg_routing_and_existing_non_msg_filter() {
++        let sender = NpcId::default();
++        let receiver = NpcId::default();
++        let mut controller = Controller::default();
++        controller.send_msg(Actor::Npc(receiver), NpcMsg::RequestHire);
++        controller.actions.push(NpcAction::Say(None, comp::Content::localized("native")));
++
++        let inbox = collect_npc_inputs(&mut controller, sender, 111, SimulationMode::Simulated);
++        assert_eq!(inbox.len(), 1);
++        assert!(inbox[0].1.native_recruit.is_none());
++        assert!(controller.actions.is_empty());
++    }
++
++    #[test]
++    fn invalid_character_recipient_keeps_existing_no_delivery_behavior() {
++        let sender = NpcId::default();
++        let mut controller = Controller::default();
++        controller.send_msg(Actor::Character(common::character::CharacterId(0)), NpcMsg::RequestHire);
++
++        let inbox = collect_npc_inputs(&mut controller, sender, 476, SimulationMode::Loaded);
++        assert!(inbox.is_empty());
++        assert!(controller.actions.is_empty());
++    }
++}
++
+ impl Rule for SimulateNpcs {
+     fn start(rtstate: &mut RtState) -> Result<Self, RuleError> {
+         rtstate.bind(on_helped);
+@@ -118,28 +237,12 @@
+     let mut npc_inputs = Vec::new();
+ 
+     for (npc_id, npc) in data.npcs.npcs.iter_mut().filter(|(_, npc)| !npc.is_dead()) {
+-        npc.controller.retain_actions_with_reason(|action| match action {
+-            // NPC-to-NPC messages never leave rtsim
+-            NpcAction::Msg { to, msg } => {
+-                if let Actor::Npc(to) = to {
+-                    npc_inputs.push((*to, NpcInput::Msg {
+-                        from: npc_id.into(),
+-                        msg: msg.clone(),
+-                    }));
+-                } else {
+-                    // TODO: Send to players?
+-                }
+-                Err("simulate_npcs_msg_consumed_in_rtsim")
+-            },
+-            // All other cases are handled by the game when loaded
+-            NpcAction::Say(_, _) | NpcAction::Attack(_) | NpcAction::Dialogue(_, _) => {
+-                if matches!(npc.mode, SimulationMode::Loaded) {
+-                    Ok(())
+-                } else {
+-                    Err("simulate_npcs_unloaded_mode_filter")
+-                }
+-            },
+-        });
++        npc_inputs.extend(collect_npc_inputs(
++            &mut npc.controller,
++            npc_id,
++            npc.uid,
++            npc.mode,
++        ));
+ 
+         if matches!(npc.mode, SimulationMode::Simulated) {
+             let activity = if data.npcs.mounts.get_mount_link(npc_id).is_some() {
+@@ -356,8 +459,21 @@
+         npc.job = npc.controller.job.clone();
+     }
+ 
+-    for (npc_id, input) in npc_inputs {
++    for (npc_id, mut input) in npc_inputs {
+         if let Some(npc) = data.npcs.get_mut(npc_id) {
++            if let Some(provenance) = input
++                .native_recruit
++                .take()
++                .filter(|provenance| provenance.target_uid == npc.uid)
++            {
++                npc.controller.native_recruit_receipts.push(NativeRecruitReceipt {
++                    event: "native_recruit_msg_delivered_to_inbox",
++                    provenance: provenance.clone(),
++                    time: ctx.event.time,
++                    hire_until: None,
++                });
++                input.native_recruit = Some(provenance);
++            }
+             npc.inbox.push_back(input);
+         }
+     }
+--- a/rtsim/src/rule/npc_ai/mod.rs
++++ b/rtsim/src/rule/npc_ai/mod.rs
+@@ -42,7 +42,10 @@
+     },
+     data::{
+         ReportKind, Sentiment, Sites,
+-        npc::{Brain, DialogueSession, Job, NativeRecruitTask, NpcId, PathData, SimulationMode},
++        npc::{
++            Brain, DialogueSession, Job, NativeRecruitMessageProvenance, NativeRecruitReceipt,
++            NativeRecruitTask, NpcId, PathData, SimulationMode,
++        },
+         quest::{Quest, QuestKind},
+     },
+     event::OnTick,
+@@ -480,7 +483,23 @@
+                     task.message_sent = true;
+                 }
+             }
+-            ctx.controller.send_msg(target, NpcMsg::RequestHire);
++            let provenance = request_id.as_ref().and_then(|request_id| {
++                ctx.controller
++                    .native_recruit
++                    .as_ref()
++                    .filter(|task| task.request_id == *request_id && task.target == target)
++                    .map(|task| NativeRecruitMessageProvenance {
++                        request_id: task.request_id.clone(),
++                        source_uid: ctx.npc.uid,
++                        target_uid: task.target_uid,
++                        decision_source: task.source.clone(),
++                    })
++            });
++            ctx.controller.send_msg_with_native_recruit_provenance(
++                target,
++                NpcMsg::RequestHire,
++                provenance,
++            );
+         }))
+         .debug(|| "inviting raid participant")
+ }
+@@ -1379,7 +1398,8 @@
+ 
+ fn check_inbox<S: State>(ctx: &mut NpcCtx) -> Option<impl Action<S> + use<S>> {
+     let mut action = None;
+-    ctx.inbox.retain(|input| {
++    ctx.inbox.retain(|entry| {
++        let input = &entry.input;
+         match input {
+             NpcInput::Report(report_id) if !ctx.known_reports.contains(report_id) => {
+                 let Some(report) = ctx.data.reports.get(*report_id) else {
+@@ -1575,6 +1595,25 @@
+                 msg: NpcMsg::RequestHire,
+             } => {
+                 let from = *from;
++                let source_id = if let Actor::Npc(source_id) = from {
++                    Some(source_id)
++                } else {
++                    None
++                };
++                let provenance = entry.native_recruit.as_ref().filter(|provenance| {
++                    provenance.target_uid == ctx.npc.uid
++                        && source_id.and_then(|source_id| ctx.data.npcs.get(source_id)).is_some_and(|source| {
++                            source.uid == provenance.source_uid
++                        })
++                }).cloned();
++                if let Some(provenance) = &provenance {
++                    ctx.controller.native_recruit_receipts.push(NativeRecruitReceipt {
++                        event: "native_recruit_hire_input_consumed",
++                        provenance: provenance.clone(),
++                        time: ctx.time,
++                        hire_until: None,
++                    });
++                }
+                 action = Some(
+                     idle()
+                         .repeat()
+@@ -1584,6 +1623,14 @@
+                                 .say(from, Content::localized("npc-response-accept_hire"));
+                             ctx.controller
+                                 .set_newly_hired(from, common::resources::Time(f64::INFINITY));
++                            if let Some(provenance) = &provenance {
++                                ctx.controller.native_recruit_receipts.push(NativeRecruitReceipt {
++                                    event: "native_recruit_hire_effect_applied",
++                                    provenance: provenance.clone(),
++                                    time: ctx.time,
++                                    hire_until: Some(common::resources::Time(f64::INFINITY)),
++                                });
++                            }
+                         }))
+                         .boxed(),
+                 );
+--- a/rtsim/src/rule/npc_ai/util.rs
++++ b/rtsim/src/rule/npc_ai/util.rs
+@@ -50,8 +50,8 @@
+             // If an end dialogue message is received, stop the dialogue
+             .stop_if(move |ctx: &mut NpcCtx| {
+                 let mut stop = false;
+-                ctx.inbox.retain(|input| {
+-                    if let NpcInput::Dialogue(_, dialogue) = input
++                ctx.inbox.retain(|entry| {
++                    if let NpcInput::Dialogue(_, dialogue) = &entry.input
+                         && dialogue.id == session.id
+                         && let DialogueKind::End = dialogue.kind
+                     {
+@@ -109,8 +109,8 @@
+             let responses = responses.clone();
+             until(move |ctx, _| {
+                 let mut id = None;
+-                ctx.inbox.retain(|input| {
+-                    if let NpcInput::Dialogue(_, dialogue) = input
++                ctx.inbox.retain(|entry| {
++                    if let NpcInput::Dialogue(_, dialogue) = &entry.input
+                         // Check that the response is for the same dialogue
+                         && dialogue.id == self.id
+                         && let DialogueKind::Response { tag, response_id, response, .. } = &dialogue.kind
+@@ -171,8 +171,8 @@
+             // Wait for the ACK
+             .then(until(move |ctx, _| {
+                     let mut acked = false;
+-                    ctx.inbox.retain(|input| {
+-                        if let NpcInput::Dialogue(_, dialogue) = input
++                    ctx.inbox.retain(|entry| {
++                        if let NpcInput::Dialogue(_, dialogue) = &entry.input
+                             // Check that the response is for the same dialogue
+                             && dialogue.id == self.id
+                             && let DialogueKind::Ack { tag } = &dialogue.kind
+--- a/server/src/rtsim/native_recruit.rs
++++ b/server/src/rtsim/native_recruit.rs
+@@ -16,7 +16,7 @@
+ const MAX_TTL_SECONDS: f64 = 120.0;
+ const LOCAL_RADIUS: f32 = 24.0;
+ 
+-fn emit(rtsim: &RtSim, event: Value) {
++pub(super) fn emit(rtsim: &RtSim, event: Value) {
+     let Some(path) = &rtsim.native_recruit_events_path else {
+         return;
+     };
+@@ -164,12 +164,97 @@
+     }
+ }
+ 
+-fn hire_observation_outcome(hired_by_this_leader: bool, request_message_sent: bool) -> Option<&'static str> {
+-    hired_by_this_leader.then_some(if request_message_sent {
++fn hire_observation_outcome(
++    hired_by_this_leader: bool,
++    request_message_sent: bool,
++    input_consumed: bool,
++    effect_applied: bool,
++    hire_until_matches: bool,
++) -> Option<&'static str> {
++    hired_by_this_leader.then_some(if request_message_sent
++        && input_consumed
++        && effect_applied
++        && hire_until_matches
++    {
+         "hired_observed"
++    } else if request_message_sent {
++        "native_hire_observed_without_correlated_effect"
+     } else {
+         "native_hire_observed_without_request_message"
+     })
++}
++
++fn hire_until_json(hire_until: Option<Time>) -> Value {
++    match hire_until {
++        Some(time) if time.0.is_finite() => json!(time.0),
++        Some(_) => json!("infinity"),
++        None => Value::Null,
++    }
++}
++
++pub(super) fn drain_recruit_receipts(rtsim: &mut RtSim) {
++    let receipts = {
++        let mut data = rtsim.state.data_mut();
++        data.npcs
++            .iter_mut()
++            .flat_map(|(_, npc)| std::mem::take(&mut npc.controller.native_recruit_receipts))
++            .collect::<Vec<_>>()
++    };
++    if receipts.is_empty() {
++        return;
++    }
++
++    let events = {
++        let mut data = rtsim.state.data_mut();
++        receipts
++            .into_iter()
++            .map(|receipt| {
++                let provenance = receipt.provenance;
++                let leader_id = npc_id_by_uid(&data, provenance.source_uid);
++                let recipient_id = npc_id_by_uid(&data, provenance.target_uid);
++                if let Some(leader_id) = leader_id
++                    && let Some(task) = data.npcs.get_mut(leader_id).and_then(|leader| {
++                        leader.controller.native_recruit.as_mut()
++                    })
++                    && task.request_id == provenance.request_id
++                    && task.target_uid == provenance.target_uid
++                {
++                    match receipt.event {
++                        "native_recruit_hire_input_consumed" => task.hire_input_consumed = true,
++                        "native_recruit_hire_effect_applied" => {
++                            task.hire_effect_applied = true;
++                            task.hire_until = receipt.hire_until;
++                        },
++                        _ => {},
++                    }
++                }
++                let mut event = json!({
++                    "event":receipt.event,
++                    "request_id":provenance.request_id,
++                    "source_uid":provenance.source_uid,
++                    "target_uid":provenance.target_uid,
++                    "leader_uid":provenance.source_uid,
++                    "recipient_uid":provenance.target_uid,
++                    "leader_npc_id":leader_id.map(|id| format!("{id:?}")),
++                    "recipient_npc_id":recipient_id.map(|id| format!("{id:?}")),
++                    "time":receipt.time.0,
++                    "decision_source":provenance.decision_source,
++                    "hire_until":hire_until_json(receipt.hire_until),
++                });
++                if matches!(
++                    receipt.event,
++                    "native_recruit_msg_delivered_to_inbox"
++                        | "native_recruit_hire_input_consumed"
++                ) {
++                    event["msg_kind"] = json!("RequestHire");
++                }
++                event
++            })
++            .collect::<Vec<_>>()
++    };
++    for event in events {
++        emit(rtsim, event);
++    }
+ }
+ 
+ fn request_id_and_payload(value: &Value) -> Option<(String, String)> {
+@@ -332,6 +417,9 @@
+             started_reported: false,
+             message_sent: false,
+             message_reported: false,
++            hire_input_consumed: false,
++            hire_effect_applied: false,
++            hire_until: None,
+         });
+         drop(data);
+         emit(rtsim, json!({
+@@ -359,12 +447,28 @@
+             .filter_map(|(leader_id, npc)| npc.controller.native_recruit.clone().map(|task| (leader_id, npc.uid, task)))
+             .collect::<Vec<_>>();
+         for (leader_id, leader_uid, task) in tasks {
++            let mut observed_hire_until = None;
+             let outcome = if let Some(target) = data.npcs.get(task.target) {
+-                let hired_by_this_leader = matches!(
++                let hired_by_this_leader = target.uid == task.target_uid && matches!(
+                     &target.job,
+                     Some(Job::Hired(Actor::Npc(hirer), _)) if *hirer == leader_id
+                 );
+-                if let Some(outcome) = hire_observation_outcome(hired_by_this_leader, task.message_sent) {
++                observed_hire_until = match &target.job {
++                    Some(Job::Hired(Actor::Npc(hirer), hire_until)) if *hirer == leader_id => {
++                        Some(*hire_until)
++                    },
++                    _ => None,
++                };
++                let hire_until_matches = task.hire_until.is_some_and(|expected| {
++                    observed_hire_until.is_some_and(|observed| observed == expected)
++                });
++                if let Some(outcome) = hire_observation_outcome(
++                    hired_by_this_leader,
++                    task.message_sent,
++                    task.hire_input_consumed,
++                    task.hire_effect_applied,
++                    hire_until_matches,
++                ) {
+                     Some(outcome)
+                 } else if now.0 >= task.expires_at.0 {
+                     Some(if task.message_sent {
+@@ -426,16 +530,25 @@
+ 
+             if let Some(outcome) = outcome {
+                 if outcome == "hired_observed" {
++                    let hire_until = observed_hire_until.expect("matched hired job has a time");
+                     events.push(json!({
+                         "event":"native_recruit_job_observed",
+                         "request_id":task.request_id,
+                         "time":now.0,
+-                        "leader_uid":leader_uid,
++                        "source_uid":leader_uid,
+                         "target_uid":task.target_uid,
+-                        "source":task.source,
++                        "leader_uid":leader_uid,
++                        "recipient_uid":task.target_uid,
++                        "leader_npc_id":format!("{leader_id:?}"),
++                        "recipient_npc_id":format!("{:?}", task.target),
++                        "hired_by_uid":leader_uid,
++                        "job_actor_uid":leader_uid,
++                        "hire_until":hire_until_json(Some(hire_until)),
++                        "decision_source":task.source.clone(),
++                        "source":task.source.clone(),
+                         "job":"Hired",
+                     }));
+-                } else if outcome == "native_hire_observed_without_request_message" {
++                } else if outcome.starts_with("native_hire_observed_without_") {
+                     events.push(json!({
+                         "event":"native_recruit_unattributed_hire_observed",
+                         "request_id":task.request_id,
+@@ -456,6 +569,8 @@
+                         "source":task.source,
+                         "started":task.started,
+                         "message_sent":task.message_sent,
++                        "hire_input_consumed":task.hire_input_consumed,
++                        "hire_effect_applied":task.hire_effect_applied,
+                         "outcome":outcome,
+                     }));
+                 }
+@@ -557,13 +672,24 @@
+     use common::resources::Time;
+ 
+     #[test]
+-    fn hired_without_request_message_is_unattributed() {
++    fn native_recruit_job_observation_requires_correlated_effect_receipt() {
+         assert_eq!(
+-            hire_observation_outcome(true, false),
++            hire_observation_outcome(true, false, false, false, false),
+             Some("native_hire_observed_without_request_message")
+         );
+-        assert_eq!(hire_observation_outcome(true, true), Some("hired_observed"));
+-        assert_eq!(hire_observation_outcome(false, true), None);
++        assert_eq!(
++            hire_observation_outcome(true, true, true, true, true),
++            Some("hired_observed")
++        );
++        assert_eq!(
++            hire_observation_outcome(true, true, true, false, true),
++            Some("native_hire_observed_without_correlated_effect")
++        );
++        assert_eq!(
++            hire_observation_outcome(true, true, true, true, false),
++            Some("native_hire_observed_without_correlated_effect")
++        );
++        assert_eq!(hire_observation_outcome(false, true, true, true, true), None);
+     }
+ 
+     #[test]
+--- a/server/src/rtsim/tick.rs
++++ b/server/src/rtsim/tick.rs
+@@ -852,6 +852,7 @@
+             dt.0,
+         );
+ 
++        super::native_recruit::drain_recruit_receipts(rtsim);
+         super::native_recruit::advance_after_tick(rtsim, *time);
+         super::native_recruit::observe(rtsim, *time, &loaded_positions);
+ 
+@@ -1075,6 +1076,7 @@
+                     crate::rtsim::external_telemetry(serde_json::json!({
+                         "event": "native_npc_baseline",
+                         "npc_uid": npc.uid,
++                        "npc_id": format!("{npc_id:?}"),
+                         "time": time.0,
+                         "time_of_day": time_of_day.0,
+                         "profession": format!("{:?}", npc.profession()),
+@@ -1234,17 +1236,21 @@
+                             agent.rtsim_controller.personality = npc.personality;
+                             agent.rtsim_controller.look_dir = npc.controller.look_dir;
+                             agent.rtsim_controller.activity = npc.controller.activity;
+-                            let request_ids =
+-                                std::mem::take(&mut npc.controller.external_action_request_ids);
+-                            for (index, action) in
+-                                std::mem::take(&mut npc.controller.actions).into_iter().enumerate()
+-                            {
+-                                let request_id = matches!(
+-                                    &action,
+-                                    common::rtsim::NpcAction::Say(_, _)
+-                                )
+-                                .then(|| request_ids.get(&index).cloned())
+-                                .flatten();
++                            let handoff = npc.controller.take_loaded_agent_actions();
++                            for provenance in handoff.retained_messages {
++                                super::native_recruit::emit(rtsim, serde_json::json!({
++                                    "event":"native_recruit_msg_retained_rtsim",
++                                    "msg_kind":"RequestHire",
++                                    "request_id":provenance.request_id,
++                                    "source_uid":provenance.source_uid,
++                                    "target_uid":provenance.target_uid,
++                                    "leader_uid":provenance.source_uid,
++                                    "recipient_uid":provenance.target_uid,
++                                    "time":time.0,
++                                    "decision_source":provenance.decision_source,
++                                }));
++                            }
++                            for (action, request_id) in handoff.agent_actions {
+                                 agent
+                                     .rtsim_controller
+                                     .push_action(action, request_id.clone());
+@@ -1260,7 +1266,11 @@
+                                 }
+                             }
+                             if let Some(rtsim_outbox) = &mut agent.rtsim_outbox {
+-                                npc.inbox.append(rtsim_outbox);
++                                npc.inbox.extend(
++                                    std::mem::take(rtsim_outbox)
++                                        .into_iter()
++                                        .map(rtsim::data::npc::NpcInboxEntry::native),
++                                );
+                             }
+                         }
+                     },

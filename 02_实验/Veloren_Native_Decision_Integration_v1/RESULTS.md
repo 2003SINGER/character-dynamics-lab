@@ -2,7 +2,7 @@
 
 2026-10-18；起点 `webgpt-sync@c4c47f8`（Talk A 代码/有限结果起点 `4026af0`）。
 
-当前状态：**DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**。本轮实际完成固定源码构建、聚焦测试和唯一一对后台 OFF/ON 运行。外部 HTN 选择已进入原生 Brain 并实际尝试招募；**没有观察到原生 Hired 结算，因此招募—受雇—跟随长链未通过**。到达预定停止条件后不重跑、不改规则救结果，不自行 CLOSED。用户本轮授权的是高层决策接入，而非继续 Talk、游戏选材或 CSV 清理。
+最新检查点：**Loaded Msg 最小修复：ROUTING / HIRE / FOLLOW 有限 PASS，READY_FOR_INDEPENDENT_REVIEW，已停止**。唯一一对真实 OFF/ON 已完成：ON只提交1请求，原生442受雇于476，并在原生跟随任务中水平移动11.82m；详见文末和[本轮原始证据](evidence/loaded_msg_repair_v1/)。不等于完整角色规划、方法优势或跨存档恢复。以下 `ab6dad9` 的 **DEVELOPMENT / PARTIAL** 与原始失败证据保持不变，不自行 CLOSED。
 
 ## 原生链准入与唯一选择
 
@@ -125,4 +125,82 @@ OFF 中头目自行进入 `preparing for raid`、`inviting raid participant` 与
 | Hired 世界效果、受雇跟随及完成后原生续行 | **未证实 / NOT_PASS**；没有效果，不能拿普通 Following 或旧 A 续行替代 |
 | 整体原生长链 / 完整 Character Dynamics | **PARTIAL**；不是方法有效性、统计对比或科研创新 |
 
-工作包按两次启动/固定时限停止，交付 `READY_FOR_INDEPENDENT_REVIEW`，不自行 CLOSED。下一步只需决定：是否另行授权一个**不改变接受策略和结算规则的 Loaded Msg 路由最小修复**及新版本一次验证；在此前不继续作者层、LLM、扩动作或重开选材。旧 A、P0/P5、冻结 C++、F0/F1、main 与已有失败记录未改。
+`ab6dad9` 工作包按两次启动/固定时限停止，交付 `READY_FOR_INDEPENDENT_REVIEW`，不自行 CLOSED。当时待授权的最小消息修复已由下节新审查授权接续；这不改变原实验结论。旧 A、P0/P5、冻结 C++、F0/F1、main 与已有失败记录未改。
+
+## 2026-10-18 新授权：Loaded Msg 最小修复与最后一次纵向验收
+
+状态：**有限接口 PASS / READY_FOR_INDEPENDENT_REVIEW，唯一 OFF/ON 已结束，不再追加运行或第二套机制修复**。新审查原文已完整私有归档并核对 SHA-256 `054d471c1ede602519d60ab6d9fc5d1ee04f39cf732c2aa9bc4026ca2feda7ba`；原文不公开，不建立另一个 RESULTS owner。
+
+本轮只将 Loaded handoff 中的 `NpcAction::Msg` 留给下一轮原生 `SimulateNpcs`；其余动作仍交原 Agent，Say 关联保留原始 action index。`Controller.reset` 不清空 actions，规则顺序不变。新诊断只观测同条消息的保留、原生 inbox 投递、实际消费、Job 变化及受雇者跟随，不直接设置状态，也不把消息发送当成功。
+
+先完成混合 Say/Msg/Say、一次投递、Simulated语义和无效收方测试，再冻结新补丁/二进制/完整 assets 清单/代码/独立输入。旧 A 与上一轮 adapter/runner/protocol/数据不覆盖；OFF/ON 都用相同修复二进制，沿用 UID476、原世界和合法候选，各最多360秒，ON最多6请求。`INSUFFICIENT_CHOICES` 严格停止；首个可信 Hired 后不再招募，只观察同一受雇者最多30秒或到总时限。
+
+最后分别判 ROUTING_PASS / HIRE_PASS / FOLLOW_PASS、PARTIAL 或 FAIL。原生未支持的深层机制不补写，不为了追成功修改第二套机制；无论结果如何本轮结束，不扩 Planner、作者层、游戏技能、LLM或新选材。
+
+### 实际改动与验证
+
+新增的[修复补丁](../../tools/veloren_native_decision_v1/veloren-native-loaded-msg-repair.patch) SHA-256 为 `4883c461895833d493b130143df5f0dd3245b31d00a8324e8b87e90d6ea84ee1`，顺序应用于官方 `1d12f35e` + 原 A + 原 Decision。9个Rust文件、527行新增/68行删除，主要包含只读因果诊断与inbox元数据封装；真正的路由改变是Loaded handoff保留Msg。`NpcInput/NpcMsg`原载荷、原生响应条件、原 `set_newly_hired`、Job序列化、hired/follow、全局规则顺序及RNG调用不改。Say仍按**原始action index**交接；Controller reset不清空actions。新增运行器与协议独立于已冻结旧版本。
+
+最终服务器二进制 SHA-256 `93473c17e11556d9ed7080b6ed9007a879b0614a77c7e9341a6a6b557ebc3aeb`；Cargo.lock仍为 `cc0d0eb5561e6463aeac5bc7a1ed50a3256a3a041210bf1e2cec9a0c9ae5348f`。完整官方资产清单含10419文件、429597400字节，逐文件核验；最终POSIX路径排序树哈希 `e117799caf8d61686fca7c8f7d6e0024384f0fa429959922b922eb2dbc0e6ebf`。初始清单排序预检失败也保留，未改变资产来准入。
+
+原生聚焦Rust测试 **8/8 RTSim + 7/7 server PASS**；父级独立Python决策测试 **54/54 PASS**，旧Talk离线回归 **25/25 PASS**。首次构建的两处类型错误、首次Rust测试的CharacterId夹具错误及其补丁/日志均保留；修正后最终构建成功。详见[尝试记录](evidence/loaded_msg_repair_v1/TEST_AND_PREFLIGHT_ATTEMPTS.md)。没有再跑旧Talk实验，没有缩减依赖、插件feature、世界或预算。
+
+### 唯一一次 OFF/ON 原生运行
+
+本地 run ID：`pair-loaded-msg-20261018-v1`；同一修复二进制、原世界独立副本、seed130626853、leader476、同一组10名observer/persister，view distance仍为2 chunks。没有GUI、传送、强写Job、注入受雇结果或运行中改代码。31项父级哈希核对全部一致，含原世界6文件、冻结源码/工具/二进制和原始JSONL，见[父级读回](evidence/loaded_msg_repair_v1/parent-readback.json)。
+
+公开归档的[最终逐文件哈希清单](evidence/loaded_msg_repair_v1/public-evidence-index.json)覆盖47个证据文件（清单自身除外），保留预审导出索引与最终独立审计；不包含游戏资产本体、存档数据库、可执行文件或私人原文。
+
+| 实际运行 | OFF | ON |
+|---|---:|---:|
+| 服务器启动次数 / 退出码 | 1 / 0 | 1 / 0 |
+| 实验停止请求单调秒数 | 360.069866 | 21.235659 |
+| 关闭宽限 / 总监督秒数 | 1.245483 / 361.316354 | 1.238025 / 22.474353 |
+| 外部请求 / 上限 | 0 / 0 | 1 / 6 |
+| 原生基线行 / recruitment事件行 | 3494 / 344 | 132 / 22 |
+| 该窗口局部Hired成员最大数 | 0 | 1 |
+| 同请求保留 / inbox投递 / 消费 / setter / Job | 0（无外部请求） | 各1 |
+| provenance violation / 未闭合JSONL尾部 | 0 / 0 | 0 / 0 |
+| 停止原因 | 固定墙钟上限 | 受雇者原生跟随证据已出现 |
+
+OFF的360秒保护在0.1秒轮询中有**0.069866秒检测超调**；随后1.245秒正常SIGUSR1关闭宽限。不能把总361.316秒写成“进程360秒内完全退出”。本地启动/信号/退出时刻、PID、字节数和哈希均在原始manifest，未重跑来美化时间。OFF/ON四路JSONL总字节各3152783/118995，未触发10000行、16MiB或6GiB磁盘下限。stdout均保留原有optional-plugin目录NotFound错误，两组exit0不等于日志无错误。
+
+ON的准入证据在原始controller行：leader476与候选433/442，Loaded/alive/有限ECS位置的三个游戏时刻 **1.069303 / 2.108912 / 3.115697**，跨度 **2.084008单调秒**；之后才有唯一planner调用和实际请求。没有使用SPEAK门槛；没有出现INSUFFICIENT_CHOICES。该停止分支由离线测试验证，本次未触发，不能宣称本次实跑覆盖了它。
+
+### 同一条真实因果链
+
+唯一请求为 `loaded-msg-on-recruit-01`，目标442，原生接受时距离5.3816m。真实映射是 **476 → NpcId(477v1)**、**442 → NpcId(443v1)**，由实际NPC表与基线核对，非由UID加一猜测。
+
+直接读回：[唯一请求](evidence/loaded_msg_repair_v1/raw_pair/on/recruit-requests.jsonl)、[原生消息与Job事件](evidence/loaded_msg_repair_v1/raw_pair/on/recruit-events.jsonl)、[受雇者原生基线](evidence/loaded_msg_repair_v1/raw_pair/on/native-events.jsonl)、[controller与准入](evidence/loaded_msg_repair_v1/raw_pair/on/controller.jsonl)、[OFF/ON完整manifest](evidence/loaded_msg_repair_v1/raw_pair/pair-manifest.json)。[独立原始读回](evidence/loaded_msg_repair_v1/raw-audit.md)另核17个原始文件、3293523字节及逐项哈希，不以manifest结论替代事件链。
+
+| 游戏时刻 | 实际证据 |
+|---|---|
+| 3.288135 | 原生accepted、started、RequestHire入队，随后Msg保留在RTSim；均同一request ID |
+| 3.322262 | 下一轮原生路由进入442 inbox，442实际消费同一RequestHire；各一次 |
+| 5.288342 | 原生接收响应执行原 `set_newly_hired` 后产生只读effect receipt，expiry为原生infinity |
+| 5.325925 | 回读442真实 `Job::Hired(476, infinity)`，与同请求的消费/效果回执一致，随后请求终结 |
+| 6.150382–12.290614 | 442本人Brain持续出现 `hired by Npc(NpcId(477v1))` 与 `Following actor Npc(NpcId(477v1))` |
+| 10.247930–12.290614 | 三个post-hire Loaded快照有原生Goto；真实ECS水平位移 **11.820530m**，三维11.988533m，不用落体Z位移代替跟随 |
+
+首个可信Job后**没有第二次规划或提交**，仅观察该受雇者；跟随证据满足即提前关闭，未用满额30秒。四人队伍目标仍有3人残留，**未完成**；本轮按授权只验证第一条招募链，不冒充整队组织、完整角色Planner或袭击成功。
+
+### 原始数据的两处展示限制
+
+1. 运行器manifest的 `loaded_prefix` 后来被重复check覆盖为null；准入已在controller原始 `loaded_native_prefix_satisfied` 行和逐NPC基线保留。不能把manifest的null当作未准入，也不事后修改冻结JSON或重跑。
+2. controller末行 `unattributed_terminal_released_controller_pending / trusted_hire:false` 描述的是**被刻意绕过Job匹配的旧adapter**释放pending，不是新完整因果链的裁决。此前已有 `first_trusted_hire_locked_submissions`，原生投递/消费/效果/Job逐项俱在，manifest新链记录1个可信Job。保留这个命名不佳的兼容日志并说明，不拿它隐藏真实Job，也不靠manifest单独证明成功。任何实际provenance重复或错配仍必须判FAIL。
+
+### 裁决与两个问题的回答
+
+| 本轮关卡 | 有界裁决 |
+|---|---|
+| ROUTING_PASS | **PASS**：同一Loaded Msg保留、原生投递、接收消费各一次，未进入Agent空分支 |
+| HIRE_PASS | **PASS**：原生接收处理与真实Job变更的同请求链闭合，非预测/发消息/外部写状态 |
+| FOLLOW_PASS | **PASS**：同一442在受雇后进入原生hired/follow + Goto，并有11.82m实际水平执行 |
+| 严格零超调的360秒执行预算 | **未完全符合**：OFF轮询检测超调0.069866秒，另列正常关闭宽限；保留偏差，不改写预算或重跑 |
+| 完整Character Dynamics / 方法有效性 | **未验证**；本轮只是修复后游戏的一个有限接口实例 |
+
+**问题1：能否改变原生NPC高层选择，并由游戏结算长期状态？** 在这条限定Pirate链上可以：HTN从既有ActorView选442，476进入原生招募前缀，442经原生消息响应变为Hired，并自行执行跟随。长期状态指游戏原生Hired/expiry机制，不是瞬时展示标志；本轮没有做跨存档重载、长期存活、战斗打断或一般职业验证。
+
+**问题2：为后续重组提供了什么？** 已有可提交的招募子任务、共享的实际雇佣关系、对方后续原生跟随和可核验的事件反馈，可作为未来“先招募、后协同行动”计划的一条真实因果边；上层不必重写这些原生执行。仍缺经过验证的多角色依赖规划、原任务竞争/保留、拒绝及协商、作者节点绑定与约束监测、在线扰动修复和跨读档语义。没有验证的新能力不能从故事想象补齐。
+
+修复本身恢复既有游戏消息机制，OFF也使用同样修复；n=1、native RNG未受控，**不以OFF的0与ON的1宣称方法优势、成功率提升或科研创新**。源码静态审查见[独立记录](evidence/loaded_msg_repair_v1/independent-static-audit.md)，原始运行另作独立读回。旧A、旧Decision/PARTIAL、原世界、冻结C++、F0/F1和main保持不变。本工作包到此停止，等待用户独立验收，不自行CLOSED，不续补Job/Follow/Quest/交易或新作者层。

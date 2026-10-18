@@ -23,7 +23,7 @@ jobs:
       - name: Install pinned HTN dependency for offline contracts
         run: python -m pip install gtpyhop-core==2.0.2
       - name: Native decision v1 Python contracts (offline; no game, Rust build, or server)
-        run: python -B -m unittest tools.veloren_native_decision_v1.tests.test_adapter tools.veloren_native_decision_v1.tests.test_runner_contract -v
+        run: python -B -m unittest tools.veloren_native_decision_v1.tests.test_adapter tools.veloren_native_decision_v1.tests.test_runner_contract tools.veloren_native_decision_v1.tests.test_loaded_msg_pair -v
       - name: Native Talk file contracts (offline; standard library, no game, Rust build, or server)
         working-directory: tools/veloren_native_v0
         run: python -B -m unittest test_native_talk test_run_talk_probe -v

@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-2026-10-18 [Veloren 原生高层决策接入](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md) 已交付 **PARTIAL / READY_FOR_INDEPENDENT_REVIEW**：固定 OFF/ON 实际运行，HTN高层选择生效，但6次招募尝试没有原生 Hired 结果，Loaded Msg 路由接缝已记录。到达预算即停止，没有改规则刷通过。此前 [Talk 接口 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 有限 PASS / FROZEN，旧失败保留，不追加 Talk 实验。[OpenXRay 源码交付](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)与[前轮载体审查](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)保留；不自动重开选材、GUI、LLM、作者层或 F0/F1。下一动作只见 [TODO](TODO.md)。
+2026-10-18 [Veloren 原生高层决策接入](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md) 的最后一对 Loaded Msg 修复验证已结束：**ROUTING / HIRE / FOLLOW 有限 PASS / READY_FOR_INDEPENDENT_REVIEW**；真实受雇与本人跟随链已采到，不等于完整系统或方法优势。旧首对PARTIAL、失败和协议偏差均不覆盖；本轮计时/日志限制只见唯一RESULTS。此前 [Talk 接口 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 有限 PASS / FROZEN，不追加 Talk 实验。[OpenXRay 源码交付](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)与[前轮载体审查](../02_实验/Classic_RPG_Carrier_Selection_v0/RESULTS.md)保留；本工作包已停，不重开修复、选材、GUI、LLM、作者层或 F0/F1。下一动作只见 [TODO](TODO.md)。
 
 2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
 

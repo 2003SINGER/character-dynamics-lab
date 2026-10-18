@@ -1,0 +1,119 @@
+{
+  "frozen_files_and_original_world_checks": {
+    "tools/veloren_native_decision_v1/adapter.py": true,
+    "tools/veloren_native_decision_v1/run_pair.py": true,
+    "tools/veloren_native_decision_v1/loaded_msg_pair.py": true,
+    "tools/veloren_native_decision_v1/LOADED_MSG_REPAIR_PROTOCOL.md": true,
+    "tools/veloren_native_decision_v1/tests/test_loaded_msg_pair.py": true,
+    "source/rtsim/src/data/npc.rs": true,
+    "source/rtsim/src/ai/mod.rs": true,
+    "source/rtsim/src/rule/report.rs": true,
+    "source/rtsim/src/rule/sync_npcs.rs": true,
+    "source/rtsim/src/rule/simulate_npcs.rs": true,
+    "source/rtsim/src/rule/npc_ai/mod.rs": true,
+    "source/rtsim/src/rule/npc_ai/util.rs": true,
+    "source/server/src/rtsim/native_recruit.rs": true,
+    "source/server/src/rtsim/tick.rs": true,
+    "binary": true,
+    "repair_patch": true,
+    "cargo_lock": true,
+    "original_world/server/map.bin": true,
+    "original_world/server/meta.ron": true,
+    "original_world/server/rtsim/data.dat": true,
+    "original_world/server/saves/db.sqlite": true,
+    "original_world/server/saves/db.sqlite-shm": true,
+    "original_world/server/saves/db.sqlite-wal": true,
+    "off/native_events": true,
+    "off/recruit_events": true,
+    "off/requests": true,
+    "off/controller": true,
+    "on/native_events": true,
+    "on/recruit_events": true,
+    "on/requests": true,
+    "on/controller": true
+  },
+  "all_hashes_match": true,
+  "trials": [
+    {
+      "mode": "off",
+      "native_records": 3494,
+      "recruit_records": 344,
+      "requests": 0,
+      "controller_records": 344,
+      "total_jsonl_bytes": 3152783,
+      "max_local_hired_count": 0,
+      "event_counts": {
+        "native_recruit_actor_view": 344
+      },
+      "prefix_from_raw": [],
+      "stop": "trial_wall_cap",
+      "exit": 0,
+      "provenance_violations": [],
+      "follow": null
+    },
+    {
+      "mode": "on",
+      "native_records": 132,
+      "recruit_records": 22,
+      "requests": 1,
+      "controller_records": 10,
+      "total_jsonl_bytes": 118995,
+      "max_local_hired_count": 1,
+      "event_counts": {
+        "native_recruit_actor_view": 13,
+        "native_recruit_request_accepted": 1,
+        "native_recruit_started": 1,
+        "native_recruit_message_sent": 1,
+        "native_recruit_msg_retained_rtsim": 1,
+        "native_recruit_msg_delivered_to_inbox": 1,
+        "native_recruit_hire_input_consumed": 1,
+        "native_recruit_hire_effect_applied": 1,
+        "native_recruit_job_observed": 1,
+        "native_recruit_terminal": 1
+      },
+      "prefix_from_raw": [
+        {
+          "event": "loaded_native_prefix_satisfied",
+          "observed_local": "2026-10-18T17:00:34.917+08:00",
+          "leader_uid": 476,
+          "loaded_candidate_uids": [
+            433,
+            442
+          ],
+          "distinct_game_times": [
+            1.069303,
+            2.108912,
+            3.115697
+          ],
+          "prefix_wall_span_seconds": 2.084008499979973,
+          "first_game_time": 1.069303,
+          "last_game_time": 3.115697,
+          "qualification": "alive_loaded_finite_ecs_positions_only; no SPEAK gate"
+        }
+      ],
+      "stop": "recipient_native_follow_evidence_observed",
+      "exit": 0,
+      "provenance_violations": [],
+      "follow": {
+        "status": "observed",
+        "samples": 3,
+        "first_game_time": 10.247929833,
+        "last_game_time": 12.290613916000002,
+        "first_ecs_position": [
+          782.0081787109375,
+          16797.96875,
+          143.0
+        ],
+        "last_ecs_position": [
+          783.349853515625,
+          16786.224609375,
+          141.0
+        ],
+        "horizontal_displacement_meters": 11.820530034702701,
+        "three_dimensional_displacement_meters": 11.988533283988856,
+        "recipient_native_hired_by_and_following_job_receipt_leader": true,
+        "recipient_controller_goto_observed": true
+      }
+    }
+  ]
+}

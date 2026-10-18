@@ -1,0 +1,29 @@
+   Compiling veloren-rtsim v0.18.0 (/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/source_build_serveronly/rtsim)
+error[E0308]: mismatched types
+    --> rtsim/src/rule/npc_ai/mod.rs:1600:46
+     |
+1600 |                         && ctx.data.npcs.get(from).is_some_and(|source| {
+     |                                          --- ^^^^ expected `NpcId`, found `Actor`
+     |                                          |
+     |                                          arguments to this method are incorrect
+     |
+note: method defined here
+    --> /Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/rust-local/cargo-home/registry/src/rsproxy.cn-e3de039b2554c837/slotmap-1.1.1/src/dense.rs:562:12
+     |
+ 562 |     pub fn get(&self, key: K) -> Option<&V> {
+     |            ^^^
+
+error[E0596]: cannot borrow `keep` as mutable, as it is not declared as mutable
+   --> rtsim/src/data/npc.rs:214:57
+    |
+214 |         self.retain_actions_with_provenance(|action, _| keep(action));
+    |                                                         ^^^^ cannot borrow as mutable
+    |
+help: consider changing this to be mutable
+    |
+212 |         mut keep: impl FnMut(&NpcAction) -> Result<(), &'static str>,
+    |         +++
+
+Some errors have detailed explanations: E0308, E0596.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `veloren-rtsim` (lib) due to 2 previous errors

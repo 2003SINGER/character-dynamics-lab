@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "description": "SHA-256 snapshot of the 14 source files modified in the isolated build copy; source code itself is not exported.",
+  "base_commit": "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248",
+  "cargo_lock_sha256": "cc0d0eb5561e6463aeac5bc7a1ed50a3256a3a041210bf1e2cec9a0c9ae5348f",
+  "patches": [
+    {"path": "veloren-native-talk.patch", "sha256": "4174287ddd467804e7efbfe7bb6868736475597f0225067c2030aaa17c709610"},
+    {"path": "veloren-native-decision.patch", "sha256": "458c590d701561a0aee011348ed6823da943d4af0e203588fd2a7e8433fb5b7f"},
+    {"path": "veloren-native-loaded-msg-repair.patch", "sha256": "4883c461895833d493b130143df5f0dd3245b31d00a8324e8b87e90d6ea84ee1"}
+  ],
+  "files": [
+    {"path": "common/src/rtsim.rs", "size_bytes": 19713, "sha256": "61f3d5db202bc092f610af4035cd1b5f94b3eab666001202bb1d36d94d70bd27"},
+    {"path": "rtsim/src/ai/mod.rs", "size_bytes": 32962, "sha256": "09008347f27cb073ee3a630c264d41a9c087f2a1096ce18dc1dee4edccc66b7f"},
+    {"path": "rtsim/src/data/npc.rs", "size_bytes": 45319, "sha256": "59116cc09a642660db03755b7a57befd3e73c112839001ec974609d49323db0f"},
+    {"path": "rtsim/src/rule/npc_ai/mod.rs", "size_bytes": 89784, "sha256": "972fc9f2bc6605b922ecc228d5bdb432f25bcc94f3ec435406d2e8bf752968cc"},
+    {"path": "rtsim/src/rule/npc_ai/util.rs", "size_bytes": 8098, "sha256": "d7cb5471ae1746d73c5f1ecc9e51b09453329974f7c1640e1056bbf4c2a44997"},
+    {"path": "rtsim/src/rule/report.rs", "size_bytes": 2241, "sha256": "2324cf2e89d5d766eaf5e6ba2d3ccc61501e5340043f564f413c6fbf373a1b68"},
+    {"path": "rtsim/src/rule/simulate_npcs.rs", "size_bytes": 20146, "sha256": "9b20087cbf6f913044484bc79a4f84777193893dcfb3fee19dc6eab818ec2f18"},
+    {"path": "rtsim/src/rule/sync_npcs.rs", "size_bytes": 5287, "sha256": "450541ecc556233812224ef65548c48e2405a707d46220586e2522536356a13f"},
+    {"path": "server-cli/src/main.rs", "size_bytes": 15948, "sha256": "e644d9ac21ab8943d38dfbde613326c7cf5c375f37f3393976cc7fff7344f910"},
+    {"path": "server/src/lib.rs", "size_bytes": 74209, "sha256": "76daddb5f471d0d249e8afce42e5429c1deb083c1cf8f67734ff478b7d3b3865"},
+    {"path": "server/src/rtsim/mod.rs", "size_bytes": 18612, "sha256": "38bf6a40e94f7802c65e1785bb479da2ac40e7dc48f8b3299be8fc70e2a7862f"},
+    {"path": "server/src/rtsim/tick.rs", "size_bytes": 52007, "sha256": "de8437be89c400b485fcd178e88c59a84c883325c295219a3e60901b73297c36"},
+    {"path": "server/src/sys/agent/behavior_tree/mod.rs", "size_bytes": 38263, "sha256": "5ffc8a633f78f55ea660fe9d8c2ab040d22b7f4dc55b863f31fbcd42c12cd2d4"},
+    {"path": "server/src/rtsim/native_recruit.rs", "size_bytes": 27610, "sha256": "b7ea0804e82ba94914cd004f96768db8183c1165ca4c35bd0dc06b47a308f4fb"}
+  ]
+}

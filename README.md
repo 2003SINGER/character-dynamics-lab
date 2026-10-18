@@ -26,7 +26,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 ## 从这里进入
 
-2026-10-18 [Veloren 原生高层决策接入](02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md) 已完成一次真实后台 OFF/ON，交付 **PARTIAL / READY_FOR_INDEPENDENT_REVIEW**：HTN选择进入原生 Brain，6次招募尝试均未见 Hired 结算；已定位 Loaded 消息路由接缝，未改规则或补跑救结果。此前 [Talk 接口 A](02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 有限 PASS / FROZEN，旧失败保留。原始证据与边界各归对应 RESULTS，下一动作见 [TODO](00_研究设计/TODO.md)。本轮已停止，不自动上作者层、LLM或扩选材；F0/F1、冻结 C++ 和 main 不动。
+2026-10-18 [Veloren 原生高层决策接入](02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md) 完成最后一对 Loaded Msg 修复验证：**ROUTING / HIRE / FOLLOW 有限 PASS，READY_FOR_INDEPENDENT_REVIEW，已停止**。ON仅1请求，442经原生消息处理受雇于476，并自行跟随、水平移动11.82m；计时超调与日志展示限制见唯一RESULTS，不宣称完整系统或方法优势。`ab6dad9` 的6尝试/0 Hired与旧协议偏差仍保留PARTIAL；此前 [Talk 接口 A](02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 有限 PASS / FROZEN。不自动追加修复、作者层、LLM或选材；F0/F1、冻结 C++ 和 main 不动。下一动作只见 [TODO](00_研究设计/TODO.md)。
 
 2026-10-09 新授权已撤销“仅外围维护”：按用户目标 TXT 开发的 [NPC System Integration v0](tools/npc_system_v0/README.md) 已贯通有限作者点/线、受限世界规划、独立演员状态/承诺、GOAP/HTN 与真实执行/监测。它是 E1 之上的 **DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW** 应用样机，不改冻结 C++ Kernel，也不是完整系统、LLM 高层规划或研究收益。具体能力与限制见[唯一结果](02_实验/NPC_System_Integration_v0/RESULTS.md)；旧语义草案中的未开工叙述按其记录日期理解，当前授权看 [TODO](00_研究设计/TODO.md)。
 

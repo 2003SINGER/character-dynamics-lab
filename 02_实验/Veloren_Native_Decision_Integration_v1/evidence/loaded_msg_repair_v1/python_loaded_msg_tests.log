@@ -1,0 +1,29 @@
+Command: python3 -B -m unittest tools.veloren_native_decision_v1.tests.test_loaded_msg_pair -v
+Exit code: 0
+
+test_exact_complete_assets_tree_is_accepted ... ok
+test_manifest_missing_or_extra_files_is_rejected ... ok
+test_follow_requires_recipient_native_trace_targeting_job_receipt_leader_and_motion ... ok
+test_leader_side_trace_or_wrong_actor_does_not_count_as_member_follow ... ok
+test_native_follow_brain_without_recipient_controller_execution_is_partial ... ok
+test_pre_hire_and_vertical_only_motion_do_not_count_as_continuation ... ok
+test_run_loop_waits_for_prefix_locks_and_stops_on_recipient_follow ... ok
+test_stale_cached_view_cannot_plan_even_as_fresh_loaded_baselines_arrive ... ok
+test_complete_exact_message_effect_and_job_chain_confirms ... ok
+test_duplicate_delivery_is_an_immediate_provenance_violation ... ok
+test_job_without_recipient_consumption_and_effect_is_not_attributed ... ok
+test_message_sent_alone_never_confirms_hire ... ok
+test_receipt_with_wrong_recipient_or_changed_source_is_rejected ... ok
+test_cached_actor_view_must_be_fresh_even_when_baselines_are_fresh ... ok
+test_first_trusted_hire_freezes_requests_and_right_censors_at_30_seconds ... ok
+test_full_wall_cap_is_right_censor_not_a_success ... ok
+test_insufficient_choices_only_stops_after_prefix_and_stops_immediately ... ok
+test_off_mode_never_plans ... ok
+test_six_requests_is_a_hard_submission_cap ... ok
+
+Ran 19 tests in 0.014s
+OK
+
+This is a concise test transcript; all process and filesystem behavior in
+MockRunLoopTests is simulated with temporary fixtures. No Veloren process,
+Rust build, or userdata was opened.

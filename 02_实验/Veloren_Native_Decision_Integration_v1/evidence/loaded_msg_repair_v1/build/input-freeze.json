@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "revision": "loaded-msg-repair-v1",
+  "frozen_at_local": "2026-10-18T16:53:13.789059+08:00",
+  "repository_base_head": "ab6dad9c0bdeffe3a962875979af74f87a41db4f",
+  "source": {
+    "commit": "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248",
+    "source_patch_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/veloren_native_decision_v1/veloren-native-loaded-msg-repair.patch",
+    "source_patch_sha256": "4883c461895833d493b130143df5f0dd3245b31d00a8324e8b87e90d6ea84ee1",
+    "base_patch_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/veloren_native_v0/veloren-native-talk.patch",
+    "base_patch_sha256": "4174287ddd467804e7efbfe7bb6868736475597f0225067c2030aaa17c709610",
+    "cargo_lock_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/source_build_serveronly/Cargo.lock",
+    "cargo_lock_sha256": "cc0d0eb5561e6463aeac5bc7a1ed50a3256a3a041210bf1e2cec9a0c9ae5348f",
+    "binary_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/binaries/veloren-server-cli-loaded-msg-repair-20261018",
+    "binary_sha256": "93473c17e11556d9ed7080b6ed9007a879b0614a77c7e9341a6a6b557ebc3aeb",
+    "assets_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/install_v0_18_0/assets",
+    "toolchain": "nightly-2025-09-08-aarch64-apple-darwin",
+    "features": [
+      "worldgen",
+      "persistent_world",
+      "plugins"
+    ],
+    "decision_patch_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/veloren_native_decision_v1/veloren-native-decision.patch",
+    "decision_patch_sha256": "458c590d701561a0aee011348ed6823da943d4af0e203588fd2a7e8433fb5b7f",
+    "assets_manifest_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/evidence/native_decision_v1/loaded-msg-repair-20261018-build/assets-manifest-pathordered.json",
+    "assets_manifest_sha256": "d77f18b964a5cf16eca4e9f836daa9cead5961077221d033d72580dc2d111002",
+    "assets_tree_sha256": "e117799caf8d61686fca7c8f7d6e0024384f0fa429959922b922eb2dbc0e6ebf"
+  },
+  "world": {
+    "world_seed": 130626853,
+    "day_length_minutes": 30,
+    "source_world_sha256": "9eb7a53bcd14cc1d10184b4f86fc6bc4ba4db26d05e673995405e1f22dce42ca",
+    "settings_contract_sha256": "6cddc15c1cecd856ea78077cbb805c2ea4e26bc710ddf919c641616667fbeb78",
+    "source_world_hash_encoding": "SHA256 canonical sorted six world file entries",
+    "settings_hash_encoding": "SHA256 UTF8 settings replacing only own absolute userdata root with <ISOLATED_USERDATA>",
+    "world_files": [
+      {
+        "path": "server/map.bin",
+        "role": "world",
+        "size_bytes": 16777252,
+        "sha256": "2560ecb22feccc642aaf75addfaf22e3066defe8668ca052770ef902a2c5e2da"
+      },
+      {
+        "path": "server/meta.ron",
+        "role": "world",
+        "size_bytes": 116,
+        "sha256": "89bfb52eec17668df287fb3aae855a3b339ac429d8fabd0cd834c3cd17efd70e"
+      },
+      {
+        "path": "server/rtsim/data.dat",
+        "role": "world",
+        "size_bytes": 5063062,
+        "sha256": "e200ca46e0ce9a8fb2e75a37ecf66c7a705f861f1b1cc02e494715f0b029a623"
+      },
+      {
+        "path": "server/saves/db.sqlite",
+        "role": "world",
+        "size_bytes": 118784,
+        "sha256": "7b2278eeafe93186f8fa30d01738d7f2fcaa83435bc7a35ba913d20d444537bb"
+      },
+      {
+        "path": "server/saves/db.sqlite-shm",
+        "role": "world",
+        "size_bytes": 32768,
+        "sha256": "eca46c641aa2c43a298cc3182ccafdb69f47ddc67d757c7916969bd2fce86135"
+      },
+      {
+        "path": "server/saves/db.sqlite-wal",
+        "role": "world",
+        "size_bytes": 819912,
+        "sha256": "8671ddfde65e652459e1b2ffd524cf31593808c3aeb65a82626f3e19075a30c0"
+      }
+    ],
+    "legacy_source_world_id": "9eb7a53bcd14cc1d10184b4f86fc6bc4ba4db26d05e673995405e1f22dce42ca"
+  },
+  "runtime": {
+    "loopback_only": true,
+    "query_address": null,
+    "leader_uid": 476,
+    "observe_npc_uids": [
+      476,
+      433,
+      450,
+      451,
+      452,
+      459,
+      469,
+      472,
+      475,
+      442
+    ],
+    "native_persister_npc_uids": [
+      476,
+      433,
+      450,
+      451,
+      452,
+      459,
+      469,
+      472,
+      475,
+      442
+    ],
+    "native_persister_view_distance_chunks": 2,
+    "max_trial_wall_seconds": 360,
+    "disk_free_floor_bytes": 6442450944,
+    "telemetry_record_cap": 10000,
+    "telemetry_byte_cap": 16777216,
+    "telemetry_seconds_cap": 1800,
+    "max_requests": 6,
+    "request_ttl_seconds": 60,
+    "loaded_prefix_min_game_times": 3,
+    "loaded_prefix_min_wall_seconds": 2,
+    "loaded_candidates_required": 2,
+    "first_trusted_hire_stops_submissions": true,
+    "post_hire_observation_seconds": 30,
+    "actor_view_max_age_seconds": 1.5
+  },
+  "trials": {
+    "off": {
+      "userdata_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/userdata/native-decision-loaded-msg-20261018-off",
+      "userdata_manifest_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/userdata/native-decision-loaded-msg-20261018-off/input-manifest.json",
+      "userdata_manifest_sha256": "1e98d76b5c9545117040317e8676644efb9e6a3d7c287c3b15f42ea25f428af1",
+      "source_world_sha256": "9eb7a53bcd14cc1d10184b4f86fc6bc4ba4db26d05e673995405e1f22dce42ca",
+      "settings_contract_sha256": "6cddc15c1cecd856ea78077cbb805c2ea4e26bc710ddf919c641616667fbeb78"
+    },
+    "on": {
+      "userdata_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/userdata/native-decision-loaded-msg-20261018-on",
+      "userdata_manifest_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/userdata/native-decision-loaded-msg-20261018-on/input-manifest.json",
+      "userdata_manifest_sha256": "e10b2006d50f3ea65742625f85f4c0198a710523809aaa2734cbcae30b460ee6",
+      "source_world_sha256": "9eb7a53bcd14cc1d10184b4f86fc6bc4ba4db26d05e673995405e1f22dce42ca",
+      "settings_contract_sha256": "6cddc15c1cecd856ea78077cbb805c2ea4e26bc710ddf919c641616667fbeb78"
+    }
+  },
+  "frozen_tool_files": [
+    {
+      "path": "tools/veloren_native_decision_v1/adapter.py",
+      "sha256": "b5ca50c20a73f034a9d96c620d8b8bdc3c8d6fd58d946c4104a161e5c1f99601",
+      "size_bytes": 26254
+    },
+    {
+      "path": "tools/veloren_native_decision_v1/run_pair.py",
+      "sha256": "ef33d7a731bb61ddcef7b12ec67eeaf53c12ab32b303a0a49ee96dded9e9b8f0",
+      "size_bytes": 28458
+    },
+    {
+      "path": "tools/veloren_native_decision_v1/loaded_msg_pair.py",
+      "sha256": "e85fb98c3fcc43967afd6e84323dc5332f5837a0de15050a154c3790b8974b68",
+      "size_bytes": 38311
+    },
+    {
+      "path": "tools/veloren_native_decision_v1/LOADED_MSG_REPAIR_PROTOCOL.md",
+      "sha256": "7eab55c422aef1b2d06bb64ee84db97c52acaa070c0530870ce30012b94443f2",
+      "size_bytes": 4178
+    },
+    {
+      "path": "tools/veloren_native_decision_v1/tests/test_loaded_msg_pair.py",
+      "sha256": "4924ebdba0602cca07bab7e478648c0cf904659f80ae45187c5dd822c3f9c7b4",
+      "size_bytes": 23587
+    }
+  ],
+  "source_files": [
+    {
+      "path": "rtsim/src/data/npc.rs",
+      "sha256": "59116cc09a642660db03755b7a57befd3e73c112839001ec974609d49323db0f",
+      "size_bytes": 45319
+    },
+    {
+      "path": "rtsim/src/ai/mod.rs",
+      "sha256": "09008347f27cb073ee3a630c264d41a9c087f2a1096ce18dc1dee4edccc66b7f",
+      "size_bytes": 32962
+    },
+    {
+      "path": "rtsim/src/rule/report.rs",
+      "sha256": "2324cf2e89d5d766eaf5e6ba2d3ccc61501e5340043f564f413c6fbf373a1b68",
+      "size_bytes": 2241
+    },
+    {
+      "path": "rtsim/src/rule/sync_npcs.rs",
+      "sha256": "450541ecc556233812224ef65548c48e2405a707d46220586e2522536356a13f",
+      "size_bytes": 5287
+    },
+    {
+      "path": "rtsim/src/rule/simulate_npcs.rs",
+      "sha256": "9b20087cbf6f913044484bc79a4f84777193893dcfb3fee19dc6eab818ec2f18",
+      "size_bytes": 20146
+    },
+    {
+      "path": "rtsim/src/rule/npc_ai/mod.rs",
+      "sha256": "972fc9f2bc6605b922ecc228d5bdb432f25bcc94f3ec435406d2e8bf752968cc",
+      "size_bytes": 89784
+    },
+    {
+      "path": "rtsim/src/rule/npc_ai/util.rs",
+      "sha256": "d7cb5471ae1746d73c5f1ecc9e51b09453329974f7c1640e1056bbf4c2a44997",
+      "size_bytes": 8098
+    },
+    {
+      "path": "server/src/rtsim/native_recruit.rs",
+      "sha256": "b7ea0804e82ba94914cd004f96768db8183c1165ca4c35bd0dc06b47a308f4fb",
+      "size_bytes": 27610
+    },
+    {
+      "path": "server/src/rtsim/tick.rs",
+      "sha256": "de8437be89c400b485fcd178e88c59a84c883325c295219a3e60901b73297c36",
+      "size_bytes": 52007
+    }
+  ]
+}

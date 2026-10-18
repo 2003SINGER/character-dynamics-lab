@@ -1,0 +1,9 @@
+   Compiling veloren-rtsim v0.18.0 (/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/source_build_serveronly/rtsim)
+error[E0277]: the trait bound `CharacterId: std::default::Default` is not satisfied
+   --> rtsim/src/rule/simulate_npcs.rs:129:46
+    |
+129 |         controller.send_msg(Actor::Character(Default::default()), NpcMsg::RequestHire);
+    |                                              ^^^^^^^^^^^^^^^^^^ the trait `std::default::Default` is not implemented for `CharacterId`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `veloren-rtsim` (lib test) due to 1 previous error
