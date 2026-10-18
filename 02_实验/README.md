@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-17 当前检查点为 [Veloren 原生接口 A](Veloren_Vertical_Slice_v0/RESULTS.md)：**仍为 PARTIAL；本次 A-Closure 在取消准入拒绝后停止，B 未启动**。新旧构建、实际 NPC 基线、全部输入、失败与执行偏差均在该 owner，不以 CLI 文件测试冒充游戏闭环。OpenXRay/RimWorld 与既有选材证据保留；下一动作只见 [TODO](../00_研究设计/TODO.md)，不追加运行或返回泛化选材、GUI。
+2026-10-18 当前为[Veloren 研究实例准入裁决](Veloren_Causal_Research_Admission_v0/ADMISSION.md)：**本轮两候选未准入，NO_GO / READY_FOR_INDEPENDENT_REVIEW**；[因果网络](Veloren_Causal_Research_Admission_v0/CAUSAL_NETWORK.md)区分固定官方源码、修复版本及既有实跑证据。本轮无新游戏运行或算法效果实验，停止扩建，等待独立审阅。此前 [Talk 接口 A](Veloren_Vertical_Slice_v0/RESULTS.md) 的有限 PASS / FROZEN 与[原生消息→受雇→跟随](Veloren_Native_Decision_Integration_v1/RESULTS.md)的有限 PASS 保留；各自早期 PARTIAL 与失败仍见原 owner。下一动作只见 [TODO](../00_研究设计/TODO.md)，不自动换载体、扩招募或启动模型。
 
 同日后续 [Open Adventure Online P1 RESULTS](OpenAdventure_Online_P1_v0/RESULTS.md) 已交付原版逐次交互、真实反馈分支与精确重放，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW，作为独立有限接口检查点保留；不代表全系统 CLOSED。**Open Adventure Planning B0 传统准入与实验**已交付 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止；协议见[PROTOCOL](OpenAdventure_Planning_B0_v0/PROTOCOL.md)，运行、失败与成本只见[唯一 RESULTS](OpenAdventure_Planning_B0_v0/RESULTS.md)。整体三方法比较为 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏；保留下面的整局 Native v0 原证据。
 

@@ -12,10 +12,11 @@
 
 ## SYSTEM / APPLICATION TRACK
 
-2026-10-18 **Loaded Msg 最小修复已交付并停止：ROUTING / HIRE / FOLLOW 有限 PASS / READY_FOR_INDEPENDENT_REVIEW**。唯一OFF/ON完成，ON仅1请求，原生442受雇于476并自行跟随11.82m；预算轮询超调与两处展示日志限制均保留披露。此前 `ab6dad9` 的6尝试/0 Hired与协议偏差原样保留PARTIAL。下一步仅独立审阅完整因果链、原始证据与研究边界；不自行CLOSED，不自动再修Job/Follow或扩作者层、LLM、选材。
+2026-10-18 **原生因果网络与研究实例准入已交付：本轮两候选 NO_GO / READY_FOR_INDEPENDENT_REVIEW**。源码存在条件化社会因果链，但本轮未建立同一持续世界下符合全部七项要求的双方案实例；不是 Veloren 全局不可能或 planner 失败。唯一裁决与下一动作见下行。此前 Loaded Msg 的 ROUTING / HIRE / FOLLOW 有限 PASS、旧 PARTIAL、失败和计时/日志限制均保留原 owner；不自动追加游戏补丁、实跑、模型或选材。
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
+| VELOREN-CAUSAL-RESEARCH-ADMISSION-V0 | **NO_GO（当前两候选未准入）；READY_FOR_INDEPENDENT_REVIEW；已停** | 独立审阅三组原生因果链与七项准入裁决，特别核条件化替代路径；不自动实施或换载体 | [唯一裁决](../02_实验/Veloren_Causal_Research_Admission_v0/ADMISSION.md)；[机制证据 owner](../02_实验/Veloren_Causal_Research_Admission_v0/CAUSAL_NETWORK.md)。无合格候选不生成实验协议；旧 RESULTS、F0/F1、游戏源码、C++、main 不动 |
 | VELOREN-NATIVE-DECISION-INTEGRATION-V1 | **ROUTING/HIRE/FOLLOW 有限 PASS；READY_FOR_INDEPENDENT_REVIEW；已停** | 独立审阅唯一新OFF/ON：1请求→原生Hired→本人跟随；核预算/日志限制，不自动追加机制或运行 | [唯一 RESULTS](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md#2026-10-18-新授权loaded-msg-最小修复与最后一次纵向验收)；旧PARTIAL/A/C++/main不改，不自行CLOSED |
 | VELOREN-VERTICAL-SLICE-V0 | **READY_FOR_INDEPENDENT_REVIEW；A=PASS_BY_NATIVE_TRACE；A_FROZEN** | 有限接口与旧失败保留，不再补跑 Talk；新授权高层接入归上行，不以旧 B 未授权声明阻挡本轮 | [唯一 RESULTS](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md#最终接口验证实际结果与停止)；Brain→Say→Agent 及有限续行已见原始证据，不推论收方接受、长期自治或完整系统 CLOSED |
 | OPENXRAY-NPC-DECISION-ADMISSION-V0 | **接入探索 DEFERRED_BY_USER；原源码交付保留** | 用户决定先试 Veloren；不恢复 CoP 数据/接口调查、不自动开发 C++ 桥或 RimWorld | [原 RESULTS](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)；OpenXRay 自身历史准入状态仍由该 RESULTS 维护，与当前 Veloren 环境状态分开 |
