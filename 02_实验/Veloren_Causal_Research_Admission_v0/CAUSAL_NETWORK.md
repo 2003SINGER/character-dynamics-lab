@@ -96,4 +96,3 @@ Quest 的具体边界：目标站点须不是当前站点；候选目的地以15
 既有 [Author Obligation Planning 结果](../Author_Obligation_Planning_v0/RESULTS.md)记录 **14 个不同的可行作者任务有原生 PASS 证据**；有限手工域已展示过程约束可进入搜索、编辑后可据历史重规划。它不代表 Veloren 能力。既有 [Mature Methods 结果](../Mature_Methods_Integration_v1/RESULTS.md)的 GT/event-driven 配对在 T7 的规范化执行序列 diff=0；这不是速度比较，且 Evennia 手工内容不能搬作 Veloren 原生能力。
 
 Mimesis、PDDL3/Porteous 仅复用既有算法卡：[Mimesis 卡](../../01_文献/算法积木/01_叙事修复与导演.md)、[PDDL3/Porteous 卡](../../01_文献/算法积木/02_人物意图与约束规划.md)。不在本轮扩展文献清单或声称重读全文。Mimesis 的 causal-link threat 可触发 accommodation，对未执行后缀重规划；作者需建动作前提/效果、因果链接、顺序与必要 failure modes。PDDL3 给轨迹约束语义，本身不是求解器；Porteous 以 PoV 选 landmark 并重规划当前子目标，需人工建模算子与约束图，无解恢复并非其保证。成熟方法可覆盖过程约束与未来重规划；是否足以解决本研究实例及其建模成本，要通过后续具体比较决定，不能据此宣称新问题无创新。
-
