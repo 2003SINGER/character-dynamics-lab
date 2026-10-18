@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-18 当前为[Veloren 研究实例准入裁决](Veloren_Causal_Research_Admission_v0/ADMISSION.md)：**本轮两候选未准入，NO_GO / READY_FOR_INDEPENDENT_REVIEW**；[因果网络](Veloren_Causal_Research_Admission_v0/CAUSAL_NETWORK.md)区分固定官方源码、修复版本及既有实跑证据。本轮无新游戏运行或算法效果实验，停止扩建，等待独立审阅。此前 [Talk 接口 A](Veloren_Vertical_Slice_v0/RESULTS.md) 的有限 PASS / FROZEN 与[原生消息→受雇→跟随](Veloren_Native_Decision_Integration_v1/RESULTS.md)的有限 PASS 保留；各自早期 PARTIAL 与失败仍见原 owner。下一动作只见 [TODO](../00_研究设计/TODO.md)，不自动换载体、扩招募或启动模型。
+2026-10-18 当前工作包是[Character Dynamics Online Integration v0](Character_Dynamics_Online_Integration_v0/README.md)，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；本轮停止**。三组真实运行已完成，有界在线作者版本编辑与原生 Job 链有证据，但服务均以 SIGTERM（exit `-15`）结束；唯一结果与原任务8项映射见[RESULTS](Character_Dynamics_Online_Integration_v0/RESULTS.md)。范围及预算见[PROTOCOL](Character_Dynamics_Online_Integration_v0/PROTOCOL.md)。同一持续系统开发与科学观察并行，G0 固定，成熟方法作为复用基础。旧 C1/C2 研究实例 `NO_GO` 与[因果网络](Veloren_Causal_Research_Admission_v0/CAUSAL_NETWORK.md)原样保留为历史候选裁决，不再是当前开发停点。此前 [Talk 接口 A](Veloren_Vertical_Slice_v0/RESULTS.md) 和[原生消息→受雇→跟随](Veloren_Native_Decision_Integration_v1/RESULTS.md)的有限证据、早期 PARTIAL 与失败均由原 owner 维护。下一动作见 [TODO](../00_研究设计/TODO.md)：独立审阅，不自动补跑或扩建。
 
 同日后续 [Open Adventure Online P1 RESULTS](OpenAdventure_Online_P1_v0/RESULTS.md) 已交付原版逐次交互、真实反馈分支与精确重放，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW，作为独立有限接口检查点保留；不代表全系统 CLOSED。**Open Adventure Planning B0 传统准入与实验**已交付 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止；协议见[PROTOCOL](OpenAdventure_Planning_B0_v0/PROTOCOL.md)，运行、失败与成本只见[唯一 RESULTS](OpenAdventure_Planning_B0_v0/RESULTS.md)。整体三方法比较为 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏；保留下面的整局 Native v0 原证据。
 

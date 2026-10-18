@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-2026-10-18 当前为[Veloren 因果网络与研究实例准入](../02_实验/Veloren_Causal_Research_Admission_v0/ADMISSION.md)：**本轮两候选均未准入，NO_GO / READY_FOR_INDEPENDENT_REVIEW**；机制证据由[原生因果网络](../02_实验/Veloren_Causal_Research_Admission_v0/CAUSAL_NETWORK.md)维护。未运行新实验，不把源码路径当已实跑能力，不因未准入而自动换游戏或扩机制；下一动作只见 [TODO](TODO.md)。此前[高层接入](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md)的 ROUTING / HIRE / FOLLOW 有限 PASS 和 [Talk 接口 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 有限 PASS / FROZEN 均保留，旧失败不覆盖；本裁决不是全局不可达或算法失败证明。
+2026-10-18 当前主线为[Character Dynamics Online Integration v0](../02_实验/Character_Dynamics_Online_Integration_v0/README.md)，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；本轮停止**：三组有界运行完成，有限在线作者版本编辑到原生 Job 的链有证据，但三台服务均以 SIGTERM（exit `-15`）结束。运行结论、原任务8项验收映射和限制只见[唯一 RESULTS](../02_实验/Character_Dynamics_Online_Integration_v0/RESULTS.md)。同一持续系统建设与科学验证并行；G0 固定，成熟方法为可复用基础。旧 C1/C2 `NO_GO` 与机制证据仍由[准入裁决](../02_实验/Veloren_Causal_Research_Admission_v0/ADMISSION.md)和[因果网络](../02_实验/Veloren_Causal_Research_Admission_v0/CAUSAL_NETWORK.md)维护，但仅描述旧候选，不是当前开发停点。范围与预算见[固定协议](../02_实验/Character_Dynamics_Online_Integration_v0/PROTOCOL.md)；此前[高层接入](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md)及 [Talk 接口 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 的有限证据和失败均保留。
 
 2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
 
@@ -96,7 +96,7 @@ Shared Runtime Kernel 保持工程冻结：它负责时间、世界、动作执�
 
 查具体论文：[文献库](../01_文献/README.md)；还原用户想法：[原始材料](../90_原始材料/README.md)。
 
-当前问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)；完整长期研究版图见 [System Vision](Character_Dynamics_System_Vision_v0.md#长期研究版图)。LLM × 成熟规划的候选职责与游戏接纳边界见这两个 owner，不要求每层都用 LLM或冻结统一层数。A/B 与 Q1–Q3 只是此前有限基线讨论，不代表完整研究任务或已确认 gap。[Pilot](AuthorialTrajectoryPilotV0.md)只维护 TypedIR/reference 候选契约。[强近邻机制对照](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)保留。下一候选入口转向作者语义、因果方案与能力/语义接纳，不继续堆站点小功能；任务和准入只见[TODO](TODO.md)，已有运行只见其 RESULTS。现有 P5 的有限控制模式不定义全局作者权限。
+当前问题定义唯一维护于 [F0/F1](CharacterDynamics_FormalProblem_v0.md)；完整长期研究版图见 [System Vision](Character_Dynamics_System_Vision_v0.md#长期研究版图)。LLM × 成熟规划的候选职责与游戏接纳边界见这两个 owner，不要求每层都用 LLM或冻结统一层数。A/B 与 Q1–Q3 只是此前有限基线讨论，不代表完整研究任务或已确认 gap。[Pilot](AuthorialTrajectoryPilotV0.md)只维护 TypedIR/reference 候选契约。[强近邻机制对照](../01_文献/算法积木/05_游戏世界规划近邻审计_2026-10-11/全量近邻精读总表_2026-10-11.md)保留。当前执行入口与状态只见[TODO](TODO.md)和 [Character Dynamics Online Integration v0](../02_实验/Character_Dynamics_Online_Integration_v0/README.md)；研究问题、成熟方法和在线集成在同一系统主线上推进。历史候选准入与旧运行仍由各自 owner 维护，现有 P5 的有限控制模式不定义全局作者权限。
 
 例如本次三项想法分别落位：分段逆映射保留原话于问题 Q01；低耦合的确定边界在完整机制 §8，未落实方案在 Q03；Object/Scene/W 动作职责在完整机制 §4，具体实现缺口在 Q05。TODO 只链接并安排验证，不再复制三遍原理。
 

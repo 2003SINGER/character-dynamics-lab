@@ -6,6 +6,7 @@ on:
     paths:
       - 'tools/veloren_native_decision_v1/**'
       - 'tools/veloren_native_v0/**'
+      - 'tools/character_dynamics_online_v0/**'
       - '.github/workflows/veloren-native-decision-contracts.yml'
 
 jobs:
@@ -27,3 +28,5 @@ jobs:
       - name: Native Talk file contracts (offline; standard library, no game, Rust build, or server)
         working-directory: tools/veloren_native_v0
         run: python -B -m unittest test_native_talk test_run_talk_probe -v
+      - name: Character Dynamics online controller contracts (offline; no game or server)
+        run: python -B -m unittest discover -s tools/character_dynamics_online_v0/tests -v

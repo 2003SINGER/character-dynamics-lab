@@ -2,7 +2,7 @@
 
 更新时间：2026-10-18。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
-当前长期目标是作者部分约束下的游戏世界在线规划与控制，问题定义见唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md)。`c228301` 研究主轴方向已获外部审阅通过；不代表完整规格、新算法或新系统通过。**Planner Adapter Integration v1 已交付 `PARTIAL / READY_FOR_INDEPENDENT_REVIEW`，本轮停止代码扩张**；唯一任务/结果 owner 是[RESULTS](../02_实验/Planner_Adapter_Integration_v1/RESULTS.md)。System Baseline v0 仍为历史 `PARTIAL`（M1 `READY_FOR_INDEPENDENT_REVIEW`、M2 `INVALID`），其阶段已停止且不进入 P6；状态和旧证据只见[原 RESULTS](../02_实验/System_Baseline_v0/RESULTS.md)。原始 P0 A/B 与 LLM/embedding/Qwen 的 PAUSED 边界及结果仍见[原始 P0 RESULTS](../02_实验/Planner_P0_v0/RESULTS.md)。P0 Baseline Gate、P0-Integration 与 P0 Author Binding 的既有状态/结果各由自己的 RESULTS 维护；暂停它们的局部扩张，不覆盖历史结果或 P5 shared-supply 失败。CI 只验证离线契约，exact-head workflow 状态以 GitHub Actions 为准。
+当前统一目标是让角色在持续游戏世界中依据自身目标行动，同时接受作者在线未来要求与修改，由协调过程组织成熟方法、调用原生行为、读取真实反馈并继续更新计划；开发与科学验证是同一过程。问题定义仍由唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md) 维护，本次不改定义。成熟方法能解是复用基础，不构成停止开发条件；多条合法路径只是特定算法对照条件，不是普遍开发门。旧 C1/C2 `NO_GO` 保留其候选级历史含义，不再作为当前停点。**当前工作包：Character Dynamics Online Integration v0，DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；本轮停止**；唯一结果与8项验收映射见该包 [RESULTS](../02_实验/Character_Dynamics_Online_Integration_v0/RESULTS.md)，范围与预算见 [PROTOCOL](../02_实验/Character_Dynamics_Online_Integration_v0/PROTOCOL.md)。Planner Adapter Integration v1、System Baseline v0、P0/P5 等历史结果继续由各自 RESULTS 维护，不覆盖。
 
 **实现检查点：系统集成首轮在 `bf30d4c` 交付 DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW，未 CLOSED**。限定原生内容与四条件开发运行的能力、失败、历史对照未成立及无方法收益证据只见[既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，不换条件刷 PASS。2026-10-14 的 `872292c` / `8ca0a45` 仅设计修订；同日后续实施授权见下段。B0传统基线已完成；随后授权的LLM-Admission见下方独立owner。正式B1/B2模型对照仍暂缓，不会因准入调用而自动扩大比较。M1–M5 / E1–E4 的历史 PARTIAL 不改写。新对话原文仅私有归档；公开限本轮代码、报告、文本回放与测试证据，不包括私有对话、第三方完整源码/资产/二进制。C++、E0、main 不动，不自行 CLOSED。
 
@@ -12,11 +12,12 @@
 
 ## SYSTEM / APPLICATION TRACK
 
-2026-10-18 **原生因果网络与研究实例准入已交付：本轮两候选 NO_GO / READY_FOR_INDEPENDENT_REVIEW**。源码存在条件化社会因果链，但本轮未建立同一持续世界下符合全部七项要求的双方案实例；不是 Veloren 全局不可能或 planner 失败。唯一裁决与下一动作见下行。此前 Loaded Msg 的 ROUTING / HIRE / FOLLOW 有限 PASS、旧 PARTIAL、失败和计时/日志限制均保留原 owner；不自动追加游戏补丁、实跑、模型或选材。
+2026-10-18 当前工作包为 **Character Dynamics Online Integration v0 / DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；本轮停止**，状态、范围与下一动作见下表及唯一 RESULTS。旧原生因果网络与研究实例准入仍是历史候选级裁决；它不代表 Veloren 全局不可行，也不再阻挡统一系统开发。此前 Loaded Msg 的 ROUTING / HIRE / FOLLOW 有限 PASS、旧 PARTIAL、失败及计时/日志限制均保留原 owner。
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| VELOREN-CAUSAL-RESEARCH-ADMISSION-V0 | **NO_GO（当前两候选未准入）；READY_FOR_INDEPENDENT_REVIEW；已停** | 独立审阅三组原生因果链与七项准入裁决，特别核条件化替代路径；不自动实施或换载体 | [唯一裁决](../02_实验/Veloren_Causal_Research_Admission_v0/ADMISSION.md)；[机制证据 owner](../02_实验/Veloren_Causal_Research_Admission_v0/CAUSAL_NETWORK.md)。无合格候选不生成实验协议；旧 RESULTS、F0/F1、游戏源码、C++、main 不动 |
+| CHARACTER-DYNAMICS-ONLINE-INTEGRATION-V0 | **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；本轮停止** | 三组有界运行完成；独立审阅8项验收映射、native 记录与 shutdown 限制。不自动修复关闭、不补跑、不换世界、不扩预算 | [唯一 RESULTS 与状态 owner](../02_实验/Character_Dynamics_Online_Integration_v0/RESULTS.md)；[README](../02_实验/Character_Dynamics_Online_Integration_v0/README.md)；[冻结协议](../02_实验/Character_Dynamics_Online_Integration_v0/PROTOCOL.md)。有限链不等于完整系统或算法优势；G0 固定、G1 本次未授权，旧 C1/C2 NO_GO 不作当前停点 |
+| VELOREN-CAUSAL-RESEARCH-ADMISSION-V0 | **历史裁决：两候选 NO_GO / READY_FOR_INDEPENDENT_REVIEW** | 保留原裁决与因果证据，不把双方案条件扩成系统开发门槛；当前集成见上行 | [唯一裁决](../02_实验/Veloren_Causal_Research_Admission_v0/ADMISSION.md)；[机制证据 owner](../02_实验/Veloren_Causal_Research_Admission_v0/CAUSAL_NETWORK.md)。原文档与历史 RESULTS 不改；不据此宣称 Veloren 全局不可能 |
 | VELOREN-NATIVE-DECISION-INTEGRATION-V1 | **ROUTING/HIRE/FOLLOW 有限 PASS；READY_FOR_INDEPENDENT_REVIEW；已停** | 独立审阅唯一新OFF/ON：1请求→原生Hired→本人跟随；核预算/日志限制，不自动追加机制或运行 | [唯一 RESULTS](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md#2026-10-18-新授权loaded-msg-最小修复与最后一次纵向验收)；旧PARTIAL/A/C++/main不改，不自行CLOSED |
 | VELOREN-VERTICAL-SLICE-V0 | **READY_FOR_INDEPENDENT_REVIEW；A=PASS_BY_NATIVE_TRACE；A_FROZEN** | 有限接口与旧失败保留，不再补跑 Talk；新授权高层接入归上行，不以旧 B 未授权声明阻挡本轮 | [唯一 RESULTS](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md#最终接口验证实际结果与停止)；Brain→Say→Agent 及有限续行已见原始证据，不推论收方接受、长期自治或完整系统 CLOSED |
 | OPENXRAY-NPC-DECISION-ADMISSION-V0 | **接入探索 DEFERRED_BY_USER；原源码交付保留** | 用户决定先试 Veloren；不恢复 CoP 数据/接口调查、不自动开发 C++ 桥或 RimWorld | [原 RESULTS](../02_实验/OpenXRay_NPC_Decision_Admission_v0/RESULTS.md)；OpenXRay 自身历史准入状态仍由该 RESULTS 维护，与当前 Veloren 环境状态分开 |
