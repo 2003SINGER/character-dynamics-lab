@@ -1,0 +1,32 @@
+Veloren v0.18.0 fixed commit: 1d12f35edd6cdbfc1fb921c167cdd7beeeffe248
+Official HEAD excerpts (git show HEAD:<path>), not patched worktree.
+
+server/src/rtsim/tick.rs, lines 624-634
+Whole-file SHA-256: 82aa92da66643703f90686146173e5281d58ad131c98b077e3b6a0b14f2cfd4d
+  624	                        if let Some(agent) = agent {
+  625	                            agent.rtsim_controller.personality = npc.personality;
+  626	                            agent.rtsim_controller.look_dir = npc.controller.look_dir;
+  627	                            agent.rtsim_controller.activity = npc.controller.activity;
+  628	                            agent
+  629	                                .rtsim_controller
+  630	                                .actions
+  631	                                .extend(std::mem::take(&mut npc.controller.actions));
+  632	                            if let Some(rtsim_outbox) = &mut agent.rtsim_outbox {
+  633	                                npc.inbox.append(rtsim_outbox);
+  634	                            }
+
+server/src/sys/agent/behavior_tree/mod.rs, lines 650-662
+Whole-file SHA-256: ceabea0e322506a04eb978aa489615d4412fb69ccc0eab95cd9292fbf140608b
+  650	                    bdata
+  651	                        .controller
+  652	                        .push_event(ControlEvent::Dialogue(*target_uid, dialogue));
+  653	                    bdata.controller.push_utterance(UtteranceKind::Greeting);
+  654	                } else {
+  655	                    warn!("NPC dialogue sent to non-existent target entity");
+  656	                }
+  657	            },
+  658	            NpcAction::Msg { .. } => {},
+  659	        }
+  660	        true
+  661	    } else {
+  662	        false

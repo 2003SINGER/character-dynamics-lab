@@ -4,18 +4,19 @@ This experimental local patch targets the official Veloren GitLab source commit
 `1d12f35edd6cdbfc1fb921c167cdd7beeeffe248` (`v0.18.0`). It changes nine Rust
 files and does not alter dependency versions or `Cargo.lock`. The upstream
 source remains under `GPL-3.0-or-later`; this is not an upstream release.
-Patch SHA-256: `19caffe6962c6b5e094fd1344c2b84b8eb5a737943a8d0ac865d9c0b39708cf8`.
+Frozen final A patch SHA-256: `4174287ddd467804e7efbfe7bb6868736475597f0225067c2030aaa17c709610` (earlier attempt hashes remain in their evidence).
 Changed paths: `common/src/rtsim.rs`; `rtsim/src/data/npc.rs`,
 `rtsim/src/rule/npc_ai/mod.rs`, `rtsim/src/rule/simulate_npcs.rs`;
 `server-cli/src/main.rs`; `server/src/lib.rs`, `server/src/rtsim/mod.rs`,
 `server/src/rtsim/tick.rs`, `server/src/sys/agent/behavior_tree/mod.rs`.
 
-Current verification (2026-10-17): `SERVER_BUILD=PASS`, native baseline
-established, and **work package A = PARTIAL**. The bounded A-Closure run stopped
-when its cancel-control request was rejected at world admission; no positive
-request was submitted. The earlier Brain/no-speech result remains historical,
-not new Agent evidence. Work package B has not started. Rust checks and focused
-tests are reported with their actual patch versions. See
+Current verification: **A = PASS_BY_NATIVE_TRACE / A_FROZEN**, limited to the
+final native Talk interface and cancellation evidence, not recipient acceptance
+or a complete planning system. The earlier A-Closure cancel-admission failure
+is retained as history, not the current result. The new high-level recruitment
+work has its own [result owner](../../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md)
+and does not rerun or alter this A interface. Rust checks and focused tests are
+reported with their actual patch versions. See
 [RESULTS.md](../../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) for the
 experiment status and evidence boundary.
 

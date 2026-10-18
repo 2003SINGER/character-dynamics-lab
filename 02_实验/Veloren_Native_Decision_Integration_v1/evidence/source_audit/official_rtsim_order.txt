@@ -1,0 +1,71 @@
+Veloren v0.18.0 fixed commit: 1d12f35edd6cdbfc1fb921c167cdd7beeeffe248
+Source: git show HEAD:rtsim/src/lib.rs (official commit, not patched worktree)
+SHA-256: b10f236733d737522a7854c5ee46f49bde8decff82846f940e25d74147b70217
+
+   199	    fn start_default_rules(&mut self) {
+   200	        info!("Starting default rtsim rules...");
+   201	        self.start_rule::<rule::migrate::Migrate>();
+   202	        self.start_rule::<rule::architect::Architect>();
+   203	        self.start_rule::<rule::replenish_resources::ReplenishResources>();
+   204	        self.start_rule::<rule::report::ReportEvents>();
+   205	        self.start_rule::<rule::sync_npcs::SyncNpcs>();
+   206	        self.start_rule::<rule::simulate_npcs::SimulateNpcs>();
+   207	        self.start_rule::<rule::npc_ai::NpcAi>();
+   208	        self.start_rule::<rule::cleanup::CleanUp>();
+   209	    }
+   236	    pub fn bind<R: Rule, E: Event>(
+   237	        &mut self,
+   238	        f: impl FnMut(EventCtx<R, E>) + Send + Sync + 'static,
+   239	    ) {
+   240	        let f = AtomicRefCell::new(f);
+   241	        self.event_handlers
+   242	            .entry::<EventHandlersOf<E>>()
+   243	            .or_default()
+   244	            .push(Box::new(move |state, world, index, event, system_data| {
+   245	                (f.borrow_mut())(EventCtx {
+   246	                    state,
+   247	                    rule: &mut state.rule_mut(),
+   248	                    event,
+   249	                    world,
+   250	                    index,
+   251	                    system_data,
+   252	                })
+   253	            }));
+   298	    pub fn emit<E: Event>(
+   299	        &mut self,
+   300	        e: E,
+   301	        system_data: &mut E::SystemData<'_>,
+   302	        world: &World,
+   303	        index: IndexRef,
+   304	    ) {
+   305	        // TODO: Queue these events up and handle them on a regular rtsim tick instead
+   306	        // of executing their handlers immediately.
+   307	        if let Some(handlers) = self.event_handlers.get::<EventHandlersOf<E>>() {
+   308	            handlers
+   309	                .iter()
+   310	                .for_each(|f| f(self, world, index, &e, system_data));
+   311	        }
+   312	    }
+   314	    pub fn tick(
+   315	        &mut self,
+   316	        system_data: &mut <OnTick as Event>::SystemData<'_>,
+   317	        world: &World,
+   318	        index: IndexRef,
+   319	        time_of_day: TimeOfDay,
+   320	        time: Time,
+   321	        dt: f32,
+   322	    ) {
+   323	        let tick = {
+   324	            let mut data = self.data_mut();
+   325	            data.time_of_day = time_of_day;
+   326	            data.tick += 1;
+   327	            data.tick
+   328	        };
+   329	        let event = OnTick {
+   330	            time_of_day,
+   331	            tick,
+   332	            time,
+   333	            dt,
+   334	        };
+   335	        self.emit(event, system_data, world, index);
+   336	    }

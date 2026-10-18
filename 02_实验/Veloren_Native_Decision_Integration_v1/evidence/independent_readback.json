@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "run": "_local_data/external_games/veloren_0_18_0/evidence/native_decision_v1/runs/pair-20261018-v1",
+  "source_commit": "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248",
+  "base_a_patch_sha256": "4174287ddd467804e7efbfe7bb6868736475597f0225067c2030aaa17c709610",
+  "recruit_patch_sha256": "458c590d701561a0aee011348ed6823da943d4af0e203588fd2a7e8433fb5b7f",
+  "binary_sha256": "2369b3c1712e90156361bda4293da910399b274ebd1710171b6d48090245c318",
+  "pair": {
+    "server_launches": 2,
+    "off": {
+      "wall_elapsed_seconds": 361.2658854579786,
+      "stop_reason": "wall_cap",
+      "exit_code": 0,
+      "request_count": 0,
+      "native_actor_snapshots": 344,
+      "recruit_actor_snapshots": 344,
+      "native_event_rows": 3317,
+      "leader_uid": 476,
+      "max_hired_member_count": 0
+    },
+    "on": {
+      "wall_elapsed_seconds": 361.3988983340096,
+      "stop_reason": "wall_cap",
+      "exit_code": 0,
+      "request_count": 6,
+      "native_actor_snapshots": 344,
+      "recruit_actor_snapshots": 344,
+      "native_event_rows": 3319,
+      "leader_uid": 476,
+      "max_hired_member_count": 0,
+      "hired_members_observed": false,
+      "rng_controlled": false
+    }
+  },
+  "limited_decision_effect": {
+    "established": "Planner requests carried source character-dynamics-htn-v1 and selected target UIDs; each was accepted into the native recruitment task, started by the native leader brain, and reached native message-action enqueue.",
+    "not_established": [
+      "recipient inbox receipt or acceptance",
+      "Job::Hired update",
+      "hired-member following or persistent relationship change",
+      "completion of the four-member planner goal"
+    ],
+    "interpretation_boundary": "Planner influence is limited to request/target selection. Native leader behavior executes the task; recipient handling and Job state are native. No Hire was observed."
+  },
+  "requests": [
+    {"id":"on-recruit-01","target_uid":442,"observed_time":4.140988333,"accepted_time":4.285312333,"message_action_time":6.229810333000003,"terminal":"expired_after_message","terminal_time":64.28595904199999,"nearest_leader_brain_time":6.157160792000003,"nearest_leader_brain":["inviting raid participant","Following actor Npc(NpcId(443v1))"],"slot_target_match":true},
+    {"id":"on-recruit-02","target_uid":469,"observed_time":65.32353762499997,"accepted_time":65.39705983299997,"message_action_time":67.52130291699996,"terminal":"expired_after_message","terminal_time":125.41828512499985,"nearest_leader_brain_time":67.37063691699996,"nearest_leader_brain":["inviting raid participant","Following actor Npc(NpcId(470v1))"],"slot_target_match":true},
+    {"id":"on-recruit-03","target_uid":433,"observed_time":126.42505574999983,"accepted_time":126.50155283299982,"message_action_time":129.6460507499998,"terminal":"expired_after_message","terminal_time":186.51498241700006,"nearest_leader_brain_time":129.4579923749998,"nearest_leader_brain":["inviting raid participant","Following actor Npc(NpcId(434v1))"],"slot_target_match":true},
+    {"id":"on-recruit-04","target_uid":450,"observed_time":187.44599012500004,"accepted_time":187.55292404200003,"message_action_time":190.34833725000001,"terminal":"expired_after_message","terminal_time":247.58879187500006,"nearest_leader_brain_time":190.50076070800003,"nearest_leader_brain":["idle"],"slot_target_match":null},
+    {"id":"on-recruit-05","target_uid":459,"observed_time":247.62702358300007,"accepted_time":247.74177687500008,"message_action_time":251.15726362499996,"terminal":"expired_after_message","terminal_time":307.753269,"nearest_leader_brain_time":250.68398425,"nearest_leader_brain":["inviting raid participant","Following actor Npc(NpcId(460v1))"],"slot_target_match":true},
+    {"id":"on-recruit-06","target_uid":452,"observed_time":308.685849333,"accepted_time":308.753151458,"message_action_time":311.6398113749999,"terminal":"right_censored_at_wall_cap","terminal_time":null,"nearest_leader_brain_time":311.7502509999999,"nearest_leader_brain":["idle"],"slot_target_match":null}
+  ],
+  "static_loaded_msg_path": {
+    "default_rule_order": ["SimulateNpcs", "NpcAi"],
+    "dispatch": "Synchronous OnTick handlers run in binding insertion order. SimulateNpcs routes currently queued Msg actions into recipient inbox before NpcAi executes.",
+    "risk": "A Msg emitted by NpcAi after SimulateNpcs can be taken by same-pass Loaded ECS synchronization into the Agent action queue; Agent handle_rtsim_actions has an empty Msg arm. A/recruit patches preserve this path.",
+    "direct_runtime_proof": false,
+    "missing_instrumentation": "Raw events do not record per-message Agent dequeue or target inbox insertion, so static flow plus no Hire is not direct event-level proof of loss."
+  },
+  "caveats": [
+    "external_lease_active is the Talk lease indicator and does not measure the native recruit task.",
+    "Five expires-after-message outcomes and the sixth wall-cap-censored request do not establish NPC refusal; the recipient may not have received the Msg.",
+    "No Hired-member state means follow behavior and full HTN causal completion cannot be evaluated.",
+    "The planner's predicted hire counts are predictions, not observed world state."
+  ]
+}

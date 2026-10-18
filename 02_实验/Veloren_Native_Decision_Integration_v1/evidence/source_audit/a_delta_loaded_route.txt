@@ -1,0 +1,84 @@
+A + native-decision delta working tree; NOT official HEAD source.
+Base commit: 1d12f35edd6cdbfc1fb921c167cdd7beeeffe248
+Public native-decision delta patch SHA-256: 458c590d701561a0aee011348ed6823da943d4af0e203588fd2a7e8433fb5b7f
+Build-copy file SHA-256: server/src/rtsim/tick.rs 53ac63e65bfd97782e7692de1a1bab49957a25ba1a4549dd5408f88e95295a80
+
+server/src/rtsim/tick.rs (build-copy, lines 1228-1261):
+  1228	                    SimulationMode::Loaded => {
+  1229	                        // Update rtsim NPC state
+  1230	                        npc.wpos = pos.0;
+  1231	
+  1232	                        // Update entity state
+  1233	                        if let Some(agent) = agent {
+  1234	                            agent.rtsim_controller.personality = npc.personality;
+  1235	                            agent.rtsim_controller.look_dir = npc.controller.look_dir;
+  1236	                            agent.rtsim_controller.activity = npc.controller.activity;
+  1237	                            let request_ids =
+  1238	                                std::mem::take(&mut npc.controller.external_action_request_ids);
+  1239	                            for (index, action) in
+  1240	                                std::mem::take(&mut npc.controller.actions).into_iter().enumerate()
+  1241	                            {
+  1242	                                let request_id = matches!(
+  1243	                                    &action,
+  1244	                                    common::rtsim::NpcAction::Say(_, _)
+  1245	                                )
+  1246	                                .then(|| request_ids.get(&index).cloned())
+  1247	                                .flatten();
+  1248	                                agent
+  1249	                                    .rtsim_controller
+  1250	                                    .push_action(action, request_id.clone());
+  1251	                                if let Some(request_id) = request_id {
+  1252	                                    crate::rtsim::external_telemetry(serde_json::json!({
+  1253	                                        "event": "native_action_handoff",
+  1254	                                        "request_id": request_id,
+  1255	                                        "npc_uid": npc.uid,
+  1256	                                        "time": time.0,
+  1257	                                        "action": "Say",
+  1258	                                        "destination": "agent_queue",
+  1259	                                    }));
+  1260	                                }
+  1261	                            }
+
+server/src/sys/agent/behavior_tree/mod.rs (build-copy, lines 640-681):
+  640	            NpcAction::Say(target, content) => {
+  641	                if let Some(target) = bdata.read_data.id_maps.actor_entity(target) {
+  642	                    bdata
+  643	                        .controller
+  644	                        .push_event(ControlEvent::Talk(target, content));
+  645	                    bdata.controller.push_utterance(UtteranceKind::Greeting);
+  646	                    bdata.agent.increase_stare_time();
+  647	                    bdata.agent.target = Some(Target::new(
+  648	                        target,
+  649	                        true,
+  650	                        bdata.read_data.time.0,
+  651	                        false,
+  652	                        bdata.read_data.positions.get(target).map(|p| p.0),
+  653	                    ));
+  654	                    bdata.agent.awareness.set_maximally_aware();
+  655	                }
+  656	            },
+  657	            NpcAction::Attack(target) => {
+  658	                if let Some(target) = bdata.read_data.id_maps.actor_entity(target) {
+  659	                    bdata.agent.target = Some(Target::new(
+  660	                        target,
+  661	                        true,
+  662	                        bdata.read_data.time.0,
+  663	                        false,
+  664	                        bdata.read_data.positions.get(target).map(|p| p.0),
+  665	                    ));
+  666	                    bdata.agent.awareness.set_maximally_aware();
+  667	                }
+  668	            },
+  669	            NpcAction::Dialogue(target, dialogue) => {
+  670	                if let Some(target) = bdata.read_data.id_maps.actor_entity(target)
+  671	                    && let Some(target_uid) = bdata.read_data.uids.get(target)
+  672	                {
+  673	                    bdata
+  674	                        .controller
+  675	                        .push_event(ControlEvent::Dialogue(*target_uid, dialogue));
+  676	                    bdata.controller.push_utterance(UtteranceKind::Greeting);
+  677	                } else {
+  678	                    warn!("NPC dialogue sent to non-existent target entity");
+  679	                }
+  680	            },
+  681	            NpcAction::Msg { .. } => {},

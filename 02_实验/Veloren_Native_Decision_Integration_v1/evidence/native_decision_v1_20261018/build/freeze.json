@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "prepared_date": "2026-10-18",
+  "status": "PRELAUNCH_FROZEN",
+  "source": {
+    "commit": "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248",
+    "source_patch_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/veloren_native_decision_v1/veloren-native-decision.patch",
+    "source_patch_sha256": "458c590d701561a0aee011348ed6823da943d4af0e203588fd2a7e8433fb5b7f",
+    "base_patch_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/veloren_native_v0/veloren-native-talk.patch",
+    "base_patch_sha256": "4174287ddd467804e7efbfe7bb6868736475597f0225067c2030aaa17c709610",
+    "cargo_lock_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/source_build_serveronly/Cargo.lock",
+    "cargo_lock_sha256": "cc0d0eb5561e6463aeac5bc7a1ed50a3256a3a041210bf1e2cec9a0c9ae5348f",
+    "binary_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/source-target-serveronly/debug/veloren-server-cli",
+    "binary_sha256": "2369b3c1712e90156361bda4293da910399b274ebd1710171b6d48090245c318",
+    "assets_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/install_v0_18_0/assets",
+    "toolchain": "nightly-2025-09-08-aarch64-apple-darwin",
+    "features": [
+      "worldgen",
+      "persistent_world",
+      "plugins"
+    ]
+  },
+  "world": {
+    "world_seed": 130626853,
+    "day_length_minutes": 30,
+    "source_world_sha256": "9eb7a53bcd14cc1d10184b4f86fc6bc4ba4db26d05e673995405e1f22dce42ca",
+    "settings_contract_sha256": "14cd6e96a4ce0955ad9113be489c154ecdaedc3ecca3c4392452e8e718237052"
+  },
+  "trials": {
+    "off": {
+      "userdata_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/userdata/native-decision-v1-20261018-off",
+      "source_world_sha256": "9eb7a53bcd14cc1d10184b4f86fc6bc4ba4db26d05e673995405e1f22dce42ca",
+      "settings_contract_sha256": "14cd6e96a4ce0955ad9113be489c154ecdaedc3ecca3c4392452e8e718237052",
+      "userdata_manifest_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/userdata/native-decision-v1-20261018-off/input-manifest.json",
+      "userdata_manifest_sha256": "eaaf825d40431d7f40919c813afe3e41afbe2983b211dbf8536634cd189546a9"
+    },
+    "on": {
+      "userdata_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/userdata/native-decision-v1-20261018-on",
+      "source_world_sha256": "9eb7a53bcd14cc1d10184b4f86fc6bc4ba4db26d05e673995405e1f22dce42ca",
+      "settings_contract_sha256": "14cd6e96a4ce0955ad9113be489c154ecdaedc3ecca3c4392452e8e718237052",
+      "userdata_manifest_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/userdata/native-decision-v1-20261018-on/input-manifest.json",
+      "userdata_manifest_sha256": "db9cfc24c028e7fb4e5d829c74a4d79535f70fe7d32f6647edc531e72bdff1f8"
+    }
+  },
+  "runtime": {
+    "loopback_only": true,
+    "query_address": null,
+    "leader_uid": 476,
+    "observe_npc_uids": [
+      476,
+      433,
+      450,
+      451,
+      452,
+      459,
+      469,
+      472,
+      475
+    ],
+    "native_persister_npc_uids": [
+      476,
+      433,
+      450,
+      451,
+      452,
+      459,
+      469,
+      472,
+      475
+    ],
+    "native_persister_view_distance_chunks": 2,
+    "max_trial_wall_seconds": 360,
+    "disk_free_floor_bytes": 6442450944,
+    "telemetry_record_cap": 10000,
+    "telemetry_byte_cap": 16777216,
+    "telemetry_seconds_cap": 1800,
+    "max_requests": 8,
+    "request_ttl_seconds": 60,
+    "loaded_prefix_min_game_times": 3,
+    "loaded_prefix_min_wall_seconds": 2,
+    "loaded_candidates_required": 2
+  },
+  "controller": {
+    "adapter_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/veloren_native_decision_v1/adapter.py",
+    "adapter_sha256": "b5ca50c20a73f034a9d96c620d8b8bdc3c8d6fd58d946c4104a161e5c1f99601",
+    "runner_path": "/Users/2003singer/Workspace/Research/character-dynamics-lab/tools/veloren_native_decision_v1/run_pair.py",
+    "runner_sha256": "ef33d7a731bb61ddcef7b12ec67eeaf53c12ab32b303a0a49ee96dded9e9b8f0",
+    "protocol_sha256": "e7bd5b439f378c14c6e6d9735c0deb5fcbeb59d9942ba08c5c96203db382811f"
+  },
+  "reproducibility_limit": "Same saved world and inputs, not coupled native RNG or a statistical method comparison. No Talk requests or GUI; actual world input files remain private."
+}

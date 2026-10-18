@@ -1,0 +1,859 @@
+--- a/server/src/rtsim/mod.rs
++++ b/server/src/rtsim/mod.rs
+@@ -1,4 +1,5 @@
+ pub mod event;
++mod native_recruit;
+ pub mod rule;
+ pub mod tick;
+ 
+@@ -47,6 +48,13 @@
+     last_external_observation: Option<Instant>,
+     last_external_catalog: Option<Instant>,
+     last_external_request_observation: Option<Instant>,
++    native_recruit_request_path: Option<PathBuf>,
++    native_recruit_events_path: Option<PathBuf>,
++    native_recruit_leader_uid: Option<u64>,
++    native_recruit_request_offset: u64,
++    seen_native_recruit_requests: HashMap<String, String>,
++    terminal_native_recruit_requests: HashSet<String>,
++    last_native_recruit_observation: Option<Instant>,
+ }
+ 
+ struct ExternalTelemetryBudget {
+@@ -236,6 +244,36 @@
+             last_external_observation: None,
+             last_external_catalog: None,
+             last_external_request_observation: None,
++            native_recruit_request_path: match (
++                std::env::var_os("VELOREN_NATIVE_RECRUIT_REQUESTS"),
++                std::env::var_os("VELOREN_NATIVE_RECRUIT_EVENTS"),
++                std::env::var("VELOREN_NATIVE_RECRUIT_LEADER_UID")
++                    .ok()
++                    .and_then(|uid| uid.parse::<u64>().ok())
++                    .filter(|uid| *uid == 476),
++            ) {
++                (Some(requests), Some(_), Some(_)) => Some(PathBuf::from(requests)),
++                _ => None,
++            },
++            native_recruit_events_path: match (
++                std::env::var_os("VELOREN_NATIVE_RECRUIT_REQUESTS"),
++                std::env::var_os("VELOREN_NATIVE_RECRUIT_EVENTS"),
++                std::env::var("VELOREN_NATIVE_RECRUIT_LEADER_UID")
++                    .ok()
++                    .and_then(|uid| uid.parse::<u64>().ok())
++                    .filter(|uid| *uid == 476),
++            ) {
++                (Some(_), Some(events), Some(_)) => Some(PathBuf::from(events)),
++                _ => None,
++            },
++            native_recruit_leader_uid: std::env::var("VELOREN_NATIVE_RECRUIT_LEADER_UID")
++                .ok()
++                .and_then(|uid| uid.parse::<u64>().ok())
++                .filter(|uid| *uid == 476),
++            native_recruit_request_offset: 0,
++            seen_native_recruit_requests: HashMap::new(),
++            terminal_native_recruit_requests: HashSet::new(),
++            last_native_recruit_observation: None,
+         };
+ 
+         rule::start_rules(&mut this.state);
+--- a/server/src/rtsim/tick.rs
++++ b/server/src/rtsim/tick.rs
+@@ -795,6 +795,12 @@
+         let rtsim = &mut *rtsim;
+         let calendar_data = (*time_of_day, (*calendar).clone());
+ 
++        let loaded_positions = (&rtsim_entities, &positions)
++            .join()
++            .map(|(npc_id, position)| (*npc_id, position.0))
++            .collect::<HashMap<_, _>>();
++
++        super::native_recruit::process_requests(rtsim, *time, &loaded_positions);
+         process_external_requests(rtsim, *time);
+         if rtsim.external_request_path.is_some() {
+             let mut data = rtsim.state.data_mut();
+@@ -845,6 +851,9 @@
+             *time,
+             dt.0,
+         );
++
++        super::native_recruit::advance_after_tick(rtsim, *time);
++        super::native_recruit::observe(rtsim, *time, &loaded_positions);
+ 
+         if rtsim.external_request_path.is_some() {
+             let mut filtered_events = Vec::new();
+--- a/rtsim/src/data/npc.rs
++++ b/rtsim/src/data/npc.rs
+@@ -72,6 +72,9 @@
+     /// Optional lease for a validated external TalkToNpc request. This is
+     /// runtime-only and is never serialized with rtsim data.
+     pub external_talk: Option<ExternalTalkLease>,
++    /// Runtime-only request to use the native pirate recruitment prefix for
++    /// one already-qualified local target.
++    pub native_recruit: Option<NativeRecruitTask>,
+     pub new_home: Option<Option<SiteId>>,
+     pub look_dir: Option<Dir>,
+     pub job: Option<Job>,
+@@ -96,6 +99,19 @@
+ pub struct ExternalActionDrop {
+     pub request_id: String,
+     pub reason: &'static str,
++}
++
++#[derive(Clone, Debug)]
++pub struct NativeRecruitTask {
++    pub request_id: String,
++    pub source: String,
++    pub target: NpcId,
++    pub target_uid: u64,
++    pub expires_at: Time,
++    pub started: bool,
++    pub started_reported: bool,
++    pub message_sent: bool,
++    pub message_reported: bool,
+ }
+ 
+ impl ExternalTalkLease {
+--- a/rtsim/src/rule/npc_ai/mod.rs
++++ b/rtsim/src/rule/npc_ai/mod.rs
+@@ -42,7 +42,7 @@
+     },
+     data::{
+         ReportKind, Sentiment, Sites,
+-        npc::{Brain, DialogueSession, Job, PathData, SimulationMode},
++        npc::{Brain, DialogueSession, Job, NativeRecruitTask, NpcId, PathData, SimulationMode},
+         quest::{Quest, QuestKind},
+     },
+     event::OnTick,
+@@ -398,6 +398,113 @@
+             }
+         }
+         idle().r()
++    })
++}
++
++fn native_recruit_is_valid(ctx: &NpcCtx, request_id: &str, target: NpcId) -> bool {
++    let Some(task) = ctx.controller.native_recruit.as_ref() else {
++        return false;
++    };
++    let Some(home) = ctx.npc.home else {
++        return false;
++    };
++    let Some(faction) = ctx.npc.faction else {
++        return false;
++    };
++    let Some(site) = ctx.data.sites.get(home) else {
++        return false;
++    };
++    let has_nearby_raid_site = site.nearby_sites_by_size.iter().any(|site_id| {
++        ctx.data.sites.get(*site_id).is_some_and(|nearby| {
++            nearby.wpos.as_::<f32>().distance_squared(ctx.npc.wpos.xy())
++                < 10_000.0f32.powi(2)
++        })
++    });
++    task.request_id == request_id
++        && task.target == target
++        && task.expires_at.0 > ctx.time.0
++        && !ctx.npc.is_dead()
++        && ctx.npc.job.is_none()
++        && ctx.npc.current_site == Some(home)
++        && matches!(ctx.npc.role, Role::Civilised(Some(Profession::Pirate(true))))
++        && has_nearby_raid_site
++        && site
++            .population
++            .iter()
++            .filter(|npc_id| {
++                ctx.data.npcs.get(**npc_id).is_some_and(|npc| {
++                    !npc.is_dead()
++                        && npc.current_site == Some(home)
++                        && npc.faction == Some(faction)
++                        && npc.job.is_none()
++                        && matches!(npc.role, Role::Civilised(Some(Profession::Pirate(false))))
++                })
++            })
++            .count()
++            > 3
++        && site.population.contains(&target)
++        && ctx.data.npcs.get(target).is_some_and(|npc| {
++            !npc.is_dead()
++                && npc.current_site == Some(home)
++                && npc.faction == Some(faction)
++                && npc.job.is_none()
++                && matches!(npc.role, Role::Civilised(Some(Profession::Pirate(false))))
++        })
++}
++
++fn pirate_recruit_prefix(target: NpcId, request_id: Option<String>) -> impl Action<DefaultState> {
++    let request_id_for_stop = request_id.clone();
++    follow_actor(Actor::Npc(target), 5.0)
++        .stop_if(move |ctx: &mut NpcCtx| {
++            if let Some(request_id) = &request_id_for_stop
++                && (!native_recruit_is_valid(ctx, request_id, target)
++                    || ctx.controller.native_recruit.as_ref().is_some_and(|task| task.message_sent))
++            {
++                return true;
++            }
++            let Some(follow_npc) = ctx.data.npcs.get(target) else {
++                return true;
++            };
++            ctx.npc.wpos.distance_squared(follow_npc.wpos) < 6.0f32.powi(2)
++        })
++        .then(just(move |ctx, _| {
++            if let Some(request_id) = &request_id {
++                if !native_recruit_is_valid(ctx, request_id, target)
++                    || ctx.controller.native_recruit.as_ref().is_some_and(|task| task.message_sent)
++                {
++                    return;
++                }
++                if let Some(task) = &mut ctx.controller.native_recruit
++                    && task.request_id == *request_id
++                {
++                    task.message_sent = true;
++                }
++            }
++            ctx.controller.send_msg(target, NpcMsg::RequestHire);
++        }))
++        .debug(|| "inviting raid participant")
++}
++
++fn wait_for_native_recruit(task: NativeRecruitTask) -> impl Action<DefaultState> {
++    idle().repeat().stop_if(move |ctx: &mut NpcCtx| {
++        ctx.time.0 >= task.expires_at.0
++            || ctx.controller.native_recruit.as_ref().is_none_or(|active| active.request_id != task.request_id)
++            || ctx.data.npcs.get(task.target).is_none_or(|target| {
++                matches!(&target.job, Some(Job::Hired(Actor::Npc(hirer), _)) if *hirer == ctx.npc_id)
++            })
++    }).map(|_, _| ())
++}
++
++fn start_native_recruit(task: NativeRecruitTask) -> impl Action<DefaultState> {
++    now(move |ctx, _| {
++        if let Some(active) = &mut ctx.controller.native_recruit
++            && active.request_id == task.request_id
++            && !active.message_sent
++            && active.expires_at.0 > ctx.time.0
++        {
++            active.started = true;
++        }
++        pirate_recruit_prefix(task.target, Some(task.request_id.clone()))
+     })
+ }
+ 
+@@ -458,16 +565,7 @@
+                             .choose(&mut ctx.rng)
+                     {
+                         let npc = *npc;
+-                        follow_actor(Actor::Npc(npc), 5.0)
+-                            .stop_if(move |ctx: &mut NpcCtx| {
+-                                let Some(follow_npc) = ctx.data.npcs.get(npc) else {
+-                                    return true;
+-                                };
+-                                ctx.npc.wpos.distance_squared(follow_npc.wpos) < 6.0f32.powi(2)
+-                            })
+-                            .then(just(move |ctx, _| ctx.controller.send_msg(npc, NpcMsg::RequestHire)))
+-                            .debug(|| "inviting raid participant")
+-                            .l()
++                        pirate_recruit_prefix(npc, None).l()
+                     } else {
+                         idle().r()
+                     }
+@@ -1642,6 +1740,14 @@
+                 },
+             };
+         } else {
++            if let Some(task) = ctx.controller.native_recruit.clone()
++            {
++                if task.message_sent {
++                    consider.important(wait_for_native_recruit(task));
++                } else if native_recruit_is_valid(ctx, &task.request_id, task.target) {
++                    consider.important(start_native_recruit(task));
++                }
++            }
+             let action = match ctx.npc.profession() {
+                 Some(Profession::Adventurer(_) | Profession::Merchant) => adventure().l().l(),
+                 Some(Profession::Pirate(is_leader)) => pirate(is_leader).l().r(),
+--- /dev/null
++++ b/server/src/rtsim/native_recruit.rs
+@@ -0,0 +1,581 @@
++use super::{ExternalTelemetryBudget, RtSim};
++use common::{resources::Time, rtsim::{Actor, NpcId, Profession, Role}};
++use rtsim::data::{Data, Npc, npc::{Job, NativeRecruitTask, SimulationMode}};
++use serde_json::{Value, json};
++use std::{
++    collections::HashMap,
++    fs::File,
++    io::{Read, Seek, SeekFrom, Write},
++    sync::{Mutex, OnceLock},
++    time::{Duration, Instant},
++};
++use vek::Vec3;
++
++const MAX_REQUEST_BYTES: usize = 1_000_000;
++const REQUEST_FRESHNESS_SECONDS: f64 = 10.0;
++const MAX_TTL_SECONDS: f64 = 120.0;
++const LOCAL_RADIUS: f32 = 24.0;
++
++fn emit(rtsim: &RtSim, event: Value) {
++    let Some(path) = &rtsim.native_recruit_events_path else {
++        return;
++    };
++    static BUDGET: OnceLock<Mutex<ExternalTelemetryBudget>> = OnceLock::new();
++    let Ok(mut budget) = BUDGET
++        .get_or_init(|| Mutex::new(ExternalTelemetryBudget::from_env()))
++        .lock()
++    else {
++        return;
++    };
++    let Ok(mut record) = serde_json::to_vec(&event) else {
++        return;
++    };
++    record.push(b'\n');
++    if budget.records >= budget.max_records
++        || budget.bytes.saturating_add(record.len()) > budget.max_bytes
++        || budget.started.elapsed() >= budget.max_duration
++        || record.len() > 64 * 1024
++    {
++        return;
++    }
++    if let Ok(mut file) = File::options().create(true).append(true).open(path)
++        && file.write_all(&record).is_ok()
++    {
++        budget.records += 1;
++        budget.bytes += record.len();
++    }
++}
++
++fn reject(rtsim: &RtSim, request_id: Option<&str>, now: Time, reason: &str) {
++    emit(rtsim, json!({
++        "event": "native_recruit_request_rejected",
++        "request_id": request_id,
++        "time": now.0,
++        "reason": reason,
++    }));
++}
++
++fn npc_id_by_uid(data: &Data, uid: u64) -> Option<NpcId> {
++    data.npcs
++        .iter()
++        .find_map(|(npc_id, npc)| (npc.uid == uid).then_some(npc_id))
++}
++
++fn pirate_leader(data: &Data, leader_id: NpcId) -> Option<(&Npc, common::rtsim::SiteId, common::rtsim::FactionId)> {
++    let leader = data.npcs.get(leader_id)?;
++    let home = leader.home?;
++    let faction = leader.faction?;
++    if leader.is_dead()
++        || leader.job.is_some()
++        || leader.current_site != Some(home)
++        || !matches!(leader.role, Role::Civilised(Some(Profession::Pirate(true))))
++        || data.sites.get(home).is_none()
++    {
++        return None;
++    }
++    Some((leader, home, faction))
++}
++
++fn eligible_unhired_pirate(data: &Data, npc_id: NpcId, home: common::rtsim::SiteId, faction: common::rtsim::FactionId) -> bool {
++    data.npcs.get(npc_id).is_some_and(|npc| {
++        !npc.is_dead()
++            && npc.current_site == Some(home)
++            && npc.faction == Some(faction)
++            && npc.job.is_none()
++            && matches!(npc.role, Role::Civilised(Some(Profession::Pirate(false))))
++    })
++}
++
++fn population_guard(data: &Data, home: common::rtsim::SiteId, faction: common::rtsim::FactionId) -> bool {
++    data.sites.get(home).is_some_and(|site| {
++        site.population
++            .iter()
++            .filter(|npc_id| eligible_unhired_pirate(data, **npc_id, home, faction))
++            .count()
++            > 3
++    })
++}
++
++fn raid_site_available(data: &Data, leader: &Npc, home: common::rtsim::SiteId) -> bool {
++    data.sites.get(home).is_some_and(|site| {
++        site.nearby_sites_by_size.iter().any(|site_id| {
++            data.sites.get(*site_id).is_some_and(|nearby| {
++                nearby.wpos.as_::<f32>().distance_squared(leader.wpos.xy()) < 10_000.0f32.powi(2)
++            })
++        })
++    })
++}
++
++fn npc_position(
++    npc_id: NpcId,
++    npc: &Npc,
++    loaded_positions: &HashMap<NpcId, Vec3<f32>>,
++) -> Option<Vec3<f32>> {
++    match npc.mode {
++        SimulationMode::Loaded => loaded_positions.get(&npc_id).copied(),
++        SimulationMode::Simulated => Some(npc.wpos),
++    }
++}
++
++fn distance(
++    a_id: NpcId,
++    a: &Npc,
++    b_id: NpcId,
++    b: &Npc,
++    loaded_positions: &HashMap<NpcId, Vec3<f32>>,
++) -> Option<f32> {
++    Some(
++        npc_position(a_id, a, loaded_positions)?
++            .distance_squared(npc_position(b_id, b, loaded_positions)?)
++            .sqrt(),
++    )
++}
++
++fn valid_target(
++    data: &Data,
++    leader_id: NpcId,
++    target_id: NpcId,
++    loaded_positions: &HashMap<NpcId, Vec3<f32>>,
++) -> Option<f32> {
++    let (leader, home, faction) = pirate_leader(data, leader_id)?;
++    if !population_guard(data, home, faction)
++        || !raid_site_available(data, leader, home)
++        || !data.sites.get(home)?.population.contains(&target_id)
++        || !eligible_unhired_pirate(data, target_id, home, faction)
++    {
++        return None;
++    }
++    let target = data.npcs.get(target_id)?;
++    let distance = distance(leader_id, leader, target_id, target, loaded_positions)?;
++    (distance <= LOCAL_RADIUS).then_some(distance)
++}
++
++fn read_job(data: &Data, npc: &Npc) -> Value {
++    match &npc.job {
++        None => Value::Null,
++        Some(Job::Hired(actor, _)) => {
++            let actor_uid = match actor {
++                Actor::Npc(npc_id) => data.npcs.get(*npc_id).map(|actor| actor.uid),
++                Actor::Character(_) => None,
++            };
++            json!({"kind":"hired", "actor_uid":actor_uid})
++        },
++        Some(Job::Quest(quest_id)) => json!({"kind":"quest", "quest_id":format!("{quest_id:?}")}),
++    }
++}
++
++fn hire_observation_outcome(hired_by_this_leader: bool, request_message_sent: bool) -> Option<&'static str> {
++    hired_by_this_leader.then_some(if request_message_sent {
++        "hired_observed"
++    } else {
++        "native_hire_observed_without_request_message"
++    })
++}
++
++fn request_id_and_payload(value: &Value) -> Option<(String, String)> {
++    let request_id = value.get("request_id")?.as_str()?.trim();
++    if request_id.is_empty() || request_id.len() > 128 {
++        return None;
++    }
++    Some((request_id.to_owned(), serde_json::to_string(value).ok()?))
++}
++
++fn validate_request_time(observed_time: f64, ttl: f64, now: Time) -> Result<(), &'static str> {
++    if !observed_time.is_finite() || observed_time < 0.0 || observed_time > now.0 {
++        return Err("invalid_observed_time");
++    }
++    if now.0 - observed_time > REQUEST_FRESHNESS_SECONDS {
++        return Err("stale_observation");
++    }
++    if !ttl.is_finite() || !(0.1..=MAX_TTL_SECONDS).contains(&ttl) {
++        return Err("invalid_ttl");
++    }
++    Ok(())
++}
++
++pub(super) fn process_requests(
++    rtsim: &mut RtSim,
++    now: Time,
++    loaded_positions: &HashMap<NpcId, Vec3<f32>>,
++) {
++    let (Some(path), Some(allowed_leader_uid)) = (
++        rtsim.native_recruit_request_path.clone(),
++        rtsim.native_recruit_leader_uid,
++    ) else {
++        return;
++    };
++    let Ok(mut file) = File::open(path) else {
++        return;
++    };
++    let Ok(file_len) = file.metadata().map(|metadata| metadata.len()) else {
++        return;
++    };
++    if file_len < rtsim.native_recruit_request_offset {
++        rtsim.native_recruit_request_offset = 0;
++    }
++    if file.seek(SeekFrom::Start(rtsim.native_recruit_request_offset)).is_err() {
++        return;
++    }
++    let mut bytes = Vec::new();
++    if file.take((MAX_REQUEST_BYTES + 1) as u64).read_to_end(&mut bytes).is_err() {
++        return;
++    }
++    if bytes.len() > MAX_REQUEST_BYTES {
++        reject(rtsim, None, now, "request_batch_over_1MiB");
++        rtsim.native_recruit_request_offset = file_len;
++        return;
++    }
++    let complete_end = bytes
++        .iter()
++        .rposition(|byte| *byte == b'\n')
++        .map_or(0, |index| index + 1);
++    if complete_end == 0 {
++        return;
++    }
++    rtsim.native_recruit_request_offset += complete_end as u64;
++
++    for line in bytes[..complete_end].split(|byte| *byte == b'\n') {
++        if line.is_empty() {
++            continue;
++        }
++        let Ok(value) = serde_json::from_slice::<Value>(line) else {
++            reject(rtsim, None, now, "invalid_jsonl");
++            continue;
++        };
++        let Some((request_id, canonical)) = request_id_and_payload(&value) else {
++            reject(rtsim, None, now, "missing_or_invalid_request_id");
++            continue;
++        };
++        if let Some(previous) = rtsim.seen_native_recruit_requests.get(&request_id) {
++            if previous != &canonical {
++                reject(rtsim, Some(&request_id), now, "request_id_conflict");
++            }
++            continue;
++        }
++        if rtsim.seen_native_recruit_requests.len() >= 4096 {
++            reject(rtsim, Some(&request_id), now, "request_id_capacity_reached");
++            continue;
++        }
++        rtsim.seen_native_recruit_requests.insert(request_id.clone(), canonical);
++
++        let Some(kind) = value.get("kind").and_then(Value::as_str) else {
++            reject(rtsim, Some(&request_id), now, "missing_kind");
++            continue;
++        };
++        if value.get("version").and_then(Value::as_u64) != Some(1) {
++            reject(rtsim, Some(&request_id), now, "unsupported_version");
++            continue;
++        }
++        if kind != "RecruitMember" {
++            reject(rtsim, Some(&request_id), now, "unsupported_kind");
++            continue;
++        }
++        let Some(source) = value.get("source").and_then(Value::as_str).filter(|s| !s.is_empty() && s.len() <= 128) else {
++            reject(rtsim, Some(&request_id), now, "invalid_source");
++            continue;
++        };
++        let Some(leader_uid) = value.get("leader_uid").and_then(Value::as_u64) else {
++            reject(rtsim, Some(&request_id), now, "invalid_leader_uid");
++            continue;
++        };
++        if leader_uid != allowed_leader_uid {
++            reject(rtsim, Some(&request_id), now, "leader_not_allowlisted");
++            continue;
++        }
++        let Some(target_uid) = value.get("target_uid").and_then(Value::as_u64) else {
++            reject(rtsim, Some(&request_id), now, "invalid_target_uid");
++            continue;
++        };
++        let Some(observed_time) = value.get("observed_time").and_then(Value::as_f64) else {
++            reject(rtsim, Some(&request_id), now, "invalid_observed_time");
++            continue;
++        };
++        let Some(ttl) = value.get("ttl_seconds").and_then(Value::as_f64) else {
++            reject(rtsim, Some(&request_id), now, "invalid_ttl");
++            continue;
++        };
++        if let Err(reason) = validate_request_time(observed_time, ttl, now) {
++            reject(rtsim, Some(&request_id), now, reason);
++            continue;
++        }
++
++        let data = rtsim.state.data();
++        let (Some(leader_id), Some(target_id)) =
++            (npc_id_by_uid(&data, leader_uid), npc_id_by_uid(&data, target_uid))
++        else {
++            reject(rtsim, Some(&request_id), now, "npc_not_found");
++            continue;
++        };
++        let active = data.npcs.values().any(|npc| npc.controller.native_recruit.is_some());
++        if active {
++            reject(rtsim, Some(&request_id), now, "another_recruitment_in_flight");
++            continue;
++        }
++        let Some(distance) = valid_target(&data, leader_id, target_id, loaded_positions) else {
++            reject(rtsim, Some(&request_id), now, "native_recruit_preconditions_failed");
++            continue;
++        };
++        drop(data);
++
++        let mut data = rtsim.state.data_mut();
++        let Some(leader) = data.npcs.get_mut(leader_id) else {
++            reject(rtsim, Some(&request_id), now, "leader_disappeared");
++            continue;
++        };
++        leader.controller.native_recruit = Some(NativeRecruitTask {
++            request_id: request_id.clone(),
++            source: source.to_owned(),
++            target: target_id,
++            target_uid,
++            expires_at: Time(now.0 + ttl),
++            started: false,
++            started_reported: false,
++            message_sent: false,
++            message_reported: false,
++        });
++        drop(data);
++        emit(rtsim, json!({
++            "event":"native_recruit_request_accepted",
++            "request_id":request_id,
++            "time":now.0,
++            "leader_uid":leader_uid,
++            "target_uid":target_uid,
++            "source":source,
++            "distance_3d":distance,
++            "expires_at":now.0 + ttl,
++        }));
++    }
++}
++
++pub(super) fn advance_after_tick(rtsim: &mut RtSim, now: Time) {
++    if rtsim.native_recruit_events_path.is_none() {
++        return;
++    }
++    let mut events = Vec::new();
++    {
++        let mut data = rtsim.state.data_mut();
++        let tasks = data.npcs
++            .iter()
++            .filter_map(|(leader_id, npc)| npc.controller.native_recruit.clone().map(|task| (leader_id, npc.uid, task)))
++            .collect::<Vec<_>>();
++        for (leader_id, leader_uid, task) in tasks {
++            let outcome = if let Some(target) = data.npcs.get(task.target) {
++                let hired_by_this_leader = matches!(
++                    &target.job,
++                    Some(Job::Hired(Actor::Npc(hirer), _)) if *hirer == leader_id
++                );
++                if let Some(outcome) = hire_observation_outcome(hired_by_this_leader, task.message_sent) {
++                    Some(outcome)
++                } else if now.0 >= task.expires_at.0 {
++                    Some(if task.message_sent {
++                        "expired_after_message"
++                    } else if task.started {
++                        "expired_after_native_action_before_message"
++                    } else {
++                        "expired_before_native_action"
++                    })
++                } else if pirate_leader(&data, leader_id).is_none() {
++                    Some("leader_invalidated")
++                } else if target.is_dead()
++                    || target.faction != data.npcs.get(leader_id).and_then(|leader| leader.faction)
++                    || target.current_site != data.npcs.get(leader_id).and_then(|leader| leader.home)
++                    || target.job.is_some()
++                    || !matches!(target.role, Role::Civilised(Some(Profession::Pirate(false))))
++                {
++                    Some("target_invalidated")
++                } else {
++                    None
++                }
++            } else {
++                Some("target_invalidated")
++            };
++
++            if task.started && !task.started_reported {
++                events.push(json!({
++                    "event":"native_recruit_started",
++                    "request_id":task.request_id,
++                    "time":now.0,
++                    "leader_uid":leader_uid,
++                    "target_uid":task.target_uid,
++                    "source":task.source,
++                }));
++                if let Some(leader) = data.npcs.get_mut(leader_id)
++                    && let Some(active) = &mut leader.controller.native_recruit
++                    && active.request_id == task.request_id
++                {
++                    active.started_reported = true;
++                }
++            }
++
++            if task.message_sent && !task.message_reported {
++                events.push(json!({
++                    "event":"native_recruit_message_sent",
++                    "request_id":task.request_id,
++                    "time":now.0,
++                    "leader_uid":leader_uid,
++                    "target_uid":task.target_uid,
++                    "source":task.source,
++                }));
++                if let Some(leader) = data.npcs.get_mut(leader_id)
++                    && let Some(active) = &mut leader.controller.native_recruit
++                    && active.request_id == task.request_id
++                {
++                    active.message_reported = true;
++                }
++            }
++
++            if let Some(outcome) = outcome {
++                if outcome == "hired_observed" {
++                    events.push(json!({
++                        "event":"native_recruit_job_observed",
++                        "request_id":task.request_id,
++                        "time":now.0,
++                        "leader_uid":leader_uid,
++                        "target_uid":task.target_uid,
++                        "source":task.source,
++                        "job":"Hired",
++                    }));
++                } else if outcome == "native_hire_observed_without_request_message" {
++                    events.push(json!({
++                        "event":"native_recruit_unattributed_hire_observed",
++                        "request_id":task.request_id,
++                        "time":now.0,
++                        "leader_uid":leader_uid,
++                        "target_uid":task.target_uid,
++                        "source":task.source,
++                        "job":"Hired",
++                    }));
++                }
++                if rtsim.terminal_native_recruit_requests.insert(task.request_id.clone()) {
++                    events.push(json!({
++                        "event":"native_recruit_terminal",
++                        "request_id":task.request_id,
++                        "time":now.0,
++                        "leader_uid":leader_uid,
++                        "target_uid":task.target_uid,
++                        "source":task.source,
++                        "started":task.started,
++                        "message_sent":task.message_sent,
++                        "outcome":outcome,
++                    }));
++                }
++                if let Some(leader) = data.npcs.get_mut(leader_id) {
++                    leader.controller.native_recruit = None;
++                }
++            }
++        }
++    }
++    for event in events {
++        emit(rtsim, event);
++    }
++}
++
++pub(super) fn observe(rtsim: &mut RtSim, now: Time, loaded_positions: &HashMap<NpcId, Vec3<f32>>) {
++    let Some(allowed_leader_uid) = rtsim.native_recruit_leader_uid else {
++        return;
++    };
++    if rtsim.native_recruit_events_path.is_none() {
++        return;
++    }
++    let sample = rtsim
++        .last_native_recruit_observation
++        .is_none_or(|last| last.elapsed() >= Duration::from_secs(1));
++    if !sample {
++        return;
++    }
++    rtsim.last_native_recruit_observation = Some(Instant::now());
++    let views = {
++        let data = rtsim.state.data();
++        data.npcs
++            .iter()
++            .filter_map(|(leader_id, leader)| {
++                if leader.uid != allowed_leader_uid {
++                    return None;
++                }
++                let Some(Profession::Pirate(is_leader)) = leader.profession() else {
++                    return None;
++                };
++                if !is_leader || leader.is_dead() {
++                    return None;
++                }
++                let faction = leader.faction;
++                let home = leader.home;
++                let leader_pos = npc_position(leader_id, leader, loaded_positions)?;
++                let local_members = data.npcs.iter().filter_map(|(member_id, member)| {
++                    if member_id == leader_id || member.is_dead() || member.faction != faction {
++                        return None;
++                    }
++                    let member_pos = npc_position(member_id, member, loaded_positions)?;
++                    let distance = leader_pos.distance_squared(member_pos).sqrt();
++                    if distance > LOCAL_RADIUS {
++                        return None;
++                    }
++                    let mode = if matches!(member.mode, SimulationMode::Loaded) { "loaded" } else { "simulated" };
++                    if matches!(&member.job, Some(Job::Hired(Actor::Npc(hirer), _)) if *hirer == leader_id) {
++                        return Some(("hired", json!({"npc_uid":member.uid,"distance_3d":distance,"mode":mode})));
++                    }
++                    if valid_target(&data, leader_id, member_id, loaded_positions).is_some() {
++                        return Some(("eligible", json!({"npc_uid":member.uid,"distance_3d":distance,"mode":mode})));
++                    }
++                    None
++                }).collect::<Vec<_>>();
++                let hired_members = local_members.iter().filter_map(|(kind, member)| (*kind == "hired").then_some(member.clone())).collect::<Vec<_>>();
++                let eligible_recruits = local_members.iter().filter_map(|(kind, member)| (*kind == "eligible").then_some(member.clone())).collect::<Vec<_>>();
++                let guard = home.zip(faction).is_some_and(|(home, faction)| population_guard(&data, home, faction));
++                let raid_site_available = home.is_some_and(|home| raid_site_available(&data, leader, home));
++                let hired_member_count = hired_members.len();
++                let role = json!({"kind":"civilised","profession":"pirate","is_leader":true});
++                Some(json!({
++                    "event":"native_recruit_actor_view",
++                    "version":1,
++                    "time":now.0,
++                    "npc_uid":leader.uid,
++                    "mode":if matches!(leader.mode, SimulationMode::Loaded) { "loaded" } else { "simulated" },
++                    "role":role,
++                    "job":read_job(&data, leader),
++                    "home_site_id":home.map(|site| format!("{site:?}")),
++                    "current_site_id":leader.current_site.map(|site| format!("{site:?}")),
++                    "faction_id":faction.map(|faction| format!("{faction:?}")),
++                    "leader_at_home":home.is_some() && leader.current_site == home,
++                    "native_recruit_population_guard":guard,
++                    "native_recruit_raid_site_available":raid_site_available,
++                    "eligible_recruits":eligible_recruits,
++                    "hired_members":hired_members,
++                    "hired_member_count":hired_member_count,
++                }))
++            })
++            .collect::<Vec<_>>()
++    };
++    for view in views {
++        emit(rtsim, view);
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::{hire_observation_outcome, validate_request_time};
++    use common::resources::Time;
++
++    #[test]
++    fn hired_without_request_message_is_unattributed() {
++        assert_eq!(
++            hire_observation_outcome(true, false),
++            Some("native_hire_observed_without_request_message")
++        );
++        assert_eq!(hire_observation_outcome(true, true), Some("hired_observed"));
++        assert_eq!(hire_observation_outcome(false, true), None);
++    }
++
++    #[test]
++    fn recruit_request_observation_must_be_fresh_and_ttl_bounded() {
++        assert!(validate_request_time(9.0, 60.0, Time(10.0)).is_ok());
++        assert_eq!(
++            validate_request_time(0.0, 60.0, Time(10.01)),
++            Err("stale_observation")
++        );
++        assert_eq!(
++            validate_request_time(9.0, 120.1, Time(10.0)),
++            Err("invalid_ttl")
++        );
++    }
++}
+

@@ -1,0 +1,68 @@
+{
+  "evidence_scope": "One approved OFF/ON pair; raw files copied byte-for-byte after both trials exited. No source world database, save payload, game assets, server binary, or private decision text is included.",
+  "pair_started_local": "2026-10-18T10:01:10.411+08:00",
+  "pair_finished_local": "2026-10-18T10:15:27.236+08:00",
+  "server_launch_limit": 2,
+  "server_launches_started": 2,
+  "native_rng_controlled": false,
+  "source_world_seed": 130626853,
+  "source_commit": "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248",
+  "source_patch_sha256": "458c590d701561a0aee011348ed6823da943d4af0e203588fd2a7e8433fb5b7f",
+  "cargo_lock_sha256": "cc0d0eb5561e6463aeac5bc7a1ed50a3256a3a041210bf1e2cec9a0c9ae5348f",
+  "initial_failed_patch_sha256": "0384f918edfa9f516374d0cd383845c03e8a6581a22292ee32525f936489f955",
+  "pair_outcome": {
+    "off": {
+      "server_pid": 53502,
+      "exit_code": 0,
+      "stop_reason": "wall_cap",
+      "monotonic_elapsed_seconds_including_shutdown": 361.2658854579786,
+      "local_timestamp_span_seconds": 361.268,
+      "requests_written": 0,
+      "controller_records": 344,
+      "native_observer_records": 3317,
+      "combined_records": 4005,
+      "input_world_free_bytes_at_end": 15658795008,
+      "runtime_manifest": "raw/off/runtime-manifest.json"
+    },
+    "on": {
+      "server_pid": 54008,
+      "exit_code": 0,
+      "stop_reason": "wall_cap",
+      "monotonic_elapsed_seconds_including_shutdown": 361.3988983340096,
+      "local_timestamp_span_seconds": 495.537,
+      "requests_written": 6,
+      "controller_records": 377,
+      "native_observer_records": 3319,
+      "combined_records": 4070,
+      "input_world_free_bytes_at_end": 15565946880,
+      "loaded_prefix": {
+        "leader_uid": 476,
+        "loaded_candidate_uids": [452, 469],
+        "distinct_game_times": [2.103038, 3.125703, 4.140988],
+        "wall_span_seconds": 2.0894221670168918
+      },
+      "requests": [
+        {"request_id": "on-recruit-01", "target_uid": 442, "message_sent": true, "terminal": "expired_after_message"},
+        {"request_id": "on-recruit-02", "target_uid": 469, "message_sent": true, "terminal": "expired_after_message"},
+        {"request_id": "on-recruit-03", "target_uid": 433, "message_sent": true, "terminal": "expired_after_message"},
+        {"request_id": "on-recruit-04", "target_uid": 450, "message_sent": true, "terminal": "expired_after_message"},
+        {"request_id": "on-recruit-05", "target_uid": 459, "message_sent": true, "terminal": "expired_after_message"},
+        {"request_id": "on-recruit-06", "target_uid": 452, "message_sent": true, "terminal": "not_observed_before_wall_cap"}
+      ],
+      "attributable_hired_job_observations": 0,
+      "runtime_manifest": "raw/on/runtime-manifest.json"
+    }
+  },
+  "verification_logs": {
+    "cargo_build_001": "E0277 compile failure; superseded by the corrected build attempt.",
+    "cargo_build_002": "dev build completed successfully.",
+    "focused_rust_tests": "7 passed, 0 failed.",
+    "python_recruitment_suite": "35 passed, 0 failed.",
+    "frozen_A_regression_suite": "25 passed, 0 failed."
+  },
+  "copied_input_manifests": [
+    "inputs/off-input-manifest.json",
+    "inputs/on-input-manifest.json"
+  ],
+  "sha256_index": "SHA256SUMS.txt"
+}

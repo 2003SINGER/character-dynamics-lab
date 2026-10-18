@@ -1,0 +1,30 @@
+Veloren v0.18.0 fixed commit: 1d12f35edd6cdbfc1fb921c167cdd7beeeffe248
+Source: git show HEAD:rtsim/src/rule/npc_ai/mod.rs (official commit)
+SHA-256: 6a7a3f547a9f7055c626b733df90ad4f84b65bf8b7e76fd476aabda3a2f1c0dd
+
+  1424	            NpcInput::Interaction(by) => {
+  1425	                action = Some(talk_to(*by).boxed());
+  1426	                false
+  1427	            },
+  1428	            // Dialogue inputs get retained because they're handled by specific conversation actions
+  1429	            // later
+  1430	            NpcInput::Dialogue(_, _) => true,
+  1431	            NpcInput::Msg {
+  1432	                from,
+  1433	                msg: NpcMsg::RequestHire,
+  1434	            } => {
+  1435	                let from = *from;
+  1436	                action = Some(
+  1437	                    idle()
+  1438	                        .repeat()
+  1439	                        .stop_if(timeout(2.0))
+  1440	                        .then(just(move |ctx, _| {
+  1441	                            ctx.controller
+  1442	                                .say(from, Content::localized("npc-response-accept_hire"));
+  1443	                            ctx.controller
+  1444	                                .set_newly_hired(from, common::resources::Time(f64::INFINITY));
+  1445	                        }))
+  1446	                        .boxed(),
+  1447	                );
+  1448	                false
+  1449	            },

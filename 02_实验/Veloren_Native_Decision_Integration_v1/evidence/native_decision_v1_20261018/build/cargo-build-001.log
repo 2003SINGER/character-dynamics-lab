@@ -1,0 +1,23 @@
+   Compiling veloren-rtsim v0.18.0 (/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/source_build_serveronly/rtsim)
+error[E0277]: the trait bound `StopIf<Repeat<impl Action<_> + Clone>, {closure@...}>: Action<...>` is not satisfied
+   --> rtsim/src/rule/npc_ai/mod.rs:488:56
+    |
+488 |   fn wait_for_native_recruit(task: NativeRecruitTask) -> impl Action<DefaultState> {
+    |                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+489 | /     idle().repeat().stop_if(move |ctx: &mut NpcCtx| {
+490 | |         ctx.time.0 >= task.expires_at.0
+491 | |             || ctx.controller.native_recruit.as_ref().is_none_or(|active| active.request_id != task.request_id)
+492 | |             || ctx.data.npcs.get(task.target).is_none_or(|target| {
+493 | |                 matches!(&target.job, Some(Job::Hired(Actor::Npc(hirer), _)) if *hirer == ctx.npc_id)
+494 | |             })
+495 | |     })
+    | |______- return type was inferred to be `StopIf<Repeat<impl Action<_> + Clone>, {closure@mod.rs:489:29}>` here
+    |
+    = help: the trait `Action<DefaultState, ()>` is not implemented for `StopIf<ai::Repeat<impl ai::Action<_> + Clone>, _>`
+            but trait `Action<DefaultState, std::option::Option<!>>` is implemented for `StopIf<ai::Repeat<impl ai::Action<DefaultState> + Clone>, _>`
+    = help: for that trait implementation, expected `std::option::Option<!>`, found `()`
+    = note: the full name for the type has been written to '/Users/2003singer/Workspace/Research/character-dynamics-lab/_local_data/external_games/veloren_0_18_0/source-target-serveronly/debug/deps/veloren_rtsim-6451b9c7c32600e1.long-type-598109307175717460.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `veloren-rtsim` (lib) due to 1 previous error

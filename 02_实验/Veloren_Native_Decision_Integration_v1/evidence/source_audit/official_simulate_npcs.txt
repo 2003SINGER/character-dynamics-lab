@@ -1,0 +1,36 @@
+Veloren v0.18.0 fixed commit: 1d12f35edd6cdbfc1fb921c167cdd7beeeffe248
+Source: git show HEAD:rtsim/src/rule/simulate_npcs.rs (official commit)
+SHA-256: 7ca4594f454cbb7a5bc2078044b27adc8352dd158a53f6546b791ef7b085517b
+
+   118	    let mut npc_inputs = Vec::new();
+   120	    for (npc_id, npc) in data.npcs.npcs.iter_mut().filter(|(_, npc)| !npc.is_dead()) {
+   121	        npc.controller.actions.retain(|action| match action {
+   122	            // NPC-to-NPC messages never leave rtsim
+   123	            NpcAction::Msg { to, msg } => {
+   124	                if let Actor::Npc(to) = to {
+   125	                    npc_inputs.push((*to, NpcInput::Msg {
+   126	                        from: npc_id.into(),
+   127	                        msg: msg.clone(),
+   128	                    }));
+   129	                } else {
+   130	                    // TODO: Send to players?
+   131	                }
+   132	                false
+   133	            },
+   134	            // All other cases are handled by the game when loaded
+   135	            NpcAction::Say(_, _) | NpcAction::Attack(_) | NpcAction::Dialogue(_, _) => {
+   136	                matches!(npc.mode, SimulationMode::Loaded)
+   137	            },
+   138	        });
+   346	        // Create registered quests
+   347	        for (id, quest) in core::mem::take(&mut npc.controller.quests_to_create) {
+   348	            data.quests.create(id, quest);
+   349	        }
+   351	        // Set job status
+   352	        npc.job = npc.controller.job.clone();
+   353	    }
+   355	    for (npc_id, input) in npc_inputs {
+   356	        if let Some(npc) = data.npcs.get_mut(npc_id) {
+   357	            npc.inbox.push_back(input);
+   358	        }
+   359	    }
