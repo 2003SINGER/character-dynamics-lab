@@ -14,6 +14,7 @@
 
 - 当前授权目标与实施范围见 [MULTI_ACTOR_PROCESS.md](MULTI_ACTOR_PROCESS.md)；旧 v0 运行条件与预算见 [PROTOCOL.md](PROTOCOL.md)。
 - 状态 owner：本 README；新里程碑结果 owner：[MULTI_ACTOR_RESULTS.md](MULTI_ACTOR_RESULTS.md)；先前三组结果 owner：[RESULTS.md](RESULTS.md)。
+- 2026-10-19 已完成[独立 Judge 首轮行为评价与开发者对照](INDEPENDENT_BEHAVIOR_REVIEW.md)：有一定效果但明显不完整。仅为开发反馈，不改变 PARTIAL 状态；本轮不修改代码或重跑。
 - 旧运行结果以 RESULTS 的证据边界为准；不把单次轨迹提升为算法优势或新里程碑完成。
 - 本轮公开范围仅为代码和报告；raw 与脱敏运行证据、私有原文均不公开。
 

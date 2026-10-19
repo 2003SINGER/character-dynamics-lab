@@ -41,3 +41,9 @@
 - Use `IMPLEMENTING`, `READY_FOR_INDEPENDENT_REVIEW`, and `CLOSED` as distinct states.
 - Codex/Luna may move a milestone to `READY_FOR_INDEPENDENT_REVIEW`, but must not declare it `CLOSED`; closure requires explicit user confirmation after independent review.
 - Passing self-written tests is implementation evidence, not independent closure. If independent review finds an uncovered invariant within the same milestone, repair that milestone rather than creating a new artificial sub-milestone.
+
+## Independent behavior review
+
+- For important native runs, delegate a read-only LLM-as-Judge review to a fresh subagent with no developer conversation history. Its first pass receives author requirements, actor goals, G0/G1 rules and raw behavior evidence, not developer RESULTS, monitor verdicts or proposed fixes. This blind-review task overrides the ordinary first-read routing above; disclose any accidental exposure.
+- Judge reconstructs actual behavior with timestamps and evidence, separates rule settlement from behavioral plausibility, and marks missing observations. Without video, do not claim visual/player experience was observed. A model judgment is development feedback, not a human-player experiment or independent scientific validation.
+- Only after the first judgment is fixed does the developer compare it with objective settlements and choose improvements. Do not weaken game rules or pursue a large refactor merely to make a custom success flag pass. Keep this as the normal review role, not a new framework or admission stage; existing publication and raw-evidence privacy boundaries still apply.
