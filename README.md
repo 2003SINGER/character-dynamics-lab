@@ -26,7 +26,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 ## 从这里进入
 
-2026-10-18 当前工作包为[Character Dynamics Online Integration v0](02_实验/Character_Dynamics_Online_Integration_v0/README.md)，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；本轮停止**。三组有界真实运行已完成；有限在线作者版本编辑到原生 Job 的链有证据，但三台服务均以 SIGTERM（exit `-15`）结束，不宣称完整系统或算法优势。运行结果、8项验收映射与限制只见该包唯一 [RESULTS](02_实验/Character_Dynamics_Online_Integration_v0/RESULTS.md)。固定 G0；成熟方法为复用基础；历史 C1/C2 `NO_GO` 不再是当前开发停点。范围与预算见[PROTOCOL](02_实验/Character_Dynamics_Online_Integration_v0/PROTOCOL.md)。
+2026-10-19 当前工作包为[Character Dynamics Online Integration v0](02_实验/Character_Dynamics_Online_Integration_v0/README.md)，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**；本轮停止扩展并提交独立审阅，完整过程未通过。多角色运行证明了真实 G1 交接与 Director v2 B 目标派发，但未完成两处集结及全部作者义务。当前目标见[计划](02_实验/Character_Dynamics_Online_Integration_v0/MULTI_ACTOR_PROCESS.md)，结果与限制见[多角色结果](02_实验/Character_Dynamics_Online_Integration_v0/MULTI_ACTOR_RESULTS.md)。此前三组 v0 运行仍由[旧 RESULTS](02_实验/Character_Dynamics_Online_Integration_v0/RESULTS.md)维护，旧协议不变。成熟方法是复用基础，旧 C1/C2 `NO_GO` 不再是当前开发停点。
 
 2026-10-18 [Veloren 原生高层决策接入](02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md) 完成最后一对 Loaded Msg 修复验证：**ROUTING / HIRE / FOLLOW 有限 PASS，READY_FOR_INDEPENDENT_REVIEW，已停止**。ON仅1请求，442经原生消息处理受雇于476，并自行跟随、水平移动11.82m；计时超调与日志展示限制见唯一RESULTS，不宣称完整系统或方法优势。`ab6dad9` 的6尝试/0 Hired与旧协议偏差仍保留PARTIAL；此前 [Talk 接口 A](02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 有限 PASS / FROZEN。该结果本身没有接入作者层；后续整合由上方新授权工作包继续，F0/F1、冻结 C++ 和 main 不动。
 
