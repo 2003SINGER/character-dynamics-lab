@@ -1,6 +1,6 @@
 # Character Dynamics Online Integration v0
 
-**当前状态：DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；本轮停止扩展并提交独立审阅，完整过程未通过。** 当前计划见 [MULTI_ACTOR_PROCESS.md](MULTI_ACTOR_PROCESS.md)，本轮多角色运行及局限见新结果 owner [MULTI_ACTOR_RESULTS.md](MULTI_ACTOR_RESULTS.md)。真实交接与 Director v2 B 目标派发成立；两处集结和完整作者义务未完成。此前三组 v0 运行仍由 [RESULTS.md](RESULTS.md) 记录，不由新报告覆盖；旧运行条件只见 [PROTOCOL.md](PROTOCOL.md)。成熟方法继续作为复用基础，历史 C1/C2 `NO_GO` 不作当前开发停点。
+**当前状态：DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW — 2026-10-22 在线作者干预迭代已停止。** 本轮运行、限制与 Judge 摘要归 [ONLINE_PLAYTEST_V1.md](ONLINE_PLAYTEST_V1.md)：Judge 认为表现有一定效果但不完整，未见作者编辑驱动实际目标行为的证据；事实勘误已纳入该 owner，Judge 私有原文不公开。未实现目标不升级为通过，不另建 Controller 或新增 G1 技能。此前多角色过程仍为 PARTIAL，其计划与原始结论分别见 [MULTI_ACTOR_PROCESS.md](MULTI_ACTOR_PROCESS.md)、[MULTI_ACTOR_RESULTS.md](MULTI_ACTOR_RESULTS.md)；三组更早运行仍由 [RESULTS.md](RESULTS.md) 记录，旧运行条件只见 [PROTOCOL.md](PROTOCOL.md)。历史结果不覆盖，成熟方法继续作为复用基础。
 
 ## 目标与边界
 
@@ -13,8 +13,8 @@
 ## 维护、计划与结果
 
 - 当前授权目标与实施范围见 [MULTI_ACTOR_PROCESS.md](MULTI_ACTOR_PROCESS.md)；旧 v0 运行条件与预算见 [PROTOCOL.md](PROTOCOL.md)。
-- 状态 owner：本 README；新里程碑结果 owner：[MULTI_ACTOR_RESULTS.md](MULTI_ACTOR_RESULTS.md)；先前三组结果 owner：[RESULTS.md](RESULTS.md)。
-- 2026-10-19 已完成[独立 Judge 首轮行为评价与开发者对照](INDEPENDENT_BEHAVIOR_REVIEW.md)：有一定效果但明显不完整。仅为开发反馈，不改变 PARTIAL 状态；本轮不修改代码或重跑。
+- 状态 owner：本 README；2026-10-22 在线作者干预运行与 Judge 摘要 owner：[ONLINE_PLAYTEST_V1.md](ONLINE_PLAYTEST_V1.md)；此前多角色结果 owner：[MULTI_ACTOR_RESULTS.md](MULTI_ACTOR_RESULTS.md)；先前三组结果 owner：[RESULTS.md](RESULTS.md)。
+- 2026-10-22 在线 playtest 独立 Judge 初评与勘误摘要见 [ONLINE_PLAYTEST_V1.md](ONLINE_PLAYTEST_V1.md)；不等于人类体验评价，也不改变 PARTIAL 状态。
 - 旧运行结果以 RESULTS 的证据边界为准；不把单次轨迹提升为算法优势或新里程碑完成。
 - 本轮公开范围仅为代码和报告；raw 与脱敏运行证据、私有原文均不公开。
 

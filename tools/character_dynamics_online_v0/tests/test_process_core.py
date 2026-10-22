@@ -3,6 +3,9 @@ from __future__ import annotations
 import unittest
 
 from tools.character_dynamics_online_v0 import new_process_session, step_process
+from tools.character_dynamics_online_v0.process_controller import (
+    _event_facts, _fact_key, _monitor_ast,
+)
 from tools.character_dynamics_online_v0.process_planning import (
     plan_fact_goals, validate_process_observations,
 )
@@ -46,6 +49,137 @@ def settlement(request, when, effects, *, event_id="evt-1", node_id=None,
 
 
 class MultiActorProcessCoreTests(unittest.TestCase):
+    def test_late_deadline_witness_keeps_historical_status_unknown_without_coverage(self):
+        ast = {"op": "deadline", "event": {"event": "g1_rally_completed",
+               "args": [10, "m-a", 30]}, "at": 4.0}
+        key = _fact_key(_event_facts(ast["event"]), "test event")
+        history = [{"matched": True, "game_time": 5.0, "facts": [key]}]
+        unknown = _monitor_ast(ast, world_facts=set(), native_history=history,
+                               now=5.0, coverage=None)
+        self.assertEqual(unknown["status"], "UNKNOWN")
+        self.assertEqual(unknown["feasibility"], "EXPIRED")
+        self.assertEqual(unknown["late_witness_at"], 5.0)
+        violated = _monitor_ast(ast, world_facts=set(), native_history=history,
+                                now=5.0, coverage=4.0)
+        self.assertEqual(violated["status"], "VIOLATED")
+        self.assertEqual(violated["feasibility"], "EXPIRED")
+
+    def test_expired_author_order_guard_does_not_halt_actor_owned_effect(self):
+        actor_action = action("side_task", {}, [], [
+            {"predicate": "side_done", "args": [10]},
+            {"predicate": "event:g1_rally_completed", "args": [10, "m-a", 30]}])
+        session = new_process_session([10], goal_specs=[
+            {"goal_id": "role-goal", "actor_uid": 10, "source": "ACTOR",
+             "goals": [{"predicate": "side_done", "args": [10]}]}])
+        command = {"op": "append", "goal_id": "expired-composition", "version": 1,
+                   "actor_uid": 10, "ast": {"op": "and", "children": [
+                       {"op": "deadline", "event": {"event": "g1_rally_completed",
+                        "args": [10, "m-a", 30]}, "at": 4.0},
+                       {"op": "event_before",
+                        "first": {"event": "g1_survey_completed", "args": [433, "m-a"]},
+                        "second": {"event": "g1_rally_completed", "args": [10, "m-a", 30]}}]}}
+        result = step_process(session, observations(5.0, [actor(10, "expired-order-v1", [], [actor_action])]),
+                              game_time=5.0, author_commands=[command])
+        self.assertEqual(result["decision"]["author_obligations"][0]["status"], "UNKNOWN")
+        self.assertEqual(result["decision"]["author_obligations"][0]["versions"][0]["feasibility"], "EXPIRED")
+        self.assertEqual(result["decision"]["requests"][0]["source"], "ACTOR")
+
+    def test_expired_deadline_blocks_director_but_actor_goal_continues(self):
+        rally_a = action("rally_marker", {"marker_id": "m-a", "follower_uid": 30},
+                         [{"predicate": "ready", "args": [10]}],
+                         [{"predicate": "rally_completed", "args": ["m-a", 30]},
+                          {"predicate": "event:g1_rally_completed", "args": [10, "m-a", 30]}],
+                         cost=100000.0)
+        actor_task = action("side_task", {}, [], [{"predicate": "side_done", "args": [10]}])
+        session = new_process_session([10], goal_specs=[
+            {"goal_id": "actor-keeps-going", "actor_uid": 10, "source": "ACTOR",
+             "goals": [{"predicate": "side_done", "args": [10]}]}])
+        author = {"op": "append", "goal_id": "late-rally", "version": 1,
+                  "actor_uid": 10, "ast": {"op": "deadline",
+                  "event": {"event": "g1_rally_completed", "args": [10, "m-a", 30]},
+                  "at": 4.0}}
+        first = step_process(session, observations(3.0, [actor(10, "v1", [fact("ready", 10)],
+            [rally_a, actor_task])]), game_time=3.0, author_commands=[author])
+        director = next(row for row in first["decision"]["requests"]
+                        if row["source"] == "DIRECTOR")
+        self.assertEqual(director["args"]["marker_id"], "m-a")
+        # Deadline equality is still live; cost is not interpreted as seconds.
+        equal = step_process(first["session"], observations(4.0, [actor(10, "v2", [fact("ready", 10)],
+            [rally_a, actor_task])]), game_time=4.0)
+        self.assertEqual(equal["decision"]["author_obligations"][0]["status"], "PENDING")
+        self.assertEqual(equal["decision"]["author_obligations"][0]["versions"][0]["feasibility"], "UNCERTAIN")
+        self.assertEqual(equal["decision"]["requests"], [])  # the original native request remains pending
+        self.assertIn("10", equal["session"]["inflight_by_actor"])
+
+        expired_pending = step_process(equal["session"], observations(4.5, [
+            actor(10, "v3", [fact("ready", 10)], [rally_a, actor_task])]), game_time=4.5)
+        self.assertEqual(expired_pending["decision"]["author_obligations"][0]["status"], "UNKNOWN")
+        self.assertEqual(expired_pending["decision"]["author_obligations"][0]["versions"][0]["feasibility"], "EXPIRED")
+        self.assertEqual(expired_pending["session"]["inflight_by_actor"]["10"]["request_id"],
+                         director["request_id"])
+        expired_plan = expired_pending["session"]["plans"]["10:DIRECTOR:late-rally:v1"]
+        self.assertEqual(expired_plan["nodes"][0]["status"], "pending")
+
+        # A correlated failure releases the original lease, but expiration must
+        # never reissue that author action; role-owned work remains eligible.
+        fail = {"event": "g1_action_failed", "request_id": director["request_id"],
+                "actor_uid": 10, "node_id": director["node_id"], "action": "rally_marker",
+                "args": director["args"], "game_time": 5.0, "reason": "ttl_expired",
+                "effects": [], "source": "DIRECTOR", "goal_id": "late-rally",
+                "author_version": 1, "event_id": "late-rally-failed"}
+        expired = step_process(expired_pending["session"], observations(5.0, [
+            actor(10, "v4", [fact("ready", 10)], [rally_a, actor_task])]),
+            game_time=5.0, feedback=[fail])
+        self.assertEqual(expired["decision"]["author_obligations"][0]["status"], "UNKNOWN")
+        self.assertEqual(expired["decision"]["author_obligations"][0]["versions"][0]["feasibility"], "EXPIRED")
+        self.assertTrue(any(row["code"] == "AUTHOR_GOAL_EXPIRED" for row in expired["decision"]["blocked"]))
+        self.assertFalse(any(":DIRECTOR:late-rally:" in row["plan_key"]
+                             for row in expired["decision"]["plans"]))
+        self.assertEqual([row["primitive"] for row in expired["decision"]["requests"]], ["side_task"])
+
+    def test_or_deadline_keeps_live_branch_and_and_keeps_all_requirements(self):
+        def rally(marker, deadline_cost=1):
+            return action("rally_marker", {"marker_id": marker, "follower_uid": 30},
+                          [{"predicate": "ready", "args": [10]}],
+                          [{"predicate": "rally_completed", "args": [marker, 30]},
+                           {"predicate": "event:g1_rally_completed", "args": [10, marker, 30]}],
+                          cost=deadline_cost)
+        models = [rally("m-a"), rally("m-b", 2)]
+        def deadline(marker, at):
+            return {"op": "deadline", "event": {"event": "g1_rally_completed",
+                    "args": [10, marker, 30]}, "at": at}
+        session = new_process_session([10])
+        or_command = {"op": "append", "goal_id": "choose-live", "version": 1,
+                      "actor_uid": 10, "ast": {"op": "or", "children": [
+                          deadline("m-a", 4), deadline("m-b", 8)]}}
+        out = step_process(session, observations(5, [actor(10, "o1", [fact("ready", 10)], models)]),
+                           game_time=5, author_commands=[or_command])
+        request = next(row for row in out["decision"]["requests"] if row["source"] == "DIRECTOR")
+        self.assertEqual(request["args"]["marker_id"], "m-b")
+        self.assertEqual(out["decision"]["author_obligations"][0]["status"], "UNKNOWN")
+        self.assertEqual(out["decision"]["author_obligations"][0]["versions"][0]["feasibility"], "UNCERTAIN")
+
+        and_command = {"op": "append", "goal_id": "both-deadlines", "version": 1,
+                       "actor_uid": 10, "ast": {"op": "and", "children": [
+                           deadline("m-a", 4), deadline("m-b", 8)]}}
+        blocked = step_process(session, observations(5, [actor(10, "a1", [fact("ready", 10)], models)]),
+                               game_time=5, author_commands=[and_command])
+        verdict = next(row for row in blocked["decision"]["author_obligations"]
+                       if row["goal_id"] == "both-deadlines")
+        self.assertEqual(verdict["status"], "UNKNOWN")
+        self.assertEqual(verdict["versions"][0]["feasibility"], "EXPIRED")
+        self.assertEqual(verdict["versions"][0]["children"][1]["status"], "PENDING")
+        self.assertFalse(any(row.get("goal_id") == "both-deadlines"
+                             for row in blocked["decision"]["plans"]))
+
+        complete = step_process(session, observations(5, [actor(10, "a2", [fact("ready", 10)], models)],
+                                                      coverage=4.0), game_time=5,
+                                author_commands=[{**and_command, "goal_id": "complete-coverage"}])
+        complete_verdict = next(row for row in complete["decision"]["author_obligations"]
+                                if row["goal_id"] == "complete-coverage")
+        self.assertEqual(complete_verdict["status"], "VIOLATED")
+        self.assertEqual(complete_verdict["versions"][0]["feasibility"], "EXPIRED")
+
     def test_delivery_waits_for_receiver_rally_terminal(self):
         delivery = action("deliver_report", {"marker_id": "m", "receiver_uid": 20},
                           [{"predicate": "own_report", "args": ["m"]}],

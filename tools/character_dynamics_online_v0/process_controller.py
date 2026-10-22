@@ -118,6 +118,13 @@ def _validate_ast(ast: object) -> dict[str, Any]:
         if not isinstance(children, Sequence) or isinstance(children, (str, bytes)) or not children:
             raise ContractError("and.children must be a non-empty array")
         return {"op": op, "children": [_validate_ast(child) for child in children]}
+    if op == "or":
+        if set(ast) != {"op", "children"}:
+            raise ContractError("or AST requires exactly op and children")
+        children = ast["children"]
+        if not isinstance(children, Sequence) or isinstance(children, (str, bytes)) or not children:
+            raise ContractError("or.children must be a non-empty array")
+        return {"op": op, "children": [_validate_ast(child) for child in children]}
     if op == "state":
         if set(ast) != {"op", "predicate", "args"}:
             raise ContractError("state AST requires predicate and args")
@@ -146,7 +153,9 @@ def _validate_ast(ast: object) -> dict[str, Any]:
 
 
 def _ast_to_plan(ast: Mapping[str, Any],
-                 native_history: Sequence[Mapping[str, Any]] = ()) -> tuple[list[dict[str, Any]], list[list[dict[str, Any]]]]:
+                 native_history: Sequence[Mapping[str, Any]] = (), *,
+                 now: float | None = None, world_facts: set[str] | None = None,
+                 coverage: float | None = None) -> tuple[list[dict[str, Any]], list[list[dict[str, Any]]]]:
     if ast["op"] == "state":
         return [{"predicate": ast["predicate"], "args": ast["args"]}], []
     if ast["op"] == "deadline":
@@ -163,10 +172,27 @@ def _ast_to_plan(ast: Mapping[str, Any],
         if first_times:
             return [second], []
         return [], [[first, second]]
+    if ast["op"] == "or":
+        # OR is a choice, not a conjunction. Preserve every disjunct in the
+        # monitor, but refine only the first still-possible branch. Expired
+        # branches are never sent to DIRECTOR as future work.
+        verdicts = [_monitor_ast(child, world_facts=world_facts or set(),
+                                 native_history=native_history,
+                                 now=0.0 if now is None else now,
+                                 coverage=coverage) for child in ast["children"]]
+        if any(item["status"] == "SATISFIED" for item in verdicts):
+            return [], []
+        for child, verdict in zip(ast["children"], verdicts):
+            if verdict.get("feasibility") == "EXPIRED" or verdict["status"] == "VIOLATED":
+                continue
+            return _ast_to_plan(child, native_history, now=now,
+                                world_facts=world_facts, coverage=coverage)
+        return [], []
     goals: list[dict[str, Any]] = []
     groups: list[list[dict[str, Any]]] = []
     for child in ast["children"]:
-        child_goals, child_groups = _ast_to_plan(child, native_history)
+        child_goals, child_groups = _ast_to_plan(child, native_history, now=now,
+                                                world_facts=world_facts, coverage=coverage)
         goals.extend(child_goals)
         groups.extend(child_groups)
     return goals, _merge_ordered_groups(groups)
@@ -207,24 +233,58 @@ def _merge_ordered_groups(groups: Sequence[Sequence[Mapping[str, Any]]]) -> list
 def _collect_ast_nodes(ast: Mapping[str, Any], op: str) -> list[Mapping[str, Any]]:
     if ast["op"] == op:
         return [ast]
-    if ast["op"] == "and":
+    if ast["op"] in ("and", "or"):
         return [item for child in ast["children"] for item in _collect_ast_nodes(child, op)]
     return []
 
 
-def _event_order_edges(ast: Mapping[str, Any]) -> list[tuple[str, str]]:
+def _active_ast_nodes(ast: Mapping[str, Any], op: str, *, world_facts: set[str],
+                      native_history: Sequence[Mapping[str, Any]], now: float,
+                      coverage: float | None) -> list[Mapping[str, Any]]:
+    """Collect nodes on the active Boolean path; OR contributes one viable branch."""
+    if ast["op"] == op:
+        return [ast]
+    if ast["op"] == "and":
+        return [node for child in ast["children"]
+                for node in _active_ast_nodes(child, op, world_facts=world_facts,
+                                               native_history=native_history, now=now,
+                                               coverage=coverage)]
+    if ast["op"] == "or":
+        verdicts = [_monitor_ast(child, world_facts=world_facts,
+                                 native_history=native_history, now=now,
+                                 coverage=coverage) for child in ast["children"]]
+        if any(item["status"] == "SATISFIED" for item in verdicts):
+            return []
+        for child, verdict in zip(ast["children"], verdicts):
+            if verdict.get("feasibility") != "EXPIRED" and verdict["status"] != "VIOLATED":
+                return _active_ast_nodes(child, op, world_facts=world_facts,
+                                         native_history=native_history, now=now,
+                                         coverage=coverage)
+    return []
+
+
+def _event_order_edges(ast: Mapping[str, Any], *, world_facts: set[str] | None = None,
+                       native_history: Sequence[Mapping[str, Any]] = (), now: float = 0.0,
+                       coverage: float | None = None) -> list[tuple[str, str]]:
     def event_identity(event: Mapping[str, Any]) -> str:
         return json.dumps([event["event"], event.get("args", [])], sort_keys=True,
                           separators=(",", ":"), ensure_ascii=False)
     edges = [(event_identity(node["first"]), event_identity(node["second"]))
-             for node in _collect_ast_nodes(ast, "event_before")]
+             for node in _active_ast_nodes(ast, "event_before", world_facts=world_facts or set(),
+                                            native_history=native_history, now=now,
+                                            coverage=coverage)]
     return edges
 
 
-def _has_order_cycle(obligations: Sequence[Mapping[str, Any]]) -> bool:
+def _has_order_cycle(obligations: Sequence[Mapping[str, Any]], *,
+                     world_facts: set[str] | None = None,
+                     native_history: Sequence[Mapping[str, Any]] = (), now: float = 0.0,
+                     coverage: float | None = None) -> bool:
     graph: dict[str, set[str]] = {}
     for item in obligations:
-        for left, right in _event_order_edges(item["ast"]):
+        for left, right in _event_order_edges(
+                item["ast"], world_facts=world_facts, native_history=native_history,
+                now=now, coverage=coverage):
             graph.setdefault(left, set()).add(right)
             graph.setdefault(right, set())
     visiting: set[str] = set()
@@ -263,7 +323,22 @@ def _monitor_ast(ast: Mapping[str, Any], *, world_facts: set[str],
         status = ("VIOLATED" if any(row["status"] == "VIOLATED" for row in rows) else
                   "SATISFIED" if all(row["status"] == "SATISFIED" for row in rows) else
                   "UNKNOWN" if any(row["status"] == "UNKNOWN" for row in rows) else "PENDING")
-        return {"status": status, "children": rows}
+        feasibility = ("EXPIRED" if any(row.get("feasibility") == "EXPIRED" for row in rows) else
+                       "SATISFIED" if status == "SATISFIED" else "UNCERTAIN")
+        return {"status": status, "feasibility": feasibility, "children": rows}
+    if op == "or":
+        rows = [_monitor_ast(child, world_facts=world_facts, native_history=native_history,
+                             now=now, coverage=coverage) for child in ast["children"]]
+        if any(row["status"] == "SATISFIED" for row in rows):
+            status = "SATISFIED"
+        elif any(row["status"] in ("PENDING", "UNKNOWN") for row in rows):
+            status = "UNKNOWN" if any(row["status"] == "UNKNOWN" for row in rows) else "PENDING"
+        else:
+            status = "VIOLATED"
+        feasibility = ("SATISFIED" if status == "SATISFIED" else
+                       "UNCERTAIN" if any(row.get("feasibility") != "EXPIRED"
+                                          for row in rows) else "EXPIRED")
+        return {"status": status, "feasibility": feasibility, "children": rows}
     if op == "state":
         fact = {"predicate": ast["predicate"], "args": ast["args"]}
         if _fact_present(fact, world_facts):
@@ -291,13 +366,25 @@ def _monitor_ast(ast: Mapping[str, Any], *, world_facts: set[str],
         times = _event_times(ast["event"], native_history)
         if any(value <= ast["at"] for value in times):
             return {"status": "SATISFIED", "event_at": min(value for value in times if value <= ast["at"]),
-                    "deadline": ast["at"]}
-        if now < ast["at"]:
-            return {"status": "PENDING", "deadline": ast["at"]}
-        if coverage is not None and coverage >= ast["at"]:
-            return {"status": "VIOLATED", "deadline": ast["at"], "reason": "complete event coverage reached deadline without witness"}
+                    "deadline": ast["at"], "feasibility": "SATISFIED"}
+        if now <= ast["at"]:
+            return {"status": "PENDING", "deadline": ast["at"],
+                    "feasibility": "UNCERTAIN",
+                    "reason": "remaining time is known but action duration is not modeled in game seconds"}
+        # Once absolute time is strictly beyond the deadline, the event can no
+        # longer satisfy this version regardless of event-log coverage. A late
+        # witness does not retroactively meet the deadline.
+        late_times = [value for value in times if value > ast["at"]]
+        complete = coverage is not None and coverage >= ast["at"]
+        if complete:
+            return {"status": "VIOLATED", "deadline": ast["at"],
+                    "feasibility": "EXPIRED",
+                    "late_witness_at": min(late_times) if late_times else None,
+                    "reason": "complete event coverage reached deadline without a timely witness"}
         return {"status": "UNKNOWN", "deadline": ast["at"],
-                "reason": "deadline passed without complete event coverage"}
+                "feasibility": "EXPIRED",
+                "late_witness_at": min(late_times) if late_times else None,
+                "reason": "deadline passed; future completion is impossible, but historical coverage is incomplete"}
     return {"status": "UNKNOWN", "reason": "unsupported monitor node"}
 
 
@@ -673,12 +760,22 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
     obligations = []
     for record in state["author_obligations"].values():
         version = record["versions"][-1]
+        verdict = _monitor_ast(version["ast"], world_facts=world_true,
+                               native_history=state["native_history"], now=now,
+                               coverage=float(coverage) if coverage is not None else None)
         obligations.append({"goal_id": record["goal_id"], "actor_uid": record["actor_uid"],
                             "version": version["version"], "ast": version["ast"],
-                            "effective_at": version["effective_at"], "source": "AUTHOR"})
+                            "effective_at": version["effective_at"], "source": "AUTHOR",
+                            "verdict": verdict})
+    active_obligations = [item for item in obligations
+                          if item["verdict"].get("feasibility") != "EXPIRED"
+                          and item["verdict"]["status"] not in ("VIOLATED", "SATISFIED")]
     author_order_guards = []
-    for item in obligations:
-        for order_node in _collect_ast_nodes(item["ast"], "event_before"):
+    for item in active_obligations:
+        for order_node in _active_ast_nodes(
+                item["ast"], "event_before", world_facts=world_true,
+                native_history=state["native_history"], now=now,
+                coverage=float(coverage) if coverage is not None else None):
             author_order_guards.append({
                 "goal_id": item["goal_id"],
                 "first": _event_facts(order_node["first"]),
@@ -695,18 +792,42 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
     work_specs = [{**item, "source": "ACTOR", "goal_source": "ACTOR", "author_version": None}
                   for item in state["actor_goal_specs"]]
     for item in obligations:
-        goals, groups = _ast_to_plan(item["ast"], state["native_history"])
+        if (item["verdict"].get("feasibility") == "EXPIRED"
+                or item["verdict"]["status"] in ("VIOLATED", "SATISFIED")):
+            if item["verdict"].get("feasibility") == "EXPIRED":
+                expired_key = (f"{item['actor_uid']}:DIRECTOR:{item['goal_id']}"
+                               f":v{item['version']}")
+                expired_plan = state["plans"].get(expired_key)
+                if expired_plan is not None:
+                    for node in expired_plan["nodes"]:
+                        if node["status"] in ("planned", "retry_blocked"):
+                            node["status"] = "invalidated"
+                            node["invalidated_reason"] = "absolute author deadline expired"
+                    expired_plan["status"] = "EXPIRED"
+                    expired_plan["reason"] = "absolute author deadline expired; any pending native request is retained"
+            continue
+        goals, groups = _ast_to_plan(
+            item["ast"], state["native_history"], now=now, world_facts=world_true,
+            coverage=float(coverage) if coverage is not None else None)
         work_specs.append({"goal_id": item["goal_id"], "actor_uid": item["actor_uid"],
                            "goals": goals, "ordered_groups": groups, "source": "DIRECTOR",
                            "goal_source": "AUTHOR",
                            "author_version": item["version"]})
-    order_conflict = _has_order_cycle(obligations)
+    order_conflict = _has_order_cycle(
+        active_obligations, world_facts=world_true, native_history=state["native_history"],
+        now=now, coverage=float(coverage) if coverage is not None else None)
     work_specs.sort(key=lambda item: (0 if item["goal_source"] == "AUTHOR" else 1,
                                       rank.get(item["goal_id"], len(rank)), item["goal_id"]))
 
     plans: dict[str, Any] = state["plans"]
     requests: list[dict[str, Any]] = []
     blocked: list[dict[str, Any]] = []
+    for item in obligations:
+        if item["verdict"].get("feasibility") == "EXPIRED":
+            blocked.append({"code": "AUTHOR_GOAL_EXPIRED", "actor_uid": item["actor_uid"],
+                            "goal_id": item["goal_id"], "source": "AUTHOR",
+                            "reason": item["verdict"].get("reason", "absolute deadline expired"),
+                            "verdict": item["verdict"]})
     plan_summaries = []
     # Each actor has at most one pending request, while independent actors may
     # progress concurrently through this single shared process controller.

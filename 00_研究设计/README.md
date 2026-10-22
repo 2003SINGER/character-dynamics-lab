@@ -4,7 +4,7 @@
 
 ## 项目架构定位
 
-2026-10-19 当前主线为[Character Dynamics Online Integration v0](../02_实验/Character_Dynamics_Online_Integration_v0/README.md)，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**；本轮停止扩展并提交独立审阅，完整过程未通过。单次有界运行证明了 G1 交接及 Director v2 B 目标派发，但未完成两处集结与全部作者义务。当前目标见[计划](../02_实验/Character_Dynamics_Online_Integration_v0/MULTI_ACTOR_PROCESS.md)，本轮结果见[多角色结果](../02_实验/Character_Dynamics_Online_Integration_v0/MULTI_ACTOR_RESULTS.md)；此前三组运行仍由[旧 RESULTS](../02_实验/Character_Dynamics_Online_Integration_v0/RESULTS.md)维护，旧条件见[固定协议](../02_实验/Character_Dynamics_Online_Integration_v0/PROTOCOL.md)。成熟方法为复用基础；旧 C1/C2 `NO_GO` 仅描述历史候选，不是当前开发停点。此前[高层接入](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md)及 [Talk 接口 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 的有限证据和失败均保留。
+2026-10-22 当前在线作者干预 playtest 已停止，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**；运行事实、未实现目标和独立 Judge 初评/勘误摘要见[ONLINE_PLAYTEST_V1](../02_实验/Character_Dynamics_Online_Integration_v0/ONLINE_PLAYTEST_V1.md)，Judge 原文仅本地保存。既有多角色结果、旧 Judge、三组运行及协议仍由各自 owner 保留。成熟方法为复用基础；旧 C1/C2 `NO_GO` 仅描述历史候选，不是当前开发停点。此前[高层接入](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md)及 [Talk 接口 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 的有限证据和失败均保留。
 
 2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
 

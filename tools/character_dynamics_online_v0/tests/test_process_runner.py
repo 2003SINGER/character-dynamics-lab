@@ -9,7 +9,8 @@ from tools.character_dynamics_online_v0.process_runner import (
     DEFAULT_ACTORS, LEADER_UID, SCOUT_UID, _actor_goal_specs, build_observations,
     _author_demo_schedule, author_monitor_world_facts, build_process_environment, g1_feedback,
     g1_request_payload, loaded_process_readiness, normalize_registered_g1_receipt,
-    process_completion_satisfied, project_actor_view,
+    exit_status_for_stop_reason, parse_author_input, process_completion_satisfied,
+    project_actor_view,
     recruit_pair_feedback,
 )
 
@@ -394,6 +395,59 @@ class ProcessRunnerProjectionTests(unittest.TestCase):
         self.assertTrue(process_completion_satisfied({"inflight_by_actor": {}}, decision, applied))
         self.assertFalse(process_completion_satisfied({"inflight_by_actor": {"476": {}}},
                                                      decision, applied))
+
+    def test_external_operator_mode_never_uses_demo_completion_gate(self):
+        # Even a fully satisfied snapshot must remain available for a later
+        # operator edit until a hard runtime/resource boundary stops the run.
+        applied = {("g1-scout-handoff-witness", 1),
+                   ("g2-leader-rally-deadline", 1), ("g2-leader-rally-deadline", 2)}
+        decision = {"plans": [{"plan_key": f"{uid}:ACTOR:goal", "status": "SATISFIED"}
+                              for uid in (SCOUT_UID, LEADER_UID, LEADER_UID)],
+                    "author_obligations": [{"status": "SATISFIED"}, {"status": "SATISFIED"}]}
+        self.assertTrue(process_completion_satisfied(
+            {"inflight_by_actor": {}}, decision, applied))
+        self.assertFalse(process_completion_satisfied(
+            {"inflight_by_actor": {}}, decision, applied, external_operator_mode=True))
+
+    def test_author_input_allowlists_are_mode_specific_and_preserve_operator_metadata(self):
+        command = {"op": "append", "goal_id": "live-goal", "version": 1,
+                   "actor_uid": SCOUT_UID,
+                   "ast": {"op": "state", "predicate": "survey_completed",
+                           "args": ["marker-a"]}}
+        session = new_process_session(DEFAULT_ACTORS, goal_specs=[])
+        external = {"source": "AGENT_OPERATOR", "operator_kind": "agent",
+                    "issued_at_game_time": 12.5, "issued_local_time": "2026-10-22T10:00:00+08:00",
+                    "command": command}
+        parsed, error = parse_author_input(external, external_operator_mode=True,
+                                           session=session)
+        self.assertIsNone(error)
+        self.assertEqual(parsed, command)
+
+        for invalid in (
+                {**external, "source": "LOCAL_AUTHOR"},
+                {**external, "operator_kind": "human"},
+                {**external, "issued_at_game_time": float("nan")},
+                {**external, "issued_local_time": " "},
+                {**external, "command": {**command, "source": "AUTHOR"}},
+                {**external, "command": {**command, "version": 2}}):
+            parsed, error = parse_author_input(invalid, external_operator_mode=True,
+                                               session=session)
+            self.assertIsNone(parsed)
+            self.assertIsNotNone(error)
+
+        legacy = {"source": "LOCAL_AUTHOR", "command": command}
+        parsed, error = parse_author_input(legacy)
+        self.assertIsNone(error)
+        self.assertEqual(parsed, command)
+        parsed, error = parse_author_input(external)
+        self.assertIsNone(parsed)
+        self.assertEqual(error, "source_not_allowlisted")
+
+    def test_runner_exit_code_surfaces_only_supervision_failures(self):
+        self.assertEqual(exit_status_for_stop_reason("runner_error:ContractError:bad"), 1)
+        self.assertEqual(exit_status_for_stop_reason("supervisor_error"), 1)
+        self.assertEqual(exit_status_for_stop_reason("wall_cap"), 0)
+        self.assertEqual(exit_status_for_stop_reason("request_budget_exhausted"), 0)
 
     def test_warmup_blocks_simulated_or_stale_views_before_dispatch(self):
         simulated = {SCOUT_UID: g1_view(SCOUT_UID, 5.0),

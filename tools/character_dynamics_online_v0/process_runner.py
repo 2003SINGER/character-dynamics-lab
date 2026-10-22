@@ -20,8 +20,9 @@ import time
 from typing import Any, Mapping, Sequence
 
 from tools.character_dynamics_online_v0.process_controller import (
-    new_process_session, step_process,
+    _validate_command, new_process_session, step_process,
 )
+from tools.character_dynamics_online_v0.contracts import ContractError
 from tools.character_dynamics_online_v0.runner import JsonlTail, append_jsonl_once, local_now
 from tools.veloren_native_decision_v1.loaded_msg_pair import (
     DISK_FLOOR_BYTES, TELEMETRY_BYTE_CAP, TELEMETRY_RECORD_CAP,
@@ -501,7 +502,13 @@ def author_monitor_world_facts(leader_view: Mapping[str, Any],
 
 
 def process_completion_satisfied(session: Mapping[str, Any], decision: Mapping[str, Any],
-                                 applied_demo_versions: set[tuple[str, int]]) -> bool:
+                                 applied_demo_versions: set[tuple[str, int]], *,
+                                 external_operator_mode: bool = False) -> bool:
+    # An operator-controlled playtest must remain available for further live
+    # edits even after current goals happen to be satisfied. Its hard wall and
+    # resource caps, not a demo-specific quiet period, bound the process.
+    if external_operator_mode:
+        return False
     expected_demo = {("g1-scout-handoff-witness", 1),
                      ("g2-leader-rally-deadline", 1),
                      ("g2-leader-rally-deadline", 2)}
@@ -614,16 +621,46 @@ def recruitment_request_payload(request: Mapping[str, Any], game_time: float) ->
             "ttl_seconds": 120.0}
 
 
-def parse_author_input(row: Mapping[str, Any]) -> tuple[dict[str, Any] | None, str | None]:
-    """Keep human/demo input provenance and validate the runner envelope only."""
-    if row.get("source") not in ("LOCAL_AUTHOR", "RUNNER_DEMO"):
+def parse_author_input(row: Mapping[str, Any], *,
+                       external_operator_mode: bool = False,
+                       session: Mapping[str, Any] | None = None
+                       ) -> tuple[dict[str, Any] | None, str | None]:
+    """Validate the wire shape, returning the original command without normalization."""
+    source = row.get("source")
+    if external_operator_mode:
+        if source != "AGENT_OPERATOR" or row.get("operator_kind") != "agent":
+            return None, "external_source_not_agent_operator"
+        if (not _finite(row.get("issued_at_game_time"))
+                or row["issued_at_game_time"] < 0
+                or not isinstance(row.get("issued_local_time"), str)
+                or not row["issued_local_time"].strip()):
+            return None, "external_issue_time_missing_or_invalid"
+    elif source not in ("LOCAL_AUTHOR", "RUNNER_DEMO"):
         return None, "source_not_allowlisted"
     command = row.get("command")
     if not isinstance(command, dict):
         return None, "command_must_be_object"
-    if command.get("op") not in ("append", "edit"):
+    if external_operator_mode:
+        if not isinstance(session, Mapping):
+            return None, "live_session_missing"
+        try:
+            # This checks the exact five-field core command and version/actor
+            # compatibility. Do not feed its normalized return (which adds
+            # source=AUTHOR) back into step_process.
+            _validate_command(command, session)
+        except ContractError as exc:
+            return None, f"invalid_author_command:{exc}"
+    elif command.get("op") not in ("append", "edit"):
         return None, "unsupported_operation"
     return dict(command), None
+
+
+def exit_status_for_stop_reason(stop_reason: object) -> int:
+    """Surface supervisor/runner failures to the invoking shell as failures."""
+    if not isinstance(stop_reason, str):
+        return 1
+    return 1 if (stop_reason == "supervisor_error"
+                  or stop_reason.startswith(("runner_error:", "supervisor_error:"))) else 0
 
 
 def _event_time(row: Mapping[str, Any]) -> float | None:
@@ -832,6 +869,11 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
     if not run_id or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_" for char in run_id):
         raise ValueError("run_id must contain only letters, digits, hyphen, or underscore")
     run_dir = RUN_ROOT / run_id
+    if author_input_path is not None:
+        if author_input_path.is_symlink() or not author_input_path.is_file():
+            raise ValueError("external author-input must be an existing regular JSONL file")
+        if author_input_path.stat().st_size != 0:
+            raise ValueError("external author-input must be empty at process start")
     run_dir.mkdir(parents=True, exist_ok=False)
     if shutil.disk_usage(run_dir).free < DISK_FLOOR_BYTES:
         raise RuntimeError("free disk below 6 GiB before launch")
@@ -854,9 +896,9 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
     native_events = JsonlTail(paths["native-events.jsonl"])
     g1_events = JsonlTail(paths["g1-events.jsonl"])
     recruit_events = JsonlTail(paths["recruit-events.jsonl"])
-    author_tails = [JsonlTail(paths["author-input.jsonl"])]
-    if author_input_path is not None:
-        author_tails.append(JsonlTail(author_input_path))
+    external_operator_mode = author_input_path is not None
+    author_tails = ([JsonlTail(author_input_path)] if external_operator_mode
+                    else [JsonlTail(paths["author-input.jsonl"])])
     views: dict[int, dict[str, Any]] = {}
     view_sequences = {uid: 0 for uid in DEFAULT_ACTORS}
     recruit_view: dict[str, Any] | None = None
@@ -866,7 +908,7 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
     registered: dict[str, dict[str, Any]] = {}
     pending_author: list[dict[str, Any]] = []
     held_author: list[dict[str, Any]] = []
-    author_source_by_id: dict[str, str] = {}
+    author_provenance_by_version: dict[tuple[str, int], dict[str, Any]] = {}
     request_total = record_total = 0
     start = time.monotonic()
     server: subprocess.Popen | None = None
@@ -875,7 +917,6 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
     signal_exit_code = None
     issued_auto_author = 0
     applied_demo_versions: set[tuple[str, int]] = set()
-    first_settlement_seen = False
     last_settlement_time: float | None = None
     survey_trigger_time: float | None = None
     demo_schedule = None
@@ -910,7 +951,11 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                                       stdout=out, stderr=err)
             append_checked(paths["status.jsonl"], {"event": "process_started",
                            "started_local": started_local, "binary_sha256": source["binary_sha256"],
-                           "wall_cap_seconds": wall_cap, "actor_uids": list(DEFAULT_ACTORS)})
+                           "wall_cap_seconds": wall_cap, "actor_uids": list(DEFAULT_ACTORS),
+                           "author_input_mode": "AGENT_OPERATOR" if external_operator_mode else "RUNNER_DEMO",
+                           "external_author_input_path": (str(author_input_path.resolve())
+                                                           if external_operator_mode else None),
+                           "native_pid": server.pid})
             append_checked(paths["session-checkpoints.jsonl"], {"event": "session_start",
                            "game_time": 0.0, "session": session})
             while server.poll() is None:
@@ -946,7 +991,6 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                     if feedback is not None:
                         pending_feedback.append(feedback)
                         if feedback["event"] in ("g1_action_settled", "g1_action_failed"):
-                            first_settlement_seen = first_settlement_seen or feedback["event"] == "g1_action_settled"
                             last_settlement_time = max(float(feedback["game_time"]),
                                                        last_settlement_time or 0.0)
                             if (feedback["event"] == "g1_action_settled"
@@ -1010,7 +1054,6 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                             recruit_settled_ids.add(request_id)
                             is_success = feedback["event"] == "g1_action_settled"
                             if is_success:
-                                first_settlement_seen = True
                                 if (feedback.get("action") == "RecruitMember"
                                         and feedback.get("args", {}).get("target_uid")
                                         == native_follower_uid):
@@ -1025,8 +1068,8 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                                 "native_terminal_time": _event_time(terminal),
                                 "receipt": feedback})
 
-                # Read author input only after an actual native terminal. A
-                # single command is applied per fresh all-actor controller cycle.
+                # Consume operator input on any fresh all-actor controller
+                # cycle; RUNNER_DEMO remains independently survey-triggered.
                 if set(views) == set(DEFAULT_ACTORS) and fresh_since_cycle == set(DEFAULT_ACTORS):
                     if demo_schedule is None and survey_trigger_time is not None and author_input_path is None:
                         demo_schedule = _author_demo_schedule(scenario["marker_ids"],
@@ -1040,21 +1083,41 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                         issued_auto_author += 1
                     for tail in author_tails:
                         for input_row in tail.read_rows():
-                            command, error = parse_author_input(input_row)
+                            if external_operator_mode:
+                                append_checked(paths["author-input.jsonl"], {
+                                    "event": "external_author_input_observed", "row": input_row})
+                            command, error = parse_author_input(
+                                input_row, external_operator_mode=external_operator_mode,
+                                session=session)
                             if error:
                                 append_checked(paths["author-versions.jsonl"],
-                                               {"event": "author_input_rejected", "reason": error})
+                                               {"event": "author_input_rejected", "source": input_row.get("source"),
+                                                "operator_kind": input_row.get("operator_kind"),
+                                                "issued_at_game_time": input_row.get("issued_at_game_time"),
+                                                "issued_local_time": input_row.get("issued_local_time"),
+                                                "observed_at_game_time": latest_game_time,
+                                                "reason": error})
                             else:
-                                held_author.append({"command": command, "source": input_row["source"],
-                                                    "issued_at_game_time": input_row.get("issued_at_game_time")})
-                    if first_settlement_seen and held_author:
+                                held_author.append({
+                                    "command": command, "source": input_row["source"],
+                                    "operator_kind": input_row.get("operator_kind"),
+                                    "issued_at_game_time": input_row.get("issued_at_game_time"),
+                                    "issued_local_time": input_row.get("issued_local_time")})
+                    if held_author:
                         queued = held_author.pop(0)
                         pending_author.append(queued["command"])
-                        author_source_by_id[queued["command"]["goal_id"]] = queued["source"]
+                        command_key = (queued["command"]["goal_id"], queued["command"]["version"])
+                        author_provenance_by_version[command_key] = {
+                            "source": queued["source"], "operator_kind": queued["operator_kind"],
+                            "issued_at_game_time": queued["issued_at_game_time"],
+                            "issued_local_time": queued["issued_local_time"]}
                         append_checked(paths["author-versions.jsonl"], {
                             "event": "author_input_accepted", "source": queued["source"],
+                            "operator_kind": queued["operator_kind"],
                             "command": queued["command"],
-                            "issued_at_game_time": queued["issued_at_game_time"]})
+                            "issued_at_game_time": queued["issued_at_game_time"],
+                            "issued_local_time": queued["issued_local_time"],
+                            "accepted_at_game_time": latest_game_time})
                     monitor_facts = author_monitor_world_facts(views[LEADER_UID],
                                                                trusted_deliveries)
                     observations = build_observations(views, recruit_view, native_follower_uid,
@@ -1107,14 +1170,34 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                         "event": "controller_decision", "local_time": local_now(),
                         "game_time": game_time,
                         "actor_view_times": {str(uid): views[uid]["time"] for uid in DEFAULT_ACTORS},
-                        "author_sources": [author_source_by_id.get(cmd.get("goal_id"))
-                                           for cmd in author_commands],
+                        "author_inputs": [
+                            {"command": cmd,
+                             **author_provenance_by_version.get(
+                                 (cmd.get("goal_id"), cmd.get("version")), {})}
+                            for cmd in author_commands],
                         "decision": decision})
                     for cmd in decision.get("author_commands_applied", []):
-                        if author_source_by_id.get(cmd.get("goal_id")) == "RUNNER_DEMO":
+                        command_key = (cmd.get("goal_id"), cmd.get("version"))
+                        provenance = author_provenance_by_version.get(command_key, {})
+                        if provenance.get("source") == "RUNNER_DEMO":
                             applied_demo_versions.add((cmd["goal_id"], cmd["version"]))
+                        applied_at_game_time = float(decision.get("game_time", game_time))
+                        if provenance.get("source") == "AGENT_OPERATOR":
+                            append_checked(paths["author-versions.jsonl"], {
+                                "event": "author_version_applied", "source": provenance["source"],
+                                "operator_kind": provenance["operator_kind"],
+                                "goal_id": cmd["goal_id"], "version": cmd["version"],
+                                "issued_at_game_time": provenance["issued_at_game_time"],
+                                "issued_local_time": provenance["issued_local_time"],
+                                "applied_at_game_time": applied_at_game_time,
+                                "command": cmd})
                         append_checked(paths["session-checkpoints.jsonl"], {
                             "event": "author_version_checkpoint", "game_time": game_time,
+                            "source": provenance.get("source"),
+                            "operator_kind": provenance.get("operator_kind"),
+                            "issued_at_game_time": provenance.get("issued_at_game_time"),
+                            "issued_local_time": provenance.get("issued_local_time"),
+                            "applied_at_game_time": applied_at_game_time,
                             "command": cmd, "session": session})
                     for request in decision.get("requests", []):
                         if request_total >= MAX_REQUESTS:
@@ -1135,7 +1218,8 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                         inflight = session.get("inflight_by_actor", {})
                         active_inflight = isinstance(inflight, Mapping) and any(inflight.values())
                         if not active_inflight and not process_completion_satisfied(
-                                session, decision, applied_demo_versions):
+                                session, decision, applied_demo_versions,
+                                external_operator_mode=external_operator_mode):
                             stop_reason = "request_budget_exhausted"
                             break
 
@@ -1147,8 +1231,9 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                     stop_reason = "subprocess_output_cap"
                     break
                 latest_decision = session.get("history", [])[-1] if session.get("history") else {}
-                if process_completion_satisfied(session, latest_decision,
-                                                applied_demo_versions):
+                if process_completion_satisfied(
+                        session, latest_decision, applied_demo_versions,
+                        external_operator_mode=external_operator_mode):
                     if completion_observation_started is None:
                         completion_observation_started = latest_game_time
                     elif latest_game_time - completion_observation_started >= 15.0:
@@ -1194,8 +1279,17 @@ def main() -> int:
     parser.add_argument("--author-input", type=Path)
     parser.add_argument("--wall-cap", type=float, default=MAX_WALL_SECONDS)
     args = parser.parse_args()
-    print(run_process(args.freeze, args.run_id, args.wall_cap, args.author_input))
-    return 0
+    run_dir = run_process(args.freeze, args.run_id, args.wall_cap, args.author_input)
+    status_path = run_dir / "status.jsonl"
+    final_status = None
+    if status_path.is_file():
+        with status_path.open("rb") as stream:
+            lines = [line for line in stream if line.strip()]
+        if lines:
+            final_status = json.loads(lines[-1])
+    stop_reason = final_status.get("stop_reason") if isinstance(final_status, Mapping) else None
+    print(run_dir)
+    return exit_status_for_stop_reason(stop_reason)
 
 
 if __name__ == "__main__":

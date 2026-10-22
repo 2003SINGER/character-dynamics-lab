@@ -1,0 +1,1388 @@
+diff --git a/common/src/comp/agent.rs b/common/src/comp/agent.rs
+index 6f8339c..6ffe7a4 100644
+--- a/common/src/comp/agent.rs
++++ b/common/src/comp/agent.rs
+@@ -650,6 +650,9 @@ pub struct Agent {
+     pub stay_pos: Option<Pos>,
+     /// Inputs sent up to rtsim
+     pub rtsim_outbox: Option<VecDeque<NpcInput>>,
++    /// Request-correlated native speech receipts sent from the loaded Agent
++    /// back to rtsim after allowed_to_speak and chat_npc both succeed.
++    pub rtsim_speech_outbox: Option<VecDeque<(String, rtsim::Actor, f64)>>,
+ }
+ 
+ #[derive(Serialize, Deserialize)]
+@@ -763,6 +766,7 @@ impl Agent {
+             stay_pos: None,
+             awareness: Awareness::new(0.0),
+             rtsim_outbox: None,
++            rtsim_speech_outbox: None,
+         }
+     }
+ 
+diff --git a/rtsim/src/data/g1_recon.rs b/rtsim/src/data/g1_recon.rs
+new file mode 100644
+index 0000000..710badf
+--- /dev/null
++++ b/rtsim/src/data/g1_recon.rs
+@@ -0,0 +1,60 @@
++use serde::{Deserialize, Serialize};
++use std::collections::{HashMap, HashSet};
++
++pub const G1_RECON_RULE_VERSION: &str = "recon-v1";
++
++#[derive(Clone, Debug, Serialize, Deserialize)]
++pub struct G1Marker {
++    pub marker_id: String,
++    pub label: String,
++    pub kind: String,
++    pub wpos: [f32; 2],
++    pub arrival_radius: f32,
++    #[serde(default = "default_follower_radius")]
++    pub follower_radius: f32,
++    pub survey_seconds: f64,
++}
++
++fn default_follower_radius() -> f32 { 10.0 }
++
++#[derive(Clone, Debug, Serialize, Deserialize)]
++pub struct G1Report {
++    pub report_id: String,
++    pub marker_id: String,
++    pub owner_uid: u64,
++    pub surveyed_at: f64,
++}
++
++#[derive(Clone, Debug, Default, Serialize, Deserialize)]
++pub struct G1ReconState {
++    #[serde(default)]
++    pub rule_version: String,
++    #[serde(default)]
++    pub markers: Vec<G1Marker>,
++    #[serde(default)]
++    pub reports: HashMap<String, G1Report>,
++    #[serde(default)]
++    pub known_reports: HashMap<u64, HashSet<String>>,
++    #[serde(default)]
++    pub completed_rallies: Vec<G1RallyFact>,
++    #[serde(default)]
++    pub completed_deliveries: Vec<G1DeliveryFact>,
++}
++
++#[derive(Clone, Debug, Serialize, Deserialize)]
++pub struct G1RallyFact {
++    pub marker_id: String,
++    pub leader_uid: u64,
++    pub follower_uid: u64,
++    pub report_id: String,
++    pub settled_at: f64,
++}
++
++#[derive(Clone, Debug, Serialize, Deserialize)]
++pub struct G1DeliveryFact {
++    pub marker_id: String,
++    pub report_id: String,
++    pub from_uid: u64,
++    pub to_uid: u64,
++    pub delivered_at: f64,
++}
+diff --git a/rtsim/src/data/mod.rs b/rtsim/src/data/mod.rs
+index 0fb0afb..5fb1e65 100644
+--- a/rtsim/src/data/mod.rs
++++ b/rtsim/src/data/mod.rs
+@@ -1,6 +1,7 @@
+ pub mod airship;
+ pub mod architect;
+ pub mod faction;
++pub mod g1_recon;
+ pub mod nature;
+ pub mod npc;
+ pub mod quest;
+@@ -10,6 +11,7 @@ pub mod site;
+ 
+ pub use self::{
+     faction::{Faction, FactionId, Factions},
++    g1_recon::{G1DeliveryFact, G1Marker, G1RallyFact, G1ReconState, G1Report},
+     nature::Nature,
+     npc::{Npc, NpcId, Npcs},
+     quest::Quests,
+@@ -56,6 +58,10 @@ pub struct Data {
+     #[serde(default)]
+     pub quests: Quests,
+ 
++    /// Versioned Character Dynamics G1 recon facts. Missing in old saves.
++    #[serde(default)]
++    pub g1_recon: G1ReconState,
++
+     #[serde(default)]
+     pub tick: u64,
+     #[serde(default)]
+diff --git a/rtsim/src/data/npc.rs b/rtsim/src/data/npc.rs
+index c3a5472..0c71749 100644
+--- a/rtsim/src/data/npc.rs
++++ b/rtsim/src/data/npc.rs
+@@ -77,6 +77,9 @@ pub struct Controller {
+     /// Optional lease for a validated external TalkToNpc request. This is
+     /// runtime-only and is never serialized with rtsim data.
+     pub external_talk: Option<ExternalTalkLease>,
++    /// Runtime-only G1 recon action lease. Survey/report effects are persisted
++    /// in Data::g1_recon only after native settlement checks pass.
++    pub g1_recon: Option<G1ReconLease>,
+     /// Runtime-only request to use the native pirate recruitment prefix for
+     /// one already-qualified local target.
+     pub native_recruit: Option<NativeRecruitTask>,
+@@ -100,6 +103,41 @@ pub struct ExternalTalkLease {
+     pub branch_reported: bool,
+ }
+ 
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub enum G1ReconAction {
++    SurveyMarker,
++    DeliverReport,
++    RallyMarker,
++}
++
++#[derive(Clone, Debug)]
++pub struct G1ReconLease {
++    pub request_id: String,
++    pub rule_version: String,
++    pub action: G1ReconAction,
++    pub actor_uid: u64,
++    pub node_id: String,
++    pub source: String,
++    pub goal_id: Option<String>,
++    pub author_version: Option<u32>,
++    pub marker_id: String,
++    pub report_id: Option<String>,
++    pub receiver_uid: Option<u64>,
++    pub follower_uid: Option<u64>,
++    pub expires_at: common::resources::Time,
++    pub survey_started_at: Option<f64>,
++    pub say_emitted_at: Option<f64>,
++    pub say_recipient_uid: Option<u64>,
++}
++
++impl G1ReconLease {
++    pub fn interrupt_survey(&mut self) {
++        if self.action == G1ReconAction::SurveyMarker {
++            self.survey_started_at = None;
++        }
++    }
++}
++
+ #[derive(Clone, Debug, PartialEq, Eq)]
+ pub struct ExternalActionDrop {
+     pub request_id: String,
+@@ -157,6 +195,21 @@ pub struct LoadedActionHandoff {
+ }
+ 
+ impl ExternalTalkLease {
++    /// Set a talk outcome only while this lease still belongs to the action
++    /// that produced it. Brain actions may finish after a later lease has
++    /// replaced the controller slot.
++    pub fn set_outcome_for_request(
++        &mut self,
++        request_id: &str,
++        outcome: &'static str,
++    ) -> bool {
++        if self.request_id != request_id || self.outcome.is_some() {
++            return false;
++        }
++        self.outcome = Some(outcome);
++        true
++    }
++
+     pub fn take_branch_diagnostic(&mut self) -> Option<(&'static str, Option<&'static str>)> {
+         if self.branch_reported {
+             return None;
+@@ -809,6 +862,69 @@ mod external_talk_tests {
+         assert_eq!(expired.settle_unstarted(Time(1.0)), Some("expired_before_native_action"));
+         assert_eq!(expired.settle_unstarted(Time(2.0)), Some("expired_before_native_action"));
+     }
++
++    #[test]
++    fn stale_talk_completion_cannot_write_a_replacement_lease() {
++        let target = Actor::Npc(NpcId::default());
++        let mut current = ExternalTalkLease {
++            request_id: "new-request".into(),
++            target,
++            expires_at: Time(10.0),
++            cancelled: false,
++            started: true,
++            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
++        };
++
++        assert!(!current.set_outcome_for_request(
++            "old-request",
++            "native_talk_completed_without_speech",
++        ));
++        assert_eq!(current.outcome, None);
++        assert!(current.set_outcome_for_request(
++            "new-request",
++            "native_talk_completed_without_speech",
++        ));
++        assert_eq!(current.outcome, Some("native_talk_completed_without_speech"));
++        assert!(!current.set_outcome_for_request(
++            "new-request",
++            "another_outcome",
++        ));
++    }
++
++    #[test]
++    fn danger_interruption_resets_only_an_active_survey_window() {
++        let mut survey = G1ReconLease {
++            request_id: "survey".into(),
++            rule_version: "recon-v1".into(),
++            action: G1ReconAction::SurveyMarker,
++            actor_uid: 1,
++            node_id: "node".into(),
++            source: "ACTOR".into(),
++            goal_id: None,
++            author_version: None,
++            marker_id: "recon_site_a".into(),
++            report_id: None,
++            receiver_uid: None,
++            follower_uid: None,
++            expires_at: Time(30.0),
++            survey_started_at: Some(5.0),
++            say_emitted_at: None,
++            say_recipient_uid: None,
++        };
++        survey.interrupt_survey();
++        assert_eq!(survey.survey_started_at, None);
++
++        let mut rally = G1ReconLease {
++            action: G1ReconAction::RallyMarker,
++            ..survey.clone()
++        };
++        rally.survey_started_at = Some(5.0);
++        rally.interrupt_survey();
++        assert_eq!(rally.survey_started_at, Some(5.0));
++    }
+ }
+ 
+ // Represents an ongoing dialogue with another actor.
+diff --git a/rtsim/src/generate/mod.rs b/rtsim/src/generate/mod.rs
+index 92ec8c9..a31e54a 100644
+--- a/rtsim/src/generate/mod.rs
++++ b/rtsim/src/generate/mod.rs
+@@ -99,6 +99,7 @@ impl Data {
+             airship_sim: Default::default(),
+             architect: Default::default(),
+             quests: Default::default(),
++            g1_recon: Default::default(),
+ 
+             tick: 0,
+             time_of_day: TimeOfDay(settings.start_time),
+diff --git a/rtsim/src/rule/npc_ai/mod.rs b/rtsim/src/rule/npc_ai/mod.rs
+index 6b4131b..095d4dd 100644
+--- a/rtsim/src/rule/npc_ai/mod.rs
++++ b/rtsim/src/rule/npc_ai/mod.rs
+@@ -44,7 +44,7 @@ use crate::{
+         ReportKind, Sentiment, Sites,
+         npc::{
+             Brain, DialogueSession, Job, NativeRecruitMessageProvenance, NativeRecruitReceipt,
+-            NativeRecruitTask, NpcId, PathData, SimulationMode,
++            G1ReconAction, NativeRecruitTask, NpcId, PathData, SimulationMode,
+         },
+         quest::{Quest, QuestKind},
+     },
+@@ -1659,11 +1659,16 @@ fn check_for_enemies<S: State>(ctx: &mut NpcCtx) -> Option<impl Action<S> + use<
+     // implementing this means accounting for changes in sentiment (that could
+     // suddenly make a nearby actor an enemy) as well as variable NPC tick
+     // rates!
+-    ctx.data
++    let enemy = ctx.data
+         .npcs
+         .nearby(Some(ctx.npc_id), ctx.npc.wpos, 24.0)
+-        .find(|actor| ctx.sentiments.toward(*actor).is(Sentiment::ENEMY))
+-        .map(|enemy| just(move |ctx, _| ctx.controller.attack(enemy)))
++        .find(|actor| ctx.sentiments.toward(*actor).is(Sentiment::ENEMY));
++    if enemy.is_some()
++        && let Some(lease) = &mut ctx.controller.g1_recon
++    {
++        lease.interrupt_survey();
++    }
++    enemy.map(|enemy| just(move |ctx, _| ctx.controller.attack(enemy)))
+ }
+ 
+ fn react_to_events<S: State>(ctx: &mut NpcCtx, _: &mut S) -> Option<impl Action<S> + use<S>> {
+@@ -1671,9 +1676,67 @@ fn react_to_events<S: State>(ctx: &mut NpcCtx, _: &mut S) -> Option<impl Action<
+         .map(Action::boxed)
+         .or_else(|| check_for_enemies(ctx).map(Action::boxed))
+         .or_else(|| quest::check_for_timeouts(ctx).map(Action::boxed))
++        .or_else(|| g1_recon_action::<S>(ctx))
+         .or_else(|| external_talk::<S>(ctx).map(Action::boxed))
+ }
+ 
++fn g1_hold_should_repath(
++    now: f64,
++    expires_at: f64,
++    distance_from_marker: f32,
++    arrival_radius: f32,
++) -> bool {
++    now >= expires_at || distance_from_marker > arrival_radius
++}
++
++/// Run G1 survey/rally navigation through the existing Brain goto primitives.
++/// Delivery intentionally uses the adjacent native external-talk lease below;
++/// the server settles it only after a provenance-matched native Say handoff.
++fn g1_recon_action<S: State>(ctx: &mut NpcCtx) -> Option<Box<dyn Action<S, ()>>> {
++    let lease = ctx.controller.g1_recon.clone()?;
++    if !matches!(lease.action, G1ReconAction::SurveyMarker | G1ReconAction::RallyMarker) {
++        return None;
++    }
++    let marker = ctx.data.g1_recon.markers.iter()
++        .find(|marker| marker.marker_id == lease.marker_id)?;
++    let position = vek::Vec2::new(marker.wpos[0], marker.wpos[1]);
++    let radius = marker.arrival_radius;
++    let request_id = lease.request_id;
++    let hold_request_id = request_id.clone();
++    let expires_at = lease.expires_at;
++    let hold_expires_at = expires_at.0;
++    let hold_position = position;
++    let hold_radius = radius;
++    Some(
++        movement::goto_2d(position, 1.0, radius)
++            .then(idle().repeat().stop_if(move |ctx: &mut NpcCtx| {
++                let lease_matches = ctx.controller.g1_recon.as_ref()
++                    .is_some_and(|active| active.request_id == hold_request_id);
++                !lease_matches || g1_hold_should_repath(
++                    ctx.time.0,
++                    hold_expires_at,
++                    ctx.npc.wpos.xy().distance(hold_position),
++                    hold_radius,
++                )
++            }))
++            .map(|_, _| ())
++            // Re-enter native navigation after the hold drifts outside the
++            // settlement radius. This also resumes the goto/hold cycle after
++            // a native interruption without pinning or writing coordinates.
++            .repeat()
++            // Guard the complete navigation action too: if the lease is
++            // cancelled or expires while goto_2d is running, movement must
++            // stop rather than merely preventing the subsequent idle loop.
++            .stop_if(move |ctx: &mut NpcCtx| {
++                ctx.controller.g1_recon.as_ref().is_none_or(|active| {
++                    active.request_id != request_id || ctx.time.0 >= expires_at.0
++                })
++            })
++            .map(|_, _| ())
++            .boxed(),
++    )
++}
++
+ /// Runs a validated external TalkToNpc request through the existing native
+ /// talk action. The lease is independent of Brain lifetime and resettable
+ /// controller activity. Native danger, cancellation, and expiry terminate the
+@@ -1686,19 +1749,39 @@ fn external_talk<S: State>(ctx: &mut NpcCtx) -> Option<impl Action<S> + use<S>>
+     lease.started = true;
+     let target = lease.target;
+     let request_id = lease.request_id.clone();
++    let action_request_id = request_id.clone();
++    let stop_request_id = request_id.clone();
++    let g1_delivery_request_id = request_id.clone();
++    let g1_delivery = ctx.controller.g1_recon.as_ref().is_some_and(|g1| {
++        g1.request_id == request_id && g1.action == G1ReconAction::DeliverReport
++    });
++    let native_talk = if g1_delivery {
++        // G1 accepts a locally known, loaded receiver within 24m. Use the
++        // existing native follow/goto behavior to approach before Say; the
++        // server still settles delivery only with a real speech receipt and
++        // its unchanged <=8m evidence gate.
++        movement::goto_actor::<S>(target, 6.0)
++            .then(talk_to_with_request::<S>(target, Some(request_id)))
++            .boxed()
++    } else {
++        talk_to_with_request::<S>(target, Some(request_id)).boxed()
++    };
+ 
+     Some(
+-        talk_to_with_request::<S>(target, Some(request_id))
++        native_talk
+             .then(just(move |ctx, _| {
+                 if let Some(lease) = &mut ctx.controller.external_talk {
+-                    if lease.outcome.is_none() {
+-                        lease.outcome = Some("native_talk_completed_without_speech");
+-                    }
++                    lease.set_outcome_for_request(
++                        &action_request_id,
++                        "native_talk_completed_without_speech",
++                    );
+                 }
+             }))
+-            .stop_if(|ctx: &mut NpcCtx| {
++            .stop_if(move |ctx: &mut NpcCtx| {
+                 let reason = if let Some(lease) = &ctx.controller.external_talk {
+-                    if lease.cancelled {
++                    if lease.request_id != stop_request_id {
++                        Some("lease_replaced")
++                    } else if lease.cancelled {
+                         Some("cancelled")
+                     } else if ctx.time.0 >= lease.expires_at.0 {
+                         Some("expired")
+@@ -1719,11 +1802,20 @@ fn external_talk<S: State>(ctx: &mut NpcCtx) -> Option<impl Action<S> + use<S>>
+                         .filter_map(|id| ctx.data.quests.get(id))
+                         .any(|quest| quest.timeout.is_some_and(|timeout| ctx.time > timeout))
+                         .then_some("native_quest_timeout_interrupt")
++                })
++                .or_else(|| {
++                    (g1_delivery
++                        && ctx.controller.g1_recon.as_ref().is_none_or(|g1| {
++                            g1.request_id != g1_delivery_request_id
++                                || g1.action != G1ReconAction::DeliverReport
++                                || ctx.time.0 >= g1.expires_at.0
++                        }))
++                    .then_some("g1_delivery_lease_expired_or_replaced")
+                 });
+ 
+                 if let Some(reason) = reason {
+                     if let Some(lease) = &mut ctx.controller.external_talk {
+-                        lease.outcome = Some(reason);
++                        lease.set_outcome_for_request(&stop_request_id, reason);
+                     }
+                     true
+                 } else {
+@@ -1734,6 +1826,18 @@ fn external_talk<S: State>(ctx: &mut NpcCtx) -> Option<impl Action<S> + use<S>>
+     )
+ }
+ 
++#[cfg(test)]
++mod g1_recon_lifecycle_tests {
++    use super::g1_hold_should_repath;
++
++    #[test]
++    fn g1_hold_repaths_only_after_drift_or_lease_expiry() {
++        assert!(!g1_hold_should_repath(5.0, 10.0, 4.0, 4.0));
++        assert!(g1_hold_should_repath(5.0, 10.0, 4.001, 4.0));
++        assert!(g1_hold_should_repath(10.0, 10.0, 1.0, 4.0));
++    }
++}
++
+ fn humanoid() -> impl Action<DefaultState> {
+     choose(|ctx, _, consider| {
+         if let Some(riding) = &ctx.data.npcs.mounts.get_mount_link(ctx.npc_id) {
+diff --git a/server-cli/src/main.rs b/server-cli/src/main.rs
+index 3bd166e..a425647 100644
+--- a/server-cli/src/main.rs
++++ b/server-cli/src/main.rs
+@@ -227,7 +227,10 @@ fn main() -> io::Result<()> {
+             .and_then(|value| value.parse::<u32>().ok())
+             .filter(|distance| (1..=8).contains(distance))
+             .unwrap_or(2);
+-        for raw_uid in selected_uids.split(',').filter(|uid| !uid.trim().is_empty()).take(2) {
++        // Multi-role G1 process: two external actors plus one native hired follower.
++        // Keep the allowlist explicitly bounded; this only persists chunks around
++        // existing NPCs and does not create or modify world entities.
++        for raw_uid in selected_uids.split(',').filter(|uid| !uid.trim().is_empty()).take(3) {
+             match raw_uid.trim().parse::<u64>() {
+                 Ok(uid) => match server.create_persister_at_npc_uid(uid, view_distance) {
+                     Some(pos) => info!(uid, ?pos, view_distance, "Loaded test chunks around existing civilised NPC"),
+diff --git a/server/src/rtsim/g1_recon.rs b/server/src/rtsim/g1_recon.rs
+new file mode 100644
+index 0000000..87d9530
+--- /dev/null
++++ b/server/src/rtsim/g1_recon.rs
+@@ -0,0 +1,677 @@
++use super::RtSim;
++use common::{resources::Time, rtsim::Actor};
++use rtsim::data::{
++    G1DeliveryFact, G1Marker, G1ReconState, G1Report,
++    npc::{ExternalTalkLease, G1ReconAction, G1ReconLease, Job, NpcId, SimulationMode},
++};
++use serde_json::{Value, json};
++use std::{
++    collections::HashMap,
++    fs::File,
++    io::{Read, Seek, SeekFrom, Write},
++    time::Instant,
++};
++
++const RULE_VERSION: &str = "recon-v1";
++const VIEW_INTERVAL: std::time::Duration = std::time::Duration::from_secs(1);
++const MAX_REQUEST_BYTES: usize = 1_000_000;
++const MAX_EVENT_BYTES: usize = 64 * 1024;
++const MAX_TTL: f64 = 120.0;
++const MAX_CLOCK_AGE: f64 = 10.0;
++const NEARBY_RADIUS: f32 = 24.0;
++const REPORT_DISTANCE: f32 = 8.0;
++
++fn emit(rtsim: &RtSim, value: Value) {
++    let Some(path) = &rtsim.g1_events_path else { return };
++    let Ok(mut row) = serde_json::to_vec(&value) else { return };
++    row.push(b'\n');
++    if row.len() > MAX_EVENT_BYTES { return }
++    if let Ok(mut file) = File::options().create(true).append(true).open(path) {
++        let _ = file.write_all(&row);
++    }
++}
++
++pub(super) fn emit_native_speech(
++    rtsim: &RtSim,
++    request_id: &str,
++    actor_uid: u64,
++    recipient_uid: u64,
++    game_time: f64,
++) {
++    emit(rtsim, json!({
++        "event":"g1_native_speech_emitted", "schema_version":1,
++        "rule_version":RULE_VERSION, "request_id":request_id,
++        "actor_uid":actor_uid, "recipient_uid":recipient_uid,
++        "native_action":"Say", "game_time":game_time,
++        "evidence":"allowed_to_speak_and_chat_npc_emitted",
++    }));
++}
++
++fn reject(rtsim: &RtSim, request_id: Option<&str>, actor_uid: Option<u64>, reason: &str, time: f64) {
++    emit(rtsim, json!({
++        "event":"g1_action_rejected", "schema_version":1,
++        "rule_version":RULE_VERSION, "request_id":request_id,
++        "actor_uid":actor_uid, "reason":reason, "game_time":time,
++    }));
++}
++
++fn init_markers(data: &mut rtsim::data::Data, anchor_uid: u64) -> Result<(), &'static str> {
++    if !data.g1_recon.markers.is_empty() {
++        return if data.g1_recon.rule_version == RULE_VERSION {
++            Ok(())
++        } else {
++            Err("g1_rule_version_mismatch")
++        };
++    }
++    let anchor = data.npcs.values().find(|npc| npc.uid == anchor_uid)
++        .and_then(|npc| npc.home.into_iter().chain(npc.current_site).find_map(|site_id| data.sites.get(site_id)))
++        .map(|site| site.wpos);
++    let Some(anchor) = anchor else { return Err("actor_has_no_real_home_or_current_site") };
++    let base = [anchor.x as f32, anchor.y as f32];
++    // Versioned G1 map labels around an existing native camp; no site, terrain,
++    // NPC, or navigation data is created or modified.
++    data.g1_recon = G1ReconState {
++        rule_version: RULE_VERSION.to_owned(),
++        markers: vec![
++            G1Marker {
++                marker_id: "recon_site_a".to_owned(),
++                label: "G1 Recon Camp A".to_owned(),
++                kind: "survey_and_rally".to_owned(),
++                wpos: [base[0] + 24.0, base[1]],
++                arrival_radius: 4.0,
++                follower_radius: 10.0,
++                survey_seconds: 2.0,
++            },
++            G1Marker {
++                marker_id: "recon_site_b".to_owned(),
++                label: "G1 Recon Camp B".to_owned(),
++                kind: "survey_and_rally".to_owned(),
++                wpos: [base[0], base[1] + 24.0],
++                arrival_radius: 4.0,
++                follower_radius: 10.0,
++                survey_seconds: 2.0,
++            },
++        ],
++        ..Default::default()
++    };
++    Ok(())
++}
++
++fn marker(state: &G1ReconState, id: &str) -> Option<G1Marker> {
++    state.markers.iter().find(|marker| marker.marker_id == id).cloned()
++}
++
++fn has_capability(marker: &G1Marker, capability: &str) -> bool {
++    marker.kind.split('_').any(|item| item == capability)
++}
++
++fn job_label(job: &Option<Job>) -> &'static str {
++    match job {
++        Some(Job::Hired(_, _)) => "Hired",
++        Some(Job::Quest(_)) => "Quest",
++        None => "None",
++    }
++}
++
++fn survey_settled_at(started_at: &mut Option<f64>, in_radius: bool, now: f64, required: f64) -> Option<f64> {
++    if !in_radius {
++        *started_at = None;
++        return None;
++    }
++    let started = *started_at.get_or_insert(now);
++    (now - started >= required).then_some(started)
++}
++
++fn lease_expired(now: f64, expires_at: f64) -> bool {
++    now >= expires_at
++}
++
++fn npc_id_by_uid(data: &rtsim::data::Data, uid: u64) -> Option<NpcId> {
++    data.npcs.iter().find_map(|(id, npc)| (npc.uid == uid).then_some(id))
++}
++
++fn request_key<'a>(value: &'a Value, key: &str) -> Option<&'a str> {
++    value.get(key).and_then(Value::as_str).filter(|s| !s.is_empty() && s.len() <= 128)
++}
++
++fn process_row(rtsim: &mut RtSim, value: Value, now: Time) {
++    let request_id = request_key(&value, "request_id");
++    let actor_uid = value.get("actor_uid").and_then(Value::as_u64);
++    let Some(request_id) = request_id else {
++        reject(rtsim, None, actor_uid, "missing_or_invalid_request_id", now.0);
++        return;
++    };
++    let Some(actor_uid) = actor_uid.filter(|uid| rtsim.g1_actor_uids.contains(uid)) else {
++        reject(rtsim, Some(request_id), actor_uid, "actor_uid_not_allowlisted", now.0);
++        return;
++    };
++    let source = request_key(&value, "source").unwrap_or("");
++    if !matches!(source, "ACTOR" | "AUTHOR" | "DIRECTOR") {
++        reject(rtsim, Some(request_id), Some(actor_uid), "invalid_source", now.0);
++        return;
++    }
++    let observed_time = value.get("observed_time").and_then(Value::as_f64).unwrap_or(f64::NAN);
++    if !observed_time.is_finite() || observed_time > now.0 || now.0 - observed_time > MAX_CLOCK_AGE {
++        reject(rtsim, Some(request_id), Some(actor_uid), "stale_or_future_observed_time", now.0);
++        return;
++    }
++    let rule_version = request_key(&value, "rule_version").unwrap_or("");
++    if rule_version != RULE_VERSION {
++        reject(rtsim, Some(request_id), Some(actor_uid), "g1_rule_version_mismatch", now.0);
++        return;
++    }
++    let ttl = value.get("ttl_seconds").and_then(Value::as_f64).unwrap_or(f64::NAN);
++    if !ttl.is_finite() || !(0.1..=MAX_TTL).contains(&ttl) {
++        reject(rtsim, Some(request_id), Some(actor_uid), "invalid_ttl", now.0);
++        return;
++    }
++    let action = match value.get("action").and_then(Value::as_str) {
++        Some("survey_marker") => G1ReconAction::SurveyMarker,
++        Some("deliver_report") => G1ReconAction::DeliverReport,
++        Some("rally_marker") => G1ReconAction::RallyMarker,
++        _ => {
++            reject(rtsim, Some(request_id), Some(actor_uid), "unsupported_action", now.0);
++            return;
++        },
++    };
++    let args = value.get("args").cloned().unwrap_or(Value::Null);
++    let marker_id = args.get("marker_id").and_then(Value::as_str).unwrap_or("");
++    if marker_id.is_empty() || marker_id.len() > 128 {
++        reject(rtsim, Some(request_id), Some(actor_uid), "invalid_marker_id", now.0);
++        return;
++    }
++    let report_hint = args.get("report_id").and_then(Value::as_str).map(str::to_owned);
++    let receiver_uid = args.get("receiver_uid").and_then(Value::as_u64);
++    let follower_uid = args.get("follower_uid").and_then(Value::as_u64);
++    let goal_id = value.get("goal_id").and_then(Value::as_str).map(str::to_owned);
++    let node_id = request_key(&value, "node_id").unwrap_or("").to_owned();
++    if node_id.is_empty() {
++        reject(rtsim, Some(request_id), Some(actor_uid), "missing_node_id", now.0);
++        return;
++    }
++    let author_version = value.get("author_version").and_then(Value::as_u64).and_then(|v| u32::try_from(v).ok());
++    if source != "ACTOR" && author_version.is_none() {
++        reject(rtsim, Some(request_id), Some(actor_uid), "author_version_required", now.0);
++        return;
++    }
++    let canonical = value.to_string();
++    if let Some(previous) = rtsim.seen_g1_requests.get(request_id) {
++        if previous != &canonical {
++            reject(rtsim, Some(request_id), Some(actor_uid), "request_id_conflict", now.0);
++        }
++        return;
++    }
++    if rtsim.seen_g1_requests.len() >= 4096 {
++        reject(rtsim, Some(request_id), Some(actor_uid), "request_capacity_reached", now.0);
++        return;
++    }
++    rtsim.seen_g1_requests.insert(request_id.to_owned(), canonical);
++
++    let mut data = rtsim.state.data_mut();
++    let anchor_uid = if rtsim.g1_actor_uids.contains(&476) { 476 } else { actor_uid };
++    if let Err(reason) = init_markers(&mut data, anchor_uid) {
++        drop(data);
++        reject(rtsim, Some(request_id), Some(actor_uid), reason, now.0);
++        return;
++    }
++    let Some(actor_id) = npc_id_by_uid(&data, actor_uid) else {
++        drop(data);
++        reject(rtsim, Some(request_id), Some(actor_uid), "actor_not_found", now.0);
++        return;
++    };
++    if !matches!(data.npcs[actor_id].mode, SimulationMode::Loaded) {
++        drop(data);
++        reject(rtsim, Some(request_id), Some(actor_uid), "actor_not_loaded", now.0);
++        return;
++    }
++    let Some(target_marker) = marker(&data.g1_recon, marker_id) else {
++        drop(data);
++        reject(rtsim, Some(request_id), Some(actor_uid), "unknown_g1_marker", now.0);
++        return;
++    };
++    if data.npcs[actor_id].is_dead() || data.npcs[actor_id].controller.g1_recon.is_some() {
++        drop(data);
++        reject(rtsim, Some(request_id), Some(actor_uid), "actor_dead_or_has_active_g1_lease", now.0);
++        return;
++    }
++    let source_npc = &data.npcs[actor_id];
++    let mut resolved_follower_uid = follower_uid;
++    let report = match action {
++        G1ReconAction::SurveyMarker => {
++            if !has_capability(&target_marker, "survey") {
++                drop(data);
++                reject(rtsim, Some(request_id), Some(actor_uid), "marker_not_survey_site", now.0);
++                return;
++            }
++            if data.g1_recon.reports.values().any(|r| r.owner_uid == actor_uid && r.marker_id == marker_id) {
++                drop(data);
++                reject(rtsim, Some(request_id), Some(actor_uid), "survey_already_recorded", now.0);
++                return;
++            }
++            None
++        },
++        G1ReconAction::DeliverReport => {
++            let Some(receiver_uid) = receiver_uid else {
++                drop(data);
++                reject(rtsim, Some(request_id), Some(actor_uid), "receiver_uid_required", now.0);
++                return;
++            };
++            let Some(report) = data.g1_recon.reports.values().find(|r| {
++                r.owner_uid == actor_uid && r.marker_id == marker_id
++                    && report_hint.as_ref().is_none_or(|hint| hint == &r.report_id)
++            }).cloned() else {
++                drop(data);
++                reject(rtsim, Some(request_id), Some(actor_uid), "no_matching_owned_report", now.0);
++                return;
++            };
++            let Some(receiver_id) = npc_id_by_uid(&data, receiver_uid) else {
++                drop(data);
++                reject(rtsim, Some(request_id), Some(actor_uid), "receiver_not_found", now.0);
++                return;
++            };
++            let receiver = &data.npcs[receiver_id];
++            let dist = receiver.wpos.xy().distance(source_npc.wpos.xy());
++            if receiver_id == actor_id || receiver.is_dead() || dist > NEARBY_RADIUS
++                || !matches!(source_npc.mode, SimulationMode::Loaded)
++                || !matches!(receiver.mode, SimulationMode::Loaded)
++                || source_npc.controller.external_talk.is_some()
++                || receiver.controller.external_talk.is_some()
++                || receiver.controller.g1_recon.is_some()
++            {
++                drop(data);
++                reject(rtsim, Some(request_id), Some(actor_uid), "receiver_not_live_loaded_nearby_or_available", now.0);
++                return;
++            }
++            Some(report)
++        },
++        G1ReconAction::RallyMarker => {
++            if !has_capability(&target_marker, "rally") {
++                drop(data);
++                reject(rtsim, Some(request_id), Some(actor_uid), "marker_not_rally_site", now.0);
++                return;
++            }
++            let known = data.g1_recon.known_reports.get(&actor_uid);
++            let report = data.g1_recon.reports.values().find(|r| {
++                r.marker_id == marker_id
++                    && r.owner_uid != actor_uid
++                    && known.is_some_and(|set| set.contains(&r.report_id))
++                    && report_hint.as_ref().is_none_or(|hint| hint == &r.report_id)
++            }).cloned();
++            let Some(report) = report else {
++                drop(data);
++                reject(rtsim, Some(request_id), Some(actor_uid), "leader_does_not_know_matching_report", now.0);
++                return;
++            };
++            let hired_follower = data.npcs.iter().find(|(_, npc)| {
++                follower_uid.is_none_or(|uid| npc.uid == uid)
++                    && matches!(npc.job, Some(Job::Hired(Actor::Npc(hirer), _)) if hirer == actor_id)
++            });
++            if let Some((_, follower)) = hired_follower {
++                resolved_follower_uid = Some(follower.uid);
++            } else {
++                drop(data);
++                reject(rtsim, Some(request_id), Some(actor_uid), "no_native_hired_follower", now.0);
++                return;
++            }
++            Some(report)
++        },
++    };
++    let resolved_report_id = report.as_ref().map(|r| r.report_id.clone());
++    if matches!(action, G1ReconAction::DeliverReport)
++        && data.npcs[actor_id].controller.external_talk.is_some()
++    {
++        drop(data);
++        reject(rtsim, Some(request_id), Some(actor_uid), "actor_has_native_talk_lease", now.0);
++        return;
++    }
++    let expiry = Time(now.0 + ttl);
++    data.npcs[actor_id].controller.g1_recon = Some(G1ReconLease {
++        request_id: request_id.to_owned(),
++        rule_version: RULE_VERSION.to_owned(),
++        action: action.clone(),
++        actor_uid,
++        node_id: node_id.clone(),
++        source: source.to_owned(),
++        goal_id: goal_id.clone(),
++        author_version,
++        marker_id: marker_id.to_owned(),
++        report_id: resolved_report_id.clone(),
++        receiver_uid,
++        follower_uid: resolved_follower_uid,
++        expires_at: expiry,
++        survey_started_at: None,
++        say_emitted_at: None,
++        say_recipient_uid: None,
++    });
++    if let Some(report) = report.filter(|_| matches!(action, G1ReconAction::DeliverReport)) {
++        let target = npc_id_by_uid(&data, receiver_uid.unwrap()).expect("validated receiver");
++        data.npcs[actor_id].controller.external_talk = Some(ExternalTalkLease {
++            request_id: request_id.to_owned(),
++            target: Actor::Npc(target),
++            expires_at: expiry,
++            cancelled: false,
++            started: false,
++            outcome: None,
++            branch_route: None,
++            smalltalk_early_cut: None,
++            branch_reported: false,
++        });
++        let _ = report;
++    }
++    drop(data);
++    emit(rtsim, json!({
++        "event":"g1_action_accepted", "schema_version":1,
++        "rule_version":RULE_VERSION, "request_id":request_id,
++        "actor_uid":actor_uid, "node_id":node_id,
++        "source":source, "goal_id":goal_id,
++        "author_version":author_version,
++        "action":value.get("action"), "args":args, "game_time":now.0,
++    }));
++}
++
++pub(super) fn process_requests(rtsim: &mut RtSim, now: Time) {
++    let Some(path) = rtsim.g1_request_path.clone() else { return };
++    let Ok(mut file) = File::open(path) else { return };
++    let Ok(file_len) = file.metadata().map(|metadata| metadata.len()) else { return };
++    if file_len < rtsim.g1_request_offset { rtsim.g1_request_offset = 0; }
++    if file.seek(SeekFrom::Start(rtsim.g1_request_offset)).is_err() { return }
++    let mut bytes = Vec::new();
++    if file.take((MAX_REQUEST_BYTES + 1) as u64).read_to_end(&mut bytes).is_err() { return }
++    if bytes.len() > MAX_REQUEST_BYTES {
++        reject(rtsim, None, None, "request_file_over_1MiB", now.0);
++        rtsim.g1_request_offset = file_len;
++        return;
++    }
++    let contents = String::from_utf8_lossy(&bytes);
++    let Some(complete_end) = contents.rfind('\n').map(|index| index + 1) else { return };
++    rtsim.g1_request_offset += complete_end as u64;
++    for line in contents[..complete_end].lines().filter(|line| !line.trim().is_empty()) {
++        match serde_json::from_str::<Value>(line) {
++            Ok(value) => process_row(rtsim, value, now),
++            Err(_) => reject(rtsim, None, None, "invalid_jsonl", now.0),
++        }
++    }
++}
++
++fn emit_terminal(rtsim: &RtSim, lease: &G1ReconLease, time: f64, event: &str, reason: Option<&str>, effects: Vec<Value>) {
++    emit(rtsim, json!({
++        "event":event, "schema_version":1, "rule_version":lease.rule_version,
++        "request_id":lease.request_id, "actor_uid":lease.actor_uid,
++        "node_id":lease.node_id, "source":lease.source,
++        "goal_id":lease.goal_id, "author_version":lease.author_version,
++        "action":match lease.action {
++            G1ReconAction::SurveyMarker => "survey_marker",
++            G1ReconAction::DeliverReport => "deliver_report",
++            G1ReconAction::RallyMarker => "rally_marker",
++        },
++        "args":{"marker_id":lease.marker_id,"report_id":lease.report_id,
++            "receiver_uid":lease.receiver_uid,"follower_uid":lease.follower_uid},
++        "game_time":time, "reason":reason, "effects":effects,
++    }));
++}
++
++pub(super) fn after_tick(rtsim: &mut RtSim, now: Time) {
++    let mut data = rtsim.state.data_mut();
++    let mut settled = Vec::new();
++    let mut failed = Vec::new();
++    let markers = data.g1_recon.markers.clone();
++    let reports = data.g1_recon.reports.clone();
++    let known_reports = data.g1_recon.known_reports.clone();
++    let people = data.npcs.iter().map(|(id, npc)| {
++        (npc.uid, (id, npc.wpos, !npc.is_dead(), matches!(npc.mode, SimulationMode::Loaded), npc.job.clone()))
++    }).collect::<HashMap<_, _>>();
++    let mut new_reports = Vec::new();
++    let mut new_deliveries = Vec::new();
++    let mut new_rallies = Vec::new();
++    for (actor_id, actor) in data.npcs.iter_mut() {
++        let actor_dead = actor.is_dead();
++        let actor_loaded = matches!(actor.mode, SimulationMode::Loaded);
++        let Some(lease) = actor.controller.g1_recon.as_mut() else { continue };
++        let Some(site) = markers.iter().find(|marker| marker.marker_id == lease.marker_id).cloned() else {
++            failed.push((actor_id, lease.clone(), "marker_unavailable".to_owned()));
++            continue;
++        };
++        if lease_expired(now.0, lease.expires_at.0) {
++            failed.push((actor_id, lease.clone(), "ttl_expired".to_owned()));
++            continue;
++        }
++        if actor_dead {
++            failed.push((actor_id, lease.clone(), "actor_dead".to_owned()));
++            continue;
++        }
++        if !actor_loaded {
++            failed.push((actor_id, lease.clone(), "actor_not_loaded".to_owned()));
++            continue;
++        }
++        match lease.action {
++            G1ReconAction::SurveyMarker => {
++                let distance = actor.wpos.xy().distance(vek::Vec2::new(site.wpos[0], site.wpos[1]));
++                if let Some(started) = survey_settled_at(
++                    &mut lease.survey_started_at,
++                    distance <= site.arrival_radius,
++                    now.0,
++                    site.survey_seconds,
++                ) {
++                        let report_id = format!("g1:{}:{}", lease.marker_id, lease.actor_uid);
++                        let report = G1Report {
++                            report_id: report_id.clone(), marker_id: lease.marker_id.clone(),
++                            owner_uid: lease.actor_uid, surveyed_at: now.0,
++                        };
++                        new_reports.push(report);
++                        let effect = json!({"event":"g1_survey_completed","report_id":report_id,
++                            "marker_id":lease.marker_id,"actual_wpos":[actor.wpos.x,actor.wpos.y,actor.wpos.z],
++                            "marker_wpos":site.wpos,"arrival_radius":site.arrival_radius,
++                            "continuous_stay_seconds":now.0-started,"started_at":started,"settled_at":now.0});
++                        settled.push((actor_id, lease.clone(), effect));
++                }
++            },
++            G1ReconAction::DeliverReport => {
++                if lease.say_emitted_at.is_none()
++                    || lease.say_recipient_uid != lease.receiver_uid
++                {
++                    let outcome = actor.controller.external_talk.as_ref()
++                        .filter(|talk| talk.request_id == lease.request_id)
++                        .and_then(|talk| talk.outcome);
++                    if let Some(outcome) = outcome.filter(|outcome| *outcome != "native_intent_queued") {
++                        failed.push((actor_id, lease.clone(), outcome.to_owned()));
++                    }
++                    continue;
++                }
++                let Some(receiver_uid) = lease.receiver_uid else {
++                    failed.push((actor_id, lease.clone(), "receiver_uid_missing".to_owned()));
++                    continue;
++                };
++                let Some((_, receiver_wpos, receiver_alive, receiver_loaded, _)) = people.get(&receiver_uid) else {
++                    failed.push((actor_id, lease.clone(), "receiver_disappeared".to_owned()));
++                    continue;
++                };
++                if !receiver_alive || !receiver_loaded {
++                    failed.push((actor_id, lease.clone(), "receiver_dead".to_owned()));
++                    continue;
++                }
++                let distance = actor.wpos.xy().distance(receiver_wpos.xy());
++                let report_id = lease.report_id.clone().unwrap_or_default();
++                if distance > REPORT_DISTANCE || report_id.is_empty()
++                    || !reports.get(&report_id).is_some_and(|report| report.owner_uid == lease.actor_uid)
++                {
++                    failed.push((actor_id, lease.clone(), "native_say_handoff_without_valid_nearby_report".to_owned()));
++                    continue;
++                }
++                new_deliveries.push(G1DeliveryFact {
++                    marker_id: lease.marker_id.clone(),
++                    report_id: report_id.clone(),
++                    from_uid: lease.actor_uid,
++                    to_uid: receiver_uid,
++                    delivered_at: now.0,
++                });
++                let effect = json!({"event":"g1_report_delivered","report_id":report_id,
++                    "from_uid":lease.actor_uid,"to_uid":receiver_uid,
++                    "actual_wpos":[actor.wpos.x,actor.wpos.y,actor.wpos.z],"distance":distance,
++                    "native_interaction":"native_speech_emitted","interaction_request_id":lease.request_id,
++                    "speech_emitted_at":lease.say_emitted_at,
++                    "settled_at":now.0});
++                settled.push((actor_id, lease.clone(), effect));
++            },
++            G1ReconAction::RallyMarker => {
++                let Some(report_id) = lease.report_id.as_ref() else { continue };
++                if !known_reports.get(&lease.actor_uid).is_some_and(|known| known.contains(report_id)) {
++                    failed.push((actor_id, lease.clone(), "leader_no_longer_knows_report".to_owned()));
++                    continue;
++                }
++                let follower = people.iter().find(|(uid, (_, _, alive, loaded, job))| {
++                    *alive && *loaded
++                        && lease.follower_uid.is_none_or(|required| required == **uid)
++                        && matches!(job, Some(Job::Hired(Actor::Npc(hirer), _)) if *hirer == actor_id)
++                });
++                let Some((follower_uid, (_, follower_wpos, _, _, _))) = follower else { continue; };
++                let leader_dist = actor.wpos.xy().distance(vek::Vec2::new(site.wpos[0], site.wpos[1]));
++                let follower_dist = follower_wpos.xy().distance(vek::Vec2::new(site.wpos[0], site.wpos[1]));
++                if leader_dist <= site.arrival_radius && follower_dist <= site.follower_radius {
++                    new_rallies.push(rtsim::data::G1RallyFact {
++                        marker_id: lease.marker_id.clone(), leader_uid: lease.actor_uid,
++                        follower_uid: *follower_uid, report_id: report_id.clone(), settled_at: now.0,
++                    });
++                    let effect = json!({"event":"g1_rally_completed","marker_id":lease.marker_id,
++                        "report_id":report_id,"report_owner_uid":reports.get(report_id).map(|report| report.owner_uid),
++                        "from_uid":reports.get(report_id).map(|report| report.owner_uid),
++                        "follower_uid":*follower_uid,"leader_uid":lease.actor_uid,
++                        "leader_wpos":[actor.wpos.x,actor.wpos.y,actor.wpos.z],
++                        "follower_wpos":[follower_wpos.x,follower_wpos.y,follower_wpos.z],
++                        "leader_radius":site.arrival_radius,"follower_radius":site.follower_radius,
++                        "leader_hired_follower":true,
++                        "leader_knows_report":true,"settled_at":now.0});
++                    settled.push((actor_id, lease.clone(), effect));
++                }
++            },
++        }
++    }
++    for report in new_reports {
++        data.g1_recon.known_reports.entry(report.owner_uid).or_default().insert(report.report_id.clone());
++        data.g1_recon.reports.insert(report.report_id.clone(), report);
++    }
++    for delivery in new_deliveries {
++        data.g1_recon.known_reports.entry(delivery.to_uid).or_default().insert(delivery.report_id.clone());
++        data.g1_recon.completed_deliveries.push(delivery);
++    }
++    data.g1_recon.completed_rallies.extend(new_rallies);
++    for (id, lease, effect) in settled {
++        emit_terminal(rtsim, &lease, now.0, "g1_action_settled", None, vec![effect]);
++        data.npcs[id].controller.g1_recon = None;
++        if data.npcs[id].controller.external_talk.as_ref().is_some_and(|talk| talk.request_id == lease.request_id) {
++            data.npcs[id].controller.external_talk = None;
++        }
++    }
++    for (id, lease, reason) in failed {
++        emit_terminal(rtsim, &lease, now.0, "g1_action_failed", Some(&reason), Vec::new());
++        data.npcs[id].controller.g1_recon = None;
++        if data.npcs[id].controller.external_talk.as_ref().is_some_and(|talk| talk.request_id == lease.request_id) {
++            data.npcs[id].controller.external_talk = None;
++        }
++    }
++}
++
++fn view(rtsim: &RtSim, actor_uid: u64, time: Time) -> Option<Value> {
++    let data = rtsim.state.data();
++    let (_, actor) = data.npcs.iter().find(|(_, npc)| npc.uid == actor_uid)?;
++    let markers = &data.g1_recon.markers;
++    let own_reports = data.g1_recon.reports.values()
++        .filter(|r| r.owner_uid == actor_uid)
++        .cloned().collect::<Vec<_>>();
++    let known_ids = data.g1_recon.known_reports.get(&actor_uid);
++    let known_reports = data.g1_recon.reports.values()
++        .filter(|r| known_ids.is_some_and(|ids| ids.contains(&r.report_id)))
++        .cloned().collect::<Vec<_>>();
++    let own_report_deliveries = data.g1_recon.completed_deliveries.iter()
++        .filter(|delivery| delivery.from_uid == actor_uid || delivery.to_uid == actor_uid)
++        .cloned().collect::<Vec<_>>();
++    let completed_rallies = data.g1_recon.completed_rallies.iter()
++        .filter(|rally| rally.leader_uid == actor_uid)
++        .cloned().collect::<Vec<_>>();
++    let nearby = data.npcs.values().filter_map(|npc| {
++        let distance = npc.wpos.xy().distance(actor.wpos.xy());
++        (npc.uid != actor_uid && distance <= NEARBY_RADIUS).then(|| json!({
++            "uid":npc.uid,"wpos":[npc.wpos.x,npc.wpos.y,npc.wpos.z],"distance":distance,
++            "alive":!npc.is_dead(),"loaded":matches!(npc.mode,SimulationMode::Loaded),
++            "hired_by_uid":match npc.job { Some(Job::Hired(Actor::Npc(hirer),_)) => data.npcs.get(hirer).map(|n|n.uid), _ => None },
++        }))
++    }).collect::<Vec<_>>();
++    Some(json!({
++        "event":"g1_actor_view","schema_version":1,"rule_version":RULE_VERSION,
++        "time":time.0,"actor_uid":actor_uid,"wpos":[actor.wpos.x,actor.wpos.y,actor.wpos.z],
++        "role":format!("{:?}",actor.role),"job":job_label(&actor.job),
++        "mode":if matches!(actor.mode,SimulationMode::Loaded){"loaded"}else{"simulated"},
++        "current_site":actor.current_site.map(|site|format!("{:?}",site)),
++        "home_site":actor.home.map(|site|format!("{:?}",site)),
++        "markers":markers,"own_reports":own_reports,"known_reports":known_reports,
++        "own_report_deliveries":own_report_deliveries,"completed_rallies":completed_rallies,
++        "nearby":nearby,
++        "active_lease":actor.controller.g1_recon.as_ref().map(|lease|json!({
++            "request_id":lease.request_id,"action":format!("{:?}",lease.action),
++            "node_id":lease.node_id,"marker_id":lease.marker_id,"expires_at":lease.expires_at.0,
++        })),
++    }))
++}
++
++pub(super) fn observe(rtsim: &mut RtSim, time: Time) {
++    if rtsim.g1_events_path.is_none() || rtsim.g1_actor_uids.is_empty() { return }
++    if rtsim.last_g1_observation.is_some_and(|last| last.elapsed() < VIEW_INTERVAL) { return }
++    rtsim.last_g1_observation = Some(Instant::now());
++    if rtsim.state.data().g1_recon.markers.is_empty() {
++        let anchor_uid = if rtsim.g1_actor_uids.contains(&476) { 476 }
++            else { rtsim.g1_actor_uids.iter().copied().min().unwrap_or_default() };
++        let mut data = rtsim.state.data_mut();
++        let _ = init_markers(&mut data, anchor_uid);
++    }
++    let mut events = Vec::new();
++    for actor_uid in rtsim.g1_actor_uids.iter().copied() {
++        if let Some(row) = view(rtsim, actor_uid, time) { events.push(row); }
++    }
++    for event in events { emit(rtsim, event); }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::{has_capability, lease_expired, survey_settled_at};
++    use rtsim::data::G1Marker;
++
++    fn marker(kind: &str) -> G1Marker {
++        G1Marker {
++            marker_id: "test".to_owned(),
++            label: "test marker".to_owned(),
++            kind: kind.to_owned(),
++            wpos: [0.0, 0.0],
++            arrival_radius: 4.0,
++            follower_radius: 10.0,
++            survey_seconds: 2.0,
++        }
++    }
++
++    #[test]
++    fn recon_sites_support_survey_and_rally_without_a_hardcoded_sequence() {
++        let site_a = marker("survey_and_rally");
++        let site_b = marker("survey_and_rally");
++        assert!(has_capability(&site_a, "survey"));
++        assert!(has_capability(&site_a, "rally"));
++        assert!(has_capability(&site_b, "survey"));
++        assert!(has_capability(&site_b, "rally"));
++        assert!(!has_capability(&site_a, "survey_and_rally"));
++    }
++
++    #[test]
++    fn survey_requires_continuous_presence_and_restarts_after_interruption() {
++        let mut started = None;
++        assert_eq!(survey_settled_at(&mut started, true, 5.0, 2.0), None);
++        assert_eq!(survey_settled_at(&mut started, false, 6.0, 2.0), None);
++        assert_eq!(started, None);
++        assert_eq!(survey_settled_at(&mut started, true, 7.0, 2.0), None);
++        assert_eq!(survey_settled_at(&mut started, true, 8.99, 2.0), None);
++        assert_eq!(survey_settled_at(&mut started, true, 9.0, 2.0), Some(7.0));
++    }
++
++    #[test]
++    fn ttl_is_terminal_at_the_deadline() {
++        assert!(!lease_expired(9.99, 10.0));
++        assert!(lease_expired(10.0, 10.0));
++        assert!(lease_expired(10.01, 10.0));
++    }
++}
+diff --git a/server/src/rtsim/mod.rs b/server/src/rtsim/mod.rs
+index bf75bd8..2ef0534 100644
+--- a/server/src/rtsim/mod.rs
++++ b/server/src/rtsim/mod.rs
+@@ -1,5 +1,6 @@
+ pub mod event;
+ mod native_recruit;
++mod g1_recon;
+ pub mod rule;
+ pub mod tick;
+ 
+@@ -55,6 +56,12 @@ pub struct RtSim {
+     seen_native_recruit_requests: HashMap<String, String>,
+     terminal_native_recruit_requests: HashSet<String>,
+     last_native_recruit_observation: Option<Instant>,
++    g1_request_path: Option<PathBuf>,
++    g1_events_path: Option<PathBuf>,
++    g1_actor_uids: HashSet<u64>,
++    g1_request_offset: u64,
++    seen_g1_requests: HashMap<String, String>,
++    last_g1_observation: Option<Instant>,
+ }
+ 
+ struct ExternalTelemetryBudget {
+@@ -274,6 +281,28 @@ impl RtSim {
+             seen_native_recruit_requests: HashMap::new(),
+             terminal_native_recruit_requests: HashSet::new(),
+             last_native_recruit_observation: None,
++            g1_request_path: match (
++                std::env::var_os("VELOREN_G1_REQUESTS"),
++                std::env::var_os("VELOREN_G1_EVENTS"),
++            ) {
++                (Some(requests), Some(_)) => Some(PathBuf::from(requests)),
++                _ => None,
++            },
++            g1_events_path: match (
++                std::env::var_os("VELOREN_G1_REQUESTS"),
++                std::env::var_os("VELOREN_G1_EVENTS"),
++            ) {
++                (Some(_), Some(events)) => Some(PathBuf::from(events)),
++                _ => None,
++            },
++            g1_actor_uids: std::env::var("VELOREN_G1_ACTOR_UIDS")
++                .unwrap_or_default()
++                .split(',')
++                .filter_map(|uid| uid.trim().parse::<u64>().ok())
++                .collect(),
++            g1_request_offset: 0,
++            seen_g1_requests: HashMap::new(),
++            last_g1_observation: None,
+         };
+ 
+         rule::start_rules(&mut this.state);
+diff --git a/server/src/rtsim/tick.rs b/server/src/rtsim/tick.rs
+index fba178d..898a131 100644
+--- a/server/src/rtsim/tick.rs
++++ b/server/src/rtsim/tick.rs
+@@ -57,6 +57,16 @@ fn mark_external_terminal(terminal_requests: &mut HashSet<String>, request_id: &
+     terminal_requests.insert(request_id.to_owned())
+ }
+ 
++fn g1_speech_recipient_uid(
++    actor: Actor,
++    persistent_uid_by_npc_id: &HashMap<NpcId, u64>,
++) -> Option<u64> {
++    match actor {
++        Actor::Npc(npc_id) => persistent_uid_by_npc_id.get(&npc_id).copied(),
++        Actor::Character(_) => None,
++    }
++}
++
+ #[derive(Clone, Copy)]
+ struct TalkCatalogCandidate {
+     position: [f32; 2],
+@@ -322,9 +332,11 @@ fn process_external_requests(rtsim: &mut RtSim, now: Time) {
+ #[cfg(test)]
+ mod native_request_tests {
+     use super::{
+-        TalkCatalogCandidate, external_request_conflicts, mark_external_terminal,
++        TalkCatalogCandidate, external_request_conflicts, g1_speech_recipient_uid,
++        mark_external_terminal,
+         select_nearby_talk_pairs, valid_external_source_ttl,
+     };
++    use common::rtsim::{Actor, NpcId};
+     use std::collections::{HashMap, HashSet};
+ 
+     #[test]
+@@ -386,6 +398,16 @@ mod native_request_tests {
+         assert!(mark_external_terminal(&mut terminal, "request-1"));
+         assert!(!mark_external_terminal(&mut terminal, "request-1"));
+     }
++
++    #[test]
++    fn g1_speech_receipt_resolves_typed_rtsim_actor_id_not_ecs_uid() {
++        let recipient = NpcId::default();
++        let persistent_uid_by_npc_id = HashMap::from([(recipient, 476_u64)]);
++        assert_eq!(
++            g1_speech_recipient_uid(Actor::Npc(recipient), &persistent_uid_by_npc_id),
++            Some(476),
++        );
++    }
+ }
+ 
+ pub fn trader_loadout(
+@@ -801,6 +823,7 @@ impl<'a> System<'a> for Sys {
+             .collect::<HashMap<_, _>>();
+ 
+         super::native_recruit::process_requests(rtsim, *time, &loaded_positions);
++        super::g1_recon::process_requests(rtsim, *time);
+         process_external_requests(rtsim, *time);
+         if rtsim.external_request_path.is_some() {
+             let mut data = rtsim.state.data_mut();
+@@ -1104,6 +1127,8 @@ impl<'a> System<'a> for Sys {
+             rtsim.save(/* &slow_jobs, */ false);
+         }
+ 
++        let mut g1_speech_receipts = Vec::new();
++        {
+         let chunk_states = rtsim.state.resource::<ChunkStates>();
+         let data = &mut *rtsim.state.data_mut();
+ 
+@@ -1217,6 +1242,15 @@ impl<'a> System<'a> for Sys {
+         }
+ 
+         // Synchronise rtsim NPC with entity data
++        // Speech receipts carry the original typed rtsim Actor, not the ECS Uid.
++        // Resolve NpcId into the persistent NPC uid namespace before matching a
++        // G1 lease (which is authored against those persistent uids).
++        let g1_npc_uid_by_id: HashMap<NpcId, u64> = data
++            .npcs
++            .npcs
++            .iter()
++            .map(|(npc_id, npc)| (npc_id, npc.uid))
++            .collect();
+         for (entity, pos, rtsim_entity, agent) in (
+             &entities,
+             &positions,
+@@ -1251,6 +1285,7 @@ impl<'a> System<'a> for Sys {
+                                 }));
+                             }
+                             for (action, request_id) in handoff.agent_actions {
++                                let is_say = matches!(&action, common::rtsim::NpcAction::Say(..));
+                                 agent
+                                     .rtsim_controller
+                                     .push_action(action, request_id.clone());
+@@ -1260,11 +1295,36 @@ impl<'a> System<'a> for Sys {
+                                         "request_id": request_id,
+                                         "npc_uid": npc.uid,
+                                         "time": time.0,
+-                                        "action": "Say",
++                                        "action": if is_say { "Say" } else { "other" },
+                                         "destination": "agent_queue",
+                                     }));
+                                 }
+                             }
++                            if let Some(speech_outbox) = &mut agent.rtsim_speech_outbox {
++                                for (request_id, recipient_actor, emitted_at) in
++                                    std::mem::take(speech_outbox)
++                                {
++                                    let recipient_uid = g1_speech_recipient_uid(
++                                        recipient_actor,
++                                        &g1_npc_uid_by_id,
++                                    );
++                                    if let Some(lease) = &mut npc.controller.g1_recon
++                                        && lease.request_id == request_id
++                                        && lease.action == rtsim::data::npc::G1ReconAction::DeliverReport
++                                        && lease.receiver_uid == recipient_uid
++                                        && let Some(recipient_uid) = recipient_uid
++                                    {
++                                        lease.say_emitted_at = Some(emitted_at);
++                                        lease.say_recipient_uid = Some(recipient_uid);
++                                        g1_speech_receipts.push((
++                                            request_id,
++                                            npc.uid,
++                                            recipient_uid,
++                                            emitted_at,
++                                        ));
++                                    }
++                                }
++                            }
+                             if let Some(rtsim_outbox) = &mut agent.rtsim_outbox {
+                                 npc.inbox.extend(
+                                     std::mem::take(rtsim_outbox)
+@@ -1280,5 +1340,20 @@ impl<'a> System<'a> for Sys {
+                 }
+             }
+         }
++        }
++        for (request_id, actor_uid, recipient_uid, emitted_at) in g1_speech_receipts {
++            super::g1_recon::emit_native_speech(
++                rtsim,
++                &request_id,
++                actor_uid,
++                recipient_uid,
++                emitted_at,
++            );
++        }
++
++    // Settle G1 effects only after loaded NPC positions have been synchronized
++    // from the actual ECS entities for this server tick.
++    super::g1_recon::after_tick(rtsim, *time);
++    super::g1_recon::observe(rtsim, *time);
+     }
+ }
+diff --git a/server/src/sys/agent/behavior_tree/mod.rs b/server/src/sys/agent/behavior_tree/mod.rs
+index 24ca56b..582c3da 100644
+--- a/server/src/sys/agent/behavior_tree/mod.rs
++++ b/server/src/sys/agent/behavior_tree/mod.rs
+@@ -629,6 +629,13 @@ fn handle_rtsim_actions(bdata: &mut BehaviorData) -> bool {
+                     }
+                     bdata.controller.push_utterance(UtteranceKind::Greeting);
+                     bdata.agent_data.chat_npc(msg, bdata.emitters);
++                    if let (Some(request_id), Some(target_actor)) =
++                        (external_request_id.as_ref(), target)
++                    {
++                        bdata.agent.rtsim_speech_outbox
++                            .get_or_insert_with(Default::default)
++                            .push_back((request_id.clone(), target_actor, bdata.read_data.time.0));
++                    }
+                     if let Some(request_id) = external_request_id {
+                         crate::rtsim::external_telemetry(serde_json::json!({
+                             "event": "native_speech_emitted",
