@@ -29,6 +29,8 @@
 
 主级独立复跑：本包 **76/76**、原生决策旧回归 **54/54**、Talk 旧回归 **25/25** 通过。新增 9 项覆盖实际动作投影、跨角色依赖、接收者知识负控、在途去重、同生产者多依赖、编辑与过期、OFF、自主动作保留及冷却/次数边界。其中同一双报告观察和同一作者要求下，OFF 下一交付为 A，ON 为 B；这是离线相同输入的具体动作差异，不是只比较 source 标签。真实游戏效果须由下方运行另行判定。
 
+代码检查点 `14bc0f8` 的 exact-head [Veloren 专项 CI](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/39773198702) 为 success；[总体回归](https://github.com/2003SINGER/character-dynamics-lab/actions/runs/39773198698) 为 failure：七个 job 中仅 `e0-keyledger-contract` 失败，其单测 37/38、fixture 13/14，明确为 H02 的 `planner status BUDGET != UNREACHABLE`。Build、CTest、Reference verification、Repository health 及其余 job 均成功。该旧预算问题不改名为不可达、不扩预算或重跑刷绿，也不冒称本轮全仓 CI 通过。后续结果记录提交只补充此事实，不改变已验证代码。主级本地 health check 完成，五项提示涉及旧原文重复、TODO 大小与私有 Rust 依赖文件，不属于失败。
+
 ## 两场真实运行与结论边界
 
 两条件六个初始 world 文件一致、规范化 map 路径后的 settings 一致、作者输入日程一致，42 文件源快照与当前源逐项哈希相符。源快照 manifest SHA-256 为 `500b80a9ce6cb1cd2f7c0f7afa781bd098272d756ec314e6d7a7fb4704a3cae1`。复用 r3 原生二进制 `ea7437da769c95f2e7532bf4cdd9f35979ba4b20f8be832d5dcf622b7fc9c474`，未改原生游戏源码或补丁。
