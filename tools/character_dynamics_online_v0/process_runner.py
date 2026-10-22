@@ -191,6 +191,7 @@ def project_actor_view(view: Mapping[str, Any], *, recruit_view: Mapping[str, An
                                      [_descriptor("own_report", [marker_id])],
                                      [_descriptor("report_delivered", [marker_id, receiver]),
                                       _descriptor("report_known", [marker_id, receiver]),
+                                      _descriptor("known_report_from", [marker_id, uid, receiver]),
                                       _descriptor("event:g1_report_delivered",
                                                   [uid, marker_id, receiver])],
                                      "native:g1_actor_view.markers+authorized-peer",
@@ -816,7 +817,8 @@ def build_observations(latest_views: Mapping[int, Mapping[str, Any]],
 
 
 def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECONDS,
-                author_input_path: Path | None = None) -> Path:
+                author_input_path: Path | None = None,
+                director_enabled: bool | None = None) -> Path:
     """Launch one process from a reviewed freeze; this function is not called in unit tests."""
     freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
     if freeze.get("status") != "READY":
@@ -824,6 +826,12 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
     source, runtime, scenario = freeze.get("source"), freeze.get("runtime"), freeze.get("scenario")
     if not all(isinstance(value, dict) for value in (source, runtime, scenario)):
         raise ValueError("freeze requires source, runtime, and scenario objects")
+    frozen_director = scenario.get("director_enabled", True)
+    if type(frozen_director) is not bool:
+        raise ValueError("scenario.director_enabled must be a boolean")
+    if director_enabled is not None and type(director_enabled) is not bool:
+        raise ValueError("director_enabled override must be a boolean")
+    director_enabled = frozen_director if director_enabled is None else director_enabled
     if source.get("commit") != "1d12f35edd6cdbfc1fb921c167cdd7beeeffe248":
         raise ValueError("source must pin the reviewed Veloren v0.18.0 commit")
     source_files = (("source_patch_path", "source_patch_sha256"),
@@ -884,7 +892,7 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
         raise ValueError("scenario.native_follower_uid must identify a non-session native NPC")
     session = new_process_session(DEFAULT_ACTORS,
                                   goal_specs=_actor_goal_specs(markers, native_follower_uid),
-                                  director_enabled=True)
+                                  director_enabled=director_enabled)
     paths = {name: run_dir / name for name in (
         "native-events.jsonl", "g1-events.jsonl", "g1-requests.jsonl", "recruit-events.jsonl",
         "recruit-requests.jsonl", "author-input.jsonl", "decisions.jsonl",
@@ -1278,8 +1286,11 @@ def main() -> int:
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--author-input", type=Path)
     parser.add_argument("--wall-cap", type=float, default=MAX_WALL_SECONDS)
+    parser.add_argument("--director-off", action="store_true",
+                        help="disable author-goal dispatch and coordination for this run")
     args = parser.parse_args()
-    run_dir = run_process(args.freeze, args.run_id, args.wall_cap, args.author_input)
+    run_dir = run_process(args.freeze, args.run_id, args.wall_cap, args.author_input,
+                          director_enabled=False if args.director_off else None)
     status_path = run_dir / "status.jsonl"
     final_status = None
     if status_path.is_file():

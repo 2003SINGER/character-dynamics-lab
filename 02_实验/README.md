@@ -4,7 +4,7 @@
 
 ## 当前状态与结果复用
 
-2026-10-22 在线作者干预 playtest 本轮停止，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**；实际运行、限制和独立 Judge 初评/勘误摘要见[ONLINE_PLAYTEST_V1](Character_Dynamics_Online_Integration_v0/ONLINE_PLAYTEST_V1.md)，Judge 原文仅本地保存。此前多角色结果、旧 Judge、三组运行和协议由各自 owner 保留。旧 C1/C2 `NO_GO` 仍只作历史候选裁决，不是当前开发停点。此前 [Talk 接口 A](Veloren_Vertical_Slice_v0/RESULTS.md) 和[原生消息→受雇→跟随](Veloren_Native_Decision_Integration_v1/RESULTS.md)的有限证据、早期 PARTIAL 与失败均由原 owner 维护。下一动作见 [TODO](../00_研究设计/TODO.md)。
+2026-10-22 跨角色作者目标协调迭代已停止，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**；已观察到真实跨角色报告交付与作者目标动作排序，但最终会合失败。OFF 监督停更导致完整 ON/OFF 对照未成立。运行事实、限制与 Judge 摘要以[唯一协调 owner](Character_Dynamics_Online_Integration_v0/CROSS_ACTOR_COORDINATION.md)为准；旧 [ONLINE_PLAYTEST_V1](Character_Dynamics_Online_Integration_v0/ONLINE_PLAYTEST_V1.md)、此前多角色结果、旧 Judge、三组运行和协议均保留各自结论。旧 C1/C2 `NO_GO` 仍只作历史候选裁决，不是当前开发停点。此前 [Talk 接口 A](Veloren_Vertical_Slice_v0/RESULTS.md) 和[原生消息→受雇→跟随](Veloren_Native_Decision_Integration_v1/RESULTS.md)的有限证据、早期 PARTIAL 与失败均由原 owner 维护。下一动作见 [TODO](../00_研究设计/TODO.md)。
 
 同日后续 [Open Adventure Online P1 RESULTS](OpenAdventure_Online_P1_v0/RESULTS.md) 已交付原版逐次交互、真实反馈分支与精确重放，DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW，作为独立有限接口检查点保留；不代表全系统 CLOSED。**Open Adventure Planning B0 传统准入与实验**已交付 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止；协议见[PROTOCOL](OpenAdventure_Planning_B0_v0/PROTOCOL.md)，运行、失败与成本只见[唯一 RESULTS](OpenAdventure_Planning_B0_v0/RESULTS.md)。整体三方法比较为 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏；保留下面的整局 Native v0 原证据。
 

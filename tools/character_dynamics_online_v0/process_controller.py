@@ -22,6 +22,7 @@ _AUTHOR_EVENT_SELECTORS = {
     "g1_survey_completed", "g1_report_delivered", "g1_rally_completed",
     "native_recruit_job_observed",
 }
+_MAX_ACTION_ATTEMPTS = 3
 
 
 def _validate_actor_goals(actor_uids: set[int], goal_specs: object) -> list[dict[str, Any]]:
@@ -80,6 +81,7 @@ def new_process_session(actor_uids: Sequence[int], *,
         "director_enabled": director_enabled,
         "actor_goal_specs": goals,
         "author_obligations": {},
+        "author_dependencies": [],
         "plans": {},
         "inflight_by_actor": {},
         "native_history": [],
@@ -441,9 +443,19 @@ def _apply_commands(session: dict[str, Any], commands: Sequence[object], now: fl
             old_plan = session["plans"].get(old_plan_key)
             if old_plan is not None:
                 for node in old_plan["nodes"]:
-                    if node["status"] == "planned":
+                    if node["status"] in ("planned", "retry_blocked"):
                         node["status"] = "invalidated"
                         node["invalidated_reason"] = "author goal edited; executed prefix and pending request retained"
+            # Coordinated producer plans carry the consumer goal/version too.
+            # Invalidate only their unexecuted future suffix; native requests
+            # already in flight remain owned by the runtime.
+            for plan in session["plans"].values():
+                if (plan.get("goal_id") == command["goal_id"]
+                        and plan.get("author_version") == prior["version"]):
+                    for node in plan["nodes"]:
+                        if node["status"] in ("planned", "retry_blocked"):
+                            node["status"] = "invalidated"
+                            node["invalidated_reason"] = "author goal edited; coordinated future work invalidated"
         version = {"version": command["version"], "ast": command["ast"],
                    "source": "AUTHOR", "effective_at": now}
         record["versions"].append(version)
@@ -613,7 +625,20 @@ def _apply_feedback(session: dict[str, Any], feedback: Sequence[object],
                     node["retry_blocked_at"] = float(row["game_time"])
                     node["retry_gate_snapshot"] = _gate_snapshot(
                         actors[actor_uid], inflight.get("retry_gate_keys", []))
-                    node["retry_count"] = int(node.get("retry_count", 0)) + 1
+                    history_row = next((entry for entry in reversed(session["native_history"])
+                                        if entry.get("receipt_id") == receipt_key), None)
+                    if history_row is not None:
+                        history_row["retry_failure"] = True
+                        history_row["retry_gate_snapshot"] = _gate_snapshot(
+                            actors[actor_uid], inflight.get("retry_gate_keys", []))
+                        if row.get("reason") == "native_talk_completed_without_speech":
+                            history_row["retry_cooldown_until"] = float(row["game_time"]) + 15.0
+                    node["retry_count"] = sum(
+                        1 for entry in session["native_history"]
+                        if entry.get("retry_failure") is True
+                        and entry.get("receipt", {}).get("actor_uid") == actor_uid
+                        and entry.get("receipt", {}).get("action") == inflight["primitive"]
+                        and entry.get("receipt", {}).get("args") == inflight["args"])
                     node.setdefault("attempt_history", []).append({
                         "request_id": row["request_id"], "game_time": float(row["game_time"]),
                         "reason": node["retry_reason"]})
@@ -684,7 +709,8 @@ def _make_plan(session: dict[str, Any], actor: dict[str, Any], *, plan_key: str,
         if existing is not None and existing.get("status") == "retry_blocked":
             gate_keys = [_fact_key(item, "retry gate") for item in
                          list(step["preconditions"]) + list(dispatch_preconditions)]
-            if _gate_snapshot(actor, gate_keys) == existing.get("retry_gate_snapshot"):
+            if (int(existing.get("retry_count", 0)) >= _MAX_ACTION_ATTEMPTS
+                    or _gate_snapshot(actor, gate_keys) == existing.get("retry_gate_snapshot")):
                 retry_status = "retry_blocked"
         dependencies = [prior_effect_node[key] for key in
                         (_fact_key(item, "step precondition") for item in step["preconditions"])
@@ -724,6 +750,73 @@ def _make_plan(session: dict[str, Any], actor: dict[str, Any], *, plan_key: str,
             "status": result.get("status"), "reason": result.get("reason"),
             "planner": result.get("planner"), "goal_facts": result.get("goal_facts", list(goals)),
             "nodes": nodes}
+
+
+def _cross_actor_author_dependencies(work_specs: Sequence[Mapping[str, Any]],
+                                     actors: Mapping[int, Mapping[str, Any]],
+                                     native_history: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Find one-step producer actions for missing author-goal preconditions.
+
+    This is a typed action-model join over the current actor-local catalogs.
+    It does not apply predicted effects to any actor state.
+    """
+    dependencies: list[dict[str, Any]] = []
+    seen: set[tuple[Any, ...]] = set()
+    for spec in work_specs:
+        if spec.get("goal_source") != "AUTHOR":
+            continue
+        consumer_uid = spec["actor_uid"]
+        consumer = actors[consumer_uid]
+        target_keys = {_fact_key(fact, "author coordination goal")
+                       for fact in spec.get("goals", [])}
+        target_keys.update(_fact_key(fact, "author coordination goal")
+                           for group in spec.get("ordered_groups", []) for fact in group)
+        for target_key in sorted(target_keys - consumer["facts"]):
+            consumer_actions = [action for action in consumer["catalog"].values()
+                                if target_key in action["effects"]]
+            for consumer_action in consumer_actions:
+                missing = set(consumer_action["preconditions"]) - consumer["facts"]
+                for fact_key in sorted(missing):
+                    candidates = []
+                    for producer_uid, producer in actors.items():
+                        if producer_uid == consumer_uid:
+                            continue
+                        for producer_action in producer["catalog"].values():
+                            if fact_key not in producer_action["effects"]:
+                                continue
+                            candidates.append((producer_action["estimated_cost"], producer_uid,
+                                               producer_action["primitive"],
+                                               json.dumps(producer_action["args"], sort_keys=True,
+                                                          separators=(",", ":")),
+                                               producer_action))
+                    if not candidates:
+                        continue
+                    _, producer_uid, primitive, args_key, producer_action = min(candidates)
+                    identity = (spec["goal_id"], spec["author_version"], consumer_uid, fact_key)
+                    if identity in seen:
+                        continue
+                    seen.add(identity)
+                    producer_args = json_safe(producer_action["args"])
+                    already_settled = any(
+                        row.get("matched") is True
+                        and row.get("receipt", {}).get("event") == "g1_action_settled"
+                        and row.get("receipt", {}).get("actor_uid") == producer_uid
+                        and row.get("receipt", {}).get("action") == primitive
+                        and row.get("receipt", {}).get("args") == producer_args
+                        for row in native_history)
+                    dependencies.append({
+                                "goal_id": spec["goal_id"],
+                                "author_version": spec["author_version"],
+                                "consumer_actor_uid": consumer_uid,
+                                "fact": _decode_fact(fact_key),
+                                "producer_actor_uid": producer_uid,
+                                "producer_primitive": primitive,
+                                "producer_args": producer_args,
+                                "status": ("AWAITING_RECEIVER_OBSERVATION" if already_settled
+                                           else "PENDING"),
+                                "evidence": "typed producer effect matches consumer action precondition",
+                            })
+    return dependencies
 
 
 def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *, game_time: float,
@@ -771,7 +864,7 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
                           if item["verdict"].get("feasibility") != "EXPIRED"
                           and item["verdict"]["status"] not in ("VIOLATED", "SATISFIED")]
     author_order_guards = []
-    for item in active_obligations:
+    for item in active_obligations if state["director_enabled"] else []:
         for order_node in _active_ast_nodes(
                 item["ast"], "event_before", world_facts=world_true,
                 native_history=state["native_history"], now=now,
@@ -791,7 +884,7 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
 
     work_specs = [{**item, "source": "ACTOR", "goal_source": "ACTOR", "author_version": None}
                   for item in state["actor_goal_specs"]]
-    for item in obligations:
+    for item in obligations if state["director_enabled"] else []:
         if (item["verdict"].get("feasibility") == "EXPIRED"
                 or item["verdict"]["status"] in ("VIOLATED", "SATISFIED")):
             if item["verdict"].get("feasibility") == "EXPIRED":
@@ -813,16 +906,35 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
                            "goals": goals, "ordered_groups": groups, "source": "DIRECTOR",
                            "goal_source": "AUTHOR",
                            "author_version": item["version"]})
+    author_dependencies = (_cross_actor_author_dependencies(
+                               work_specs, actors, state["native_history"])
+                           if state["director_enabled"] else [])
+    state["author_dependencies"] = json_safe(author_dependencies)
+    grouped_dependencies: dict[tuple[str, int, int], list[dict[str, Any]]] = {}
+    for dependency in author_dependencies:
+        if dependency["status"] == "AWAITING_RECEIVER_OBSERVATION":
+            continue
+        grouped_dependencies.setdefault((dependency["goal_id"],
+                                         dependency["author_version"],
+                                         dependency["producer_actor_uid"]), []).append(dependency)
+    for (goal_id, author_version, producer_uid), dependencies in grouped_dependencies.items():
+        work_specs.append({"goal_id": goal_id,
+                           "actor_uid": producer_uid,
+                           "goals": [item["fact"] for item in dependencies], "ordered_groups": [],
+                           "source": "DIRECTOR", "goal_source": "AUTHOR",
+                           "author_version": author_version,
+                           "coordination_dependencies": dependencies})
     order_conflict = _has_order_cycle(
         active_obligations, world_facts=world_true, native_history=state["native_history"],
         now=now, coverage=float(coverage) if coverage is not None else None)
-    work_specs.sort(key=lambda item: (0 if item["goal_source"] == "AUTHOR" else 1,
+    work_specs.sort(key=lambda item: (0 if state["director_enabled"]
+                                      and item["goal_source"] == "AUTHOR" else 1,
                                       rank.get(item["goal_id"], len(rank)), item["goal_id"]))
 
     plans: dict[str, Any] = state["plans"]
     requests: list[dict[str, Any]] = []
     blocked: list[dict[str, Any]] = []
-    for item in obligations:
+    for item in obligations if state["director_enabled"] else []:
         if item["verdict"].get("feasibility") == "EXPIRED":
             blocked.append({"code": "AUTHOR_GOAL_EXPIRED", "actor_uid": item["actor_uid"],
                             "goal_id": item["goal_id"], "source": "AUTHOR",
@@ -856,6 +968,25 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
             plan_summaries.append({"plan_key": plan_key, "status": plan["status"],
                                    "nodes": plan["nodes"], "planner": plan["planner"]})
             continue
+        receiver_delivery_inflight = next((dependency for dependency in author_dependencies
+                                           if dependency["consumer_actor_uid"] == actor_uid
+                                           and dependency["producer_primitive"] == "deliver_report"
+                                           and any(
+                                               other_actor != str(actor_uid)
+                                               and other.get("primitive") == "deliver_report"
+                                               and isinstance(other.get("args"), Mapping)
+                                               and other["args"].get("receiver_uid") == actor_uid
+                                               for other_actor, other
+                                               in state["inflight_by_actor"].items())), None)
+        if receiver_delivery_inflight is not None:
+            blocked.append({"code": "AUTHOR_RECEIVER_RESERVED", "actor_uid": actor_uid,
+                            "goal_id": receiver_delivery_inflight["goal_id"],
+                            "author_version": receiver_delivery_inflight["author_version"],
+                            "producer_actor_uid": receiver_delivery_inflight["producer_actor_uid"],
+                            "reason": "an authored cross-actor delivery is in flight to this actor"})
+            plan_summaries.append({"plan_key": plan_key, "status": plan["status"],
+                                   "nodes": plan["nodes"], "planner": plan["planner"]})
+            continue
         trusted_event_facts = {
             fact_key
             for row in state["native_history"] if row.get("matched") is True
@@ -865,13 +996,76 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
         pending_node = None
         for candidate in plan["nodes"]:
             if candidate["status"] == "retry_blocked":
-                blocked.append({"code": "ACTION_RETRY_WAIT", "actor_uid": actor_uid,
-                                "goal_id": spec["goal_id"], "node_id": candidate["node_id"],
-                                "reason": candidate.get("retry_reason"),
-                                "wait_for": "a change in this action's logical or dispatch preconditions"})
-                continue
+                prior_failures = [entry for entry in state["native_history"]
+                                  if entry.get("retry_failure") is True
+                                  and entry.get("receipt", {}).get("actor_uid") == actor_uid
+                                  and entry.get("receipt", {}).get("action") == candidate["primitive"]
+                                  and entry.get("receipt", {}).get("args") == candidate["args"]]
+                if prior_failures:
+                    gate_keys = [_fact_key(fact, "retry gate") for fact in
+                                 list(candidate["preconditions"])
+                                 + list(candidate.get("dispatch_preconditions", []))]
+                    same_gate = (_gate_snapshot(actor, gate_keys)
+                                 == prior_failures[-1].get("retry_gate_snapshot"))
+                    cooldown_until = prior_failures[-1].get("retry_cooldown_until")
+                    if len(prior_failures) >= _MAX_ACTION_ATTEMPTS:
+                        blocked.append({"code": "ACTION_RETRY_LIMIT", "actor_uid": actor_uid,
+                                        "goal_id": spec["goal_id"], "node_id": candidate["node_id"],
+                                        "attempts": len(prior_failures),
+                                        "reason": "bounded native action retry limit reached"})
+                        continue
+                    if cooldown_until is not None and now < float(cooldown_until):
+                        blocked.append({"code": "ACTION_RETRY_COOLDOWN", "actor_uid": actor_uid,
+                                        "goal_id": spec["goal_id"], "node_id": candidate["node_id"],
+                                        "retry_at_or_after": float(cooldown_until),
+                                        "reason": "transient speech completion has a fixed 15 game-second retry delay"})
+                        continue
+                    if same_gate and not (cooldown_until is not None
+                                          and now >= float(cooldown_until)):
+                        blocked.append({"code": "ACTION_RETRY_WAIT", "actor_uid": actor_uid,
+                                        "goal_id": spec["goal_id"], "node_id": candidate["node_id"],
+                                        "reason": candidate.get("retry_reason"),
+                                        "wait_for": "a change in this action's logical or dispatch preconditions"})
+                        continue
+                    candidate["status"] = "planned"
+                else:
+                    blocked.append({"code": "ACTION_RETRY_WAIT", "actor_uid": actor_uid,
+                                    "goal_id": spec["goal_id"], "node_id": candidate["node_id"],
+                                    "reason": candidate.get("retry_reason"),
+                                    "wait_for": "a recorded matched native failure"})
+                    continue
             if candidate["status"] != "planned":
                 continue
+            prior_failures = [entry for entry in state["native_history"]
+                              if entry.get("retry_failure") is True
+                              and entry.get("receipt", {}).get("actor_uid") == actor_uid
+                              and entry.get("receipt", {}).get("action") == candidate["primitive"]
+                              and entry.get("receipt", {}).get("args") == candidate["args"]]
+            if prior_failures:
+                gate_keys = [_fact_key(fact, "retry gate") for fact in
+                             list(candidate["preconditions"])
+                             + list(candidate.get("dispatch_preconditions", []))]
+                current_gate = _gate_snapshot(actor, gate_keys)
+                last_failed_gate = prior_failures[-1].get("retry_gate_snapshot")
+                cooldown_until = prior_failures[-1].get("retry_cooldown_until")
+                if cooldown_until is not None and now < float(cooldown_until):
+                    blocked.append({"code": "ACTION_RETRY_COOLDOWN", "actor_uid": actor_uid,
+                                    "goal_id": spec["goal_id"], "node_id": candidate["node_id"],
+                                    "retry_at_or_after": float(cooldown_until),
+                                    "reason": "transient speech completion has a fixed 15 game-second retry delay"})
+                    continue
+                if len(prior_failures) >= _MAX_ACTION_ATTEMPTS:
+                    blocked.append({"code": "ACTION_RETRY_LIMIT", "actor_uid": actor_uid,
+                                    "goal_id": spec["goal_id"], "node_id": candidate["node_id"],
+                                    "attempts": len(prior_failures),
+                                    "reason": "bounded native action retry limit reached"})
+                    continue
+                if current_gate == last_failed_gate and not (
+                        cooldown_until is not None and now >= float(cooldown_until)):
+                    blocked.append({"code": "ACTION_RETRY_WAIT", "actor_uid": actor_uid,
+                                    "goal_id": spec["goal_id"], "node_id": candidate["node_id"],
+                                    "reason": "same typed precondition state as the last native failure"})
+                    continue
             unresolved_dependencies = [node_id for node_id in candidate.get("dependencies", [])
                                        if status_by_node.get(node_id) != "executed"]
             if unresolved_dependencies:
@@ -969,6 +1163,8 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
                    "dependencies": pending_node["dependencies"],
                    "provenance": pending_node["provenance"], "observed_time": now,
                    "rule_version": "recon-v1", "ttl_seconds": 120.0}
+        if spec.get("coordination_dependencies") is not None:
+            request["author_dependencies"] = json_safe(spec["coordination_dependencies"])
         requests.append(request)
         state["inflight_by_actor"][str(actor_uid)] = {"request_id": request_id,
                                                        "node_id": pending_node["node_id"],
@@ -1005,10 +1201,28 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
     for actor_uid, actor in actors.items():
         state["observation_ids"][str(actor_uid)] = actor["observation_id"]
     state["decision_sequence"] = int(state["decision_sequence"]) + 1
+    for dependency in author_dependencies:
+        producer_inflight = state["inflight_by_actor"].get(
+            str(dependency["producer_actor_uid"]))
+        if (producer_inflight is not None
+                and producer_inflight.get("primitive") == dependency["producer_primitive"]
+                and producer_inflight.get("args") == dependency["producer_args"]
+                and producer_inflight.get("goal_id") == dependency["goal_id"]
+                and producer_inflight.get("author_version") == dependency["author_version"]):
+            dependency["status"] = "IN_FLIGHT"
+        elif any(request["actor_uid"] == dependency["producer_actor_uid"]
+                 and request["primitive"] == dependency["producer_primitive"]
+                 and request["args"] == dependency["producer_args"]
+                 and request["goal_id"] == dependency["goal_id"]
+                 and request["author_version"] == dependency["author_version"]
+                 for request in requests):
+            dependency["status"] = "REQUESTED"
+    state["author_dependencies"] = json_safe(author_dependencies)
     decision = {"sequence": state["decision_sequence"], "game_time": now,
                 "sources": {"native": "NATIVE", "actor_goals": "ACTOR",
                             "author_goals": "AUTHOR", "coordination": "DIRECTOR"},
                 "director_enabled": state["director_enabled"],
+                "author_coordination": {"dependencies": json_safe(author_dependencies)},
                 "author_commands_applied": commands, "feedback_applied": feedback_applied,
                 "author_obligations": author_status, "plans": plan_summaries,
                 "requests": requests, "blocked": blocked,

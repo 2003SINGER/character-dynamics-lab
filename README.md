@@ -26,7 +26,7 @@ P1/P2、P3-A/B、P3-C0/C1a 与 P4-0 保留各自历史结果 owner。P5 Author B
 
 ## 从这里进入
 
-2026-10-22 在线作者干预 playtest 本轮停止，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**；运行事实、未实现目标与独立 Judge 初评/勘误摘要见[ONLINE_PLAYTEST_V1](02_实验/Character_Dynamics_Online_Integration_v0/ONLINE_PLAYTEST_V1.md)，Judge 原文仅本地保存。此前多角色结果与旧三组运行由各自既有 owner 保留，不改写。成熟方法是复用基础，旧 C1/C2 `NO_GO` 不再是当前开发停点。
+2026-10-22 跨角色作者目标协调迭代已停止，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**；系统实际协调并执行了跨角色报告交付与作者目标动作排序，但最终会合失败。OFF 运行的监督链中断，完整 ON/OFF 对照未成立。当前事实、限制与审阅边界以[唯一协调 owner](02_实验/Character_Dynamics_Online_Integration_v0/CROSS_ACTOR_COORDINATION.md)为准；Judge 摘要也从该 owner 进入，私有原文不公开。旧 [ONLINE_PLAYTEST_V1](02_实验/Character_Dynamics_Online_Integration_v0/ONLINE_PLAYTEST_V1.md) 与更早历史保持原结论。
 
 2026-10-18 [Veloren 原生高层决策接入](02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md) 完成最后一对 Loaded Msg 修复验证：**ROUTING / HIRE / FOLLOW 有限 PASS，READY_FOR_INDEPENDENT_REVIEW，已停止**。ON仅1请求，442经原生消息处理受雇于476，并自行跟随、水平移动11.82m；计时超调与日志展示限制见唯一RESULTS，不宣称完整系统或方法优势。`ab6dad9` 的6尝试/0 Hired与旧协议偏差仍保留PARTIAL；此前 [Talk 接口 A](02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 有限 PASS / FROZEN。该结果本身没有接入作者层；后续整合由上方新授权工作包继续，F0/F1、冻结 C++ 和 main 不动。
 
