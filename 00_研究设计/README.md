@@ -4,7 +4,9 @@
 
 ## 项目架构定位
 
-2026-10-22 跨角色作者目标协调迭代已停止，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**。已观察到真实跨角色报告交付和作者目标动作排序，但最终会合失败；OFF 监督停更使完整 ON/OFF 对照未成立。运行事实、限制与 Judge 摘要以[唯一协调 owner](../02_实验/Character_Dynamics_Online_Integration_v0/CROSS_ACTOR_COORDINATION.md)为准。旧[ONLINE_PLAYTEST_V1](../02_实验/Character_Dynamics_Online_Integration_v0/ONLINE_PLAYTEST_V1.md)、多角色结果、旧 Judge、三组运行及协议均保留原结论。成熟方法为复用基础；旧 C1/C2 `NO_GO` 仅描述历史候选，不是当前开发停点。此前[高层接入](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md)及 [Talk 接口 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 的有限证据和失败均保留。
+2026-10-24 Character Dynamics Online Integration v0 基础稳定化已完成离线验收，本轮停止，状态为 **`DEVELOPMENT / OFFLINE_VERIFIED / NATIVE_NOT_RUN / READY_FOR_INDEPENDENT_REVIEW`**。原生新验证因空间不足未运行；详情见[唯一 owner](../02_实验/Character_Dynamics_Online_Integration_v0/RUNTIME_CONTINUITY.md)。
+
+2026-10-22 跨角色作者目标协调迭代的历史状态为 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**。已观察到真实跨角色报告交付和作者目标动作排序，但最终会合失败；OFF 监督停更使完整 ON/OFF 对照未成立。该轮事实、限制与 Judge 摘要以[历史 owner](../02_实验/Character_Dynamics_Online_Integration_v0/CROSS_ACTOR_COORDINATION.md)为准。旧[ONLINE_PLAYTEST_V1](../02_实验/Character_Dynamics_Online_Integration_v0/ONLINE_PLAYTEST_V1.md)、多角色结果、旧 Judge、三组运行及协议均保留原结论。成熟方法为复用基础；旧 C1/C2 `NO_GO` 仅描述历史候选，不是当前开发停点。此前[高层接入](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md)及 [Talk 接口 A](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md) 的有限证据和失败均保留。
 
 2026-10-14 Open Adventure B0 传统准入与实验已交付，状态 `DEVELOPMENT / READY_FOR_INDEPENDENT_REVIEW`，本轮停止。P1 仍是独立有限在线接口检查点；三方法比较整体 `PARTIAL`，B1/B2 `DEFERRED_BY_USER`，该B0检查点未调用模型，未自动启动新游戏。范围见[固定协议](../02_实验/OpenAdventure_Planning_B0_v0/PROTOCOL.md)，结果只见[唯一 RESULTS](../02_实验/OpenAdventure_Planning_B0_v0/RESULTS.md)。
 

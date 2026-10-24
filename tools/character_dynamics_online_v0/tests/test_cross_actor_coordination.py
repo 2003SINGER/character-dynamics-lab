@@ -64,6 +64,38 @@ def rally_actor_goal(marker_id: str):
 
 
 class CrossActorCoordinationTests(unittest.TestCase):
+    def test_missing_producer_view_does_not_release_authored_delivery_receiver(self):
+        marker = "marker-b"
+        session = new_process_session([SCOUT_UID, LEADER_UID],
+                                      goal_specs=rally_actor_goal(marker))
+        initial = views(10.0, marker, scout_reports=[{
+            "marker_id": marker, "report_id": "native-report-b", "surveyed_at": 9.0}])
+        first = step_process(session, initial, game_time=10.0,
+                             author_commands=[author_rally(marker)])
+        authored_delivery = next(row for row in first["decision"]["requests"]
+                                 if row["actor_uid"] == SCOUT_UID
+                                 and row["primitive"] == "deliver_report")
+        actor_plan_key = f"{LEADER_UID}:ACTOR:leader-rally"
+        self.assertIn(actor_plan_key, first["session"]["plans"])
+        actor_plan_nodes = first["session"]["plans"][actor_plan_key]["nodes"]
+
+        # The producer has no new view. The receiver's fresh view now makes
+        # its ACTOR rally dispatchable, but the correlated authored delivery
+        # still reserves that receiver until its terminal arrives.
+        partial = views(11.0, marker)
+        partial["actors"] = [row for row in partial["actors"]
+                             if row["actor_uid"] == LEADER_UID]
+        waiting = step_process(first["session"], partial, game_time=11.0,
+                               available_actor_uids=[LEADER_UID])
+        self.assertFalse(any(row["actor_uid"] == LEADER_UID
+                             and row["primitive"] == "rally_marker"
+                             for row in waiting["decision"]["requests"]))
+        self.assertIn("AUTHOR_RECEIVER_RESERVED",
+                      [row["code"] for row in waiting["decision"]["blocked"]])
+        self.assertEqual(waiting["session"]["inflight_by_actor"][str(SCOUT_UID)]["request_id"],
+                         authored_delivery["request_id"])
+        self.assertEqual(waiting["session"]["plans"][actor_plan_key]["nodes"], actor_plan_nodes)
+
     def test_missing_leader_report_selects_real_scout_delivery_and_records_dependency(self):
         marker = "marker-b"
         observations = views(10.0, marker, scout_reports=[{

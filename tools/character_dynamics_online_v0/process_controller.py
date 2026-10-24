@@ -623,14 +623,16 @@ def _apply_feedback(session: dict[str, Any], feedback: Sequence[object],
                     node["status"] = "retry_blocked"
                     node["retry_reason"] = row.get("reason", "native action failed")
                     node["retry_blocked_at"] = float(row["game_time"])
-                    node["retry_gate_snapshot"] = _gate_snapshot(
-                        actors[actor_uid], inflight.get("retry_gate_keys", []))
+                    gate_keys = inflight.get("retry_gate_keys", [])
+                    retry_gate = (_gate_snapshot(actors[actor_uid], gate_keys)
+                                  if actor_uid in actors else
+                                  [[key, None] for key in sorted(set(gate_keys))])
+                    node["retry_gate_snapshot"] = retry_gate
                     history_row = next((entry for entry in reversed(session["native_history"])
                                         if entry.get("receipt_id") == receipt_key), None)
                     if history_row is not None:
                         history_row["retry_failure"] = True
-                        history_row["retry_gate_snapshot"] = _gate_snapshot(
-                            actors[actor_uid], inflight.get("retry_gate_keys", []))
+                        history_row["retry_gate_snapshot"] = retry_gate
                         if row.get("reason") == "native_talk_completed_without_speech":
                             history_row["retry_cooldown_until"] = float(row["game_time"]) + 15.0
                     node["retry_count"] = sum(
@@ -822,7 +824,8 @@ def _cross_actor_author_dependencies(work_specs: Sequence[Mapping[str, Any]],
 def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *, game_time: float,
                  author_commands: Sequence[object] = (), feedback: Sequence[object] = (),
                  director_hint: Mapping[str, Any] | None = None,
-                 request_budget_remaining: int | None = None) -> dict[str, Any]:
+                 request_budget_remaining: int | None = None,
+                 available_actor_uids: Sequence[int] | None = None) -> dict[str, Any]:
     """Consume fresh per-actor views and receipts, then propose ready primitives.
 
     ``world_facts`` is deliberately excluded from every actor's HTN state.
@@ -833,13 +836,27 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
         raise ContractError("unsupported process session schema")
     if not finite_number(game_time) or game_time < 0:
         raise ContractError("game_time must be absolute and finite")
+    previous_game_time = state.get("last_game_time")
+    if (previous_game_time is not None
+            and (not finite_number(previous_game_time) or game_time < previous_game_time)):
+        raise ContractError("process game_time cannot move backwards")
     if (request_budget_remaining is not None
             and (type(request_budget_remaining) is not int or request_budget_remaining < 0)):
         raise ContractError("request_budget_remaining must be a non-negative integer or None")
     now = float(game_time)
     actors = validate_process_observations(observations, now)
-    if set(actors) != set(state["actor_uids"]):
-        raise ContractError("one fresh actor observation is required for every session actor")
+    if available_actor_uids is None:
+        available = set(state["actor_uids"])
+    else:
+        if (not isinstance(available_actor_uids, Sequence)
+                or isinstance(available_actor_uids, (str, bytes))):
+            raise ContractError("available_actor_uids must be an array of session actor IDs")
+        available_rows = [uid(value, "available_actor_uid") for value in available_actor_uids]
+        if len(set(available_rows)) != len(available_rows):
+            raise ContractError("available_actor_uids must not contain duplicates")
+        available = set(available_rows)
+    if available != set(actors) or not available.issubset(set(state["actor_uids"])):
+        raise ContractError("available_actor_uids must exactly match a subset of session actor observations")
     for actor_uid, actor in actors.items():
         previous = state["observation_ids"].get(str(actor_uid))
         if previous == actor["observation_id"]:
@@ -908,7 +925,8 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
                            "author_version": item["version"]})
     author_dependencies = (_cross_actor_author_dependencies(
                                work_specs, actors, state["native_history"])
-                           if state["director_enabled"] else [])
+                           if state["director_enabled"] and available == set(state["actor_uids"])
+                           else [])
     state["author_dependencies"] = json_safe(author_dependencies)
     grouped_dependencies: dict[tuple[str, int, int], list[dict[str, Any]]] = {}
     for dependency in author_dependencies:
@@ -924,6 +942,9 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
                            "source": "DIRECTOR", "goal_source": "AUTHOR",
                            "author_version": author_version,
                            "coordination_dependencies": dependencies})
+    # Plans and in-flight work for unavailable actors remain in the same
+    # session untouched; only current actor views may produce proposals.
+    work_specs = [item for item in work_specs if item["actor_uid"] in available]
     order_conflict = _has_order_cycle(
         active_obligations, world_facts=world_true, native_history=state["native_history"],
         now=now, coverage=float(coverage) if coverage is not None else None)
@@ -968,16 +989,15 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
             plan_summaries.append({"plan_key": plan_key, "status": plan["status"],
                                    "nodes": plan["nodes"], "planner": plan["planner"]})
             continue
-        receiver_delivery_inflight = next((dependency for dependency in author_dependencies
-                                           if dependency["consumer_actor_uid"] == actor_uid
-                                           and dependency["producer_primitive"] == "deliver_report"
-                                           and any(
-                                               other_actor != str(actor_uid)
-                                               and other.get("primitive") == "deliver_report"
-                                               and isinstance(other.get("args"), Mapping)
-                                               and other["args"].get("receiver_uid") == actor_uid
-                                               for other_actor, other
-                                               in state["inflight_by_actor"].items())), None)
+        receiver_delivery_inflight = next((
+            {**other, "producer_actor_uid": int(other_actor)}
+            for other_actor, other in state["inflight_by_actor"].items()
+            if other_actor != str(actor_uid)
+            and other.get("source") == "DIRECTOR"
+            and type(other.get("author_version")) is int
+            and other.get("primitive") == "deliver_report"
+            and isinstance(other.get("args"), Mapping)
+            and other["args"].get("receiver_uid") == actor_uid), None)
         if receiver_delivery_inflight is not None:
             blocked.append({"code": "AUTHOR_RECEIVER_RESERVED", "actor_uid": actor_uid,
                             "goal_id": receiver_delivery_inflight["goal_id"],
@@ -1201,6 +1221,7 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
     for actor_uid, actor in actors.items():
         state["observation_ids"][str(actor_uid)] = actor["observation_id"]
     state["decision_sequence"] = int(state["decision_sequence"]) + 1
+    state["last_game_time"] = now
     for dependency in author_dependencies:
         producer_inflight = state["inflight_by_actor"].get(
             str(dependency["producer_actor_uid"]))
@@ -1221,6 +1242,10 @@ def step_process(session: Mapping[str, Any], observations: Mapping[str, Any], *,
     decision = {"sequence": state["decision_sequence"], "game_time": now,
                 "sources": {"native": "NATIVE", "actor_goals": "ACTOR",
                             "author_goals": "AUTHOR", "coordination": "DIRECTOR"},
+                "actor_availability": {
+                    "available_actor_uids": sorted(available),
+                    "unavailable_actor_uids": sorted(set(state["actor_uids"]) - available),
+                    "reason": "fresh_observation_required_for_actor_dispatch"},
                 "director_enabled": state["director_enabled"],
                 "author_coordination": {"dependencies": json_safe(author_dependencies)},
                 "author_commands_applied": commands, "feedback_applied": feedback_applied,

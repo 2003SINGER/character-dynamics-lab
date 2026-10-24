@@ -4,7 +4,7 @@ import unittest
 
 from tools.character_dynamics_online_v0 import new_process_session, step_process
 from tools.character_dynamics_online_v0.process_controller import (
-    _event_facts, _fact_key, _monitor_ast,
+    _event_facts, _fact_key, _monitor_ast, ContractError,
 )
 from tools.character_dynamics_online_v0.process_planning import (
     plan_fact_goals, validate_process_observations,
@@ -49,6 +49,72 @@ def settlement(request, when, effects, *, event_id="evt-1", node_id=None,
 
 
 class MultiActorProcessCoreTests(unittest.TestCase):
+    def test_partial_actor_cycle_processes_missing_actor_terminal_and_recovers_fresh(self):
+        a10 = action("work10", {}, [], [{"predicate": "done", "args": [10]}])
+        a20 = action("work20", {}, [{"predicate": "ready", "args": [20]}],
+                     [{"predicate": "done", "args": [20]}])
+        session = new_process_session([10, 20], goal_specs=[
+            {"goal_id": "g10", "actor_uid": 10, "source": "ACTOR",
+             "goals": [{"predicate": "done", "args": [10]}]},
+            {"goal_id": "g20", "actor_uid": 20, "source": "ACTOR",
+             "goals": [{"predicate": "done", "args": [20]}]},
+        ])
+        first = step_process(session, observations(1.0, [
+                  actor(10, "10-v1", [], [a10]), actor(20, "20-v1", [fact("ready", 20)], [a20])]),
+            game_time=1.0)
+        req20 = next(row for row in first["decision"]["requests"] if row["actor_uid"] == 20)
+        failed = {"event": "g1_action_failed", "request_id": req20["request_id"],
+                  "actor_uid": 20, "node_id": req20["node_id"], "action": req20["primitive"],
+                  "args": req20["args"], "game_time": 2.0, "reason": "native_rejected",
+                  "effects": [], "source": req20["source"], "goal_id": req20["goal_id"],
+                  "author_version": req20["author_version"], "event_id": "fail-20"}
+        partial = step_process(first["session"], observations(2.0, [
+            actor(10, "10-v2", [], [a10])]), game_time=2.0, feedback=[failed],
+            available_actor_uids=[10])
+        self.assertTrue(partial["decision"]["feedback_applied"][0]["matched"])
+        self.assertNotIn("20", partial["session"]["inflight_by_actor"])
+        self.assertEqual(partial["session"]["observation_ids"]["20"], "20-v1")
+        retry_node = next(node for plan in partial["session"]["plans"].values()
+                          for node in plan["nodes"] if node["node_id"] == req20["node_id"])
+        self.assertEqual(retry_node["retry_gate_snapshot"], [["[\"ready\",[20]]", None]])
+        self.assertIn("10", partial["session"]["inflight_by_actor"])
+
+        restored_unknown = step_process(partial["session"], observations(3.0, [
+            actor(20, "20-v2", [fact("ready", 20, value=None)], [a20])]), game_time=3.0,
+            available_actor_uids=[20])
+        self.assertFalse(any(row["actor_uid"] == 20 for row in restored_unknown["decision"]["requests"]))
+        self.assertEqual(restored_unknown["session"]["native_history"][-1]["retry_gate_snapshot"],
+                         [["[\"ready\",[20]]", None]])
+        self.assertIn("10", restored_unknown["session"]["inflight_by_actor"])
+
+        restored_known = step_process(restored_unknown["session"], observations(4.0, [
+            actor(20, "20-v3", [fact("ready", 20)], [a20])]), game_time=4.0,
+            available_actor_uids=[20])
+        self.assertEqual(len(restored_known["decision"]["requests"]), 1)
+        self.assertEqual(restored_known["decision"]["requests"][0]["actor_uid"], 20)
+        self.assertIn("10", restored_known["session"]["inflight_by_actor"])
+
+    def test_empty_maintenance_cycle_updates_author_deadline_without_actor_view(self):
+        session = new_process_session([10])
+        command = {"op": "append", "goal_id": "deadline", "version": 1,
+                   "actor_uid": 10, "ast": {"op": "deadline",
+                   "event": {"event": "g1_rally_completed", "args": [10, "m", 30]}, "at": 5.0}}
+        first = step_process(session, observations(1.0, [actor(10, "v1", [], [])]),
+                             game_time=1.0, author_commands=[command])
+        maintenance = step_process(first["session"], observations(6.0, []), game_time=6.0,
+                                   available_actor_uids=[])
+        obligation = maintenance["decision"]["author_obligations"][0]
+        self.assertEqual(obligation["status"], "UNKNOWN")
+        self.assertEqual(obligation["versions"][0]["feasibility"], "EXPIRED")
+
+    def test_controller_rejects_game_time_regression(self):
+        session = new_process_session([10])
+        first = step_process(session, observations(2.0, [actor(10, "v1", [], [])]),
+                             game_time=2.0)
+        with self.assertRaisesRegex(ContractError, "cannot move backwards"):
+            step_process(first["session"], observations(1.0, [actor(10, "v2", [], [])]),
+                         game_time=1.0)
+
     def test_late_deadline_witness_keeps_historical_status_unknown_without_coverage(self):
         ast = {"op": "deadline", "event": {"event": "g1_rally_completed",
                "args": [10, "m-a", 30]}, "at": 4.0}
@@ -594,19 +660,40 @@ class MultiActorProcessCoreTests(unittest.TestCase):
                          repr(appended["decision"]["requests"]))
         edited = step_process(appended["session"], views(13.0, scout_reports=own_a), game_time=13.0,
                               author_commands=[schedule[2]["command"]])
+        v1_delivery = next(request for request in appended["decision"]["requests"]
+                           if request["primitive"] == "deliver_report")
+        self.assertEqual(v1_delivery["author_version"], 1)
+        self.assertEqual(edited["session"]["inflight_by_actor"][str(SCOUT_UID)]["request_id"],
+                         v1_delivery["request_id"])
         rally = next((request for request in edited["decision"]["requests"]
                       if request["primitive"] == "rally_marker"), None)
-        self.assertIsNotNone(rally, repr(edited["decision"]))
+        self.assertIsNone(rally, repr(edited["decision"]["requests"]))
+        settled_v1 = {"event": "g1_action_settled", "request_id": v1_delivery["request_id"],
+                      "actor_uid": SCOUT_UID, "node_id": v1_delivery["node_id"],
+                      "action": "deliver_report", "args": v1_delivery["args"],
+                      "game_time": 14.0, "effects": [
+                          {"predicate": "report_delivered",
+                           "args": ["marker-a", LEADER_UID]},
+                          {"predicate": "event:g1_report_delivered",
+                           "args": [SCOUT_UID, "marker-a", LEADER_UID]}],
+                      "source": "DIRECTOR", "goal_id": v1_delivery["goal_id"],
+                      "author_version": 1, "event_id": "v1-delivery-settled-after-edit"}
+        settled_then_resume = step_process(
+            edited["session"], views(14.0, scout_reports=own_a), game_time=14.0,
+            feedback=[settled_v1])
+        rally = next((request for request in settled_then_resume["decision"]["requests"]
+                      if request["primitive"] == "rally_marker"), None)
+        self.assertIsNotNone(rally, repr(settled_then_resume["decision"]))
         self.assertEqual(rally["source"], "DIRECTOR")
         self.assertEqual(rally["goal_id"], "g2-leader-rally-deadline")
         self.assertEqual(rally["author_version"], 2)
         self.assertEqual(rally["args"], {"marker_id": "marker-b", "follower_uid": follower_uid})
-        self.assertIn(prefix_event, repr(edited["session"]["native_history"]))
-        deadlines = [node["at"] for version in edited["session"]["author_obligations"][
+        self.assertIn(prefix_event, repr(settled_then_resume["session"]["native_history"]))
+        deadlines = [node["at"] for version in settled_then_resume["session"]["author_obligations"][
             "g2-leader-rally-deadline"]["versions"] for node in
             [version["ast"]] if node.get("op") == "deadline"]
         self.assertEqual(deadlines, [250.0, 250.0])
-        self.assertTrue(edited["decision"]["world_facts_used_only_for_author_monitor"])
+        self.assertTrue(settled_then_resume["decision"]["world_facts_used_only_for_author_monitor"])
 
 
 if __name__ == "__main__":

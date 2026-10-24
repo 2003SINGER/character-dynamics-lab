@@ -572,6 +572,77 @@ def loaded_process_readiness(views: Mapping[int, Mapping[str, Any]],
     return True, "loaded_native_inputs_ready"
 
 
+def native_view_timestamp_is_fresh(actor_uid: int, view_time: object,
+                                   last_view_times: dict[int, float]) -> bool:
+    """Admit only strictly advancing native timestamps for each actor."""
+    if not _finite(view_time) or view_time < 0:
+        return False
+    previous = last_view_times.get(actor_uid)
+    if previous is not None and view_time <= previous:
+        return False
+    last_view_times[actor_uid] = float(view_time)
+    return True
+
+
+def runtime_available_actor_uids(views: Mapping[int, Mapping[str, Any]],
+                                 fresh_actor_uids: Sequence[int],
+                                 game_time: float) -> set[int]:
+    """Return this cycle's loaded actor views within the frozen 2s freshness bound."""
+    return set(DEFAULT_ACTORS) - set(runtime_actor_unavailability_reasons(
+        views, fresh_actor_uids, game_time))
+
+
+def runtime_actor_unavailability_reasons(views: Mapping[int, Mapping[str, Any]],
+                                         fresh_actor_uids: Sequence[int],
+                                         game_time: float) -> dict[int, str]:
+    reasons = {}
+    fresh = set(fresh_actor_uids)
+    for uid in DEFAULT_ACTORS:
+        view = views.get(uid)
+        if view is None:
+            reasons[uid] = "no_native_view_received"
+        elif str(view.get("mode", "")).lower() != "loaded":
+            reasons[uid] = "actor_not_loaded"
+        elif not _finite(view.get("time")):
+            reasons[uid] = "native_view_time_invalid"
+        elif view["time"] > game_time:
+            reasons[uid] = "native_view_time_in_future"
+        elif game_time - view["time"] > 2.0:
+            reasons[uid] = "native_view_stale_over_2s"
+        elif uid not in fresh:
+            reasons[uid] = "no_new_native_view_this_cycle"
+    return reasons
+
+
+def runtime_recruit_view(recruit_view: Mapping[str, Any] | None,
+                         recruit_view_observed: bool,
+                         game_time: float) -> Mapping[str, Any] | None:
+    """Do not project an old roster into a fresh leader observation."""
+    if (not recruit_view_observed or not isinstance(recruit_view, Mapping)
+            or recruit_view.get("event") != "native_recruit_actor_view"
+            or recruit_view.get("version") != 1
+            or recruit_view.get("npc_uid") != LEADER_UID
+            or str(recruit_view.get("mode", "")).lower() != "loaded"):
+        return None
+    view_time = recruit_view.get("time")
+    if (not _finite(view_time) or view_time > game_time or game_time - view_time > 2.0):
+        return None
+    return recruit_view
+
+
+def runtime_controller_cycle_due(*, warmup_completed: bool,
+                                 all_actor_views_loaded: bool,
+                                 fresh_actor_uids: Sequence[int],
+                                 pending_feedback: Sequence[object],
+                                 game_time: float,
+                                 last_controller_game_time: float) -> bool:
+    """Keep strict startup; afterward run on partial views, receipts, or native time."""
+    if not warmup_completed:
+        return all_actor_views_loaded and set(fresh_actor_uids) == set(DEFAULT_ACTORS)
+    return (bool(fresh_actor_uids) or bool(pending_feedback)
+            or game_time > last_controller_game_time)
+
+
 def build_process_environment(base_env: Mapping[str, str], source: Mapping[str, Any],
                               runtime: Mapping[str, Any], paths: Mapping[str, Path],
                               userdata: Path, actor_uids: Sequence[int],
@@ -797,10 +868,16 @@ def build_observations(latest_views: Mapping[int, Mapping[str, Any]],
                        latest_recruit_view: Mapping[str, Any] | None,
                        native_follower_uid: int,
                        world_facts: Sequence[Mapping[str, Any]] = (),
-                       event_coverage_through: float | None = None) -> dict[str, Any]:
+                       event_coverage_through: float | None = None,
+                       available_actor_uids: Sequence[int] | None = None) -> dict[str, Any]:
     actors = []
     times = []
+    available = set(latest_views) if available_actor_uids is None else set(available_actor_uids)
+    if not available.issubset(set(DEFAULT_ACTORS)) or not available.issubset(set(latest_views)):
+        raise ValueError("available actor views must be a subset of the supplied session views")
     for uid in DEFAULT_ACTORS:
+        if uid not in available:
+            continue
         view = latest_views[uid]
         recruit = latest_recruit_view if uid == LEADER_UID else None
         projected = project_actor_view(view, recruit_view=recruit,
@@ -811,7 +888,7 @@ def build_observations(latest_views: Mapping[int, Mapping[str, Any]],
                        ("actor_uid", "observation_id", "facts", "action_models")})
     # Game time remains absolute; actor-specific source timestamps stay with
     # their raw views and are logged by the caller rather than collapsed away.
-    game_time = max(times)
+    game_time = max(times, default=0.0)
     return {"schema": SCHEMA, "game_time": game_time, "actors": actors,
             "world_facts": list(world_facts), "event_coverage_through": event_coverage_through}
 
@@ -909,6 +986,7 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                     else [JsonlTail(paths["author-input.jsonl"])])
     views: dict[int, dict[str, Any]] = {}
     view_sequences = {uid: 0 for uid in DEFAULT_ACTORS}
+    last_view_times: dict[int, float] = {}
     recruit_view: dict[str, Any] | None = None
     recruit_view_observed = False
     pending_feedback: list[dict[str, Any]] = []
@@ -930,6 +1008,8 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
     demo_schedule = None
     fresh_since_cycle: set[int] = set()
     latest_game_time = 0.0
+    last_native_event_time: float | None = None
+    last_controller_game_time = 0.0
     warmup_baseline_logged = False
     last_readiness_note: str | None = None
     native_follower_hired = False
@@ -982,12 +1062,28 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                 # budget as G1/recruit receipts and controller output.
                 for _row in native_events.read_rows():
                     record_total += 1
+                    native_time = _row.get("time")
+                    if (_finite(native_time) and native_time >= 0
+                            and (last_native_event_time is None
+                                 or native_time >= last_native_event_time)):
+                        last_native_event_time = float(native_time)
+                        latest_game_time = max(latest_game_time, last_native_event_time)
 
                 for row in g1_events.read_rows():
                     record_total += 1
                     if row.get("event") == "g1_actor_view":
                         projected_uid = row.get("actor_uid")
                         if projected_uid not in DEFAULT_ACTORS:
+                            continue
+                        view_time = row.get("time")
+                        prior_view_time = last_view_times.get(projected_uid)
+                        if not native_view_timestamp_is_fresh(projected_uid, view_time,
+                                                              last_view_times):
+                            append_checked(paths["status.jsonl"], {
+                                "event": "native_actor_view_rejected",
+                                "actor_uid": projected_uid, "view_time": view_time,
+                                "prior_view_time": prior_view_time,
+                                "reason": "actor view timestamp is invalid or moved backwards"})
                             continue
                         view_sequences[projected_uid] += 1
                         row = dict(row)
@@ -998,6 +1094,7 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                     feedback, issue = normalize_registered_g1_receipt(row, registered)
                     if feedback is not None:
                         pending_feedback.append(feedback)
+                        latest_game_time = max(latest_game_time, float(feedback["game_time"]))
                         if feedback["event"] in ("g1_action_settled", "g1_action_failed"):
                             last_settlement_time = max(float(feedback["game_time"]),
                                                        last_settlement_time or 0.0)
@@ -1033,10 +1130,12 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                     request_id = row.get("request_id")
                     request = registered.get(request_id) if isinstance(request_id, str) else None
                     if accepted and request:
+                        accepted_time = float(row.get("time", request["observed_time"]))
                         pending_feedback.append({"event": "g1_action_dispatch_accepted",
                                                  "request_id": request_id, "actor_uid": LEADER_UID,
                                                  "node_id": request["node_id"],
-                                                 "game_time": float(row.get("time", request["observed_time"]))})
+                                                 "game_time": accepted_time})
+                        latest_game_time = max(latest_game_time, accepted_time)
                     trusted = loaded_chain.observe(row)
                     if trusted is not None and request:
                         recruit_job_by_id[request_id] = trusted
@@ -1076,9 +1175,16 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                                 "native_terminal_time": _event_time(terminal),
                                 "receipt": feedback})
 
-                # Consume operator input on any fresh all-actor controller
-                # cycle; RUNNER_DEMO remains independently survey-triggered.
-                if set(views) == set(DEFAULT_ACTORS) and fresh_since_cycle == set(DEFAULT_ACTORS):
+                # Preserve strict all-actor warmup, then run the same process
+                # controller on any fresh actor subset or pending terminal.
+                cycle_due = runtime_controller_cycle_due(
+                    warmup_completed=warmup_baseline_logged,
+                    all_actor_views_loaded=set(views) == set(DEFAULT_ACTORS),
+                    fresh_actor_uids=fresh_since_cycle,
+                    pending_feedback=pending_feedback,
+                    game_time=latest_game_time,
+                    last_controller_game_time=last_controller_game_time)
+                if cycle_due:
                     if demo_schedule is None and survey_trigger_time is not None and author_input_path is None:
                         demo_schedule = _author_demo_schedule(scenario["marker_ids"],
                                                               native_follower_uid,
@@ -1126,17 +1232,14 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                             "issued_at_game_time": queued["issued_at_game_time"],
                             "issued_local_time": queued["issued_local_time"],
                             "accepted_at_game_time": latest_game_time})
-                    monitor_facts = author_monitor_world_facts(views[LEADER_UID],
-                                                               trusted_deliveries)
-                    observations = build_observations(views, recruit_view, native_follower_uid,
-                                                      world_facts=monitor_facts)
-                    latest_game_time = float(observations["game_time"])
-                    game_time = float(observations["game_time"])
-                    ready, readiness_reason = loaded_process_readiness(
-                        views, recruit_view, native_follower_uid,
-                        recruit_view_observed=recruit_view_observed, game_time=game_time,
-                        warmup_completed=warmup_baseline_logged,
-                        native_follower_hired=native_follower_hired)
+                    game_time = latest_game_time
+                    if not warmup_baseline_logged:
+                        ready, readiness_reason = loaded_process_readiness(
+                            views, recruit_view, native_follower_uid,
+                            recruit_view_observed=recruit_view_observed, game_time=game_time,
+                            warmup_completed=False, native_follower_hired=False)
+                    else:
+                        ready, readiness_reason = True, "runtime_actor_availability_is_local"
                     if not ready:
                         if readiness_reason != last_readiness_note:
                             append_checked(paths["status.jsonl"], {
@@ -1159,14 +1262,35 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                             "leader_recruit_view": recruit_view,
                             "native_follower_uid": native_follower_uid})
                         warmup_baseline_logged = True
+                    available_actor_uids = (set(DEFAULT_ACTORS) if not warmup_baseline_logged else
+                                             runtime_available_actor_uids(
+                                                 views, fresh_since_cycle, game_time))
+                    unavailable_actor_reasons = ({} if not warmup_baseline_logged else
+                                                 runtime_actor_unavailability_reasons(
+                                                     views, fresh_since_cycle, game_time))
+                    monitor_facts = (author_monitor_world_facts(views[LEADER_UID], trusted_deliveries)
+                                     if LEADER_UID in available_actor_uids else [])
+                    cycle_recruit_view = runtime_recruit_view(
+                        recruit_view, recruit_view_observed, game_time)
+                    observations = build_observations(
+                        views, cycle_recruit_view, native_follower_uid,
+                        world_facts=monitor_facts,
+                        available_actor_uids=sorted(available_actor_uids))
+                    game_time = max(game_time, float(observations["game_time"]))
+                    observations["game_time"] = game_time
+                    latest_game_time = game_time
                     author_commands = pending_author[:1]
                     del pending_author[:len(author_commands)]
                     result = step_process(session, observations, game_time=game_time,
                                           author_commands=author_commands,
                                           feedback=pending_feedback,
-                                          request_budget_remaining=max(0, MAX_REQUESTS - request_total))
+                                          request_budget_remaining=max(0, MAX_REQUESTS - request_total),
+                                          available_actor_uids=sorted(available_actor_uids))
                     pending_feedback.clear()
                     session, decision = result["session"], result["decision"]
+                    decision["actor_availability"]["unavailable_reasons"] = {
+                        str(uid): reason for uid, reason in unavailable_actor_reasons.items()}
+                    last_controller_game_time = game_time
                     fresh_since_cycle.clear()
                     if any(item.get("matched") and item.get("event") in
                            ("g1_action_settled", "g1_action_failed")
@@ -1177,7 +1301,13 @@ def run_process(freeze_path: Path, run_id: str, wall_cap: float = MAX_WALL_SECON
                     append_checked(paths["decisions.jsonl"], {
                         "event": "controller_decision", "local_time": local_now(),
                         "game_time": game_time,
-                        "actor_view_times": {str(uid): views[uid]["time"] for uid in DEFAULT_ACTORS},
+                        "actor_view_times": {str(uid): views[uid]["time"]
+                                             for uid in sorted(available_actor_uids)},
+                        "unavailable_actor_uids": sorted(set(DEFAULT_ACTORS)
+                                                          - set(available_actor_uids)),
+                        "unavailable_actor_reasons": {
+                            str(uid): reason
+                            for uid, reason in unavailable_actor_reasons.items()},
                         "author_inputs": [
                             {"command": cmd,
                              **author_provenance_by_version.get(

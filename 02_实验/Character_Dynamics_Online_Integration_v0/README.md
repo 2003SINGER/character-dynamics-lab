@@ -1,6 +1,6 @@
 # Character Dynamics Online Integration v0
 
-**当前状态：DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW — 2026-10-22 跨角色作者目标协调迭代已停止。** 本轮真实执行了跨角色报告交付与作者目标动作排序，但最终会合失败；OFF 监督链停更，完整 ON/OFF 对照未成立。当前事实、边界及 Judge 摘要由[唯一 owner](CROSS_ACTOR_COORDINATION.md)维护。停止供独立审阅，不自动修复或扩展；后续优先诊断 readiness 连续性和接近后会合停滞。旧[ONLINE_PLAYTEST_V1.md](ONLINE_PLAYTEST_V1.md)、此前多角色过程/结果及三组运行均保留原结论，不覆盖；成熟方法继续作为复用基础。
+**当前状态：`DEVELOPMENT / OFFLINE_VERIFIED / NATIVE_NOT_RUN / READY_FOR_INDEPENDENT_REVIEW` — 本轮停止。** 当前状态与验收证据见[唯一 owner](RUNTIME_CONTINUITY.md)；原生验证因空间不足未运行。2026-10-22 跨角色协调结果保持 `PARTIAL`，由[CROSS_ACTOR_COORDINATION.md](CROSS_ACTOR_COORDINATION.md)维护；旧[ONLINE_PLAYTEST_V1.md](ONLINE_PLAYTEST_V1.md)、此前多角色过程/结果及三组运行均保留原结论，不覆盖。
 
 ## 目标与边界
 
@@ -12,8 +12,8 @@
 
 ## 维护、计划与结果
 
-- 本轮授权范围与冻结条件见 [CROSS_ACTOR_COORDINATION.md](CROSS_ACTOR_COORDINATION.md)；此前多角色目标见 [MULTI_ACTOR_PROCESS.md](MULTI_ACTOR_PROCESS.md)，旧 v0 运行条件与预算见 [PROTOCOL.md](PROTOCOL.md)。
-- 当前跨角色协调状态、运行事实与 Judge 摘要 owner：[CROSS_ACTOR_COORDINATION.md](CROSS_ACTOR_COORDINATION.md)。
+- 本轮授权范围、冻结条件与完成状态见 [RUNTIME_CONTINUITY.md](RUNTIME_CONTINUITY.md)；此前多角色目标见 [MULTI_ACTOR_PROCESS.md](MULTI_ACTOR_PROCESS.md)，旧 v0 运行条件与预算见 [PROTOCOL.md](PROTOCOL.md)。
+- 当前基础稳定化状态与诊断 owner：[RUNTIME_CONTINUITY.md](RUNTIME_CONTINUITY.md)。2026-10-22 跨角色协调状态、运行事实与 Judge 摘要 owner：[CROSS_ACTOR_COORDINATION.md](CROSS_ACTOR_COORDINATION.md)。
 - 旧在线作者干预 playtest owner：[ONLINE_PLAYTEST_V1.md](ONLINE_PLAYTEST_V1.md)；此前多角色结果 owner：[MULTI_ACTOR_RESULTS.md](MULTI_ACTOR_RESULTS.md)；先前三组结果 owner：[RESULTS.md](RESULTS.md)。这些历史结论不由当前 owner 覆盖。
 - 旧运行结果以 RESULTS 的证据边界为准；不把单次轨迹提升为算法优势或新里程碑完成。
 - 本轮公开范围仅为代码和报告；raw 与脱敏运行证据、私有原文均不公开。

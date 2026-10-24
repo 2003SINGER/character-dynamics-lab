@@ -10,7 +10,8 @@ from tools.character_dynamics_online_v0.process_runner import (
     _author_demo_schedule, author_monitor_world_facts, build_process_environment, g1_feedback,
     g1_request_payload, loaded_process_readiness, normalize_registered_g1_receipt,
     exit_status_for_stop_reason, parse_author_input, process_completion_satisfied,
-    project_actor_view,
+    project_actor_view, native_view_timestamp_is_fresh, runtime_available_actor_uids,
+    runtime_controller_cycle_due, runtime_recruit_view,
     recruit_pair_feedback,
 )
 
@@ -48,6 +49,66 @@ def recruit_view(time: float):
 
 
 class ProcessRunnerProjectionTests(unittest.TestCase):
+    def test_runtime_admission_keeps_local_views_and_maintenance_without_stale_roster(self):
+        seen = {}
+        self.assertTrue(native_view_timestamp_is_fresh(SCOUT_UID, 141.0, seen))
+        self.assertFalse(native_view_timestamp_is_fresh(SCOUT_UID, 141.0, seen))
+        self.assertTrue(native_view_timestamp_is_fresh(LEADER_UID, 141.0, seen))
+        self.assertEqual(seen, {SCOUT_UID: 141.0, LEADER_UID: 141.0})
+
+        views = {SCOUT_UID: {**g1_view(SCOUT_UID, 141.9), "mode": "loaded"},
+                 LEADER_UID: {**g1_view(LEADER_UID, 139.0), "mode": "loaded"}}
+        self.assertEqual(runtime_available_actor_uids(
+            views, [SCOUT_UID, LEADER_UID], 141.9), {SCOUT_UID})
+        self.assertTrue(runtime_controller_cycle_due(
+            warmup_completed=True, all_actor_views_loaded=True,
+            fresh_actor_uids=[], pending_feedback=[], game_time=141.9,
+            last_controller_game_time=140.8))
+        self.assertFalse(runtime_controller_cycle_due(
+            warmup_completed=False, all_actor_views_loaded=False,
+            fresh_actor_uids=[SCOUT_UID], pending_feedback=[], game_time=141.9,
+            last_controller_game_time=140.8))
+
+        stale_roster = {**recruit_view(139.0), "mode": "loaded",
+                        "hired_members": [{"npc_uid": 442}]}
+        self.assertIsNone(runtime_recruit_view(stale_roster, True, 141.9))
+        fresh_roster_missing_follower = {**recruit_view(141.8), "mode": "loaded",
+                                         "hired_members": []}
+        fresh_recruit = runtime_recruit_view(fresh_roster_missing_follower, True, 141.9)
+        self.assertIs(fresh_recruit, fresh_roster_missing_follower)
+
+        scout = {**views[SCOUT_UID], "time": 141.9}
+        leader = {**views[LEADER_UID], "time": 141.9,
+                  "known_reports": [{"marker_id": "marker-a", "report_id": "r1",
+                                     "owner_uid": SCOUT_UID}],
+                  "nearby": [{"uid": SCOUT_UID, "wpos": [0, 0, 0], "distance": 5,
+                              "alive": True, "loaded": True, "hired_by_uid": None},
+                             {"uid": 442, "wpos": [0, 0, 0], "distance": 5,
+                              "alive": True, "loaded": True, "hired_by_uid": None}]}
+        observations = build_observations(
+            {SCOUT_UID: scout, LEADER_UID: leader}, fresh_recruit, 442,
+            available_actor_uids=[SCOUT_UID, LEADER_UID])
+        leader_row = next(row for row in observations["actors"] if row["actor_uid"] == LEADER_UID)
+        self.assertNotIn({"predicate": "hired_follower", "args": [LEADER_UID, 442], "value": True},
+                         leader_row["facts"])
+
+        session = new_process_session(DEFAULT_ACTORS,
+                                      goal_specs=_actor_goal_specs(["marker-a", "marker-b"], 442),
+                                      director_enabled=False)
+        result = step_process(session, observations, game_time=141.9)
+        self.assertTrue(any(row["actor_uid"] == SCOUT_UID for row in result["decision"]["requests"]))
+        self.assertFalse(any(row["actor_uid"] == LEADER_UID and row["primitive"] == "rally_marker"
+                             for row in result["decision"]["requests"]))
+
+    def test_observation_builder_projects_only_available_fresh_actors(self):
+        views = {SCOUT_UID: g1_view(SCOUT_UID, 10.0),
+                 LEADER_UID: g1_view(LEADER_UID, 10.5)}
+        observations = build_observations(
+            views, recruit_view(10.5), 450,
+            available_actor_uids=[SCOUT_UID])
+        self.assertEqual([row["actor_uid"] for row in observations["actors"]], [SCOUT_UID])
+        self.assertEqual(observations["game_time"], 10.0)
+
     def test_exact_rust_terminal_args_shapes_settle_all_three_g1_actions(self):
         common = {"request_id": "g1-shape", "actor_uid": SCOUT_UID,
                   "node_id": "node-shape", "source": "ACTOR", "goal_id": "goal-shape",

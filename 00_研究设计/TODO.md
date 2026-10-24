@@ -1,8 +1,8 @@
 # TODO｜active research queue
 
-更新时间：2026-10-22。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
+更新时间：2026-10-24。此页只保留 ID、状态、下一动作、验收条件和链接；历史论证与已完成批次见[TODO 原版快照](归档/2026-09-07_TODO瘦身/TODO_原版_2026-09-07.md)。总体失败证据和证据边界以[研究重建审计](研究重建审计_2026-10-06.md)为准。
 
-当前统一目标是让角色在持续游戏世界中依据自身目标行动，同时接受作者在线未来要求与修改，由协调过程组织成熟方法、调用原生行为、读取真实反馈并继续更新计划；开发与科学验证是同一过程。问题定义仍由唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md) 维护，本次不改定义。成熟方法能解是复用基础，不构成停止开发条件；多条合法路径只是特定算法对照条件，不是普遍开发门。旧 C1/C2 `NO_GO` 保留其候选级历史含义，不再作为当前停点。**当前工作包：Character Dynamics Online Integration v0，DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**；本轮跨角色协调结果与 Judge 摘要以[唯一 owner](../02_实验/Character_Dynamics_Online_Integration_v0/CROSS_ACTOR_COORDINATION.md)为准；此前多角色结果、旧在线 playtest 与先前三组运行均按各自历史 owner 保留，不回写。多角色、作者剧情协调与明确版本化 G1 属同一系统开发主线。
+当前统一目标是让角色在持续游戏世界中依据自身目标行动，同时接受作者在线未来要求与修改，由协调过程组织成熟方法、调用原生行为、读取真实反馈并继续更新计划；开发与科学验证是同一过程。问题定义仍由唯一 [F0/F1](CharacterDynamics_FormalProblem_v0.md) 维护，本次不改定义。成熟方法能解是复用基础，不构成停止开发条件；多条合法路径只是特定算法对照条件，不是普遍开发门。旧 C1/C2 `NO_GO` 保留其候选级历史含义，不再作为当前停点。**当前工作包：Character Dynamics Online Integration v0，`DEVELOPMENT / OFFLINE_VERIFIED / NATIVE_NOT_RUN / READY_FOR_INDEPENDENT_REVIEW`；本轮停止。** 当前状态见[唯一 owner](../02_实验/Character_Dynamics_Online_Integration_v0/RUNTIME_CONTINUITY.md)。原生一次验证尚缺环境，不自动进入剧情系统；2026-10-22 跨角色协调 `PARTIAL` 与旧多角色、在线 playtest、先前三组运行按各自 owner 保留，不回写。
 
 **实现检查点：系统集成首轮在 `bf30d4c` 交付 DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW，未 CLOSED**。限定原生内容与四条件开发运行的能力、失败、历史对照未成立及无方法收益证据只见[既有 RESULTS](../02_实验/Mature_Methods_Integration_v1/RESULTS.md)，不换条件刷 PASS。2026-10-14 的 `872292c` / `8ca0a45` 仅设计修订；同日后续实施授权见下段。B0传统基线已完成；随后授权的LLM-Admission见下方独立owner。正式B1/B2模型对照仍暂缓，不会因准入调用而自动扩大比较。M1–M5 / E1–E4 的历史 PARTIAL 不改写。新对话原文仅私有归档；公开限本轮代码、报告、文本回放与测试证据，不包括私有对话、第三方完整源码/资产/二进制。C++、E0、main 不动，不自行 CLOSED。
 
@@ -12,11 +12,11 @@
 
 ## SYSTEM / APPLICATION TRACK
 
-2026-10-22 跨角色作者目标协调迭代已停止，状态 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**。已执行真实跨角色报告交付与作者目标动作排序，但最终会合失败；OFF 监督停更导致完整对照未成立。当前摘要与 Judge 口径以[唯一协调 owner](../02_实验/Character_Dynamics_Online_Integration_v0/CROSS_ACTOR_COORDINATION.md)为准。本轮停止供独立审阅，不自动修复或扩展；后续优先诊断监督 readiness 连续性及接近后会合停滞。旧 ONLINE_PLAYTEST、多角色结果、旧 Judge 和三组运行均保留，不回写。
+2026-10-22 跨角色作者目标协调的历史结果为 **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW**。已执行真实跨角色报告交付与作者目标动作排序，但最终会合失败；OFF 监督停更导致完整对照未成立。历史摘要与 Judge 口径以[历史协调 owner](../02_实验/Character_Dynamics_Online_Integration_v0/CROSS_ACTOR_COORDINATION.md)为准；旧 ONLINE_PLAYTEST、多角色结果、旧 Judge 和三组运行均保留，不回写。
 
 | ID | 状态 | 下一动作 | 验收 / owner |
 |---|---|---|---|
-| CHARACTER-DYNAMICS-ONLINE-INTEGRATION-V0 | **DEVELOPMENT / PARTIAL / READY_FOR_INDEPENDENT_REVIEW；跨角色协调轮停止** | 停止供独立审阅；后续优先诊断 readiness 连续性与接近后会合停滞，不自动修复或扩展 | [唯一协调 owner 与 Judge 摘要](../02_实验/Character_Dynamics_Online_Integration_v0/CROSS_ACTOR_COORDINATION.md)；真实协调已执行但最终会合失败，OFF 监督停更使完整对照未成立；旧 ONLINE_PLAYTEST 与历史保持原结论 |
+| CHARACTER-DYNAMICS-ONLINE-INTEGRATION-V0 | **`DEVELOPMENT / OFFLINE_VERIFIED / NATIVE_NOT_RUN / READY_FOR_INDEPENDENT_REVIEW`；本轮停止** | 本轮停止，供独立审阅；原生一次验证尚缺环境，不自动进入剧情系统 | [当前 owner](../02_实验/Character_Dynamics_Online_Integration_v0/RUNTIME_CONTINUITY.md)；2026-10-22 `PARTIAL`、旧 ONLINE_PLAYTEST 与历史结果保留各自结论 |
 | VELOREN-CAUSAL-RESEARCH-ADMISSION-V0 | **历史裁决：两候选 NO_GO / READY_FOR_INDEPENDENT_REVIEW** | 保留原裁决与因果证据，不把双方案条件扩成系统开发门槛；当前集成见上行 | [唯一裁决](../02_实验/Veloren_Causal_Research_Admission_v0/ADMISSION.md)；[机制证据 owner](../02_实验/Veloren_Causal_Research_Admission_v0/CAUSAL_NETWORK.md)。原文档与历史 RESULTS 不改；不据此宣称 Veloren 全局不可能 |
 | VELOREN-NATIVE-DECISION-INTEGRATION-V1 | **ROUTING/HIRE/FOLLOW 有限 PASS；READY_FOR_INDEPENDENT_REVIEW；已停** | 独立审阅唯一新OFF/ON：1请求→原生Hired→本人跟随；核预算/日志限制，不自动追加机制或运行 | [唯一 RESULTS](../02_实验/Veloren_Native_Decision_Integration_v1/RESULTS.md#2026-10-18-新授权loaded-msg-最小修复与最后一次纵向验收)；旧PARTIAL/A/C++/main不改，不自行CLOSED |
 | VELOREN-VERTICAL-SLICE-V0 | **READY_FOR_INDEPENDENT_REVIEW；A=PASS_BY_NATIVE_TRACE；A_FROZEN** | 有限接口与旧失败保留，不再补跑 Talk；新授权高层接入归上行，不以旧 B 未授权声明阻挡本轮 | [唯一 RESULTS](../02_实验/Veloren_Vertical_Slice_v0/RESULTS.md#最终接口验证实际结果与停止)；Brain→Say→Agent 及有限续行已见原始证据，不推论收方接受、长期自治或完整系统 CLOSED |
